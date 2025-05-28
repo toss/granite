@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/devtools-frontend",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "A debugger frontend for Granite",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",

@@ -1,5 +1,11 @@
 # @granite-js/pulumi-aws
 
+## 1.0.0
+
+### Minor Changes
+
+- 561a3ed: fix: docs deadlink
+
 ## 0.0.3
 
 ### Patch Changes
