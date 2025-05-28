@@ -1,0 +1,35 @@
+{
+  "name": "@granite-app/showcase",
+  "private": true,
+  "scripts": {
+    "dev": "granite dev",
+    "build": "granite build",
+    "test": "jest --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --write"
+  },
+  "dependencies": {
+    "@granite-js/native": "workspace:*",
+    "@granite-js/react-native": "workspace:*",
+    "react": "18.2.0",
+    "react-native": "0.72.6"
+  },
+  "devDependencies": {
+    "@babel/core": "7.23.9",
+    "@babel/runtime": "7.18.9",
+    "@biomejs/biome": "^1.9.4",
+    "@granite-js/forge-cli": "workspace:*",
+    "@granite-js/plugin-env": "workspace:*",
+    "@granite-js/plugin-hermes": "workspace:*",
+    "@granite-js/plugin-router": "workspace:*",
+    "@testing-library/react-native": "^12.9.0",
+    "@types/babel__core": "^7.20.5",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.2",
+    "@types/react": "18.3.3",
+    "babel-preset-granite": "workspace:*",
+    "jest": "^29.7.0",
+    "react-test-renderer": "18.2.0",
+    "typescript": "^5.7.2"
+  }
+}

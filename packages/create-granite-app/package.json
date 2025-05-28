@@ -1,0 +1,43 @@
+{
+  "name": "create-granite-app",
+  "version": "0.0.1",
+  "type": "module",
+  "bin": {
+    "cba": "./bin.js",
+    "create-granite-app": "./bin.js"
+  },
+  "files": [
+    "templates",
+    "tool-templates",
+    "dist",
+    "bin.js",
+    "package.json"
+  ],
+  "license": "Apache-2.0",
+  "description": "Create Granite App",
+  "scripts": {
+    "prepack": "yarn build && node scripts/prepack.js",
+    "postpack": "node scripts/postpack.js",
+    "build": "tsup src/index.ts --format esm",
+    "dev": "tsup src/index.ts --format esm --watch",
+    "typecheck": "tsc --noEmit",
+    "test:no-parallel": "vitest --no-watch"
+  },
+  "devDependencies": {
+    "@types/kill-port": "^2.0.1",
+    "@types/node": "^22.10.2",
+    "@types/yargs": "^17.0.33",
+    "es-toolkit": "^1.30.1",
+    "execa": "^9.5.2",
+    "kill-port": "^2.0.1",
+    "tsup": "^8.5.0",
+    "typescript": "5.8.3",
+    "vitest": "^2.1.8",
+    "wait-port": "^1.1.0",
+    "workspace-tools": "^0.38.1",
+    "yargs": "^17.7.2"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.8.2"
+  }
+}

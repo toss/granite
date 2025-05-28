@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    /* Modules */
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    /* Type Checking */
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+
+    "types": [],
+    /* Language and Environment */
+    "experimentalDecorators": true,
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "ESNext.AsyncIterable"],
+    "target": "ESNext",
+
+    /* Interop Constraints */
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Completeness */
+    "allowJs": false,
+    "skipLibCheck": true,
+
+    /* Others */
+    "stripInternal": true
+  },
+  "exclude": ["**/dist/*", "**/esm/*"]
+}

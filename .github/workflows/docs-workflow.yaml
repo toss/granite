@@ -1,0 +1,44 @@
+name: docs-workflow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: ./.github/actions/setup-node-yarn
+        name: Setup
+
+      - name: Build VitePress
+        run: yarn docs:build
+        working-directory: ./docs
+
+      - name: Check build output
+        run: |
+          if [ ! -f "docs/.vitepress/dist/index.html" ]; then
+            echo "Vitepress build failed - index.html file not found"
+            exit 1
+          fi
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/.vitepress/dist

@@ -1,0 +1,201 @@
+NOTICE
+
+This project makes use of third-party libraries that are licensed under their respective open-source licenses. Below is a list of these libraries, their licenses, and their links for further reference.
+
+================================================================================
+Project Name: @granite-js/cli
+Copyright 2025 Viva Republica, Inc
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+================================================================================
+Third-Party Libraries:
+
+1. **@babel/core**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/babel/babel.git
+	
+2. **@babel/preset-env**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/babel/babel.git
+	
+3. **@babel/preset-typescript**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/babel/babel.git
+	
+4. **@inquirer/prompts**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/SBoudrias/Inquirer.js.git
+	
+5. **@shopify/semaphore**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/Shopify/quilt.git
+	
+6. **@types/babel__core**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
+	
+7. **@types/babel__preset-env**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
+	
+8. **@types/connect**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
+	
+9. **@types/debug**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
+	
+10. **@types/node**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
+	
+11. **@types/serve-static**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
+	
+12. **chalk**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/chalk/chalk.git
+	
+13. **clipanion**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/arcanis/clipanion
+	
+14. **connect**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/senchalabs/connect.git
+	
+15. **cosmiconfig**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/cosmiconfig/cosmiconfig.git
+	
+16. **cosmiconfig-typescript-loader**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/Codex-/cosmiconfig-typescript-loader.git
+	
+17. **debug**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git://github.com/debug-js/debug.git
+	
+18. **enquirer**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/enquirer/enquirer.git
+	
+19. **es-toolkit**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/toss/es-toolkit.git
+	
+20. **esbuild**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/evanw/esbuild.git
+	
+21. **eslint**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/eslint/eslint.git
+	
+22. **execa**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/sindresorhus/execa.git
+	
+23. **ora**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/sindresorhus/ora.git
+	
+24. **ts-prune**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git@github.com:nadeesha/ts-prune.git
+	
+25. **tsup**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/egoist/tsup.git
+	
+26. **typanion**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/arcanis/typanion
+	
+27. **vitest**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/vitest-dev/vitest.git
+	
+28. **zod**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/colinhacks/zod.git
+	
+29. **typescript**
+	
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: https://github.com/microsoft/TypeScript.git
+	
+
+================================================================================
+
+For further details about each license, please refer to the provided links. If there are updates to these dependencies, this file should also be updated.

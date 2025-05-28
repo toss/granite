@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../front_end/panels/device_manager"},"files":["../../../../../../front_end/panels/device_manager/device_manager-meta.ts"],"references":[{"path":"./bundle-tsconfig.json"}]}

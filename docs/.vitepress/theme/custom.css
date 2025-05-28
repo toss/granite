@@ -1,0 +1,22 @@
+@import url('./style.css');
+
+/* .vitepress/theme/custom.css */
+/** https://github.com/vuejs/vitepress/blob/main/src/client/theme-default/styles/vars.css */
+:root {
+  /* --vp-home-hero-name-color: #1e1e1e; */
+  --vp-home-hero-name-color: #808080;
+  --vp-c-brand-1: rgb(27, 109, 225);
+  --vp-code-color: var(--vp-c-text-1);
+  --vp-button-brand-bg: rgb(27, 109, 225);
+}
+
+.content-container {
+  /* 콘텐츠 영역을 넓힘 */
+  max-width: 75rem !important;
+}
+
+.VPBadge-small {
+  padding: 0 6px;
+  line-height: 16px;
+  font-size: 10px;
+}

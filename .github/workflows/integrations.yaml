@@ -1,0 +1,142 @@
+name: Integrations
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Cache node modules and dist
+        uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+            .yarn/unplugged
+            .nx
+            packages/*/dist
+            tools/dist
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - uses: ./.github/actions/setup-node-yarn
+        name: Setup
+
+      - name: Build All
+        run: yarn build:all
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            packages/*/dist
+            tools/dist
+          retention-days: 1
+
+  lint:
+    name: Lint
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Cache node modules and dist
+        uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+            .yarn/unplugged
+            .nx
+            packages/*/dist
+            tools/dist
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
+
+      - uses: ./.github/actions/setup-node-yarn
+        name: Setup
+      - name: Check lint
+        run: yarn lint
+
+  type-check:
+    name: Type check
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Cache node modules and dist
+        uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+            .yarn/unplugged
+            .nx
+            packages/*/dist
+            tools/dist
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
+
+      - uses: ./.github/actions/setup-node-yarn
+        name: Setup
+      - name: Check types
+        run: yarn typecheck:all
+
+  test:
+    name: Test
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Cache node modules and dist
+        uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+            .yarn/unplugged
+            .nx
+            packages/*/dist
+            tools/dist
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
+
+      - uses: ./.github/actions/setup-node-yarn
+        name: Setup
+      - name: Run tests
+        run: yarn test:all

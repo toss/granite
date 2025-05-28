@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    /* 서드파티 라이브러리 호환을 위해 추가합니다 */
+    "jsx": "react",
+    "types": ["node", "jest"]
+  },
+  "include": ["src"]
+}

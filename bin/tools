@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+BIN_DIR=$(cd "$(dirname "$0")" && pwd)
+ROOT_DIR="${BIN_DIR}/.."
+
+node --require "$ROOT_DIR/.pnp.cjs" \
+  --import "$ROOT_DIR/.pnp.loader.mjs" \
+  "$ROOT_DIR/tools/dist/index.js" "$@"

@@ -1,0 +1,39 @@
+{
+  "name": "@granite-js/jest",
+  "version": "0.0.1",
+  "description": "Jest presets for Granite",
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "tsup"
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "jest": "^29.7.0"
+  },
+  "devDependencies": {
+    "@granite-js/native": "workspace:*",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.10.2",
+    "eslint": "^9.7.0",
+    "tsup": "^8.5.0",
+    "typescript": "5.8.3"
+  },
+  "peerDependencies": {
+    "@granite-js/native": "*",
+    "react": "*",
+    "react-native": "*"
+  }
+}

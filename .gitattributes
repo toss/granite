@@ -1,0 +1,6 @@
+/.yarn/**            linguist-vendored
+/.yarn/releases/*    binary
+/.yarn/plugins/**/*  binary
+/.pnp.*              binary linguist-generated
+
+packages/mpack/**/*.js linguist-generated

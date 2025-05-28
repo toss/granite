@@ -1,0 +1,17 @@
+{
+  "name": "granite-docs",
+  "private": true,
+  "devDependencies": {
+    "@algolia/client-search": "^4.24.0",
+    "@types/node": "^22.10.2",
+    "typescript": "5.8.3",
+    "vitepress": "^1.4.1",
+    "vue": "^3.4.31"
+  },
+  "scripts": {
+    "docs:dev": "yarn vitepress dev",
+    "docs:build": "yarn vitepress build",
+    "docs:preview": "yarn vitepress preview",
+    "preview": "npx serve ./.vitepress/dist"
+  }
+}

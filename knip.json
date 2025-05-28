@@ -1,0 +1,25 @@
+{
+  "ignore": [".yarn", "lib"],
+  "ignoreDependencies": [
+    "typescript",
+    "@babel/core",
+    "@swc/core",
+    "react",
+    "react-dom",
+    "@types/react-dom",
+    "jest-environment-jsdom",
+    "enhanced-resolve"
+  ],
+  "ignoreBinaries": ["tsc"],
+  "workspaces": {
+    "packages/*": {
+      "entry": [
+        "{index,main,cli}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}",
+        "src/{index,main,cli}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}",
+        "bin/{index,main,cli}.{js,cjs,mjs,ts,cts,mts}"
+      ],
+      "project": ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"]
+    }
+  },
+  "exclude": ["nsExports", "nsTypes", "classMembers", "enumMembers"]
+}

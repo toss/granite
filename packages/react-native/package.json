@@ -1,0 +1,92 @@
+{
+  "name": "@granite-js/react-native",
+  "version": "0.0.1",
+  "description": "The Granite Framework",
+  "bin": {
+    "granite": "./bin/cli.js"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --no-watch",
+    "lint": "eslint .",
+    "build": "tsup && tsc -p tsconfig.build.json",
+    "prepack": "yarn build"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./async-bridges": {
+      "types": "./src/async-bridges.ts",
+      "default": "./src/async-bridges.ts"
+    },
+    "./constant-bridges": {
+      "types": "./src/constant-bridges.ts",
+      "default": "./src/constant-bridges.ts"
+    },
+    "./jest": {
+      "types": "./dist/jest/index.d.ts",
+      "default": "./dist/jest/index.js"
+    },
+    "./cli": {
+      "types": "./cli.d.ts",
+      "default": "./cli.js"
+    },
+    "./config": {
+      "types": "./config.d.ts",
+      "default": "./config.js"
+    },
+    "./types": {
+      "types": "./dist/types/global.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "dist",
+    "bin",
+    "config.js",
+    "cli.js",
+    "*.d.ts"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.24.9",
+    "@babel/preset-env": "^7.24.8",
+    "@babel/preset-typescript": "^7.24.7",
+    "@granite-js/native": "workspace:*",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.1.0",
+    "@types/babel__core": "^7",
+    "@types/babel__preset-env": "^7",
+    "@types/node": "^22.10.2",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "^18",
+    "esbuild": "^0.25.4",
+    "eslint": "^9.7.0",
+    "jsdom": "^25.0.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.72.6",
+    "tsup": "^8.5.0",
+    "typescript": "5.8.3",
+    "vitest": "^2.1.8"
+  },
+  "peerDependencies": {
+    "@granite-js/native": "*",
+    "@types/react": "*",
+    "react": "*",
+    "react-native": "*"
+  },
+  "dependencies": {
+    "@granite-js/cli": "workspace:*",
+    "@granite-js/image": "workspace:*",
+    "@granite-js/jest": "workspace:*",
+    "@granite-js/mpack": "workspace:*",
+    "@granite-js/style-utils": "workspace:*",
+    "es-toolkit": "^1.34.1",
+    "react-native-url-polyfill": "1.3.0"
+  }
+}

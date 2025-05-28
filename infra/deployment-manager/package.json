@@ -1,0 +1,38 @@
+{
+  "name": "@granite-js/deployment-manager",
+  "type": "module",
+  "version": "0.0.1",
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "bin",
+    "package.json"
+  ],
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "build": "tsup"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-cloudfront": "^3.812.0",
+    "@aws-sdk/client-s3": "^3.812.0",
+    "@types/node": "^22.10.2",
+    "aws-lambda": "^1.0.7",
+    "aws-sdk-client-mock": "^4.1.0",
+    "es-toolkit": "^1.38.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "valibot": "^1.1.0",
+    "vitest": "^3.1.4"
+  }
+}

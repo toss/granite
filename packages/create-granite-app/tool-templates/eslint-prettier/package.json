@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "eslint": "^9.17.0",
+    "eslint-plugin-react": "^7.37.2",
+    "typescript-eslint": "^8.31.0",
+    "prettier": "3.4.2",
+    "@eslint/js": "^9.17.0"
+  }
+}

@@ -1,0 +1,47 @@
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Swap the comments on the following lines if you don't wish to use zero-installs
+# Documentation here: https://yarnpkg.com/features/zero-installs
+# !.yarn/cache
+.pnp.*
+dist
+esm
+*.tgz
+*.tsbuildinfo
+.next
+node_modules
+.env
+.DS_Store
+
+.idea/
+
+#rn
+.swc
+.toss
+.granite
+
+# 테스트를 진행하면서 생성된 파일들이 들어가는 디렉토리
+test-meta
+.vitest
+
+.nx/cache
+.nx/workspace-data
+
+# mpack
+perf.json
+
+# bundle
+*.ait
+
+# analyze
+report-*.json
+report-*.html
+
+# rust
+target
+*.wasm

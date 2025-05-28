@@ -1,0 +1,65 @@
+{
+  "name": "@granite-js/cli",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "The Granite CLI",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "bin": "node scripts/run.js",
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "find-deadcode": "ts-prune",
+    "build": "tsup"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.24.9",
+    "@babel/preset-env": "^7.24.8",
+    "@babel/preset-typescript": "^7.24.7",
+    "@types/babel__core": "^7",
+    "@types/babel__preset-env": "^7",
+    "@types/connect": "^3",
+    "@types/debug": "^4",
+    "@types/node": "^22.10.2",
+    "@types/serve-static": "^1",
+    "esbuild": "^0.25.4",
+    "eslint": "^9.7.0",
+    "ts-prune": "^0.10.3",
+    "tsup": "^8.5.0",
+    "typescript": "5.8.3",
+    "vitest": "^3.0.7"
+  },
+  "dependencies": {
+    "@granite-js/mpack": "workspace:*",
+    "@granite-js/plugin-core": "workspace:*",
+    "@granite-js/utils": "workspace:*",
+    "@inquirer/prompts": "^7.2.3",
+    "@shopify/semaphore": "^3.1.0",
+    "chalk": "^4",
+    "clipanion": "^4.0.0-rc.4",
+    "connect": "^3.7.0",
+    "cosmiconfig": "^9.0.0",
+    "cosmiconfig-typescript-loader": "^5.1.0",
+    "debug": "^4.3.7",
+    "enquirer": "^2.4.1",
+    "es-toolkit": "^1.32.0",
+    "execa": "^5",
+    "ora": "^5",
+    "typanion": "^3.14.0",
+    "zod": "3.24.4"
+  }
+}

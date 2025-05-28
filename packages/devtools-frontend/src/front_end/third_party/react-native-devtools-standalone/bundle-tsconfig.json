@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../front_end/third_party/react-native-devtools-standalone"},"files":["../../../../../../front_end/third_party/react-native-devtools-standalone/react-native-devtools-standalone.ts"],"references":[{"path":"./react-native-devtools-standalone-tsconfig.json"}]}
