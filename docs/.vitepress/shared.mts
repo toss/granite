@@ -7,6 +7,8 @@ const require = createRequire(import.meta.url);
 
 export const shared = defineConfig({
   title: 'Granite',
+  // TODO: Remove if domain is available
+  base: '/granite/',
   lastUpdated: true,
   metaChunk: true,
   themeConfig: {
