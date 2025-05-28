@@ -1,5 +1,14 @@
 # @granite-js/plugin-env
 
+## 0.0.3
+
+### Patch Changes
+
+- ed4d356: changeset
+- Updated dependencies [ed4d356]
+  - @granite-js/plugin-core@0.0.3
+  - @granite-js/utils@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes
