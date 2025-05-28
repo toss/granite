@@ -9,12 +9,12 @@
 ### Patch Changes
 
 - Updated dependencies [561a3ed]
-  - @granite-js/cli@1.0.0
-  - @granite-js/image@1.0.0
-  - @granite-js/jest@1.0.0
-  - @granite-js/mpack@1.0.0
-  - @granite-js/native@1.0.0
-  - @granite-js/style-utils@1.0.0
+  - @granite-js/cli@0.1.0
+  - @granite-js/image@0.1.0
+  - @granite-js/jest@0.1.0
+  - @granite-js/mpack@0.1.0
+  - @granite-js/native@0.1.0
+  - @granite-js/style-utils@0.1.0
 
 ## 0.0.3
 

@@ -9,8 +9,8 @@
 ### Patch Changes
 
 - Updated dependencies [561a3ed]
-  - @granite-js/deployment-manager@1.0.0
-  - @granite-js/cli@1.0.0
+  - @granite-js/deployment-manager@0.1.0
+  - @granite-js/cli@0.1.0
 
 ## 0.0.3
 

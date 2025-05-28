@@ -9,8 +9,8 @@
 ### Patch Changes
 
 - Updated dependencies [561a3ed]
-  - @granite-js/devtools-frontend@1.0.0
-  - @granite-js/utils@1.0.0
+  - @granite-js/devtools-frontend@0.1.0
+  - @granite-js/utils@0.1.0
 
 ## 0.0.3
 

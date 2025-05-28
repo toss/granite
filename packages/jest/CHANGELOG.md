@@ -9,7 +9,7 @@
 ### Patch Changes
 
 - Updated dependencies [561a3ed]
-  - @granite-js/native@1.0.0
+  - @granite-js/native@0.1.0
 
 ## 0.0.3
 

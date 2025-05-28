@@ -9,9 +9,9 @@
 ### Patch Changes
 
 - Updated dependencies [561a3ed]
-  - @granite-js/mpack@1.0.0
-  - @granite-js/plugin-core@1.0.0
-  - @granite-js/utils@1.0.0
+  - @granite-js/mpack@0.1.0
+  - @granite-js/plugin-core@0.1.0
+  - @granite-js/utils@0.1.0
 
 ## 0.0.3
 
