@@ -2,4 +2,4 @@
 
 set -e
 
-yarn workspaces foreach --all --no-private exec yarn npm publish --access public
+yarn workspaces foreach --all --no-private exec npm publish --access public
