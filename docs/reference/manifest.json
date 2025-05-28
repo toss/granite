@@ -6,7 +6,7 @@
     "react-native": {
       "name": "react-native",
       "itemCount": 17,
-      "firstItemPath": "/reference/react-native/core/Granite",
+      "firstItemPath": "/reference/react-native/Core/Granite",
       "items": [
         {
           "text": "react-native",
@@ -18,11 +18,11 @@
               "items": [
                 {
                   "text": "Granite",
-                  "link": "/reference/react-native/core/Granite"
+                  "link": "/reference/react-native/Core/Granite"
                 },
                 {
                   "text": "InitialProps",
-                  "link": "/reference/react-native/core/InitialProps"
+                  "link": "/reference/react-native/Core/InitialProps"
                 }
               ]
             },
@@ -89,15 +89,15 @@
               "items": [
                 {
                   "text": "ColorPreference",
-                  "link": "/reference/react-native/ui/ColorPreference"
+                  "link": "/reference/react-native/UI/ColorPreference"
                 },
                 {
                   "text": "KeyboardAboveView",
-                  "link": "/reference/react-native/ui/KeyboardAboveView"
+                  "link": "/reference/react-native/UI/KeyboardAboveView"
                 },
                 {
                   "text": "ScrollViewInertialBackground",
-                  "link": "/reference/react-native/ui/ScrollViewInertialBackground"
+                  "link": "/reference/react-native/UI/ScrollViewInertialBackground"
                 }
               ]
             },
@@ -118,7 +118,7 @@
     "style-utils": {
       "name": "style-utils",
       "itemCount": 10,
-      "firstItemPath": "/reference/style-utils/ui/Flex",
+      "firstItemPath": "/reference/style-utils/UI/Flex",
       "items": [
         {
           "text": "style-utils",
@@ -130,43 +130,43 @@
               "items": [
                 {
                   "text": "Flex",
-                  "link": "/reference/style-utils/ui/Flex"
+                  "link": "/reference/style-utils/UI/Flex"
                 },
                 {
                   "text": "FlexCenter",
-                  "link": "/reference/style-utils/ui/FlexCenter"
+                  "link": "/reference/style-utils/UI/FlexCenter"
                 },
                 {
                   "text": "FlexCenterHorizontal",
-                  "link": "/reference/style-utils/ui/FlexCenterHorizontal"
+                  "link": "/reference/style-utils/UI/FlexCenterHorizontal"
                 },
                 {
                   "text": "FlexCenterVertical",
-                  "link": "/reference/style-utils/ui/FlexCenterVertical"
+                  "link": "/reference/style-utils/UI/FlexCenterVertical"
                 },
                 {
                   "text": "Spacing",
-                  "link": "/reference/style-utils/ui/Spacing"
+                  "link": "/reference/style-utils/UI/Spacing"
                 },
                 {
                   "text": "Stack",
-                  "link": "/reference/style-utils/ui/Stack"
+                  "link": "/reference/style-utils/UI/Stack"
                 },
                 {
                   "text": "StackHorizontal",
-                  "link": "/reference/style-utils/ui/StackHorizontal"
+                  "link": "/reference/style-utils/UI/StackHorizontal"
                 },
                 {
                   "text": "StackVertical",
-                  "link": "/reference/style-utils/ui/StackVertical"
+                  "link": "/reference/style-utils/UI/StackVertical"
                 },
                 {
                   "text": "margin",
-                  "link": "/reference/style-utils/ui/margin"
+                  "link": "/reference/style-utils/UI/margin"
                 },
                 {
                   "text": "padding",
-                  "link": "/reference/style-utils/ui/padding"
+                  "link": "/reference/style-utils/UI/padding"
                 }
               ]
             }
