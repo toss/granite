@@ -1,5 +1,18 @@
 # @granite-js/cli
 
+## 0.1.0
+
+### Minor Changes
+
+- 561a3ed: fix: docs deadlink
+
+### Patch Changes
+
+- Updated dependencies [561a3ed]
+  - @granite-js/mpack@0.1.0
+  - @granite-js/plugin-core@0.1.0
+  - @granite-js/utils@0.1.0
+
 ## 0.0.3
 
 ### Patch Changes
