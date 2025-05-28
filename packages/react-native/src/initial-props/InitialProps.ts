@@ -138,7 +138,7 @@ type IOSFontSizeType =
  *   appName: APP_NAME,
  *   context,
  * });
- * :::
  * ```
+ * :::
  */
 export type InitialProps = AndroidInitialProps | IOSInitialProps;
