@@ -9,7 +9,6 @@ export const shared = defineConfig({
   title: 'Granite',
   lastUpdated: true,
   metaChunk: true,
-
   themeConfig: {
     search: {
       provider: 'local',

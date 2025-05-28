@@ -5,7 +5,7 @@ sourcePath: packages/react-native/src/visibility/useVisibility.tsx
 # useVisibility
 
 Returns whether the screen is visible to the user.
-Returns `true` if the app's screen is currently visible to the user, and `false` if it's not. However, the screen visibility state does not change when opening and closing the system share modal ([share](/reference/react-native/Share/share)).
+Returns `true` if the app's screen is currently visible to the user, and `false` if it's not. However, the screen visibility state does not change when opening and closing the system share modal (share).
 
 Usage examples:
 

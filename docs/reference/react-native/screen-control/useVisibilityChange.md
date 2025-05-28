@@ -5,7 +5,7 @@ sourcePath: packages/react-native/src/visibility/useVisibilityChange.ts
 # useVisibilityChange
 
 Calls a callback function with the visibility state when the screen's visibility changes.
-The callback function receives the return value from [useVisibility](/en/reference/react-native/Screen%20Control/useVisibility). If the return value is `true`, it passes 'visible', and if `false`, it passes 'hidden'.
+The callback function receives the return value from [useVisibility](./useVisibility). If the return value is `true`, it passes 'visible', and if `false`, it passes 'hidden'.
 
 ## Signature
 
