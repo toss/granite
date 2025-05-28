@@ -1,0 +1,29 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "targetDefaults": {
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "test": {
+      "dependsOn": ["^build", "^build:release"],
+      "cache": false
+    },
+    "test:no-parallel": {
+      "dependsOn": ["^build", "^build:release"],
+      "cache": false
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["{projectRoot}/dist"],
+      "cache": true
+    },
+    "build:release": {
+      "dependsOn": ["^build:release"],
+      "outputs": ["{projectRoot}/target/wasm32-wasi/release"],
+      "cache": true
+    }
+  },
+  "defaultBase": "main",
+  "neverConnectToCloud": true
+}

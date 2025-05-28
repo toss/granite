@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "stripInternal": true,
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "exclude": ["**/dist/*", "**/*.test.*", "**/*.spec.*", "**/*.e2e.*", "**/__fixtures__/*"],
+  "include": ["src"]
+}

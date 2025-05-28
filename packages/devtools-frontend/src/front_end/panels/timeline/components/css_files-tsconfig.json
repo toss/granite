@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "composite": true,
+        "outDir": "."
+    },
+    "files": [
+        "breadcrumbsUI.css.js",
+        "interactionBreakdown.css.js"
+    ]
+}

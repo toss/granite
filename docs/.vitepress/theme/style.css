@@ -1,0 +1,80 @@
+:root {
+  --dockit-border: #b0b8c1;
+  --dockit-color-primary: rgb(78, 89, 104);
+  --dockit-red: #f44336;
+  --dockit-green: rgb(0, 166, 97);
+  --dockit-color-secondary: rgb(78, 89, 104);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dockit-border: #5c6064;
+    --dockit-color-primary: #f0f0f0;
+    --dockit-red: #f5645a;
+    --dockit-green: #38cc8e;
+    --dockit-color-secondary: #f0f0f0;
+  }
+}
+
+ul.post-parameters-ul {
+  margin-top: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.post-parameters-ul .post-parameters-li {
+  position: relative;
+  padding-left: 16px;
+  margin-left: 12px;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.post-parameters-ul .post-parameters-li::before {
+  position: absolute;
+  left: 0;
+  display: block;
+  content: '';
+  top: 6px;
+  width: 8px;
+  height: 8px;
+  border-left: 2px solid var(--dockit-border);
+  border-bottom: 2px solid var(--dockit-border);
+}
+
+.post-parameters-ul .post-parameters-li-root {
+  margin-left: 0;
+  padding-left: 0;
+}
+/* post-parameters-li-root 클래스가 있는 li는 ::before 제거 */
+.post-parameters-ul .post-parameters-li-root::before {
+  content: none;
+}
+
+.post-parameters-li .post-parameters--name {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--vp-c-text-1);
+  margin-right: 6px;
+  font-family: Menlo, Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+}
+
+.post-parameters-li .post-parameters--required {
+  font-size: 14px;
+  color: var(--dockit-red);
+}
+
+.post-parameters-li .post-parameters--type {
+  font-size: 14px;
+  color: var(--dockit-green);
+}
+
+.post-parameters-li .post-parameters--default {
+  font-size: 14px;
+}
+
+.post-parameters-li .post-parameters--description {
+  margin: 0;
+  font-size: 14px;
+  color: var(--vp-c-text-1);
+}

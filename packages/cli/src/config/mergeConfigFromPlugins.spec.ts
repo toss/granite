@@ -1,0 +1,134 @@
+import { flattenPlugins } from '@granite-js/plugin-core';
+import { noop } from 'es-toolkit';
+import { describe, expect, it } from 'vitest';
+import { mergeConfigFromPlugins } from './mergeConfigFromPlugins';
+
+describe('mergeConfigFromPlugins', () => {
+  it('can merge config from a single plugin', async () => {
+    const plugins = await flattenPlugins([
+      {
+        name: 'plugin-1',
+        config: {
+          babel: {
+            plugins: ['plugin-1'],
+          },
+        },
+      },
+    ]);
+
+    const result = await mergeConfigFromPlugins(plugins);
+    expect(result).toEqual({
+      babel: {
+        plugins: ['plugin-1'],
+      },
+    });
+  });
+
+  it('can merge config from multiple plugins', async () => {
+    const plugins = await flattenPlugins([
+      {
+        name: 'plugin-1',
+        config: {
+          babel: {
+            plugins: ['plugin-1'],
+          },
+        },
+      },
+      {
+        name: 'plugin-2',
+        config: {
+          babel: {
+            plugins: ['plugin-2'],
+            presets: ['preset-1'],
+          },
+        },
+      },
+      Promise.resolve({
+        name: 'plugin-3',
+        config: {
+          mpack: {
+            devServer: {
+              middlewares: ['middleware-1', noop],
+            },
+          },
+        },
+      }),
+    ]);
+
+    const result = await mergeConfigFromPlugins(plugins);
+    expect(result).toEqual({
+      babel: {
+        plugins: ['plugin-1', 'plugin-2'],
+        presets: ['preset-1'],
+      },
+      mpack: {
+        devServer: {
+          middlewares: ['middleware-1', noop],
+        },
+      },
+    });
+  });
+
+  it('can handle promise-wrapped plugins', async () => {
+    const plugins = await flattenPlugins([
+      Promise.resolve({
+        name: 'plugin-1',
+        config: {
+          babel: {
+            plugins: ['plugin-1'],
+          },
+        },
+      }),
+    ]);
+
+    const result = await mergeConfigFromPlugins(plugins);
+    expect(result).toEqual({
+      babel: {
+        plugins: ['plugin-1'],
+      },
+    });
+  });
+
+  it('can handle nested plugin arrays', async () => {
+    const plugins = await flattenPlugins([
+      [
+        {
+          name: 'plugin-1',
+          config: {
+            babel: {
+              plugins: ['plugin-1'],
+            },
+          },
+        },
+        {
+          name: 'plugin-2',
+          config: {
+            babel: {
+              presets: ['preset-1'],
+            },
+          },
+        },
+      ],
+    ]);
+
+    const result = await mergeConfigFromPlugins(plugins);
+    expect(result).toEqual({
+      babel: {
+        plugins: ['plugin-1'],
+        presets: ['preset-1'],
+      },
+    });
+  });
+
+  it('can handle plugins without config', async () => {
+    const plugins = [
+      {
+        name: 'plugin-1',
+        config: undefined,
+      },
+    ];
+
+    const result = await mergeConfigFromPlugins(plugins);
+    expect(result).toEqual({});
+  });
+});

@@ -1,0 +1,178 @@
+{
+  "title": "manifest for vitepress sidebar items",
+  "description": "file list",
+  "version": "1.0.0",
+  "documents": {
+    "react-native": {
+      "name": "react-native",
+      "itemCount": 30,
+      "firstItemPath": "/reference/react-native/ui/ColorPreference",
+      "items": [
+        {
+          "text": "react-native",
+          "collapsed": true,
+          "items": [
+            {
+              "text": "코어",
+              "collapsed": true,
+              "items": [
+                {
+                  "text": "Granite",
+                  "link": "/reference/react-native/core/Granite"
+                },
+                {
+                  "text": "InitialProps",
+                  "link": "/reference/react-native/core/InitialProps"
+                }
+              ]
+            },
+            {
+              "text": "화면 제어",
+              "collapsed": true,
+              "items": [
+                {
+                  "text": "IOFlatList",
+                  "link": "/reference/react-native/screen-control/IOFlatList"
+                },
+                {
+                  "text": "IOScrollView",
+                  "link": "/reference/react-native/screen-control/IOScrollView"
+                },
+                {
+                  "text": "ImpressionArea",
+                  "link": "/reference/react-native/screen-control/ImpressionArea"
+                },
+                {
+                  "text": "InView",
+                  "link": "/reference/react-native/screen-control/InView"
+                },
+                {
+                  "text": "closeView",
+                  "link": "/reference/react-native/screen-control/closeView"
+                },
+                {
+                  "text": "useBackEvent",
+                  "link": "/reference/react-native/screen-control/useBackEvent"
+                },
+                {
+                  "text": "useParams",
+                  "link": "/reference/react-native/screen-control/useParams"
+                },
+                {
+                  "text": "useVisibility",
+                  "link": "/reference/react-native/screen-control/useVisibility"
+                },
+                {
+                  "text": "useVisibilityChange",
+                  "link": "/reference/react-native/screen-control/useVisibilityChange"
+                },
+                {
+                  "text": "useWaitForReturnNavigator",
+                  "link": "/reference/react-native/screen-control/useWaitForReturnNavigator"
+                }
+              ]
+            },
+            {
+              "text": "화면 이동",
+              "collapsed": true,
+              "items": [
+                {
+                  "text": "openURL",
+                  "link": "/reference/react-native/screen-navigation/openURL"
+                }
+              ]
+            },
+            {
+              "text": "UI",
+              "collapsed": true,
+              "items": [
+                {
+                  "text": "ColorPreference",
+                  "link": "/reference/react-native/ui/ColorPreference"
+                },
+                {
+                  "text": "KeyboardAboveView",
+                  "link": "/reference/react-native/ui/KeyboardAboveView"
+                },
+                {
+                  "text": "ScrollViewInertialBackground",
+                  "link": "/reference/react-native/ui/ScrollViewInertialBackground"
+                }
+              ]
+            },
+
+            {
+              "text": "환경 확인",
+              "collapsed": true,
+              "items": [
+                {
+                  "text": "getSchemeUri",
+                  "link": "/reference/react-native/environment-check/getSchemeUri"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "style-utils": {
+      "name": "style-utils",
+      "itemCount": 10,
+      "firstItemPath": "/reference/style-utils/ui/Flex",
+      "items": [
+        {
+          "text": "style-utils",
+          "collapsed": true,
+          "items": [
+            {
+              "text": "UI",
+              "collapsed": true,
+              "items": [
+                {
+                  "text": "Flex",
+                  "link": "/reference/style-utils/ui/Flex"
+                },
+                {
+                  "text": "FlexCenter",
+                  "link": "/reference/style-utils/ui/FlexCenter"
+                },
+                {
+                  "text": "FlexCenterHorizontal",
+                  "link": "/reference/style-utils/ui/FlexCenterHorizontal"
+                },
+                {
+                  "text": "FlexCenterVertical",
+                  "link": "/reference/style-utils/ui/FlexCenterVertical"
+                },
+                {
+                  "text": "Spacing",
+                  "link": "/reference/style-utils/ui/Spacing"
+                },
+                {
+                  "text": "Stack",
+                  "link": "/reference/style-utils/ui/Stack"
+                },
+                {
+                  "text": "StackHorizontal",
+                  "link": "/reference/style-utils/ui/StackHorizontal"
+                },
+                {
+                  "text": "StackVertical",
+                  "link": "/reference/style-utils/ui/StackVertical"
+                },
+                {
+                  "text": "margin",
+                  "link": "/reference/style-utils/ui/margin"
+                },
+                {
+                  "text": "padding",
+                  "link": "/reference/style-utils/ui/padding"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

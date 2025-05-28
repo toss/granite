@@ -1,0 +1,44 @@
+{
+  "name": "@granite-js/plugin-router",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "A Route Generator for Granite project",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest --no-watch",
+    "build": "tsdown"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsdown": "^0.11.12",
+    "typescript": "5.8.3",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@granite-js/plugin-core": "workspace:*",
+    "@swc/core": "1.5.24",
+    "chokidar": "4.0.1",
+    "es-toolkit": "^1.26.1"
+  },
+  "sideEffects": false
+}

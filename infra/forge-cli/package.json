@@ -1,0 +1,35 @@
+{
+  "name": "@granite-js/forge-cli",
+  "description": "A CLI tool for managing Granite applications",
+  "type": "module",
+  "version": "0.0.1",
+  "bin": {
+    "granite-forge": "./bin/index.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "package.json"
+  ],
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run --passWithNoTests",
+    "build": "tsdown"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsdown": "^0.11.13",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.10.1",
+    "@commander-js/extra-typings": "^14.0.0",
+    "@granite-js/cli": "workspace:*",
+    "@granite-js/deployment-manager": "workspace:*",
+    "commander": "^14.0.0",
+    "uuid": "^11.1.0",
+    "valibot": "^1.1.0"
+  }
+}

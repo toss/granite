@@ -1,0 +1,33 @@
+{
+  "name": "@granite-js/image",
+  "version": "0.0.1",
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json"
+  },
+  "main": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "devDependencies": {
+    "@granite-js/native": "workspace:*",
+    "@types/react": "18.3.3",
+    "eslint": "^9.7.0",
+    "react": "18.2.0",
+    "react-native": "0.72.6",
+    "typescript": "5.8.3"
+  },
+  "peerDependencies": {
+    "@granite-js/native": "*",
+    "@types/react": "*",
+    "react": "*",
+    "react-native": "*"
+  }
+}

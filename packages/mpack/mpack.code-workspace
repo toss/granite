@@ -1,0 +1,18 @@
+{
+  "folders": [
+    {
+      "path": ".",
+    },
+  ],
+  "settings": {
+    "eslint.useFlatConfig": true,
+    "eslint.nodePath": "../../.yarn/sdks",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "typescript.tsdk": "../../.yarn/sdks/typescript/lib",
+    "prettier.prettierPath": "../../.yarn/sdks/prettier/index.cjs",
+    "prettier.configPath": "../../.prettierrc",
+    "jest.rootPath": ".",
+    "jest.jestCommandLine": "yarn jest",
+    "jest.enable": false,
+  },
+}

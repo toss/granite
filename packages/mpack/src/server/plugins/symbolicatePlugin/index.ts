@@ -1,0 +1,1 @@
+export { symbolicatePlugin } from './symbolicatePlugin';

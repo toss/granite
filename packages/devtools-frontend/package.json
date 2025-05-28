@@ -1,0 +1,19 @@
+{
+  "name": "@granite-js/devtools-frontend",
+  "version": "0.0.1",
+  "description": "A debugger frontend for Granite",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "scripts": {
+    "cleanup": "node scripts/remove-unnecessary-files.mjs",
+    "prepack": "yarn cleanup"
+  },
+  "files": [
+    "src"
+  ],
+  "devDependencies": {
+    "p-limit": "^6.1.0",
+    "tiny-glob": "^0.2.9"
+  },
+  "preferUnplugged": true
+}

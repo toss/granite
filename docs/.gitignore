@@ -1,0 +1,6 @@
+.vitepress/cache
+.vitepress/dist
+cache
+
+.vitepress/.temp
+config.mts.*.mjs

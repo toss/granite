@@ -1,0 +1,4 @@
+config:
+  aws:region: ap-northeast-2
+  pulumi-testbed:bucketName: granite-js
+  pulumi-testbed:region: ap-northeast-2

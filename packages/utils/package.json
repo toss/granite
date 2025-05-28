@@ -1,0 +1,37 @@
+{
+  "name": "@granite-js/utils",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Utilities for Granite",
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "build": "tsup"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/yauzl": "^2.10.3",
+    "tsup": "^8.5.0",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "yauzl": "^3.2.0"
+  },
+  "sideEffects": false
+}

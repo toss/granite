@@ -1,0 +1,25 @@
+{
+  "name": "@granite-internal/tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepack": "yarn build",
+    "dev": "tsx src/index.ts --",
+    "typecheck": "tsc --noEmit",
+    "build": "tsup"
+  },
+  "main": "./dist/index.js",
+  "devDependencies": {
+    "@commander-js/extra-typings": "^13.1.0",
+    "@nx/devkit": "^21.0.3",
+    "@types/node": "^22.10.2",
+    "@types/yargs": "^17.0.33",
+    "@types/yauzl": "^2.10.3",
+    "commander": "^13.1.0",
+    "nx": "^21.0.3",
+    "tsup": "^8.5.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.6.3",
+    "zx": "^8.5.4"
+  }
+}

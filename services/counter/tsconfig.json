@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "baseUrl": "src",
+    "lib": ["ESNext"],
+    "jsx": "preserve",
+    "rootDir": ".",
+    "allowJs": true,
+    "outDir": "./dist"
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/*.e2e.ts"]
+}
