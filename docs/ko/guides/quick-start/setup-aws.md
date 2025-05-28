@@ -31,11 +31,11 @@ npm install @granite-js/pulumi-aws --save-dev
 ```
 
 ```sh [pnpm]
-yarn add @granite-js/pulumi-aws @yarnpkg/pnpify --dev
+pnpm add @granite-js/pulumi-aws --save-dev
 ```
 
 ```sh [yarn]
-pnpm add @granite-js/pulumi-aws --save-dev
+yarn add @granite-js/pulumi-aws @yarnpkg/pnpify --dev
 ```
 
 :::
@@ -88,8 +88,8 @@ export const androidSharedUrl = pulumi.interpolate`https://${cdn.cloudfrontDomai
 위 예제 코드에서 사용하는 구성 변수 `bucketName`과 `region`은 Pulumi 설정으로 미리 지정해야 해요.
 
 ```bash
-pulumi config set bucketName your-bucket-name
-pulumi config set region us-west-2
+pulumi config set bucketName <your-bucket-name>
+pulumi config set region <your-region>
 ```
 
 ## 인프라 배포하기
@@ -102,12 +102,13 @@ pulumi up
 
 ::: warning Yarn Plug’n’Play(PnP)를 사용하는 경우
 다음 명령어로 pnpify를 설치하고 pulumi 명령어를 실행해야 해요.
+
 ```bash
 yarn add @yarnpkg/pnpify -D
 yarn pnpify pulumi up
 ```
-:::
 
+:::
 
 명령어를 실행하면 Pulumi가 어떤 리소스를 만들지 보여줘요. 내용을 검토한 뒤, `yes`를 입력하면 배포가 시작돼요. 이 과정에서 AWS에 React Native CDN 인프라가 생성돼요.
 
