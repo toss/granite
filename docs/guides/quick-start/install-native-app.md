@@ -32,7 +32,7 @@ Follow the guide below to install the app.
 
 ### Installation Steps
 
-1. Download the Granite Android app bundle from the link below.  
+1. Download the Granite Android APK from the link below.  
    [granite_android.zip](/download/granite_android.zip)
 
 2. Extract the downloaded `granite_android.zip` file.

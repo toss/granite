@@ -31,7 +31,7 @@ Granite: {
 
 
 `Granite.registerApp` 함수가 제공하는 기능은 다음과 같아요.	
-- 라우팅: 파일 경로에 맞게 URL이 자동으로 매핑돼요. Next.js의 파일 기반 라우팅과 비슷한 방식으로 동작해요. 예를 들어 `/my-service/pages/index.ts` 파일은 `scheme://my-service` 주소로 접근할 수 있고, `/my-service/pages/home.ts 파일은 scheme://my-service/home` 주소로 접근할 수 있어요.	
+- 라우팅: 파일 경로에 맞게 URL이 자동으로 매핑돼요. Next.js의 파일 기반 라우팅과 비슷한 방식으로 동작해요. 예를 들어 `/my-service/pages/index.ts` 파일은 `scheme://my-service` 주소로 접근할 수 있고, `/my-service/pages/home.ts` 파일은 `scheme://my-service/home` 주소로 접근할 수 있어요.	
 - 쿼리 파라미터: URL 스킴으로 전달 받은 쿼리 파라미터를 쉽게 사용할 수 있어요. 예를 들어, `referrer` 파라미터를 받아서 로그를 남길 수 있어요.	
 - 뒤로 가기 제어: 뒤로 가기 이벤트를 제어할 수 있어요. 예를 들어, 사용자가 화면에서 뒤로 가기를 누르면 다이얼로그를 띄우거나 화면을 닫을 수 있어요.	
 - 화면 가시성(Visibility): 화면이 사용자에게 보이는지, 가려져 있는지 알 수 있어요. 예를 들어, 사용자가 홈 화면으로 나갔을 때 이 값을 활용해 특정 동작을 처리할 수 있어요.	
