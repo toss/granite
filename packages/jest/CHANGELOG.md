@@ -1,5 +1,13 @@
 # @granite-js/jest
 
+## 0.0.3
+
+### Patch Changes
+
+- ed4d356: changeset
+- Updated dependencies [ed4d356]
+  - @granite-js/native@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes

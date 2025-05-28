@@ -1,5 +1,11 @@
 # create-granite-app
 
+## 0.0.3
+
+### Patch Changes
+
+- ed4d356: changeset
+
 ## 0.0.2
 
 ### Patch Changes
