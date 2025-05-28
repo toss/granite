@@ -4,3 +4,4 @@
 /.pnp.*              binary linguist-generated
 
 packages/mpack/**/*.js linguist-generated
+packages/devtools-frontend/**/*.js linguist-generated

@@ -33,9 +33,11 @@ iOS에서 React Native 앱을 테스트하려면 시뮬레이터가 필요해요
 ### 설치 방법
 
 1. 아래 링크에서 Granite Android 앱 번들을 다운로드해요.  
-   [granite_android.apk](https://example.com/download/granite_android.apk)
+   [granite_android.zip](/download/granite_android.zip)
 
-2. 설치 방법 중 하나를 선택해요.
+2. 다운로드한 `granite_android.zip` 파일의 압축을 풀어요.
+
+3. 설치 방법 중 하나를 선택해요.
 
 #### ADB 명령어로 설치
 

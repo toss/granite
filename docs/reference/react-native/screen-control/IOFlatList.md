@@ -6,7 +6,7 @@ sourcePath: packages/react-native/src/intersection-observer/IOFlatList.ts
 
 `IOFlatList` is a `FlatList` component with added Intersection Observer functionality to detect when specific elements become visible or disappear from the screen during scrolling. Using this component, you can easily check and handle whether each item in the list is visible on the screen.
 
-When used with `InView`, you can check the exposure status of each element. The [InView](/reference/react-native/Screen%20Control/InView) component included as a child element detects whether the element is visible on the screen through the observation functionality of `IOFlatList` and triggers events based on the exposure status.
+When used with `InView`, you can check the exposure status of each element. The [InView](./InView) component included as a child element detects whether the element is visible on the screen through the observation functionality of `IOFlatList` and triggers events based on the exposure status.
 
 ## Signature
 

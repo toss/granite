@@ -6,7 +6,7 @@ sourcePath: packages/react-native/src/use-back-event/useBackEvent.tsx
 
 A Hook that returns a controller object for registering and removing back events. Using this Hook, you can handle back events only when a specific component is active.
 Use `addEventListener` to register back events and `removeEventListener` to remove them.
-Registered back events are only active when the user is viewing the screen. The condition for viewing the screen is determined using [useVisibility](/en/reference/react-native/Screen%20Control/useVisibility).
+Registered back events are only active when the user is viewing the screen. The condition for viewing the screen is determined using [useVisibility](./useVisibility).
 
 Using this Hook, you can define logic to handle back events in specific components.
 

@@ -10,7 +10,7 @@ The second argument of the `onChanged` handler receives the exposure ratio of th
 
 ::: warning Note
 
-`InView` must be used inside [IOScrollView](/reference/react-native/Screen%20Control/InView.md) or [IOFlatList](/reference/react-native/Screen%20Control/IOFlatList.md) that includes `IOContext`.
+`InView` must be used inside [IOScrollView](./IOScrollView) or [IOFlatList](./IOFlatList) that includes `IOContext`.
 If used outside of `IOContext`, an `IOProviderMissingError` will occur.
 
 :::

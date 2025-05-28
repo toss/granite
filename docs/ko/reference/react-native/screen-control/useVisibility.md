@@ -5,7 +5,7 @@ sourcePath: packages/react-native/src/visibility/useVisibility.tsx
 # useVisibility
 
 화면이 사용자에게 보이는 상태인지 여부를 반환해요.
-앱의 화면이 현재 사용자에게 보인다면 `true`를 반환하고, 보이지 않는다면 `false`를 반환해요. 단, 시스템 공유하기 모달([share](/ko/reference/react-native/share/share))을 열고 닫을 때는 화면이 보이는 상태가 바뀌지 않아요.
+앱의 화면이 현재 사용자에게 보인다면 `true`를 반환하고, 보이지 않는다면 `false`를 반환해요. 단, 시스템 공유하기 모달(share)을 열고 닫을 때는 화면이 보이는 상태가 바뀌지 않아요.
 
 사용 예시는 다음과 같아요.
 

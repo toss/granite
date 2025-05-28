@@ -33,15 +33,17 @@ Follow the guide below to install the app.
 ### Installation Steps
 
 1. Download the Granite Android app bundle from the link below.  
-   [granite_android.apk](/download/granite_android.apk)
+   [granite_android.zip](/download/granite_android.zip)
 
-2. Choose one of the installation methods.
+2. Extract the downloaded `granite_android.zip` file.
+
+3. Choose one of the installation methods.
 
 #### Install using ADB command
 
 - Connect your Android device to your computer, then run the following command in the terminal:
   ```bash
-  adb install granite_android.apk
+  adb install granite_android.zip
   ```
 
 #### Direct installation on device
