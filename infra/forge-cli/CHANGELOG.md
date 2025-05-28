@@ -1,5 +1,14 @@
 # @granite-js/forge-cli
 
+## 0.0.3
+
+### Patch Changes
+
+- ed4d356: changeset
+- Updated dependencies [ed4d356]
+  - @granite-js/deployment-manager@0.0.3
+  - @granite-js/cli@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes
