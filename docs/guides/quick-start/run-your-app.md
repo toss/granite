@@ -2,7 +2,7 @@
 
 Once you've deployed your app with `granite-forge` and have the bundle address, you can run it directly in the sandbox app. Follow the steps below to set it up easily.
 
-If you don't have the sandbox app yet, please check the [Install Sandbox App](/ko/guides/quick-start/install-native-app) document first.
+If you don't have the sandbox app yet, please check the [Install Sandbox App](/guides/quick-start/install-native-app) document first.
 
 ## 1. Check Required Information
 
