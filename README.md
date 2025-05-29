@@ -50,7 +50,7 @@ Deploy your app to production with a single command. Our Forge  handles the rest
 npm run granite-forge deploy --bucket your-s3-bucket-name
 ```
 
-For a simple, step-by-step guide on getting started with Granite, please visit our [getting started guide](https://toss.github.io/granite/guides/quick-start/install-native-app.html). 
+For a simple, step-by-step guide, please visit our [getting started guide](https://granite.run/guides/quick-start/create-your-app.html). 
 
 ## Contributing
 
