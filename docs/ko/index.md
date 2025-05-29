@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: 'Granite'
-  text: 'React Native Framework'
+  text: '엔터프라이즈 React Native 프레임워크'
   image:
     src: /granite.png
     alt: granite
