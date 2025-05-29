@@ -22,8 +22,7 @@ function sidebar(): DefaultTheme.Sidebar {
           items: [
             { text: 'Getting Started', link: '/guides/quick-start/create-your-app' },
             { text: 'Set Up Infrastructure', link: '/guides/quick-start/setup-aws' },
-            { text: 'Deploy Your App', link: '/guides/quick-start/deploy-your-app' },
-            { text: 'Run Your App', link: '/guides/quick-start/run-your-app' },
+            { text: 'Deploy & Run Your App', link: '/guides/quick-start/deploy-your-app' },
           ],
         },
         {

@@ -1,4 +1,4 @@
-# Deploy Your Granite App
+# Deploy & Run Your Granite App
 
 Get your app live on AWS in 5 minutes.
 
@@ -7,9 +7,9 @@ Get your app live on AWS in 5 minutes.
 - Upload optimized bundles to your AWS S3 bucket
 - Distribute globally via CloudFront CDN
 - Update apps instantly
-- Enable A/B testing with canary deployments
 
-> **⏱️ Estimated time:** 5 minutes  
+> **⏱️ Estimated time:** 5 minutes
+
 > **📱 Result:** Your app running live from AWS CDN
 
 ## Prerequisites
@@ -17,7 +17,7 @@ Get your app live on AWS in 5 minutes.
 Make sure you've completed these guides first:
 
 - **[Getting Started](./create-your-app.md)** - Your Granite app is built and working
-- **[AWS Infrastructure](./setup-aws.md)** - Your AWS CDN is set up and running
+- **[Setting Up AWS Infrastructure](./setup-aws.md)** - Your AWS CDN is set up and running
 
 ## 1: Build Your Production App
 
@@ -102,7 +102,7 @@ $ npx granite-forge deploy --bucket {Your bucket name}
 │
 ◇  Bundle list updated
 │
-◇  Deployed successfully! (Deployment ID: 01971c12-3e69-71b7-8f1a-2d0e46beca31)
+◇  Deployed successfully! (Deployment ID: **********************)
 │
 └  Done
 ```
@@ -111,29 +111,45 @@ $ npx granite-forge deploy --bucket {Your bucket name}
 
 ## 4: Test Your Granite App
 
-Configure your Granite test app to use the production bundles:
+Now that your app is deployed, let's test it out using the Granite test app.
 
-1. Open Granite test app on your simulator.
-2. 
-3. **Set Bundle URL** to: `https://d1234567890123.cloudfront.net/ios/my-granite-app/100/bundle`
-4. **Tap "Reload App"**
+Open the [Granite test app](../miscellaneous/install-native-app.md) on your simulator and enter the following information:
+
+| Field | What to Enter |
+|-------|---------------|
+| Host | The CDN URL from your AWS infrastructure deployment (you can find this in the previous step's output) |
+| URL Scheme | Your app's URL scheme in the format: `{your-scheme}://{your-app-name}` (these values come from your Granite config) |
+
+::: details Finding your scheme and app name
+
+These values are defined in your `granite.config.ts` file. Let's take a look at how to find them:
+
+```ts
+import { defineConfig } from '@granite-js/react-native/config';
+
+export default defineConfig({
+  // Example execution scheme: granite://showcase
+  scheme: 'granite',
+  appName: 'showcase',
+  plugins: [
+    // ...
+  ],
+});
+```
+
+:::
 
 <img src="../../public/getting-started/input-cdn-url.png" style="max-width: 320px; margin: 0 auto; width: 100%;" />
 
-Your app should now load from AWS! 🌍
+Click Submit and watch your app load instantly from your AWS infrastructure! Your app is now being served through a global CDN, ready for users worldwide. 🌍
 
-### Test on Real Device
 
-To test on a real device:
+## Example Videos
 
-1. **Install Granite test app** on your phone
-2. **Scan QR code** or **enter URL manually**:
-   ```
-   https://d1234567890123.cloudfront.net/ios/my-granite-app/100/bundle
-   ```
-3. **Your app loads instantly** from the CDN
+| iOS                                                                                                                                                                                                             | Android                                                                                                                                                                                                             |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <video autoplay loop muted style="max-width:400px; width:100%; height:auto; margin-top:1rem;"> <source src="/videos/ios_showcase.mp4" type="video/mp4" /> Your browser does not support the video tag. </video> | <video autoplay loop muted style="max-width:400px; width:100%; height:auto; margin-top:1rem;"> <source src="/videos/android_showcase.mov" type="video/mp4" /> Your browser does not support the video tag. </video> |
 
-> **✅ Success indicator:** Your app loads and works exactly like in development
 
 ## Understanding Deployment URLs
 
@@ -154,204 +170,12 @@ https://d1234567890123.cloudfront.net/android/my-granite-app/100/bundle
 ```
 
 ### Version Numbers (1-1000)
-- **1-100**: Canary releases (limited users)
-- **101-500**: Beta releases  
-- **501-1000**: Production releases
 
-## Advanced Deployment Options
-
-### Deploy Specific Version
-
-Deploy to a specific version number:
-
-```bash
-npx granite-forge deploy --version 250
-```
-
-### Deploy to Different Environment
-
-Deploy to staging or production:
-
-```bash
-# Deploy to staging
-npx granite-forge deploy --env staging
-
-# Deploy to production  
-npx granite-forge deploy --env production
-```
-
-### Canary Deployment
-
-Deploy to a small percentage of users first:
-
-```bash
-# Deploy to 10% of users
-npx granite-forge deploy --canary 10
-
-# If successful, promote to all users
-npx granite-forge promote --version 100
-```
-
-## Managing Your Deployments
-
-### View Deployment History
-
-See all your previous deployments:
-
-```bash
-npx granite-forge list
-```
-
-### Rollback to Previous Version
-
-If something goes wrong, rollback instantly:
-
-```bash
-# Rollback to previous version
-npx granite-forge rollback
-
-# Or rollback to specific version
-npx granite-forge rollback --version 95
-```
-
-### Delete Old Versions
-
-Clean up old bundles to save storage costs:
-
-```bash
-# Keep only last 10 versions
-npx granite-forge cleanup --keep 10
-```
+Version numbers control what percentage of users get your app update, from 0% to 100% of your user base, with 0.1% granularity.
 
 ## 🎉 Congratulations!
 
 Your Granite app is now live on AWS! Here's what you can do now:
 
-- ✅ **Update instantly** - Deploy new versions without app store approval
-- ✅ **Global performance** - Your app loads fast worldwide via CDN
-- ✅ **A/B testing** - Test features with different user groups
-- ✅ **Instant rollbacks** - Fix issues immediately if needed
-
-## What's Next?
-
-Now that your app is deployed:
-
-1. **[Set Up CI/CD](./cicd-setup.md)** - Automate deployments from Git
-2. **[Configure A/B Testing](./ab-testing.md)** - Test features safely
-3. **[Monitor Performance](./monitoring.md)** - Track your app's health
-4. **[Integrate with Existing Apps](./brownfield-integration.md)** - Add to current apps
-
-## Troubleshooting
-
-**"Bucket not found" error:**
-- Make sure your bucket name in config matches AWS setup
-- Check that your AWS credentials are still valid
-
-**Bundles not loading in app:**
-- Verify the CDN URL is correct
-- Wait 5-10 minutes for CloudFront to update
-- Check browser developer tools for error messages
-
-**Deployment takes too long:**
-- Large bundles take more time to upload
-- Check your internet connection
-- Consider optimizing bundle sizes
-
-**App crashes after deployment:**
-- Test locally first with `npm run dev`
-- Check bundle compatibility between development and production
-- Review error logs in your test app
-
-## Need Help?
-
-- 📖 [Deployment Troubleshooting](../troubleshooting/deployment.md)
-- 💬 [Discord Community](https://discord.gg/granite) - Get help from other developers
-- 🐛 [GitHub Issues](https://github.com/your-org/granite/issues) - Report deployment issues
-
----
-
-**Next:** [Set Up CI/CD Pipeline →](./cicd-setup.md)
-
-# Deploy Your App
-
-This guide explains how to create a Granite application using `granite-app` and deploy service bundles to AWS using the `granite-forge` deployment tool. By following this process, you can deploy and run your application on an Amazon S3 bucket.
-
-## Prerequisites
-
-To deploy your application to AWS, you need to meet the following conditions:
-
-- **Your Granite app** - Complete the [Getting Started guide](./create-your-app.md) first
-- **AWS infrastructure** - Complete the [AWS infrastructure guide](./setup-aws.md) first
-
-## 1. Building the Application
-
-Build the optimized Granite app created in the [getting Started guide](./create-your-app.md#7-build-your-app) with the following command:
-
-::: code-group
-
-```sh [npm]
-npm run granite build
-```
-
-```sh [pnpm]
-pnpm granite build
-```
-
-```sh [yarn]
-yarn granite build
-```
-
-:::
-
-## 2. Install the Granite Forge CLI
-
-
-### Installing Dependencies
-
-Install the `granite-forge` CLI to deploy Granite applications.
-
-::: code-group
-
-```sh [npm]
-npm install @granite-js/forge-cli --save-dev
-```
-
-```sh [pnpm]
-pnpm add @granite-js/forge-cli --save-dev
-```
-
-```sh [yarn]
-yarn add @granite-js/forge-cli --dev
-```
-
-:::
-
-
-## 3. Deploying the Service Bundle
-
-This command uploads the built service bundle to the specified S3 bucket and provisions the necessary AWS resources to deploy the application. You must specify the correct S3 bucket name for deployment using the `--bucket` option.
-
-::: code-group
-
-```sh [npm]
-npm run granite-forge deploy --bucket {Your S3 Bucket Name}
-```
-
-```sh [pnpm]
-pnpm granite-forge deploy --bucket {Your S3 Bucket Name}
-```
-
-```sh [yarn]
-yarn granite-forge deploy --bucket {Your S3 Bucket Name}
-```
-
-:::
-
-## Next Steps
-
-Once the application is successfully deployed, you can use the following endpoint addresses to access the service on each platform.
-`1-1000` should be replaced with a number between `1` and `1000`. This number is used for canary deployments.
-
-The endpoint addresses are as follows:
-- iOS: `https://<cloudfront-cdn>/ios/<appName>/1-1000/bundle`
-- Android: `https://<cloudfront-cdn>/android/<appName>/1-1000/bundle`
+- **Update instantly** - Deploy new versions by single CLI command
+- **Global performance** - Your app loads worldwide via CDN
