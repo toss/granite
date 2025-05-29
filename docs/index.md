@@ -10,12 +10,15 @@ hero:
     alt: granite
 
   actions:
+    - theme: brand
+      text: Quick Start
+      link: /guides/quick-start/install-native-app
     - theme: alt
-      text: Introduction
+      text: introduction
       link: /guides/introduction
     - theme: alt
-      text: Reference
-      link: /reference/react-native/core/Granite
+      text: GitHub
+      link: https://github.com/toss/granite
 
 features:
   - title: Consistent Behavior Across Platforms
