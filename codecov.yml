@@ -23,10 +23,6 @@ component_management:
       name: '@granite-js/native'
       paths:
         - packages/native/**
-    - component_id: native
-      name: '@granite-js/native'
-      paths:
-        - packages/native/**
     - component_id: plugin-env
       name: '@granite-js/plugin-env'
       paths:
@@ -43,10 +39,6 @@ component_management:
       name: '@granite-js/react-native'
       paths:
         - packages/react-native/**
-    - component_id: style-utils
-      name: '@granite-js/style-utils'
-      paths:
-        - packages/style-utils/**
     - component_id: style-utils
       name: '@granite-js/style-utils'
       paths:
