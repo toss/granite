@@ -7,8 +7,6 @@ const require = createRequire(import.meta.url);
 
 export const shared = defineConfig({
   title: 'Granite',
-  // TODO: Remove if domain is available
-  base: '/granite/',
   lastUpdated: true,
   metaChunk: true,
   themeConfig: {
@@ -24,6 +22,11 @@ export const shared = defineConfig({
       {
         icon: 'github',
         link: 'https://github.com/toss/granite',
+      },
+      {
+        icon: 'npm',
+        link: 'https://www.npmjs.com/package/@granite-js/react-native',
+        ariaLabel: 'npm',
       },
     ],
   },
