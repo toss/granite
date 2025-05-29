@@ -29,7 +29,7 @@ Using the `useParams` hook, you can easily get the query string values from the 
 Additionally, by using the `validateParams` option, you can define and validate the parameters required for the screen. Refer to the example below.
 
 ```tsx
-import { createRoute } from '@granite/react-native';
+import { createRoute } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 
 // Define the screen corresponding to the root path ('/')
@@ -72,7 +72,7 @@ Therefore, use the `validateParams` option to ensure that required parameters ar
 ::: code-group
 
 ```tsx [vanilla]
-import { createRoute } from '@granite/react-native';
+import { createRoute } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 
 export const Route = createRoute('/', {
@@ -112,7 +112,7 @@ function Index() {
 ```
 
 ```tsx [valibot]
-import { createRoute } from '@granite/react-native';
+import { createRoute } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 import * as v from 'valibot';
 
@@ -142,7 +142,7 @@ function Index() {
 ```
 
 ```tsx [zod]
-import { createRoute } from '@granite/react-native';
+import { createRoute } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 import { z } from 'zod';
 
@@ -187,7 +187,7 @@ The result of the `parserParams` option is transformed before being passed to th
 Using the default parser, query string values are automatically converted to appropriate types. The example below shows how to convert parameters to their correct types.
 
 ```tsx
-import { createRoute } from '@granite/react-native';
+import { createRoute } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 
 // Example URL: granite://test-app?name=tom&age=10&arr=1,2,3&obj={\"name\":\"jane\",\"age\":20}
@@ -229,7 +229,7 @@ function Index() {
 The `parserParams` option allows you to define and use a custom function to transform query parameters that are difficult to handle with the default parser. For example, the code below shows how to remove a specific parameter (`referer`) and process the remaining parameters with the default parser.
 
 ```tsx
-import { createRoute, defaultParserParams } from '@granite/react-native';
+import { createRoute, defaultParserParams } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 
 // Example URL: granite://test-app?name=tom&age=10&referer=https://google.com
