@@ -6,7 +6,7 @@
 
 시작하기 전에 다음 도구들이 설치되어 있는지 확인하세요.
 
-- **Node.js LTS** (22 권장) - [다운로드](https://nodejs.org/)
+- **Node.js LTS** (22.12.0 권장) - [다운로드](https://nodejs.org/)
 - **Xcode** (iOS 테스트용) - Mac App Store에서 설치 가능
 - **Android Studio** (Android 테스트용) - [다운로드](https://developer.android.com/studio)
 - **Granite 테스트 앱** - iOS 시뮬레이터나 Android 에뮬레이터에 설치 ([설치 가이드](../miscellaneous/install-native-app))

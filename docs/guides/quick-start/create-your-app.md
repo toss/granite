@@ -6,7 +6,7 @@ Build your first enterprise-grade React Native microservice app in 10 minutes.
 
 Before you start, make sure you have these tools installed:
 
-- **Node.js LTS** (22 recommended) - [Download here](https://nodejs.org/)
+- **Node.js LTS** (22.12.0 recommended) - [Download here](https://nodejs.org/)
 - **Xcode** (for testing in iOS) - Available from Mac App Store
 - **Android Studio** (for testing in Android) - [Download here](https://developer.android.com/studio)
 - **Granite test app** - Install on your iOS simulator or Android emulator ([Installation guide](../miscellaneous/install-native-app))
