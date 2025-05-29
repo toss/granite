@@ -16,12 +16,12 @@
 
 다음 가이드를 먼저 완료했는지 확인하세요.
 
-- **[시작하기](./create-your-app.md)** - Granite 앱이 빌드되고 작동하는 상태
-- **[AWS 인프라 설정하기](./setup-aws.md)** - AWS CDN이 설정되고 실행 중인 상태
+- **[시작하기](./create-your-app)** - Granite 앱이 빌드되고 작동하는 상태
+- **[AWS 인프라 설정하기](./setup-aws)** - AWS CDN이 설정되고 실행 중인 상태
 
 ## 1: 프로덕션용 앱 빌드하기
 
-먼저 프로덕션용 [Granite 앱](./create-your-app.md)을 빌드해보세요. 프로젝트 디렉토리에서 다음 명령어를 실행하세요.
+먼저 프로덕션용 [Granite 앱](./create-your-app)을 빌드해보세요. 프로젝트 디렉토리에서 다음 명령어를 실행하세요.
 
 ::: code-group
 
@@ -67,7 +67,7 @@ yarn add @granite-js/forge-cli --dev
 
 ## 3: 앱 배포하기
 
-[AWS 인프라 가이드](./setup-aws.md)에서 설정한 S3 버킷을 사용해 앱을 배포해보세요.
+[AWS 인프라 가이드](./setup-aws)에서 설정한 S3 버킷을 사용해 앱을 배포해보세요.
 
 ::: code-group
 
@@ -113,7 +113,7 @@ $ npx granite-forge deploy --bucket {버킷 이름}
 
 이제 앱이 배포됐으니 Granite 테스트 앱으로 테스트해보세요.
 
-시뮬레이터에서 [Granite 테스트 앱](../miscellaneous/install-native-app.md)을 열고 다음 정보를 입력하세요.
+시뮬레이터에서 [Granite 테스트 앱](../miscellaneous/install-native-app)을 열고 다음 정보를 입력하세요.
 
 | 필드 | 입력할 내용 |
 |-------|---------------|

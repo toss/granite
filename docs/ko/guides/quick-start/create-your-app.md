@@ -9,7 +9,7 @@
 - **Node.js LTS** (22 권장) - [다운로드](https://nodejs.org/)
 - **Xcode** (iOS 테스트용) - Mac App Store에서 설치 가능
 - **Android Studio** (Android 테스트용) - [다운로드](https://developer.android.com/studio)
-- **Granite 테스트 앱** - iOS 시뮬레이터나 Android 에뮬레이터에 설치 ([설치 가이드](../miscellaneous/install-native-app.md))
+- **Granite 테스트 앱** - iOS 시뮬레이터나 Android 에뮬레이터에 설치 ([설치 가이드](../miscellaneous/install-native-app))
 
 ## 1. Granite 프로젝트 생성
 
@@ -107,7 +107,7 @@ my-granite-app/
 Granite 프로젝트의 중요한 디렉토리와 파일은 다음과 같아요.
 
 - **'pages/'** - 각 파일이 앱의 화면이 돼요
-- **'granite.config.ts'** - Granite 앱 설정 ([참고](../../reference/react-native/config/defineConfig.md))
+- **'granite.config.ts'** - Granite 앱 설정 ([참고](../../reference/react-native/config/defineConfig))
 - **'src/_app.tsx'** - 마이크로서비스의 모든 화면에서 공유하는 로직을 추가할 수 있는 메인 진입점
 
 ## 4. 개발 서버 실행
@@ -155,7 +155,7 @@ To open debugger press "j"
 
 ### 5.1 Granite 테스트 앱 설치
 
-아직 설치하지 않았다면, 시뮬레이터에 Granite 테스트 앱을 설치해 보세요. [설치 가이드](../miscellaneous/install-native-app.md)를 따라가면 쉽게 설치할 수 있어요.
+아직 설치하지 않았다면, 시뮬레이터에 Granite 테스트 앱을 설치해 보세요. [설치 가이드](../miscellaneous/install-native-app)를 따라가면 쉽게 설치할 수 있어요.
 
 ### 5.2 앱 실행
 
@@ -306,11 +306,11 @@ Granite 프레임워크가 최적화된 JavaScript 번들을 만들어요. 최�
 
 이제 작동하는 Granite 앱이 생겼으니, 다음 단계로 넘어갈 수 있어요:
 
-1. **[AWS 인프라 설정하기](./setup-aws.md)** - 번들을 위한 CDN 인프라 구성
-2. **[프로덕션 배포하기](./deploy-your-app.md)** - AWS CDN에 번들을 배포하는 방법 배우기
-3. **[고급 라우팅](../granite-router/routing.md)** - 타입-세이프 라우팅과 내비게이션에 대해 배우기
+1. **[AWS 인프라 설정하기](./setup-aws)** - 번들을 위한 CDN 인프라 구성
+2. **[프로덕션 배포하기](./deploy-your-app)** - AWS CDN에 번들을 배포하는 방법 배우기
+3. **[고급 라우팅](../granite-router/routing)** - 타입-세이프 라우팅과 내비게이션에 대해 배우기
 
 ## 참고 링크
 
-- 📖 [문서](../../index.md) - Granite 완벽 가이드
+- 📖 [문서](../../index) - Granite 완벽 가이드
 - 🐛 [GitHub 이슈](https://github.com/your-org/granite/issues) - 버그 신고나 기능 요청하기

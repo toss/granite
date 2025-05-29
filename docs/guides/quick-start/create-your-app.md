@@ -9,7 +9,7 @@ Before you start, make sure you have these tools installed:
 - **Node.js LTS** (22 recommended) - [Download here](https://nodejs.org/)
 - **Xcode** (for testing in iOS) - Available from Mac App Store
 - **Android Studio** (for testing in Android) - [Download here](https://developer.android.com/studio)
-- **Granite test app** - Install on your iOS simulator or Android emulator ([Installation guide](../miscellaneous/install-native-app.md))
+- **Granite test app** - Install on your iOS simulator or Android emulator ([Installation guide](../miscellaneous/install-native-app))
 
 ## 1. Create Your Granite Project
 
@@ -106,7 +106,7 @@ my-granite-app/
 
 **Key files:**
 - **`pages/`** - Each file becomes a screen in your app
-- **`granite.config.ts`** - Configure your Granite app ([Reference](../../reference/react-native/config/defineConfig.md))
+- **`granite.config.ts`** - Configure your Granite app ([Reference](../../reference/react-native/config/defineConfig))
 - **`src/_app.tsx`** - The main entry point where you can add logic that's shared across all screens in your microservice
 
 ## 4. Start Development Server
@@ -155,7 +155,7 @@ Now let's see your app running in the Granite test app:
 ### 5.1 Install Granite Test App
 
 If you haven't already, install the Granite test app on your simulator:
-- Follow our [installation guide](../miscellaneous/install-native-app.md)
+- Follow our [installation guide](../miscellaneous/install-native-app)
 
 ### 5.2 Run Your App
 
@@ -306,11 +306,11 @@ You've successfully created your first Granite app! Here's what you accomplished
 
 Now that you have a working Granite app, you can:
 
-1. **[Set up AWS Infrastructure](./setup-aws.md)** - Configure CDN infrastructure for your bundles
-2. **[Deploy to Production](./deploy-your-app.md)** - Learn how to deploy your bundles to AWS CDN
-3. **[Advanced Routing](../granite-router/routing.md)** - Learn about type-safe routing and navigation
+1. **[Set up AWS Infrastructure](./setup-aws)** - Configure CDN infrastructure for your bundles
+2. **[Deploy to Production](./deploy-your-app)** - Learn how to deploy your bundles to AWS CDN
+3. **[Advanced Routing](../granite-router/routing)** - Learn about type-safe routing and navigation
 
 ## Need Help?
 
-- 📖 [Documentation](../../index.md) - Complete Granite guide
+- 📖 [Documentation](../../index) - Complete Granite guide
 - 🐛 [GitHub Issues](https://github.com/your-org/granite/issues) - Report bugs or request features

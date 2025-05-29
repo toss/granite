@@ -253,4 +253,4 @@ Pulumi will show you what resources it will delete and ask for confirmation. Ent
 
 Now that your infrastructure is set up:
 
-- [Deploy Your App](./deploy-your-app.md) - Learn how to deploy your Granite app to your AWS infrastructure
+- [Deploy Your App](./deploy-your-app) - Learn how to deploy your Granite app to your AWS infrastructure

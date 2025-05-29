@@ -16,12 +16,12 @@ Get your app live on AWS in 5 minutes.
 
 Make sure you've completed these guides first:
 
-- **[Getting Started](./create-your-app.md)** - Your Granite app is built and working
-- **[Setting Up AWS Infrastructure](./setup-aws.md)** - Your AWS CDN is set up and running
+- **[Getting Started](./create-your-app)** - Your Granite app is built and working
+- **[Setting Up AWS Infrastructure](./setup-aws)** - Your AWS CDN is set up and running
 
 ## 1: Build Your Production App
 
-First, let's build your [Granite app](./create-your-app.md) for production. Run this command in your project directory:
+First, let's build your [Granite app](./create-your-app) for production. Run this command in your project directory:
 
 ::: code-group
 
@@ -67,7 +67,7 @@ yarn add @granite-js/forge-cli --dev
 
 ## 3: Deploy Your App
 
-With the S3 bucket set up from the [AWS infrastructure guide](./setup-aws.md), let's deploy your app.
+With the S3 bucket set up from the [AWS infrastructure guide](./setup-aws), let's deploy your app.
 
 ::: code-group
 
@@ -113,7 +113,7 @@ $ npx granite-forge deploy --bucket {Your bucket name}
 
 Now that your app is deployed, let's test it out using the Granite test app.
 
-Open the [Granite test app](../miscellaneous/install-native-app.md) on your simulator and enter the following information:
+Open the [Granite test app](../miscellaneous/install-native-app) on your simulator and enter the following information:
 
 | Field | What to Enter |
 |-------|---------------|
