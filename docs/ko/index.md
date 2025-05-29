@@ -12,13 +12,10 @@ hero:
   actions:
     - theme: brand
       text: 빠른 시작
-      link: /ko/guides/quick-start/install-native-app
+      link: ./guides/quick-start/create-your-app
     - theme: alt
       text: 소개
-      link: /ko/guides/introduction
-    - theme: alt
-      text: GitHub
-      link: https://github.com/toss/granite
+      link: ./guides/introduction
 
 features:
   - icon: 🔌
