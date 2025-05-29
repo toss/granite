@@ -4749,6 +4749,7 @@ __metadata:
     "@aws-sdk/client-cloudfront": "npm:^3.812.0"
     "@aws-sdk/client-s3": "npm:^3.812.0"
     "@types/node": "npm:^22.10.2"
+    "@vitest/coverage-v8": "npm:^3.1.4"
     aws-lambda: "npm:^1.0.7"
     aws-sdk-client-mock: "npm:^4.1.0"
     es-toolkit: "npm:^1.38.0"
@@ -4777,6 +4778,7 @@ __metadata:
     "@granite-js/cli": "workspace:*"
     "@granite-js/deployment-manager": "workspace:*"
     "@types/node": "npm:^22.10.2"
+    "@vitest/coverage-v8": "npm:^3.1.4"
     commander: "npm:^14.0.0"
     tsdown: "npm:^0.11.13"
     typescript: "npm:^5.8.3"
@@ -4877,6 +4879,7 @@ __metadata:
     "@types/serve-static": "npm:^1"
     "@types/temp": "npm:^0"
     "@types/ws": "npm:^8"
+    "@vitest/coverage-v8": "npm:^2.1.8"
     absolute-path: "npm:^0.0.0"
     accepts: "npm:^1.3.7"
     assert: "npm:2.1.0"
@@ -5012,6 +5015,7 @@ __metadata:
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/utils": "workspace:*"
     "@types/babel__core": "npm:^7.20.5"
+    "@vitest/coverage-v8": "npm:^3.1.3"
     tsdown: "npm:^0.11.12"
     typescript: "npm:^5.6.3"
     vitest: "npm:^3.1.3"
@@ -5024,6 +5028,7 @@ __metadata:
   dependencies:
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/utils": "workspace:*"
+    "@vitest/coverage-v8": "npm:^3.1.3"
     es-toolkit: "npm:^1.38.0"
     execa: "npm:^5"
     source-map: "npm:^0.8.0-beta.0"
@@ -5040,6 +5045,7 @@ __metadata:
     "@granite-js/plugin-core": "workspace:*"
     "@swc/core": "npm:1.5.24"
     "@types/node": "npm:^22.10.2"
+    "@vitest/coverage-v8": "npm:^2.1.8"
     chokidar: "npm:4.0.1"
     es-toolkit: "npm:^1.26.1"
     tsdown: "npm:^0.11.12"
@@ -5059,6 +5065,7 @@ __metadata:
     "@pulumi/pulumi": "npm:^3.170.0"
     "@types/aws-lambda": "npm:^8.10.149"
     "@types/node": "npm:^22.15.19"
+    "@vitest/coverage-v8": "npm:^3.1.4"
     aws-lambda: "npm:^1.0.7"
     aws-sdk-client-mock: "npm:^4.1.0"
     es-toolkit: "npm:^1.38.0"
@@ -5093,6 +5100,7 @@ __metadata:
     "@types/node": "npm:^22.10.2"
     "@types/react": "npm:18.3.3"
     "@types/react-dom": "npm:^18"
+    "@vitest/coverage-v8": "npm:^2.1.8"
     es-toolkit: "npm:^1.34.1"
     esbuild: "npm:^0.25.4"
     eslint: "npm:^9.7.0"
@@ -9504,7 +9512,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/coverage-v8@npm:^3.1.4":
+"@vitest/coverage-v8@npm:^2.1.8":
+  version: 2.1.9
+  resolution: "@vitest/coverage-v8@npm:2.1.9"
+  dependencies:
+    "@ampproject/remapping": "npm:^2.3.0"
+    "@bcoe/v8-coverage": "npm:^0.2.3"
+    debug: "npm:^4.3.7"
+    istanbul-lib-coverage: "npm:^3.2.2"
+    istanbul-lib-report: "npm:^3.0.1"
+    istanbul-lib-source-maps: "npm:^5.0.6"
+    istanbul-reports: "npm:^3.1.7"
+    magic-string: "npm:^0.30.12"
+    magicast: "npm:^0.3.5"
+    std-env: "npm:^3.8.0"
+    test-exclude: "npm:^7.0.1"
+    tinyrainbow: "npm:^1.2.0"
+  peerDependencies:
+    "@vitest/browser": 2.1.9
+    vitest: 2.1.9
+  peerDependenciesMeta:
+    "@vitest/browser":
+      optional: true
+  checksum: 10c0/ccf5871954a630453af9393e84ff40a0f8a4515e988ea32c7ebac5db7c79f17535a12c1c2567cbb78ea01a1eb99abdde94e297f6b6ccd5f7f7fc9b8b01c5963c
+  languageName: node
+  linkType: hard
+
+"@vitest/coverage-v8@npm:^3.1.3, @vitest/coverage-v8@npm:^3.1.4":
   version: 3.1.4
   resolution: "@vitest/coverage-v8@npm:3.1.4"
   dependencies:
@@ -12083,6 +12117,7 @@ __metadata:
     "@types/kill-port": "npm:^2.0.1"
     "@types/node": "npm:^22.10.2"
     "@types/yargs": "npm:^17.0.33"
+    "@vitest/coverage-v8": "npm:^2.1.8"
     es-toolkit: "npm:^1.30.1"
     execa: "npm:^9.5.2"
     kill-port: "npm:^2.0.1"
@@ -14856,7 +14891,6 @@ __metadata:
     "@types/jest": "npm:^29.5.12"
     "@types/node": "npm:^22.10.2"
     "@types/react": "npm:18.3.3"
-    "@vitest/coverage-v8": "npm:^3.1.4"
     "@yarnpkg/types": "npm:^4.0.0"
     chalk: "npm:^5.3.0"
     eslint: "npm:^9.10.0"

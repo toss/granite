@@ -39,6 +39,7 @@
     "@pulumi/pulumi": "^3.170.0",
     "@types/aws-lambda": "^8.10.149",
     "@types/node": "^22.15.19",
+    "@vitest/coverage-v8": "^3.1.4",
     "aws-lambda": "^1.0.7",
     "aws-sdk-client-mock": "^4.1.0",
     "es-toolkit": "^1.38.0",
