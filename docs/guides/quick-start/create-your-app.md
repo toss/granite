@@ -307,11 +307,10 @@ You've successfully created your first Granite app! Here's what you accomplished
 Now that you have a working Granite app, you can:
 
 1. **[Set up AWS Infrastructure](./setup-aws.md)** - Configure CDN infrastructure for your bundles
-2. **[Deploy to Production](./deployment.md)** - Learn how to deploy your bundles to AWS CDN
-3. **[Integrate with Existing Apps](./brownfield-integration.md)** - Add Granite to your current iOS/Android app
-4. **[Advanced Routing](../granite-router/routing.md)** - Learn about type-safe routing and navigation
+2. **[Deploy to Production](./deploy-your-app.md)** - Learn how to deploy your bundles to AWS CDN
+3. **[Advanced Routing](../granite-router/routing.md)** - Learn about type-safe routing and navigation
 
 ## Need Help?
 
-- 📖 [Documentation](../../) - Complete Granite guide
+- 📖 [Documentation](../../index.md) - Complete Granite guide
 - 🐛 [GitHub Issues](https://github.com/your-org/granite/issues) - Report bugs or request features

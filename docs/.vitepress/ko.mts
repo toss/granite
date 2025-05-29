@@ -18,12 +18,11 @@ function sidebar(): DefaultTheme.Sidebar {
       items: [
         { text: '소개', link: '/ko/guides/introduction' },
         {
-          text: '빠른 시작',
+          text: '시작',
           items: [
-            { text: '샌드박스 앱 설치', link: '/ko/guides/quick-start/install-native-app' },
-            { text: 'AWS에 인프라 배포하기', link: '/ko/guides/quick-start/setup-aws' },
-            { text: '앱 배포하기', link: '/ko/guides/quick-start/deploy-your-app' },
-            { text: '앱 실행하기', link: '/ko/guides/quick-start/run-your-app' },
+            { text: '첫 Granite 앱 만들기', link: '/ko/guides/quick-start/create-your-app' },
+            { text: 'AWS 인프라 만들기', link: '/ko/guides/quick-start/setup-aws' },
+            { text: 'Granite 앱 배포하고 실행하기', link: '/ko/guides/quick-start/deploy-your-app' },
           ],
         },
         {
@@ -35,6 +34,12 @@ function sidebar(): DefaultTheme.Sidebar {
             { text: '공통 레이아웃 구성하기', link: '/ko/guides/granite-router/layouts' },
           ],
         },
+        {
+          text: '기타',
+          items: [
+            { text: '테스트 앱 설치하기', link: '/ko/guides/miscellaneous/install-native-app' },
+          ]
+        }
       ],
     },
     {

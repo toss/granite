@@ -1,28 +1,128 @@
-# AWS에 인프라 배포하기
+# Granite AWS 인프라 설정하기
 
-이 문서는 **Pulumi**를 사용해서 **React Native CDN(Content Delivery Network)** 인프라를 AWS에 설정하는 방법을 안내해요. 이 작업은 `@granite-js/pulumi-aws` 패키지를 사용해서 진행해요.
+15분 안에 AWS에 Granite 앱을 배포하기 위한 React Native CDN 인프라를 구축해보세요.
 
-## 설치하기
+## 만들게 될 것들
 
-Pulumi를 처음 사용한다면 먼저 Pulumi CLI를 설치해야 해요. 아래 공식 가이드를 참고해서 운영 체제에 맞게 설치해 주세요.
+이 가이드를 마치면 다음과 같은 것들을 만들게 돼요.
 
-- [Pulumi 설치 가이드](https://www.pulumi.com/docs/iac/download-install/)
+- Granite 앱 번들을 저장할 S3 버킷
+- 전 세계에 빠르게 전송하기 위한 CloudFront CDN
+- 사용자가 늘어나도 확장 가능한 프로덕션급 인프라
 
-## Pulumi 프로젝트 생성하기
+## 준비물
 
-Pulumi 프로젝트를 생성하려면 아래 명령어를 실행해요.
+시작하기 전에 다음이 필요해요.
 
-명령어를 실행하면 기본 템플릿이 생성되고, 몇 가지 설정을 물어봐요. 프로젝트 이름, 설명, AWS 리전 등을 입력한 뒤 마무리하면 프로젝트가 준비돼요.
+- **AWS 계정** - [가입하기](https://aws.amazon.com/)
+
+## 1. Pulumi CLI 설치
+
+먼저 AWS 인프라를 코드로 설정할 수 있게 도와주는 Pulumi를 설치해야 해요. 운영 체제에 맞는 명령어를 선택하세요.
+
+::: code-group
+
+```sh [macOS]
+brew install pulumi
+```
+
+```sh [Windows]
+winget install pulumi
+```
+
+```sh [Linux]
+curl -fsSL https://get.pulumi.com | sh
+```
+
+:::
+
+자세한 설치 방법은 [Pulumi 설치 가이드](https://www.pulumi.com/docs/iac/download-install/)를 참고하세요.
+
+> **✅ 성공했다면:** 'pulumi version' 명령어를 실행했을 때 버전 정보가 보여요
+
+## 2. AWS 자격 증명 설정
+
+Pulumi가 AWS 계정에 접근할 수 있도록 설정해야 해요. 두 가지 방법 중 하나를 선택하세요.
+
+### 방법 A: AWS CLI 사용하기 (권장)
+
+AWS CLI를 설치하고 다음 명령어를 입력하여 AWS 인증 정보를 저장하세요.
 
 ```bash
-mkdir react-native-cdn
-cd react-native-cdn
+# AWS CLI 설치하기
+# macOS: brew install awscli
+# Windows: winget install Amazon.AWSCLI
+# Linux: apt install awscli
+
+# 자격 증명 설정하기
+aws configure
+```
+
+명령어를 입력하면 AWS 인증 정보를 묻는 프롬프트가 나타나요. 프롬프트에 인증 정보를 입력하세요.
+
+```
+AWS Access Key ID: {액세스 키 ID}
+AWS Secret Access Key: {시크릿 키}
+Default region: {리전}
+Default output format: json
+```
+
+### 방법 B: 환경 변수 사용하기
+
+AWS CLI 대신 터미널에서 다음과 같이 환경 변수를 설정할 수도 있어요. 터미널을 껐다 켜면 인증 정보가 사라진다는 점에 주의하세요.
+
+```bash
+export AWS_ACCESS_KEY_ID="{액세스 키 ID}"
+export AWS_SECRET_ACCESS_KEY="{시크릿 키}"
+export AWS_REGION="{리전}"
+```
+
+::: info AWS 인증 정보 얻는 방법
+
+AWS 콘솔 → IAM → 사용자 → 사용자 선택 → 보안 자격 증명 → 액세스 키 만들기로 이동하면 AWS 인증 정보를 얻을 수 있어요.
+
+:::
+
+## 3. 인프라 생성 프로젝트
+
+AWS 인프라 코드가 위치할 새 디렉토리를 만드세요.
+
+```bash
+mkdir my-granite-infrastructure
+cd my-granite-infrastructure
+```
+
+새로운 Pulumi 프로젝트를 초기화하세요.
+
+```bash
 pulumi new aws-typescript
 ```
 
-## 패키지 설치하기
+CLI에서 Pulumi 프로젝트를 생성하기 위한 정보를 물어보면 입력하세요.
 
-Pulumi에서 React Native CDN 컴포넌트를 사용하려면 `@granite-js/pulumi-aws` 패키지를 설치해야 해요. 사용하는 패키지 매니저에 따라 다음 명령어 중 하나를 실행해요.
+```
+This command will walk you through creating a new Pulumi project.
+
+Enter a value or leave blank to accept the (default), and press <ENTER>.
+Press ^C at any time to quit.
+
+Project name: my-granite-infrastructure
+Project description: Granite app CDN infrastructure
+Created project 'my-granite-infrastructure'
+
+stack name: dev
+Created stack 'dev'
+
+The package manager to use for installing dependencies: {패키지 매니저}
+The AWS region to deploy into (aws:region): {AWS 리전}
+Saved config
+```
+
+> **✅ 성공했다면:** "Your new project is ready to go!" 메시지가 보여요
+
+## 4. Granite 인프라 패키지 설치
+
+Granite 배포 인프라를 생성하는 Pulumi 코드 패키지를 설치하세요.
 
 ::: code-group
 
@@ -35,73 +135,59 @@ pnpm add @granite-js/pulumi-aws --save-dev
 ```
 
 ```sh [yarn]
-yarn add @granite-js/pulumi-aws @yarnpkg/pnpify --dev
+yarn add @granite-js/pulumi-aws --dev
 ```
 
 :::
 
-## AWS 자격 증명(AWS Credentials) 구성하기
+## 5. 인프라 설정
 
-Pulumi가 AWS 리소스를 생성할 수 있도록 자격 증명을 설정해야 해요. 환경 변수로 설정하거나, AWS CLI로 구성할 수 있어요.
+Granite CDN 인프라를 생성하기 위해 `index.ts` 파일의 내용을 다음과 같이 입력하세요.
 
-### 방법1: 환경 변수로 설정하기
-
-Pulumi는 실행되는 환경에서 AWS 자격 증명을 읽어서 리소스를 생성해요. 자격 증명을 환경 변수로 설정하면 별도 설정 파일 없이도 Pulumi가 자동으로 값을 읽을 수 있어요.
-
-다음과 같이 터미널에서 자격 증명을 설정해요. 이 방법은 일시적으로만 적용되며, 터미널을 종료하면 사라져요.
-
-```bash
-export AWS_ACCESS_KEY_ID="your-access-key-id"
-export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
-export AWS_REGION="your-region"
-```
-
-### 방법2: AWS CLI로 설정하기
-
-이 명령어를 실행하면 자격 증명과 기본 리전을 입력할 수 있어요. 자격 증명을 AWS CLI로 설정하면 터미널을 종료해도 자격 증명이 유지돼요.
-
-```bash
-aws configure
-```
-
-## 사용 방법
-
-`ReactNativeBundleCDN` 컴포넌트를 사용하려면 Pulumi 프로그램에서 가져와 인스턴스를 만들면 돼요.
-
-```ts
-import { ReactNativeBundleCDN } from '@granite-js/pulumi-aws';
+```typescript
 import * as pulumi from '@pulumi/pulumi';
+import { ReactNativeBundleCDN } from '@granite-js/pulumi-aws';
 
 const config = new pulumi.Config();
 
-const cdn = new ReactNativeBundleCDN('myReactNativeBundleCDN', {
+// Granite CDN 인프라 생성하기
+const cdn = new ReactNativeBundleCDN('granite-cdn', {
   bucketName: config.require('bucketName'),
   region: config.require('region'),
 });
 
-export const iosSharedUrl = pulumi.interpolate`https://${cdn.cloudfrontDomain}/ios/shared/1/bundle`;
-export const androidSharedUrl = pulumi.interpolate`https://${cdn.cloudfrontDomain}/android/shared/1/bundle`;
+export const cdnUrl = cdn.cloudfrontDomain;
+export const bucketName = cdn.bucketName;
 ```
 
-## 구성 변수 설정하기
+## 6. 설정값 지정
 
-위 예제 코드에서 사용하는 구성 변수 `bucketName`과 `region`은 Pulumi 설정으로 미리 지정해야 해요.
+Granite AWS 인프라에서 사용할 S3 버킷 이름과 리전을 설정하세요.
 
 ```bash
-pulumi config set bucketName <your-bucket-name>
-pulumi config set region <your-region>
+# 고유한 버킷 이름을 설정하세요 (전체 AWS에서 유일해야 해요)
+pulumi config set bucketName {버킷 이름}
+
+# AWS 리전을 설정하세요
+pulumi config set region {리전}
 ```
 
-## 인프라 배포하기
+::: info 
 
-설정이 모두 끝났다면 다음 명령어로 인프라를 배포해요.
+버킷 이름은 전체 AWS에서 유일해야 해요. 다른 사람과 겹치지 않는 이름을 사용하세요.
+
+:::
+
+## 7. 인프라 배포하기  
+
+이제 Granite 앱을 서빙할 AWS 인프라를 만들어볼게요.
 
 ```bash
 pulumi up
 ```
 
-::: warning Yarn Plug’n’Play(PnP)를 사용하는 경우
-다음 명령어로 pnpify를 설치하고 pulumi 명령어를 실행해야 해요.
+::: warning Yarn Plug'n'Play (PnP) 를 사용한다면
+pnpify를 설치하고, 다음과 같이 pulumi 명령어를 실행해야 해요.
 
 ```bash
 yarn add @yarnpkg/pnpify -D
@@ -110,14 +196,63 @@ yarn pnpify pulumi up
 
 :::
 
-명령어를 실행하면 Pulumi가 어떤 리소스를 만들지 보여줘요. 내용을 검토한 뒤, `yes`를 입력하면 배포가 시작돼요. 이 과정에서 AWS에 React Native CDN 인프라가 생성돼요.
+`pulumi up` 명령어로 인프라를 배포하면 Pulumi가 생성할 리소스를 보여줘요.
 
-## 리소스 정리하기
+```
+Previewing update (dev)
 
-배포한 리소스를 더 이상 사용하지 않아 삭제하려면 다음 명령어를 실행하면 돼요.
+View Live: https://app.pulumi.com/yourname/my-granite-infrastructure/dev/previews/...
+
+     Type                              Name                              Plan       
+ +   pulumi:pulumi:Stack               my-granite-infrastructure-dev     create     
+ +   └─ {생성될 인프라}   
+
+Resources:
+    + * to create
+
+Do you want to perform this update? yes
+```
+
+`yes`를 입력하고 Enter를 누르세요. Pulumi가 지정된 AWS 계정에 인프라를 생성해요.
+
+```
+Updating (dev)
+
+View Live: https://app.pulumi.com/yourname/my-granite-infrastructure/dev/updates/1
+
+     Type                              Name                              Status      
+ +   pulumi:pulumi:Stack               my-granite-infrastructure-dev     created     
+ +   └─ {생성된 인프라}     
+
+Resources:
+    + * created
+
+Duration: {소요 시간}
+```
+
+> **✅ 성공했다면:** "Resources: + * created"와 CDN URL이 보여요
+
+## 🎉 축하해요!
+
+AWS에 Granite 인프라를 성공적으로 만들었어요. 이제 다음과 같은 것들이 준비됐어요.
+
+- 스스로의 AWS 계정에서 직접 운영하는 React Native 인프라
+- 전 세계에서 빠르게 React Native 번들을 로딩할 수 있는 CDN
+- 사용자가 늘어나도 확장 가능한 아키텍처
+- 배포 인프라에 대한 완전한 제어
+
+## 불필요한 리소스 지우기
+
+더 이상 필요하지 않은 리소스를 삭제하려면 다음 명령어를 실행하세요.
 
 ```bash
 pulumi destroy
 ```
 
-Pulumi가 어떤 리소스를 삭제할지 보여주고, 확인을 요청해요. `yes`를 입력하면 모든 리소스가 삭제돼요.
+Pulumi가 삭제할 리소스를 보여주고 확인을 요청해요. `yes`를 입력하면 모든 리소스가 삭제돼요.
+
+## 다음 단계
+
+이제 인프라가 준비됐으니 다음 단계로 넘어가세요.
+
+- [앱 배포하기](./deploy-your-app.md) - Granite 앱을 AWS 인프라에 배포하는 방법 배우기
