@@ -1,6 +1,6 @@
-# Installing Sandbox App
+# Installing Test App
 
-The Granite Sandbox App is an application for testing deployed bundles. This document guides you through installing and setting up the Granite Sandbox App on iOS simulators and Android devices.
+The Granite test App is an application for testing deployed bundles. This document guides you through installing and setting up the Granite test App on iOS simulators and Android devices.
 
 ## <span style="display:inline-flex; align-items:center; gap:5px;"><img src="/icons/apple.svg" alt="Apple iOS" width="24" height="24" style="margin-top:-4px"> iOS Simulator Installation Guide </span>
 
@@ -61,7 +61,7 @@ When you first run the app, you need to enter the CDN address for loading bundle
 | **Host**       | `https://d2dzky5bdhec40.cloudfront.net` | Trial bundle CDN address. Provided for testing. |
 | **URL Scheme** | `granite://showcase` <br> `granite://counter`  | Scheme used for handling deep links in the app. |
 
-Enter these values in the Granite sandbox settings and run the app.
+Enter these values in the Granite test settings and run the app.
 
 | iOS                                                                                                                                                                                                             | Android                                                                                                                                                                                                             |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

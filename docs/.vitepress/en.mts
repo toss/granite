@@ -20,7 +20,7 @@ function sidebar(): DefaultTheme.Sidebar {
         {
           text: 'Quick Start',
           items: [
-            { text: 'Install Sandbox App', link: '/guides/quick-start/install-native-app' },
+            { text: 'Getting Started', link: '/guides/quick-start/create-your-app' },
             { text: 'Set Up Infrastructure', link: '/guides/quick-start/setup-aws' },
             { text: 'Deploy Your App', link: '/guides/quick-start/deploy-your-app' },
             { text: 'Run Your App', link: '/guides/quick-start/run-your-app' },
@@ -35,6 +35,12 @@ function sidebar(): DefaultTheme.Sidebar {
             { text: 'Using Layouts', link: '/guides/granite-router/layouts' },
           ],
         },
+        {
+          text: 'Miscellaneous',
+          items: [
+            { text: 'Install Test App', link: '/guides/miscellaneous/install-native-app' },
+          ]
+        }
       ],
     },
     {

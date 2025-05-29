@@ -1,28 +1,126 @@
-# Setting up Infrastructure on AWS
+# Setting Up AWS Infrastructure for Granite
 
-This guide explains how to set up a **React Native CDN (Content Delivery Network)** infrastructure on AWS using **Pulumi**. This process is done using the `@granite-js/pulumi-aws` package.
+Set up an on-premise React Native CDN infrastructure on AWS in 15 minutes.
 
-## Installation
+## What You'll Build
 
-If you're using Pulumi for the first time, you'll need to install the Pulumi CLI first. Please refer to the official guide below to install it according to your operating system.
+By the end of this guide, you'll have:
+- S3 Bucket for storing your app bundles
+- CloudFront CDN for fast global delivery
+- Production-ready infrastructure that scales with your users
 
-- [Pulumi Installation Guide](https://www.pulumi.com/docs/iac/download-install/)
+## Prerequisites
 
-## Creating a Pulumi Project
+Before you start, make sure you have:
 
-To create a Pulumi project, run the following command
+- **AWS Account** - [Sign up here](https://aws.amazon.com/)
 
-When you run this command, a default template will be created and you'll be prompted for some settings. After entering the project name, description, AWS region, etc., your project will be ready.
+## 1. Install Pulumi CLI
+
+First, install Pulumi - a tool that helps you set up AWS infrastructure using code. Choose your operating system below:
+
+::: code-group
+
+```sh [macOS]
+brew install pulumi
+```
+
+```sh [Windows]
+winget install pulumi
+```
+
+```sh [Linux]
+curl -fsSL https://get.pulumi.com | sh
+```
+
+:::
+
+For detailed installation steps, check out the [Pulumi installation guide](https://www.pulumi.com/docs/iac/download-install/).
+
+> **✅ Success indicator:** Run `pulumi version` - you should see version info
+
+## 2. Set Up AWS Credentials
+
+You need to tell Pulumi how to access your AWS account. Choose one method:
+
+### Option A: Using AWS CLI (Recommended)
+
+Install AWS CLI and configure it:
 
 ```bash
-mkdir react-native-cdn
-cd react-native-cdn
+# Install AWS CLI
+# macOS: brew install awscli
+# Windows: winget install Amazon.AWSCLI
+# Linux: apt install awscli
+
+# Configure your credentials
+aws configure
+```
+
+Enter your credentials when prompted:
+```
+AWS Access Key ID: [Your access key]
+AWS Secret Access Key: [Your secret key]  
+Default region: [Your region]
+Default output format: json
+```
+
+### Option B: Using Environment Variables
+
+For temporary setup, set these in your terminal:
+
+```bash
+export AWS_ACCESS_KEY_ID="your-access-key-id"
+export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
+export AWS_REGION="your-region"
+```
+
+::: info Where to get AWS credentials
+
+Go to AWS Console → IAM → Users → Your User → Security Credentials → Create Access Key.
+
+:::
+
+## 3. Create Your Infrastructure Project
+
+Create a new directory for your AWS infrastructure:
+
+```bash
+mkdir my-granite-infrastructure
+cd my-granite-infrastructure
+```
+
+Initialize a new Pulumi project:
+
+```bash
 pulumi new aws-typescript
 ```
 
-## Installing Packages
+You'll see an interactive setup:
 
-To use the React Native CDN component in Pulumi, you need to install the `@granite-js/pulumi-aws` package. Run one of the following commands based on your package manager
+```
+This command will walk you through creating a new Pulumi project.
+
+Enter a value or leave blank to accept the (default), and press <ENTER>.
+Press ^C at any time to quit.
+
+Project name: my-granite-infrastructure
+Project description: Granite app CDN infrastructure
+Created project 'my-granite-infrastructure'
+
+stack name: dev
+Created stack 'dev'
+
+The package manager to use for installing dependencies: {Your package manager}
+The AWS region to deploy into (aws:region): {Your AWS region}
+Saved config
+```
+
+> **✅ Success indicator:** You see "Your new project is ready to go!" message
+
+## 4. Install Granite Infrastructure Package
+
+Add the Granite infrastructure components:
 
 ::: code-group
 
@@ -40,59 +138,44 @@ yarn add @granite-js/pulumi-aws --dev
 
 :::
 
-## Configuring AWS Credentials
+## 5. Configure Your Infrastructure
 
-You need to set up credentials so that Pulumi can create AWS resources. You can do this either through environment variables or using the AWS CLI.
+Replace the contents of `index.ts` with:
 
-### Method 1: Setting up with Environment Variables
-
-Pulumi reads AWS credentials from the environment to create resources. By setting credentials as environment variables, Pulumi can automatically read the values without requiring a separate configuration file.
-
-Set the credentials in your terminal as follows. This method is temporary and will be lost when you close the terminal.
-
-```bash
-export AWS_ACCESS_KEY_ID="your-access-key-id"
-export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
-export AWS_REGION="your-region"
-```
-
-### Method 2: Setting up with AWS CLI
-
-When you run this command, you can enter your credentials and default region. Setting up credentials with AWS CLI ensures they persist even after closing the terminal.
-
-```bash
-aws configure
-```
-
-## Usage
-
-To use the `ReactNativeBundleCDN` component, import it in your Pulumi program and create an instance
-
-```ts
+```typescript
 import * as pulumi from '@pulumi/pulumi';
-import * as aws from '@pulumi/aws';
 import { ReactNativeBundleCDN } from '@granite-js/pulumi-aws';
 
 const config = new pulumi.Config();
 
-new ReactNativeBundleCDN('myReactNativeBundleCDN', {
+// Create your Granite CDN infrastructure
+const cdn = new ReactNativeBundleCDN('granite-cdn', {
   bucketName: config.require('bucketName'),
   region: config.require('region'),
 });
 ```
 
-## Setting Configuration Variables
+## 6. Set Configuration Values
 
-The configuration variables `bucketName` and `region` used in the example code above need to be specified in Pulumi configuration beforehand
+Configure your bucket name and region:
 
 ```bash
-pulumi config set bucketName <your-bucket-name>
-pulumi config set region <your-region>
+# Set your unique bucket name (must be globally unique)
+pulumi config set bucketName {your-bucket-name}
+
+# Set your AWS region
+pulumi config set region {your-region}
 ```
 
-## Deploying Infrastructure
+::: info 
 
-Once all settings are complete, deploy the infrastructure using the following command
+Bucket names must be globally unique. 
+
+:::
+
+## 7. Deploy Your Infrastructure  
+
+Let's proceed with creating your AWS infrastructure:
 
 ```bash
 pulumi up
@@ -108,14 +191,63 @@ yarn pnpify pulumi up
 
 :::
 
-When you run this command, Pulumi will show you what resources it will create. After reviewing the changes, enter `yes` to start the deployment. This process will create the React Native CDN infrastructure on AWS.
+Pulumi will show you what it's going to create:
 
-## Cleaning up Resources
+```
+Previewing update (dev)
 
-To delete the deployed resources when they are no longer needed, run the following command
+View Live: https://app.pulumi.com/yourname/my-granite-infrastructure/dev/previews/...
+
+     Type                              Name                              Plan       
+ +   pulumi:pulumi:Stack               my-granite-infrastructure-dev     create     
+ +   └─ {The infrastructure to create}   
+
+Resources:
+    + * to create
+
+Do you want to perform this update? yes
+```
+
+Type `yes` and press Enter. Pulumi will create your infrastructure:
+
+```
+Updating (dev)
+
+View Live: https://app.pulumi.com/yourname/my-granite-infrastructure/dev/updates/1
+
+     Type                              Name                              Status      
+ +   pulumi:pulumi:Stack               my-granite-infrastructure-dev     created     
+ +   └─ {The infrastructure to create}     
+
+Resources:
+    + * created
+
+Duration: {duration}
+```
+
+> **✅ Success indicator:** You see "Resources: + * created" and your CDN URL
+
+## 🎉 Congratulations!
+
+You've successfully created your Granite infrastructure in AWS! Here's what you now have:
+
+- On-premise AWS infrastructure
+- Global CDN for fast app loading worldwide
+- Scalable architecture that grows with your users
+- Full control over your deployment pipeline
+
+## Clean Up (Optional)
+
+To delete the deployed resources when they are no longer needed, run the following command:
 
 ```bash
 pulumi destroy
 ```
 
 Pulumi will show you what resources it will delete and ask for confirmation. Enter `yes` to delete all resources.
+
+## What's Next?
+
+Now that your infrastructure is set up:
+
+- [Deploy Your App](./deploy-your-app.md) - Learn how to deploy your Granite app to your AWS infrastructure
