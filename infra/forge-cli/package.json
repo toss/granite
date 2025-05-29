@@ -24,6 +24,8 @@
     "vitest": "^3.1.4"
   },
   "dependencies": {
+    "@aws-sdk/credential-providers": "^3.817.0",
+    "@aws-sdk/shared-ini-file-loader": "^3.374.0",
     "@clack/prompts": "^0.10.1",
     "@commander-js/extra-typings": "^14.0.0",
     "@granite-js/cli": "workspace:*",
