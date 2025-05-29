@@ -1,4 +1,6 @@
 import path from 'path';
+import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
+import { loadSharedConfigFiles } from '@aws-sdk/shared-ini-file-loader';
 import * as p from '@clack/prompts';
 import { Command } from '@commander-js/extra-typings';
 import { loadConfig } from '@granite-js/cli';
@@ -13,18 +15,25 @@ const envSchema = v.object({
   AWS_SESSION_TOKEN: v.optional(v.string()),
 });
 
+const awsCredentialsProvider = fromNodeProviderChain();
+
 export function deploy() {
   return new Command('deploy')
     .description('Deploy a Granite application')
     .requiredOption('--bucket <BUCKET>', 'AWS bucket')
     .action(async (options) => {
-      const config = await loadConfig();
+      
+      const [config, awsCredentials, region] = await Promise.all([
+        loadConfig(),
+        awsCredentialsProvider(),
+        getRegion()
+      ]);
 
       const envResult = v.safeParse(envSchema, {
-        AWS_REGION: process.env.AWS_REGION,
-        AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
-        AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
-        AWS_SESSION_TOKEN: process.env.AWS_SESSION_TOKEN,
+        AWS_REGION: region,
+        AWS_ACCESS_KEY_ID: awsCredentials.accessKeyId,
+        AWS_SECRET_ACCESS_KEY: awsCredentials.secretAccessKey,
+        AWS_SESSION_TOKEN: awsCredentials.sessionToken,
       });
 
       if (!envResult.success) {
@@ -48,7 +57,7 @@ export function deploy() {
         },
         {
           s3Client: new S3Client({
-            region: envResult.output.AWS_REGION,
+            region,
             bucket: options.bucket,
             credentials: {
               accessKeyId: envResult.output.AWS_ACCESS_KEY_ID,
@@ -59,4 +68,29 @@ export function deploy() {
         }
       );
     });
+}
+
+
+async function getRegion() {
+  const { configFile } = await loadSharedConfigFiles();
+
+  const envRegion = process.env.AWS_REGION;
+
+  if (envRegion != null) {
+    return envRegion;
+  }
+
+  const currentProfile = process.env.AWS_PROFILE;
+
+  if (currentProfile != null) {
+    const region = configFile?.[currentProfile]?.region;
+
+    if (region != null) {
+      return region;
+    }
+  }
+
+  const defaultRegion = configFile.default?.region;
+
+  return defaultRegion;
 }
