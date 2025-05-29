@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: 'Granite'
-  text: 'React Native Framework'
+  text: 'Enterprise-grade React Native Framework'
   image:
     src: /granite.png
     alt: granite
@@ -14,17 +14,26 @@ hero:
       text: Quick Start
       link: /guides/quick-start/install-native-app
     - theme: alt
-      text: introduction
+      text: Introduction
       link: /guides/introduction
-    - theme: alt
-      text: GitHub
-      link: https://github.com/toss/granite
 
 features:
-  - title: Consistent Behavior Across Platforms
-    details: Provides consistent behavior across iOS and Android platforms.
-  - title: High Reliability
-    details: Every component has E2E (End to End) tests that are verified with each release.
-  - title: Comprehensive Documentation
-    details: Every component and feature comes with detailed explanations and usage guidelines.
+  - icon: 🔌
+    title: Brownfield integration
+    details: Easily integrate React Native screens into your current iOS and Android apps.
+  - icon: 📦
+    title: Tiny bundles
+    details: Create tiny 200-300KB microservice bundles with bundle splitting and smart optimization.
+  - icon: 🚀
+    title: Fast JavaScript builds
+    details: Keep your JavaScript bundle build times down to just seconds using ESBuild.
+  - icon: 🌐
+    title: Full AWS setup
+    details: Complete infrastructure configuration with full deployment control.
+  - icon: ✅
+    title: Comprehensive end-to-end testing
+    details: Every feature comes with end-to-end tests included.
+  - icon: ⚡️
+    title: Fast native builds (WIP)
+    details: Keep your native build times quick with prebuilt frameworks.
 ---
