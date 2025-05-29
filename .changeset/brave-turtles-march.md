@@ -19,4 +19,4 @@
 '@granite-js/cli': patch
 ---
 
-fix scaffold
+Improve scaffolding to provide a better showcase UI
