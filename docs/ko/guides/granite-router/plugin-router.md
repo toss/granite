@@ -48,7 +48,7 @@ export default defineConfig({
 ::: code-group
 
 ```sh [npm]
-$ npm run granite dev
+$ npx granite dev
 ```
 
 ```sh [pnpm]

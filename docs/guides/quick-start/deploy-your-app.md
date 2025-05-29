@@ -94,7 +94,7 @@ This command compiles and optimizes the application source code into a deployabl
 ::: code-group
 
 ```sh [npm]
-npm run granite build
+npx granite build
 ```
 
 ```sh [pnpm]
@@ -114,7 +114,7 @@ This command uploads the built service bundle to the specified S3 bucket and pro
 ::: code-group
 
 ```sh [npm]
-npm run granite-forge deploy --bucket your-s3-bucket-name
+npx granite-forge deploy --bucket your-s3-bucket-name
 ```
 
 ```sh [pnpm]
