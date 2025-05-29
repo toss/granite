@@ -29,7 +29,7 @@ granite://test-app?name=tom&age=10
 추가로 `validateParams` 옵션을 활용하면, 화면에서 필요한 파라미터를 정의하고 유효성을 검사할 수 있어요. 아래 예제를 참고하세요.
 
 ```tsx
-import { createRoute } from '@granite/react-native';
+import { createRoute } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 
 // 루트 경로('/')에 해당하는 화면 정의
@@ -72,7 +72,7 @@ function Index() {
 ::: code-group
 
 ```tsx [vanilla]
-import { createRoute } from '@granite/react-native';
+import { createRoute } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 
 export const Route = createRoute('/', {
@@ -112,7 +112,7 @@ function Index() {
 ```
 
 ```tsx [valibot]
-import { createRoute } from '@granite/react-native';
+import { createRoute } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 import * as v from 'valibot';
 
@@ -142,7 +142,7 @@ function Index() {
 ```
 
 ```tsx [zod]
-import { createRoute } from '@granite/react-native';
+import { createRoute } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 import { z } from 'zod';
 
@@ -187,7 +187,7 @@ function Index() {
 기본 파서를 활용하면 스트링 값이 자동으로 적절한 타입으로 변환돼요. 아래 예제는 파라미터를 타입에 맞게 변환하는 방법을 보여줘요.
 
 ```tsx
-import { createRoute } from '@granite/react-native';
+import { createRoute } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 
 // URL 예시: granite://test-app?name=tom&age=10&arr=1,2,3&obj={"name":"jane","age":20}
@@ -229,7 +229,7 @@ function Index() {
 `parserParams` 옵션을 사용하면 기본 파서로 처리하기 어려운 query parameter를 변환하는 함수를 직접 정의해서 사용할 수 있어요. 예를 들어, 특정 파라미터(`referer`)를 제거하고 나머지 파라미터를 기본 파서로 처리하는 방법을 아래 코드에서 보여줘요.
 
 ```tsx
-import { createRoute, defaultParserParams } from '@granite/react-native';
+import { createRoute, defaultParserParams } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 
 // URL 예시: granite://test-app?name=tom&age=10&referer=https://google.com
