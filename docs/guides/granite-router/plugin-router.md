@@ -48,7 +48,7 @@ In development mode, when you create a new page file, the screen component code 
 ::: code-group
 
 ```sh [npm]
-$ npm run granite dev
+$ npx granite dev
 ```
 
 ```sh [pnpm]

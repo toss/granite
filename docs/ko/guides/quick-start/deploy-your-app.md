@@ -90,7 +90,7 @@ aws configure
 ::: code-group
 
 ```sh [npm]
-npm run granite build
+npx granite build
 ```
 
 ```sh [pnpm]
@@ -110,7 +110,7 @@ yarn granite build
 ::: code-group
 
 ```sh [npm]
-npm run granite-forge deploy --bucket your-s3-bucket-name
+npx granite-forge deploy --bucket your-s3-bucket-name
 ```
 
 ```sh [pnpm]
