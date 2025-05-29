@@ -1,5 +1,17 @@
 # @granite-js/forge-cli
 
+## 0.1.1
+
+### Patch Changes
+
+- d675415: Improve scaffolding to provide a better showcase UI
+- 7f0afd4: Updated forge-cli to support reading AWS configuration files when available, instead of relying solely on environment variables.
+- 10a5f3f: empty
+- Updated dependencies [d675415]
+- Updated dependencies [10a5f3f]
+  - @granite-js/deployment-manager@0.1.1
+  - @granite-js/cli@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
