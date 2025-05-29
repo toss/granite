@@ -8,6 +8,7 @@ export const ko = defineConfig({
   description: 'React Native Framework',
   themeConfig: {
     sidebar: sidebar(),
+    nav: nav(),
   },
 });
 
@@ -17,6 +18,7 @@ function sidebar(): DefaultTheme.Sidebar {
       text: '가이드',
       items: [
         { text: '소개', link: '/ko/guides/introduction' },
+        { text: 'vs 기본 RN', link: '/ko/guides/comparison' },
         {
           text: '시작',
           items: [
@@ -74,3 +76,17 @@ export const search: DefaultTheme.LocalSearchOptions['locales'] = {
     },
   },
 };
+
+function nav(): DefaultTheme.NavItem[] {
+  return [
+    { text: '소개', link: '/ko/guides/introduction' },
+    {
+      text: '가이드',
+      link: '/ko/guides/quick-start/create-your-app'
+    },
+    {
+      text: '레퍼런스',
+      link: '/ko/reference/react-native/config/defineConfig'
+    },
+  ]
+}

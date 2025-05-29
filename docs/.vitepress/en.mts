@@ -8,6 +8,7 @@ export const en = defineConfig({
   description: 'React Native Framework',
   themeConfig: {
     sidebar: sidebar(),
+    nav: nav(),
   },
 });
 
@@ -17,6 +18,7 @@ function sidebar(): DefaultTheme.Sidebar {
       text: 'Guide',
       items: [
         { text: 'Introduction', link: '/guides/introduction' },
+        { text: 'vs. Traditional RN', link: '/guides/comparison' },
         {
           text: 'Quick Start',
           items: [
@@ -47,4 +49,18 @@ function sidebar(): DefaultTheme.Sidebar {
       items: categorizeManifest(referenceManifest, 'en'),
     },
   ];
+}
+
+function nav(): DefaultTheme.NavItem[] {
+  return [
+    { text: 'Introduction', link: '/guides/introduction' },
+    {
+      text: 'Guide',
+      link: '/guides/quick-start/create-your-app'
+    },
+    {
+      text: 'Reference',
+      link: '/reference/react-native/config/defineConfig'
+    },
+  ]
 }
