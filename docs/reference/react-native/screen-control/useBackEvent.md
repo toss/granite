@@ -26,7 +26,7 @@ function useBackEvent(): BackEventControls;
   </li>
 </ul>
 
-### 에러
+### Error
 
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">

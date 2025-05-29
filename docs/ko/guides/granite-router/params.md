@@ -4,7 +4,7 @@
 
 # 화면 파라미터 정의하기
 
-애플리케이션이 [URL 스킴](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)으로 실행될 때, 스킴에 포함된 [스트링](https://en.wikipedia.org/wiki/Query_string) 값을 참조할 수 있어요. 스킴으로 애플리케이션을 실행할 때, 필요한 데이터를 전달하거나 특정 기능을 활성화할 수 있어요.
+애플리케이션이 [URL 스킴](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)으로 실행될 때, 스킴에 포함된 [쿼리 스트링](https://en.wikipedia.org/wiki/Query_string) 값을 참조할 수 있어요. 스킴으로 애플리케이션을 실행할 때, 필요한 데이터를 전달하거나 특정 기능을 활성화할 수 있어요.
 
 ## 파라미터로 데이터 전달하기
 

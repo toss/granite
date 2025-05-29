@@ -31,11 +31,11 @@ npm install @granite-js/pulumi-aws --save-dev
 ```
 
 ```sh [pnpm]
-yarn add @granite-js/pulumi-aws --dev
+pnpm add @granite-js/pulumi-aws --save-dev
 ```
 
 ```sh [yarn]
-pnpm add @granite-js/pulumi-aws --save-dev
+yarn add @granite-js/pulumi-aws --dev
 ```
 
 :::
@@ -86,8 +86,8 @@ new ReactNativeBundleCDN('myReactNativeBundleCDN', {
 The configuration variables `bucketName` and `region` used in the example code above need to be specified in Pulumi configuration beforehand
 
 ```bash
-pulumi config set bucketName your-bucket-name
-pulumi config set region us-west-2
+pulumi config set bucketName <your-bucket-name>
+pulumi config set region <your-region>
 ```
 
 ## Deploying Infrastructure
@@ -100,12 +100,13 @@ pulumi up
 
 ::: warning When using Yarn Plug'n'Play (PnP)
 You need to install pnpify and run the pulumi command as follows:
+
 ```bash
 yarn add @yarnpkg/pnpify -D
 yarn pnpify pulumi up
 ```
-:::
 
+:::
 
 When you run this command, Pulumi will show you what resources it will create. After reviewing the changes, enter `yes` to start the deployment. This process will create the React Native CDN infrastructure on AWS.
 
