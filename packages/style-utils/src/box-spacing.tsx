@@ -197,7 +197,7 @@ function createSpacingWithProperty(cssProperty: string) {
  * @property {ViewStyle} left32 - A style object that applies 32px inner spacing to the left
  *
  * @example
- * ## Example of applying 8px inner spacing in horizontal and vertical directions, and 100px spacing in the bottom direction
+ * ### Example of applying 8px inner spacing in horizontal and vertical directions, and 100px spacing in the bottom direction
  *
  * ```tsx
  * import { padding } from '@granite-js/react-native';
@@ -276,7 +276,7 @@ export const padding = createSpacingWithProperty('padding');
  * @property {ViewStyle} left32 - A style object that applies 32px outer spacing to the left
  *
  * @example
- * ## Example of applying 8px outer spacing in horizontal and vertical directions, and 100px spacing in the bottom direction
+ * ### Example of applying 8px outer spacing in horizontal and vertical directions, and 100px spacing in the bottom direction
  *
  * ```tsx
  * import { margin } from '@granite-js/react-native';

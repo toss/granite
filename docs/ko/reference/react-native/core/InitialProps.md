@@ -1,9 +1,8 @@
 ---
 sourcePath: packages/react-native/src/initial-props/InitialProps.ts
 ---
+
 # InitialProps
-
-
 
 React Native 앱에서 사용자가 특정 화면에 진입할 때,
 네이티브 플랫폼(Android/iOS)이 앱으로 전달하는 초기 데이터 타입을 제공해요.
@@ -17,11 +16,8 @@ Android에서 제공하는 데이터 타입은 `AndroidInitialProps`이고, iOS�
 type InitialProps = AndroidInitialProps | IOSInitialProps;
 ```
 
-
-
-
-
 ### 프로퍼티
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">platform</span><span class="post-parameters--required">필수</span> · <span class="post-parameters--type">&#39;ios&#39; | &#39;android&#39;</span>
@@ -37,17 +33,12 @@ type InitialProps = AndroidInitialProps | IOSInitialProps;
   </li>
 </ul>
 
-
-
-
-
-
-
 ## 예제
 
 ### `InitialProps`를 사용하는 예제
 
 ::: code-group
+
 ```tsx [_app.tsx]
 import { PropsWithChildren } from 'react';
 import { Granite, InitialProps } from '@granite-js/react-native';
@@ -64,5 +55,6 @@ export default Granite.registerApp(AppContainer, {
   appName: APP_NAME,
   context,
 });
-:::
 ```
+
+:::
