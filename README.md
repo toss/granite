@@ -1,4 +1,4 @@
-# Granite &middot; [![Apache 2.0 License](https://img.shields.io/badge/license-Apache-blue.svg)](https://github.com/toss/slash/blob/main/LICENSE) [![NPM badge](https://img.shields.io/npm/v/@granite-js/react-native?logo=npm)](https://www.npmjs.com/package/@granite-js/react-native)
+# Granite &middot; [![Apache 2.0 License](https://img.shields.io/badge/license-Apache-blue.svg)](https://github.com/toss/slash/blob/main/LICENSE) [![NPM badge](https://img.shields.io/npm/v/@granite-js/react-native?logo=npm)](https://www.npmjs.com/package/@granite-js/react-native) [![codecov](https://codecov.io/gh/toss/granite/graph/badge.svg?token=LCP519I5BN)](https://codecov.io/gh/toss/granite)
 
 Granite is an enterprise-grade React Native framework for microservice apps with brownfield integration, 200KB bundle sizes, and AWS-ready infrastructure.
 
@@ -44,13 +44,13 @@ new ReactNativeBundleCDN('myReactNativeBundleCDN', {
 
 ### Deploying Your App
 
-Deploy your app to production with a single command. Our Forge  handles the rest - uploading your bundle and getting it on your CDN.
+Deploy your app to production with a single command. Our Forge handles the rest - uploading your bundle and getting it on your CDN.
 
 ```sh
 npm run granite-forge deploy --bucket your-s3-bucket-name
 ```
 
-For a simple, step-by-step guide on getting started with Granite, please visit our [getting started guide](https://toss.github.io/granite/guides/quick-start/install-native-app.html). 
+For a simple, step-by-step guide on getting started with Granite, please visit our [getting started guide](https://toss.github.io/granite/guides/quick-start/install-native-app.html).
 
 ## Contributing
 
