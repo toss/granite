@@ -20,9 +20,11 @@ export const shared = defineConfig({
         },
       },
     },
-
     socialLinks: [
-      /** TODO */
+      {
+        icon: 'github',
+        link: 'https://github.com/toss/granite',
+      },
     ],
   },
 

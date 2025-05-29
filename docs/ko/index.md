@@ -10,12 +10,15 @@ hero:
     alt: granite
 
   actions:
+    - theme: brand
+      text: 빠른 시작
+      link: /ko/guides/quick-start/install-native-app
     - theme: alt
       text: 소개
       link: /ko/guides/introduction
     - theme: alt
-      text: 레퍼런스
-      link: /ko/reference/react-native/core/Granite
+      text: GitHub
+      link: https://github.com/toss/granite
 
 features:
   - title: 플랫폼별 일관된 동작
