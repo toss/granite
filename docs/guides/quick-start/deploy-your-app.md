@@ -1,47 +1,53 @@
-# Deploy Your App
+# Deploy & Run Your Granite App
 
-This guide explains how to create a Granite application using `granite-app` and deploy service bundles to AWS using the `granite-forge` deployment tool. By following this process, you can deploy and run your application on an Amazon S3 bucket.
+Get your app live on AWS in 5 minutes.
+
+## What Happens When You Deploy
+
+- Upload optimized bundles to your AWS S3 bucket
+- Distribute globally via CloudFront CDN
+- Update apps instantly
+
+> **⏱️ Estimated time:** 5 minutes
+
+> **📱 Result:** Your app running live from AWS CDN
 
 ## Prerequisites
 
-To deploy your application to AWS, you need to meet the following conditions:
+Make sure you've completed these guides first:
 
-- You must have an AWS account.
-- You need to have an access key and secret key with `AmazonS3FullAccess` permissions issued from IAM.
-- An S3 bucket created via Pulumi must be ready.
+- **[Getting Started](./create-your-app)** - Your Granite app is built and working
+- **[Setting Up AWS Infrastructure](./setup-aws)** - Your AWS CDN is set up and running
 
-## 1. Creating a Granite Application
+## 1. Build Your Production App
 
-First, create a new Granite application. Open your terminal and run one of the following commands based on your package manager:
+First, let's build your [Granite app](./create-your-app) for production. Run this command in your project directory:
 
 ::: code-group
 
 ```sh [npm]
-npx create-granite-app@latest
-cd my-granite-app
+npm run build
 ```
 
 ```sh [pnpm]
-pnpm create granite-app
-cd my-granite-app
+pnpm run build
 ```
 
 ```sh [yarn]
-yarn create granite-app
-cd my-granite-app
+yarn build
 ```
 
 :::
 
-This command creates a new directory named `my-granite-app` and generates the basic structure of a Granite application within it.
+Granite will create optimized microservice bundles, and your optimized bundles are now in the `dist/` directory:
 
-## 2. Installing Deployment Tools and Configuring Environment
+<img src="../../public/getting-started/bundle-size.png" style="margin: 0 auto; max-width: 500px; width: 100%;" />
 
-Navigate to the created application directory, install the necessary dependencies, and set up environment variables for AWS deployment.
+> **✅ Success indicator:** You see built bundles, with sizes under 300KB each
 
-### Installing Dependencies
+## 2. Install Granite Forge CLI
 
-`granite-forge` is the tool for deploying Granite applications.
+Next, install the Granite Forge CLI - this tool helps you deploy your bundles to AWS:
 
 ::: code-group
 
@@ -59,79 +65,117 @@ yarn add @granite-js/forge-cli --dev
 
 :::
 
-## Configuring AWS Credentials
+## 3. Deploy Your App
 
-You need to set up credentials so that Pulumi can create AWS resources. You can do this either through environment variables or using the AWS CLI.
-
-### Method 1: Setting up with Environment Variables
-
-Pulumi reads AWS credentials from the environment to create resources. By setting credentials as environment variables, Pulumi can automatically read the values without requiring a separate configuration file.
-
-Set the credentials in your terminal as follows. This method is temporary and will be lost when you close the terminal.
-
-```bash
-export AWS_ACCESS_KEY_ID="your-access-key-id"
-export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
-export AWS_REGION="your-region"
-```
-
-### Method 2: Setting up with AWS CLI
-
-When you run this command, you can enter your credentials and default region. Setting up credentials with AWS CLI ensures they persist even after closing the terminal.
-
-```bash
-aws configure
-```
-
-## 3. Building and Deploying the Application
-
-Once the environment variables are set, use the following commands to build and deploy your Granite application.
-
-### Building the Application
-
-This command compiles and optimizes the application source code into a deployable format.
+With the S3 bucket set up from the [AWS infrastructure guide](./setup-aws), let's deploy your app.
 
 ::: code-group
 
 ```sh [npm]
-npx granite build
+npx granite-forge deploy --bucket {Your S3 Bucket Name}
 ```
 
 ```sh [pnpm]
-pnpm granite build
+pnpm granite-forge deploy --bucket {Your S3 Bucket Name}
 ```
 
 ```sh [yarn]
-yarn granite build
+yarn granite-forge deploy --bucket {Your S3 Bucket Name}
 ```
 
 :::
 
-### Deploying the Service Bundle
+You'll see the deployment progress:
 
-This command uploads the built service bundle to the specified S3 bucket and provisions the necessary AWS resources to deploy the application. You must specify the correct S3 bucket name for deployment using the `--bucket` option.
-
-::: code-group
-
-```sh [npm]
-npx granite-forge deploy --bucket your-s3-bucket-name
+```
+$ npx granite-forge deploy --bucket {Your bucket name}
+┌  Start deployment
+│
+◇  Successfully fetched current deployment state
+│
+▲  No deployment state found
+│
+◇  Are you sure you want to deploy test-granite-app?
+│  Yes
+│
+◇  Bundle uploaded
+│
+◇  Bundle list updated
+│
+◇  Deployed successfully! (Deployment ID: **********************)
+│
+└  Done
 ```
 
-```sh [pnpm]
-pnpm granite-forge deploy --bucket your-s3-bucket-name
-```
+> **✅ Success indicator:** You see "Done" with your CDN URLs
 
-```sh [yarn]
-yarn granite-forge deploy --bucket your-s3-bucket-name
+## 4. Test Your Granite App
+
+Now that your app is deployed, let's test it out using the Granite test app.
+
+Open the [Granite test app](../miscellaneous/install-native-app) on your simulator and enter the following information:
+
+| Field | What to Enter |
+|-------|---------------|
+| Host | The CDN URL from your AWS infrastructure deployment (you can find this in the previous step's output) |
+| URL Scheme | Your app's URL scheme in the format: `{your-scheme}://{your-app-name}` (these values come from your Granite config) |
+
+::: details Finding your scheme and app name
+
+These values are defined in your `granite.config.ts` file. Let's take a look at how to find them:
+
+```ts
+import { defineConfig } from '@granite-js/react-native/config';
+
+export default defineConfig({
+  // Example execution scheme: granite://showcase
+  scheme: 'granite',
+  appName: 'showcase',
+  plugins: [
+    // ...
+  ],
+});
 ```
 
 :::
 
-## Next Steps
+<img src="../../public/getting-started/input-cdn-url.png" style="max-width: 320px; margin: 0 auto; width: 100%;" />
 
-Once the application is successfully deployed, you can use the following endpoint addresses to access the service on each platform.
-`1-1000` should be replaced with a number between `1` and `1000`. This number is used for canary deployments.
+Click Submit and watch your app load instantly from your AWS infrastructure! Your app is now being served through a global CDN, ready for users worldwide. 🌍
 
-The endpoint addresses are as follows:
-- iOS: `https://<cloudfront-cdn>/ios/<appName>/1-1000/bundle`
-- Android: `https://<cloudfront-cdn>/android/<appName>/1-1000/bundle`
+
+## Example Videos
+
+| iOS                                                                                                                                                                                                             | Android                                                                                                                                                                                                             |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <video autoplay loop muted style="max-width:400px; width:100%; height:auto; margin-top:1rem;"> <source src="/videos/ios_showcase.mp4" type="video/mp4" /> Your browser does not support the video tag. </video> | <video autoplay loop muted style="max-width:400px; width:100%; height:auto; margin-top:1rem;"> <source src="/videos/android_showcase.mov" type="video/mp4" /> Your browser does not support the video tag. </video> |
+
+
+## Understanding Deployment URLs
+
+Your app is deployed to specific URLs based on platform and version:
+
+### URL Structure
+```
+https://<your-cdn>/[platform]/[appName]/[version]/bundle
+```
+
+### Example URLs
+```bash
+# iOS bundles
+https://d1234567890123.cloudfront.net/ios/my-granite-app/100/bundle
+
+# Android bundles  
+https://d1234567890123.cloudfront.net/android/my-granite-app/100/bundle
+```
+
+### Version Numbers (1-1000)
+
+Version numbers control what percentage of users get your app update, from 0% to 100% of your user base, with 0.1% granularity.
+
+## 🎉 Congratulations!
+
+Your Granite app is now live on AWS! Here's what you can do now:
+
+- **Update instantly** - Deploy new versions by single CLI command
+- **Global performance** - Your app loads worldwide via CDN

@@ -13,6 +13,17 @@
           "collapsed": true,
           "items": [
             {
+              "text": "Config",
+              "collapsed": true,
+              "items": [
+                {
+                  "text": "defineConfig",
+                  "link": "/reference/react-native/config/defineConfig"
+                }
+              ]
+            },
+
+            {
               "text": "Core",
               "collapsed": true,
               "items": [
