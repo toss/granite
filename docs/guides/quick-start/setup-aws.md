@@ -153,6 +153,9 @@ const cdn = new ReactNativeBundleCDN('granite-cdn', {
   bucketName: config.require('bucketName'),
   region: config.require('region'),
 });
+
+export const cdnUrl = cdn.cloudfrontDomain;
+export const bucketName = cdn.bucketName;
 ```
 
 ## 6. Set Configuration Values

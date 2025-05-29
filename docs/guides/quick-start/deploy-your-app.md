@@ -69,14 +69,6 @@ yarn add @granite-js/forge-cli --dev
 
 With the S3 bucket set up from the [AWS infrastructure guide](./setup-aws.md), let's deploy your app.
 
-Setup the AWS environment variables:
-
-```bash
-export AWS_ACCESS_KEY_ID="your-access-key-id"
-export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
-export AWS_REGION="your-region"
-```
-
 ::: code-group
 
 ```sh [npm]
@@ -96,44 +88,37 @@ yarn granite-forge deploy --bucket {Your S3 Bucket Name}
 You'll see the deployment progress:
 
 ```
-🚀 Starting deployment to AWS...
-
-📋 Deployment Configuration:
-├── Bucket: my-granite-app-bundles-2024
-├── Region: us-east-1  
-├── App: my-granite-app
-└── Version: 100
-
-📦 Uploading bundles...
-├── ✅ index.bundle.js → s3://my-granite-app-bundles-2024/ios/my-granite-app/100/
-├── ✅ profile.bundle.js → s3://my-granite-app-bundles-2024/ios/my-granite-app/100/
-└── ✅ shared.bundle.js → s3://my-granite-app-bundles-2024/ios/my-granite-app/100/
-
-📦 Uploading Android bundles...
-├── ✅ index.bundle.js → s3://my-granite-app-bundles-2024/android/my-granite-app/100/
-├── ✅ profile.bundle.js → s3://my-granite-app-bundles-2024/android/my-granite-app/100/
-└── ✅ shared.bundle.js → s3://my-granite-app-bundles-2024/android/my-granite-app/100/
-
-🌍 Your app is now live at:
-├── iOS: https://d1234567890123.cloudfront.net/ios/my-granite-app/100/bundle
-└── Android: https://d1234567890123.cloudfront.net/android/my-granite-app/100/bundle
-
-🎉 Deployment completed successfully!
-⏱️ Total time: 1m 23s
+$ npx granite-forge deploy --bucket {Your bucket name}
+┌  Start deployment
+│
+◇  Successfully fetched current deployment state
+│
+▲  No deployment state found
+│
+◇  Are you sure you want to deploy test-granite-app?
+│  Yes
+│
+◇  Bundle uploaded
+│
+◇  Bundle list updated
+│
+◇  Deployed successfully! (Deployment ID: 01971c12-3e69-71b7-8f1a-2d0e46beca31)
+│
+└  Done
 ```
 
-> **✅ Success indicator:** You see "Deployment completed successfully!" with your CDN URLs
+> **✅ Success indicator:** You see "Done" with your CDN URLs
 
-## Step 5: Test Your Live App
-
-### Update Your Test App
+## 4: Test Your Granite App
 
 Configure your Granite test app to use the production bundles:
 
-1. **Open Granite test app** on your simulator
-2. **Go to Settings** → **Bundle Configuration**
+1. Open Granite test app on your simulator.
+2. 
 3. **Set Bundle URL** to: `https://d1234567890123.cloudfront.net/ios/my-granite-app/100/bundle`
 4. **Tap "Reload App"**
+
+<img src="../../public/getting-started/input-cdn-url.png" style="max-width: 320px; margin: 0 auto; width: 100%;" />
 
 Your app should now load from AWS! 🌍
 
