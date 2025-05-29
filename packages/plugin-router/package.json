@@ -22,7 +22,7 @@
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "vitest --no-watch",
+    "test": "vitest --no-watch --coverage",
     "build": "tsdown"
   },
   "files": [

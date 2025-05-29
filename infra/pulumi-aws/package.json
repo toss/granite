@@ -28,7 +28,7 @@
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest",
+    "test": "vitest --coverage",
     "build": "tsup"
   },
   "devDependencies": {

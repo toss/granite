@@ -7,7 +7,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest --no-watch",
+    "test": "vitest --no-watch --coverage",
     "lint": "eslint .",
     "build": "tsup && tsc -p tsconfig.build.json",
     "prepack": "yarn build"

@@ -21,7 +21,7 @@
     "build": "tsup src/index.ts --format esm",
     "dev": "tsup src/index.ts --format esm --watch",
     "typecheck": "tsc --noEmit",
-    "test:no-parallel": "vitest --no-watch"
+    "test:no-parallel": "vitest --no-watch --coverage"
   },
   "devDependencies": {
     "@types/kill-port": "^2.0.1",

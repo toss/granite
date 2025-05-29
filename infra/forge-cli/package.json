@@ -14,7 +14,7 @@
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest --run --passWithNoTests",
+    "test": "vitest --run --coverage --passWithNoTests",
     "build": "tsdown"
   },
   "devDependencies": {

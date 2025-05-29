@@ -7,7 +7,7 @@
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest --run",
+    "test": "vitest --run --coverage",
     "build": "tsdown"
   },
   "types": "./dist/index.d.ts",
