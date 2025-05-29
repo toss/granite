@@ -19,7 +19,7 @@ Make sure you've completed these guides first:
 - **[Getting Started](./create-your-app)** - Your Granite app is built and working
 - **[Setting Up AWS Infrastructure](./setup-aws)** - Your AWS CDN is set up and running
 
-## 1: Build Your Production App
+## 1. Build Your Production App
 
 First, let's build your [Granite app](./create-your-app) for production. Run this command in your project directory:
 
@@ -45,9 +45,9 @@ Granite will create optimized microservice bundles, and your optimized bundles a
 
 > **✅ Success indicator:** You see built bundles, with sizes under 300KB each
 
-## 2: Install Granite Forge CLI
+## 2. Install Granite Forge CLI
 
-Install the deployment tool to upload your bundles to AWS:
+Next, install the Granite Forge CLI - this tool helps you deploy your bundles to AWS:
 
 ::: code-group
 
@@ -65,7 +65,7 @@ yarn add @granite-js/forge-cli --dev
 
 :::
 
-## 3: Deploy Your App
+## 3. Deploy Your App
 
 With the S3 bucket set up from the [AWS infrastructure guide](./setup-aws), let's deploy your app.
 
@@ -109,7 +109,7 @@ $ npx granite-forge deploy --bucket {Your bucket name}
 
 > **✅ Success indicator:** You see "Done" with your CDN URLs
 
-## 4: Test Your Granite App
+## 4. Test Your Granite App
 
 Now that your app is deployed, let's test it out using the Granite test app.
 

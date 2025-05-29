@@ -19,7 +19,7 @@
 - **[시작하기](./create-your-app)** - Granite 앱이 빌드되고 작동하는 상태
 - **[AWS 인프라 설정하기](./setup-aws)** - AWS CDN이 설정되고 실행 중인 상태
 
-## 1: 프로덕션용 앱 빌드하기
+## 1. 프로덕션용 앱 빌드하기
 
 먼저 프로덕션용 [Granite 앱](./create-your-app)을 빌드해보세요. 프로젝트 디렉토리에서 다음 명령어를 실행하세요.
 
@@ -45,7 +45,7 @@ Granite가 최적화된 JavaScript 번들을 만들어요. 최적화된 번들�
 
 > **✅ 성공했다면:** 각각 300KB 미만인 빌드된 번들이 보여요
 
-## 2: Granite Forge CLI 설치하기
+## 2. Granite Forge CLI 설치하기
 
 번들을 AWS에 업로드하기 위한 배포 도구인 Forge CLI를 설치하세요.
 
@@ -65,7 +65,7 @@ yarn add @granite-js/forge-cli --dev
 
 :::
 
-## 3: 앱 배포하기
+## 3. 앱 배포하기
 
 [AWS 인프라 가이드](./setup-aws)에서 설정한 S3 버킷을 사용해 앱을 배포해보세요.
 
@@ -109,7 +109,7 @@ $ npx granite-forge deploy --bucket {버킷 이름}
 
 > **✅ 성공했다면:** CDN URL과 함께 "Doone" 메시지가 보여요
 
-## 4: Granite 앱 테스트
+## 4. Granite 앱 테스트
 
 이제 앱이 배포됐으니 Granite 테스트 앱으로 테스트해보세요.
 
@@ -176,4 +176,4 @@ https://d1234567890123.cloudfront.net/android/my-granite-app/100/bundle
 이제 Granite 앱이 AWS에서 실행되고 있어요! 이제 다음과 같은 것들을 할 수 있어요.
 
 - **즉시 업데이트** - CLI 명령어 하나로 새 버전 배포
-- **전 세계 성능** - CDN을 통해 전 세계에서 앱 로딩
+- **전 세계에 배포** - CDN을 통해 전 세계에서 앱 로딩
