@@ -12,7 +12,7 @@ hero:
   actions:
     - theme: brand
       text: Quick Start
-      link: /guides/quick-start/install-native-app
+      link: /guides/quick-start/create-your-app
     - theme: alt
       text: Introduction
       link: /guides/introduction

@@ -13,6 +13,16 @@
           "collapsed": true,
           "items": [
             {
+              "text": "설정",
+              "collapsed": true,
+              "items": [
+                {
+                  "text": "defineConfig",
+                  "link": "/reference/react-native/config/defineConfig"
+                }
+              ]
+            },
+            {
               "text": "코어",
               "collapsed": true,
               "items": [
