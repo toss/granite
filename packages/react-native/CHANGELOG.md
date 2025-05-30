@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 0.1.1
+
+### Patch Changes
+
+- d675415: Improve scaffolding to provide a better showcase UI
+- 10a5f3f: empty
+- Updated dependencies [d675415]
+- Updated dependencies [10a5f3f]
+  - @granite-js/style-utils@0.1.1
+  - @granite-js/native@0.1.1
+  - @granite-js/image@0.1.1
+  - @granite-js/mpack@0.1.1
+  - @granite-js/jest@0.1.1
+  - @granite-js/cli@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
