@@ -15,6 +15,10 @@ function assertValidAppName(input: string) {
   const appName = getAppName(input);
   const kebabCaseAppName = kebabCase(appName);
 
+  if (appName === '') {
+    return;
+  }
+
   if (kebabCaseAppName !== appName) {
     throw new Error(`Project name must be in kebab-case (e.g. ${kebabCaseAppName})`);
   }
