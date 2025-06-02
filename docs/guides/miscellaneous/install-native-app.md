@@ -15,12 +15,12 @@ Follow the guide below to install the app.
 
 ### Installation Steps
 
-1. Download the Granite iOS app bundle from GitHub releases:  
-   **[Browse All Releases](https://github.com/toss/granite/releases)**
-   
-   - **For stable use**: Choose releases without "Pre-release" badge or `alpha`/`beta`/`rc` in the version name
-   - **For testing**: Pre-release versions are available if you want to try the latest features
-   - Download the `granite_ios.zip` file from the Assets section
+1. Download the Granite iOS app bundle from GitHub Releases  
+   **[Browse all releases](https://github.com/toss/granite/releases)**
+
+   - To use a stable version, choose a release without the "Pre-release" badge or version names like `alpha`, `beta`, or `rc`.
+   - To try the latest features, you can use a pre-release version.
+   - In the Assets section, download the `granite_ios.zip` file.
 
 2. Extract the downloaded `granite_ios.zip` file.
 
