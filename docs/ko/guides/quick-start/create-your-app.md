@@ -159,9 +159,12 @@ To open debugger press "j"
 
 ### 5.2 앱 실행
 
-1. iOS 시뮬레이터 또는 Android 에뮬레이터를 실행하세요
-2. Granite 테스트 앱을 실행하세요
-3. 앱이 자동으로 개발 서버에 연결돼요.
+1. **iOS 시뮬레이터** 또는 **Android 에뮬레이터**를 실행하세요
+2. 시뮬레이터에서 **Granite 테스트 앱**을 실행하세요
+3. **개발 서버에 연결하기:**
+   - 터미널에서 `npm run dev`가 계속 실행 중인지 확인하세요
+   - Granite 테스트 앱에서 **"Open Dev Server"**를 탭하세요
+   - 앱이 로컬 개발 서버에 연결되어 React Native 화면을 로드해요
 
 네이티브 앱에서 Granite 앱이 로딩되는 걸 볼 수 있어요.
 
