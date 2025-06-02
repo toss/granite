@@ -159,9 +159,13 @@ If you haven't already, install the Granite test app on your simulator:
 
 ### 5.2 Run Your App
 
-1. Open your iOS Simulator (or Android Emulator)
-2. Launch the Granite test app
-3. The app will automatically connect to your development server
+1. **Open your iOS Simulator** (or Android Emulator)
+2. **Launch the Granite test app** from your simulator
+3. **Connect to your development server:**
+   - Ensure your `granite dev` is still running in the terminal
+   - **For Android users:** Run `adb reverse tcp:8081 tcp:8081` in a separate terminal to enable connection
+   - In the Granite test app, tap **"Open Dev Server"**
+   - The app will connect to your local development server and load your React Native screens
 
 You should see your app's home screen loading in the native app!
 
