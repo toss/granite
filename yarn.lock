@@ -5119,6 +5119,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@granite-js/plugin-sentry@workspace:packages/plugin-sentry":
+  version: 0.0.0-use.local
+  resolution: "@granite-js/plugin-sentry@workspace:packages/plugin-sentry"
+  dependencies:
+    "@granite-js/plugin-core": "workspace:*"
+    "@granite-js/utils": "workspace:*"
+    "@sentry/cli": "npm:^2.45.0"
+    es-toolkit: "npm:^1.38.0"
+    execa: "npm:^5"
+    tsdown: "npm:^0.11.11"
+    typescript: "npm:^5.8.3"
+    vitest: "npm:^3.1.4"
+  languageName: unknown
+  linkType: soft
+
 "@granite-js/pulumi-aws@workspace:*, @granite-js/pulumi-aws@workspace:infra/pulumi-aws":
   version: 0.0.0-use.local
   resolution: "@granite-js/pulumi-aws@workspace:infra/pulumi-aws"
@@ -7543,6 +7558,102 @@ __metadata:
   version: 0.4.1
   resolution: "@sec-ant/readable-stream@npm:0.4.1"
   checksum: 10c0/64e9e9cf161e848067a5bf60cdc04d18495dc28bb63a8d9f8993e4dd99b91ad34e4b563c85de17d91ffb177ec17a0664991d2e115f6543e73236a906068987af
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-darwin@npm:2.46.0":
+  version: 2.46.0
+  resolution: "@sentry/cli-darwin@npm:2.46.0"
+  conditions: os=darwin
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-linux-arm64@npm:2.46.0":
+  version: 2.46.0
+  resolution: "@sentry/cli-linux-arm64@npm:2.46.0"
+  conditions: (os=linux | os=freebsd | os=android) & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-linux-arm@npm:2.46.0":
+  version: 2.46.0
+  resolution: "@sentry/cli-linux-arm@npm:2.46.0"
+  conditions: (os=linux | os=freebsd | os=android) & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-linux-i686@npm:2.46.0":
+  version: 2.46.0
+  resolution: "@sentry/cli-linux-i686@npm:2.46.0"
+  conditions: (os=linux | os=freebsd | os=android) & (cpu=x86 | cpu=ia32)
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-linux-x64@npm:2.46.0":
+  version: 2.46.0
+  resolution: "@sentry/cli-linux-x64@npm:2.46.0"
+  conditions: (os=linux | os=freebsd | os=android) & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-win32-arm64@npm:2.46.0":
+  version: 2.46.0
+  resolution: "@sentry/cli-win32-arm64@npm:2.46.0"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-win32-i686@npm:2.46.0":
+  version: 2.46.0
+  resolution: "@sentry/cli-win32-i686@npm:2.46.0"
+  conditions: os=win32 & (cpu=x86 | cpu=ia32)
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-win32-x64@npm:2.46.0":
+  version: 2.46.0
+  resolution: "@sentry/cli-win32-x64@npm:2.46.0"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@sentry/cli@npm:^2.45.0":
+  version: 2.46.0
+  resolution: "@sentry/cli@npm:2.46.0"
+  dependencies:
+    "@sentry/cli-darwin": "npm:2.46.0"
+    "@sentry/cli-linux-arm": "npm:2.46.0"
+    "@sentry/cli-linux-arm64": "npm:2.46.0"
+    "@sentry/cli-linux-i686": "npm:2.46.0"
+    "@sentry/cli-linux-x64": "npm:2.46.0"
+    "@sentry/cli-win32-arm64": "npm:2.46.0"
+    "@sentry/cli-win32-i686": "npm:2.46.0"
+    "@sentry/cli-win32-x64": "npm:2.46.0"
+    https-proxy-agent: "npm:^5.0.0"
+    node-fetch: "npm:^2.6.7"
+    progress: "npm:^2.0.3"
+    proxy-from-env: "npm:^1.1.0"
+    which: "npm:^2.0.2"
+  dependenciesMeta:
+    "@sentry/cli-darwin":
+      optional: true
+    "@sentry/cli-linux-arm":
+      optional: true
+    "@sentry/cli-linux-arm64":
+      optional: true
+    "@sentry/cli-linux-i686":
+      optional: true
+    "@sentry/cli-linux-x64":
+      optional: true
+    "@sentry/cli-win32-arm64":
+      optional: true
+    "@sentry/cli-win32-i686":
+      optional: true
+    "@sentry/cli-win32-x64":
+      optional: true
+  bin:
+    sentry-cli: bin/sentry-cli
+  checksum: 10c0/9fd4157bf8b30afb7683bb5b436b052de77d7aa8f9fa99f438f663d4b43df18acb19a0096df5501219ffb44b5e9dbaed29826a2f49e6bc0f613e052dd4019b4b
   languageName: node
   linkType: hard
 
@@ -15249,7 +15360,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"https-proxy-agent@npm:^5.0.1":
+"https-proxy-agent@npm:^5.0.0, https-proxy-agent@npm:^5.0.1":
   version: 5.0.1
   resolution: "https-proxy-agent@npm:5.0.1"
   dependencies:
@@ -18648,7 +18759,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.2.0, node-fetch@npm:^2.6.0":
+"node-fetch@npm:^2.2.0, node-fetch@npm:^2.6.0, node-fetch@npm:^2.6.7":
   version: 2.7.0
   resolution: "node-fetch@npm:2.7.0"
   dependencies:
@@ -20117,6 +20228,13 @@ __metadata:
   version: 2.0.0
   resolution: "proggy@npm:2.0.0"
   checksum: 10c0/1bfc14fa95769e6dd7e91f9d3cae8feb61e6d833ed7210d87ee5413bfa068f4ee7468483da96b2f138c40a7e91a2307f5d5d2eb6de9761c21e266a34602e6a5f
+  languageName: node
+  linkType: hard
+
+"progress@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "progress@npm:2.0.3"
+  checksum: 10c0/1697e07cb1068055dbe9fe858d242368ff5d2073639e652b75a7eb1f2a1a8d4afd404d719de23c7b48481a6aa0040686310e2dac2f53d776daa2176d3f96369c
   languageName: node
   linkType: hard
 
@@ -23055,7 +23173,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsdown@npm:^0.11.12, tsdown@npm:^0.11.13":
+"tsdown@npm:^0.11.11, tsdown@npm:^0.11.12, tsdown@npm:^0.11.13":
   version: 0.11.13
   resolution: "tsdown@npm:0.11.13"
   dependencies:
@@ -24366,7 +24484,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"which@npm:^2.0.1":
+"which@npm:^2.0.1, which@npm:^2.0.2":
   version: 2.0.2
   resolution: "which@npm:2.0.2"
   dependencies:
