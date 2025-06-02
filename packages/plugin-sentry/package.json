@@ -1,0 +1,43 @@
+{
+  "name": "@granite-js/plugin-sentry",
+  "type": "module",
+  "version": "0.1.1",
+  "description": "Plugin for integrating Sentry with Granite applications",
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run",
+    "build": "tsdown"
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "tsdown": "^0.11.11",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  },
+  "dependencies": {
+    "@granite-js/plugin-core": "workspace:*",
+    "@granite-js/utils": "workspace:*",
+    "@sentry/cli": "^2.45.0",
+    "es-toolkit": "^1.38.0",
+    "execa": "^5"
+  },
+  "sideEffects": false
+}
