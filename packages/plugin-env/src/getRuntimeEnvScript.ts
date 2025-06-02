@@ -1,13 +1,9 @@
 import type { SerializableObject } from './types';
 
 export function getRuntimeEnvScript(serializableObject: SerializableObject) {
-  const assignExpressions = Object.entries(serializableObject).map(([key, value]) => {
-    if (value == null) {
-      throw new Error(`${key} is not defined`);
-    }
-
-    return `global.__granite.meta.env['${key}'] = ${JSON.stringify(value)};`;
-  });
+  const assignExpressions = Object.entries(serializableObject).map(
+    ([key, value]) => `global.__granite.meta.env['${key}'] = ${JSON.stringify(String(value))};`
+  );
 
   return `
   (function (global) {

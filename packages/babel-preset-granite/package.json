@@ -34,7 +34,7 @@
   ],
   "sideEffects": false,
   "devDependencies": {
-    "@types/node": "^22.15.21",
+    "@types/node": "^22.10.2",
     "tsdown": "^0.12.0"
   }
 }
