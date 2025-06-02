@@ -1,6 +1,11 @@
 import type { SentryPluginContext } from './types';
 
-export function uploadSourcemap(bundlePath: string, sourcemapPath: string, context: SentryPluginContext) {
+export interface UploadSourcemapOptions {
+  bundlePath: string;
+  sourcemapPath: string;
+}
+
+export function uploadSourcemap(context: SentryPluginContext, { bundlePath, sourcemapPath }: UploadSourcemapOptions) {
   return context.client.execute(
     ['sourcemaps', 'upload', '--debug-id-reference', '--strip-prefix', context.root, bundlePath, sourcemapPath],
     true

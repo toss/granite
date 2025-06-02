@@ -43,7 +43,10 @@ export const sentryPlugin = ({ enabled = true, ...options }: SentryPluginOptions
           const targetSourcemap = hermesBundle?.sourcemap ?? sourcemap;
 
           await writeDebugIdInjectedSourcemap(targetSourcemap, debugId);
-          await sentryActions.uploadSourcemap(targetBundle, targetSourcemap, { root: config.cwd });
+          await sentryActions.uploadSourcemap(
+            { root: config.cwd },
+            { bundlePath: targetBundle, sourcemapPath: targetSourcemap }
+          );
         }
       },
     },

@@ -1,10 +1,10 @@
 import SentryCLI from '@sentry/cli';
 import { asyncNoop } from 'es-toolkit';
 import type { SentryPluginContext, SentryPluginOptions } from './types';
-import { uploadSourcemap } from './uploadSourcemap';
+import { uploadSourcemap, type UploadSourcemapOptions } from './uploadSourcemap';
 
 export interface SentryClientActions {
-  uploadSourcemap: (bundle: string, sourcemap: string, { root }: Omit<SentryPluginContext, 'client'>) => Promise<void>;
+  uploadSourcemap: ({ root }: Omit<SentryPluginContext, 'client'>, options: UploadSourcemapOptions) => Promise<void>;
 }
 
 export function createClientActions(options: SentryPluginOptions): SentryClientActions {
@@ -17,8 +17,8 @@ export function createClientActions(options: SentryPluginOptions): SentryClientA
   const client = new SentryCLI(null, options);
 
   return {
-    uploadSourcemap: async (bundle: string, sourcemap: string, { root }: Omit<SentryPluginContext, 'client'>) => {
-      await uploadSourcemap(bundle, sourcemap, { client, root });
+    uploadSourcemap: async (context, options) => {
+      await uploadSourcemap({ client, ...context }, options);
     },
   };
 }
