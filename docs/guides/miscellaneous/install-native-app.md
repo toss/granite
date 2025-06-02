@@ -51,7 +51,7 @@ Follow the guide below to install the app.
 
 - Connect your Android device to your computer, then run the following command in the terminal:
   ```bash
-  adb install granite_android.zip
+  adb install granite_android.apk
   ```
 
 #### Direct installation on device

@@ -51,7 +51,7 @@ iOS에서 React Native 앱을 테스트하려면 시뮬레이터가 필요해요
 
 - 컴퓨터에 안드로이드 기기를 연결한 뒤, 터미널에서 아래 명령어를 실행해요.
   ```bash
-  adb install granite_android.zip
+  adb install granite_android.apk
   ```
 
 #### 기기에서 직접 설치
