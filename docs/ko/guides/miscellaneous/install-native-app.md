@@ -18,7 +18,7 @@ iOS에서 React Native 앱을 테스트하려면 시뮬레이터가 필요해요
 1. GitHub 릴리스에서 Granite iOS 앱 번들을 다운로드해요:  
    **[모든 릴리스 보기](https://github.com/toss/granite/releases)**
    
-   - **안정적인 사용**: "Pre-release" 배지나 `alpha`/`beta`/`rc`가 없는 릴리스를 선택하세요
+   - **안정적인 버전을 사용하고 싶다면**: "Pre-release" 배지나 `alpha`/`beta`/`rc`가 없는 버전을 사용하세요
    - **테스트 목적**: 최신 기능을 시도해보고 싶다면 Pre-release 버전도 사용할 수 있어요
    - Assets 섹션에서 `granite_ios.zip` 파일을 다운로드해요
 
