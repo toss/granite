@@ -1,5 +1,12 @@
 # @granite-js/mpack
 
+## 1.0.0
+
+### Patch Changes
+
+- @granite-js/devtools-frontend@1.0.0
+- @granite-js/utils@1.0.0
+
 ## 0.1.1
 
 ### Patch Changes

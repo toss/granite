@@ -1,5 +1,13 @@
 # @granite-js/plugin-env
 
+## 1.0.0
+
+### Patch Changes
+
+- 62cf090: normalize environment variable values to string types
+  - @granite-js/plugin-core@1.0.0
+  - @granite-js/utils@1.0.0
+
 ## 0.1.1
 
 ### Patch Changes
