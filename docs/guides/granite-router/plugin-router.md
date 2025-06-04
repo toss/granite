@@ -11,7 +11,7 @@ $ npm install @granite-js/plugin-router --save-dev
 ```
 
 ```sh [pnpm]
-$ pnpm install @granite-js/plugin-router --save-dev
+$ pnpm add @granite-js/plugin-router --save-dev
 ```
 
 ```sh [yarn]

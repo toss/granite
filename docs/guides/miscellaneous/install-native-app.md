@@ -15,8 +15,12 @@ Follow the guide below to install the app.
 
 ### Installation Steps
 
-1. Download the Granite iOS app bundle from the link below.  
-   [granite_ios.zip](/download/granite_ios.zip)
+1. Download the Granite iOS app bundle from GitHub Releases  
+   **[Browse all releases](https://github.com/toss/granite/releases)**
+
+   - To use a stable version, choose a release without the "Pre-release" badge or version names like `alpha`, `beta`, or `rc`.
+   - To try the latest features, you can use a pre-release version.
+   - In the Assets section, download the `granite_ios.zip` file.
 
 2. Extract the downloaded `granite_ios.zip` file.
 
@@ -32,8 +36,12 @@ Follow the guide below to install the app.
 
 ### Installation Steps
 
-1. Download the Granite Android APK from the link below.  
-   [granite_android.zip](/download/granite_android.zip)
+1. Download the Granite Android APK from GitHub Releases  
+   **[Browse all releases](https://github.com/toss/granite/releases)**
+
+   - To use a stable version, choose a release without the "Pre-release" badge or version names like `alpha`, `beta`, or `rc`.
+   - To try the latest features, you can use a pre-release version.
+   - In the Assets section, download the `granite_android.zip` file.
 
 2. Extract the downloaded `granite_android.zip` file.
 
@@ -43,7 +51,7 @@ Follow the guide below to install the app.
 
 - Connect your Android device to your computer, then run the following command in the terminal:
   ```bash
-  adb install granite_android.zip
+  adb install granite_android.apk
   ```
 
 #### Direct installation on device
