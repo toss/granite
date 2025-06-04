@@ -30,7 +30,7 @@
     "build": "tsup && tsc -p tsconfig.build.json && node .scripts/copy-vendors-dts.mjs",
     "lint": "eslint .",
     "find-deadcode": "ts-prune",
-    "test:no-parallel": "vitest --no-watch --no-file-parallelism"
+    "test:no-parallel": "vitest --no-watch --no-file-parallelism --coverage"
   },
   "devDependencies": {
     "@babel/runtime": "7.24.8",
@@ -57,6 +57,7 @@
     "@types/serve-static": "^1",
     "@types/temp": "^0",
     "@types/ws": "^8",
+    "@vitest/coverage-v8": "^2.1.8",
     "eslint": "9.7.0",
     "execa": "^5.0.0",
     "fast-glob": "^3.3.2",
