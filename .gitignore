@@ -25,9 +25,13 @@ node_modules
 .toss
 .granite
 
-# 테스트를 진행하면서 생성된 파일들이 들어가는 디렉토리
+# testing
 test-meta
 .vitest
+coverage
+__screenshots__
+vitest.config.ts.timestamp*
+tsconfig.vitest-temp.json
 
 .nx/cache
 .nx/workspace-data
