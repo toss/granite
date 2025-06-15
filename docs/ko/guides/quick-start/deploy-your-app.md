@@ -118,7 +118,7 @@ $ npx granite-forge deploy --bucket {버킷 이름}
 | 필드 | 입력할 내용 |
 |-------|---------------|
 | Host | AWS 인프라 배포에서 얻은 CDN URL (이전 단계의 출력에서 확인할 수 있어요) |
-| URL Scheme | '{your-scheme}://{your-app-name}' 형식의 앱 URL 스킴 (이 값들은 Granite 설정에서 가져와요) |
+| URL Scheme | `{your-scheme}://{your-app-name}` 형식의 앱 URL 스킴 (이 값들은 Granite 설정에서 가져와요) |
 
 ::: details 스킴과 앱 이름 찾기
 
