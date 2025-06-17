@@ -45,7 +45,13 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/facebook/react-native.git
 	
-5. **typescript**
+5. **tsup**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/egoist/tsup.git
+	
+6. **typescript**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0

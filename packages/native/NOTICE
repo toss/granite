@@ -147,7 +147,31 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-native-community/react-native-svg
 	
-22. **typescript**
+22. **react-native-video**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git@github.com:TheWidlarzGroup/react-native-video.git
+	
+23. **react-native-webview**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/react-native-webview/react-native-webview.git
+	
+24. **lottie-ios**
+	
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: git+https://github.com/airbnb/lottie-ios.git
+	
+25. **lottie-react-native**
+	
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: https://github.com/react-native-community/lottie-react-native
+	
+26. **typescript**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0

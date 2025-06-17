@@ -21,37 +21,43 @@ limitations under the License.
 ================================================================================
 Third-Party Libraries:
 
-1. **es-toolkit**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/toss/es-toolkit.git
-	
-2. **execa**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/sindresorhus/execa.git
-	
-3. **tsdown**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/rolldown/tsdown.git
-	
-4. **vitest**
+1. **@vitest/coverage-v8**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/vitest-dev/vitest.git
 	
-5. **source-map**
+2. **es-toolkit**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/toss/es-toolkit.git
+	
+3. **execa**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/sindresorhus/execa.git
+	
+4. **tsdown**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/rolldown/tsdown.git
+	
+5. **vitest**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/vitest-dev/vitest.git
+	
+6. **source-map**
 	
    - License: BSD-3-Clause
    - License Text: https://opensource.org/licenses/BSD-3-Clause
    - Repository: http://github.com/mozilla/source-map.git
 	
-6. **typescript**
+7. **typescript**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0
