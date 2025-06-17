@@ -1,6 +1,6 @@
-import { createRoute } from '@granite-js/react-native';
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { createRoute, Stack } from '@granite-js/react-native';
+import { StyleSheet, Text } from 'react-native';
+import { Button } from 'components/Button';
 
 export const Route = createRoute('/about', {
   component: Page,
@@ -9,18 +9,21 @@ export const Route = createRoute('/about', {
 function Page() {
   const navigation = Route.useNavigation();
 
+  const handleGoShowcase = () => {
+    navigation.navigate('/showcase');
+  };
+
   const handleGoBack = () => {
     navigation.goBack();
   };
 
   return (
-    <View style={styles.container}>
+    <Stack.Vertical style={styles.container} gutter={16}>
       <Text style={styles.title}>About Granite</Text>
       <Text style={styles.description}>Granite is a powerful and flexible React Native Framework 🚀</Text>
-      <TouchableOpacity style={styles.button} onPress={handleGoBack}>
-        <Text style={styles.buttonText}>Go Back</Text>
-      </TouchableOpacity>
-    </View>
+      <Button label="Show more" onPress={handleGoShowcase} />
+      <Button label="Go Back" appearance="text" onPress={handleGoBack} />
+    </Stack.Vertical>
   );
 }
 
@@ -46,8 +49,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     lineHeight: 26,
   },
-  button: {
+  buttonBase: {
     marginTop: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  button: {
     backgroundColor: '#0064FF',
     paddingVertical: 12,
     paddingHorizontal: 32,
@@ -61,8 +69,14 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  buttonText: {
+  buttonLabel: {
     color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  textButtonLabel: {
+    color: '#777',
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
