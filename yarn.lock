@@ -4905,6 +4905,7 @@ __metadata:
     eslint: "npm:^9.7.0"
     react: "npm:18.2.0"
     react-native: "npm:0.72.6"
+    react-simplikit: "npm:^0.0.40"
     typescript: "npm:5.8.3"
   peerDependencies:
     "@granite-js/native": "*"
@@ -5090,9 +5091,12 @@ __metadata:
     "@babel/preset-env": "npm:^7.24.8"
     "@babel/preset-typescript": "npm:^7.24.7"
     "@babel/runtime": "npm:^7"
+    "@react-native-async-storage/async-storage": "npm:1.19.4"
+    "@react-native-community/blur": "npm:4.3.2"
     "@react-navigation/elements": "npm:1.3.9"
     "@react-navigation/native": "npm:6.0.13"
     "@react-navigation/native-stack": "npm:6.9.0"
+    "@shopify/flash-list": "npm:1.6.2"
     "@types/babel__core": "npm:^7"
     "@types/babel__preset-env": "npm:^7"
     "@types/jest": "npm:^29.5.12"
@@ -5105,7 +5109,9 @@ __metadata:
     lottie-react-native: "npm:6.4.0"
     react: "npm:18.2.0"
     react-native: "npm:0.72.6"
+    react-native-fast-image: "npm:8.6.3"
     react-native-gesture-handler: "npm:2.8.0"
+    react-native-pager-view: "npm:6.1.2"
     react-native-safe-area-context: "npm:4.7.4"
     react-native-screens: "npm:3.27.0"
     react-native-svg: "npm:13.14.0"
@@ -6937,6 +6943,17 @@ __metadata:
   peerDependencies:
     react-native: ^0.0.0-0 || 0.60 - 0.72 || 1000.0.0
   checksum: 10c0/51c6b524298112c277b89430da7d44f8ca1fdccd60a2cf3c2b3a09b30391de5591704a811959ea9f91e1b3102f422fd6c491bc4d6ddae40994ee1b25f2034cf0
+  languageName: node
+  linkType: hard
+
+"@react-native-async-storage/async-storage@npm:1.19.4":
+  version: 1.19.4
+  resolution: "@react-native-async-storage/async-storage@npm:1.19.4"
+  dependencies:
+    merge-options: "npm:^3.0.4"
+  peerDependencies:
+    react-native: ^0.0.0-0 || 0.60 - 0.72 || 1000.0.0
+  checksum: 10c0/554362c9c1d5384b258e0ad58eaee08e68103c606dad8ee44579b2d624043cbeae939eaffa0035a10f293839b420783da5f1157f914bbc508e5237d64b229404
   languageName: node
   linkType: hard
 
@@ -20925,6 +20942,15 @@ __metadata:
   peerDependencies:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
   checksum: 10c0/c194d741792e86043a4ae272f7353c1cb9412bc649945c4220c6a101a6ea5410cceb3d65d5a4d750f11a24f7426e8eec7977e8a4e3ad5d3ee235ca2b18166fa8
+  languageName: node
+  linkType: hard
+
+"react-simplikit@npm:^0.0.40":
+  version: 0.0.40
+  resolution: "react-simplikit@npm:0.0.40"
+  peerDependencies:
+    react: "*"
+  checksum: 10c0/9fca56dc995caacf42b00cbb1fa71a0d84d87e1b7e0d9093681181ca76c59339f9b520d5a1923e03501d44a4ba8a687918d76cf85c3cc53d29cdd583e82e4bf2
   languageName: node
   linkType: hard
 

@@ -29,5 +29,8 @@
     "@types/react": "*",
     "react": "*",
     "react-native": "*"
+  },
+  "dependencies": {
+    "react-simplikit": "^0.0.40"
   }
 }
