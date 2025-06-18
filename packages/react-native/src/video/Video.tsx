@@ -1,5 +1,4 @@
-/* eslint-disable import/no-duplicates */
-import type { ReactVideoProps, VideoRef } from '@granite-js/native/react-native-video';
+import type { default as VideoRef } from '@granite-js/native/react-native-video';
 import { ComponentProps, forwardRef, useMemo, useState } from 'react';
 import { Animated, Platform } from 'react-native';
 import * as instance from './instance';
@@ -63,7 +62,7 @@ type VideoProps = ComponentProps<typeof AnimatedRNVideo>;
  * }
  * ```
  */
-const Video = forwardRef<VideoRef, ReactVideoProps>((props, ref) => {
+const Video = forwardRef<VideoRef, instance.VideoNativeProps>((props, ref) => {
   const [isFocused, setIsFocused] = useState(props.muted || props.paused);
   const visible = useVisibility();
 
@@ -82,7 +81,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>((props, ref) => {
       progressUpdateInterval={16}
       disableFocus={Platform.OS === 'ios' ? false : disableFocus}
       playWhenInactive
-      onAudioFocusChanged={(event) => {
+      onAudioFocusChanged={(event: any) => {
         setIsFocused(event.hasAudioFocus);
         props.onAudioFocusChanged?.(event);
       }}

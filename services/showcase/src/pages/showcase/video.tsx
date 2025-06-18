@@ -1,7 +1,8 @@
-import { createRoute, Video, VisibilityProvider } from '@granite-js/react-native';
+import { createRoute, Video, VisibilityProvider, Stack } from '@granite-js/react-native';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { TextInput } from '../../components/TextInput';
+import { Button } from '../../components/Button';
 
 export const Route = createRoute('/showcase/video', {
   validateParams: (params) => params,
@@ -10,11 +11,12 @@ export const Route = createRoute('/showcase/video', {
 
 function ShowcaseVideo() {
   const [url, setUrl] = useState('');
+  const [load, setLoad] = useState(false);
 
   return (
     // @FIXME: Sandbox app doesn't provide visibility state in the `initialProps`.
     <VisibilityProvider isVisible={true}>
-      <View style={styles.textInputContainer}>
+      <Stack.Vertical style={styles.textInputContainer} gutter={16}>
         <TextInput
           value={url}
           onChangeText={setUrl}
@@ -22,8 +24,9 @@ function ShowcaseVideo() {
           autoCapitalize="none"
           autoCorrect={false}
         />
-      </View>
-      <Video muted style={styles.videoContainer} source={{ uri: url }} />
+        <Button label="Load" onPress={() => setLoad(Boolean(url))} />
+      </Stack.Vertical>
+      {url && load ? <Video muted style={styles.videoContainer} source={{ uri: url }} /> : null}
     </VisibilityProvider>
   );
 }
