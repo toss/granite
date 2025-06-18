@@ -1,5 +1,5 @@
-import { Image, View } from 'react-native';
 import { createRoute, SvgImage } from '@granite-js/react-native';
+import { Image, View } from 'react-native';
 
 export const Route = createRoute('/showcase/image', {
   validateParams: (params) => params,

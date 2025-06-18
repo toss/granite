@@ -1,8 +1,8 @@
 import { createRoute, Video, VisibilityProvider, Stack } from '@granite-js/react-native';
 import { useState } from 'react';
 import { StyleSheet } from 'react-native';
-import { TextInput } from '../../components/TextInput';
 import { Button } from '../../components/Button';
+import { TextInput } from '../../components/TextInput';
 
 export const Route = createRoute('/showcase/video', {
   validateParams: (params) => params,
