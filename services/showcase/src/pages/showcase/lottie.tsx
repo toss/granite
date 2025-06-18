@@ -1,6 +1,5 @@
-import React from 'react';
-import { ScrollView } from 'react-native';
 import { createRoute, Lottie } from '@granite-js/react-native';
+import { ScrollView } from 'react-native';
 
 export const Route = createRoute('/showcase/lottie', {
   validateParams: (params) => params,

@@ -1,7 +1,5 @@
-import type { RegisterScreen } from '@granite-js/react-native';
-import React from 'react';
+import { createRoute, type RegisterScreen } from '@granite-js/react-native';
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { createRoute } from '@granite-js/react-native';
 import { context } from '../../../require.context';
 
 export const Route = createRoute('/', {

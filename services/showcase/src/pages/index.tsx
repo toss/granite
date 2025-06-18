@@ -1,7 +1,6 @@
 import { createRoute, Stack } from '@granite-js/react-native';
-import { Button } from 'components/Button';
-import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
+import { Button } from '../components/Button';
 
 export const Route = createRoute('/', {
   component: Page,

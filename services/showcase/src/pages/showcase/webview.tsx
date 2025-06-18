@@ -1,7 +1,6 @@
-import React from 'react';
-import { View } from 'react-native';
-import { createRoute } from '@granite-js/react-native';
 import { WebView } from '@granite-js/native/react-native-webview';
+import { createRoute } from '@granite-js/react-native';
+import { View } from 'react-native';
 
 export const Route = createRoute('/showcase/webview', {
   validateParams: (params) => params,
