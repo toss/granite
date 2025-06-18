@@ -45,7 +45,13 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/facebook/react-native.git
 	
-5. **typescript**
+5. **react-simplikit**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/toss/react-simplikit.git
+	
+6. **typescript**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0
