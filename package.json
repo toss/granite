@@ -24,7 +24,6 @@
     "consistency-check-licenses": "node .scripts/licenses.mjs consistency-check",
     "build:all": "nx run-many --targets=build,build:release",
     "build:shared": "tsdown --config shared/tsdown.config.ts",
-    "publish": ".scripts/publish.sh",
     "clear": "rimraf --glob \"**/*/dist\" .nx",
     "tools": "./bin/tools"
   },
