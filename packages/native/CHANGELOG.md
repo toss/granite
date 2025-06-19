@@ -1,5 +1,11 @@
 # @granite-js/native
 
+## 1.0.0
+
+### Patch Changes
+
+- e1384cf: re-add previously excluded native module packages
+
 ## 0.1.1
 
 ### Patch Changes

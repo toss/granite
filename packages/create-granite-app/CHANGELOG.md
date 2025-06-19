@@ -1,5 +1,11 @@
 # create-granite-app
 
+## 1.0.0
+
+### Minor Changes
+
+- 32c6959: Allow empty string for project name in `create-granite-app` to use the default value.
+
 ## 0.1.1
 
 ### Patch Changes

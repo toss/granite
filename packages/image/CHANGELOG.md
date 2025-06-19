@@ -1,5 +1,12 @@
 # @granite-js/image
 
+## 1.0.0
+
+### Patch Changes
+
+- Updated dependencies [e1384cf]
+  - @granite-js/native@1.0.0
+
 ## 0.1.1
 
 ### Patch Changes
