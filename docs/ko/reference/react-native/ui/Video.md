@@ -4,7 +4,7 @@ sourcePath: packages/react-native/src/video/Video.tsx
 
 # Video
 
-Video 컴포넌트는 다른 앱에서 음악을 재생 중일 때, 토스 앱에서 그 음악을 중지시키지 않도록 오디오 포커스를 제어하는 로직이 구현된 컴포넌트에요. 앱의 상태에 따라 자동으로 재생하거나 일시정지해요. 예를 들어, 앱이 백그라운드로 전환되면 비디오가 자동으로 일시정지돼요.
+Video 컴포넌트는 다른 앱에서 음악을 재생 중일 때, 앱에서 그 음악을 중지시키지 않도록 오디오 포커스를 제어하는 로직이 구현된 컴포넌트에요. 앱의 상태에 따라 자동으로 재생하거나 일시정지해요. 예를 들어, 앱이 백그라운드로 전환되면 비디오가 자동으로 일시정지돼요.
 
 ::: warning
 Video 컴포넌트는 [`react-native-video` 버전(6.0.0-alpha.6)](https://github.com/TheWidlarzGroup/react-native-video/tree/v6.0.0-alpha.6) 을 사용하고 있어요. 따라서 일부 타입이나 기능이 최신 버전과 호환되지 않을 수 있어요.
