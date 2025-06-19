@@ -33,8 +33,8 @@ export interface ImageProps extends Omit<FastImageProps, 'source'> {
  * The following example shows how to load bitmap and vector image resources, and how to print an error message to `console.log` if an error occurs.
  *
  * ```tsx
+ * import { Image } from '@granite-js/react-native';
  * import { View } from 'react-native';
- * import { Image } from 'react-native-bedrock';
  *
  * export function ImageExample() {
  *   return (
