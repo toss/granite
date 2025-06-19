@@ -4,7 +4,7 @@ sourcePath: packages/react-native/src/video/Video.tsx
 
 # Video
 
-The Video component implements audio focus control logic to prevent the sandbox app from stopping music playing in other apps. It automatically plays or pauses based on the app's state. For example, when the app transitions to the background, the video automatically pauses.
+The Video component implements audio focus control logic to prevent the app from stopping music playing in other apps. It automatically plays or pauses based on the app's state. For example, when the app transitions to the background, the video automatically pauses.
 
 ::: warning
 The Video component uses [react-native-video version (6.0.0-alpha.6)](https://github.com/TheWidlarzGroup/react-native-video/tree/v6.0.0-alpha.6). Therefore, some types or features may not be compatible with the latest version.
