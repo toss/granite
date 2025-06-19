@@ -31,6 +31,13 @@ type InitialProps = AndroidInitialProps | IOSInitialProps;
     <p class="post-parameters--description">The initial color theme. Represents the color theme set by the user.</p>
   </li>
 </ul>
+<ul class="post-parameters-ul">
+  <li class="post-parameters-li post-parameters-li-root">
+    <span class="post-parameters--name">scheme</span><span class="post-parameters--type">string</span>
+    <br />
+    <p class="post-parameters--description">The URL scheme used to enter the current screen.</p>
+  </li>
+</ul>
 
 ## Example
 

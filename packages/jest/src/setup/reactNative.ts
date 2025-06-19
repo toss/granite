@@ -1,4 +1,3 @@
- 
 import { requireFromRoot } from '../utils/requireFromRoot';
 
 interface ReactNativeSetupOptions {
@@ -9,6 +8,7 @@ export function setupReactNative({ rootDir }: ReactNativeSetupOptions) {
   setupGestureHandler({ rootDir });
   setupAppState();
   setupBridgeModule();
+  setupWebView();
 }
 
 function setupGestureHandler({ rootDir }: ReactNativeSetupOptions) {
@@ -34,4 +34,11 @@ function setupBridgeModule() {
     removeListeners: jest.fn(),
   };
   ReactNative.NativeModules.GraniteCoreModule = {};
+}
+
+function setupWebView() {
+  /**
+   * Since WebView cannot be mocked, it is provided as a View.
+   */
+  jest.mock('@granite-js/native/react-native-webview', () => ({ WebView: require('react-native').View }));
 }

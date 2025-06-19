@@ -1,0 +1,18 @@
+[
+  "@react-native-async-storage/async-storage",
+  "@react-native-community/blur",
+  "@react-navigation/elements",
+  "@react-navigation/native",
+  "@react-navigation/native-stack",
+  "@shopify/flash-list",
+  "lottie-ios",
+  "lottie-react-native",
+  "react-native-fast-image",
+  "react-native-gesture-handler",
+  "react-native-pager-view",
+  "react-native-safe-area-context",
+  "react-native-screens",
+  "react-native-svg",
+  "react-native-video",
+  "react-native-webview"
+]

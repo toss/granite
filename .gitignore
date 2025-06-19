@@ -22,7 +22,6 @@ node_modules
 
 #rn
 .swc
-.toss
 .granite
 
 # testing

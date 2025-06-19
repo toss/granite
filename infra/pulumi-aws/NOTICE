@@ -57,43 +57,49 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-7. **aws-lambda**
+7. **@vitest/coverage-v8**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/vitest-dev/vitest.git
+	
+8. **aws-lambda**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/awspilot/cli-lambda-deploy
 	
-8. **aws-sdk-client-mock**
+9. **aws-sdk-client-mock**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/m-radzikowski/aws-sdk-client-mock.git
 	
-9. **es-toolkit**
+10. **es-toolkit**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/toss/es-toolkit.git
 	
-10. **oxc-transform**
+11. **oxc-transform**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/oxc-project/oxc.git
 	
-11. **tsup**
+12. **tsup**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/egoist/tsup.git
 	
-12. **uuid**
+13. **uuid**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/uuidjs/uuid.git
 	
-13. **vitest**
+14. **vitest**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT

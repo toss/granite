@@ -45,37 +45,43 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-5. **aws-lambda**
+5. **@vitest/coverage-v8**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/vitest-dev/vitest.git
+	
+6. **aws-lambda**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/awspilot/cli-lambda-deploy
 	
-6. **aws-sdk-client-mock**
+7. **aws-sdk-client-mock**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/m-radzikowski/aws-sdk-client-mock.git
 	
-7. **es-toolkit**
+8. **es-toolkit**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/toss/es-toolkit.git
 	
-8. **tsup**
+9. **tsup**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/egoist/tsup.git
 	
-9. **valibot**
+10. **valibot**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/fabian-hiller/valibot
 	
-10. **vitest**
+11. **vitest**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT

@@ -3,6 +3,29 @@
   "description": "file list",
   "version": "1.0.0",
   "documents": {
+    "image": {
+      "name": "image",
+      "itemCount": 1,
+      "firstItemPath": "/reference/image/ui/Image",
+      "items": [
+        {
+          "text": "image",
+          "collapsed": true,
+          "items": [
+            {
+              "text": "UI",
+              "collapsed": true,
+              "items": [
+                {
+                  "text": "Image",
+                  "link": "/reference/image/ui/Image"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
     "react-native": {
       "name": "react-native",
       "itemCount": 17,
@@ -109,6 +132,10 @@
                 {
                   "text": "ScrollViewInertialBackground",
                   "link": "/reference/react-native/ui/ScrollViewInertialBackground"
+                },
+                {
+                  "text": "Video",
+                  "link": "/reference/react-native/ui/Video"
                 }
               ]
             },

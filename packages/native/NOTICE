@@ -45,113 +45,185 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-5. **@react-navigation/elements**
+5. **@react-native-async-storage/async-storage**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/react-native-async-storage/async-storage.git
+	
+6. **@react-native-community/blur**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/react-native-community/react-native-blur
+	
+7. **@react-navigation/elements**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-navigation/react-navigation.git
 	
-6. **@react-navigation/native**
+8. **@react-navigation/native**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-navigation/react-navigation.git
 	
-7. **@react-navigation/native-stack**
+9. **@react-navigation/native-stack**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-navigation/react-navigation.git
 	
-8. **@types/babel__core**
+10. **@shopify/flash-list**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/Shopify/flash-list
+	
+11. **@types/babel__core**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-9. **@types/babel__preset-env**
+12. **@types/babel__preset-env**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-10. **@types/jest**
+13. **@types/jest**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-11. **@types/node**
+14. **@types/node**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-12. **@types/react**
+15. **@types/react**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-13. **babel-jest**
+16. **@types/react-native-video**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
+	
+17. **babel-jest**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/jestjs/jest.git
 	
-14. **eslint**
+18. **esbuild**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/evanw/esbuild.git
+	
+19. **eslint**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/eslint/eslint.git
 	
-15. **jest**
+20. **jest**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/jestjs/jest.git
 	
-16. **react**
+21. **react**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/facebook/react.git
 	
-17. **react-native**
+22. **react-native**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/facebook/react-native.git
 	
-18. **react-native-gesture-handler**
+23. **react-native-gesture-handler**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/software-mansion/react-native-gesture-handler.git
 	
-19. **react-native-safe-area-context**
+24. **react-native-pager-view**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/callstack/react-native-pager-view
+	
+25. **react-native-safe-area-context**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/th3rdwave/react-native-safe-area-context.git
 	
-20. **react-native-screens**
+26. **react-native-screens**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/software-mansion/react-native-screens.git
 	
-21. **react-native-svg**
+27. **react-native-svg**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-native-community/react-native-svg
 	
-22. **typescript**
+28. **react-native-video**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git@github.com:react-native-video/react-native-video.git
+	
+29. **react-native-webview**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/react-native-webview/react-native-webview.git
+	
+30. **tsx**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/privatenumber/tsx.git
+	
+31. **lottie-ios**
+	
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: git+https://github.com/airbnb/lottie-ios.git
+	
+32. **lottie-react-native**
+	
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: https://github.com/react-native-community/lottie-react-native
+	
+33. **typescript**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0
    - Repository: https://github.com/microsoft/TypeScript.git
+	
+34. **react-native-fast-image**
+	
+   - License: (MIT AND Apache-2.0)
+   - License Text: https://opensource.org/licenses/MIT, https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: https://github.com/DylanVann/react-native-fast-image.git
 	
 
 ================================================================================
