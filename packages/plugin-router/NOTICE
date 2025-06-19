@@ -39,25 +39,31 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-4. **chokidar**
+4. **@vitest/coverage-v8**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/vitest-dev/vitest.git
+	
+5. **chokidar**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/paulmillr/chokidar.git
 	
-5. **es-toolkit**
+6. **es-toolkit**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/toss/es-toolkit.git
 	
-6. **tsdown**
+7. **tsdown**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/rolldown/tsdown.git
 	
-7. **vitest**
+8. **vitest**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT

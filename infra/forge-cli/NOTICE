@@ -21,59 +21,77 @@ limitations under the License.
 ================================================================================
 Third-Party Libraries:
 
-1. **@clack/prompts**
+1. **@aws-sdk/credential-providers**
+	
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: https://github.com/aws/aws-sdk-js-v3.git
+	
+2. **@aws-sdk/shared-ini-file-loader**
+	
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: https://github.com/aws/aws-sdk-js-v3.git
+	
+3. **typescript**
+	
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: https://github.com/microsoft/TypeScript.git
+	
+4. **@clack/prompts**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/bombshell-dev/clack.git
 	
-2. **@commander-js/extra-typings**
+5. **@commander-js/extra-typings**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/commander-js/extra-typings.git
 	
-3. **@types/node**
+6. **@types/node**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-4. **commander**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/tj/commander.js.git
-	
-5. **tsdown**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/rolldown/tsdown.git
-	
-6. **uuid**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/uuidjs/uuid.git
-	
-7. **valibot**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/fabian-hiller/valibot
-	
-8. **vitest**
+7. **@vitest/coverage-v8**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/vitest-dev/vitest.git
 	
-9. **typescript**
+8. **commander**
 	
-   - License: Apache-2.0
-   - License Text: https://www.apache.org/licenses/LICENSE-2.0
-   - Repository: https://github.com/microsoft/TypeScript.git
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/tj/commander.js.git
+	
+9. **tsdown**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/rolldown/tsdown.git
+	
+10. **uuid**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/uuidjs/uuid.git
+	
+11. **valibot**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/fabian-hiller/valibot
+	
+12. **vitest**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/vitest-dev/vitest.git
 	
 
 ================================================================================

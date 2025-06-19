@@ -1,1 +1,1 @@
-export * from './SvgImage';
+export { Image, type ImageProps } from './Image';
