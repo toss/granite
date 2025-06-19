@@ -1,5 +1,19 @@
 # @granite-js/react-native
 
+## 0.1.2
+
+### Patch Changes
+
+- e1384cf: re-add previously excluded native module packages
+- Updated dependencies [e1384cf]
+  - @granite-js/lottie@0.1.2
+  - @granite-js/native@0.1.2
+  - @granite-js/image@0.1.2
+  - @granite-js/jest@0.1.2
+  - @granite-js/style-utils@0.1.2
+  - @granite-js/cli@0.1.2
+  - @granite-js/mpack@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
