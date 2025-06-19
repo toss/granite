@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [["create-granite-app", "@granite-js/*"]],
+  "fixed": [["babel-preset-granite", "create-granite-app", "@granite-js/*"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
