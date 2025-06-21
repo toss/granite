@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
 <UsageSection assetType="image" assetPath="/usage/navigation/navigate-2.gif">
 
 
-You can use the [`goBack`](https://reactnavigation.org/docs/navigation-actions/#goback) method to return to the previous screen. However, an error may occur if there is no previous screen history, so you should first check with [`canGoBack`](https://reactnavigation.org/docs/navigation-prop/#cangoback).
+You can use the [`goBack`](https://reactnavigation.org/docs/navigation-actions/#goback) method to return to the previous screen. However, an error may occur if there is no previous screen history, so you should first check with [`canGoBack`](https://reactnavigation.org/docs/navigation-object/#cangoback).
 
 ```tsx
 // page-b.tsx
