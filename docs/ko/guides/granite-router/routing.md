@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
 
 <UsageSection assetType="image" assetPath="/usage/navigation/navigate-2.gif">
 
-[`goBack`](https://reactnavigation.org/docs/navigation-actions/#goback) 메서드를 사용하면 이전 화면으로 돌아갈 수 있어요. 하지만 이전 화면 기록이 없는 경우에는 에러가 발생할 수 있으니, [`canGoBack`](https://reactnavigation.org/docs/navigation-prop/#cangoback)으로 먼저 확인해야 해요.
+[`goBack`](https://reactnavigation.org/docs/navigation-actions/#goback) 메서드를 사용하면 이전 화면으로 돌아갈 수 있어요. 하지만 이전 화면 기록이 없는 경우에는 에러가 발생할 수 있으니, [`canGoBack`](https://reactnavigation.org/docs/navigation-object/#cangoback)으로 먼저 확인해야 해요.
 
 ```tsx
 // page-b.tsx
