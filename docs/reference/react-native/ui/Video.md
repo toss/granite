@@ -55,7 +55,7 @@ Video: import('react').ForwardRefExoticComponent<
 </ul>
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
-    <span class="post-parameters--name">ref</span><span class="post-parameters--required">필수</span> · <span class="post-parameters--type">Ref&lt;VideoRef&gt;</span>
+    <span class="post-parameters--name">ref</span><span class="post-parameters--required">required</span> · <span class="post-parameters--type">Ref&lt;VideoRef&gt;</span>
     <br />
     <p class="post-parameters--description">Reference object to access the video instance. Through this ref, you can access various methods of the video instance.</p>
   </li>
