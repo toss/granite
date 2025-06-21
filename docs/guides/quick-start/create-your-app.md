@@ -317,4 +317,4 @@ Now that you have a working Granite app, you can:
 ## Need Help?
 
 - 📖 [Documentation](../../index) - Complete Granite guide
-- 🐛 [GitHub Issues](https://github.com/your-org/granite/issues) - Report bugs or request features
+- 🐛 [GitHub Issues](https://github.com/toss/granite/issues) - Report bugs or request features
