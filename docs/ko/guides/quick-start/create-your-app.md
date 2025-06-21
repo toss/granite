@@ -317,4 +317,4 @@ Granite 프레임워크가 최적화된 JavaScript 번들을 만들어요. 최�
 ## 참고 링크
 
 - 📖 [문서](../../index) - Granite 완벽 가이드
-- 🐛 [GitHub 이슈](https://github.com/your-org/granite/issues) - 버그 신고나 기능 요청하기
+- 🐛 [GitHub 이슈](https://github.com/toss/granite/issues) - 버그 신고나 기능 요청하기
