@@ -38,15 +38,14 @@ $ npx create-granite-app@latest
 
 ┌  Create Granite App Project
 │
-◆  Project Setup
 ◇  Project name or path:
 │  my-granite-app
 │
-◇  Select development tools:
-│  ◻ ESLint + Prettier (recommended)
+◇  Select tools:
+│  ◻ ESLint + Prettier
 │  ◻ Biome
 │
-◇  ✅ Created Granite App successfully!
+◇  Created Granite App
 │
 ◇  Next steps ─────────────╮
 │                          │
@@ -56,7 +55,7 @@ $ npx create-granite-app@latest
 │                          │
 ├──────────────────────────╯
 │
-└  🎉 Done! Your Granite app is ready.
+└  Done
 ```
 
 이렇게 하면 프로젝트 이름으로 새 디렉토리가 생성되고 기본적인 Granite 앱 구조가 생겨요.
