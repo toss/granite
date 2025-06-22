@@ -18,6 +18,9 @@ $ pnpm add @granite-js/plugin-router --save-dev
 $ yarn add @granite-js/plugin-router --dev
 ```
 
+```sh [bun]
+$ bun add @granite-js/plugin-router --dev
+```
 :::
 
 다음은 router 플러그인을 `granite.config.ts` 설정에 추가하는 예시예요. 이 플러그인은 `pages/` 폴더를 기반으로 경로(route)를 자동으로 만들어줘요.
@@ -59,6 +62,9 @@ $ pnpm granite dev
 $ yarn granite dev
 ```
 
+```sh [bun]
+$ bun granite dev
+```
 :::
 
 예를 들어, `pages/page-a.tsx` 파일을 추가하면 다음과 같은 화면 컴포넌트와 라우팅 코드가 자동으로 생성돼요.

@@ -29,6 +29,9 @@ pnpm create granite-app
 yarn create granite-app
 ```
 
+```sh [bun]
+bun create granite-app
+```
 :::
 
 CLI의 질문에 답하면 Granite 프로젝트가 생성돼요.
@@ -83,6 +86,9 @@ pnpm install
 yarn install
 ```
 
+```sh [bun]
+bun install
+```
 :::
 
 ## 3. 프로젝트 구조 이해하기
@@ -128,6 +134,9 @@ pnpm run dev
 yarn dev
 ```
 
+```sh [bun]
+bun run dev
+```
 :::
 
 개발 서버가 정상적으로 실행되면, 다음과 같이 Granite 글자가 떠요.
@@ -288,6 +297,9 @@ pnpm run build
 yarn build
 ```
 
+```sh [bun]
+bun run build
+```
 :::
 
 Granite 프레임워크가 최적화된 JavaScript 번들을 만들어요. 최적화된 번들은 `dist/` 디렉토리에 있어요.
