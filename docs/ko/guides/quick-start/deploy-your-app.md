@@ -37,6 +37,9 @@ pnpm run build
 yarn build
 ```
 
+```sh [bun]
+bun run build
+```
 :::
 
 Granite가 최적화된 JavaScript 번들을 만들어요. 최적화된 번들은 `dist/` 디렉토리에 있어요.
@@ -63,6 +66,9 @@ pnpm add @granite-js/forge-cli --save-dev
 yarn add @granite-js/forge-cli --dev
 ```
 
+```sh [bun]
+bun add @granite-js/forge-cli --dev
+```
 :::
 
 ## 3. 앱 배포하기
@@ -83,6 +89,9 @@ pnpm granite-forge deploy --bucket {S3 버킷 이름}
 yarn granite-forge deploy --bucket {S3 버킷 이름}
 ```
 
+```sh [bun]
+bun granite-forge deploy --bucket {S3 버킷 이름}
+```
 :::
 
 배포 진행 상황이 보여요.

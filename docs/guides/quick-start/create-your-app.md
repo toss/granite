@@ -29,6 +29,9 @@ pnpm create granite-app
 yarn create granite-app
 ```
 
+```sh [bun]
+bun create granite-app
+```
 :::
 
 The interactive CLI will guide you through setup:
@@ -83,6 +86,9 @@ pnpm install
 yarn install
 ```
 
+```sh [bun]
+bun install
+```
 :::
 
 ## 3. Understanding Your Project Structure
@@ -127,6 +133,9 @@ pnpm run dev
 yarn dev
 ```
 
+```sh [bun]
+bun run dev
+```
 :::
 
 You'll see the Granite welcome screen:
@@ -288,6 +297,9 @@ pnpm run build
 yarn build
 ```
 
+```sh [bun]
+bun run build
+```
 :::
 
 Granite will create optimized microservice bundles, and your optimized bundles are now in the `dist/` directory:

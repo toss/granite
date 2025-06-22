@@ -136,6 +136,9 @@ pnpm add @granite-js/pulumi-aws --save-dev
 yarn add @granite-js/pulumi-aws --dev
 ```
 
+```sh [bun]
+bun add @granite-js/pulumi-aws --dev
+```
 :::
 
 ## 5. Configure Your Infrastructure

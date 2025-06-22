@@ -37,6 +37,9 @@ pnpm run build
 yarn build
 ```
 
+```sh [bun]
+bun run build
+```
 :::
 
 Granite will create optimized microservice bundles, and your optimized bundles are now in the `dist/` directory:
@@ -63,6 +66,9 @@ pnpm add @granite-js/forge-cli --save-dev
 yarn add @granite-js/forge-cli --dev
 ```
 
+```sh [bun]
+bun add @granite-js/forge-cli --dev
+```
 :::
 
 ## 3. Deploy Your App
@@ -83,6 +89,9 @@ pnpm granite-forge deploy --bucket {Your S3 Bucket Name}
 yarn granite-forge deploy --bucket {Your S3 Bucket Name}
 ```
 
+```sh [bun]
+bun granite-forge deploy --bucket {Your S3 Bucket Name}
+```
 :::
 
 You'll see the deployment progress:

@@ -18,6 +18,9 @@ $ pnpm add @granite-js/plugin-router --save-dev
 $ yarn add @granite-js/plugin-router --dev
 ```
 
+```sh [bun]
+$ bun add @granite-js/plugin-router --dev
+```
 :::
 
 The following is an example of adding the router plugin to the `granite.config.ts` configuration. This plugin automatically creates routes based on the `pages/` folder.
@@ -59,6 +62,9 @@ $ pnpm granite dev
 $ yarn granite dev
 ```
 
+```sh [bun]
+$ bun granite dev
+```
 :::
 
 For example, if you add a `pages/page-a.tsx` file, the following screen component and routing code will be automatically generated:
