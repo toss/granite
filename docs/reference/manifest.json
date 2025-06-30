@@ -122,6 +122,10 @@
               "collapsed": true,
               "items": [
                 {
+                  "text": "BlurView",
+                  "link": "/reference/react-native/ui/BlurView"
+                },
+                {
                   "text": "ColorPreference",
                   "link": "/reference/react-native/ui/ColorPreference"
                 },
