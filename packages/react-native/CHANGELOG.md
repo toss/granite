@@ -1,5 +1,19 @@
 # @granite-js/react-native
 
+## 0.1.3
+
+### Patch Changes
+
+- 1adad4c: add StatusBar API
+- a4783c8: expose keyboard utils
+  - @granite-js/cli@0.1.3
+  - @granite-js/image@0.1.3
+  - @granite-js/jest@0.1.3
+  - @granite-js/lottie@0.1.3
+  - @granite-js/mpack@0.1.3
+  - @granite-js/native@0.1.3
+  - @granite-js/style-utils@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
