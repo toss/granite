@@ -17,6 +17,7 @@ export * from './react';
 export * from './router/createRoute';
 export * from './event';
 export * from './video';
+export * from './status-bar';
 
 export type { InitialProps, ColorPreference } from './initial-props';
 export type { GraniteProps } from './app';
