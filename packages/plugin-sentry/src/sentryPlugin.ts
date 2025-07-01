@@ -1,11 +1,11 @@
-import * as fs from 'fs/promises';
 import type { GranitePluginCore } from '@granite-js/plugin-core';
+import { noop } from 'es-toolkit';
 import { extractSentryDebugId } from './extractSentryDebugId';
 import { writeDebugIdInjectedSourcemap } from './injectSentryDebugId';
 import { tryResolveHermesBundle } from './resolveHermesBundle';
 import { createClientActions } from './sentryClientActions';
 import { getSentryDebugIdSnippets } from './snippets';
-import type { SentryPluginOptions } from './types';
+import type { SentryPluginOptions, SentryPluginResult } from './types';
 
 const PLUGIN_NAME = 'sentry-plugin';
 const PLUGIN_SHIM: GranitePluginCore = { name: PLUGIN_NAME };
@@ -23,6 +23,7 @@ export const sentryPlugin = ({ enabled = true, ...options }: SentryPluginOptions
     build: {
       order: 'post',
       handler: async function (config) {
+        const sentryResults: SentryPluginResult[] = [];
         const files = config.buildResults.map(({ outfile, sourcemapOutfile }) => ({
           bundle: outfile,
           sourcemap: sourcemapOutfile,
@@ -30,8 +31,7 @@ export const sentryPlugin = ({ enabled = true, ...options }: SentryPluginOptions
 
         for (const file of files) {
           const { bundle, sourcemap } = file;
-          const bundleContent = await fs.readFile(bundle, 'utf-8');
-          const debugId = await extractSentryDebugId(bundleContent);
+          const debugId = await extractSentryDebugId(bundle);
 
           if (debugId == null) {
             console.error('Cannot find Sentry Debug ID');
@@ -42,12 +42,27 @@ export const sentryPlugin = ({ enabled = true, ...options }: SentryPluginOptions
           const targetBundle = hermesBundle?.hbc ?? bundle;
           const targetSourcemap = hermesBundle?.sourcemap ?? sourcemap;
 
-          await writeDebugIdInjectedSourcemap(targetSourcemap, debugId);
+          await Promise.all([
+            writeDebugIdInjectedSourcemap(sourcemap, debugId),
+            hermesBundle?.sourcemap ? writeDebugIdInjectedSourcemap(hermesBundle?.sourcemap, debugId) : noop,
+          ]);
+
           await sentryActions.uploadSourcemap(
             { root: config.cwd },
-            { bundlePath: targetBundle, sourcemapPath: targetSourcemap }
+            {
+              bundlePath: targetBundle,
+              sourcemapPath: targetSourcemap,
+            }
           );
+
+          sentryResults.push({
+            bundle,
+            sourcemap,
+            debugId,
+          });
         }
+
+        this.meta.sentry = sentryResults;
       },
     },
     config: {

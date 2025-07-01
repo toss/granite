@@ -15,6 +15,30 @@ function mergeMetroConfig<T = unknown, S = unknown>(objValue: T, srcValue: S, ke
   return undefined;
 }
 
+function mergeEsbuildConfig<T = unknown, S = unknown>(objValue: T, srcValue: S, key: string) {
+  if (key === 'banner' && typeof objValue === 'object' && typeof srcValue === 'object') {
+    return Object.entries(srcValue ?? {}).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: [acc[key], value].join('\n'),
+      }),
+      (objValue ?? {}) as Record<string, string>
+    );
+  }
+
+  if (key === 'footer' && typeof objValue === 'object' && typeof srcValue === 'object') {
+    return Object.entries(srcValue ?? {}).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: [acc[key], value].join('\n'),
+      }),
+      (objValue ?? {}) as Record<string, string>
+    );
+  }
+
+  return undefined;
+}
+
 function combineComparers<T extends Record<PropertyKey, any>, S extends Record<PropertyKey, any>>(
   ...fns: Parameters<typeof mergeWith>[2][]
 ) {
@@ -32,7 +56,8 @@ function combineComparers<T extends Record<PropertyKey, any>, S extends Record<P
 export async function mergeConfigFromPlugins(plugins: PluginInput): Promise<GranitePluginCore['config']> {
   const pluginsResolved = await flattenPlugins(plugins);
   return pluginsResolved.reduce(
-    (acc, plugin) => mergeWith(acc, plugin.config ?? {}, combineComparers(concatArray, mergeMetroConfig)),
+    (acc, plugin) =>
+      mergeWith(acc, plugin.config ?? {}, combineComparers(concatArray, mergeMetroConfig, mergeEsbuildConfig)),
     {}
   );
 }
