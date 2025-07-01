@@ -32,6 +32,14 @@ describe('mergeConfigFromPlugins', () => {
           babel: {
             plugins: ['plugin-1'],
           },
+          esbuild: {
+            banner: {
+              js: 'console.log("banner:plugin-1");',
+            },
+            footer: {
+              js: 'console.log("footer:plugin-1");',
+            },
+          },
         },
       },
       {
@@ -40,6 +48,14 @@ describe('mergeConfigFromPlugins', () => {
           babel: {
             plugins: ['plugin-2'],
             presets: ['preset-1'],
+          },
+          esbuild: {
+            banner: {
+              js: 'console.log("banner:plugin-2");',
+            },
+            footer: {
+              js: 'console.log("footer:plugin-2");',
+            },
           },
         },
       },
@@ -60,6 +76,14 @@ describe('mergeConfigFromPlugins', () => {
       babel: {
         plugins: ['plugin-1', 'plugin-2'],
         presets: ['preset-1'],
+      },
+      esbuild: {
+        banner: {
+          js: 'console.log("banner:plugin-1");\nconsole.log("banner:plugin-2");',
+        },
+        footer: {
+          js: 'console.log("footer:plugin-1");\nconsole.log("footer:plugin-2");',
+        },
       },
       mpack: {
         devServer: {
