@@ -1,5 +1,14 @@
 # @granite-js/cli
 
+## 0.1.5
+
+### Patch Changes
+
+- 767298b: ensure esbuild config applied correctly
+  - @granite-js/mpack@0.1.5
+  - @granite-js/plugin-core@0.1.5
+  - @granite-js/utils@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes
