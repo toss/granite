@@ -21,3 +21,9 @@ export interface SentryPluginContext {
   client: SentryCLI;
   root: string;
 }
+
+export interface SentryPluginResult {
+  bundle: string;
+  sourcemap: string;
+  debugId: string;
+}
