@@ -222,7 +222,7 @@ Update your `pages/index.tsx` to add navigation:
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@granite-js/react-native'
+import { useRouter } from '@granite/react-native';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
