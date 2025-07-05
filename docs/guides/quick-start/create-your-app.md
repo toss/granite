@@ -219,12 +219,13 @@ const styles = StyleSheet.create({
 Update your `pages/index.tsx` to add navigation:
 
 ```tsx
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useRouter } from '@granite/router';
+import { useNavigation } from '@granite-js/react-native'
 
 export default function HomeScreen() {
-  const router = useRouter();
+  const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
@@ -232,7 +233,7 @@ export default function HomeScreen() {
       
       <TouchableOpacity 
         style={styles.button}
-        onPress={() => router.push('/profile')}
+        onPress={() => navigation.navigate('/profile')}
       >
         <Text style={styles.buttonText}>Go to Profile</Text>
       </TouchableOpacity>
