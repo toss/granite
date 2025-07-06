@@ -6,20 +6,19 @@ import { Config } from '..';
 import { createDebuggerMiddleware } from './createDebuggerMiddleware';
 import { DEV_SERVER_DEFAULT_PORT } from '../constants';
 import { getMetroConfig, type AdditionalMetroConfig } from '../metro/getMetroConfig';
-import { loadConfig } from '../utils/loadConfig';
 import { printLogo } from '../utils/printLogo';
 import { getModule } from '../vendors';
 
 const debug = Debug('cli:start');
 
 interface RunServerConfig {
+  config: Config;
   host?: string;
   port?: number;
   middlewares?: HandleFunction[];
   enableEmbeddedReactDevTools?: boolean;
   onServerReady?: () => Promise<void> | void;
   cwd?: string;
-  config?: Config;
   additionalConfig?: AdditionalMetroConfig;
 }
 
@@ -28,16 +27,15 @@ const { Terminal } = getModule('metro-core');
 const { mergeConfig } = getModule('metro-config');
 
 export async function runServer({
+  config,
   host,
   port = DEV_SERVER_DEFAULT_PORT,
   middlewares = [],
   enableEmbeddedReactDevTools = true,
   onServerReady,
   cwd = process.cwd(),
-  config: $config,
   additionalConfig,
 }: RunServerConfig) {
-  const config = $config ?? (await loadConfig({ rootDir: cwd }));
   // 제어흐름상 `eventsSocketEndpoint.reportEvent` 을 먼저 할당할 수 없기에, 객체를 통해 참조하도록 합니다
   const ref: Partial<{
     reportEvent: (event: any) => void;
@@ -70,7 +68,7 @@ export async function runServer({
   };
 
   const baseConfig = await getMetroConfig(
-    { rootPath: cwd, appName: config?.appName ?? '', scheme: config?.scheme ?? '' },
+    { rootPath: cwd, appName: config.appName, scheme: config.scheme },
     additionalConfig
   );
   const metroConfig = mergeConfig(baseConfig, {
