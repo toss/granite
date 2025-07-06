@@ -1,0 +1,40 @@
+{
+  "name": "@granite-js/plugin-shared-modules",
+  "type": "module",
+  "version": "0.1.5",
+  "description": "Plugin for sharing modules",
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run",
+    "build": "tsdown"
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime/index.js",
+      "require": "./dist/runtime/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "tsdown": "^0.11.11",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@granite-js/plugin-core": "workspace:*",
+    "es-toolkit": "^1.38.0",
+    "picocolors": "^1.1.1"
+  },
+  "sideEffects": false
+}

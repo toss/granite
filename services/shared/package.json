@@ -34,6 +34,7 @@
     "@babel/runtime": "7.18.9",
     "@granite-js/forge-cli": "workspace:*",
     "@granite-js/plugin-hermes": "workspace:*",
+    "@granite-js/plugin-shared-modules": "workspace:*",
     "@types/node": "^22.10.2",
     "@types/react": "18.3.3",
     "@types/react-native-video": "^5.0.20",

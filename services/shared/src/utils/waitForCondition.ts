@@ -1,5 +1,5 @@
 const INTERVAL_TICK = 100;
-const TIMEOUT = 3000;
+const TIMEOUT = 15000;
 
 export async function waitForCondition(waitingTarget: string, predicate: () => boolean) {
   return new Promise<void>((resolve, reject) => {
