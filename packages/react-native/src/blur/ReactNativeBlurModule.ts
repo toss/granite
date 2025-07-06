@@ -7,7 +7,6 @@ const ReactNativeBlurModule = (() => {
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     return require('@granite-js/native/@react-native-community/blur') as {
       BlurView: typeof BlurView;
       VibrancyView: typeof VibrancyView;
