@@ -1,6 +1,21 @@
+import pkg from '@granite-js/native/package.json';
 import { hermes } from '@granite-js/plugin-hermes';
 import { shared } from '@granite-js/plugin-shared-modules';
 import { defineConfig } from '@granite-js/react-native/config';
+
+const SHARED_MODULE_CONFIG = { singleton: true, eager: true } as const;
+
+function getNativePackages(excludePackages: string[] = []) {
+  return Object.keys(pkg.dependencies)
+    .filter((libName) => !(libName.startsWith('@types/') || excludePackages.includes(libName)))
+    .reduce(
+      (prev, libName) => ({
+        ...prev,
+        [libName]: SHARED_MODULE_CONFIG,
+      }),
+      {} as Record<string, { singleton: boolean; eager: boolean }>
+    );
+}
 
 export default defineConfig({
   appName: 'shared',
@@ -15,62 +30,10 @@ export default defineConfig({
         port: 8082,
       },
       shared: {
-        '@react-native-community/blur': {
-          singleton: true,
-          eager: true,
-        },
-        '@react-navigation/native': {
-          singleton: true,
-          eager: true,
-        },
-        '@react-navigation/native-stack': {
-          singleton: true,
-          eager: true,
-        },
-        '@shopify/flash-list': {
-          singleton: true,
-          eager: true,
-        },
-        'lottie-react-native': {
-          singleton: true,
-          eager: true,
-        },
-        'react-native-safe-area-context': {
-          singleton: true,
-          eager: true,
-        },
-        'react-native-screens': {
-          singleton: true,
-          eager: true,
-        },
-        'react-native-fast-image': {
-          singleton: true,
-          eager: true,
-        },
-        'react-native-svg': {
-          singleton: true,
-          eager: true,
-        },
-        'react-native-gesture-handler': {
-          singleton: true,
-          eager: true,
-        },
-        'react-native': {
-          singleton: true,
-          eager: true,
-        },
-        react: {
-          singleton: true,
-          eager: true,
-        },
-        'react-native-video': {
-          singleton: true,
-          eager: true,
-        },
-        'react-native-webview': {
-          singleton: true,
-          eager: true,
-        },
+        // @FIXME: AsyncStorage is not included in the sandbox app. need to rebuild the app to include it.
+        ...getNativePackages(['@react-native-async-storage/async-storage']),
+        react: SHARED_MODULE_CONFIG,
+        'react-native': SHARED_MODULE_CONFIG,
       },
     }),
   ],

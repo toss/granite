@@ -90,7 +90,6 @@
     "dist"
   ],
   "dependencies": {
-    "@babel/runtime": "^7",
     "@react-native-async-storage/async-storage": "1.18.2",
     "@react-native-community/blur": "4.3.2",
     "@react-navigation/elements": "1.3.9",
@@ -98,7 +97,6 @@
     "@react-navigation/native-stack": "6.9.0",
     "@shopify/flash-list": "1.6.2",
     "@types/react-native-video": "^5.0.20",
-    "lottie-ios": "3.2.3",
     "lottie-react-native": "6.4.0",
     "react-native-fast-image": "8.6.3",
     "react-native-gesture-handler": "2.8.0",
@@ -113,6 +111,7 @@
     "@babel/core": "^7.24.9",
     "@babel/preset-env": "^7.24.8",
     "@babel/preset-typescript": "^7.24.7",
+    "@babel/runtime": "^7",
     "@types/babel__core": "^7",
     "@types/babel__preset-env": "^7",
     "@types/jest": "^29.5.12",

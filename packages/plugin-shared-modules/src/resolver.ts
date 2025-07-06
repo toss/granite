@@ -42,19 +42,23 @@ export function virtualSharedConfig<Entries extends [string, object]>(moduleEntr
   }));
 
   const protocols = {
-    ...(alias.length > 0
-      ? {
-          [VIRTUAL_SHARED_PROTOCOL]: {
-            load: function virtualSharedProtocolLoader(args: { path: string }) {
-              return {
-                loader: 'js',
-                contents: `module.exports = global.__SHARED_MODULES__.__SHARED__['${args.path}'].get();`,
-              };
-            },
-          },
-        }
-      : null),
+    [VIRTUAL_SHARED_PROTOCOL]: {
+      load: function virtualSharedProtocolLoader(args: { path: string }) {
+        return {
+          loader: 'js',
+          contents: `
+          var sharedModule = global.__SHARED_MODULES__.__SHARED__['${args.path}'];
+
+          if (sharedModule == null) {
+            throw new Error("'${args.path}' is not registered in the shared registry");
+          }
+
+          module.exports = sharedModule.get();
+          `,
+        };
+      },
+    },
   };
 
-  return { alias, protocols };
+  return { alias, protocols: alias.length > 0 ? protocols : undefined };
 }

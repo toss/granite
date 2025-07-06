@@ -5013,6 +5013,7 @@ __metadata:
     "@babel/runtime": "npm:7.18.9"
     "@granite-js/forge-cli": "workspace:*"
     "@granite-js/mpack": "workspace:*"
+    "@granite-js/native": "workspace:*"
     "@granite-js/plugin-hermes": "workspace:*"
     "@granite-js/plugin-shared-modules": "workspace:*"
     "@granite-js/react-native": "workspace:*"
@@ -5387,7 +5388,6 @@ __metadata:
     esbuild: "npm:^0.25.5"
     eslint: "npm:^9.7.0"
     jest: "npm:^29.7.0"
-    lottie-ios: "npm:3.2.3"
     lottie-react-native: "npm:6.4.0"
     react: "npm:18.2.0"
     react-native: "npm:0.72.6"
@@ -18514,13 +18514,6 @@ __metadata:
   bin:
     loose-envify: cli.js
   checksum: 10c0/655d110220983c1a4b9c0c679a2e8016d4b67f6e9c7b5435ff5979ecdb20d0813f4dec0a08674fcbdd4846a3f07edbb50a36811fd37930b94aaa0d9daceb017e
-  languageName: node
-  linkType: hard
-
-"lottie-ios@npm:3.2.3":
-  version: 3.2.3
-  resolution: "lottie-ios@npm:3.2.3"
-  checksum: 10c0/72b52f61c61fcfaacd2759cb8878788fc3b520dc6973079bcac21989b61d297d7a8ba21c99fcc2216e7a8831583442a014449c0c28e4382ca465228178da429f
   languageName: node
   linkType: hard
 

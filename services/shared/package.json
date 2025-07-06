@@ -33,6 +33,7 @@
   "devDependencies": {
     "@babel/runtime": "7.18.9",
     "@granite-js/forge-cli": "workspace:*",
+    "@granite-js/native": "workspace:*",
     "@granite-js/plugin-hermes": "workspace:*",
     "@granite-js/plugin-shared-modules": "workspace:*",
     "@types/node": "^22.10.2",

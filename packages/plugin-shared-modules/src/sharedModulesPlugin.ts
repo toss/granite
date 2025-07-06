@@ -28,6 +28,10 @@ export const sharedModulesPlugin = async (options: SharedModulesPluginOptions): 
     }
   }
 
+  /**
+   * If importing `react-native` from the shared registry,
+   * `InitializeCore.js` must be excluded from the bundle to ensure the core is loaded only once per runtime.
+   */
   const shouldExcludeReactNativeInitializeCore = Boolean(
     nonEagerEntries.find(([libName]) => libName === 'react-native')
   );
