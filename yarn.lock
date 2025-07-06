@@ -5602,6 +5602,31 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@granite-js/plugin-radon@workspace:packages/plugin-radon":
+  version: 0.0.0-use.local
+  resolution: "@granite-js/plugin-radon@workspace:packages/plugin-radon"
+  dependencies:
+    "@babel/core": "npm:7.23.9"
+    "@babel/template": "npm:^7.27.2"
+    "@granite-js/plugin-core": "workspace:*"
+    "@granite-js/utils": "workspace:*"
+    "@types/babel__core": "npm:^7.20.5"
+    "@types/babel__template": "npm:^7"
+    "@types/node": "npm:^22.10.2"
+    "@vitest/coverage-v8": "npm:^3.1.3"
+    es-toolkit: "npm:^1.38.0"
+    execa: "npm:^5"
+    source-map: "npm:^0.8.0-beta.0"
+    tsdown: "npm:^0.11.13"
+    typescript: "npm:^5.8.3"
+    vitest: "npm:^3.1.3"
+  peerDependencies:
+    "@babel/types": "*"
+    react: "*"
+    react-native: "*"
+  languageName: unknown
+  linkType: soft
+
 "@granite-js/plugin-router@workspace:*, @granite-js/plugin-router@workspace:packages/plugin-router":
   version: 0.0.0-use.local
   resolution: "@granite-js/plugin-router@workspace:packages/plugin-router"
@@ -14520,6 +14545,18 @@ __metadata:
     is-date-object: "npm:^1.0.5"
     is-symbol: "npm:^1.0.4"
   checksum: 10c0/c7e87467abb0b438639baa8139f701a06537d2b9bc758f23e8622c3b42fd0fdb5bde0f535686119e446dd9d5e4c0f238af4e14960f4771877cf818d023f6730b
+  languageName: node
+  linkType: hard
+
+"es-toolkit@npm:^1.38.0":
+  version: 1.38.0
+  resolution: "es-toolkit@npm:1.38.0"
+  dependenciesMeta:
+    "@trivago/prettier-plugin-sort-imports@4.3.0":
+      unplugged: true
+    prettier-plugin-sort-re-exports@0.0.1:
+      unplugged: true
+  checksum: 10c0/1bffc2d8dbe8db45969cf6674a674bdf9d40d803c923b01645b8a433f43f9304b1d369b6cde2a6ef3889a5aa71ddc741bf8e4103b4d4b48a366e04b4b3d30519
   languageName: node
   linkType: hard
 
