@@ -61,7 +61,7 @@ function Index() {
 
 ## 파라미터 유효성 검증하기
 
-<UsageSection assetType="image" assetPath="/usage/query-param/query-param-required.gif">
+<UsageSection assetType="image" assetPath="/usage/query-param/query-param-required.png">
 
 필수로 포함해야 하는 파라미터는 `validateParams` 옵션을 사용해서 유효성을 검사할 수 있어요.
 
