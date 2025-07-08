@@ -15,7 +15,36 @@ module.exports = function(api) {
 
   // --- Helper Functions ---
   
-  const createRequirePath = (moduleName) => `'__RNIDE_lib__/${moduleName}'`;
+  // 번들링된 렌더러 파일들의 경로를 생성하는 함수
+  const createRendererPath = (rendererFileName, version) => {
+    try {
+      const pluginPackageJsonPath = require.resolve('@granite-js/plugin-radon/package.json', { paths: [appRoot] });
+      const pluginRoot = path.dirname(pluginPackageJsonPath);
+      
+      let versionFolder;
+      if (version.startsWith("0.72")) {
+        versionFolder = "react-native-72";
+      } else if (version.startsWith("0.74") || version.startsWith("0.75") || version.startsWith("0.76") || version.startsWith("0.77")) {
+        versionFolder = "react-native-74-77";
+      } else if (version.startsWith("0.78") || version.startsWith("0.79")) {
+        versionFolder = "react-native-78-79";
+      } else if (version.startsWith("0.80")) {
+        versionFolder = "react-native-80";
+      }
+      
+      if (versionFolder) {
+        const rendererPath = path.join(pluginRoot, 'src', 'lib', 'rn-renderer', versionFolder, rendererFileName);
+        console.log(`🔥 RADON BABEL PLUGIN: Constructed renderer path: ${rendererPath}`);
+        return rendererPath;
+      }
+      
+      console.log(`🔥 RADON BABEL PLUGIN: No version folder found for version: ${version}`);
+      return null;
+    } catch (e) {
+      console.error('🔥 RADON BABEL PLUGIN: Failed to resolve renderer path:', e);
+      return null;
+    }
+  };
 
   const injectCode = (programPath, code, prepend = false) => {
     const ast = parse(code, { sourceType: 'module', filename: 'radon.injection.js', parserOpts: { allowReturnOutsideFunction: true } });
@@ -86,63 +115,110 @@ module.exports = function(api) {
             return;
           }
 
-          // --- Other file transformations ---
-          if (isTransforming("expo-router/entry.js")) {
-            const { version } = requireFromAppDir("expo-router/package.json");
-            if (version.startsWith("2.")) {
-              injectCode(programPath, `require(${createRequirePath('expo_router_v2_plugin.js')});`);
-            } else if (version.startsWith("3.") || version.startsWith("4.")) {
-              injectCode(programPath, `require(${createRequirePath('expo_router_plugin.js')});`);
-            } else if (version.startsWith("5.")) {
-              injectCode(programPath, `require(${createRequirePath('expo_router_v5_plugin.js')});`);
-            }
-            injected = true;
-          } else if (isTransforming("react-native-ide/index.js") || isTransforming("radon-ide/index.js")) {
-            injectCode(programPath, `preview = require(${createRequirePath('preview.js')}).preview;`);
-            injected = true;
-          } else if (isTransforming("@dev-plugins/react-native-mmkv/build/index.js")) {
-            injectCode(programPath, `require(${createRequirePath('expo_dev_plugins.js')}).register("@dev-plugins/react-native-mmkv");`, true);
-            injected = true;
-          } else if (isTransforming("redux-devtools-expo-dev-plugin/build/index.js")) {
-            injectCode(programPath, `require(${createRequirePath('expo_dev_plugins.js')}).register("redux-devtools-expo-dev-plugin");`, true);
-            injected = true;
-          } else if (isTransforming("react-native/Libraries/Renderer/implementations/ReactFabric-dev.js") || isTransforming("react-native/Libraries/Renderer/implementations/ReactNativeRenderer-dev.js")) {
+          // --- React Native 렌더러 파일 교체 ---
+          if (isTransforming("react-native/Libraries/Renderer/implementations/ReactFabric-dev.js") || 
+              isTransforming("react-native/Libraries/Renderer/implementations/ReactNativeRenderer-dev.js")) {
+            
+            console.log(`🔥 RADON BABEL PLUGIN: Replacing React Native renderer: ${filename}`);
+            
             const { version } = requireFromAppDir("react-native/package.json");
             const rendererFileName = path.basename(filename);
-            let replacementPath;
-            if (version.startsWith("0.74") || version.startsWith("0.75") || version.startsWith("0.76") || version.startsWith("0.77")) {
-              replacementPath = createRequirePath(`rn-renderer/react-native-74-77/${rendererFileName}`);
-            } else if (version.startsWith("0.78") || version.startsWith("0.79")) {
-              replacementPath = createRequirePath(`rn-renderer/react-native-78-79/${rendererFileName}`);
-            } else if (version.startsWith("0.80")) {
-              replacementPath = createRequirePath(`rn-renderer/react-native-80/${rendererFileName}`);
+            
+            console.log(`🔥 RADON BABEL PLUGIN: React Native version: ${version}, Renderer file: ${rendererFileName}`);
+            
+            const rendererPath = createRendererPath(rendererFileName, version);
+            
+            if (rendererPath && fs.existsSync(rendererPath)) {
+              console.log(`🔥 RADON BABEL PLUGIN: ✅ Loading custom renderer from: ${rendererPath}`);
+              
+              try {
+                const rendererCode = fs.readFileSync(rendererPath, 'utf8');
+                // Add a fingerprint to verify the custom renderer is loaded.
+                const fingerprint = `globalThis.__RADON_RENDERER_LOADED__ = '${path.basename(rendererPath)}';`;
+                const finalRendererCode = `${fingerprint}\n${rendererCode}`;
+
+                replaceModuleWith(programPath, finalRendererCode);
+                injected = true;
+                console.log(`🔥 RADON BABEL PLUGIN: ✅ Successfully replaced renderer`);
+              } catch (e) {
+                console.error('🔥 RADON BABEL PLUGIN: 🚨 Failed to read custom renderer:', e);
+                // 실패 시 원본 파일 유지
+              }
+            } else {
+              console.warn(`🔥 RADON BABEL PLUGIN: ⚠️ Custom renderer not found: ${rendererPath}`);
+              if (version.startsWith("0.72")) {
+                console.log(`🔥 RADON BABEL PLUGIN: ⚠️ 0.72 version detected but no custom renderer found. This might be the issue!`);
+              }
             }
-            if (replacementPath) {
-              replaceModuleWith(programPath, `module.exports = require(${replacementPath});`);
-              injected = true;
-            }
-          } else if (isTransforming("react/cjs/react-jsx-dev-runtime.development.js")) {
+          }
+          // --- JSX Runtime 파일 교체 ---
+          else if (isTransforming("react/cjs/react-jsx-dev-runtime.development.js")) {
             const { version } = requireFromAppDir("react-native/package.json");
             const jsxRuntimeFileName = path.basename(filename);
-            let replacementPath;
-            if (version.startsWith("0.78") || version.startsWith("0.79")) {
-                replacementPath = createRequirePath(`JSXRuntime/react-native-78-79/${jsxRuntimeFileName}`);
-            } else if (version.startsWith("0.80")) {
-                replacementPath = createRequirePath(`JSXRuntime/react-native-80/${jsxRuntimeFileName}`);
+            
+            try {
+              const pluginPackageJsonPath = require.resolve('@granite-js/plugin-radon/package.json', { paths: [appRoot] });
+              const pluginRoot = path.dirname(pluginPackageJsonPath);
+              
+              let versionFolder;
+              if (version.startsWith("0.78") || version.startsWith("0.79")) {
+                versionFolder = "react-native-78-79";
+              } else if (version.startsWith("0.80")) {
+                versionFolder = "react-native-80";
+              }
+              
+              if (versionFolder) {
+                const jsxRuntimePath = path.join(pluginRoot, 'dist', 'lib', 'JSXRuntime', versionFolder, jsxRuntimeFileName);
+                
+                if (fs.existsSync(jsxRuntimePath)) {
+                  const jsxRuntimeCode = fs.readFileSync(jsxRuntimePath, 'utf8');
+                  replaceModuleWith(programPath, jsxRuntimeCode);
+                  injected = true;
+                  console.log(`🔥 RADON BABEL PLUGIN: ✅ Successfully replaced JSX runtime`);
+                }
+              }
+            } catch (e) {
+              console.error('🔥 RADON BABEL PLUGIN: 🚨 Failed to replace JSX runtime:', e);
             }
-            if (replacementPath) {
-              replaceModuleWith(programPath, `module.exports = require(${replacementPath});`);
-              injected = true;
+          }
+          // --- React Query 플러그인 주입 ---
+          else if (isTransforming("@tanstack/react-query/src/index.ts") || 
+                   isTransforming("@tanstack/react-query/build/lib/index.js")) {
+            
+            try {
+              const pluginPackageJsonPath = require.resolve('@granite-js/plugin-radon/package.json', { paths: [appRoot] });
+              const pluginRoot = path.dirname(pluginPackageJsonPath);
+              const reactQueryPluginPath = path.join(pluginRoot, 'dist', 'lib', 'plugins', 'react-query-devtools.cjs');
+              
+              if (fs.existsSync(reactQueryPluginPath)) {
+                const reactQueryPluginCode = fs.readFileSync(reactQueryPluginPath, 'utf8');
+                injectCode(programPath, reactQueryPluginCode, true);
+                injected = true;
+                console.log(`🔥 RADON BABEL PLUGIN: ✅ Successfully injected React Query plugin`);
+              }
+            } catch (e) {
+              console.error('🔥 RADON BABEL PLUGIN: 🚨 Failed to inject React Query plugin:', e);
             }
-          } else if (isTransforming("@tanstack/react-query/src/index.ts") || isTransforming("@tanstack/react-query/build/lib/index.js")) {
-            injectCode(programPath, `require(${createRequirePath('plugins/react-query-devtools.js')});`, true);
-            injected = true;
-          } else if (isTransforming("/lib/rn-internals/rn-internals.js")) {
+          }
+          // --- RN Internals 파일 교체 ---
+          else if (isTransforming("/lib/rn-internals/rn-internals.js")) {
             const { version } = requireFromAppDir("react-native/package.json");
             const majorMinorVersion = version.split(".").slice(0, 2).join(".");
-            const replacementPath = createRequirePath(`rn-internals/rn-internals-${majorMinorVersion}.js`);
-            replaceModuleWith(programPath, `module.exports = require(${replacementPath});`);
-            injected = true;
+            
+            try {
+              const pluginPackageJsonPath = require.resolve('@granite-js/plugin-radon/package.json', { paths: [appRoot] });
+              const pluginRoot = path.dirname(pluginPackageJsonPath);
+              const rnInternalsPath = path.join(pluginRoot, 'dist', 'lib', 'rn-internals', `rn-internals-${majorMinorVersion}.cjs`);
+              
+              if (fs.existsSync(rnInternalsPath)) {
+                const rnInternalsCode = fs.readFileSync(rnInternalsPath, 'utf8');
+                replaceModuleWith(programPath, rnInternalsCode);
+                injected = true;
+                console.log(`🔥 RADON BABEL PLUGIN: ✅ Successfully replaced RN internals`);
+              }
+            } catch (e) {
+              console.error('🔥 RADON BABEL PLUGIN: 🚨 Failed to replace RN internals:', e);
+            }
           }
 
           if (injected) {
