@@ -1,4 +1,4 @@
-const RNInternals = require("./rn-internals/rn-internals");
+const RNInternals = require("./rn-internals/rn-internals-0.72");
 const { PluginMessageBridge } = require("./plugins/PluginMessageBridge");
 
 function mimeTypeFromResponseType(responseType) {
