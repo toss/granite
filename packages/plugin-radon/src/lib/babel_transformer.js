@@ -1,12 +1,8 @@
-console.log("🔥 RADON BABEL TRANSFORMER: Starting babel_transformer.js execution");
-console.log("🔥 RADON BABEL TRANSFORMER: Process PID:", process.pid);
-
 const ORIGINAL_TRANSFORMER_PATH = process.env.RADON_IDE_ORIG_BABEL_TRANSFORMER_PATH;
 const path = require("path");
 const buildPluginWarnOnDeeImports = require("./babel_plugins/build-plugin-warn-on-deep-imports");
 const { requireFromAppDir, overrideModuleFromAppDir } = require("./metro_helpers");
 
-console.log("🔥 RADON BABEL TRANSFORMER: Dependencies loaded, ORIGINAL_TRANSFORMER_PATH:", ORIGINAL_TRANSFORMER_PATH);
 
 // In some configurations, React Native may pull several different version of JSX transform plugins:
 // plugin-transform-react-jsx-self, plugin-transform-react-jsx-source, plugin-transform-react-jsx and
@@ -61,17 +57,14 @@ overrideModuleFromAppDir("@babel/plugin-transform-react-jsx-self", {
 overrideModuleFromAppDir("@react-native/babel-preset/src/plugin-warn-on-deep-imports.js", buildPluginWarnOnDeeImports(process.env.RADON_IDE_LIB_PATH))
 
 function transformWrapper({ filename, src, ...rest }) {
-  console.log("🔥 RADON BABEL TRANSFORMER: transformWrapper called for file:", filename);
   
   function isTransforming(unixPath) {
     return filename.endsWith(path.normalize(unixPath));
   }
 
   const { transform } = require(ORIGINAL_TRANSFORMER_PATH);
-  console.log("🔥 RADON BABEL TRANSFORMER: Original transformer loaded, checking file transformations...");
   if (isTransforming("node_modules/react-native/Libraries/Core/InitializeCore.js")) {
     const port = process.env.RCT_DEVTOOLS_PORT;
-    console.log(`🔥 RADON BABEL TRANSFORMER: ✅ Injecting runtime.js and DevTools Port [${port}] into InitializeCore.js`);
     
     let injection = '';
     if (port) {
@@ -80,7 +73,6 @@ function transformWrapper({ filename, src, ...rest }) {
     injection += `require("__RNIDE_lib__/runtime.js");`;
 
     src = `${src};${injection}`;
-    console.log("🔥 RADON BABEL TRANSFORMER: ✅ INJECTION COMPLETED");
   } 
   // else if (isTransforming("node_modules/expo-router/entry.js")) {
   //   // expo-router v2 and v3 integration
@@ -165,10 +157,8 @@ function transformWrapper({ filename, src, ...rest }) {
   //   src = `module.exports = require("__RNIDE_lib__/rn-internals/rn-internals-${majorMinorVersion}.js");`;
   // }
 
-  console.log("🔥 RADON BABEL TRANSFORMER: File transformation completed for:", filename);
   return transform({ filename, src, ...rest });
 }
 
-console.log("🔥 RADON BABEL TRANSFORMER: babel_transformer.js module fully loaded and ready");
 
 module.exports = { transform: transformWrapper };
