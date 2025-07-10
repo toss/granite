@@ -7,7 +7,6 @@ let messageQueue = [];
 const agent = {
   postMessage: (message) => {
     if (devtoolsAgent) {
-      console.log("🔥 Radon Runtime: Sending message to React DevTools:", message);
       devtoolsAgent._bridge.send("RNIDE_message", message);
     } else {
       messageQueue.push(message);
@@ -31,7 +30,6 @@ const setDevtoolsAgent = (newDevtoolsAgent) => {
   messages.forEach((message) => {
     devtoolsAgent._bridge.send("RNIDE_message", message);
   });
-  console.log("✅ Radon Runtime: Radon agent is connected to React DevTools.");
   
 };
 
@@ -53,4 +51,3 @@ if (hook && hook.reactDevtoolsAgent) {
 
 
 globalThis.__RADON_AGENT__ = agent;
-console.log("✅ Radon Runtime: __RADON_AGENT__ initialized.");

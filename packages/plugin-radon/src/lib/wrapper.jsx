@@ -219,13 +219,11 @@ function getInspectorDataForCoordinates(mainContainerRef, x, y, requestStack, ca
     // 모든 버전에서 먼저 getInspectorDataForViewAtPoint 시도
     if (renderer && renderer.rendererConfig && renderer.rendererConfig.getInspectorDataForViewAtPoint) {
       try {
-        console.log("🔥 Debug: Calling getInspectorDataForViewAtPoint");
         renderer.rendererConfig.getInspectorDataForViewAtPoint(
           mainContainerRef.current,
           x * screenWidth,
           y * screenHeight,
           (viewData) => {
-            console.log("🔥 Debug: getInspectorDataForViewAtPoint callback:", viewData);
             const frame = viewData.frame;
             const scaledFrame = {
               x: frame.left / screenWidth,

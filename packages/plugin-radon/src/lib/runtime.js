@@ -1,6 +1,3 @@
-console.log("🔥 Radon Runtime: Initializing bulletproof globals...");
-
-
 require("./react_devtools_agent")
 
 globalThis.__RADON_INSPECTOR_BRIDGE__ = require("./inspector_bridge")
