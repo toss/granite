@@ -4,6 +4,7 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __esm = (fn, res) => function __init() {
   return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
 };
@@ -31,6 +32,10 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
 
 // react-devtools-shared/src/BridgelessUIManager.js
 var require_BridgelessUIManager = __commonJS({
@@ -410,6 +415,18 @@ var require_MessageQueue = __commonJS({
     var DEBUG_INFO_LIMIT = 32;
     var MessageQueue = class _MessageQueue {
       constructor() {
+        __publicField(this, "_lazyCallableModules");
+        __publicField(this, "_queue");
+        __publicField(this, "_successCallbacks");
+        __publicField(this, "_failureCallbacks");
+        __publicField(this, "_callID");
+        __publicField(this, "_lastFlush");
+        __publicField(this, "_eventLoopStartTime");
+        __publicField(this, "_reactNativeMicrotasksCallback");
+        __publicField(this, "_debugInfo");
+        __publicField(this, "_remoteModuleTable");
+        __publicField(this, "_remoteMethodTable");
+        __publicField(this, "__spy");
         this._lazyCallableModules = {};
         this._queue = [[], [], [], 0];
         this._successCallbacks = /* @__PURE__ */ new Map();
@@ -962,7 +979,36 @@ var require_PaperUIManager = __commonJS({
   "react-devtools-shared/src/PaperUIManager.js"(exports, module) {
     init_NativeUIManager();
     var NativeModules2 = require_NativeModules();
-    var defineLazyObjectProperty = require_defineLazyObjectProperty();
+    function defineLazyObjectProperty(object, name, descriptor) {
+      const { get } = descriptor;
+      const enumerable = descriptor.enumerable !== false;
+      const writable = descriptor.writable !== false;
+      let value;
+      let valueSet = false;
+      function getValue() {
+        if (!valueSet) {
+          valueSet = true;
+          setValue(get());
+        }
+        return value;
+      }
+      function setValue(newValue) {
+        value = newValue;
+        valueSet = true;
+        Object.defineProperty(object, name, {
+          value: newValue,
+          configurable: true,
+          enumerable,
+          writable
+        });
+      }
+      Object.defineProperty(object, name, {
+        get: getValue,
+        set: setValue,
+        configurable: true,
+        enumerable
+      });
+    }
     var Platform = {
       OS: "ios"
     };
@@ -1276,7 +1322,7 @@ var UIManager = {
       const FabricUIManager = nullthrows(getFabricUIManager());
       const shadowNode = FabricUIManager.findShadowNodeByTag_DEPRECATED(reactTag);
       const ancestorShadowNode = FabricUIManager.findShadowNodeByTag_DEPRECATED(ancestorReactTag);
-      if (!shadowNode || !ancestorShadowNode) {   
+      if (!shadowNode || !ancestorShadowNode) {
         return;
       }
       FabricUIManager.measureLayout(
@@ -1787,7 +1833,6 @@ function getInspectorDataForViewAtPoint(inspectedView, locationX, locationY, cal
     );
   }
 }
-
 var renderer = {
   getInspectorDataForInstance,
   getInspectorDataForViewAtPoint,
@@ -1798,5 +1843,4 @@ export {
   ReactNativeFiberInspector_default as default,
   getFabricUIManager
 };
-
-//# sourceMappingURL=ReactNativeFiberInspector.bundle.js.map
+//# sourceMappingURL=createRendererConfig.js.map
