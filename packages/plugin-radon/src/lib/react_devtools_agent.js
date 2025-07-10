@@ -2,17 +2,13 @@ require('./react_devtools_polyfill.js');
 
 const hook = global.window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
 let devtoolsAgent = undefined;
-const messageQueue = [];
+let messageQueue = [];
 
 const agent = {
   postMessage: (message) => {
-    if (devtoolsAgent && devtoolsAgent._bridge) {
-       try {
-          devtoolsAgent._bridge.send("RNIDE_message", message);
-       } catch (error) {
-         console.error("🔥 Radon Runtime: Failed to post message", error);
-         messageQueue.push(message);
-       }
+    if (devtoolsAgent) {
+      console.log("🔥 Radon Runtime: Sending message to React DevTools:", message);
+      devtoolsAgent._bridge.send("RNIDE_message", message);
     } else {
       messageQueue.push(message);
     }
@@ -21,43 +17,40 @@ const agent = {
 };
 
 const setDevtoolsAgent = (newDevtoolsAgent) => {
-  if (!newDevtoolsAgent || !newDevtoolsAgent._bridge) {
-    console.warn("🔥 Radon Runtime: setDevtoolsAgent called with invalid agent.");
+  if (!newDevtoolsAgent) {
     return;
   }
-
   devtoolsAgent = newDevtoolsAgent;
-  
-   try {
-    devtoolsAgent._bridge.addListener("RNIDE_message", (message) => {
-      if (agent.onmessage) {
-        agent.onmessage(message);
-      }
-    });
-
-    // 큐에 쌓여있던 메시지들을 전송합니다.
-    const messagesToFlush = messageQueue.slice();
-    messageQueue.length = 0;
-    if (messagesToFlush.length > 0) {
-      console.log(`✅ Radon Runtime: Flushing ${messagesToFlush.length} queued messages.`);
-      messagesToFlush.forEach(agent.postMessage);
+  devtoolsAgent._bridge.addListener("RNIDE_message", (message) => {
+    if (agent.onmessage) {
+      agent.onmessage(message);
     }
-    
-    console.log("✅ Radon Runtime: Radon agent is connected to React DevTools.");
-   } catch (error) {
-     console.error("🔥 Radon Runtime: Error setting up devtools agent", error);
-   }
+  });
+  const messages = messageQueue;
+  messageQueue = [];
+  messages.forEach((message) => {
+    devtoolsAgent._bridge.send("RNIDE_message", message);
+  });
+  console.log("✅ Radon Runtime: Radon agent is connected to React DevTools.");
+  
 };
-
 
 if (hook && hook.reactDevtoolsAgent) {
   setDevtoolsAgent(hook.reactDevtoolsAgent);
 } else if (hook) {
-  // reactDevtoolsAgent가 아직 준비되지 않은 경우를 대비하여, 이벤트를 리스닝합니다.
-  hook.on("react-devtools", setDevtoolsAgent);
+  // reactDevtoolsAgent가 나중에 설정될 수 있도록 폴링 방식으로 체크
+  const checkForAgent = () => {
+    if (hook.reactDevtoolsAgent) {
+      setDevtoolsAgent(hook.reactDevtoolsAgent);
+    } else {
+      setTimeout(checkForAgent, 100);
+    }
+  };
+  checkForAgent();
 } else {
   console.error("🔥 Radon Runtime: __REACT_DEVTOOLS_GLOBAL_HOOK__ not found.");
 }
+
 
 globalThis.__RADON_AGENT__ = agent;
 console.log("✅ Radon Runtime: __RADON_AGENT__ initialized.");

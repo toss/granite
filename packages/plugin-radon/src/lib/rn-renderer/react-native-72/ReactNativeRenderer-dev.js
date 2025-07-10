@@ -2693,7 +2693,14 @@ injectEventPluginsByName({
 var instanceCache = new Map();
 var instanceProps = new Map();
 function precacheFiberNode(hostInst, tag) {
+  // instanceCache에 등록
   instanceCache.set(tag, hostInst);
+
+  // globalThis에 등록 (단 한 번만)
+  if (!globalThis.__REACT_NATIVE_INSTANCE_CACHE__) {
+    globalThis.__REACT_NATIVE_INSTANCE_CACHE__ = instanceCache;
+  }
+
 }
 function uncacheFiberNode(tag) {
   instanceCache.delete(tag);
