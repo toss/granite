@@ -1416,10 +1416,11 @@ function drawWeb(nodeToData2) {
 function groupAndSortNodes(nodeToData2) {
   const positionGroups = /* @__PURE__ */ new Map();
   iterateNodes(nodeToData2, ({ rect, color, displayName, count }) => {
+    var _a;
     if (!rect) return;
     const key = `${rect.left},${rect.top}`;
     if (!positionGroups.has(key)) positionGroups.set(key, []);
-    positionGroups.get(key)?.push({ rect, color, displayName, count });
+    (_a = positionGroups.get(key)) == null ? void 0 : _a.push({ rect, color, displayName, count });
   });
   return Array.from(positionGroups.values()).sort((groupA, groupB) => {
     const maxCountA = Math.max(...groupA.map((item) => item.count));
