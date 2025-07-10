@@ -8,7 +8,7 @@ if (hook && !hook.reactDevtoolsAgent) {
 
   try {
     const { Agent, createBridge } = require('./createReactDevtoolsAgent.js');
-    const rendererConfig = require('./rendererConfig_polyfill.js').default;
+    const rendererConfig = require('./createRendererConfig.js').default;
     const hook = globalThis.__REACT_DEVTOOLS_GLOBAL_HOOK__;
     if (hook && hook.renderers && hook.renderers.has(1)) {
         const renderer = hook.renderers.get(1);
