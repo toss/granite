@@ -1,26 +1,20 @@
-/**
- * 이 스크립트는 React Native 0.72.6 이하 버전에서 누락된
- * `__REACT_DEVTOOLS_GLOBAL_HOOK__.reactDevtoolsAgent`를 생성하여 주입하는
- * 폴리필(Polyfill) 역할을 합니다.
- * 
- * - 네이티브 WebSocket을 사용하여 IDE와 직접 통신합니다.
- * - 로컬에 번들된 `createReactDevtoolsAgent.js`를 사용하여 공식 `Agent`와 `createBridge`를 가져옵니다.
- * - 최종적으로 생성된 Agent를 `hook.reactDevtoolsAgent`에 설정합니다.
- */
-
 if (typeof window === 'undefined' && typeof global !== 'undefined') {
   global.window = global;
 }
 
-const hook = global.window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
-
+const hook = globalThis.__REACT_DEVTOOLS_GLOBAL_HOOK__;
 if (hook && !hook.reactDevtoolsAgent) {
   console.log("🔥 Radon Runtime: No reactDevtoolsAgent found. Polyfilling for RN <= 0.72.6...");
 
   try {
     const { Agent, createBridge } = require('./createReactDevtoolsAgent.js');
-    console.log("🔥 Radon Runtime: createBridge", createBridge);
-    console.log("🔥 Radon Runtime: Agent", Agent);
+    const rendererConfig = require('./rendererConfig_polyfill.js').default;
+    const hook = globalThis.__REACT_DEVTOOLS_GLOBAL_HOOK__;
+    if (hook && hook.renderers && hook.renderers.has(1)) {
+        const renderer = hook.renderers.get(1);
+        renderer.rendererConfig = rendererConfig;
+    }
+
 
     const port = globalThis.__REACT_DEVTOOLS_PORT__;
     if (!port) {
@@ -37,7 +31,8 @@ if (hook && !hook.reactDevtoolsAgent) {
       listen(fn) {
         websocket.onmessage = (event) => {
           try {
-            fn(JSON.parse(event.data));
+            const data = JSON.parse(event.data);
+            fn(data);
           } catch (e) {
             console.error("🔥 Radon Runtime: Error parsing message in wall.listen", e);
           }
@@ -84,7 +79,8 @@ if (hook && !hook.reactDevtoolsAgent) {
     };
 
     const bridge = createBridge(globalThis, wall);
-    hook.reactDevtoolsAgent = new Agent(bridge);
+    const agent = new Agent(bridge);
+    hook.reactDevtoolsAgent = agent;
     console.log("✅ Radon Runtime: Successfully polyfilled reactDevtoolsAgent.");
 
   } catch (error) {
