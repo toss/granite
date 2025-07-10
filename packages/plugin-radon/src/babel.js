@@ -35,11 +35,9 @@ module.exports = function(api) {
       
       if (versionFolder) {
         const rendererPath = path.join(pluginRoot, 'src', 'lib', 'rn-renderer', versionFolder, rendererFileName);
-        console.log(`🔥 RADON BABEL PLUGIN: Constructed renderer path: ${rendererPath}`);
         return rendererPath;
       }
       
-      console.log(`🔥 RADON BABEL PLUGIN: No version folder found for version: ${version}`);
       return null;
     } catch (e) {
       console.error('🔥 RADON BABEL PLUGIN: Failed to resolve renderer path:', e);
@@ -92,17 +90,14 @@ module.exports = function(api) {
           if (isTransforming("react-native/Libraries/Renderer/implementations/ReactFabric-dev.js") || 
               isTransforming("react-native/Libraries/Renderer/implementations/ReactNativeRenderer-dev.js")) {
             
-            console.log(`🔥 RADON BABEL PLUGIN: Replacing React Native renderer: ${filename}`);
             
             const { version } = requireFromAppDir("react-native/package.json");
             const rendererFileName = path.basename(filename);
             
-            console.log(`🔥 RADON BABEL PLUGIN: React Native version: ${version}, Renderer file: ${rendererFileName}`);
             
             const rendererPath = createRendererPath(rendererFileName, version);
             
             if (rendererPath && fs.existsSync(rendererPath)) {
-              console.log(`🔥 RADON BABEL PLUGIN: ✅ Loading custom renderer from: ${rendererPath}`);
               
               try {
                 const rendererCode = fs.readFileSync(rendererPath, 'utf8');
@@ -112,7 +107,6 @@ module.exports = function(api) {
 
                 replaceModuleWith(programPath, finalRendererCode);
                 injected = true;
-                console.log(`🔥 RADON BABEL PLUGIN: ✅ Successfully replaced renderer`);
               } catch (e) {
                 console.error('🔥 RADON BABEL PLUGIN: 🚨 Failed to read custom renderer:', e);
                 // 실패 시 원본 파일 유지
@@ -129,7 +123,6 @@ module.exports = function(api) {
             state.file.metadata.radonInjected = true;
           }
           if (isTransforming("react-native/Libraries/Core/InitializeCore.js")) {
-            console.log(`🔥 RADON BABEL PLUGIN: ✅ INJECTING BUNDLED RUNTIME AT THE END of InitializeCore.js`);
             try {
               const pluginPackageJsonPath = require.resolve('@granite-js/plugin-radon/package.json', { paths: [appRoot] });
               const pluginRoot = path.dirname(pluginPackageJsonPath);
@@ -138,7 +131,6 @@ module.exports = function(api) {
               const runtimeCode = fs.readFileSync(runtimePath, 'utf8');
 
               const devtoolsPort = process.env.RCT_DEVTOOLS_PORT;
-              console.log(`🔥 RADON BABEL PLUGIN: Reading process.env.RCT_DEVTOOLS_PORT. Value is: [${devtoolsPort}]`);
 
               const portInjectionCode = devtoolsPort ? `globalThis.__REACT_DEVTOOLS_PORT__ = ${devtoolsPort};` : '';
 
@@ -151,7 +143,6 @@ module.exports = function(api) {
               injectCode(programPath, finalSafeCode, false); // Append to the end
               
               state.file.metadata.radonInjected = true;
-              console.log(`🔥 RADON BABEL PLUGIN: ✅ INJECTION COMPLETED`);
             } catch (e) {
               console.error('🔥 RADON BABEL PLUGIN: 🚨 FAILED TO READ RUNTIME BUNDLE.', e);
               throw e;
