@@ -4,12 +4,9 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-};
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -27,13 +24,16 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
 
-// node_modules/yallist/iterator.js
+// react-devtools-shared/node_modules/yallist/iterator.js
 var require_iterator = __commonJS({
-  "node_modules/yallist/iterator.js"(exports2, module2) {
+  "react-devtools-shared/node_modules/yallist/iterator.js"(exports, module) {
     "use strict";
-    module2.exports = function(Yallist) {
+    module.exports = function(Yallist) {
       Yallist.prototype[Symbol.iterator] = function* () {
         for (let walker = this.head; walker; walker = walker.next) {
           yield walker.value;
@@ -43,11 +43,11 @@ var require_iterator = __commonJS({
   }
 });
 
-// node_modules/yallist/yallist.js
+// react-devtools-shared/node_modules/yallist/yallist.js
 var require_yallist = __commonJS({
-  "node_modules/yallist/yallist.js"(exports2, module2) {
+  "react-devtools-shared/node_modules/yallist/yallist.js"(exports, module) {
     "use strict";
-    module2.exports = Yallist;
+    module.exports = Yallist;
     Yallist.Node = Node2;
     Yallist.create = Yallist;
     function Yallist(list) {
@@ -412,9 +412,9 @@ var require_yallist = __commonJS({
   }
 });
 
-// node_modules/lru-cache/index.js
+// react-devtools-shared/node_modules/lru-cache/index.js
 var require_lru_cache = __commonJS({
-  "node_modules/lru-cache/index.js"(exports2, module2) {
+  "react-devtools-shared/node_modules/lru-cache/index.js"(exports, module) {
     "use strict";
     var Yallist = require_yallist();
     var MAX = Symbol("max");
@@ -575,7 +575,8 @@ var require_lru_cache = __commonJS({
         return true;
       }
       has(key) {
-        if (!this[CACHE].has(key)) return false;
+        if (!this[CACHE].has(key))
+          return false;
         const hit = this[CACHE].get(key).value;
         return !isStale(this, hit);
       }
@@ -677,21 +678,15 @@ var require_lru_cache = __commonJS({
       if (hit)
         fn.call(thisp, hit.value, hit.key, self);
     };
-    module2.exports = LRUCache;
+    module.exports = LRUCache;
   }
 });
 
-// src/index.js
-var index_exports = {};
-__export(index_exports, {
-  Agent: () => Agent,
-  createBridge: () => createBridge
-});
-module.exports = __toCommonJS(index_exports);
-
-// src/events.js
+// react-devtools-shared/src/events.js
 var EventEmitter = class {
-  listenersMap = /* @__PURE__ */ new Map();
+  constructor() {
+    __publicField(this, "listenersMap", /* @__PURE__ */ new Map());
+  }
   addListener(event, listener) {
     const listeners = this.listenersMap.get(event);
     if (listeners === void 0) {
@@ -744,17 +739,17 @@ var EventEmitter = class {
   }
 };
 
-// src/constants.js
+// react-devtools-shared/src/constants.js
 var __DEBUG__ = false;
 var SESSION_STORAGE_LAST_SELECTION_KEY = "React::DevTools::lastSelection";
 
-// src/utils.js
+// react-devtools-shared/src/utils.js
 var import_lru_cache = __toESM(require_lru_cache(), 1);
 
-// src/ReactFeatureFlags.js
+// react-devtools-shared/src/ReactFeatureFlags.js
 var renameElementSymbol = true;
 
-// src/ReactSymbols.js
+// react-devtools-shared/src/ReactSymbols.js
 var REACT_LEGACY_ELEMENT_TYPE = Symbol.for("react.element");
 var REACT_ELEMENT_TYPE = renameElementSymbol ? Symbol.for("react.transitional.element") : REACT_LEGACY_ELEMENT_TYPE;
 var REACT_PORTAL_TYPE = Symbol.for("react.portal");
@@ -786,7 +781,7 @@ var REACT_VIEW_TRANSITION_TYPE = Symbol.for(
   "react.view_transition"
 );
 
-// src/storage.js
+// react-devtools-shared/src/storage.js
 function sessionStorageGetItem(key) {
   try {
     return sessionStorage.getItem(key);
@@ -807,16 +802,16 @@ function sessionStorageSetItem(key, value) {
   }
 }
 
-// src/isArray.js
+// react-devtools-shared/src/isArray.js
 var isArray = Array.isArray;
 
-// src/utils.js
+// react-devtools-shared/src/utils.js
 var encodedStringCache = new import_lru_cache.default({
   max: 1e3
 });
 var LEGACY_REACT_PROVIDER_TYPE = Symbol.for("react.provider");
 
-// src/hydration.js
+// react-devtools-shared/src/hydration.js
 var meta = {
   inspectable: Symbol("inspectable"),
   inspected: Symbol("inspected"),
@@ -829,12 +824,12 @@ var meta = {
   unserializable: Symbol("unserializable")
 };
 
-// src/backend/utils/index.js
+// react-devtools-shared/src/backend/utils/index.js
 var isReactNativeEnvironment = () => {
   return window.document == null;
 };
 
-// src/backend/views/utils.js
+// react-devtools-shared/src/backend/views/utils.js
 function getOwnerWindow(node) {
   if (!node.ownerDocument) {
     return null;
@@ -920,7 +915,8 @@ function getElementDimensions(domElement) {
   };
 }
 function extractHOCNames(displayName) {
-  if (!displayName) return { baseComponentName: "", hocNames: [] };
+  if (!displayName)
+    return { baseComponentName: "", hocNames: [] };
   const hocRegex = /([A-Z][a-zA-Z0-9]*?)\((.*)\)/g;
   const hocNames = [];
   let baseComponentName = displayName;
@@ -938,14 +934,14 @@ function extractHOCNames(displayName) {
   };
 }
 
-// src/backend/views/Highlighter/Overlay.js
+// react-devtools-shared/src/backend/views/Highlighter/Overlay.js
 var assign = Object.assign;
 var OverlayRect = class {
-  node;
-  border;
-  padding;
-  content;
   constructor(doc, container) {
+    __publicField(this, "node");
+    __publicField(this, "border");
+    __publicField(this, "padding");
+    __publicField(this, "content");
     this.node = doc.createElement("div");
     this.border = doc.createElement("div");
     this.padding = doc.createElement("div");
@@ -984,10 +980,10 @@ var OverlayRect = class {
   }
 };
 var OverlayTip = class {
-  tip;
-  nameSpan;
-  dimSpan;
   constructor(doc, container) {
+    __publicField(this, "tip");
+    __publicField(this, "nameSpan");
+    __publicField(this, "dimSpan");
     this.tip = doc.createElement("div");
     assign(this.tip.style, {
       display: "flex",
@@ -1037,13 +1033,13 @@ var OverlayTip = class {
   }
 };
 var Overlay = class {
-  window;
-  tipBoundsWindow;
-  container;
-  tip;
-  rects;
-  agent;
   constructor(agent2) {
+    __publicField(this, "window");
+    __publicField(this, "tipBoundsWindow");
+    __publicField(this, "container");
+    __publicField(this, "tip");
+    __publicField(this, "rects");
+    __publicField(this, "agent");
     const currentWindow = window.__REACT_DEVTOOLS_TARGET_WINDOW__ || window;
     this.window = currentWindow;
     const tipBoundsWindow = window.__REACT_DEVTOOLS_TARGET_WINDOW__ || window;
@@ -1182,7 +1178,7 @@ var overlayStyles = {
   border: "rgba(255, 200, 50, 0.3)"
 };
 
-// src/backend/views/Highlighter/Highlighter.js
+// react-devtools-shared/src/backend/views/Highlighter/Highlighter.js
 var SHOW_DURATION = 2e3;
 var timeoutID = null;
 var overlay = null;
@@ -1223,7 +1219,7 @@ function showOverlay(elements, componentName, agent2, hideAfterTimeout) {
   );
 }
 
-// src/backend/views/Highlighter/index.js
+// react-devtools-shared/src/backend/views/Highlighter/index.js
 var iframesListeningTo = /* @__PURE__ */ new Set();
 function setupHighlighter(bridge, agent2) {
   bridge.addListener("clearHostInstanceHighlight", clearHostInstanceHighlight);
@@ -1327,7 +1323,8 @@ function setupHighlighter(bridge, agent2) {
     event.preventDefault();
     event.stopPropagation();
     const target = getEventTarget(event);
-    if (lastHoveredNode === target) return;
+    if (lastHoveredNode === target)
+      return;
     lastHoveredNode = target;
     if (target.tagName === "IFRAME") {
       const iframe = target;
@@ -1361,7 +1358,7 @@ function setupHighlighter(bridge, agent2) {
   }
 }
 
-// src/backend/views/TraceUpdates/canvas.js
+// react-devtools-shared/src/backend/views/TraceUpdates/canvas.js
 var COLORS = [
   "#37afa9",
   "#63b19e",
@@ -1416,11 +1413,12 @@ function drawWeb(nodeToData2) {
 function groupAndSortNodes(nodeToData2) {
   const positionGroups = /* @__PURE__ */ new Map();
   iterateNodes(nodeToData2, ({ rect, color, displayName, count }) => {
-    var _a;
-    if (!rect) return;
+    if (!rect)
+      return;
     const key = `${rect.left},${rect.top}`;
-    if (!positionGroups.has(key)) positionGroups.set(key, []);
-    (_a = positionGroups.get(key)) == null ? void 0 : _a.push({ rect, color, displayName, count });
+    if (!positionGroups.has(key))
+      positionGroups.set(key, []);
+    positionGroups.get(key)?.push({ rect, color, displayName, count });
   });
   return Array.from(positionGroups.values()).sort((groupA, groupB) => {
     const maxCountA = Math.max(...groupA.map((item) => item.count));
@@ -1521,7 +1519,7 @@ function initialize() {
   root.insertBefore(canvas, root.firstChild);
 }
 
-// src/backend/views/TraceUpdates/index.js
+// react-devtools-shared/src/backend/views/TraceUpdates/index.js
 var DISPLAY_DURATION = 250;
 var MAX_DISPLAY_DURATION = 3e3;
 var REMEASUREMENT_AFTER_DURATION = 250;
@@ -1558,7 +1556,8 @@ function toggleEnabled(value) {
   }
 }
 function traceUpdates(nodes) {
-  if (!isEnabled) return;
+  if (!isEnabled)
+    return;
   nodes.forEach((node) => {
     const data = nodeToData.get(node);
     const now = getCurrentTime();
@@ -1619,7 +1618,7 @@ function measureNode(node) {
   return getNestedBoundingClientRect(node, currentWindow);
 }
 
-// src/bridge.js
+// react-devtools-shared/src/bridge.js
 var BRIDGE_PROTOCOL = [
   // This version technically never existed,
   // but a backwards breaking change was added in 4.11,
@@ -1646,13 +1645,73 @@ var BRIDGE_PROTOCOL = [
 ];
 var currentBridgeProtocol = BRIDGE_PROTOCOL[BRIDGE_PROTOCOL.length - 1];
 var Bridge = class extends EventEmitter {
-  _isShutdown = false;
-  _messageQueue = [];
-  _scheduledFlush = false;
-  _wall;
-  _wallUnlisten = null;
   constructor(wall) {
     super();
+    __publicField(this, "_isShutdown", false);
+    __publicField(this, "_messageQueue", []);
+    __publicField(this, "_scheduledFlush", false);
+    __publicField(this, "_wall");
+    __publicField(this, "_wallUnlisten", null);
+    __publicField(this, "_flush", () => {
+      try {
+        if (this._messageQueue.length) {
+          for (let i = 0; i < this._messageQueue.length; i += 2) {
+            this._wall.send(this._messageQueue[i], ...this._messageQueue[i + 1]);
+          }
+          this._messageQueue.length = 0;
+        }
+      } finally {
+        this._scheduledFlush = false;
+      }
+    });
+    // Temporarily support older standalone backends by forwarding "overrideValueAtPath" commands
+    // to the older message types they may be listening to.
+    __publicField(this, "overrideValueAtPath", ({
+      id,
+      path,
+      rendererID,
+      type,
+      value
+    }) => {
+      switch (type) {
+        case "context":
+          this.send("overrideContext", {
+            id,
+            path,
+            rendererID,
+            wasForwarded: true,
+            value
+          });
+          break;
+        case "hooks":
+          this.send("overrideHookState", {
+            id,
+            path,
+            rendererID,
+            wasForwarded: true,
+            value
+          });
+          break;
+        case "props":
+          this.send("overrideProps", {
+            id,
+            path,
+            rendererID,
+            wasForwarded: true,
+            value
+          });
+          break;
+        case "state":
+          this.send("overrideState", {
+            id,
+            path,
+            rendererID,
+            wasForwarded: true,
+            value
+          });
+          break;
+      }
+    });
     this._wall = wall;
     this._wallUnlisten = wall.listen((message) => {
       if (message && message.event) {
@@ -1704,70 +1763,10 @@ var Bridge = class extends EventEmitter {
       this._flush();
     } while (this._messageQueue.length);
   }
-  _flush = () => {
-    try {
-      if (this._messageQueue.length) {
-        for (let i = 0; i < this._messageQueue.length; i += 2) {
-          this._wall.send(this._messageQueue[i], ...this._messageQueue[i + 1]);
-        }
-        this._messageQueue.length = 0;
-      }
-    } finally {
-      this._scheduledFlush = false;
-    }
-  };
-  // Temporarily support older standalone backends by forwarding "overrideValueAtPath" commands
-  // to the older message types they may be listening to.
-  overrideValueAtPath = ({
-    id,
-    path,
-    rendererID,
-    type,
-    value
-  }) => {
-    switch (type) {
-      case "context":
-        this.send("overrideContext", {
-          id,
-          path,
-          rendererID,
-          wasForwarded: true,
-          value
-        });
-        break;
-      case "hooks":
-        this.send("overrideHookState", {
-          id,
-          path,
-          rendererID,
-          wasForwarded: true,
-          value
-        });
-        break;
-      case "props":
-        this.send("overrideProps", {
-          id,
-          path,
-          rendererID,
-          wasForwarded: true,
-          value
-        });
-        break;
-      case "state":
-        this.send("overrideState", {
-          id,
-          path,
-          rendererID,
-          wasForwarded: true,
-          value
-        });
-        break;
-    }
-  };
 };
 var bridge_default = Bridge;
 
-// src/backend/agent.js
+// react-devtools-shared/src/backend/agent.js
 var debug = (methodName, ...args) => {
   if (__DEBUG__) {
     console.log(
@@ -1779,15 +1778,441 @@ var debug = (methodName, ...args) => {
   }
 };
 var Agent = class extends EventEmitter {
-  _bridge;
-  _isProfiling = false;
-  _rendererInterfaces = {};
-  _persistedSelection = null;
-  _persistedSelectionMatch = null;
-  _traceUpdatesEnabled = false;
-  _onReloadAndProfile;
   constructor(bridge, isProfiling = false, onReloadAndProfile) {
     super();
+    __publicField(this, "_bridge");
+    __publicField(this, "_isProfiling", false);
+    __publicField(this, "_rendererInterfaces", {});
+    __publicField(this, "_persistedSelection", null);
+    __publicField(this, "_persistedSelectionMatch", null);
+    __publicField(this, "_traceUpdatesEnabled", false);
+    __publicField(this, "_onReloadAndProfile");
+    __publicField(this, "clearErrorsAndWarnings", ({
+      rendererID
+    }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}"`);
+      } else {
+        renderer.clearErrorsAndWarnings();
+      }
+    });
+    __publicField(this, "clearErrorsForElementID", ({
+      id,
+      rendererID
+    }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}"`);
+      } else {
+        renderer.clearErrorsForElementID(id);
+      }
+    });
+    __publicField(this, "clearWarningsForElementID", ({
+      id,
+      rendererID
+    }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}"`);
+      } else {
+        renderer.clearWarningsForElementID(id);
+      }
+    });
+    __publicField(this, "copyElementPath", ({
+      id,
+      path,
+      rendererID
+    }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
+      } else {
+        const value = renderer.getSerializedElementValueByPath(id, path);
+        if (value != null) {
+          this._bridge.send("saveToClipboard", value);
+        } else {
+          console.warn(`Unable to obtain serialized value for element "${id}"`);
+        }
+      }
+    });
+    __publicField(this, "deletePath", ({
+      hookID,
+      id,
+      path,
+      rendererID,
+      type
+    }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
+      } else {
+        renderer.deletePath(type, id, hookID, path);
+      }
+    });
+    __publicField(this, "getBackendVersion", () => {
+      const version = "0.0.0";
+      if (version) {
+        this._bridge.send("backendVersion", version);
+      }
+    });
+    __publicField(this, "getBridgeProtocol", () => {
+      this._bridge.send("bridgeProtocol", currentBridgeProtocol);
+    });
+    __publicField(this, "getProfilingData", ({ rendererID }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}"`);
+      }
+      this._bridge.send("profilingData", renderer.getProfilingData());
+    });
+    __publicField(this, "getProfilingStatus", () => {
+      this._bridge.send("profilingStatus", this._isProfiling);
+    });
+    __publicField(this, "getOwnersList", ({ id, rendererID }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
+      } else {
+        const owners = renderer.getOwnersList(id);
+        this._bridge.send("ownersList", { id, owners });
+      }
+    });
+    __publicField(this, "inspectElement", ({
+      forceFullData,
+      id,
+      path,
+      rendererID,
+      requestID
+    }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
+      } else {
+        this._bridge.send(
+          "inspectedElement",
+          renderer.inspectElement(requestID, id, path, forceFullData)
+        );
+        if (this._persistedSelectionMatch === null || this._persistedSelectionMatch.id !== id) {
+          this._persistedSelection = null;
+          this._persistedSelectionMatch = null;
+          renderer.setTrackedPath(null);
+          this._lastSelectedElementID = id;
+          this._lastSelectedRendererID = rendererID;
+          if (!this._persistSelectionTimerScheduled) {
+            this._persistSelectionTimerScheduled = true;
+            setTimeout(this._persistSelection, 1e3);
+          }
+        }
+      }
+    });
+    __publicField(this, "logElementToConsole", ({ id, rendererID }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
+      } else {
+        renderer.logElementToConsole(id);
+      }
+    });
+    __publicField(this, "overrideError", ({
+      id,
+      rendererID,
+      forceError
+    }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
+      } else {
+        renderer.overrideError(id, forceError);
+      }
+    });
+    __publicField(this, "overrideSuspense", ({
+      id,
+      rendererID,
+      forceFallback
+    }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
+      } else {
+        renderer.overrideSuspense(id, forceFallback);
+      }
+    });
+    __publicField(this, "overrideValueAtPath", ({
+      hookID,
+      id,
+      path,
+      rendererID,
+      type,
+      value
+    }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
+      } else {
+        renderer.overrideValueAtPath(type, id, hookID, path, value);
+      }
+    });
+    // Temporarily support older standalone front-ends by forwarding the older message types
+    // to the new "overrideValueAtPath" command the backend is now listening to.
+    __publicField(this, "overrideContext", ({
+      id,
+      path,
+      rendererID,
+      wasForwarded,
+      value
+    }) => {
+      if (!wasForwarded) {
+        this.overrideValueAtPath({
+          id,
+          path,
+          rendererID,
+          type: "context",
+          value
+        });
+      }
+    });
+    // Temporarily support older standalone front-ends by forwarding the older message types
+    // to the new "overrideValueAtPath" command the backend is now listening to.
+    __publicField(this, "overrideHookState", ({
+      id,
+      hookID,
+      path,
+      rendererID,
+      wasForwarded,
+      value
+    }) => {
+      if (!wasForwarded) {
+        this.overrideValueAtPath({
+          id,
+          path,
+          rendererID,
+          type: "hooks",
+          value
+        });
+      }
+    });
+    // Temporarily support older standalone front-ends by forwarding the older message types
+    // to the new "overrideValueAtPath" command the backend is now listening to.
+    __publicField(this, "overrideProps", ({
+      id,
+      path,
+      rendererID,
+      wasForwarded,
+      value
+    }) => {
+      if (!wasForwarded) {
+        this.overrideValueAtPath({
+          id,
+          path,
+          rendererID,
+          type: "props",
+          value
+        });
+      }
+    });
+    // Temporarily support older standalone front-ends by forwarding the older message types
+    // to the new "overrideValueAtPath" command the backend is now listening to.
+    __publicField(this, "overrideState", ({
+      id,
+      path,
+      rendererID,
+      wasForwarded,
+      value
+    }) => {
+      if (!wasForwarded) {
+        this.overrideValueAtPath({
+          id,
+          path,
+          rendererID,
+          type: "state",
+          value
+        });
+      }
+    });
+    __publicField(this, "onReloadAndProfileSupportedByHost", () => {
+      this._bridge.send("isReloadAndProfileSupportedByBackend", true);
+    });
+    __publicField(this, "reloadAndProfile", ({ recordChangeDescriptions, recordTimeline }) => {
+      if (typeof this._onReloadAndProfile === "function") {
+        this._onReloadAndProfile(recordChangeDescriptions, recordTimeline);
+      }
+      this._bridge.send("reloadAppForProfiling");
+    });
+    __publicField(this, "renamePath", ({
+      hookID,
+      id,
+      newPath,
+      oldPath,
+      rendererID,
+      type
+    }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
+      } else {
+        renderer.renamePath(type, id, hookID, oldPath, newPath);
+      }
+    });
+    __publicField(this, "setTraceUpdatesEnabled", (traceUpdatesEnabled) => {
+      this._traceUpdatesEnabled = traceUpdatesEnabled;
+      toggleEnabled(traceUpdatesEnabled);
+      for (const rendererID in this._rendererInterfaces) {
+        const renderer = this._rendererInterfaces[rendererID];
+        renderer.setTraceUpdatesEnabled(traceUpdatesEnabled);
+      }
+    });
+    __publicField(this, "syncSelectionFromBuiltinElementsPanel", () => {
+      const target = window.__REACT_DEVTOOLS_GLOBAL_HOOK__.$0;
+      if (target == null) {
+        return;
+      }
+      this.selectNode(target);
+    });
+    __publicField(this, "shutdown", () => {
+      this.emit("shutdown");
+      this._bridge.removeAllListeners();
+      this.removeAllListeners();
+    });
+    __publicField(this, "startProfiling", ({ recordChangeDescriptions, recordTimeline }) => {
+      this._isProfiling = true;
+      for (const rendererID in this._rendererInterfaces) {
+        const renderer = this._rendererInterfaces[rendererID];
+        renderer.startProfiling(recordChangeDescriptions, recordTimeline);
+      }
+      this._bridge.send("profilingStatus", this._isProfiling);
+    });
+    __publicField(this, "stopProfiling", () => {
+      this._isProfiling = false;
+      for (const rendererID in this._rendererInterfaces) {
+        const renderer = this._rendererInterfaces[rendererID];
+        renderer.stopProfiling();
+      }
+      this._bridge.send("profilingStatus", this._isProfiling);
+    });
+    __publicField(this, "stopInspectingNative", (selected) => {
+      this._bridge.send("stopInspectingHost", selected);
+    });
+    __publicField(this, "storeAsGlobal", ({
+      count,
+      id,
+      path,
+      rendererID
+    }) => {
+      const renderer = this._rendererInterfaces[rendererID];
+      if (renderer == null) {
+        console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
+      } else {
+        renderer.storeAsGlobal(id, path, count);
+      }
+    });
+    __publicField(this, "updateHookSettings", (settings) => {
+      this.emit("updateHookSettings", settings);
+    });
+    __publicField(this, "getHookSettings", () => {
+      this.emit("getHookSettings");
+    });
+    __publicField(this, "onHookSettings", (settings) => {
+      this._bridge.send("hookSettings", settings);
+    });
+    __publicField(this, "updateComponentFilters", (componentFilters) => {
+      for (const rendererIDString in this._rendererInterfaces) {
+        const rendererID = +rendererIDString;
+        const renderer = this._rendererInterfaces[rendererID];
+        if (this._lastSelectedRendererID === rendererID) {
+          const path = renderer.getPathForElement(this._lastSelectedElementID);
+          if (path !== null) {
+            renderer.setTrackedPath(path);
+            this._persistedSelection = {
+              rendererID,
+              path
+            };
+          }
+        }
+        renderer.updateComponentFilters(componentFilters);
+      }
+    });
+    __publicField(this, "getEnvironmentNames", () => {
+      let accumulatedNames = null;
+      for (const rendererID in this._rendererInterfaces) {
+        const renderer = this._rendererInterfaces[+rendererID];
+        const names = renderer.getEnvironmentNames();
+        if (accumulatedNames === null) {
+          accumulatedNames = names;
+        } else {
+          for (let i = 0; i < names.length; i++) {
+            if (accumulatedNames.indexOf(names[i]) === -1) {
+              accumulatedNames.push(names[i]);
+            }
+          }
+        }
+      }
+      this._bridge.send("environmentNames", accumulatedNames || []);
+    });
+    __publicField(this, "onTraceUpdates", (nodes) => {
+      this.emit("traceUpdates", nodes);
+    });
+    __publicField(this, "onFastRefreshScheduled", () => {
+      if (__DEBUG__) {
+        debug("onFastRefreshScheduled");
+      }
+      this._bridge.send("fastRefreshScheduled");
+    });
+    __publicField(this, "onHookOperations", (operations) => {
+      if (__DEBUG__) {
+        debug(
+          "onHookOperations",
+          `(${operations.length}) [${operations.join(", ")}]`
+        );
+      }
+      this._bridge.send("operations", operations);
+      if (this._persistedSelection !== null) {
+        const rendererID = operations[0];
+        if (this._persistedSelection.rendererID === rendererID) {
+          const renderer = this._rendererInterfaces[rendererID];
+          if (renderer == null) {
+            console.warn(`Invalid renderer id "${rendererID}"`);
+          } else {
+            const prevMatch = this._persistedSelectionMatch;
+            const nextMatch = renderer.getBestMatchForTrackedPath();
+            this._persistedSelectionMatch = nextMatch;
+            const prevMatchID = prevMatch !== null ? prevMatch.id : null;
+            const nextMatchID = nextMatch !== null ? nextMatch.id : null;
+            if (prevMatchID !== nextMatchID) {
+              if (nextMatchID !== null) {
+                this._bridge.send("selectElement", nextMatchID);
+              }
+            }
+            if (nextMatch !== null && nextMatch.isFullMatch) {
+              this._persistedSelection = null;
+              this._persistedSelectionMatch = null;
+              renderer.setTrackedPath(null);
+            }
+          }
+        }
+      }
+    });
+    __publicField(this, "getIfHasUnsupportedRendererVersion", () => {
+      this.emit("getIfHasUnsupportedRendererVersion");
+    });
+    __publicField(this, "_persistSelectionTimerScheduled", false);
+    __publicField(this, "_lastSelectedRendererID", -1);
+    __publicField(this, "_lastSelectedElementID", -1);
+    __publicField(this, "_persistSelection", () => {
+      this._persistSelectionTimerScheduled = false;
+      const rendererID = this._lastSelectedRendererID;
+      const id = this._lastSelectedElementID;
+      const renderer = this._rendererInterfaces[rendererID];
+      const path = renderer != null ? renderer.getPathForElement(id) : null;
+      if (path !== null) {
+        sessionStorageSetItem(
+          SESSION_STORAGE_LAST_SELECTION_KEY,
+          JSON.stringify({ rendererID, path })
+        );
+      } else {
+        sessionStorageRemoveItem(SESSION_STORAGE_LAST_SELECTION_KEY);
+      }
+    });
     this._isProfiling = isProfiling;
     this._onReloadAndProfile = onReloadAndProfile;
     const persistedSelectionString = sessionStorageGetItem(
@@ -1848,69 +2273,6 @@ var Agent = class extends EventEmitter {
   get rendererInterfaces() {
     return this._rendererInterfaces;
   }
-  clearErrorsAndWarnings = ({
-    rendererID
-  }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}"`);
-    } else {
-      renderer.clearErrorsAndWarnings();
-    }
-  };
-  clearErrorsForElementID = ({
-    id,
-    rendererID
-  }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}"`);
-    } else {
-      renderer.clearErrorsForElementID(id);
-    }
-  };
-  clearWarningsForElementID = ({
-    id,
-    rendererID
-  }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}"`);
-    } else {
-      renderer.clearWarningsForElementID(id);
-    }
-  };
-  copyElementPath = ({
-    id,
-    path,
-    rendererID
-  }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
-    } else {
-      const value = renderer.getSerializedElementValueByPath(id, path);
-      if (value != null) {
-        this._bridge.send("saveToClipboard", value);
-      } else {
-        console.warn(`Unable to obtain serialized value for element "${id}"`);
-      }
-    }
-  };
-  deletePath = ({
-    hookID,
-    id,
-    path,
-    rendererID,
-    type
-  }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
-    } else {
-      renderer.deletePath(type, id, hookID, path);
-    }
-  };
   getInstanceAndStyle({
     id,
     rendererID
@@ -2009,210 +2371,6 @@ var Agent = class extends EventEmitter {
       return null;
     }
   }
-  getBackendVersion = () => {
-    const version = "0.0.0";
-    if (version) {
-      this._bridge.send("backendVersion", version);
-    }
-  };
-  getBridgeProtocol = () => {
-    this._bridge.send("bridgeProtocol", currentBridgeProtocol);
-  };
-  getProfilingData = ({ rendererID }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}"`);
-    }
-    this._bridge.send("profilingData", renderer.getProfilingData());
-  };
-  getProfilingStatus = () => {
-    this._bridge.send("profilingStatus", this._isProfiling);
-  };
-  getOwnersList = ({ id, rendererID }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
-    } else {
-      const owners = renderer.getOwnersList(id);
-      this._bridge.send("ownersList", { id, owners });
-    }
-  };
-  inspectElement = ({
-    forceFullData,
-    id,
-    path,
-    rendererID,
-    requestID
-  }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
-    } else {
-      this._bridge.send(
-        "inspectedElement",
-        renderer.inspectElement(requestID, id, path, forceFullData)
-      );
-      if (this._persistedSelectionMatch === null || this._persistedSelectionMatch.id !== id) {
-        this._persistedSelection = null;
-        this._persistedSelectionMatch = null;
-        renderer.setTrackedPath(null);
-        this._lastSelectedElementID = id;
-        this._lastSelectedRendererID = rendererID;
-        if (!this._persistSelectionTimerScheduled) {
-          this._persistSelectionTimerScheduled = true;
-          setTimeout(this._persistSelection, 1e3);
-        }
-      }
-    }
-  };
-  logElementToConsole = ({ id, rendererID }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
-    } else {
-      renderer.logElementToConsole(id);
-    }
-  };
-  overrideError = ({
-    id,
-    rendererID,
-    forceError
-  }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
-    } else {
-      renderer.overrideError(id, forceError);
-    }
-  };
-  overrideSuspense = ({
-    id,
-    rendererID,
-    forceFallback
-  }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
-    } else {
-      renderer.overrideSuspense(id, forceFallback);
-    }
-  };
-  overrideValueAtPath = ({
-    hookID,
-    id,
-    path,
-    rendererID,
-    type,
-    value
-  }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
-    } else {
-      renderer.overrideValueAtPath(type, id, hookID, path, value);
-    }
-  };
-  // Temporarily support older standalone front-ends by forwarding the older message types
-  // to the new "overrideValueAtPath" command the backend is now listening to.
-  overrideContext = ({
-    id,
-    path,
-    rendererID,
-    wasForwarded,
-    value
-  }) => {
-    if (!wasForwarded) {
-      this.overrideValueAtPath({
-        id,
-        path,
-        rendererID,
-        type: "context",
-        value
-      });
-    }
-  };
-  // Temporarily support older standalone front-ends by forwarding the older message types
-  // to the new "overrideValueAtPath" command the backend is now listening to.
-  overrideHookState = ({
-    id,
-    hookID,
-    path,
-    rendererID,
-    wasForwarded,
-    value
-  }) => {
-    if (!wasForwarded) {
-      this.overrideValueAtPath({
-        id,
-        path,
-        rendererID,
-        type: "hooks",
-        value
-      });
-    }
-  };
-  // Temporarily support older standalone front-ends by forwarding the older message types
-  // to the new "overrideValueAtPath" command the backend is now listening to.
-  overrideProps = ({
-    id,
-    path,
-    rendererID,
-    wasForwarded,
-    value
-  }) => {
-    if (!wasForwarded) {
-      this.overrideValueAtPath({
-        id,
-        path,
-        rendererID,
-        type: "props",
-        value
-      });
-    }
-  };
-  // Temporarily support older standalone front-ends by forwarding the older message types
-  // to the new "overrideValueAtPath" command the backend is now listening to.
-  overrideState = ({
-    id,
-    path,
-    rendererID,
-    wasForwarded,
-    value
-  }) => {
-    if (!wasForwarded) {
-      this.overrideValueAtPath({
-        id,
-        path,
-        rendererID,
-        type: "state",
-        value
-      });
-    }
-  };
-  onReloadAndProfileSupportedByHost = () => {
-    this._bridge.send("isReloadAndProfileSupportedByBackend", true);
-  };
-  reloadAndProfile = ({ recordChangeDescriptions, recordTimeline }) => {
-    if (typeof this._onReloadAndProfile === "function") {
-      this._onReloadAndProfile(recordChangeDescriptions, recordTimeline);
-    }
-    this._bridge.send("reloadAppForProfiling");
-  };
-  renamePath = ({
-    hookID,
-    id,
-    newPath,
-    oldPath,
-    rendererID,
-    type
-  }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
-    } else {
-      renderer.renamePath(type, id, hookID, oldPath, newPath);
-    }
-  };
   selectNode(target) {
     const id = this.getIDForHostInstance(target);
     if (id !== null) {
@@ -2227,171 +2385,12 @@ var Agent = class extends EventEmitter {
       rendererInterface.setTrackedPath(selection.path);
     }
   }
-  setTraceUpdatesEnabled = (traceUpdatesEnabled) => {
-    this._traceUpdatesEnabled = traceUpdatesEnabled;
-    toggleEnabled(traceUpdatesEnabled);
-    for (const rendererID in this._rendererInterfaces) {
-      const renderer = this._rendererInterfaces[rendererID];
-      renderer.setTraceUpdatesEnabled(traceUpdatesEnabled);
-    }
-  };
-  syncSelectionFromBuiltinElementsPanel = () => {
-    const target = window.__REACT_DEVTOOLS_GLOBAL_HOOK__.$0;
-    if (target == null) {
-      return;
-    }
-    this.selectNode(target);
-  };
-  shutdown = () => {
-    this.emit("shutdown");
-    this._bridge.removeAllListeners();
-    this.removeAllListeners();
-  };
-  startProfiling = ({ recordChangeDescriptions, recordTimeline }) => {
-    this._isProfiling = true;
-    for (const rendererID in this._rendererInterfaces) {
-      const renderer = this._rendererInterfaces[rendererID];
-      renderer.startProfiling(recordChangeDescriptions, recordTimeline);
-    }
-    this._bridge.send("profilingStatus", this._isProfiling);
-  };
-  stopProfiling = () => {
-    this._isProfiling = false;
-    for (const rendererID in this._rendererInterfaces) {
-      const renderer = this._rendererInterfaces[rendererID];
-      renderer.stopProfiling();
-    }
-    this._bridge.send("profilingStatus", this._isProfiling);
-  };
-  stopInspectingNative = (selected) => {
-    this._bridge.send("stopInspectingHost", selected);
-  };
-  storeAsGlobal = ({
-    count,
-    id,
-    path,
-    rendererID
-  }) => {
-    const renderer = this._rendererInterfaces[rendererID];
-    if (renderer == null) {
-      console.warn(`Invalid renderer id "${rendererID}" for element "${id}"`);
-    } else {
-      renderer.storeAsGlobal(id, path, count);
-    }
-  };
-  updateHookSettings = (settings) => {
-    this.emit("updateHookSettings", settings);
-  };
-  getHookSettings = () => {
-    this.emit("getHookSettings");
-  };
-  onHookSettings = (settings) => {
-    this._bridge.send("hookSettings", settings);
-  };
-  updateComponentFilters = (componentFilters) => {
-    for (const rendererIDString in this._rendererInterfaces) {
-      const rendererID = +rendererIDString;
-      const renderer = this._rendererInterfaces[rendererID];
-      if (this._lastSelectedRendererID === rendererID) {
-        const path = renderer.getPathForElement(this._lastSelectedElementID);
-        if (path !== null) {
-          renderer.setTrackedPath(path);
-          this._persistedSelection = {
-            rendererID,
-            path
-          };
-        }
-      }
-      renderer.updateComponentFilters(componentFilters);
-    }
-  };
-  getEnvironmentNames = () => {
-    let accumulatedNames = null;
-    for (const rendererID in this._rendererInterfaces) {
-      const renderer = this._rendererInterfaces[+rendererID];
-      const names = renderer.getEnvironmentNames();
-      if (accumulatedNames === null) {
-        accumulatedNames = names;
-      } else {
-        for (let i = 0; i < names.length; i++) {
-          if (accumulatedNames.indexOf(names[i]) === -1) {
-            accumulatedNames.push(names[i]);
-          }
-        }
-      }
-    }
-    this._bridge.send("environmentNames", accumulatedNames || []);
-  };
-  onTraceUpdates = (nodes) => {
-    this.emit("traceUpdates", nodes);
-  };
-  onFastRefreshScheduled = () => {
-    if (__DEBUG__) {
-      debug("onFastRefreshScheduled");
-    }
-    this._bridge.send("fastRefreshScheduled");
-  };
-  onHookOperations = (operations) => {
-    if (__DEBUG__) {
-      debug(
-        "onHookOperations",
-        `(${operations.length}) [${operations.join(", ")}]`
-      );
-    }
-    this._bridge.send("operations", operations);
-    if (this._persistedSelection !== null) {
-      const rendererID = operations[0];
-      if (this._persistedSelection.rendererID === rendererID) {
-        const renderer = this._rendererInterfaces[rendererID];
-        if (renderer == null) {
-          console.warn(`Invalid renderer id "${rendererID}"`);
-        } else {
-          const prevMatch = this._persistedSelectionMatch;
-          const nextMatch = renderer.getBestMatchForTrackedPath();
-          this._persistedSelectionMatch = nextMatch;
-          const prevMatchID = prevMatch !== null ? prevMatch.id : null;
-          const nextMatchID = nextMatch !== null ? nextMatch.id : null;
-          if (prevMatchID !== nextMatchID) {
-            if (nextMatchID !== null) {
-              this._bridge.send("selectElement", nextMatchID);
-            }
-          }
-          if (nextMatch !== null && nextMatch.isFullMatch) {
-            this._persistedSelection = null;
-            this._persistedSelectionMatch = null;
-            renderer.setTrackedPath(null);
-          }
-        }
-      }
-    }
-  };
-  getIfHasUnsupportedRendererVersion = () => {
-    this.emit("getIfHasUnsupportedRendererVersion");
-  };
   onUnsupportedRenderer() {
     this._bridge.send("unsupportedRendererVersion");
   }
-  _persistSelectionTimerScheduled = false;
-  _lastSelectedRendererID = -1;
-  _lastSelectedElementID = -1;
-  _persistSelection = () => {
-    this._persistSelectionTimerScheduled = false;
-    const rendererID = this._lastSelectedRendererID;
-    const id = this._lastSelectedElementID;
-    const renderer = this._rendererInterfaces[rendererID];
-    const path = renderer != null ? renderer.getPathForElement(id) : null;
-    if (path !== null) {
-      sessionStorageSetItem(
-        SESSION_STORAGE_LAST_SELECTION_KEY,
-        JSON.stringify({ rendererID, path })
-      );
-    } else {
-      sessionStorageRemoveItem(SESSION_STORAGE_LAST_SELECTION_KEY);
-    }
-  };
 };
 
-// src/createBridge.js
+// react-devtools-shared/src/createBridge.js
 function createBridge(contentWindow, wall) {
   const { parent } = contentWindow;
   if (wall == null) {
@@ -2412,8 +2411,8 @@ function createBridge(contentWindow, wall) {
   }
   return new bridge_default(wall);
 }
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
+export {
   Agent,
   createBridge
-});
+};
+//# sourceMappingURL=createReactDevtoolsAgent.js.map
