@@ -1,8 +1,8 @@
 {
-  "name": "@granite-js/plugin-shared-modules",
+  "name": "@granite-js/plugin-micro-frontend",
   "type": "module",
   "version": "0.1.5",
-  "description": "Plugin for sharing modules",
+  "description": "Plugin for micro frontend",
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",

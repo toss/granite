@@ -1,9 +1,9 @@
 import pkg from '@granite-js/native/package.json';
 import { hermes } from '@granite-js/plugin-hermes';
-import { shared } from '@granite-js/plugin-shared-modules';
+import { microFrontend } from '@granite-js/plugin-micro-frontend';
 import { defineConfig } from '@granite-js/react-native/config';
 
-const SHARED_MODULE_CONFIG = { singleton: true, eager: true } as const;
+const SHARED_MODULE_CONFIG = { eager: true } as const;
 
 function getNativePackages(excludePackages: string[] = []) {
   return Object.keys(pkg.dependencies)
@@ -13,7 +13,7 @@ function getNativePackages(excludePackages: string[] = []) {
         ...prev,
         [libName]: SHARED_MODULE_CONFIG,
       }),
-      {} as Record<string, { singleton: boolean; eager: boolean }>
+      {} as Record<string, { eager: boolean }>
     );
 }
 
@@ -23,7 +23,7 @@ export default defineConfig({
   entryFile: 'index.ts',
   plugins: [
     hermes(),
-    shared({
+    microFrontend({
       name: 'shared',
       remote: {
         host: 'localhost',

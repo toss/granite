@@ -1,5 +1,5 @@
 ---
-'@granite-js/plugin-shared-modules': patch
+'@granite-js/plugin-micro-frontend': patch
 ---
 
-impl shared modules plugin
+impl micro frontend plugin

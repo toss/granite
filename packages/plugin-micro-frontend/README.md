@@ -1,4 +1,4 @@
-# @granite-js/plugin-shared-modules
+# @granite-js/plugin-micro-frontend
 
 Plugin for sharing modules
 
@@ -6,25 +6,25 @@ Plugin for sharing modules
 
 ```bash
 # NPM
-npm install @granite-js/plugin-shared-modules
+npm install @granite-js/plugin-micro-frontend
 
 # pnpm
-pnpm add @granite-js/plugin-shared-modules
+pnpm add @granite-js/plugin-micro-frontend
 
 # yarn
-yarn add @granite-js/plugin-shared-modules
+yarn add @granite-js/plugin-micro-frontend
 ```
 
 ## Usage
 
 ```ts
 import { defineConfig } from '@granite-js/react-native/config';
-import { shared } from '@granite-js/plugin-shared-modules';
+import { microFrontend } from '@granite-js/plugin-micro-frontend';
 
 // Example 1. Host container
 export default defineConfig({
   plugins: [
-    shared({
+    microFrontend({
       /**
        * Container name
        */
@@ -42,12 +42,6 @@ export default defineConfig({
       shared: {
         react: {
           /**
-           * Whether the module is a singleton
-           *
-           * Only `true` is supported for now.
-           */
-          singleton: true,
-          /**
            * Whether the module is eager
            *
            * Specifies whether the module is eager; if true, it's bundled with the host, otherwise loaded from the shared registry
@@ -55,7 +49,6 @@ export default defineConfig({
           eager: true,
         },
         'react-native': {
-          singleton: true,
           eager: true,
         },
       },
@@ -66,7 +59,7 @@ export default defineConfig({
 // Example 2. Remote container
 export default defineConfig({
   plugins: [
-    shared({
+    microFrontend({
       /**
        * Container name
        */
@@ -74,15 +67,11 @@ export default defineConfig({
       /**
        * Shared modules config
        */
-      shared: {
+      shared: [
         // Libraries are loaded from the shared registry
-        react: {
-          singleton: true,
-        },
-        'react-native': {
-          singleton: true,
-        },
-      },
+        'react',
+        'react-native',
+      ],
     }),
   ],
 });

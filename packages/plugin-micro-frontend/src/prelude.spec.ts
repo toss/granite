@@ -11,11 +11,9 @@ describe('prelude', () => {
       },
       shared: {
         react: {
-          singleton: true,
           eager: true,
         },
         'react-native': {
-          singleton: true,
           eager: true,
         },
       },
@@ -32,7 +30,7 @@ describe('prelude', () => {
           }
           ",
         "preludeScript": "import { registerShared, createContainer } from '@granite-js/plugin-shared-modules/runtime';
-      createContainer('test', {"remote":{"host":"localhost","port":8082},"shared":{"react":{"singleton":true,"eager":true},"react-native":{"singleton":true,"eager":true}}});
+      createContainer('test', {"remote":{"host":"localhost","port":8082},"shared":{"react":{"eager":true},"react-native":{"eager":true}}});
 
           // react
           import * as __mod0 from 'react';

@@ -1,6 +1,6 @@
-import type { SharedModulesPluginOptions } from './types';
+import type { MicroFrontendPluginOptions } from './types';
 
-export function getPreludeConfig(options: SharedModulesPluginOptions) {
+export function getPreludeConfig(options: MicroFrontendPluginOptions) {
   const sharedEntries = Object.entries(options.shared ?? {});
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const eagerEntries = sharedEntries.filter(([_, config]) => config.eager === true);
@@ -15,7 +15,7 @@ export function getPreludeConfig(options: SharedModulesPluginOptions) {
   });
 
   const preludeScript = [
-    `import { registerShared, createContainer } from '@granite-js/plugin-shared-modules/runtime';`,
+    `import { registerShared, createContainer } from '@granite-js/plugin-micro-frontend/runtime';`,
     `createContainer('${options.name}', ${JSON.stringify({ remote: options.remote, shared: options.shared })});`,
     ...registerStatements,
   ].join('\n');

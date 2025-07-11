@@ -5,10 +5,11 @@ import { log } from './log';
 import { getPreludeConfig } from './prelude';
 import { fetchRemoteBundle } from './remote';
 import { virtualInitializeCoreConfig, virtualSharedConfig } from './resolver';
-import type { SharedModulesPluginOptions } from './types';
+import type { MicroFrontendPluginOptions } from './types';
+import { intoShared } from './utils/intoShared';
 
-export const sharedModulesPlugin = async (options: SharedModulesPluginOptions): Promise<GranitePluginCore> => {
-  const sharedEntries = Object.entries(options.shared ?? {});
+export const microFrontendPlugin = async (options: MicroFrontendPluginOptions): Promise<GranitePluginCore> => {
+  const sharedEntries = Object.entries(intoShared(options.shared) ?? {});
   const nonEagerEntries = sharedEntries
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .filter(([_, config]) => config.eager !== true);
@@ -40,7 +41,7 @@ export const sharedModulesPlugin = async (options: SharedModulesPluginOptions): 
   const virtualShared = virtualSharedConfig(nonEagerEntries);
 
   return {
-    name: 'shared-modules-plugin',
+    name: 'micro-frontend-plugin',
     config: {
       resolver: {
         alias: [...(virtualInitializeCore?.alias ?? []), ...virtualShared.alias],

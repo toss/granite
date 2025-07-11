@@ -5015,7 +5015,7 @@ __metadata:
     "@granite-js/mpack": "workspace:*"
     "@granite-js/native": "workspace:*"
     "@granite-js/plugin-hermes": "workspace:*"
-    "@granite-js/plugin-shared-modules": "workspace:*"
+    "@granite-js/plugin-micro-frontend": "workspace:*"
     "@granite-js/react-native": "workspace:*"
     "@react-native-async-storage/async-storage": "npm:1.18.2"
     "@react-native-community/blur": "npm:4.3.2"
@@ -5053,8 +5053,8 @@ __metadata:
     "@granite-js/native": "workspace:*"
     "@granite-js/plugin-env": "workspace:*"
     "@granite-js/plugin-hermes": "workspace:*"
+    "@granite-js/plugin-micro-frontend": "workspace:*"
     "@granite-js/plugin-router": "workspace:*"
-    "@granite-js/plugin-shared-modules": "workspace:*"
     "@granite-js/react-native": "workspace:*"
     "@testing-library/react-native": "npm:^12.9.0"
     "@types/babel__core": "npm:^7.20.5"
@@ -5457,6 +5457,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@granite-js/plugin-micro-frontend@workspace:*, @granite-js/plugin-micro-frontend@workspace:packages/plugin-micro-frontend":
+  version: 0.0.0-use.local
+  resolution: "@granite-js/plugin-micro-frontend@workspace:packages/plugin-micro-frontend"
+  dependencies:
+    "@granite-js/plugin-core": "workspace:*"
+    es-toolkit: "npm:^1.38.0"
+    picocolors: "npm:^1.1.1"
+    tsdown: "npm:^0.11.11"
+    typescript: "npm:^5.8.3"
+    vitest: "npm:^3.2.4"
+  languageName: unknown
+  linkType: soft
+
 "@granite-js/plugin-router@workspace:*, @granite-js/plugin-router@workspace:packages/plugin-router":
   version: 0.0.0-use.local
   resolution: "@granite-js/plugin-router@workspace:packages/plugin-router"
@@ -5485,19 +5498,6 @@ __metadata:
     tsdown: "npm:^0.11.11"
     typescript: "npm:^5.8.3"
     vitest: "npm:^3.1.4"
-  languageName: unknown
-  linkType: soft
-
-"@granite-js/plugin-shared-modules@workspace:*, @granite-js/plugin-shared-modules@workspace:packages/plugin-shared-modules":
-  version: 0.0.0-use.local
-  resolution: "@granite-js/plugin-shared-modules@workspace:packages/plugin-shared-modules"
-  dependencies:
-    "@granite-js/plugin-core": "workspace:*"
-    es-toolkit: "npm:^1.38.0"
-    picocolors: "npm:^1.1.1"
-    tsdown: "npm:^0.11.11"
-    typescript: "npm:^5.8.3"
-    vitest: "npm:^3.2.4"
   languageName: unknown
   linkType: soft
 

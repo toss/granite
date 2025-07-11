@@ -1,4 +1,4 @@
-export interface SharedModulesPluginOptions {
+export interface MicroFrontendPluginOptions {
   /**
    * Container name
    */
@@ -10,7 +10,7 @@ export interface SharedModulesPluginOptions {
   /**
    * Shared modules config
    */
-  shared?: SharedConfig;
+  shared?: SharedConfig | string[];
 }
 
 export interface RemoteConfig {
@@ -26,12 +26,6 @@ export interface RemoteConfig {
 
 export interface SharedConfig {
   [lib: string]: {
-    /**
-     * Whether the module is a singleton
-     *
-     * Only `true` is supported for now.
-     */
-    singleton: true;
     /**
      * Whether the module is eager
      *

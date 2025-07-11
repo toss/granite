@@ -35,7 +35,7 @@
     "@granite-js/forge-cli": "workspace:*",
     "@granite-js/native": "workspace:*",
     "@granite-js/plugin-hermes": "workspace:*",
-    "@granite-js/plugin-shared-modules": "workspace:*",
+    "@granite-js/plugin-micro-frontend": "workspace:*",
     "@types/node": "^22.10.2",
     "@types/react": "18.3.3",
     "@types/react-native-video": "^5.0.20",
