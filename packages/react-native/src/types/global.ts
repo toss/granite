@@ -15,12 +15,6 @@ export interface GraniteGlobal {
 
 declare global {
   // @internal
-  var __SPLIT_CHUNK_ENABLED__: boolean;
-
-  // @internal
-  var __granite_require__: (id: string) => any;
-
-  // @internal
   var __granite: GraniteGlobal;
 
   // @internal

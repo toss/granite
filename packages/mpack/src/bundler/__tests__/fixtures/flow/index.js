@@ -1,25 +1,45 @@
-import React, { Component } from "react";
+// @flow
 
-type Reducer<T, U> = (u: U, t: T) => U;
+type Operation = 'add' | 'sub' | 'mul' | 'div';
 
-function reduce<T, U>(arr: Array<T>, reducer: Reducer<T, U>, base: U): U {
-  let acc = base;
-  for (const value of arr) {
-    acc = reducer(acc, value);
-  }
-  return acc;
+function add(a: number, b: number): number {
+  return a + b;
 }
 
-class App extends Component {
-  render() {
-    return <span>Hello, world!</span>;
-  }
+function sub(a: number, b: number): number {
+  return a - b;
 }
 
-const OtherComponent = React.createClass({
-  render() {
-    return null;
-  }
-});
+function mul(a: number, b: number): number {
+  return a * b;
+}
 
-export default App;
+function div(a: number, b: number): number {
+  if (b === 0) {
+    throw new Error('Division by zero');
+  }
+  return a / b;
+}
+
+const operations: { [key: Operation]: (number, number) => number } = {
+  add,
+  sub,
+  mul,
+  div
+};
+
+const op: mixed = 'mul';
+const typedOp: Operation = (op: any);
+
+function safeExecute(fn: ?(number, number) => number, a: number, b: number): number {
+  if (fn == null) {
+    throw new Error('Function not found');
+  }
+  return fn(a, b);
+}
+
+const a: number = 10;
+const b: number = 5;
+
+const result: number = safeExecute(operations[typedOp], a, b);
+console.log(`${typedOp}(${a}, ${b}) = ${result}`);

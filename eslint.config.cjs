@@ -41,6 +41,7 @@ module.exports = tseslint.config(
       '**/bin/*.js',
       '.pnp.*',
       '.yarn/',
+      '**/.granite/',
     ],
   },
   eslint.configs.recommended,

@@ -1,20 +1,24 @@
 import { createRoute, type RegisterScreen } from '@granite-js/react-native';
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { context } from '../../../require.context';
 
-export const Route = createRoute('/', {
+export const Route = createRoute('/showcase', {
   validateParams: (params) => params,
   component: Showcase,
 });
 
-const SHOWCASE_PAGES = (context.keys() as string[])
-  .filter((key) => {
-    return key.startsWith('./showcase/') && !(key.endsWith('index.tsx') || key.endsWith('_layout.tsx'));
-  })
-  .map((key) => key.replace(/^\.|\.tsx$/g, '')) as (keyof RegisterScreen)[];
-
 function Showcase() {
   const navigation = Route.useNavigation();
+  const showcasePages = useMemo(
+    () =>
+      navigation
+        .getState()
+        .routeNames.filter((key) => {
+          return key.startsWith('/showcase/') && !(key.endsWith('index.tsx') || key.endsWith('_layout.tsx'));
+        })
+        .map((key) => key.replace(/^\.tsx$/g, '')) as (keyof RegisterScreen)[],
+    [navigation]
+  );
 
   const handlePressShowcaseItem = (page: keyof RegisterScreen) => {
     navigation.navigate(page);
@@ -22,7 +26,7 @@ function Showcase() {
 
   return (
     <ScrollView style={{ flex: 1 }}>
-      {SHOWCASE_PAGES.map((page) => (
+      {showcasePages.map((page) => (
         <ShowcaseItem key={page} page={page} onPress={handlePressShowcaseItem.bind(null, page)} />
       ))}
     </ScrollView>

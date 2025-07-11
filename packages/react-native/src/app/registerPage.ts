@@ -21,9 +21,7 @@ const globalThis = new Function('return this')();
  * ```
  */
 export function registerPage(Page: ComponentType<any>): ComponentType<any> {
-  if (globalThis.__SPLIT_CHUNK_ENABLED__) {
-    globalThis.Page = Page;
-  }
+  globalThis.Page = Page;
 
   return Page;
 }

@@ -20,8 +20,8 @@ function getCoreModule() {
 }
 
 export function loadAppContent(): Promise<LoadResult> {
-  const bundleLoadTask: Promise<void> = global?.__mpackInternal?.evaluateMainBundle
-    ? global?.__mpackInternal?.evaluateMainBundle()
+  const bundleLoadTask: Promise<void> = global?.__mpackInternal?.loadRemote
+    ? global?.__mpackInternal?.loadRemote()
     : getCoreModule().importLazy();
 
   return bundleLoadTask.then(resolveAppContent).then((Component) => ({ default: Component }));

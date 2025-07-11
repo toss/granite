@@ -53,17 +53,53 @@ export async function initializeFixture() {
     await $('yarn', ['add', ...deps]);
   }
 
+  async function getVirtualPath(request: string) {
+    const virtualPath = await $('node', ['-e', `console.log(require.resolve('${request}'));`]);
+    return virtualPath.stdout.trim();
+  }
+
   async function buildWithConfig(config: BuildConfig, options?: execa.Options) {
     const buildScriptPath = path.resolve(fixtureDir, 'build.js');
     const buildScript = await fs.promises.readFile(path.resolve(__dirname, './fixtures/build-with-config.js'), {
       encoding: 'utf-8',
     });
 
-    await fs.promises.writeFile(
-      buildScriptPath,
-      applyPlaceholders(buildScript, { config: JSON.stringify(config) }),
-      'utf-8'
+    const VIRTUAL_INITIALIZE_CORE_PROTOCOL = 'virtual-initialize-core';
+    const reactNativePath = path.dirname(await getVirtualPath('react-native'));
+    const initializeCorePath = path.join(reactNativePath, 'Libraries/Core/InitializeCore.js');
+    const replaces = {
+      __load_fn__: `() => ({ loader: 'js', contents: '// noop' })`,
+    };
+
+    /**
+     * In testing environment, we need to replace the `InitializeCore.js` with a virtual protocol
+     * because cannot evaluate React Native specific code in Node.js environment.
+     */
+    config.resolver = {
+      ...config.resolver,
+      alias: [
+        {
+          from: `prelude:${initializeCorePath}`,
+          to: `${VIRTUAL_INITIALIZE_CORE_PROTOCOL}:noop`,
+          exact: false,
+        },
+        ...(config.resolver?.alias ?? []),
+      ],
+      protocols: {
+        ...config.resolver?.protocols,
+        [VIRTUAL_INITIALIZE_CORE_PROTOCOL]: {
+          // @ts-expect-error -- function cannot be serialized
+          load: '__load_fn__',
+        },
+      },
+    };
+
+    const serializedConfig = Object.entries(replaces).reduce(
+      (prev, [key, value]) => prev.replaceAll(`"${key}"`, value),
+      JSON.stringify(config, null, 2)
     );
+
+    await fs.promises.writeFile(buildScriptPath, applyPlaceholders(buildScript, { config: serializedConfig }), 'utf-8');
 
     await $('node', [buildScriptPath], options);
   }
