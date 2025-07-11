@@ -9,6 +9,19 @@ import { createTmpDir, TmpDirManager } from './createTmpDir';
 const noop = () => {};
 
 const YARN_VERSION = '4.9.1';
+const YARN_CONFIGS: Record<string, string | string[]> = {
+  enableImmutableInstalls: JSON.stringify(false),
+  packageExtensions: [
+    '--json',
+    JSON.stringify({
+      '@typescript-eslint/type-utils@^8': {
+        dependencies: {
+          '@typescript-eslint/types': '^8',
+        },
+      },
+    }),
+  ],
+};
 
 type ToolType = 'biome' | 'eslint-prettier';
 
@@ -105,7 +118,13 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     await fs.writeFile(path.join(manager.dir, appName, 'yarn.lock'), '');
 
     await manager.$('yarn', ['set', 'version', YARN_VERSION], { cwd: appName });
-    await manager.$('yarn', ['config', 'set', 'enableImmutableInstalls', String(false)], { cwd: appName });
+    await Object.entries(YARN_CONFIGS).reduce(async (prev, [name, value]) => {
+      await prev;
+      await manager.$('yarn', ['config', 'set', name, ...(typeof value === 'string' ? [value] : value)], {
+        cwd: appName,
+      });
+    }, Promise.resolve());
+
     await manager.$('yarn', ['install', '--no-immutable'], { cwd: appName });
 
     console.log('✅ yarn install');
