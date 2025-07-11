@@ -1,3 +1,4 @@
+import * as fs from 'fs/promises';
 import type { GranitePluginCore } from '@granite-js/plugin-core';
 import { noop } from 'es-toolkit';
 import { extractSentryDebugId } from './extractSentryDebugId';
@@ -31,7 +32,8 @@ export const sentryPlugin = ({ enabled = true, ...options }: SentryPluginOptions
 
         for (const file of files) {
           const { bundle, sourcemap } = file;
-          const debugId = await extractSentryDebugId(bundle);
+          const bundleContent = await fs.readFile(bundle, 'utf-8');
+          const debugId = await extractSentryDebugId(bundleContent);
 
           if (debugId == null) {
             console.error('Cannot find Sentry Debug ID');
