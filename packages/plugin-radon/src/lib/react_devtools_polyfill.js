@@ -9,9 +9,32 @@ if (hook && !hook.reactDevtoolsAgent) {
     const { Agent, createBridge } = require('./createReactDevtoolsAgent.js');
     const rendererConfig = require('./createRendererConfig.js').default;
     const hook = globalThis.__REACT_DEVTOOLS_GLOBAL_HOOK__;
-    if (hook && hook.renderers && hook.renderers.has(1)) {
+    
+    const setupRendererConfig = () => {
+      if (hook && hook.renderers && hook.renderers.has(1)) {
         const renderer = hook.renderers.get(1);
         renderer.rendererConfig = rendererConfig;
+        return true;
+      }
+      return false;
+    };
+    
+    if (!setupRendererConfig()) {
+      
+      if (hook && hook.inject) {
+        const originalInject = hook.inject;
+        hook.inject = function(renderer) {
+          const result = originalInject.call(this, renderer);
+          
+          setTimeout(() => {
+            if (setupRendererConfig()) {
+              console.log("✅ Radon Runtime: Renderer configured via inject hook!");
+            }
+          }, 0);
+          
+          return result;
+        };
+      }
     }
 
 
