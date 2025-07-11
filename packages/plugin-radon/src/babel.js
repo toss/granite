@@ -16,12 +16,10 @@ module.exports = function(api) {
       
       // router.gen.ts 파일이 존재하는지 확인
       if (fs.existsSync(routerGenPath)) {
-        console.log('🔥 RADON BABEL PLUGIN: Found router.gen.ts, parsing routes');
         return parseRouterGenFile(routerGenPath);
       }
       
       // router.gen.ts가 없으면 pages/ 폴더 직접 스캔 (fallback)
-      console.log('🔥 RADON BABEL PLUGIN: router.gen.ts not found, scanning pages/ folder');
       return scanPagesFolderDirect();
       
     } catch (error) {
@@ -59,44 +57,9 @@ module.exports = function(api) {
         });
       }
       
-      console.log('🔥 RADON BABEL PLUGIN: Parsed routes from router.gen.ts:', routes);
       return routes;
     } catch (error) {
       console.error('🔥 RADON BABEL PLUGIN: Failed to parse router.gen.ts:', error);
-      return [];
-    }
-  };
-  
-  // pages/ 폴더를 직접 스캔 (fallback 방식)
-  const scanPagesFolderDirect = () => {
-    try {
-      const glob = require('glob');
-      const routes = [];
-      
-      // pages/**/*.{tsx,ts} 패턴으로 파일 스캔 (Granite Router 방식)
-      const pageFiles = glob.sync('pages/**/*.{tsx,ts}', { 
-        cwd: appRoot,
-        ignore: ['**/pages/_*.{tsx,ts}'] // layout 파일 제외
-      });
-      
-      console.log('🔥 RADON BABEL PLUGIN: Found page files:', pageFiles);
-      
-      pageFiles.forEach(filePath => {
-        // pages/index.tsx -> index
-        const pagePath = filePath.replace(/^pages\//, '').replace(/\.(tsx|ts)$/, '');
-        const routePath = convertPagePathToRoute(pagePath);
-        
-        routes.push({
-          path: routePath,
-          filePath: './' + filePath,
-          type: 'route'
-        });
-      });
-      
-      console.log('🔥 RADON BABEL PLUGIN: Generated routes from pages scan:', routes);
-      return routes;
-    } catch (error) {
-      console.error('🔥 RADON BABEL PLUGIN: Pages scan failed:', error);
       return [];
     }
   };
@@ -274,11 +237,9 @@ module.exports = function(api) {
               const graniteDetectionCode = `
 // Mark that Granite Router is being used
 globalThis.__GRANITE_ROUTER_DETECTED__ = true;
-console.log("✅ Radon Runtime: Granite Router detected");
 
 // 자동 스캔된 라우트 주입
 globalThis.__GRANITE_ROUTES = ${routesJson};
-console.log("🔥 Radon Runtime: Auto-injected routes:", globalThis.__GRANITE_ROUTES);
 `;
               
               injectCode(programPath, graniteDetectionCode, false);
@@ -293,7 +254,6 @@ console.log("🔥 Radon Runtime: Auto-injected routes:", globalThis.__GRANITE_RO
           
           if (isPageFile && !state.file.metadata.radonPageInjected) {
             try {
-              console.log('🔥 RADON BABEL PLUGIN: Processing page file:', filename);
               
               // AST를 순회하면서 useNavigation 훅 사용 여부 확인
               let usesNavigation = false;
@@ -333,7 +293,6 @@ console.log("🔥 Radon Runtime: Auto-injected routes:", globalThis.__GRANITE_RO
               });
               
               if (usesNavigation) {
-                console.log('🔥 RADON BABEL PLUGIN: Found useNavigation in', path.basename(filename));
                 
                 // React import 추가 (필요한 경우)
                 if (!hasReactDefaultImport) {
@@ -342,7 +301,6 @@ console.log("🔥 Radon Runtime: Auto-injected routes:", globalThis.__GRANITE_RO
                     t.stringLiteral('react')
                   );
                   programPath.unshiftContainer('body', reactImport);
-                  console.log('🔥 RADON BABEL PLUGIN: Added React default import');
                 }
                 
                 // navigation 관련 호출을 찾아서 바로 다음에 등록 코드 추가
@@ -358,7 +316,6 @@ console.log("🔥 Radon Runtime: Auto-injected routes:", globalThis.__GRANITE_RO
                       if (variablePath.node.init.type === 'CallExpression' &&
                           variablePath.node.init.callee.name === 'useNavigation') {
                         isNavigationVariable = true;
-                        console.log('🔥 RADON BABEL PLUGIN: Found useNavigation() pattern:', variableName);
                       }
                       
                       // 패턴 2: const navigation = Route.useNavigation()
@@ -366,7 +323,6 @@ console.log("🔥 Radon Runtime: Auto-injected routes:", globalThis.__GRANITE_RO
                                variablePath.node.init.callee.type === 'MemberExpression' &&
                                variablePath.node.init.callee.property.name === 'useNavigation') {
                         isNavigationVariable = true;
-                        console.log('🔥 RADON BABEL PLUGIN: Found Route.useNavigation() pattern:', variableName);
                       }
                     }
                     
@@ -374,8 +330,6 @@ console.log("🔥 Radon Runtime: Auto-injected routes:", globalThis.__GRANITE_RO
                       // 해당 변수가 선언된 함수나 블록 찾기
                       const parentFunction = variablePath.getFunctionParent();
                       if (parentFunction) {
-                        const functionName = parentFunction.node.id?.name || 'Component';
-                        console.log('🔥 RADON BABEL PLUGIN: Adding registration to function:', functionName);
                         
                         // navigation 등록 코드 생성
                         const registrationCode = `
@@ -384,7 +338,6 @@ console.log("🔥 Radon Runtime: Auto-injected routes:", globalThis.__GRANITE_RO
     try {
       if (globalThis.__granite_register_navigation && ${variableName}) {
         globalThis.__granite_register_navigation(${variableName});
-        console.log("🔥 Radon Runtime: Auto-registered navigation from ${functionName}");
       }
     } catch (error) {
       console.log("🔥 Radon Runtime: Could not auto-register navigation:", error.message);
@@ -402,7 +355,6 @@ console.log("🔥 Radon Runtime: Auto-injected routes:", globalThis.__GRANITE_RO
                         // 변수 선언 바로 다음에 추가
                         const statement = variablePath.getStatementParent();
                         statement.insertAfter(registrationAST.program.body);
-                        console.log('🔥 RADON BABEL PLUGIN: Injected navigation registration after', variableName);
                       }
                     }
                   }
