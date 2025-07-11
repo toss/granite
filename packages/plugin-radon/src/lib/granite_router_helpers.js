@@ -30,10 +30,6 @@ export function checkNavigationDescriptorsEqual(a, b) {
 
 // Send navigation change event if the route has actually changed
 export function sendNavigationChange(previousRouteInfo, routeInfo, onNavigationChange) {
-  console.log("🔥 Radon Runtime: sendNavigationChange called");
-  console.log("🔥 Radon Runtime: Previous route:", previousRouteInfo.current);
-  console.log("🔥 Radon Runtime: Current route:", routeInfo);
-  
   const pathname = routeInfo?.pathname || routeInfo?.name;
   const params = routeInfo?.params || {};
   
@@ -45,8 +41,6 @@ export function sendNavigationChange(previousRouteInfo, routeInfo, onNavigationC
     (!previousRouteInfo.current ||
      !checkNavigationDescriptorsEqual(previousRouteInfo.current, routeInfo));
   
-  console.log("🔥 Radon Runtime: Route changed:", hasChanged);
-  
   if (hasChanged) {
     const navigationDescriptor = {
       name: displayName,
@@ -54,7 +48,6 @@ export function sendNavigationChange(previousRouteInfo, routeInfo, onNavigationC
       params,
       id: computeRouteIdentifier(pathname, params),
     };
-    console.log("🔥 Radon Runtime: Sending navigation descriptor:", navigationDescriptor);
     onNavigationChange(navigationDescriptor);
   }
   previousRouteInfo.current = routeInfo;
@@ -62,10 +55,8 @@ export function sendNavigationChange(previousRouteInfo, routeInfo, onNavigationC
 
 // Extract route list from Granite Router's routes array (Expo Router style)
 export function extractGraniteRouteList(routes) {
-  console.log("🔥 Radon Runtime: Extracting Granite route list from:", routes);
   
   if (!routes || !Array.isArray(routes)) {
-    console.log("🔥 Radon Runtime: Invalid routes input");
     return [];
   }
   
@@ -89,7 +80,6 @@ export function extractGraniteRouteList(routes) {
     return aPath.length - bPath.length;
   });
   
-  console.log("🔥 Radon Runtime: Sorted route list:", sortedRoutes);
   return sortedRoutes;
 }
 
