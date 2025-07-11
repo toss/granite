@@ -8,6 +8,119 @@ module.exports = function(api) {
   const { parse, types: t } = api; // types를 올바르게 destructure
   
   const appRoot = process.cwd();
+  
+  // Granite Router 자동 라우트 스캔 함수 (router.gen.ts 기반)
+  const scanGraniteRoutes = () => {
+    try {
+      const routerGenPath = path.join(appRoot, 'src', 'router.gen.ts');
+      
+      // router.gen.ts 파일이 존재하는지 확인
+      if (fs.existsSync(routerGenPath)) {
+        console.log('🔥 RADON BABEL PLUGIN: Found router.gen.ts, parsing routes');
+        return parseRouterGenFile(routerGenPath);
+      }
+      
+      // router.gen.ts가 없으면 pages/ 폴더 직접 스캔 (fallback)
+      console.log('🔥 RADON BABEL PLUGIN: router.gen.ts not found, scanning pages/ folder');
+      return scanPagesFolderDirect();
+      
+    } catch (error) {
+      console.error('🔥 RADON BABEL PLUGIN: Route scanning failed:', error);
+      return [{
+        path: "/",
+        filePath: "./pages/index.tsx",
+        type: "route"
+      }]; // 기본 라우트
+    }
+  };
+  
+  // router.gen.ts 파일을 파싱하여 라우트 정보 추출
+  const parseRouterGenFile = (routerGenPath) => {
+    try {
+      const content = fs.readFileSync(routerGenPath, 'utf8');
+      const routes = [];
+      
+      // import 구문에서 라우트 정보 추출
+      // import { Route as _IndexRoute } from '../pages/index';
+      // import { Route as _AboutRoute } from '../pages/about';
+      const importRegex = /import\s+\{\s*Route\s+as\s+_(\w+)Route\s*\}\s+from\s+['"]\.\.\/pages\/([^'"]+)['"]/g;
+      let match;
+      
+      while ((match = importRegex.exec(content)) !== null) {
+        const componentName = match[1];
+        const pagePath = match[2];
+        const routePath = convertPagePathToRoute(pagePath);
+        
+        routes.push({
+          path: routePath,
+          filePath: `./pages/${pagePath}.tsx`,
+          componentName: componentName,
+          type: 'route'
+        });
+      }
+      
+      console.log('🔥 RADON BABEL PLUGIN: Parsed routes from router.gen.ts:', routes);
+      return routes;
+    } catch (error) {
+      console.error('🔥 RADON BABEL PLUGIN: Failed to parse router.gen.ts:', error);
+      return [];
+    }
+  };
+  
+  // pages/ 폴더를 직접 스캔 (fallback 방식)
+  const scanPagesFolderDirect = () => {
+    try {
+      const glob = require('glob');
+      const routes = [];
+      
+      // pages/**/*.{tsx,ts} 패턴으로 파일 스캔 (Granite Router 방식)
+      const pageFiles = glob.sync('pages/**/*.{tsx,ts}', { 
+        cwd: appRoot,
+        ignore: ['**/pages/_*.{tsx,ts}'] // layout 파일 제외
+      });
+      
+      console.log('🔥 RADON BABEL PLUGIN: Found page files:', pageFiles);
+      
+      pageFiles.forEach(filePath => {
+        // pages/index.tsx -> index
+        const pagePath = filePath.replace(/^pages\//, '').replace(/\.(tsx|ts)$/, '');
+        const routePath = convertPagePathToRoute(pagePath);
+        
+        routes.push({
+          path: routePath,
+          filePath: './' + filePath,
+          type: 'route'
+        });
+      });
+      
+      console.log('🔥 RADON BABEL PLUGIN: Generated routes from pages scan:', routes);
+      return routes;
+    } catch (error) {
+      console.error('🔥 RADON BABEL PLUGIN: Pages scan failed:', error);
+      return [];
+    }
+  };
+  
+  // 페이지 경로를 라우트 경로로 변환 (Granite Router 방식)
+  const convertPagePathToRoute = (pagePath) => {
+    // index → /
+    // about → /about  
+    // user/profile → /user/profile
+    // user/[id] → /user/:id
+    
+    let routePath = pagePath
+      .replace(/\/index$/, '') // /index → 빈 문자열
+      .replace(/\[([^\]]+)\]/g, ':$1'); // [id] → :id (동적 라우트)
+    
+    // 빈 문자열이면 루트 경로
+    if (!routePath || routePath === '' || routePath === 'index') {
+      routePath = '/';
+    } else if (!routePath.startsWith('/')) {
+      routePath = '/' + routePath;
+    }
+    
+    return routePath;
+  };
 
   const requireFromAppDir = (module) => {
     const resolvedPath = require.resolve(module, { paths: [appRoot] });
@@ -149,6 +262,158 @@ module.exports = function(api) {
             }
             // Once handled, we are done with this file.
             return;
+          }
+
+          if (isTransforming("@granite-js/react-native")) {
+            try {
+              // 실제 파일 시스템에서 라우트 스캔
+              const scannedRoutes = scanGraniteRoutes();
+              const routesJson = JSON.stringify(scannedRoutes, null, 2);
+              
+              // 스캔된 라우트를 앱에 주입
+              const graniteDetectionCode = `
+// Mark that Granite Router is being used
+globalThis.__GRANITE_ROUTER_DETECTED__ = true;
+console.log("✅ Radon Runtime: Granite Router detected");
+
+// 자동 스캔된 라우트 주입
+globalThis.__GRANITE_ROUTES = ${routesJson};
+console.log("🔥 Radon Runtime: Auto-injected routes:", globalThis.__GRANITE_ROUTES);
+`;
+              
+              injectCode(programPath, graniteDetectionCode, false);
+              state.file.metadata.radonInjected = true;
+            } catch (e) {
+              console.error('🔥 RADON BABEL PLUGIN: Failed to inject Granite detection code:', e);
+            } 
+          }
+
+          // pages/ 폴더의 파일들에 navigation 등록 코드 자동 주입
+          const isPageFile = filename.includes('/pages/') && /\.(tsx|ts|jsx|js)$/.test(filename);
+          
+          if (isPageFile && !state.file.metadata.radonPageInjected) {
+            try {
+              console.log('🔥 RADON BABEL PLUGIN: Processing page file:', filename);
+              
+              // AST를 순회하면서 useNavigation 훅 사용 여부 확인
+              let usesNavigation = false;
+              let hasUseEffect = false;
+              let hasReactImport = false;
+              let hasReactDefaultImport = false;
+              
+              programPath.traverse({
+                ImportDeclaration(importPath) {
+                  const source = importPath.node.source.value;
+                  
+                  // React import 확인
+                  if (source === 'react') {
+                    hasReactImport = true;
+                    importPath.node.specifiers.forEach(spec => {
+                      if (spec.type === 'ImportDefaultSpecifier') {
+                        hasReactDefaultImport = true;
+                      }
+                      if (spec.type === 'ImportSpecifier' && spec.imported.name === 'useEffect') {
+                        hasUseEffect = true;
+                      }
+                    });
+                  }
+                  
+                  // createRoute import 확인 (Route.useNavigation 패턴 대비)
+                  if (source === '@granite-js/react-native') {
+                    importPath.node.specifiers.forEach(spec => {
+                      if (spec.type === 'ImportSpecifier' && spec.imported.name === 'useNavigation') {
+                        usesNavigation = true;
+                      }
+                      if (spec.type === 'ImportSpecifier' && spec.imported.name === 'createRoute') {
+                        usesNavigation = true; // createRoute가 있으면 Route.useNavigation을 사용할 가능성
+                      }
+                    });
+                  }
+                }
+              });
+              
+              if (usesNavigation) {
+                console.log('🔥 RADON BABEL PLUGIN: Found useNavigation in', path.basename(filename));
+                
+                // React import 추가 (필요한 경우)
+                if (!hasReactDefaultImport) {
+                  const reactImport = t.importDeclaration(
+                    [t.importDefaultSpecifier(t.identifier('React'))],
+                    t.stringLiteral('react')
+                  );
+                  programPath.unshiftContainer('body', reactImport);
+                  console.log('🔥 RADON BABEL PLUGIN: Added React default import');
+                }
+                
+                // navigation 관련 호출을 찾아서 바로 다음에 등록 코드 추가
+                programPath.traverse({
+                  VariableDeclarator(variablePath) {
+                    let isNavigationVariable = false;
+                    let variableName = null;
+                    
+                    if (variablePath.node.init && variablePath.node.id.type === 'Identifier') {
+                      variableName = variablePath.node.id.name;
+                      
+                      // 패턴 1: const navigation = useNavigation()
+                      if (variablePath.node.init.type === 'CallExpression' &&
+                          variablePath.node.init.callee.name === 'useNavigation') {
+                        isNavigationVariable = true;
+                        console.log('🔥 RADON BABEL PLUGIN: Found useNavigation() pattern:', variableName);
+                      }
+                      
+                      // 패턴 2: const navigation = Route.useNavigation()
+                      else if (variablePath.node.init.type === 'CallExpression' &&
+                               variablePath.node.init.callee.type === 'MemberExpression' &&
+                               variablePath.node.init.callee.property.name === 'useNavigation') {
+                        isNavigationVariable = true;
+                        console.log('🔥 RADON BABEL PLUGIN: Found Route.useNavigation() pattern:', variableName);
+                      }
+                    }
+                    
+                    if (isNavigationVariable && variableName) {
+                      // 해당 변수가 선언된 함수나 블록 찾기
+                      const parentFunction = variablePath.getFunctionParent();
+                      if (parentFunction) {
+                        const functionName = parentFunction.node.id?.name || 'Component';
+                        console.log('🔥 RADON BABEL PLUGIN: Adding registration to function:', functionName);
+                        
+                        // navigation 등록 코드 생성
+                        const registrationCode = `
+  // 🔥 RadonIDE: Auto-register navigation object
+  React.useEffect(() => {
+    try {
+      if (globalThis.__granite_register_navigation && ${variableName}) {
+        globalThis.__granite_register_navigation(${variableName});
+        console.log("🔥 Radon Runtime: Auto-registered navigation from ${functionName}");
+      }
+    } catch (error) {
+      console.log("🔥 Radon Runtime: Could not auto-register navigation:", error.message);
+    }
+  }, [${variableName}]);
+`;
+                        
+                        // AST로 파싱
+                        const registrationAST = parse(registrationCode, { 
+                          sourceType: 'module', 
+                          filename: 'navigation-registration.js',
+                          parserOpts: { allowReturnOutsideFunction: true }
+                        });
+                        
+                        // 변수 선언 바로 다음에 추가
+                        const statement = variablePath.getStatementParent();
+                        statement.insertAfter(registrationAST.program.body);
+                        console.log('🔥 RADON BABEL PLUGIN: Injected navigation registration after', variableName);
+                      }
+                    }
+                  }
+                });
+                
+                state.file.metadata.radonPageInjected = true;
+              }
+              
+            } catch (error) {
+              console.error('🔥 RADON BABEL PLUGIN: Failed to process page file:', error);
+            }
           }
         }
       },

@@ -25,6 +25,6 @@ export default defineConfig([
     clean: false, // Important: do not clean the dist folder again
     bundle: true,
     platform: 'node',
-    external: [/^react-native\//],
+    external: [/^react-native\//, '@granite-js/react-native', 'react'],
   }
 ]);

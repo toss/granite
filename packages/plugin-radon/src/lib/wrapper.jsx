@@ -20,6 +20,27 @@ export function registerNavigationPlugin(name, plugin) {
   navigationPlugins.push({ name, plugin });
 }
 
+// Granite navigation plugin 로드 시도 (Granite Router 감지된 경우만)
+let graniteNavigationPlugin = null;
+if (globalThis.__GRANITE_ROUTER_DETECTED__) {
+  try {
+    graniteNavigationPlugin = require('./granite_navigation_plugin');
+    console.log("✅ Radon Runtime: Granite navigation plugin loaded");
+    
+    // 즉시 플러그인 등록
+    if (graniteNavigationPlugin && graniteNavigationPlugin.useGraniteRouterPluginMainHook) {
+      console.log("🔥 Radon Runtime: Registering Granite navigation plugin immediately");
+      registerNavigationPlugin("granite-router", { 
+        mainHook: graniteNavigationPlugin.useGraniteRouterPluginMainHook 
+      });
+      console.log("✅ Radon Runtime: Granite navigation plugin registered at load time!");
+    }
+  } catch (error) {
+    console.log("⚠️ Radon Runtime: Could not load Granite navigation plugin:", error.message);
+  }
+}
+
+
 const devtoolPlugins = new Set(["network"]);
 let devtoolPluginsChanged = undefined;
 export function registerDevtoolPlugin(name) {
@@ -342,27 +363,44 @@ export function AppWrapper({ children, initialProps, fabric }) {
   }, [layoutCallback]);
 
   const handleNavigationChange = useCallback((navigationDescriptor) => {
+    console.log("🔥 Radon Runtime: handleNavigationChange called with:", navigationDescriptor);
     navigationHistory.set(navigationDescriptor.id, navigationDescriptor);
-    inspectorBridge.sendMessage({
+    console.log("🔥 Radon Runtime: Navigation history updated, current size:", navigationHistory.size);
+    
+    const message = {
       type: "navigationChanged",
       data: {
         displayName: navigationDescriptor.name,
         id: navigationDescriptor.id,
       },
-    });
+    };
+    console.log("🔥 Radon Runtime: Sending navigation message to inspector:", message);
+    inspectorBridge.sendMessage(message);
+    console.log("🔥 Radon Runtime: Navigation message sent successfully");
   });
 
   const handleRouteListChange = useCallback((routeList) => {
-    inspectorBridge.sendMessage({
+    console.log("🔥 Radon Runtime: handleRouteListChange called with:", routeList);
+    const message = {
       type: "navigationRouteListUpdated",
       data: routeList,
-    });
+    };
+    console.log("🔥 Radon Runtime: Sending route list message:", message);
+    inspectorBridge.sendMessage(message);
+    console.log("🔥 Radon Runtime: Route list message sent successfully");
   }, []);
 
   const useNavigationMainHook = navigationPlugins[0]?.plugin.mainHook || emptyNavigationHook;
+  console.log("🔥 Radon Runtime: Navigation plugin selected:", navigationPlugins[0]?.name || "none");
+  console.log("🔥 Radon Runtime: Using navigation hook:", useNavigationMainHook.name || "anonymous");
+  
   const { requestNavigationChange } = useNavigationMainHook({
     onNavigationChange: handleNavigationChange,
     onRouteListChange: handleRouteListChange,
+  });
+  
+  console.log("🔥 Radon Runtime: Navigation hook result:", {
+    requestNavigationChange: typeof requestNavigationChange
   });
 
   const openPreview = useCallback(
@@ -503,6 +541,7 @@ export function AppWrapper({ children, initialProps, fabric }) {
           navigationPlugins: navigationPlugins.map((plugin) => plugin.name),
         },
       });
+      
       devtoolPluginsChanged = () => {
         inspectorBridge.sendMessage({
           type: "devtoolPluginsChanged",
