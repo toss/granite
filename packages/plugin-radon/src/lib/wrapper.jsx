@@ -231,8 +231,6 @@ function getInspectorDataForCoordinates(mainContainerRef, x, y, requestStack, ca
     // Fallback: React Native가 설치되지 않은 경우 기본값 사용
   }
   
-  const majorMinor = rnVersion.split('.').slice(0, 2).join('.');
-
   try {
     const hook = globalThis.__REACT_DEVTOOLS_GLOBAL_HOOK__;
     const renderer = hook?.renderers?.get(1);
@@ -300,40 +298,6 @@ function getInspectorDataForCoordinates(mainContainerRef, x, y, requestStack, ca
         );
       } catch (error) {
         console.error("🔥 Radon Runtime: getInspectorDataForViewAtPoint failed:", error);
-        
-        // nativeFabricUIManager 에러 시 UIManager fallback 사용
-        console.log("🔥 Debug: Trying UIManager fallback");
-        try {
-          const { UIManager } = require('react-native');
-          const nodeHandle = findNodeHandle(mainContainerRef.current);
-          
-          if (UIManager && UIManager.findSubviewIn && nodeHandle) {
-            UIManager.findSubviewIn(
-              nodeHandle,
-              [x * screenWidth, y * screenHeight],
-              (nativeTag, left, top, width, height) => {
-                const scaledFrame = {
-                  x: left / screenWidth,
-                  y: top / screenHeight,
-                  width: width / screenWidth,
-                  height: height / screenHeight,
-                };
-                
-                if (!requestStack) {
-                  callback({ frame: scaledFrame });
-                  return;
-                }
-                
-                // fallback에서는 빈 스택 반환
-                callback({ frame: scaledFrame, stack: [] });
-              }
-            );
-            return;
-          }
-        } catch (fallbackError) {
-          console.warn("🔥 Radon Runtime: UIManager fallback also failed:", fallbackError);
-        }
-        
         callback({ frame: { x: 0, y: 0, width: 0, height: 0 } });
       }
     } else {
@@ -363,9 +327,7 @@ export function AppWrapper({ children, initialProps, fabric }) {
   }, [layoutCallback]);
 
   const handleNavigationChange = useCallback((navigationDescriptor) => {
-    console.log("🔥 Radon Runtime: handleNavigationChange called with:", navigationDescriptor);
     navigationHistory.set(navigationDescriptor.id, navigationDescriptor);
-    console.log("🔥 Radon Runtime: Navigation history updated, current size:", navigationHistory.size);
     
     const message = {
       type: "navigationChanged",
@@ -374,34 +336,24 @@ export function AppWrapper({ children, initialProps, fabric }) {
         id: navigationDescriptor.id,
       },
     };
-    console.log("🔥 Radon Runtime: Sending navigation message to inspector:", message);
     inspectorBridge.sendMessage(message);
-    console.log("🔥 Radon Runtime: Navigation message sent successfully");
   });
 
   const handleRouteListChange = useCallback((routeList) => {
-    console.log("🔥 Radon Runtime: handleRouteListChange called with:", routeList);
     const message = {
       type: "navigationRouteListUpdated",
       data: routeList,
     };
-    console.log("🔥 Radon Runtime: Sending route list message:", message);
     inspectorBridge.sendMessage(message);
-    console.log("🔥 Radon Runtime: Route list message sent successfully");
   }, []);
 
   const useNavigationMainHook = navigationPlugins[0]?.plugin.mainHook || emptyNavigationHook;
-  console.log("🔥 Radon Runtime: Navigation plugin selected:", navigationPlugins[0]?.name || "none");
-  console.log("🔥 Radon Runtime: Using navigation hook:", useNavigationMainHook.name || "anonymous");
   
   const { requestNavigationChange } = useNavigationMainHook({
     onNavigationChange: handleNavigationChange,
     onRouteListChange: handleRouteListChange,
   });
   
-  console.log("🔥 Radon Runtime: Navigation hook result:", {
-    requestNavigationChange: typeof requestNavigationChange
-  });
 
   const openPreview = useCallback(
     (previewKey) => {
