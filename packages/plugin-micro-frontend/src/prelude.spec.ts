@@ -29,7 +29,7 @@ describe('prelude', () => {
             };
           }
           ",
-        "preludeScript": "import { registerShared, createContainer } from '@granite-js/plugin-shared-modules/runtime';
+        "preludeScript": "import { registerShared, createContainer } from '@granite-js/plugin-micro-frontend/runtime';
       createContainer('test', {"remote":{"host":"localhost","port":8082},"shared":{"react":{"eager":true},"react-native":{"eager":true}}});
 
           // react

@@ -14,14 +14,14 @@ describe('runtime', () => {
     const CONTAINER_NAME = 'test-app';
 
     it('should create a container', () => {
-      createContainer(CONTAINER_NAME, { shared: { lib: { singleton: true } } });
+      createContainer(CONTAINER_NAME, { shared: { lib: { eager: true } } });
       expect(global.__SHARED_MODULES__.__INSTANCES__).toMatchInlineSnapshot(`
         [
           {
             "config": {
               "shared": {
                 "lib": {
-                  "singleton": true,
+                  "eager": true,
                 },
               },
             },
@@ -32,7 +32,7 @@ describe('runtime', () => {
     });
 
     it('should throw an error if a container is already registered', () => {
-      expect(() => createContainer(CONTAINER_NAME, { shared: { react: { singleton: true } } })).toThrow();
+      expect(() => createContainer(CONTAINER_NAME, { shared: { react: { eager: true } } })).toThrow();
     });
   });
 
