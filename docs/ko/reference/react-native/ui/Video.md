@@ -24,7 +24,7 @@ Video: import('react').ForwardRefExoticComponent<
 
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
-    <span class="post-parameters--name">props</span><span class="post-parameters--required">필수</span> · <span class="post-parameters--type">VideoProperties</span>
+    <span class="post-parameters--name">props</span><span class="post-parameters--type">VideoProperties</span>
     <br />
     <p class="post-parameters--description"><a href="https://github.com/TheWidlarzGroup/react-native-video/tree/v6.0.0-alpha.6" target="_blank" rel="noreferrer">`react-native-video`</a>에서 제공하는 속성들이에요.</p>
     <ul class="post-parameters-ul">
@@ -41,7 +41,7 @@ Video: import('react').ForwardRefExoticComponent<
       <li class="post-parameters-li">
         <span class="post-parameters--name">props.onAudioFocusChanged</span><span class="post-parameters--type">callback</span>
         <br />
-        <p class="post-parameters--description">오디오 포커스가 변경될 때 호출되는 콜백 함수에요. <code>muted</code> 가 <code>false</code> 인 경우에 필수로 구현해야해요.</p>
+        <p class="post-parameters--description">오디오 포커스가 변경될 때 호출되는 콜백 함수에요. <code>muted</code> 가 <code>false</code> 인 경우에 필수로 구현해야해요. 자세한 내용은 <a href="/ko/reference/react-native/ui/OnAudioFocusChanged" target="_blank" rel="noreferrer">OnAudioFocusChanged</a>를 참고해주세요.</p>
       </li>
     </ul>
   </li>
@@ -51,20 +51,6 @@ Video: import('react').ForwardRefExoticComponent<
     <span class="post-parameters--name">props.source.uri</span><span class="post-parameters--type">string</span>
     <br />
     <p class="post-parameters--description">재생할 비디오의 소스에요. 파일 경로나 URL을 설정할 수 있어요.</p>
-  </li>
-</ul>
-<ul class="post-parameters-ul">
-  <li class="post-parameters-li post-parameters-li-root">
-    <span class="post-parameters--name">event</span><span class="post-parameters--required">필수</span> · <span class="post-parameters--type">Object</span>
-    <br />
-    <p class="post-parameters--description">- 오디오 포커스 정보를 담고 있는 이벤트 객체에요.</p>
-    <ul class="post-parameters-ul">
-      <li class="post-parameters-li">
-        <span class="post-parameters--name">event.hasAudioFocus</span><span class="post-parameters--required">필수</span> · <span class="post-parameters--type">boolean</span>
-        <br />
-        <p class="post-parameters--description">- 비디오 컴포넌트가 오디오 포커스를 가지고 있는지 여부를 나타내요.</p>
-      </li>
-    </ul>
   </li>
 </ul>
 <ul class="post-parameters-ul">
