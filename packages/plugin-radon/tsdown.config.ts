@@ -3,7 +3,7 @@ import { builtinModules } from 'module';
 
 export default defineConfig([
   {
-    entry: ['src/babel.js'],
+    entry: ['src/index.ts', 'src/babel.js'],
     format: ['esm', 'cjs'],
     dts: true,
     clean: true,
