@@ -5,22 +5,17 @@ const createJSXSourceVisitor = require('./jsx-source-visitor');
 module.exports = function(api, options = {}) {
   api.assertVersion(7);
   
-  const { parse, types: t } = api; // types를 올바르게 destructure
+  const { parse, types: t } = api;
   
   const appRoot = process.cwd();
   
-  // Granite Router 자동 라우트 스캔 함수 (router.gen.ts 기반)
   const scanGraniteRoutes = () => {
     try {
       const routerGenPath = path.join(appRoot, 'src', 'router.gen.ts');
       
-      // router.gen.ts 파일이 존재하는지 확인
       if (fs.existsSync(routerGenPath)) {
         return parseRouterGenFile(routerGenPath);
       }
-      
-      // router.gen.ts가 없으면 pages/ 폴더 직접 스캔 (fallback)
-      return scanPagesFolderDirect();
       
     } catch (error) {
       console.error('🔥 RADON BABEL PLUGIN: Route scanning failed:', error);
@@ -28,7 +23,7 @@ module.exports = function(api, options = {}) {
         path: "/",
         filePath: "./pages/index.tsx",
         type: "route"
-      }]; // 기본 라우트
+      }];
     }
   };
   
@@ -38,9 +33,6 @@ module.exports = function(api, options = {}) {
       const content = fs.readFileSync(routerGenPath, 'utf8');
       const routes = [];
       
-      // import 구문에서 라우트 정보 추출
-      // import { Route as _IndexRoute } from '../pages/index';
-      // import { Route as _AboutRoute } from '../pages/about';
       const importRegex = /import\s+\{\s*Route\s+as\s+_(\w+)Route\s*\}\s+from\s+['"]\.\.\/pages\/([^'"]+)['"]/g;
       let match;
       
