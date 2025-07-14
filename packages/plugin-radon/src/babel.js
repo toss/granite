@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const createJSXSourceVisitor = require('./jsx-source-visitor');
 
-module.exports = function(api) {
+module.exports = function(api, options = {}) {
   api.assertVersion(7);
   
   const { parse, types: t } = api; // types를 올바르게 destructure
@@ -198,7 +198,8 @@ module.exports = function(api) {
           if (injected) {
             state.file.metadata.radonInjected = true;
           }
-          if (isTransforming("react-native/Libraries/Core/InitializeCore.js")) {
+          // runtime 주입이 비활성화되지 않은 경우만 주입
+          if (isTransforming("react-native/Libraries/Core/InitializeCore.js") && !options.disableRuntimeInjection) {
             try {
               const pluginPackageJsonPath = require.resolve('@granite-js/plugin-radon/package.json', { paths: [appRoot] });
               const pluginRoot = path.dirname(pluginPackageJsonPath);

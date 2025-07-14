@@ -1,5 +1,3 @@
-require('./react_devtools_polyfill.js');
-
 const hook = global.window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
 let devtoolsAgent = undefined;
 let messageQueue = [];
