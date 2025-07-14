@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
 ```tsx
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useRouter } from '@granite/react-native';
+import { useRouter } from '@granite/router';
 
 export default function HomeScreen() {
   const router = useRouter();
