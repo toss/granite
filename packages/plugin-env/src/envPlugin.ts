@@ -46,13 +46,6 @@ export const envPlugin = (environments: SerializableObject, options?: EnvPluginO
       order: 'pre',
       handler: setup,
     },
-    transformSync(id, code) {
-      if(id === '파일명') {
-        const injectCode = fs.readFile
-        return [code, injectCode].join('\n');
-      }
-      return code;
-    },
     config: {
       metro: {
         serializer: {
