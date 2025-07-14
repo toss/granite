@@ -14,23 +14,15 @@ export default defineConfig([
     outExtensions: () => ({ js: '.cjs' }),
   },
   {
-    entry: ['src/lib/react_devtools_polyfill.js'],
-    outDir: 'dist/lib',
+    entry: ['src/lib/RNpolyfill/react_devtools_polyfill.js'],
+    outDir: 'dist/lib/RNpolyfill',
     format: ['cjs'],
     minify: true,
     noExternal: () => true,  // Include all dependencies in bundle
     outExtensions: () => ({ js: '.cjs' }),
   },
   {
-    entry: ['src/radonPolyfillPlugin.ts'],
-    outDir: 'dist',
-    format: ['cjs'],
-    minify: true,
-    noExternal: () => true,  // Include all dependencies in bundle
-    outExtensions: () => ({ js: '.cjs' }),
-  },
-  {
-    entry: ['src/lib/radonPolyfillBabel.js'],
+    entry: ['src/lib/RNpolyfill/radonPolyfillBabel.js'],
     outDir: 'dist',
     format: ['cjs'],
     outExtensions: () => ({ js: '.cjs' }),
