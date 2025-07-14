@@ -22,7 +22,7 @@ export default defineConfig([
     outExtensions: () => ({ js: '.cjs' }),
   },
   {
-    entry: ['src/lib/RNpolyfill/radonPolyfillBabel.js'],
+    entry: ['src/lib/RNpolyfill/polyfill_babel.js'],
     outDir: 'dist',
     format: ['cjs'],
     outExtensions: () => ({ js: '.cjs' }),
