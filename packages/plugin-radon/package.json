@@ -7,7 +7,7 @@
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
     "test": "vitest --run --coverage --passWithNoTests",
-    "build": "tsdown --entry-file=src/babel.js --out-file=dist/babel.js && tsdown --bundle --entry-file=src/lib/runtime.js --out-file=dist/lib/runtime.cjs"
+    "build": "tsdown"
   },
   "types": "./dist/index.d.ts",
   "exports": {
