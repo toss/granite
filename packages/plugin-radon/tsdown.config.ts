@@ -1,30 +1,38 @@
 import { defineConfig } from 'tsdown';
-import { builtinModules } from 'module';
 
 export default defineConfig([
   {
     entry: ['src/index.ts', 'src/babel.js'],
-    format: ['esm', 'cjs'],
+    format: ['cjs', 'esm'],
     dts: true,
-    clean: true,
-    splitting: false,
-    sourcemap: true,
-    target: 'node16',
-    external: builtinModules,
+    external: ['@granite-js/react-native', 'react'],
   },
   {
-    entry: {
-      'lib/runtime': 'src/lib/runtime.js'
-    },
-    format: 'cjs',
+    entry: ['src/lib/runtime.js'],
+    outDir: 'dist/lib',
+    format: ['cjs'],
+    outExtensions: () => ({ js: '.cjs' }),
+  },
+  {
+    entry: ['src/lib/react_devtools_polyfill.js'],
+    outDir: 'dist/lib',
+    format: ['cjs'],
+    minify: true,
+    noExternal: () => true,  // Include all dependencies in bundle
+    outExtensions: () => ({ js: '.cjs' }),
+  },
+  {
+    entry: ['src/radonPolyfillPlugin.ts'],
     outDir: 'dist',
-    target: 'node16',
-    splitting: false,
-    dts: false,
-    sourcemap: false,
-    clean: false, // Important: do not clean the dist folder again
-    bundle: true,
-    platform: 'node',
-    external: [/^react-native\//, '@granite-js/react-native', 'react'],
-  }
+    format: ['cjs'],
+    minify: true,
+    noExternal: () => true,  // Include all dependencies in bundle
+    outExtensions: () => ({ js: '.cjs' }),
+  },
+  {
+    entry: ['src/lib/radonPolyfillBabel.js'],
+    outDir: 'dist',
+    format: ['cjs'],
+    outExtensions: () => ({ js: '.cjs' }),
+  },
 ]);
