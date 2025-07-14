@@ -20,12 +20,10 @@ export function registerNavigationPlugin(name, plugin) {
   navigationPlugins.push({ name, plugin });
 }
 
-// Granite navigation plugin 로드 시도 (Granite Router 감지된 경우만)
 let graniteNavigationPlugin = null;
 if (globalThis.__GRANITE_ROUTER_DETECTED__) {
   try {
-    graniteNavigationPlugin = require('./granite_navigation_plugin');
-    console.log("✅ Radon Runtime: Granite navigation plugin loaded");
+    graniteNavigationPlugin = require('./granite_router/granite_navigation_plugin.js');
     
     // 즉시 플러그인 등록
     if (graniteNavigationPlugin && graniteNavigationPlugin.useGraniteRouterPluginMainHook) {
@@ -33,7 +31,6 @@ if (globalThis.__GRANITE_ROUTER_DETECTED__) {
       registerNavigationPlugin("granite-router", { 
         mainHook: graniteNavigationPlugin.useGraniteRouterPluginMainHook 
       });
-      console.log("✅ Radon Runtime: Granite navigation plugin registered at load time!");
     }
   } catch (error) {
     console.log("⚠️ Radon Runtime: Could not load Granite navigation plugin:", error.message);
