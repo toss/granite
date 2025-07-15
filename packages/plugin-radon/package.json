@@ -15,19 +15,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./babel": "./dist/babel.js",
-    "./babel.js": "./dist/babel.js",
     "./lib/*": "./dist/lib/*",
-    "./lib/react_devtools_polyfill": {
-      "import": "./dist/lib/react_devtools_polyfill.js",
-      "require": "./dist/lib/react_devtools_polyfill.cjs"
-    },
-    "./package.json": "./package.json",
-    "./lib/": "./dist/lib/"
+    "./package.json": "./package.json"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "devDependencies": {
     "@babel/core": "7.23.9",
