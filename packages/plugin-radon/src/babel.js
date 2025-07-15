@@ -102,7 +102,7 @@ module.exports = function(api, options = {}) {
       }
       
       if (versionFolder) {
-        const rendererPath = path.join(pluginRoot, 'src', 'lib', 'rn-renderer', versionFolder, rendererFileName);
+        const rendererPath = path.join(pluginRoot, 'dist', 'lib', 'rn-renderer', versionFolder, rendererFileName.replace('.js', '.cjs'));
         return rendererPath;
       }
       

@@ -25,7 +25,7 @@ export const radonPolyfill = (options: RadonPolyfillPluginOptions = DEFAULT_OPTI
     config: {
       babel: {
         plugins: [
-          [path.resolve(__dirname, './polyfill_babel.cjs'), mergedOptions]
+          [path.resolve(__dirname, './lib/RNpolyfill/polyfill_babel.cjs'), mergedOptions]
         ]
       }
     }
