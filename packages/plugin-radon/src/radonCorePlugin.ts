@@ -30,7 +30,7 @@ export const radonCore = (options: RadonCorePluginOptions = DEFAULT_OPTIONS): Gr
       babel: {
         plugins: [
           // babel.js 플러그인 사용 (전체 RadonIDE 기능)
-          [path.resolve(__dirname, './babel.js'), {
+          [path.resolve(__dirname, './babel.cjs'), {
             ...mergedOptions
           }],
           // JSX Source 플러그인 (개발용)
