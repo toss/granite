@@ -33,8 +33,6 @@ export const radonCore = (options: RadonCorePluginOptions = DEFAULT_OPTIONS): Gr
           [path.resolve(__dirname, './babel.cjs'), {
             ...mergedOptions
           }],
-          // JSX Source 플러그인 (개발용)
-          ...(mergedOptions.enableJSXSource ? [['@babel/plugin-transform-react-jsx-source']] : [])
         ]
       }
     }
