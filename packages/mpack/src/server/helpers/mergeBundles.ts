@@ -1,29 +1,29 @@
 import * as esbuild from 'esbuild';
 import { BundleData } from '../../bundler/types';
-import { INTERNAL_EVALUATE_MAIN_BUNDLE_IDENTIFIER, INTERNAL_NAMESPACE_IDENTIFIER } from '../../constants';
+import { INTERNAL_LOAD_REMOTE_IDENTIFIER, INTERNAL_NAMESPACE_IDENTIFIER } from '../../constants';
 import { getBundleName } from '../../utils/getBundleName';
 import { getSourcemapName } from '../../utils/getSourcemapName';
 import { DEV_SERVER_BUNDLE_NAME } from '../constants';
 import { Platform } from '../types';
 
 const INTERNAL_SOURCE = 'mpack:internal';
-const IMPORT_SOURCE = 'mpack:main-bundle';
+const IMPORT_SOURCE = 'mpack:remote';
 
 export async function mergeBundles({
   platform,
-  preloadedBundleContent,
-  mainBundle,
+  hostBundleContent,
+  remoteBundleContent,
 }: {
   platform: Platform;
-  preloadedBundleContent: string;
-  mainBundle: BundleData;
+  hostBundleContent: string;
+  remoteBundleContent: string;
 }): Promise<BundleData> {
   const bundleName = getBundleName(DEV_SERVER_BUNDLE_NAME);
   const sourcemapName = getSourcemapName(bundleName);
   const result = await esbuild.build({
     logLevel: 'silent',
     stdin: {
-      contents: [`require('${INTERNAL_SOURCE}');`, preloadedBundleContent].join('\n'),
+      contents: [`require('${INTERNAL_SOURCE}');`, hostBundleContent].join('\n'),
       loader: 'js',
     },
     outfile: bundleName,
@@ -53,7 +53,7 @@ export async function mergeBundles({
     },
     plugins: [
       {
-        name: 'main-bundle-loader',
+        name: 'remote-bundle-loader',
         setup(build) {
           build.onResolve({ filter: new RegExp(`^${INTERNAL_SOURCE}$`) }, () => ({
             path: 'dev-server-runtime',
@@ -61,15 +61,15 @@ export async function mergeBundles({
           }));
 
           build.onResolve({ filter: new RegExp(`^${IMPORT_SOURCE}$`) }, () => ({
-            path: 'main-bundle',
-            namespace: 'MAIN_BUNDLE',
+            path: 'remote-bundle',
+            namespace: 'REMOTE_BUNDLE',
           }));
 
           build.onLoad({ filter: /.*/, namespace: 'DEV_SERVER_RUNTIME' }, () => ({
             contents: `
             (function(global) {
               global.${INTERNAL_NAMESPACE_IDENTIFIER} = {};
-              global.${INTERNAL_NAMESPACE_IDENTIFIER}.${INTERNAL_EVALUATE_MAIN_BUNDLE_IDENTIFIER} = function INTERNAL__evaluateMainBundle() {
+              global.${INTERNAL_NAMESPACE_IDENTIFIER}.${INTERNAL_LOAD_REMOTE_IDENTIFIER} = function INTERNAL__loadRemote() {
                 require('${IMPORT_SOURCE}');
                 return Promise.resolve();
               }
@@ -86,8 +86,8 @@ export async function mergeBundles({
             loader: 'js',
           }));
 
-          build.onLoad({ filter: /.*/, namespace: 'MAIN_BUNDLE' }, () => ({
-            contents: mainBundle.source.text,
+          build.onLoad({ filter: /.*/, namespace: 'REMOTE_BUNDLE' }, () => ({
+            contents: remoteBundleContent,
             loader: 'js',
           }));
         },

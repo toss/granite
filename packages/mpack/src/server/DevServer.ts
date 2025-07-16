@@ -1,5 +1,4 @@
 import assert from 'assert';
-import * as fs from 'fs/promises';
 import Fastify, { DoneFuncWithErrOrRes, FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { setupDevToolsProxy } from 'react-native-devtools-standalone/backend';
 import { DevServerConfig } from '..';
@@ -224,12 +223,13 @@ export class DevServer {
     const { bundle } = await bundler.build({ withDispose: false });
     let targetBundle: BundleData;
 
-    if (this.devServerOptions.preloadBundle != null) {
-      const sharedBundleContent = await fs.readFile(this.devServerOptions.preloadBundle, 'utf-8');
+    if (globalThis.remoteBundles != null) {
+      const hostBundleContent = bundle.source.text;
+      const remoteBundleContent = globalThis.remoteBundles[platform];
       const mergedBundle = await mergeBundles({
         platform,
-        preloadedBundleContent: sharedBundleContent,
-        mainBundle: bundle,
+        hostBundleContent,
+        remoteBundleContent,
       });
 
       targetBundle = mergedBundle;
@@ -239,4 +239,9 @@ export class DevServer {
 
     return targetBundle;
   }
+}
+
+declare global {
+  // eslint-disable-next-line no-var
+  var remoteBundles: Record<'android' | 'ios', string> | null;
 }

@@ -440,7 +440,6 @@ function getBabelTransformArgs(file, { options, config, projectRoot }) {
     // MARK: - GRANITE
     ...additionalBabelConfig,
     plugins: additionalBabelConfig?.plugins ?? [],
-    filename: file.filename,
     src: file.code,
   };
 }

@@ -17,7 +17,6 @@ interface RunServerArgs {
   devServerConfig: DevServerConfig;
   host?: string;
   port?: number;
-  preloadBundle?: string;
   plugins?: DevServerPlugin[];
   onServerReady?: () => Promise<void> | void;
 }
@@ -32,7 +31,6 @@ export async function experimental_runServer({
   host,
   port = DEV_SERVER_DEFAULT_PORT,
   plugins,
-  preloadBundle,
   onServerReady,
 }: RunServerArgs) {
   const rootDir = process.cwd();
@@ -40,10 +38,8 @@ export async function experimental_runServer({
     appName,
     scheme,
     build: devServerConfig.build,
-    presets: devServerConfig.presets,
     host,
     port,
-    preloadBundle,
     plugins,
     rootDir,
   });

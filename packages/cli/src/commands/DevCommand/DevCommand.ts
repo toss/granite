@@ -27,12 +27,11 @@ export class DevCommand extends Command {
 
   // mpack dev-server
   experimentalMode = Option.Boolean('--experimental-mode');
-  preloadBundle = Option.String('--preload-bundle', {
-    description: 'Preload 할 번들 파일의 경로',
-  });
 
   async execute() {
     try {
+      process.env.MPACK_DEV_SERVER = 'true';
+
       const config = await loadConfig();
       const serverOptions = {
         host: this.host,
@@ -45,7 +44,6 @@ export class DevCommand extends Command {
         ...serverOptions,
         disableEmbeddedReactDevTools: this.disableEmbeddedReactDevTools,
         experimentalMode: this.experimentalMode,
-        preloadBundle: this.preloadBundle,
       });
 
       if (this.experimentalMode) {
@@ -60,7 +58,6 @@ export class DevCommand extends Command {
           devServerConfig: mpackDevServerConfig,
           host: serverOptions.host,
           port: serverOptions.port,
-          preloadBundle: this.preloadBundle,
         });
       } else {
         const resolvedPlugins = await resolvePlugins(config.plugins);

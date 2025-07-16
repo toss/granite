@@ -137,8 +137,8 @@ describe('bundle', () => {
       outfile,
     });
 
-    const fileContent = await context.readFile(outfile);
+    const { stdout } = await context.$(`node`, [outfile]);
 
-    expect(fileContent).toMatchSnapshot();
+    expect(stdout.trim()).toMatchInlineSnapshot(`"mul(10, 5) = 50"`);
   });
 });

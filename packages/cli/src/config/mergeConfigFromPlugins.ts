@@ -39,6 +39,18 @@ function mergeEsbuildConfig<T = unknown, S = unknown>(objValue: T, srcValue: S, 
   return undefined;
 }
 
+function mergeResolverConfig<T = unknown, S = unknown>(objValue: T, srcValue: S, key: string) {
+  if (key === 'alias' && Array.isArray(objValue) && Array.isArray(srcValue)) {
+    return [...objValue, ...srcValue];
+  }
+
+  if (key === 'protocols' && typeof objValue === 'object' && typeof srcValue === 'object') {
+    return { ...objValue, ...srcValue };
+  }
+
+  return undefined;
+}
+
 function combineComparers<T extends Record<PropertyKey, any>, S extends Record<PropertyKey, any>>(
   ...fns: Parameters<typeof mergeWith>[2][]
 ) {
@@ -57,7 +69,11 @@ export async function mergeConfigFromPlugins(plugins: PluginInput): Promise<Gran
   const pluginsResolved = await flattenPlugins(plugins);
   return pluginsResolved.reduce(
     (acc, plugin) =>
-      mergeWith(acc, plugin.config ?? {}, combineComparers(concatArray, mergeMetroConfig, mergeEsbuildConfig)),
+      mergeWith(
+        acc,
+        plugin.config ?? {},
+        combineComparers(concatArray, mergeMetroConfig, mergeEsbuildConfig, mergeResolverConfig)
+      ),
     {}
   );
 }

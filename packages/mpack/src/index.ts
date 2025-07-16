@@ -1,7 +1,5 @@
 export { Bundler } from './bundler';
 export { DevServer } from './server';
-export { loadConfig } from './utils/loadConfig';
-export { loadPresets } from './utils/loadPresets';
 export { getMetroConfig, runBuild as metroBuild, type MetroConfig } from './metro';
 export {
   DEV_SERVER_DEFAULT_HOST,
