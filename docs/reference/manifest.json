@@ -134,6 +134,10 @@
                   "link": "/reference/react-native/ui/KeyboardAboveView"
                 },
                 {
+                  "text": "OnAudioFocusChanged",
+                  "link": "/reference/react-native/ui/OnAudioFocusChanged"
+                },
+                {
                   "text": "ScrollViewInertialBackground",
                   "link": "/reference/react-native/ui/ScrollViewInertialBackground"
                 },

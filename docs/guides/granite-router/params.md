@@ -61,7 +61,7 @@ function Index() {
 
 ## Validating Parameters
 
-<UsageSection assetType="image" assetPath="/usage/query-param/query-param-required.gif">
+<UsageSection assetType="image" assetPath="/usage/query-param/query-param-required.png">
 
 Parameters that must be included can be validated using the `validateParams` option.
 

@@ -107,7 +107,7 @@ $ npx granite-forge deploy --bucket {Your bucket name}
 └  Done
 ```
 
-> **✅ Success indicator:** You see "Done" with your CDN URLs
+> **✅ Success indicator:** You see "Done"
 
 ## 4. Test Your Granite App
 
@@ -115,10 +115,10 @@ Now that your app is deployed, let's test it out using the Granite test app.
 
 Open the [Granite test app](../miscellaneous/install-native-app) on your simulator and enter the following information:
 
-| Field | What to Enter |
-|-------|---------------|
-| Host | The CDN URL from your AWS infrastructure deployment (you can find this in the previous step's output) |
-| URL Scheme | Your app's URL scheme in the format: `{your-scheme}://{your-app-name}` (these values come from your Granite config) |
+| Field      | What to Enter                                                                                                                                                                        |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Host       | The CDN URL from your [AWS infrastructure deployment](../quick-start/setup-aws.html#_7-deploy-your-infrastructure) (you can check it in the output of the infrastructure deployment) |
+| URL Scheme | Your app's URL scheme in the format: `{your-scheme}://{your-app-name}` (these values come from your Granite config)                                                                  |
 
 ::: details Finding your scheme and app name
 
