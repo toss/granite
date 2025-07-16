@@ -41,7 +41,7 @@ Video: import('react').ForwardRefExoticComponent<
       <li class="post-parameters-li">
         <span class="post-parameters--name">props.onAudioFocusChanged</span><span class="post-parameters--type">OnAudioFocusChanged</span>
         <br />
-        <p class="post-parameters--description">Callback function called when audio focus changes. Must be implemented when <code>muted</code> is <code>false</code>. For more details, see <a href="/reference/react-native/Types/OnAudioFocusChanged.html" target="_blank" rel="noreferrer">OnAudioFocusChanged</a>.</p>
+        <p class="post-parameters--description">Callback function called when audio focus changes. Must be implemented when <code>muted</code> is <code>false</code>. For more details, see <a href="/reference/react-native/ui/OnAudioFocusChanged" target="_blank" rel="noreferrer">OnAudioFocusChanged</a>.</p>
       </li>
     </ul>
   </li>

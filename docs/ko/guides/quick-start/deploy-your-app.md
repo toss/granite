@@ -107,7 +107,7 @@ $ npx granite-forge deploy --bucket {버킷 이름}
 └  Done
 ```
 
-> **✅ 성공했다면:** CDN URL과 함께 "Doone" 메시지가 보여요
+> **✅ 성공했다면:** "Done" 메시지가 보여요
 
 ## 4. Granite 앱 테스트
 
@@ -115,10 +115,10 @@ $ npx granite-forge deploy --bucket {버킷 이름}
 
 시뮬레이터에서 [Granite 테스트 앱](../miscellaneous/install-native-app)을 열고 다음 정보를 입력하세요.
 
-| 필드 | 입력할 내용 |
-|-------|---------------|
-| Host | AWS 인프라 배포에서 얻은 CDN URL (이전 단계의 출력에서 확인할 수 있어요) |
-| URL Scheme | `{your-scheme}://{your-app-name}` 형식의 앱 URL 스킴 (이 값들은 Granite 설정에서 가져와요) |
+| 필드       | 입력할 내용                                                                                                                             |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Host       | [AWS 인프라 배포](../quick-start/setup-aws.html#_7-인프라-배포하기)에서 얻은 CDN URL (인프라 배포 후 출력에서 확인할 수 있어요) |
+| URL Scheme | `{your-scheme}://{your-app-name}` 형식의 앱 URL 스킴 (이 값들은 Granite 설정에서 가져와요)                                              |
 
 ::: details 스킴과 앱 이름 찾기
 
