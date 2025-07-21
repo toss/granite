@@ -29,11 +29,27 @@ export const radonCore = (options: RadonCorePluginOptions = DEFAULT_OPTIONS): Gr
     config: {
       babel: {
         plugins: [
-          // babel.js 플러그인 사용 (전체 RadonIDE 기능)
           [path.resolve(__dirname, './babel.cjs'), {
             ...mergedOptions
           }],
         ]
+      },
+      metro: {
+          serializer: {
+            getPolyfills: () => {
+              if (!global.__RADON_WATCH_FOLDERS_OUTPUTTED) {
+                const extensionLib = process.env.RADON_IDE_LIB_PATH;
+                if (extensionLib) {
+                  process.stdout.write(JSON.stringify({
+                    type: "RNIDE_watch_folders",
+                    watchFolders: [extensionLib]
+                  }) + "\n");
+                  global.__RADON_WATCH_FOLDERS_OUTPUTTED = true;
+                }
+              }
+            return []; // 실제 polyfill 반환
+          }
+        }
       }
     }
   };
