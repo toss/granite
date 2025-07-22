@@ -1,4 +1,5 @@
 import { flattenPlugins } from '@granite-js/plugin-core';
+import type { HandleFunction } from "connect";
 import { noop } from 'es-toolkit';
 import { describe, expect, it } from 'vitest';
 import { mergeConfigFromPlugins } from './mergeConfigFromPlugins';
@@ -64,7 +65,7 @@ describe('mergeConfigFromPlugins', () => {
         config: {
           mpack: {
             devServer: {
-              middlewares: ['middleware-1', noop],
+              middlewares: ['middleware-1', noop] as HandleFunction[],
             },
           },
         },
