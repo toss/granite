@@ -35,19 +35,30 @@ export const radonCore = (options: RadonCorePluginOptions = DEFAULT_OPTIONS): Gr
         ]
       },
       metro: {
-          serializer: {
-            getPolyfills: () => {
-              if (!global.__RADON_WATCH_FOLDERS_OUTPUTTED) {
-                const extensionLib = process.env.RADON_IDE_LIB_PATH;
-                if (extensionLib) {
-                  process.stdout.write(JSON.stringify({
-                    type: "RNIDE_watch_folders",
-                    watchFolders: [extensionLib]
-                  }) + "\n");
-                  global.__RADON_WATCH_FOLDERS_OUTPUTTED = true;
-                }
+        serializer: {
+          getPolyfills: () => {
+            if (!global.__RADON_WATCH_FOLDERS_OUTPUTTED) {
+              const extensionLib = process.env.RADON_IDE_LIB_PATH;
+              if (extensionLib) {
+                process.stdout.write(JSON.stringify({
+                  type: "RNIDE_watch_folders",
+                  watchFolders: [extensionLib]
+                }) + "\n");
+                global.__RADON_WATCH_FOLDERS_OUTPUTTED = true;
               }
-            return []; // 실제 polyfill 반환
+            }
+          return []; // 실제 polyfill 반환
+        }
+      },
+        reporter: {
+          update(event:any) {
+            if (Object.prototype.toString.call(event.error) === "[object Error]") {
+              event = Object.assign(event, {
+                message: event.error.message,
+                stack: event.error.stack,
+              });
+            }
+            process.stdout.write(JSON.stringify(event) + "\n");
           }
         }
       }
