@@ -6,7 +6,7 @@ import { getMonorepoRoot } from './getMonorepoRoot';
 import { writeEnvScript } from './runtime';
 import type { MetroConfig } from './types';
 import { DEV_SERVER_DEFAULT_PORT, SOURCE_EXTENSIONS } from '../constants';
-import type { ReportableEvent } from '../vendors/metro/src/lib/TerminalReporter';
+import type { ReportableEvent } from '../vendors/metro/src/lib/ReportableEvent';
 import { getDefaultValues } from '../vendors/metro-config/src/defaults';
 import exclusionList from '../vendors/metro-config/src/defaults/exclusionList';
 import { mergeConfig } from '../vendors/metro-config/src/loadConfig';
