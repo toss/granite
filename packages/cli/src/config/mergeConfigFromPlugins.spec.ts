@@ -26,6 +26,10 @@ describe('mergeConfigFromPlugins', () => {
   });
 
   it('can merge config from multiple plugins', async () => {
+    const middleware1: HandleFunction = () => {};
+    const middleware2: HandleFunction = () => {};
+
+    
     const plugins = await flattenPlugins([
       {
         name: 'plugin-1',
@@ -65,7 +69,7 @@ describe('mergeConfigFromPlugins', () => {
         config: {
           mpack: {
             devServer: {
-              middlewares: ['middleware-1', noop] as HandleFunction[],
+              middlewares: [middleware1, middleware2],
             },
           },
         },
@@ -88,7 +92,7 @@ describe('mergeConfigFromPlugins', () => {
       },
       mpack: {
         devServer: {
-          middlewares: ['middleware-1', noop],
+          middlewares: [middleware1, middleware2],
         },
       },
     });
