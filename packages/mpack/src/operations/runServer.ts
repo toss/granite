@@ -53,6 +53,10 @@ export async function runServer({
       terminalReporter.update(event);
       ref.reportEvent?.(event);
 
+      if (baseConfig.reporter?.update) {
+        baseConfig.reporter.update(event);
+      }
+
       switch (event.type) {
         case 'initialize_started':
           printLogo();
