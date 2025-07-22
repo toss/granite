@@ -1,3 +1,5 @@
+import { ReportableEvent } from "../vendors/metro/src/lib/ReportableEvent";
+
 type Untyped = any;
 
 interface PackageJson {
@@ -88,5 +90,7 @@ export interface MetroConfig {
   readonly symbolicator?: any;
   readonly transformer?: any;
   readonly watcher?: any;
-  readonly reporter?: any;
+  readonly reporter?: {
+    update: (event: ReportableEvent) => void;
+  };
 }
