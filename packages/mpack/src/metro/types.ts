@@ -88,4 +88,5 @@ export interface MetroConfig {
   readonly symbolicator?: any;
   readonly transformer?: any;
   readonly watcher?: any;
+  readonly reporter?: any;
 }
