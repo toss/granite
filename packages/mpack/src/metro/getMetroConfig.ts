@@ -19,6 +19,9 @@ export interface GetMetroConfig {
 export interface AdditionalMetroConfig extends MetroConfig {
   transformSync?: (id: string, code: string) => string;
   babelConfig?: babel.TransformOptions;
+  reporter?: {
+    update: (event: any) => void;
+  };
 }
 
 const INTERNAL_CALLSITES_REGEX = new RegExp(
@@ -107,6 +110,7 @@ export async function getMetroConfig(
     server: {
       port: DEV_SERVER_DEFAULT_PORT,
     },
+    reporter: additionalConfig?.reporter,
     ...(process.env.METRO_RESET_CACHE !== 'false' ? { resetCache: true } : {}),
   });
 }
