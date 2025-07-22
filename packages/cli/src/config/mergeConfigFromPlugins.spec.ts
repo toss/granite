@@ -1,6 +1,5 @@
 import { flattenPlugins } from '@granite-js/plugin-core';
 import type { HandleFunction } from "connect";
-import { noop } from 'es-toolkit';
 import { describe, expect, it } from 'vitest';
 import { mergeConfigFromPlugins } from './mergeConfigFromPlugins';
 
