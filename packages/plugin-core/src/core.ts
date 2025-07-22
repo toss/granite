@@ -1,11 +1,13 @@
 import type { BabelConfig, BuildResult, EsbuildConfig, MetroConfig, SwcConfig } from '@granite-js/mpack';
 import type { MpackConfig } from './types/mpackConfig';
 
-type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
-  : T;
+type DeepPartial<T> = T extends (...args: any[]) => any
+  ? T
+  : T extends object
+    ? {
+        [P in keyof T]?: DeepPartial<T[P]>;
+      }
+    : T;
 
 export interface GranitePluginConfig {
   entryFile: string;

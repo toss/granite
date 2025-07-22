@@ -6,6 +6,7 @@ import { getMonorepoRoot } from './getMonorepoRoot';
 import { writeEnvScript } from './runtime';
 import type { MetroConfig } from './types';
 import { DEV_SERVER_DEFAULT_PORT, SOURCE_EXTENSIONS } from '../constants';
+import type { ReportableEvent } from '../vendors/metro/src/lib/ReportableEvent';
 import { getDefaultValues } from '../vendors/metro-config/src/defaults';
 import exclusionList from '../vendors/metro-config/src/defaults/exclusionList';
 import { mergeConfig } from '../vendors/metro-config/src/loadConfig';
@@ -19,6 +20,9 @@ export interface GetMetroConfig {
 export interface AdditionalMetroConfig extends MetroConfig {
   transformSync?: (id: string, code: string) => string;
   babelConfig?: babel.TransformOptions;
+  reporter?: {
+    update: (event: ReportableEvent) => void;
+  };
 }
 
 const INTERNAL_CALLSITES_REGEX = new RegExp(
@@ -107,6 +111,7 @@ export async function getMetroConfig(
     server: {
       port: DEV_SERVER_DEFAULT_PORT,
     },
+    reporter: additionalConfig?.reporter,
     ...(process.env.METRO_RESET_CACHE !== 'false' ? { resetCache: true } : {}),
   });
 }

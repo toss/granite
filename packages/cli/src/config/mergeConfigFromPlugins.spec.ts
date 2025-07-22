@@ -1,5 +1,5 @@
 import { flattenPlugins } from '@granite-js/plugin-core';
-import { noop } from 'es-toolkit';
+import type { HandleFunction } from "connect";
 import { describe, expect, it } from 'vitest';
 import { mergeConfigFromPlugins } from './mergeConfigFromPlugins';
 
@@ -25,6 +25,10 @@ describe('mergeConfigFromPlugins', () => {
   });
 
   it('can merge config from multiple plugins', async () => {
+    const middleware1: HandleFunction = () => {};
+    const middleware2: HandleFunction = () => {};
+
+    
     const plugins = await flattenPlugins([
       {
         name: 'plugin-1',
@@ -64,7 +68,7 @@ describe('mergeConfigFromPlugins', () => {
         config: {
           mpack: {
             devServer: {
-              middlewares: ['middleware-1', noop],
+              middlewares: [middleware1, middleware2],
             },
           },
         },
@@ -87,7 +91,7 @@ describe('mergeConfigFromPlugins', () => {
       },
       mpack: {
         devServer: {
-          middlewares: ['middleware-1', noop],
+          middlewares: [middleware1, middleware2],
         },
       },
     });
