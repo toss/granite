@@ -1,4 +1,3 @@
-import path from 'path';
 import type { GranitePluginCore } from '@granite-js/plugin-core';
 
 export interface RadonCorePluginOptions {
@@ -23,7 +22,7 @@ export const radonCore = (options: RadonCorePluginOptions = DEFAULT_OPTIONS): Gr
     config: {
       babel: {
         plugins: [
-          [path.resolve(__dirname, './babel.cjs'), {
+          [require.resolve('@granite-js/plugin-radon/dist/babel.cjs'), {
             ...mergedOptions
           }],
         ]
