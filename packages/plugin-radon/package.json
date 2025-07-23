@@ -22,11 +22,17 @@
   "files": [
     "dist"
   ],
+  "dependencies": {
+    "@granite-js/utils": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-native": ">=0.60.0"
+  },
   "devDependencies": {
     "@babel/core": "7.23.9",
     "@babel/template": "^7.27.2",
     "@granite-js/plugin-core": "workspace:*",
-    "@granite-js/utils": "workspace:*",
     "@types/babel__core": "^7.20.5",
     "@types/babel__template": "^7",
     "@types/node": "^22.10.2",

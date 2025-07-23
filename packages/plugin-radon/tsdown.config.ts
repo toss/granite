@@ -6,7 +6,6 @@ export default defineConfig([
     format: ['cjs', 'esm'],
     dts: true,
     minify: true,
-    external: ['react', 'react-native'],
   },
   {
     entry: 'src/babel.js',
@@ -14,16 +13,6 @@ export default defineConfig([
     format: ['cjs'],
     dts: false,
     minify: true,
-    external: [
-      'fs', 
-      'path', 
-      '@babel/core', 
-      '@babel/template', 
-      '@babel/types',
-      'react',
-      /^react-native/,
-      'react/jsx-runtime',
-    ],
   },
   {
     entry: 'src/lib/vendor/RNpolyfill/polyfill_babel.js',
@@ -31,7 +20,6 @@ export default defineConfig([
     format: ['cjs'],
     dts: false,
     minify: true,
-    external: ['@babel/core', '@babel/template', '@babel/types'],
   },
   {
     entry: 'src/lib/runtime.js',
@@ -39,28 +27,9 @@ export default defineConfig([
     format: ['cjs'],
     dts: false,
     minify: true,
-    external: [
-      'react',
-      /^react-native/,
-      'react/jsx-runtime',
-    ],
   },
   {
     entry: 'src/lib/vendor/RNpolyfill/react_devtools_polyfill.js',
-    outDir: 'dist/lib/RNpolyfill',
-    format: ['cjs'],
-    dts: false,
-    minify: true,
-  },
-  {
-    entry: 'src/lib/vendor/RNpolyfill/createReactDevtoolsAgent.js',
-    outDir: 'dist/lib/RNpolyfill',
-    format: ['cjs'],
-    dts: false,
-    minify: true,
-  },
-  {
-    entry: 'src/lib/vendor/RNpolyfill/createRendererConfig.js',
     outDir: 'dist/lib/RNpolyfill',
     format: ['cjs'],
     dts: false,
@@ -72,10 +41,6 @@ export default defineConfig([
     format: ['cjs'],
     dts: false,
     minify: true,
-    external: [
-      'scheduler',
-      'react',
-      /^react-native/,
-    ],
+    external: ['scheduler'],
   },
 ]);
