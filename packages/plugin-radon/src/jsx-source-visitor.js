@@ -11,7 +11,7 @@ module.exports = function createJSXSourceVisitor(t) {
         const loc = node.loc;
         const filename = state.file.opts.filename;
         
-        // React.Fragment나 Fragment는 건너뛰기
+        // Skip React.Fragment or Fragment
         const elementName = node.openingElement.name;
         if (t.isJSXIdentifier(elementName)) {
           if (elementName.name === 'Fragment') {
@@ -24,9 +24,9 @@ module.exports = function createJSXSourceVisitor(t) {
         }
         
   
-        // 위치 정보와 파일명이 있는 경우에만 _source 추가
+        // Add _source only when position info and filename are available
         if (loc && filename) {
-          // 이미 _source 속성이 있는지 확인
+          // Check if _source attribute already exists
           const hasSourceAttr = node.openingElement.attributes.some(attr => 
             t.isJSXAttribute(attr) && 
             t.isJSXIdentifier(attr.name) && 
@@ -35,7 +35,7 @@ module.exports = function createJSXSourceVisitor(t) {
   
   
           if (!hasSourceAttr) {
-            // _source 속성 생성
+            // Create _source attribute
             const sourceAttr = t.jsxAttribute(
               t.jsxIdentifier('_source'),
               t.jsxExpressionContainer(
@@ -56,7 +56,7 @@ module.exports = function createJSXSourceVisitor(t) {
               )
             );
   
-            // 기존 속성들에 _source 추가
+            // Add _source to existing attributes
             node.openingElement.attributes.push(sourceAttr);
             
           }
