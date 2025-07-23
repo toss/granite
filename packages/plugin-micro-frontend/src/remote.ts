@@ -1,16 +1,26 @@
 import { log } from './log';
 import type { RemoteConfig } from './types';
 
-export async function fetchRemoteBundle(remote: RemoteConfig) {
-  log('Fetching remote bundles...');
-  const [androidBundle, iosBundle] = await Promise.all([fetchBundle(remote, 'android'), fetchBundle(remote, 'ios')]);
+const FALLBACK_SCRIPT = `console.warn('[MICRO FRONTEND] Failed to fetch remote bundles. Please check if the remote dev server is running')`;
 
+export async function fetchRemoteBundle(remote: RemoteConfig) {
   globalThis.remoteBundles = {
-    android: androidBundle,
-    ios: iosBundle,
+    android: FALLBACK_SCRIPT,
+    ios: FALLBACK_SCRIPT,
   };
 
-  log('Fetch complete');
+  try {
+    log('Prefetching remote bundles for development environment...');
+    const [androidBundle, iosBundle] = await Promise.all([fetchBundle(remote, 'android'), fetchBundle(remote, 'ios')]);
+
+    globalThis.remoteBundles = {
+      android: androidBundle,
+      ios: iosBundle,
+    };
+    log('Fetch complete');
+  } catch {
+    log('Failed to fetch remote bundles. Please check if the remote dev server is running');
+  }
 }
 
 async function fetchBundle(remote: RemoteConfig, platform: 'android' | 'ios') {

@@ -21,6 +21,7 @@
     "@granite-js/forge-cli": "workspace:^",
     "@granite-js/plugin-env": "workspace:*",
     "@granite-js/plugin-hermes": "workspace:*",
+    "@granite-js/plugin-micro-frontend": "workspace:^",
     "@granite-js/plugin-router": "workspace:*",
     "@testing-library/react-native": "^12.9.0",
     "@types/babel__core": "^7.20.5",

@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { GranitePluginCore } from '@granite-js/plugin-core';
-import { log } from './log';
 import { getPreludeConfig } from './prelude';
 import { fetchRemoteBundle } from './remote';
 import { virtualInitializeCoreConfig, virtualSharedConfig } from './resolver';
@@ -23,13 +22,7 @@ export const microFrontendPlugin = async (options: MicroFrontendPluginOptions): 
    * @TODO `MPACK_DEV_SERVER` flag should be removed after next version of bundle loader is released and load bundle dynamically at JS runtime.
    */
   if (process.env.MPACK_DEV_SERVER === 'true' && options.remote) {
-    try {
-      await fetchRemoteBundle(options.remote);
-    } catch (error) {
-      log('Failed to fetch remote bundles. Please check if the remote dev server is running');
-      console.error(error);
-      process.exit(1);
-    }
+    await fetchRemoteBundle(options.remote);
   }
 
   /**

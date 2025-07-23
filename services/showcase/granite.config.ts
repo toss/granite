@@ -15,7 +15,10 @@ export default defineConfig({
     env({ MY_ENV: 'test' }),
     hermes(),
     microFrontend({
-      name: 'showcase',
+      name: 'remoteApp',
+      exposes: {
+        './AppContainer': './src/_app.tsx',
+      },
       shared: [
         '@react-native-community/blur',
         '@react-navigation/native',

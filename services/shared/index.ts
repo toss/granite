@@ -1,8 +1,4 @@
-import { Alert } from 'react-native';
+import { register } from '@granite-js/react-native';
+import App from './src/_app';
 
-try {
-  require('./src/index').initialize();
-} catch (error) {
-  const message = (error instanceof Error ? error.stack : '') || String(error);
-  Alert.alert(message);
-}
+register(App);

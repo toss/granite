@@ -4990,6 +4990,7 @@ __metadata:
     "@granite-js/native": "workspace:*"
     "@granite-js/plugin-env": "workspace:*"
     "@granite-js/plugin-hermes": "workspace:*"
+    "@granite-js/plugin-micro-frontend": "workspace:^"
     "@granite-js/plugin-router": "workspace:*"
     "@granite-js/react-native": "workspace:*"
     "@testing-library/react-native": "npm:^12.9.0"
@@ -5457,7 +5458,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@granite-js/plugin-micro-frontend@workspace:*, @granite-js/plugin-micro-frontend@workspace:packages/plugin-micro-frontend":
+"@granite-js/plugin-micro-frontend@workspace:*, @granite-js/plugin-micro-frontend@workspace:^, @granite-js/plugin-micro-frontend@workspace:packages/plugin-micro-frontend":
   version: 0.0.0-use.local
   resolution: "@granite-js/plugin-micro-frontend@workspace:packages/plugin-micro-frontend"
   dependencies:

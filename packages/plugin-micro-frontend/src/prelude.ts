@@ -1,3 +1,4 @@
+import path from 'path';
 import type { MicroFrontendPluginOptions } from './types';
 
 export function getPreludeConfig(options: MicroFrontendPluginOptions) {
@@ -14,10 +15,21 @@ export function getPreludeConfig(options: MicroFrontendPluginOptions) {
     `;
   });
 
+  const exposeStatements = Object.entries(options.exposes ?? {}).map(([exposeName, modulePath], index) => {
+    const identifier = `__expose${index}`;
+    const resolvedModulePath = path.resolve(modulePath);
+
+    return `
+    import * as ${identifier} from '${resolvedModulePath}';
+    exposeModule(__container, '${exposeName}', ${identifier});
+    `;
+  });
+
   const preludeScript = [
-    `import { registerShared, createContainer } from '@granite-js/plugin-micro-frontend/runtime';`,
-    `createContainer('${options.name}', ${JSON.stringify({ remote: options.remote, shared: options.shared })});`,
+    `import { registerShared, createContainer, exposeModule } from '@granite-js/plugin-micro-frontend/runtime';`,
+    `const __container = createContainer('${options.name}', ${JSON.stringify({ remote: options.remote, shared: options.shared })});`,
     ...registerStatements,
+    ...exposeStatements,
   ].join('\n');
 
   return {

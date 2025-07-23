@@ -11,6 +11,10 @@ export interface MicroFrontendPluginOptions {
    * Shared modules config
    */
   shared?: SharedConfig | string[];
+  /**
+   * Configuration for exposing modules to other containers
+   */
+  exposes?: ExposeConfig;
 }
 
 export interface RemoteConfig {
@@ -33,4 +37,8 @@ export interface SharedConfig {
      */
     eager?: boolean;
   };
+}
+
+export interface ExposeConfig {
+  [exposePath: string]: string;
 }

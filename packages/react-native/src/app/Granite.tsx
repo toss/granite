@@ -1,7 +1,8 @@
 import { SafeAreaProvider } from '@granite-js/native/react-native-safe-area-context';
 import { ComponentType, PropsWithChildren } from 'react';
+import { AppRegistry } from 'react-native';
 import { App } from './App';
-import { registerPage } from './registerPage';
+import { ENTRY_BUNDLE_NAME } from '../constants';
 import type { InitialProps } from '../initial-props';
 import { Router, type RouterProps, type RequireContext } from '../router';
 import { BackEventProvider, useBackEventState } from '../use-back-event';
@@ -24,6 +25,11 @@ export interface GraniteProps {
    * Configuration object to be passed to the router.
    */
   router?: RouterProps;
+  /**
+   * @description
+   * Renders the app container without the router.
+   */
+  UNSTABLE__disableRouter?: boolean;
 }
 
 /**
@@ -36,7 +42,14 @@ interface AppRootProps extends GraniteProps {
 
 const scheme = global.__granite.app.scheme;
 
-function AppRoot({ appName, context, container, initialProps, router }: AppRootProps) {
+function AppRoot({
+  appName,
+  context,
+  container: Container,
+  initialProps,
+  router,
+  UNSTABLE__disableRouter,
+}: AppRootProps) {
   const backEventState = useBackEventState();
   const baseScheme = `${scheme}://${appName}`;
 
@@ -44,15 +57,20 @@ function AppRoot({ appName, context, container, initialProps, router }: AppRootP
     <App {...initialProps}>
       <SafeAreaProvider>
         <BackEventProvider backEvent={backEventState}>
-          <Router
-            context={context}
-            initialProps={initialProps}
-            container={container}
-            canGoBack={!backEventState.hasBackEvent}
-            onBack={backEventState.onBack}
-            prefix={baseScheme}
-            {...router}
-          />
+          {/* NOTE: Route-related concerns should be decoupled */}
+          {UNSTABLE__disableRouter ? (
+            <Container {...initialProps} />
+          ) : (
+            <Router
+              context={context}
+              initialProps={initialProps}
+              container={Container}
+              canGoBack={!backEventState.hasBackEvent}
+              onBack={backEventState.onBack}
+              prefix={baseScheme}
+              {...router}
+            />
+          )}
         </BackEventProvider>
       </SafeAreaProvider>
     </App>
@@ -65,7 +83,7 @@ const createApp = () => {
   return {
     registerApp(
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
-      { appName, context, router }: GraniteProps
+      { appName, context, router, UNSTABLE__disableRouter = false }: GraniteProps
     ): (initialProps: InitialProps) => JSX.Element {
       function Root(initialProps: InitialProps) {
         return (
@@ -75,11 +93,17 @@ const createApp = () => {
             appName={appName}
             context={context}
             router={router}
+            UNSTABLE__disableRouter={UNSTABLE__disableRouter}
           />
         );
       }
 
-      registerPage(Root);
+      if (appName === ENTRY_BUNDLE_NAME && UNSTABLE__disableRouter !== true) {
+        throw new Error(`Reserved app name 'shared' cannot be used with the router`);
+      }
+
+      AppRegistry.registerComponent(appName, () => Root);
+
       _appName = appName;
       return Root;
     },
