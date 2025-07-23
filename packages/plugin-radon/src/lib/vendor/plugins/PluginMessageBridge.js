@@ -1,4 +1,4 @@
-const inspectorBridge = require("../inspector_bridge");
+const inspectorBridge = require("../../inspector_bridge");
 
 export class PluginMessageBridge {
   constructor(pluginId) {

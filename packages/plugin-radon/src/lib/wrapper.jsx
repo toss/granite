@@ -10,7 +10,7 @@ const {
 } = require("react-native");
 
 const inspectorBridge = globalThis.__RADON_INSPECTOR_BRIDGE__;
-const RNInternals = require("./rn-internals/rn-internals-0.72.js");
+const RNInternals = require("./vendor/rn-internals/rn-internals-0.72.js");
 
 
 const OffscreenComponentReactTag = 22;
@@ -55,7 +55,7 @@ const InternalImports = {
     return require("./network").setup;
   },
   get reduxDevtoolsExtensionCompose() {
-    return require("./plugins/redux-devtools").compose;
+    return require("./vendor/plugins/redux-devtools").compose;
   },
   get setupRenderOutlinesPlugin() {
     return require("./render_outlines").setup;

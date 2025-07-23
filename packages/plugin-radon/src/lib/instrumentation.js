@@ -1,21 +1,5 @@
-const {
-  registerPlugin,
-  registerHost,
-  getPlugins,
-  getHost,
-} = require("./bippy");
-const {
-  didFiberCommit,
-  getDisplayName,
-  getFiberId,
-  getNearestHostFibers,
-  getType,
-  instrument,
-  isCompositeFiber,
-  traverseRenderedFibers,
-} = require("./bippy");
-const { getFabricUIManager } = require("react-native/Libraries/ReactNative/FabricUIManager.js");
 const { Dimensions, StatusBar, UIManager, Platform } = require("react-native");
+const { getFabricUIManager } = require("react-native/Libraries/ReactNative/FabricUIManager.js");
 const FabricUIManager = getFabricUIManager();
 
 const CORE_COMPONENT_NAMES = new Set([
@@ -168,7 +152,7 @@ async function onRender(fibers) {
   options.reportRenders(Array.from(blueprintMap.entries()));
 }
 
-const isValidFiber = (_fiber) => {
+const isValidFiber = () => {
   return true;
 };
 
@@ -177,7 +161,7 @@ function onCommitFiberRoot(_rendererID, root) {
     return;
   }
   const renderedFibers = [];
-  traverseRenderedFibers(root.current, (fiber, _phase) => {
+  traverseRenderedFibers(root.current, (fiber) => {
     const type = getType(fiber.type);
     if (!type) {
       return null;

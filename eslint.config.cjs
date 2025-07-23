@@ -1,7 +1,7 @@
 /**
  * https://github.com/microsoft/vscode-eslint/issues/1620#issuecomment-2090780605
  */
- 
+
 const tseslint = require('typescript-eslint');
 const { fixupPluginRules } = require('@eslint/compat');
 const eslint = require('@eslint/js');
@@ -42,6 +42,7 @@ module.exports = tseslint.config(
       '.pnp.*',
       '.yarn/',
       '**/.granite/',
+      'packages/plugin-radon/src/lib/vendor/**/*',
     ],
   },
   eslint.configs.recommended,

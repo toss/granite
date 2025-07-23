@@ -7,7 +7,8 @@
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
     "test": "vitest --run --coverage --passWithNoTests",
-    "build": "tsdown"
+    "build": "tsdown",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "types": "./dist/index.d.ts",
   "exports": {
