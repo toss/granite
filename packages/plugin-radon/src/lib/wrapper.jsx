@@ -25,7 +25,7 @@ if (globalThis.__GRANITE_ROUTER_DETECTED__) {
   try {
     graniteNavigationPlugin = require('./granite_router/granite_navigation_plugin.js');
     
-    // 즉시 플러그인 등록
+    // Register plugin immediately
     if (graniteNavigationPlugin && graniteNavigationPlugin.useGraniteRouterPluginMainHook) {
       console.log("🔥 Radon Runtime: Registering Granite navigation plugin immediately");
       registerNavigationPlugin("granite-router", { 
@@ -93,19 +93,19 @@ function getRendererConfig() {
 function extractComponentStack(startNode, viewDataHierarchy) {
   const componentStack = [];
   
-  // React Native 버전 감지
+  // Detect React Native version
   let rnVersion = '0.72'; // 기본값
   try {
     const rnPackage = require('react-native/package.json');
     rnVersion = rnPackage.version;
   } catch (e) {
-    // Fallback: React Native가 설치되지 않은 경우 기본값 사용
+    // Fallback: Use default value if React Native is not installed
   }
   
   const majorMinor = rnVersion.split('.').slice(0, 2).join('.');
   const versionNumber = parseFloat(majorMinor);
   
-  // 내부 컴포넌트 필터링 함수
+  // Internal component filtering function
   const isInternalComponent = (fileName) => {
     return fileName.includes('node_modules/react-native/') ||
            fileName.includes('node_modules/@react-navigation/') ||
@@ -114,20 +114,20 @@ function extractComponentStack(startNode, viewDataHierarchy) {
            fileName.includes('react-native/Libraries/');
   };
   
-  // RN 0.72 전용 measure 함수 생성기
+  // RN 0.72 specific measure function generator
   const createMeasureFunction = (fiberNode) => {
     return (callback) => {
       try {
         const stateNode = fiberNode.stateNode;
         if (stateNode && stateNode.measure) {
-          // 네이티브 뷰가 직접 measure 함수를 가지고 있는 경우
+          // When native view directly has measure function
           stateNode.measure(callback);
         } else if (stateNode && stateNode._nativeTag) {
-          // UIManager를 통한 measure
+          // Measure through UIManager
           const UIManager = require('react-native').UIManager;
           UIManager.measure(stateNode._nativeTag, callback);
         } else {
-          // Fallback으로 0,0,0,0 반환
+          // Return 0,0,0,0 as fallback
           callback(0, 0, 0, 0, 0, 0);
         }
       } catch (e) {
@@ -138,10 +138,10 @@ function extractComponentStack(startNode, viewDataHierarchy) {
   
   switch (true) {
     case versionNumber <= 0.72:
-      // RN 0.72: Fiber 트리 직접 탐색으로 사용자 컴포넌트 소스 정보 추출
+      // RN 0.72: Extract user component source info by directly traversing Fiber tree
       let fiberNode = startNode;
       
-      // startNode가 publicInstance인 경우 Fiber 노드 찾기
+      // Find Fiber node if startNode is publicInstance
       if (startNode && !startNode.tag && startNode._reactInternalFiber) {
         fiberNode = startNode._reactInternalFiber;
       } else if (startNode && !startNode.tag && startNode._reactInternalInstance) {
@@ -151,12 +151,12 @@ function extractComponentStack(startNode, viewDataHierarchy) {
       if (fiberNode && typeof fiberNode.tag === 'number') {
         let node = fiberNode;
         while (node && node.tag !== OffscreenComponentReactTag) {
-          // Fiber 노드에서 직접 _source 정보 확인
+          // Check _source info directly from Fiber node
           if (node.memoizedProps && node.memoizedProps._source) {
             const source = node.memoizedProps._source;
             
             if (!isInternalComponent(source.fileName)) {
-              // 사용자 컴포넌트만 수집
+              // Collect only user components
               componentStack.push({
                 name: node.type?.displayName || node.type?.name || 'Unknown',
                 source: source,
@@ -165,14 +165,14 @@ function extractComponentStack(startNode, viewDataHierarchy) {
             }
           }
           
-          // 부모 노드로 이동 (Fiber 트리 탐색)
+          // Move to parent node (Fiber tree traversal)
           node = node.return;
         }
       }
       break;
       
     default:
-      // RN 0.73 이상: instanceCache 사용 가능, React DevTools 방식 사용
+      // RN 0.73+: instanceCache available, use React DevTools method
       const rendererConfig = getRendererConfig();
       let stackItems = [];
       
@@ -219,20 +219,20 @@ function extractComponentStack(startNode, viewDataHierarchy) {
 function getInspectorDataForCoordinates(mainContainerRef, x, y, requestStack, callback) {
   const { width: screenWidth, height: screenHeight } = Dimensions.get("screen");
 
-  // React Native 버전 감지
+  // Detect React Native version
   let rnVersion = '0.72'; // 기본값
   try {
     const rnPackage = require('react-native/package.json');
     rnVersion = rnPackage.version;
   } catch (e) {
-    // Fallback: React Native가 설치되지 않은 경우 기본값 사용
+    // Fallback: Use default value if React Native is not installed
   }
   
   try {
     const hook = globalThis.__REACT_DEVTOOLS_GLOBAL_HOOK__;
     const renderer = hook?.renderers?.get(1);
     
-    // 모든 버전에서 먼저 getInspectorDataForViewAtPoint 시도
+    // Try getInspectorDataForViewAtPoint first in all versions
     if (renderer && renderer.rendererConfig && renderer.rendererConfig.getInspectorDataForViewAtPoint) {
       try {
         renderer.rendererConfig.getInspectorDataForViewAtPoint(
@@ -301,7 +301,7 @@ function getInspectorDataForCoordinates(mainContainerRef, x, y, requestStack, ca
       callback({ frame: { x: 0, y: 0, width: 0, height: 0 } });
     }
   } catch (error) {
-    console.error("🔥 Radon Runtime: getInspectorDataForCoordinates 오류:", error);
+    console.error("🔥 Radon Runtime: getInspectorDataForCoordinates error:", error);
     callback({ frame: { x: 0, y: 0, width: 0, height: 0 } });
   }
 }

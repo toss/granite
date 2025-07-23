@@ -27,7 +27,7 @@ module.exports = function(api, options = {}) {
     }
   };
   
-  // router.gen.ts 파일을 파싱하여 라우트 정보 추출
+  // Parse router.gen.ts file to extract route information
   const parseRouterGenFile = (routerGenPath) => {
     try {
       const content = fs.readFileSync(routerGenPath, 'utf8');
@@ -56,7 +56,7 @@ module.exports = function(api, options = {}) {
     }
   };
   
-  // 페이지 경로를 라우트 경로로 변환 (Granite Router 방식)
+  // Convert page path to route path (Granite Router style)
   const convertPagePathToRoute = (pagePath) => {
     // index → /
     // about → /about  
@@ -64,10 +64,10 @@ module.exports = function(api, options = {}) {
     // user/[id] → /user/:id
     
     let routePath = pagePath
-      .replace(/\/index$/, '') // /index → 빈 문자열
-      .replace(/\[([^\]]+)\]/g, ':$1'); // [id] → :id (동적 라우트)
+      .replace(/\/index$/, '') // /index → empty string
+      .replace(/\[([^\]]+)\]/g, ':$1'); // [id] → :id (dynamic route)
     
-    // 빈 문자열이면 루트 경로
+    // If empty string, use root path
     if (!routePath || routePath === '' || routePath === 'index') {
       routePath = '/';
     } else if (!routePath.startsWith('/')) {
@@ -84,7 +84,7 @@ module.exports = function(api, options = {}) {
 
   // --- Helper Functions ---
   
-  // 번들링된 렌더러 파일들의 경로를 생성하는 함수
+  // Function to generate paths for bundled renderer files
   const createRendererPath = (rendererFileName, version) => {
     try {
       const pluginPackageJsonPath = require.resolve('@granite-js/plugin-radon/package.json', { paths: [appRoot] });
@@ -128,7 +128,6 @@ module.exports = function(api, options = {}) {
     programPath.pushContainer('body', ast.program.body);
   };
 
-  // JSX Source visitor 생성
   const jsxSourceVisitor = createJSXSourceVisitor(t);
 
   return {
@@ -154,7 +153,6 @@ module.exports = function(api, options = {}) {
           
           // This MUST be the first check.
           
-          // --- React Native 렌더러 파일 교체 ---
           if (isTransforming("react-native/Libraries/Renderer/implementations/ReactFabric-dev.js") || 
               isTransforming("react-native/Libraries/Renderer/implementations/ReactNativeRenderer-dev.js")) {
             
@@ -177,7 +175,6 @@ module.exports = function(api, options = {}) {
                 injected = true;
               } catch (e) {
                 console.error('🔥 RADON BABEL PLUGIN: 🚨 Failed to read custom renderer:', e);
-                // 실패 시 원본 파일 유지
               }
             } else {
               console.warn(`🔥 RADON BABEL PLUGIN: ⚠️ Custom renderer not found: ${rendererPath}`);
@@ -190,7 +187,6 @@ module.exports = function(api, options = {}) {
           if (injected) {
             state.file.metadata.radonInjected = true;
           }
-          // runtime 주입이 비활성화되지 않은 경우만 주입
           if (isTransforming("react-native/Libraries/Core/InitializeCore.js") && !options.disableRuntimeInjection) {
             try {
               const pluginPackageJsonPath = require.resolve('@granite-js/plugin-radon/package.json', { paths: [appRoot] });
@@ -222,16 +218,14 @@ module.exports = function(api, options = {}) {
 
           if (isTransforming("@granite-js/react-native")) {
             try {
-              // 실제 파일 시스템에서 라우트 스캔
               const scannedRoutes = scanGraniteRoutes();
               const routesJson = JSON.stringify(scannedRoutes, null, 2);
               
-              // 스캔된 라우트를 앱에 주입
               const graniteDetectionCode = `
 // Mark that Granite Router is being used
 globalThis.__GRANITE_ROUTER_DETECTED__ = true;
 
-// 자동 스캔된 라우트 주입
+// Inject auto-scanned routes
 globalThis.__GRANITE_ROUTES = ${routesJson};
 `;
               
@@ -242,13 +236,11 @@ globalThis.__GRANITE_ROUTES = ${routesJson};
             } 
           }
 
-          // pages/ 폴더의 파일들에 navigation 등록 코드 자동 주입
           const isPageFile = filename.includes('/pages/') && /\.(tsx|ts|jsx|js)$/.test(filename);
           
           if (isPageFile && !state.file.metadata.radonPageInjected) {
             try {
               
-              // AST를 순회하면서 useNavigation 훅 사용 여부 확인
               let usesNavigation = false;
               let hasReactDefaultImport = false;
               
@@ -256,7 +248,6 @@ globalThis.__GRANITE_ROUTES = ${routesJson};
                 ImportDeclaration(importPath) {
                   const source = importPath.node.source.value;
                   
-                  // React import 확인
                   if (source === 'react') {
                     importPath.node.specifiers.forEach(spec => {
                       if (spec.type === 'ImportDefaultSpecifier') {
@@ -265,14 +256,14 @@ globalThis.__GRANITE_ROUTES = ${routesJson};
                     });
                   }
                   
-                  // createRoute import 확인 (Route.useNavigation 패턴 대비)
+                  // Check for createRoute import (to prepare for Route.useNavigation pattern)
                   if (source === '@granite-js/react-native') {
                     importPath.node.specifiers.forEach(spec => {
                       if (spec.type === 'ImportSpecifier' && spec.imported.name === 'useNavigation') {
                         usesNavigation = true;
                       }
                       if (spec.type === 'ImportSpecifier' && spec.imported.name === 'createRoute') {
-                        usesNavigation = true; // createRoute가 있으면 Route.useNavigation을 사용할 가능성
+                        usesNavigation = true; // If createRoute exists, likely to use Route.useNavigation
                       }
                     });
                   }
@@ -281,7 +272,7 @@ globalThis.__GRANITE_ROUTES = ${routesJson};
               
               if (usesNavigation) {
                 
-                // React import 추가 (필요한 경우)
+                // Add React import (if needed)
                 if (!hasReactDefaultImport) {
                   const reactImport = t.importDeclaration(
                     [t.importDefaultSpecifier(t.identifier('React'))],
@@ -290,7 +281,7 @@ globalThis.__GRANITE_ROUTES = ${routesJson};
                   programPath.unshiftContainer('body', reactImport);
                 }
                 
-                // navigation 관련 호출을 찾아서 바로 다음에 등록 코드 추가
+                // Find navigation-related calls and add registration code right after
                 programPath.traverse({
                   VariableDeclarator(variablePath) {
                     let isNavigationVariable = false;
@@ -299,13 +290,13 @@ globalThis.__GRANITE_ROUTES = ${routesJson};
                     if (variablePath.node.init && variablePath.node.id.type === 'Identifier') {
                       variableName = variablePath.node.id.name;
                       
-                      // 패턴 1: const navigation = useNavigation()
+                      // Pattern 1: const navigation = useNavigation()
                       if (variablePath.node.init.type === 'CallExpression' &&
                           variablePath.node.init.callee.name === 'useNavigation') {
                         isNavigationVariable = true;
                       }
                       
-                      // 패턴 2: const navigation = Route.useNavigation()
+                      // Pattern 2: const navigation = Route.useNavigation()
                       else if (variablePath.node.init.type === 'CallExpression' &&
                                variablePath.node.init.callee.type === 'MemberExpression' &&
                                variablePath.node.init.callee.property.name === 'useNavigation') {
@@ -314,11 +305,11 @@ globalThis.__GRANITE_ROUTES = ${routesJson};
                     }
                     
                     if (isNavigationVariable && variableName) {
-                      // 해당 변수가 선언된 함수나 블록 찾기
+                      // Find the function or block where this variable is declared
                       const parentFunction = variablePath.getFunctionParent();
                       if (parentFunction) {
                         
-                        // navigation 등록 코드 생성
+                        // Generate navigation registration code
                         const registrationCode = `
   // 🔥 RadonIDE: Auto-register navigation object
   React.useEffect(() => {
@@ -332,14 +323,14 @@ globalThis.__GRANITE_ROUTES = ${routesJson};
   }, [${variableName}]);
 `;
                         
-                        // AST로 파싱
+                        // Parse as AST
                         const registrationAST = parse(registrationCode, { 
                           sourceType: 'module', 
                           filename: 'navigation-registration.js',
                           parserOpts: { allowReturnOutsideFunction: true }
                         });
                         
-                        // 변수 선언 바로 다음에 추가
+                        // Add right after variable declaration
                         const statement = variablePath.getStatementParent();
                         statement.insertAfter(registrationAST.program.body);
                       }
@@ -357,7 +348,7 @@ globalThis.__GRANITE_ROUTES = ${routesJson};
         }
       },
       
-      // JSX Source visitor를 여기에 추가
+      // Add JSX Source visitor here
       ...jsxSourceVisitor
     }
   };

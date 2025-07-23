@@ -34,7 +34,7 @@ const setDevtoolsAgent = (newDevtoolsAgent) => {
 if (hook && hook.reactDevtoolsAgent) {
   setDevtoolsAgent(hook.reactDevtoolsAgent);
 } else if (hook) {
-  // reactDevtoolsAgent가 나중에 설정될 수 있도록 폴링 방식으로 체크
+  // Check with polling method in case reactDevtoolsAgent is set later
   const checkForAgent = () => {
     if (hook.reactDevtoolsAgent) {
       setDevtoolsAgent(hook.reactDevtoolsAgent);

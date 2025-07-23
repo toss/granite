@@ -13,21 +13,21 @@ const DEFAULT_OPTIONS: Required<Pick<RadonPluginOptions, 'enablePolyfill'>> = {
 };
 
 /**
- * 통합 Radon 플러그인
- * - radonPolyfill: RN 0.72 호환성 (polyfill 먼저 실행)
- * - radonCore: RadonIDE 핵심 기능 (agent 나중에 실행)
+ * Integrated Radon plugin
+ * - radonPolyfill: RN 0.72 compatibility (runs polyfill first)
+ * - radonCore: RadonIDE core functionality (runs agent later)
  */
 export const radon = (options: RadonPluginOptions = {}): GranitePlugin[] => {
   const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
   
   const plugins: GranitePlugin[] = [];
   
-  // 1. polyfill 먼저 (RN 0.72 호환성)
+  // 1. polyfill first (RN 0.72 compatibility)
   if (mergedOptions.enablePolyfill) {
     plugins.push(radonPolyfill(mergedOptions.polyfill));
   }
   
-  // 2. core 나중에 (RadonIDE 기능 + agent)
+  // 2. core later (RadonIDE functionality + agent)
   plugins.push(radonCore(mergedOptions.core));
   
   return plugins;
