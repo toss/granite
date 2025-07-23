@@ -250,8 +250,6 @@ globalThis.__GRANITE_ROUTES = ${routesJson};
               
               // AST를 순회하면서 useNavigation 훅 사용 여부 확인
               let usesNavigation = false;
-              let hasUseEffect = false;
-              let hasReactImport = false;
               let hasReactDefaultImport = false;
               
               programPath.traverse({
@@ -260,13 +258,9 @@ globalThis.__GRANITE_ROUTES = ${routesJson};
                   
                   // React import 확인
                   if (source === 'react') {
-                    hasReactImport = true;
                     importPath.node.specifiers.forEach(spec => {
                       if (spec.type === 'ImportDefaultSpecifier') {
                         hasReactDefaultImport = true;
-                      }
-                      if (spec.type === 'ImportSpecifier' && spec.imported.name === 'useEffect') {
-                        hasUseEffect = true;
                       }
                     });
                   }

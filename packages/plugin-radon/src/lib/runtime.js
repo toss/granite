@@ -13,7 +13,7 @@ global.__RNIDE_enabled = true;
 // };
 
 
-const RNInternals = require("./rn-internals/rn-internals-0.72");
+const RNInternals = require("./vendor/rn-internals/rn-internals-0.72");
 const AppRegistry = RNInternals.AppRegistry;
 
 if (AppRegistry) {

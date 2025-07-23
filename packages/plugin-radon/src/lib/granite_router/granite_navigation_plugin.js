@@ -87,7 +87,7 @@ const connectToGraniteRouter = () => {
         canGoBack: () => {
           try {
             return navigation.canGoBack();
-          } catch (error) {
+          } catch {
             return false;
           }
         }
@@ -226,7 +226,7 @@ const useReactNavigationStateListener = (onNavigationChange) => {
       const navigation = globalThis.__granite_real_navigation;
       if (navigation && navigation.addListener && !isListenerAdded) {
         
-        const unsubscribe = navigation.addListener('state', (e) => {
+        const unsubscribe = navigation.addListener('state', () => {
           const state = navigation.getState();
           
           if (state && state.routes && state.routes.length > 0) {
@@ -325,6 +325,7 @@ function useGraniteRouterPluginMainHook({ onNavigationChange, onRouteListChange 
 }
 
 // Expo Router와 동일한 플러그인 등록 방식
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 global.__RNIDE_register_navigation_plugin &&
   global.__RNIDE_register_navigation_plugin("granite-router", { mainHook: useGraniteRouterPluginMainHook });
 

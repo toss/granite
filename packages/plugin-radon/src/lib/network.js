@@ -1,5 +1,5 @@
-const RNInternals = require("./rn-internals/rn-internals-0.72");
-const { PluginMessageBridge } = require("./plugins/PluginMessageBridge");
+const { PluginMessageBridge } = require("./vendor/plugins/PluginMessageBridge");
+const RNInternals = require("./vendor/rn-internals/rn-internals-0.72");
 
 function mimeTypeFromResponseType(responseType) {
   switch (responseType) {
@@ -159,7 +159,7 @@ function enableNetworkInspect(networkProxy) {
       },
     });
 
-    xhr.addEventListener("abort", (event) => {
+    xhr.addEventListener("abort", () => {
       sendCDPMessage("Network.loadingFailed", {
         requestId: requestId,
         timestamp: Date.now() / 1000,
@@ -169,7 +169,7 @@ function enableNetworkInspect(networkProxy) {
       });
     });
 
-    xhr.addEventListener("error", (event) => {
+    xhr.addEventListener("error", () => {
       sendCDPMessage("Network.loadingFailed", {
         requestId: requestId,
         timestamp: Date.now() / 1000,
@@ -179,13 +179,13 @@ function enableNetworkInspect(networkProxy) {
       });
     });
 
-    xhr.addEventListener("readystatechange", (event) => {
+    xhr.addEventListener("readystatechange", () => {
       if (xhr.readyState === HEADERS_RECEIVED) {
         ttfb = Date.now() - sendTime;
       }
     });
 
-    xhr.addEventListener("load", (event) => {
+    xhr.addEventListener("load", () => {
       sendCDPMessage("Network.responseReceived", {
         requestId: requestId,
         loaderId,
@@ -204,7 +204,7 @@ function enableNetworkInspect(networkProxy) {
       });
     });
 
-    xhr.addEventListener("loadend", (event) => {
+    xhr.addEventListener("loadend", () => {
       sendCDPMessage("Network.loadingFinished", {
         requestId: requestId,
         timestamp: Date.now() / 1000,

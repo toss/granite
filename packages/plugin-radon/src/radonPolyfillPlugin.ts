@@ -1,5 +1,5 @@
-import type { GranitePluginCore } from '@granite-js/plugin-core';
 import path from 'path';
+import type { GranitePluginCore } from '@granite-js/plugin-core';
 
 export interface RadonPolyfillPluginOptions {
   enabled?: boolean;
