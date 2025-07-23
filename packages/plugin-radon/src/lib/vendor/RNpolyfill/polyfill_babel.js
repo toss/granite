@@ -23,7 +23,7 @@ setImmediate(() => {
     ${portInjectionCode}
     
     if (globalThis.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
-      require('@granite-js/plugin-radon/lib/RNpolyfill/react_devtools_polyfill');
+      require('@granite-js/plugin-radon/dist/lib/RNpolyfill/react_devtools_polyfill');
     } else {
       console.log('🔥 RADON POLYFILL: globalThis.__REACT_DEVTOOLS_GLOBAL_HOOK__ not detected');
     }

@@ -1,4 +1,3 @@
-import path from 'path';
 import type { GranitePluginCore } from '@granite-js/plugin-core';
 
 export interface RadonPolyfillPluginOptions {
@@ -25,7 +24,7 @@ export const radonPolyfill = (options: RadonPolyfillPluginOptions = DEFAULT_OPTI
     config: {
       babel: {
         plugins: [
-          [path.resolve(__dirname, './lib/RNpolyfill/polyfill_babel.cjs'), mergedOptions]
+          [require.resolve('@granite-js/plugin-radon/dist/lib/RNpolyfill/polyfill_babel.cjs'), mergedOptions]
         ]
       }
     }
