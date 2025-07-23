@@ -5609,6 +5609,7 @@ __metadata:
     "@babel/core": "npm:7.23.9"
     "@babel/template": "npm:^7.27.2"
     "@granite-js/plugin-core": "workspace:*"
+    "@granite-js/utils": "workspace:*"
     "@types/babel__core": "npm:^7.20.5"
     "@types/babel__template": "npm:^7"
     "@types/node": "npm:^22.10.2"

@@ -6,6 +6,7 @@ export default defineConfig([
     format: ['cjs', 'esm'],
     dts: true,
     minify: true,
+    external: ['react', 'react-native'],
   },
   {
     entry: 'src/babel.js',
@@ -13,7 +14,16 @@ export default defineConfig([
     format: ['cjs'],
     dts: false,
     minify: true,
-    external: ['fs', 'path', '@babel/core', '@babel/template', '@babel/types'],
+    external: [
+      'fs', 
+      'path', 
+      '@babel/core', 
+      '@babel/template', 
+      '@babel/types',
+      'react',
+      /^react-native/,
+      'react/jsx-runtime',
+    ],
   },
   {
     entry: 'src/lib/vendor/RNpolyfill/polyfill_babel.js',
@@ -29,6 +39,11 @@ export default defineConfig([
     format: ['cjs'],
     dts: false,
     minify: true,
+    external: [
+      'react',
+      /^react-native/,
+      'react/jsx-runtime',
+    ],
   },
   {
     entry: 'src/lib/vendor/RNpolyfill/react_devtools_polyfill.js',
@@ -57,6 +72,10 @@ export default defineConfig([
     format: ['cjs'],
     dts: false,
     minify: true,
-    external: ['scheduler'],
+    external: [
+      'scheduler',
+      'react',
+      /^react-native/,
+    ],
   },
 ]);
