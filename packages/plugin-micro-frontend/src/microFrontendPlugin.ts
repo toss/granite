@@ -19,6 +19,9 @@ export const microFrontendPlugin = async (options: MicroFrontendPluginOptions): 
   fs.mkdirSync(path.dirname(preludePath), { recursive: true });
   fs.writeFileSync(preludePath, preludeConfig.preludeScript);
 
+  /**
+   * @TODO `MPACK_DEV_SERVER` flag should be removed after next version of bundle loader is released and load bundle dynamically at JS runtime.
+   */
   if (process.env.MPACK_DEV_SERVER === 'true' && options.remote) {
     try {
       await fetchRemoteBundle(options.remote);
