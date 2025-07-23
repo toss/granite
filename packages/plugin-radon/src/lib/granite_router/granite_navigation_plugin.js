@@ -5,13 +5,13 @@ import {
   sendNavigationChange
 } from "./granite_router_helpers.js";
 
-// Granite Router 전역 상태 관리 (Expo Router의 store와 유사)
+// Granite Router global state management (similar to Expo Router's store)
 const graniteStore = {
   currentRoute: { pathname: "/", params: {} },
   routes: [],
   listeners: [],
   
-  // Expo Router의 subscribeToRootState와 유사
+  // Similar to Expo Router's subscribeToRootState
   subscribeToStateChange: (callback) => {
     graniteStore.listeners.push(callback);
     return () => {
@@ -22,12 +22,12 @@ const graniteStore = {
     };
   },
   
-  // Expo Router의 routeInfoSnapshot과 유사
+  // Similar to Expo Router's routeInfoSnapshot
   routeInfoSnapshot: () => {
     return graniteStore.currentRoute;
   },
   
-  // 상태 변경 알림
+  // Notify state changes
   notifyStateChange: () => {
     graniteStore.listeners.forEach(listener => {
       try {
@@ -38,7 +38,7 @@ const graniteStore = {
     });
   },
   
-  // 라우트 업데이트
+  // Update route
   updateRoute: (newRoute) => {
     graniteStore.currentRoute = newRoute;
     graniteStore.notifyStateChange();
@@ -49,7 +49,7 @@ const getNavigationObject = () => {
   return globalThis.__granite_real_navigation;
 };
 
-// 실제 Granite Router와 연결하기 위한 유틸리티
+// Utility for connecting to actual Granite Router
 const connectToGraniteRouter = () => {
   try {
     const navigation = getNavigationObject()
@@ -100,7 +100,7 @@ const connectToGraniteRouter = () => {
   return null;
 };
 
-// Granite Router API 초기화 (실제 라우터와 연결 시도)
+// Initialize Granite Router API (attempt to connect to actual router)
 if (!globalThis.__granite) {
   globalThis.__granite = {};
 }
@@ -114,7 +114,7 @@ if (!globalThis.__granite.router) {
         params: params || {} 
       };
       
-      // 매번 실제 네비게이션 연결 시도 (dynamic retry)
+      // Attempt to connect to actual navigation every time (dynamic retry)
       const realRouter = connectToGraniteRouter();
       if (realRouter) {
         realRouter.navigate(pathname, params);
@@ -149,13 +149,13 @@ if (!globalThis.__granite.router) {
       globalThis.__granite.router.current = newRoute;
     },
     
-    // RadonIDE용 수동 라우트 등록 함수 (fallback용)
+    // Manual route registration function for RadonIDE (fallback)
     registerRoute: (route) => {
       if (!globalThis.__GRANITE_MANUAL_ROUTES) {
         globalThis.__GRANITE_MANUAL_ROUTES = [];
       }
       
-      // 중복 제거
+      // Remove duplicates
       const existingIndex = globalThis.__GRANITE_MANUAL_ROUTES.findIndex(r => r.path === route.path);
       if (existingIndex >= 0) {
         globalThis.__GRANITE_MANUAL_ROUTES[existingIndex] = route;
@@ -164,14 +164,14 @@ if (!globalThis.__granite.router) {
       }
     },
     
-    // 등록된 라우트 목록 조회
+    // Get registered route list
     getRoutes: () => {
       return globalThis.__GRANITE_ROUTES || globalThis.__GRANITE_MANUAL_ROUTES || [];
     }
   };
 }
 
-// Granite Router용 useRouter 훅 시뮬레이션
+// useRouter hook simulation for Granite Router
 const useGraniteRouter = () => {
   return {
     navigate: globalThis.__granite.router.navigate,
@@ -181,11 +181,11 @@ const useGraniteRouter = () => {
   };
 };
 
-// 실제 navigation 객체를 전역에 등록하는 헬퍼
+// Helper to register actual navigation object globally
 globalThis.__granite_register_navigation = (navigation) => {
   globalThis.__granite_real_navigation = navigation;
   
-  // 등록 즉시 현재 상태를 Granite store에 동기화
+  // Sync current state to Granite store immediately upon registration
   try {
     const state = navigation.getState();
     if (state && state.routes && state.routes.length > 0) {
@@ -202,7 +202,7 @@ globalThis.__granite_register_navigation = (navigation) => {
   }
 };
 
-// Granite Router용 useSyncExternalStore 시뮬레이션
+// useSyncExternalStore simulation for Granite Router
 const useGraniteRouteInfo = () => {
   const [routeInfo, setRouteInfo] = useState(graniteStore.routeInfoSnapshot());
   
@@ -217,7 +217,7 @@ const useGraniteRouteInfo = () => {
   return routeInfo;
 };
 
-// 실제 React Navigation state 변경 감지 시스템
+// Actual React Navigation state change detection system
 const useReactNavigationStateListener = (onNavigationChange) => {
   useEffect(() => {
     let isListenerAdded = false;
@@ -246,10 +246,10 @@ const useReactNavigationStateListener = (onNavigationChange) => {
       return null;
     };
     
-    // 즉시 시도
+    // Try immediately
     let unsubscribe = addNavigationListener();
     
-    // navigation이 나중에 등록될 수 있으므로 주기적으로 재시도
+    // Retry periodically since navigation might be registered later
     const interval = setInterval(() => {
       if (!isListenerAdded) {
         unsubscribe = addNavigationListener();
@@ -265,20 +265,20 @@ const useReactNavigationStateListener = (onNavigationChange) => {
   }, [onNavigationChange]);
 };
 
-// Expo Router 구조와 동일한 main hook
+// Main hook identical to Expo Router structure
 function useGraniteRouterPluginMainHook({ onNavigationChange, onRouteListChange }) {
   
   const router = useGraniteRouter();
   const routeInfo = useGraniteRouteInfo();
   const previousRouteInfo = useRef();
   
-  // React Navigation state 변경 감지 (앱 → RadonIDE 동기화)
+  // React Navigation state change detection (App → RadonIDE sync)
   useReactNavigationStateListener(onNavigationChange);
 
   const pathname = routeInfo?.pathname;
   const params = routeInfo?.params;
 
-  // 라우트 리스트 전송 (Granite Router 자동 감지)
+  // Send route list (Granite Router auto-detection)
   useEffect(() => {
     const routes = globalThis.__GRANITE_ROUTES || [];
     const routeList = extractGraniteRouteList(routes);
@@ -286,12 +286,12 @@ function useGraniteRouterPluginMainHook({ onNavigationChange, onRouteListChange 
     
   }, [onRouteListChange]);
 
-  // 네비게이션 변경 감지 (Expo Router와 동일한 방식)
+  // Navigation change detection (same method as Expo Router)
   useEffect(() => {
     sendNavigationChange(previousRouteInfo, routeInfo, onNavigationChange);
   }, [pathname, params, onNavigationChange]);
 
-  // 네비게이션 요청 함수 (Expo Router와 동일한 시그니처)
+  // Navigation request function (same signature as Expo Router)
   function requestNavigationChange({ pathname, params }) {
     
     if (pathname === "__BACK__") {
@@ -307,7 +307,7 @@ function useGraniteRouterPluginMainHook({ onNavigationChange, onRouteListChange 
     }
   }
 
-  // Expo Router와 동일한 return 형식
+  // Same return format as Expo Router
   return {
     getCurrentNavigationDescriptor: () => {
       const snapshot = graniteStore.routeInfoSnapshot();
@@ -324,7 +324,7 @@ function useGraniteRouterPluginMainHook({ onNavigationChange, onRouteListChange 
   };
 }
 
-// Expo Router와 동일한 플러그인 등록 방식
+// Same plugin registration method as Expo Router
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 global.__RNIDE_register_navigation_plugin &&
   global.__RNIDE_register_navigation_plugin("granite-router", { mainHook: useGraniteRouterPluginMainHook });

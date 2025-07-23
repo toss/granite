@@ -70,7 +70,7 @@ export function extractGraniteRouteList(routes) {
     };
   });
   
-  // Expo Router와 동일한 정렬 방식
+  // Same sorting method as Expo Router
   const sortedRoutes = routeList.sort((a, b) => {
     const aPath = a.path.split("/");
     const bPath = b.path.split("/");
