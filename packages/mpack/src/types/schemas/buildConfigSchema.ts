@@ -1,8 +1,6 @@
 import type * as esbuild from 'esbuild';
 import z from 'zod';
-
-const callableSchema = <T>(returnType: z.ZodType<T>) =>
-  z.function().returns(z.union([returnType, z.promise(returnType)]));
+import type { AliasConfig, ProtocolConfig } from '../BuildConfig';
 
 export const esbuildConfigSchema = z.custom<
   esbuild.BuildOptions & {
@@ -33,23 +31,8 @@ export const swcConfigSchema = z.object({
 });
 
 export const resolverConfigSchema = z.object({
-  alias: z
-    .array(
-      z.object({
-        from: z.string(),
-        to: z.union([z.string(), callableSchema(z.string())]),
-        exact: z.boolean().optional(),
-      })
-    )
-    .optional(),
-  protocols: z
-    .record(
-      z.object({
-        resolve: callableSchema(z.any()).optional(),
-        load: callableSchema(z.any()),
-      })
-    )
-    .optional(),
+  alias: z.array(z.custom<AliasConfig>()).optional(),
+  protocols: z.custom<ProtocolConfig>().optional(),
 });
 
 export const buildConfigSchema = z.object({

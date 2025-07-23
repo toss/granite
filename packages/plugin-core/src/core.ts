@@ -83,3 +83,5 @@ export type PluginResolvable =
   | Promise<GranitePluginCore>;
 
 export type PluginInput = PluginResolvable | PluginInput[];
+
+export type { MpackConfig, MetroConfig, BabelConfig, EsbuildConfig, SwcConfig, ResolverConfig };
