@@ -1,20 +1,24 @@
 const fs = require('fs');
 const path = require('path');
+const { getPackageRoot } = require('@granite-js/utils');
 const createJSXSourceVisitor = require('./jsx-source-visitor');
+const { injectGraniteGlobals } = require('./lib/granite_router/global_injector');
+const { processPageFile } = require('./lib/granite_router/navigation_injector');
+const { parseRouterGenFile } = require('./lib/granite_router/router_parser');
 
 module.exports = function(api, options = {}) {
   api.assertVersion(7);
   
   const { parse, types: t } = api;
   
-  const appRoot = process.cwd();
+  const appRoot = getPackageRoot();
   
   const scanGraniteRoutes = () => {
     try {
       const routerGenPath = path.join(appRoot, 'src', 'router.gen.ts');
       
       if (fs.existsSync(routerGenPath)) {
-        return parseRouterGenFile(routerGenPath);
+        return parseRouterGenFile(parse, routerGenPath);
       }
       
     } catch (error) {
@@ -27,55 +31,7 @@ module.exports = function(api, options = {}) {
     }
   };
   
-  // Parse router.gen.ts file to extract route information
-  const parseRouterGenFile = (routerGenPath) => {
-    try {
-      const content = fs.readFileSync(routerGenPath, 'utf8');
-      const routes = [];
-      
-      const importRegex = /import\s+\{\s*Route\s+as\s+_(\w+)Route\s*\}\s+from\s+['"]\.\.\/pages\/([^'"]+)['"]/g;
-      let match;
-      
-      while ((match = importRegex.exec(content)) !== null) {
-        const componentName = match[1];
-        const pagePath = match[2];
-        const routePath = convertPagePathToRoute(pagePath);
-        
-        routes.push({
-          path: routePath,
-          filePath: `./pages/${pagePath}.tsx`,
-          componentName: componentName,
-          type: 'route'
-        });
-      }
-      
-      return routes;
-    } catch (error) {
-      console.error('🔥 RADON BABEL PLUGIN: Failed to parse router.gen.ts:', error);
-      return [];
-    }
-  };
-  
-  // Convert page path to route path (Granite Router style)
-  const convertPagePathToRoute = (pagePath) => {
-    // index → /
-    // about → /about  
-    // user/profile → /user/profile
-    // user/[id] → /user/:id
-    
-    let routePath = pagePath
-      .replace(/\/index$/, '') // /index → empty string
-      .replace(/\[([^\]]+)\]/g, ':$1'); // [id] → :id (dynamic route)
-    
-    // If empty string, use root path
-    if (!routePath || routePath === '' || routePath === 'index') {
-      routePath = '/';
-    } else if (!routePath.startsWith('/')) {
-      routePath = '/' + routePath;
-    }
-    
-    return routePath;
-  };
+
 
   const requireFromAppDir = (module) => {
     const resolvedPath = require.resolve(module, { paths: [appRoot] });
@@ -219,132 +175,18 @@ module.exports = function(api, options = {}) {
           if (isTransforming("@granite-js/react-native")) {
             try {
               const scannedRoutes = scanGraniteRoutes();
-              const routesJson = JSON.stringify(scannedRoutes, null, 2);
+              const injected = injectGraniteGlobals(injectCode, programPath, scannedRoutes);
               
-              const graniteDetectionCode = `
-// Mark that Granite Router is being used
-globalThis.__GRANITE_ROUTER_DETECTED__ = true;
-
-// Inject auto-scanned routes
-globalThis.__GRANITE_ROUTES = ${routesJson};
-`;
-              
-              injectCode(programPath, graniteDetectionCode, false);
-              state.file.metadata.radonInjected = true;
+              if (injected) {
+                state.file.metadata.radonInjected = true;
+              }
             } catch (e) {
               console.error('🔥 RADON BABEL PLUGIN: Failed to inject Granite detection code:', e);
             } 
           }
 
-          const isPageFile = filename.includes('/pages/') && /\.(tsx|ts|jsx|js)$/.test(filename);
-          
-          if (isPageFile && !state.file.metadata.radonPageInjected) {
-            try {
-              
-              let usesNavigation = false;
-              let hasReactDefaultImport = false;
-              
-              programPath.traverse({
-                ImportDeclaration(importPath) {
-                  const source = importPath.node.source.value;
-                  
-                  if (source === 'react') {
-                    importPath.node.specifiers.forEach(spec => {
-                      if (spec.type === 'ImportDefaultSpecifier') {
-                        hasReactDefaultImport = true;
-                      }
-                    });
-                  }
-                  
-                  // Check for createRoute import (to prepare for Route.useNavigation pattern)
-                  if (source === '@granite-js/react-native') {
-                    importPath.node.specifiers.forEach(spec => {
-                      if (spec.type === 'ImportSpecifier' && spec.imported.name === 'useNavigation') {
-                        usesNavigation = true;
-                      }
-                      if (spec.type === 'ImportSpecifier' && spec.imported.name === 'createRoute') {
-                        usesNavigation = true; // If createRoute exists, likely to use Route.useNavigation
-                      }
-                    });
-                  }
-                }
-              });
-              
-              if (usesNavigation) {
-                
-                // Add React import (if needed)
-                if (!hasReactDefaultImport) {
-                  const reactImport = t.importDeclaration(
-                    [t.importDefaultSpecifier(t.identifier('React'))],
-                    t.stringLiteral('react')
-                  );
-                  programPath.unshiftContainer('body', reactImport);
-                }
-                
-                // Find navigation-related calls and add registration code right after
-                programPath.traverse({
-                  VariableDeclarator(variablePath) {
-                    let isNavigationVariable = false;
-                    let variableName = null;
-                    
-                    if (variablePath.node.init && variablePath.node.id.type === 'Identifier') {
-                      variableName = variablePath.node.id.name;
-                      
-                      // Pattern 1: const navigation = useNavigation()
-                      if (variablePath.node.init.type === 'CallExpression' &&
-                          variablePath.node.init.callee.name === 'useNavigation') {
-                        isNavigationVariable = true;
-                      }
-                      
-                      // Pattern 2: const navigation = Route.useNavigation()
-                      else if (variablePath.node.init.type === 'CallExpression' &&
-                               variablePath.node.init.callee.type === 'MemberExpression' &&
-                               variablePath.node.init.callee.property.name === 'useNavigation') {
-                        isNavigationVariable = true;
-                      }
-                    }
-                    
-                    if (isNavigationVariable && variableName) {
-                      // Find the function or block where this variable is declared
-                      const parentFunction = variablePath.getFunctionParent();
-                      if (parentFunction) {
-                        
-                        // Generate navigation registration code
-                        const registrationCode = `
-  // 🔥 RadonIDE: Auto-register navigation object
-  React.useEffect(() => {
-    try {
-      if (globalThis.__granite_register_navigation && ${variableName}) {
-        globalThis.__granite_register_navigation(${variableName});
-      }
-    } catch (error) {
-      console.log("🔥 Radon Runtime: Could not auto-register navigation:", error.message);
-    }
-  }, [${variableName}]);
-`;
-                        
-                        // Parse as AST
-                        const registrationAST = parse(registrationCode, { 
-                          sourceType: 'module', 
-                          filename: 'navigation-registration.js',
-                          parserOpts: { allowReturnOutsideFunction: true }
-                        });
-                        
-                        // Add right after variable declaration
-                        const statement = variablePath.getStatementParent();
-                        statement.insertAfter(registrationAST.program.body);
-                      }
-                    }
-                  }
-                });
-                
-                state.file.metadata.radonPageInjected = true;
-              }
-              
-            } catch (error) {
-              console.error('🔥 RADON BABEL PLUGIN: Failed to process page file:', error);
-            }
-          }
+          // Process page files for navigation auto-registration
+          processPageFile(filename, programPath, parse, t, state);
         }
       },
       
