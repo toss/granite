@@ -79,7 +79,7 @@ export async function runServer({
   );
   const metroConfig = mergeConfig(baseConfig, {
     server: { port },
-    reporter
+    reporter,
   });
 
   const { middleware, websocketEndpoints, messageSocketEndpoint, eventsSocketEndpoint } = createDevServerMiddleware({
