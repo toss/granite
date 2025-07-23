@@ -1,7 +1,7 @@
 export function getContainer(instanceName: string) {
-  const containerIndex = __SHARED_MODULES__.__INSTANCES__[instanceName];
+  const containerIndex = __MICRO_FRONTEND__.__INSTANCES__[instanceName];
 
-  return typeof containerIndex === 'number' ? __SHARED_MODULES__.__INSTANCES__[containerIndex]! : null;
+  return typeof containerIndex === 'number' ? __MICRO_FRONTEND__.__INSTANCES__[containerIndex]! : null;
 }
 
 export function normalizePath(path: string) {

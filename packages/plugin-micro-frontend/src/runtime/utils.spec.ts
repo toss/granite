@@ -6,7 +6,7 @@ import { normalizePath, parseRemotePath, importRemoteModule, getContainer } from
 describe('utils', () => {
   describe('getContainer', () => {
     beforeAll(() => {
-      global.__SHARED_MODULES__ = {
+      global.__MICRO_FRONTEND__ = {
         __INSTANCES__: [] as any,
         __SHARED__: {},
       };
@@ -50,7 +50,7 @@ describe('utils', () => {
 
   describe('importRemoteModule', () => {
     beforeAll(() => {
-      global.__SHARED_MODULES__ = {
+      global.__MICRO_FRONTEND__ = {
         __INSTANCES__: [] as any,
         __SHARED__: {},
       };

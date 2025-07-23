@@ -48,7 +48,7 @@ export function virtualSharedConfig<Entries extends [string, object]>(moduleEntr
         return {
           loader: 'js',
           contents: `
-          var sharedModule = global.__SHARED_MODULES__.__SHARED__['${args.path}'];
+          var sharedModule = global.__MICRO_FRONTEND__.__SHARED__['${args.path}'];
 
           if (sharedModule == null) {
             throw new Error("'${args.path}' is not registered in the shared registry");

@@ -3,7 +3,7 @@ import type { RemoteConfig, SharedConfig } from '../types';
 
 declare global {
   // eslint-disable-next-line no-var
-  var __SHARED_MODULES__: RuntimeContext;
+  var __MICRO_FRONTEND__: RuntimeContext;
 }
 
 export interface RuntimeContext {

@@ -34,8 +34,8 @@ export function getPreludeConfig(options: MicroFrontendPluginOptions) {
 
   return {
     banner: `
-    if (global.__SHARED_MODULES__ == null) {
-      global.__SHARED_MODULES__ = {
+    if (global.__MICRO_FRONTEND__ == null) {
+      global.__MICRO_FRONTEND__ = {
         __SHARED__: {},
         __INSTANCES__: [],
       };

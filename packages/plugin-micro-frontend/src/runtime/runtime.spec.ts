@@ -5,7 +5,7 @@ import { registerShared } from './registerShared';
 
 describe('runtime', () => {
   beforeAll(() => {
-    global.__SHARED_MODULES__ = {
+    global.__MICRO_FRONTEND__ = {
       __INSTANCES__: [] as any,
       __SHARED__: {},
     };
@@ -18,8 +18,8 @@ describe('runtime', () => {
       const container = createContainer(CONTAINER_NAME, { shared: { lib: { eager: true } } });
 
       expect(container.name).toBe(CONTAINER_NAME);
-      expect(global.__SHARED_MODULES__.__INSTANCES__.length).toBe(1);
-      expect(global.__SHARED_MODULES__.__INSTANCES__).toMatchInlineSnapshot(`
+      expect(global.__MICRO_FRONTEND__.__INSTANCES__.length).toBe(1);
+      expect(global.__MICRO_FRONTEND__.__INSTANCES__).toMatchInlineSnapshot(`
         [
           {
             "config": {
@@ -46,8 +46,8 @@ describe('runtime', () => {
       const mod = {};
       registerShared('lib-name', mod);
 
-      expect(global.__SHARED_MODULES__.__SHARED__['lib-name']).toBeTruthy();
-      expect(global.__SHARED_MODULES__.__SHARED__['lib-name']?.get()).toEqual(mod);
+      expect(global.__MICRO_FRONTEND__.__SHARED__['lib-name']).toBeTruthy();
+      expect(global.__MICRO_FRONTEND__.__SHARED__['lib-name']?.get()).toEqual(mod);
     });
 
     it('should throw an error if a shared module is already registered', () => {

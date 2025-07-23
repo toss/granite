@@ -24,5 +24,5 @@ export interface GraniteGlobal {
    * @internal
    * Micro frontend runtime
    */
-  __SHARED_MODULES__: RuntimeContext;
+  __MICRO_FRONTEND__: RuntimeContext;
 }

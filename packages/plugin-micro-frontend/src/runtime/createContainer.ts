@@ -5,24 +5,24 @@ export function createContainer(
   name: string,
   config: { remote?: RemoteConfig; shared?: SharedConfig; exposes?: ExposeConfig }
 ) {
-  if (typeof global.__SHARED_MODULES__.__INSTANCES__[name] === 'number') {
+  if (typeof global.__MICRO_FRONTEND__.__INSTANCES__[name] === 'number') {
     throw new Error(`'${name}' container already registered`);
   }
 
-  const containerIndex = global.__SHARED_MODULES__.__INSTANCES__.length;
+  const containerIndex = global.__MICRO_FRONTEND__.__INSTANCES__.length;
   const container: Container = {
     name,
     config,
     exposeMap: {},
   };
 
-  Object.defineProperty(global.__SHARED_MODULES__.__INSTANCES__, name, {
+  Object.defineProperty(global.__MICRO_FRONTEND__.__INSTANCES__, name, {
     value: containerIndex,
     enumerable: false,
     writable: false,
   });
 
-  global.__SHARED_MODULES__.__INSTANCES__.push(container);
+  global.__MICRO_FRONTEND__.__INSTANCES__.push(container);
 
   return container;
 }
