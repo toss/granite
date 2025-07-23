@@ -1,5 +1,5 @@
 const { updateInstrumentationOptions } = require("./instrumentation");
-const { PluginMessageBridge } = require("./plugins/PluginMessageBridge");
+const { PluginMessageBridge } = require("./vendor/plugins/PluginMessageBridge");
 
 let setupCompleted = false;
 
