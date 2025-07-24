@@ -1,5 +1,18 @@
 # @granite-js/react-native
 
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies [208c053]
+  - @granite-js/mpack@0.1.7
+  - @granite-js/cli@0.1.7
+  - @granite-js/image@0.1.7
+  - @granite-js/jest@0.1.7
+  - @granite-js/lottie@0.1.7
+  - @granite-js/native@0.1.7
+  - @granite-js/style-utils@0.1.7
+
 ## 0.1.6
 
 ### Patch Changes
