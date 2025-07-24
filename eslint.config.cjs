@@ -41,6 +41,7 @@ module.exports = tseslint.config(
       '**/bin/*.js',
       '.pnp.*',
       '.yarn/',
+      'packages/plugin-radon/src/lib/vendor/**/*',
     ],
   },
   eslint.configs.recommended,

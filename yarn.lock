@@ -5455,6 +5455,27 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@granite-js/plugin-radon@workspace:packages/plugin-radon":
+  version: 0.0.0-use.local
+  resolution: "@granite-js/plugin-radon@workspace:packages/plugin-radon"
+  dependencies:
+    "@babel/core": "npm:7.23.9"
+    "@babel/template": "npm:^7.27.2"
+    "@granite-js/plugin-core": "workspace:*"
+    "@granite-js/utils": "workspace:*"
+    "@types/babel__core": "npm:^7.20.5"
+    "@types/babel__template": "npm:^7"
+    "@types/node": "npm:^22.10.2"
+    "@vitest/coverage-v8": "npm:^3.1.3"
+    tsdown: "npm:^0.11.13"
+    typescript: "npm:^5.8.3"
+    vitest: "npm:^3.1.3"
+  peerDependencies:
+    react: ">=16.8.0"
+    react-native: ">=0.60.0"
+  languageName: unknown
+  linkType: soft
+
 "@granite-js/plugin-router@workspace:*, @granite-js/plugin-router@workspace:packages/plugin-router":
   version: 0.0.0-use.local
   resolution: "@granite-js/plugin-router@workspace:packages/plugin-router"
