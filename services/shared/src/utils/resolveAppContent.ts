@@ -1,20 +1,27 @@
+import { getContainer, parseRemotePath, importRemoteModule } from '@granite-js/plugin-micro-frontend/runtime';
 import type { ComponentType } from 'react';
-import { getGlobal } from './getGlobal';
 import { waitForCondition } from './waitForCondition';
-import { ErrorPage } from '../pages/ErrorPage';
 
-export async function resolveAppContent(): Promise<ComponentType<unknown>> {
-  const global = getGlobal();
-  const isReady = () => global.Page != null;
+export async function resolveAppContent(remotePath: string): Promise<ComponentType<any>> {
+  const { remoteName } = parseRemotePath(remotePath);
 
-  if (isReady()) {
-    return global.Page!;
+  const isRemoteReady = () => {
+    return Boolean(getContainer(remoteName));
+  };
+
+  const getAppComponent = () => {
+    const module = importRemoteModule(remotePath);
+    return module?.default || module;
+  };
+
+  if (isRemoteReady()) {
+    return getAppComponent();
   } else {
-    const Component = await waitForCondition('AppContent', isReady)
-      .then(() => global.Page!)
+    const Component = await waitForCondition('AppContent', isRemoteReady)
+      .then(() => getAppComponent())
       .catch((error) => {
         console.error('resolveAppContent', error);
-        return ErrorPage;
+        throw error;
       });
 
     return Component;

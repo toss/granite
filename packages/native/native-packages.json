@@ -5,7 +5,6 @@
   "@react-navigation/native",
   "@react-navigation/native-stack",
   "@shopify/flash-list",
-  "lottie-ios",
   "lottie-react-native",
   "react-native-fast-image",
   "react-native-gesture-handler",
