@@ -1,5 +1,13 @@
 # @granite-js/mpack
 
+## 0.1.7
+
+### Patch Changes
+
+- 208c053: feat: add additionalConfig reporter spec
+  - @granite-js/devtools-frontend@0.1.7
+  - @granite-js/utils@0.1.7
+
 ## 0.1.6
 
 ### Patch Changes
