@@ -1,7 +1,7 @@
-import type { FastifyPluginAsync, FastifyPlugin } from 'fastify';
 import type { HandleFunction } from 'connect';
+import type { FastifyPluginAsync, FastifyPluginCallback } from 'fastify';
 
-export type Middleware = FastifyPluginAsync | FastifyPlugin;
+export type Middleware = FastifyPluginAsync | FastifyPluginCallback;
 export type MetroMiddleware = HandleFunction;
 
 export interface DevServerConfig {
