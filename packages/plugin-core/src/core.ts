@@ -1,4 +1,11 @@
-import type { BabelConfig, BuildResult, EsbuildConfig, MetroConfig, SwcConfig } from '@granite-js/mpack';
+import type {
+  BabelConfig,
+  BuildResult,
+  EsbuildConfig,
+  MetroConfig,
+  SwcConfig,
+  ResolverConfig,
+} from '@granite-js/mpack';
 import type { MpackConfig } from './types/mpackConfig';
 
 type DeepPartial<T> = T extends (...args: any[]) => any
@@ -65,6 +72,7 @@ export interface GranitePluginCore {
     babel?: DeepPartial<BabelConfig>;
     esbuild?: DeepPartial<EsbuildConfig>;
     swc?: DeepPartial<SwcConfig>;
+    resolver?: DeepPartial<ResolverConfig>;
   };
 }
 
@@ -77,3 +85,5 @@ export type PluginResolvable =
   | Promise<GranitePluginCore>;
 
 export type PluginInput = PluginResolvable | PluginInput[];
+
+export type { MpackConfig, MetroConfig, BabelConfig, EsbuildConfig, SwcConfig, ResolverConfig };

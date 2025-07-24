@@ -48,22 +48,6 @@ export function getRouteScreens(context: RequireContext): RouteScreen[] {
  * @description Maps paths of screens.
  *
  * @param {RouteScreen[]} routeScreens - List of screens that can be navigated to
- *
- * @example
- * ```tsx
- * import { registerPage, getRouteScreens, getScreenPathMapConfig, Router } from '@granite-js/react-native';
- * import { context } from '../require.context';
- *
- * function App() {
- *   return <Router context={context} prefix={'scheme://minibench'} />;
- * }
- *
- * export default registerPage(
- *   App,
- *   'minibench',
- *   getScreenPathMapConfig(getRouteScreens(context))
- * );
- * ```
  */
 export function getScreenPathMapConfig(routeScreens: RouteScreen[]) {
   const screensConfig: ScreenPath = {};

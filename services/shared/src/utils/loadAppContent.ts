@@ -1,9 +1,11 @@
 import type { ComponentType } from 'react';
 import * as ReactNative from 'react-native';
 import { getGlobal } from './getGlobal';
+import { isMetro } from './isMetro';
 import { resolveAppContent } from './resolveAppContent';
+
 interface LoadResult {
-  default: ComponentType<unknown>;
+  default: ComponentType<any>;
 }
 
 const global = getGlobal();
@@ -19,10 +21,14 @@ function getCoreModule() {
   };
 }
 
-export function loadAppContent(): Promise<LoadResult> {
-  const bundleLoadTask: Promise<void> = global?.__mpackInternal?.evaluateMainBundle
-    ? global?.__mpackInternal?.evaluateMainBundle()
+export function loadAppContent(remotePath: string): Promise<LoadResult> {
+  if (isMetro()) {
+    return Promise.reject(new Error('Dynamic bundle loading is not supported in Metro'));
+  }
+
+  const bundleLoadTask: Promise<void> = global?.__mpackInternal?.loadRemote
+    ? global?.__mpackInternal?.loadRemote()
     : getCoreModule().importLazy();
 
-  return bundleLoadTask.then(resolveAppContent).then((Component) => ({ default: Component }));
+  return bundleLoadTask.then(() => resolveAppContent(remotePath)).then((Component) => ({ default: Component }));
 }

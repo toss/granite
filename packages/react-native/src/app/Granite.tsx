@@ -1,10 +1,10 @@
-import { SafeAreaProvider } from '@granite-js/native/react-native-safe-area-context';
 import { ComponentType, PropsWithChildren } from 'react';
-import { App } from './App';
-import { registerPage } from './registerPage';
+import { AppRegistry } from 'react-native';
+import { ENTRY_BUNDLE_NAME } from '../constants';
 import type { InitialProps } from '../initial-props';
-import { Router, type RouterProps, type RequireContext } from '../router';
-import { BackEventProvider, useBackEventState } from '../use-back-event';
+import type { RouterProps, RequireContext } from '../router';
+import { AppRoot } from './AppRoot';
+import { HostAppRoot } from './HostAppRoot';
 
 export interface GraniteProps {
   /**
@@ -26,47 +26,26 @@ export interface GraniteProps {
   router?: RouterProps;
 }
 
-/**
- * @internal
- */
-interface AppRootProps extends GraniteProps {
-  container: ComponentType<PropsWithChildren<InitialProps>>;
-  initialProps: InitialProps;
-}
-
-const scheme = global.__granite.app.scheme;
-
-function AppRoot({ appName, context, container, initialProps, router }: AppRootProps) {
-  const backEventState = useBackEventState();
-  const baseScheme = `${scheme}://${appName}`;
-
-  return (
-    <App {...initialProps}>
-      <SafeAreaProvider>
-        <BackEventProvider backEvent={backEventState}>
-          <Router
-            context={context}
-            initialProps={initialProps}
-            container={container}
-            canGoBack={!backEventState.hasBackEvent}
-            onBack={backEventState.onBack}
-            prefix={baseScheme}
-            {...router}
-          />
-        </BackEventProvider>
-      </SafeAreaProvider>
-    </App>
-  );
-}
-
 const createApp = () => {
   let _appName: string | null = null;
+
+  function registerComponent(appKey: string, component: React.ComponentType<any>): string {
+    if (AppRegistry.getAppKeys().includes(appKey)) {
+      throw new Error(`App with key '${appKey}' already registered`);
+    }
+
+    return AppRegistry.registerComponent(appKey, () => component);
+  }
 
   return {
     registerApp(
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
       { appName, context, router }: GraniteProps
     ): (initialProps: InitialProps) => JSX.Element {
+      if (appName === ENTRY_BUNDLE_NAME) {
+        throw new Error(`Reserved app name 'shared' cannot be used`);
+      }
+
       function Root(initialProps: InitialProps) {
         return (
           <AppRoot
@@ -79,14 +58,33 @@ const createApp = () => {
         );
       }
 
-      registerPage(Root);
+      registerComponent(appName, Root);
       _appName = appName;
+
+      return Root;
+    },
+
+    registerHostApp(
+      AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
+      { appName }: Pick<GraniteProps, 'appName'>
+    ): (initialProps: InitialProps) => JSX.Element {
+      if (appName !== ENTRY_BUNDLE_NAME) {
+        throw new Error(`Host appName must be 'shared'`);
+      }
+
+      function Root(initialProps: InitialProps) {
+        return <HostAppRoot container={AppContainer} initialProps={initialProps} />;
+      }
+
+      registerComponent(appName, Root);
+      _appName = appName;
+
       return Root;
     },
 
     get appName(): string {
       if (_appName === null) {
-        throw new Error('Granite.appName can only be used after registerApp has been called.');
+        throw new Error('Granite.appName can only be used after registerApp or registerHostApp has been called.');
       }
       return _appName;
     },

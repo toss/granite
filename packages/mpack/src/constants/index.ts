@@ -34,4 +34,4 @@ export const RESOLVER_MAIN_FIELDS = ['react-native', 'browser', 'main'];
 export const RESOLVER_EXPORTS_MAP_CONDITIONS = ['react-native'];
 
 export const INTERNAL_NAMESPACE_IDENTIFIER = '__mpackInternal';
-export const INTERNAL_EVALUATE_MAIN_BUNDLE_IDENTIFIER = 'evaluateMainBundle';
+export const INTERNAL_LOAD_REMOTE_IDENTIFIER = 'loadRemote';

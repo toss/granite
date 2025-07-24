@@ -15,6 +15,7 @@ import { BundlerConfig, INTERNAL__Id } from '../types';
 import { Plugin } from '../types/Plugin';
 import { getId } from '../utils/getId';
 import { PromiseHandler } from '../utils/promiseHandler';
+import { combineWithBaseBuildConfig } from './internal/presets';
 
 type BundlerStatus = 'idle' | 'prepared' | 'building';
 
@@ -33,6 +34,10 @@ export class Bundler {
     this.pluginDriver = new PluginDriver(id);
     this.config.buildConfig.entry = path.resolve(this.config.rootDir, this.config.buildConfig.entry);
     this.config.buildConfig.outfile = path.resolve(this.config.rootDir, this.config.buildConfig.outfile);
+    this.config.buildConfig = combineWithBaseBuildConfig(this.config, {
+      rootDir: this.config.rootDir,
+      dev: this.config.dev,
+    });
 
     logger.debug('Bundler.constructor', { id, config });
   }

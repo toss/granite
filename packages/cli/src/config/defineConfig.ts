@@ -2,6 +2,7 @@ import path from 'path';
 import {
   babelConfigSchema,
   esbuildConfigSchema,
+  resolverConfigSchema,
   type AdditionalMetroConfig,
   type Config as MpackConfig,
   type TaskConfig,
@@ -13,8 +14,6 @@ import { merge } from 'es-toolkit';
 import { z } from 'zod';
 import { mergeConfigFromPlugins } from './mergeConfigFromPlugins';
 import { mergeTransformFromPlugins } from './mergeTransformFromPlugins';
-import { service } from '../presets/service';
-import { shared } from '../presets/shared';
 
 const graniteConfigSchema = z.object({
   appName: z.string(),
@@ -23,19 +22,14 @@ const graniteConfigSchema = z.object({
   outdir: z.string().default('dist'),
   entryFile: z.string().default('./src/_app.tsx'),
   cwd: z.string().default(process.cwd()),
+  resolver: resolverConfigSchema.optional(),
   mpack: mpackConfigScheme.optional(),
   babel: babelConfigSchema.optional(),
   esbuild: esbuildConfigSchema.optional(),
   metro: z.custom<Partial<AdditionalMetroConfig>>().optional(),
-  INTERNAL__useSharedPreset: z.boolean().optional(),
 });
 
-export type GraniteConfigInput = z.input<typeof graniteConfigSchema> & {
-  /**
-   * @internal
-   */
-  INTERNAL__useSharedPreset?: boolean;
-};
+export type GraniteConfigInput = z.input<typeof graniteConfigSchema>;
 
 export interface GraniteConfigResponse extends z.infer<typeof graniteConfigSchema> {
   mpack: {
@@ -55,16 +49,16 @@ export interface GraniteConfigResponse extends z.infer<typeof graniteConfigSchem
  * @name defineConfig
  * @description
  * Configures your Granite application by defining key settings in `granite.config.ts`.
- * 
+ *
  * The configuration lets you specify:
  * - How users will access your app through a URL scheme (e.g. `granite://`)
- * - Your app's unique name that appears in the URL (e.g. `granite://my-service`) 
+ * - Your app's unique name that appears in the URL (e.g. `granite://my-service`)
  * - Build settings for bundlers like ESBuild and Metro
  * - Code transformation settings through Babel
  * - Additional functionality through Granite plugins
- * 
+ *
  * @param config - Configuration options
- * @param config.appName - Your app's unique identifier 
+ * @param config.appName - Your app's unique identifier
  * @param config.scheme - URL scheme for launching your app (e.g. 'granite')
  * @param config.plugins - Granite plugins to enhance functionality
  * @param config.outdir - Where to output build files (defaults to 'dist')
@@ -75,17 +69,17 @@ export interface GraniteConfigResponse extends z.infer<typeof graniteConfigSchem
  * @param config.esbuild - Adjust ESBuild bundling
  * @param config.metro - Configure Metro bundler settings
  * @returns The processed configuration
- * 
+ *
  * @example
  * Here's a basic configuration that:
  * - Makes your app accessible via the `granite://` scheme
  * - Names your service "my-app" so it's reachable at `granite://my-app`
  * - Uses the Hermes plugin to optimize JavaScript bundles into bytecode
- * 
+ *
  * ```ts
  * import { defineConfig } from '@granite-js/react-native/config';
  * import { hermes } from '@granite-js/plugin-hermes';
- * 
+ *
  * export default defineConfig({
  *   // The name of your microservice
  *   appName: 'my-app',
@@ -110,6 +104,7 @@ export const defineConfig = async (config: GraniteConfigInput): Promise<GraniteC
   const mergedConfig = await mergeConfigFromPlugins(plugins);
   const mergedTransform = await mergeTransformFromPlugins(plugins);
 
+  const resolver = mergedConfig?.resolver ? merge(mergedConfig.resolver, parsedConfig?.resolver ?? {}) : void 0;
   const esbuild = mergedConfig?.esbuild ? merge(mergedConfig.esbuild, parsedConfig?.esbuild ?? {}) : void 0;
   const metro = mergedConfig?.metro ? merge(mergedConfig.metro, parsedConfig?.metro ?? {}) : void 0;
   const babel = mergedConfig?.babel ? merge(mergedConfig.babel, parsedConfig?.babel ?? {}) : void 0;
@@ -117,11 +112,10 @@ export const defineConfig = async (config: GraniteConfigInput): Promise<GraniteC
     ? merge(mergedConfig?.mpack?.devServer ?? {}, parsedConfig?.mpack?.devServer ?? {})
     : void 0;
 
-  const buildPreset = config.INTERNAL__useSharedPreset ? shared : service;
   const createTask = (platform: 'ios' | 'android'): TaskConfig => ({
     tag: `${appName}-${platform}`,
-    presets: [buildPreset()],
     build: {
+      resolver,
       esbuild,
       babel,
       platform,
@@ -141,16 +135,14 @@ export const defineConfig = async (config: GraniteConfigInput): Promise<GraniteC
         config: {
           appName,
           scheme,
-          services: {
-            /* TODO: Plugin 구조로 변경 필요 */
-            sentry: {
-              enabled: false,
-            },
-          },
           devServer: {
-            presets: [buildPreset()],
             build: {
               entry: entryFile,
+              resolver,
+              esbuild,
+              babel,
+              transformSync: mergedTransform?.transformSync,
+              transformAsync: mergedTransform?.transformAsync,
             },
           },
           tasks: [],
@@ -160,12 +152,6 @@ export const defineConfig = async (config: GraniteConfigInput): Promise<GraniteC
         config: {
           appName,
           scheme,
-          services: {
-            /* TODO: Plugin 구조로 변경 필요 */
-            sentry: {
-              enabled: false,
-            },
-          },
           concurrency: 2,
           tasks: [createTask('ios'), createTask('android')],
         },

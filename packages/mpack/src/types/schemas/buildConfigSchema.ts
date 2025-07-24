@@ -1,8 +1,6 @@
 import type * as esbuild from 'esbuild';
 import z from 'zod';
-
-const callableSchema = <T>(returnType: z.ZodType<T>) =>
-  z.function().returns(z.union([returnType, z.promise(returnType)]));
+import type { AliasConfig, ProtocolConfig } from '../BuildConfig';
 
 export const esbuildConfigSchema = z.custom<
   esbuild.BuildOptions & {
@@ -32,31 +30,16 @@ export const swcConfigSchema = z.object({
   plugins: z.array(z.any()).optional(),
 });
 
+export const resolverConfigSchema = z.object({
+  alias: z.array(z.custom<AliasConfig>()).optional(),
+  protocols: z.custom<ProtocolConfig>().optional(),
+});
+
 export const buildConfigSchema = z.object({
   platform: z.enum(['ios', 'android']),
   entry: z.string(),
   outfile: z.string(),
-  resolver: z
-    .object({
-      alias: z
-        .array(
-          z.object({
-            from: z.string(),
-            to: z.union([z.string(), callableSchema(z.string())]),
-            exact: z.boolean().optional(),
-          })
-        )
-        .optional(),
-      protocols: z
-        .record(
-          z.object({
-            resolve: callableSchema(z.any()).optional(),
-            load: callableSchema(z.any()),
-          })
-        )
-        .optional(),
-    })
-    .optional(),
+  resolver: resolverConfigSchema.optional(),
   esbuild: esbuildConfigSchema.optional(),
   babel: babelConfigSchema.optional(),
   swc: swcConfigSchema.optional(),
@@ -66,4 +49,5 @@ export const buildConfigSchema = z.object({
 export type EsbuildConfig = z.infer<typeof esbuildConfigSchema>;
 export type BabelConfig = z.infer<typeof babelConfigSchema>;
 export type SwcConfig = z.infer<typeof swcConfigSchema>;
+export type ResolverConfig = z.infer<typeof resolverConfigSchema>;
 export type RawBuildConfig = z.infer<typeof buildConfigSchema>;

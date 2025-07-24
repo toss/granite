@@ -10,7 +10,6 @@ import { DEV_SERVER_BUNDLE_NAME } from '../../constants';
 import type { Platform } from '../../types';
 import { invalidRequest, notFound } from '../reply';
 
- 
 async function symbolicatePluginImpl(
   app: FastifyInstance,
   { getBundle }: { getBundle: (platform: Platform) => Promise<BundleData> }

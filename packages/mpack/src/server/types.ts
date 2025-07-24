@@ -9,7 +9,6 @@ export interface DevServerOptions extends DevServerConfig {
   rootDir: string;
   appName: string;
   scheme: string;
-  preloadBundle?: string;
   host?: string;
   port?: number;
   plugins?: DevServerPlugin[];
