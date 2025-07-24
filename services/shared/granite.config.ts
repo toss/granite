@@ -3,6 +3,8 @@ import { microFrontend } from '@granite-js/plugin-micro-frontend';
 import { defineConfig } from '@granite-js/react-native/config';
 
 const SHARED_MODULES = [
+  // FIXME: Sandbox app update is required
+  // '@react-native-async-storage/async-storage',
   '@react-native-community/blur',
   '@react-navigation/native',
   '@react-navigation/native-stack',
