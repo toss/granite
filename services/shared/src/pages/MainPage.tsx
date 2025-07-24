@@ -1,8 +1,8 @@
+import type { InitialProps } from '@granite-js/react-native';
 import { ErrorBoundary } from '@toss/error-boundary';
 import React, { Suspense } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ErrorPage } from '../components/ErrorPage';
-import type { InitialProps } from '../types';
 import { loadAppContent } from '../utils/loadAppContent';
 
 const AppContent = React.lazy(() => loadAppContent('remoteApp/AppContainer'));

@@ -5,7 +5,7 @@ import { isMetro } from './isMetro';
 import { resolveAppContent } from './resolveAppContent';
 
 interface LoadResult {
-  default: ComponentType<unknown>;
+  default: ComponentType<any>;
 }
 
 const global = getGlobal();

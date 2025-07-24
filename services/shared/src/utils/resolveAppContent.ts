@@ -2,7 +2,7 @@ import { getContainer, parseRemotePath, importRemoteModule } from '@granite-js/p
 import type { ComponentType } from 'react';
 import { waitForCondition } from './waitForCondition';
 
-export async function resolveAppContent(remotePath: string): Promise<ComponentType<unknown>> {
+export async function resolveAppContent(remotePath: string): Promise<ComponentType<any>> {
   const { remoteName } = parseRemotePath(remotePath);
 
   const isRemoteReady = () => {
