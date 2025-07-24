@@ -35,8 +35,6 @@ export function combineWithBaseBuildConfig(
   config: BundlerConfig,
   context: { rootDir: string; dev: boolean }
 ): BuildConfig {
-  const DUMMY_BUILD_NUMBER = '00000000';
-
   return mergeBuildConfigs(
     {
       entry: config.buildConfig.entry,
@@ -49,8 +47,7 @@ export function combineWithBaseBuildConfig(
           js: [
             globalVariables({ dev: context.dev }),
             'global.__granite = global.__granite || {};',
-            `global.__granite.shared = { buildNumber: ${JSON.stringify(DUMMY_BUILD_NUMBER)} };`,
-            `global.__granite.app = { name: ${JSON.stringify(config.appName)}, scheme: ${JSON.stringify(config.scheme)}, buildNumber: ${JSON.stringify(DUMMY_BUILD_NUMBER)} };`,
+            `global.__granite.app = { name: ${JSON.stringify(config.appName)}, scheme: ${JSON.stringify(config.scheme)} };`,
             // symbol-asynciterator polyfill (ES5)
             `(function(){if(typeof Symbol!=="undefined"&&!Symbol.asyncIterator){Symbol.asyncIterator=Symbol.for("@@asyncIterator")}})();`,
           ].join('\n'),

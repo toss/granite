@@ -14,11 +14,9 @@ export async function writeEnvScript(rootPath: string, appName: string, scheme: 
 }
 
 function getEnvScript(appName: string, scheme: string) {
-  const buildNumber = '00000000';
   const script = [
     'global.__granite = global.__granite || {};',
-    `global.__granite.shared = { buildNumber: ${JSON.stringify(buildNumber)} };`,
-    `global.__granite.app = { name: ${appName.startsWith('babel:') ? appName.slice(6) : JSON.stringify(appName)}, scheme: ${JSON.stringify(scheme)}, buildNumber: ${JSON.stringify(buildNumber)} };`,
+    `global.__granite.app = { name: ${appName.startsWith('babel:') ? appName.slice(6) : JSON.stringify(appName)}, scheme: ${JSON.stringify(scheme)} };`,
   ].join('\n');
 
   return script;

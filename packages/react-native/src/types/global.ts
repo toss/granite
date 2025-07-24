@@ -3,13 +3,9 @@
 import type { ComponentType } from 'react';
 
 export interface GraniteGlobal {
-  shared: {
-    buildNumber: string;
-  };
   app: {
     name: string;
     scheme: string;
-    buildNumber: string;
   };
 }
 
