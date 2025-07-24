@@ -49,16 +49,10 @@ module.exports = function(api, options = {}) {
       let versionFolder;
       if (version.startsWith("0.72")) {
         versionFolder = "react-native-72";
-      } else if (version.startsWith("0.74") || version.startsWith("0.75") || version.startsWith("0.76") || version.startsWith("0.77")) {
-        versionFolder = "react-native-74-77";
-      } else if (version.startsWith("0.78") || version.startsWith("0.79")) {
-        versionFolder = "react-native-78-79";
-      } else if (version.startsWith("0.80")) {
-        versionFolder = "react-native-80";
-      }
+      } 
       
       if (versionFolder) {
-        const rendererPath = path.join(pluginRoot, 'dist', 'lib', 'rn-renderer', versionFolder, rendererFileName.replace('.js', '.cjs'));
+        const rendererPath = path.join(pluginRoot, 'dist', 'lib', 'rn-renderer', rendererFileName.replace('.js', '.cjs'));
         return rendererPath;
       }
       
