@@ -3,26 +3,36 @@ import type * as babel from '@babel/core';
 import { getPackageRoot } from '@granite-js/utils';
 import { createResolver } from './enhancedResolver';
 import { getMonorepoRoot } from './getMonorepoRoot';
-import { writeEnvScript } from './runtime';
 import type { MetroConfig } from './types';
 import { DEV_SERVER_DEFAULT_PORT, SOURCE_EXTENSIONS } from '../constants';
-import type { ReportableEvent } from '../vendors/metro/src/lib/ReportableEvent';
 import { getDefaultValues } from '../vendors/metro-config/src/defaults';
 import exclusionList from '../vendors/metro-config/src/defaults/exclusionList';
 import { mergeConfig } from '../vendors/metro-config/src/loadConfig';
 
 export interface GetMetroConfig {
   rootPath: string;
-  appName: string;
-  scheme: string;
 }
 
 export interface AdditionalMetroConfig extends MetroConfig {
-  transformSync?: (id: string, code: string) => string;
+  /**
+   * Partial support for some options only
+   *
+   * - `getPolyfills`
+   */
+  serializer?: MetroConfig['serializer'];
+  /**
+   * Partial support for some options only
+   *
+   * - `blockList`
+   */
+  resolver?: MetroConfig['resolver'];
+  reporter?: MetroConfig['reporter'];
+  /**
+   * Script paths to be executed before the main module is run
+   */
+  prelude?: string[];
   babelConfig?: babel.TransformOptions;
-  reporter?: {
-    update: (event: ReportableEvent) => void;
-  };
+  transformSync?: (id: string, code: string) => string;
 }
 
 const INTERNAL_CALLSITES_REGEX = new RegExp(
@@ -45,16 +55,11 @@ const INTERNAL_CALLSITES_REGEX = new RegExp(
   ].join('|')
 );
 
-export async function getMetroConfig(
-  { rootPath, appName, scheme }: GetMetroConfig,
-  additionalConfig?: AdditionalMetroConfig
-) {
+export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalConfig?: AdditionalMetroConfig) {
   const defaultConfig = getDefaultValues(rootPath);
   const reactNativePath = path.dirname(resolveFromRoot('react-native/package.json', rootPath));
   const resolvedRootPath = await getMonorepoRoot(rootPath);
-
   const packageRootPath = await getPackageRoot();
-  const { path: envFilePath } = await writeEnvScript(packageRootPath, appName, scheme);
 
   return mergeConfig(defaultConfig, {
     watchFolders: [resolvedRootPath, packageRootPath],
@@ -95,11 +100,11 @@ export async function getMetroConfig(
     },
     serializer: {
       getModulesRunBeforeMainModule: () => [resolveFromRoot('react-native/Libraries/Core/InitializeCore', rootPath)],
-       
+
       getPolyfills: () => [
-        envFilePath,
-        ...(additionalConfig?.serializer?.getPolyfills?.() ?? []),
         ...require(path.join(reactNativePath, 'rn-get-polyfills'))(),
+        ...(additionalConfig?.serializer?.getPolyfills?.() ?? []),
+        ...(additionalConfig?.prelude ?? []),
       ],
     },
     symbolicator: {

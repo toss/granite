@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@granite-js/plugin-core": "workspace:*",
+    "@granite-js/utils": "workspace:*",
     "es-toolkit": "^1.38.0",
     "picocolors": "^1.1.1"
   },

@@ -1,9 +1,13 @@
 import assert from 'assert';
-import Fastify, { DoneFuncWithErrOrRes, FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import Fastify, {
+  type DoneFuncWithErrOrRes,
+  type FastifyInstance,
+  type FastifyRequest,
+  type FastifyReply,
+} from 'fastify';
 import { setupDevToolsProxy } from 'react-native-devtools-standalone/backend';
-import { DevServerConfig } from '..';
 import { DebuggerEventHandler } from './debugger/DebuggerEventHandler';
-import { createDevServerForDevServer } from './helpers/createBundlerForDevServer';
+import { createBundlerForDevServer } from './helpers/createBundlerForDevServer';
 import { mergeBundles } from './helpers/mergeBundles';
 import { createLiveReloadMiddleware } from './middlewares';
 import * as serverPlugins from './plugins';
@@ -50,10 +54,10 @@ export class DevServer {
 
   async initialize() {
     logger.trace('DevServer.initialize');
-    const { rootDir, appName, scheme, ...devServerConfig } = this.devServerOptions;
+    const { rootDir, buildConfig } = this.devServerOptions;
 
     await persistentStorage.loadData();
-    this.context = await this.createDevServerContext(rootDir, appName, scheme, devServerConfig);
+    this.context = await this.createDevServerContext(rootDir, buildConfig);
   }
 
   listen() {
@@ -134,7 +138,7 @@ export class DevServer {
       .addHook('onRequest', inspectorProxy.handleRequest)
       .addHook('onSend', this.setCommonHeaders);
 
-    for (const plugin of this.devServerOptions.plugins ?? []) {
+    for (const plugin of this.devServerOptions.middlewares ?? []) {
       app.register(plugin);
     }
 
@@ -180,13 +184,11 @@ export class DevServer {
 
   private async createDevServerContext(
     rootDir: string,
-    appName: string,
-    scheme: string,
-    config: DevServerConfig
+    buildConfig: DevServerOptions['buildConfig']
   ): Promise<DevServerContext> {
     const [androidBundler, iosBundler] = await Promise.all([
-      createDevServerForDevServer({ rootDir, appName, scheme, platform: 'android', config }),
-      createDevServerForDevServer({ rootDir, appName, scheme, platform: 'ios', config }),
+      createBundlerForDevServer({ rootDir, platform: 'android', buildConfig }),
+      createBundlerForDevServer({ rootDir, platform: 'ios', buildConfig }),
     ]);
 
     // Register common plugins for dev server
@@ -205,15 +207,14 @@ export class DevServer {
     });
 
     return {
-      config,
       rootDir,
       android: {
         bundler: androidBundler,
-        progressBar: createProgressBar(`${appName}:android`),
+        progressBar: createProgressBar('android'),
       },
       ios: {
         bundler: iosBundler,
-        progressBar: createProgressBar(`${appName}:ios`),
+        progressBar: createProgressBar('ios'),
       },
     };
   }

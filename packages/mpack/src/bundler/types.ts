@@ -2,7 +2,6 @@ import * as esbuild from 'esbuild';
 import type { BuildConfig } from '..';
 
 export type BuildResult = esbuild.BuildResult & {
-  tag: string;
   bundle: BundleData;
   outfile: BuildConfig['outfile'];
   sourcemapOutfile: NonNullable<BuildConfig['sourcemapOutfile']>;

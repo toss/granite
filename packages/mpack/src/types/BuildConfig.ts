@@ -3,67 +3,69 @@ import * as esbuild from 'esbuild';
 
 export interface BuildConfig {
   /**
-   * 빌드 타겟 플랫폼
+   * Build platform
    */
   platform: 'ios' | 'android';
   /**
-   * 빌드 진입점 파일 경로
+   * Entry file path
    */
   entry: string;
   /**
-   * 빌드 결과 파일 경로
+   * Build output file path
    */
   outfile: string;
   /**
-   * 소스맵 결과 파일 경로
+   * Source map output file path
    *
    * @default `${outfile}.map`
    */
   sourcemapOutfile?: string;
   /**
-   * 모듈 resolution 구성
+   * Module resolution configuration
    */
   resolver?: {
     /**
-     * 의존성 alias 구성
+     * Dependency alias configuration
      */
     alias?: AliasConfig[];
     /**
-     * 커스텀 모듈 Protocol 구성
+     * Custom module protocol configuration
      */
     protocols?: ProtocolConfig;
   };
   /**
-   * 커스텀 Transform 구성
+   * Transformer configuration
    */
-  transformSync?: (id: string, code: string) => string;
-  transformAsync?: (id: string, code: string) => Promise<string>;
+  transformer?: {
+    transformSync?: TransformSync;
+    transformAsync?: TransformAsync;
+  };
   /**
-   * esbuild 구성
+   * esbuild configuration
    */
   esbuild?: esbuild.BuildOptions & {
     /**
-     * Entry point 최상단에 주입할 스크립트 경로
+     * Script path to inject at the entry point
      *
-     * esbuild.inject 옵션에 추가한 스크립트의 경우 entry-point 모듈에만 주입되는 것이 아니라 모든 모듈에 주입되는 문제가 있음.
-     * entry-point 모듈의 최상단에만 코드를 주입하도록 별도 옵션을 구성합니다.
+     * esbuild.inject option added script is not only injected into the entry-point module, but also into all modules.
+     * entry-point module's top level only inject code.
      *
-     * - 의도한 것과 같이 entry-point 모듈 최상단에 1회만 주입(import)됩니다
-     * - 중복되는 inject 스크립트가 제거되어 번들 크기가 작아집니다
+     * - injected only once at the top level of the entry-point module
+     * - duplicate inject script is removed, reducing bundle size
      *
      * @see issue {@link https://github.com/evanw/esbuild/issues/475}
      */
     prelude?: string[];
   };
   /**
-   * 커스텀 babel 구성
+   * Custom babel configuration
    */
   babel?: {
     /**
-     * Babel transform 처리를 위한 규칙 리스트
-     * (속도가 느리기 때문에 특정 조건이 충족할 때에만 transform 하기 위한 옵션)
+     * List of rules for Babel transform processing
+     * (option to skip Babel transform only when certain conditions are met)
      *
-     * 모든 규칙이 `false`를 반환할 경우 Babel transform 과정을 건너뜁니다
+     * If all rules return `false`, Babel transform is skipped
      */
     conditions?: Array<(code: string, path: string) => boolean>;
     configFile?: string;
@@ -71,19 +73,19 @@ export interface BuildConfig {
     plugins?: (string | [string, any])[];
   };
   /**
-   * 커스텀 swc 구성
+   * Custom swc configuration
    */
   swc?: {
     /**
-     * 플러그인 바이너리(wasm) 경로, 플러그인 구성
+     * Plugin binary(wasm) path, plugin configuration
      */
     plugins?: NonNullable<swc.JscConfig['experimental']>['plugins'];
   };
   /**
-   * 추가 데이터
+   * Additional data
    *
-   * 작업 결과 데이터에 포함되며, 특정 값을 기반으로 후처리 하기 위한 목적으로 사용
-   * (eg. 프리셋에서 특정 extra 데이터를 추가해주고, 결과에서 어떤 프리셋으로 빌드되었는지 구분)
+   * Included in the build result data, used for post-processing based on specific values
+   * (eg. add specific extra data in preset, and distinguish which preset the build result is from)
    *
    * ```js
    * const result = new Bundler({
@@ -98,27 +100,30 @@ export interface BuildConfig {
    * }).build();
    *
    * if (result.extra?.reanimated === 3) {
-   *   // reav3 에 대한 빌드 결과물 처리
+   *   // handle build result for reanimated v3
    * }
    * ```
    */
   extra?: any;
 }
 
+export type TransformSync = (id: string, code: string) => string;
+export type TransformAsync = (id: string, code: string) => Promise<string>;
+
 export interface AliasConfig {
   /**
-   * 치환 대상 모듈 경로
+   * Replacement target module path
    */
   from: string;
   /**
-   * 치환할 모듈 경로 혹은 모듈 경로를 반환하는 함수
+   * Replacement module path or function that returns module path
    */
   to:
     | string
     | ((context: { args: esbuild.OnResolveArgs; resolve: esbuild.PluginBuild['resolve'] }) => string | Promise<string>);
   /**
-   * - `false`: (기본값) subpath 가 존재해도 치환합니다 (`^name(?:$|/)`)
-   * - `true`: 완벽히 일치하는 대상만 치환합니다 (`^name$`)
+   * - `false`: (default) replace even if subpath exists (`^name(?:$|/)`)
+   * - `true`: replace only if the target is exactly matched (`^name$`)
    *
    * ```js
    * const config = {
@@ -145,20 +150,20 @@ export interface AliasConfig {
 }
 
 /**
- * 커스텀 프로토콜 Resolve 구성
+ * Custom protocol resolve configuration
  *
- * 지정한 프로토콜로 참조하는 모듈을 직접 resolve, load 할 수 있도록 구성하는 옵션입니다
+ * This option configures to directly resolve and load modules referenced by the specified protocol
  *
  * ```ts
  * // AS-IS
  * import mod from 'custom-protocol:/path/to/module';
  *
  * // TO-BE
- * // `custom-protocol:/path/to/module` 모듈은 아래와 같이 처리됨
+ * // `custom-protocol:/path/to/module` module is handled as follows
  * export default global.__import('/path/to/module');
  * ```
  *
- * 구성 예시
+ * Configuration example
  *
  * ```ts
  * {
@@ -174,11 +179,11 @@ export interface AliasConfig {
 export interface ProtocolConfig {
   [name: string]: {
     /**
-     * Resolve 할 모듈 경로
+     * Module path to resolve
      */
     resolve?: (args: esbuild.OnResolveArgs) => string | Promise<string>;
     /**
-     * Resolve 된 경로를 기준으로 모듈 코드를 반환
+     * Return module code based on the resolved path
      */
     load: (args: esbuild.OnLoadArgs) => esbuild.OnLoadResult | Promise<esbuild.OnLoadResult>;
   };

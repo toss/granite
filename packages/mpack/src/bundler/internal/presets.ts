@@ -46,8 +46,6 @@ export function combineWithBaseBuildConfig(
         banner: {
           js: [
             globalVariables({ dev: context.dev }),
-            'global.__granite = global.__granite || {};',
-            `global.__granite.app = { name: ${JSON.stringify(config.appName)}, scheme: ${JSON.stringify(config.scheme)} };`,
             // symbol-asynciterator polyfill (ES5)
             `(function(){if(typeof Symbol!=="undefined"&&!Symbol.asyncIterator){Symbol.asyncIterator=Symbol.for("@@asyncIterator")}})();`,
           ].join('\n'),

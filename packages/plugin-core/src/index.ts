@@ -1,4 +1,6 @@
-export * from './core.js';
+export * from './createContext.js';
 export * from './utils/flattenPlugins.js';
 export * from './utils/resolvePlugins.js';
-export * from './types/mpackConfig.js';
+export * from './utils/mergeConfig.js';
+
+export type * from './types.js';

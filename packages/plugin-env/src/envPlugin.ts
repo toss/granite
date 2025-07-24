@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import { join } from 'path';
 import type { GranitePluginCore } from '@granite-js/plugin-core';
-import { getPackageRoot } from '@granite-js/utils';
+import { getPackageRoot, prepareLocalDirectory } from '@granite-js/utils';
 import { generateEnvType } from './generateEnvType';
 import { getRuntimeEnvScript } from './getRuntimeEnvScript';
 import type { SerializableObject } from './types';
@@ -26,12 +26,8 @@ export const envPlugin = (environments: SerializableObject, options?: EnvPluginO
   const script = getRuntimeEnvScript(environments);
   const hash = crypto.createHash('sha256').update(script).digest('hex').slice(0, 8);
 
-  const graniteDir = join(packageRoot, '.granite');
-  if (!fs.existsSync(graniteDir)) {
-    fs.mkdirSync(graniteDir, { recursive: true });
-  }
-
-  const envFilePath = join(graniteDir, `.granite-${hash}.env.js`);
+  const localDir = prepareLocalDirectory(packageRoot);
+  const envFilePath = join(localDir, `.granite-${hash}.env.js`);
 
   const setup = () => {
     fs.writeFileSync(envFilePath, script, 'utf-8');

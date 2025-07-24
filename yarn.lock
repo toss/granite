@@ -4986,11 +4986,11 @@ __metadata:
     "@babel/core": "npm:7.23.9"
     "@babel/runtime": "npm:7.18.9"
     "@biomejs/biome": "npm:^1.9.4"
-    "@granite-js/forge-cli": "workspace:^"
+    "@granite-js/forge-cli": "workspace:*"
     "@granite-js/native": "workspace:*"
     "@granite-js/plugin-env": "workspace:*"
     "@granite-js/plugin-hermes": "workspace:*"
-    "@granite-js/plugin-micro-frontend": "workspace:^"
+    "@granite-js/plugin-micro-frontend": "workspace:*"
     "@granite-js/plugin-router": "workspace:*"
     "@granite-js/react-native": "workspace:*"
     "@testing-library/react-native": "npm:^12.9.0"
@@ -5155,7 +5155,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@granite-js/forge-cli@workspace:*, @granite-js/forge-cli@workspace:^, @granite-js/forge-cli@workspace:infra/forge-cli":
+"@granite-js/forge-cli@workspace:*, @granite-js/forge-cli@workspace:infra/forge-cli":
   version: 0.0.0-use.local
   resolution: "@granite-js/forge-cli@workspace:infra/forge-cli"
   dependencies:
@@ -5416,7 +5416,7 @@ __metadata:
     "@granite-js/mpack": "workspace:*"
     "@types/connect": "npm:^3"
     connect: "npm:^3.7.0"
-    es-toolkit: "npm:^1.34.1"
+    es-toolkit: "npm:^1.39.7"
     esbuild: "npm:^0.25.4"
     tsdown: "npm:^0.11.12"
     typescript: "npm:^5.6.3"
@@ -5458,11 +5458,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@granite-js/plugin-micro-frontend@workspace:*, @granite-js/plugin-micro-frontend@workspace:^, @granite-js/plugin-micro-frontend@workspace:packages/plugin-micro-frontend":
+"@granite-js/plugin-micro-frontend@workspace:*, @granite-js/plugin-micro-frontend@workspace:packages/plugin-micro-frontend":
   version: 0.0.0-use.local
   resolution: "@granite-js/plugin-micro-frontend@workspace:packages/plugin-micro-frontend"
   dependencies:
     "@granite-js/plugin-core": "workspace:*"
+    "@granite-js/utils": "workspace:*"
     es-toolkit: "npm:^1.38.0"
     picocolors: "npm:^1.1.1"
     tsdown: "npm:^0.11.11"
@@ -14102,6 +14103,18 @@ __metadata:
     prettier-plugin-sort-re-exports@0.0.1:
       unplugged: true
   checksum: 10c0/1bffc2d8dbe8db45969cf6674a674bdf9d40d803c923b01645b8a433f43f9304b1d369b6cde2a6ef3889a5aa71ddc741bf8e4103b4d4b48a366e04b4b3d30519
+  languageName: node
+  linkType: hard
+
+"es-toolkit@npm:^1.39.7":
+  version: 1.39.7
+  resolution: "es-toolkit@npm:1.39.7"
+  dependenciesMeta:
+    "@trivago/prettier-plugin-sort-imports@4.3.0":
+      unplugged: true
+    prettier-plugin-sort-re-exports@0.0.1:
+      unplugged: true
+  checksum: 10c0/dde082b76d22430bdef383bf60abb893ec4ebb50da9a900005e9b57481837b9118398897670cf33c5cdf473375345dc1e897820ede4ee58482407e9626b67ba3
   languageName: node
   linkType: hard
 

@@ -1,23 +1,7 @@
-import type * as esbuild from 'esbuild';
 import z from 'zod';
-import type { AliasConfig, ProtocolConfig } from '../BuildConfig';
+import type { AliasConfig, BuildConfig, ProtocolConfig } from '../BuildConfig';
 
-export const esbuildConfigSchema = z.custom<
-  esbuild.BuildOptions & {
-    /**
-     * Entry point 최상단에 주입할 스크립트 경로
-     *
-     * esbuild.inject 옵션에 추가한 스크립트의 경우 entry-point 모듈에만 주입되는 것이 아니라 모든 모듈에 주입되는 문제가 있음.
-     * entry-point 모듈의 최상단에만 코드를 주입하도록 별도 옵션을 구성합니다.
-     *
-     * - 의도한 것과 같이 entry-point 모듈 최상단에 1회만 주입(import)됩니다
-     * - 중복되는 inject 스크립트가 제거되어 번들 크기가 작아집니다
-     *
-     * @see issue {@link https://github.com/evanw/esbuild/issues/475}
-     */
-    prelude?: string[];
-  }
->();
+export const esbuildConfigSchema = z.custom<BuildConfig['esbuild']>();
 
 export const babelConfigSchema = z.object({
   configFile: z.string().optional(),

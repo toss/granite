@@ -43,9 +43,7 @@ describe('mergeBuildConfigs', () => {
     expect(merged.swc?.plugins).toHaveLength(2);
     expect(merged).toMatchInlineSnapshot(`
       {
-        "babel": {
-          "conditions": [],
-        },
+        "babel": undefined,
         "entry": "./index.js",
         "esbuild": {
           "banner": {
@@ -87,6 +85,7 @@ describe('mergeBuildConfigs', () => {
             ],
           ],
         },
+        "transformer": undefined,
       }
     `);
   });

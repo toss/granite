@@ -11,6 +11,7 @@ export {
 export * from './operations';
 export * from './types/schemas';
 export * from './types';
+export * from './utils';
 
 export type { AdditionalMetroConfig } from './metro/getMetroConfig';
 export type { BuildResult } from './bundler/types';

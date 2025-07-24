@@ -1,4 +1,4 @@
-import type { PluginInput, GranitePluginCore } from '../core';
+import type { PluginInput, GranitePluginCore } from '../types';
 
 export const flattenPlugins = async (plugin: PluginInput): Promise<GranitePluginCore[]> => {
   if (Array.isArray(plugin)) {

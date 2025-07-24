@@ -1,4 +1,4 @@
-import type { INTERNAL__Id } from './TaskConfig';
+import type { INTERNAL__Id } from './Id';
 import type { BuildResult } from '../bundler/types';
 import type { BundlerConfig } from '../types/BundlerConfig';
 

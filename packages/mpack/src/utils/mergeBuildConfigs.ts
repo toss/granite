@@ -1,36 +1,26 @@
-import { mergeBanners } from './mergeBanners';
-import { mergeInject } from './mergeInject';
 import type { BuildConfig } from '../types';
+import { mergeBabel } from './mergeBabel';
+import { mergeEsbuild } from './mergeEsbuild';
+import { mergeExtra } from './mergeExtra';
+import { mergeResolver } from './mergeResolver';
+import { mergeSwc } from './mergeSwc';
+import { mergeTransformer } from './mergeTransformer';
 
 export function mergeBuildConfigs(baseConfig: BuildConfig, ...otherConfigs: Partial<BuildConfig>[]): BuildConfig {
-  const result = { ...baseConfig };
+  const mergedConfig = otherConfigs.reduce(
+    (acc, curr) => ({
+      entry: acc.entry ?? curr.entry,
+      outfile: acc.outfile ?? curr.outfile,
+      platform: acc.platform ?? curr.platform,
+      resolver: mergeResolver(acc.resolver, curr.resolver),
+      transformer: mergeTransformer(acc.transformer, curr.transformer),
+      esbuild: mergeEsbuild(acc.esbuild, curr.esbuild),
+      swc: mergeSwc(acc.swc, curr.swc),
+      babel: mergeBabel(acc.babel, curr.babel),
+      extra: mergeExtra(acc.extra, curr.extra),
+    }),
+    baseConfig
+  );
 
-  for (const otherConfig of otherConfigs) {
-    result.entry = otherConfig.entry ?? result.entry;
-    result.outfile = otherConfig.outfile ?? result.outfile;
-    result.esbuild = {
-      ...result.esbuild,
-      ...otherConfig.esbuild,
-      define: { ...result.esbuild?.define, ...otherConfig.esbuild?.define },
-      banner: mergeBanners(result.esbuild?.banner ?? {}, otherConfig.esbuild?.banner ?? {}),
-      inject: mergeInject(result.esbuild?.inject ?? [], otherConfig.esbuild?.inject ?? []),
-      prelude: mergeInject(result.esbuild?.prelude ?? [], otherConfig.esbuild?.prelude ?? []),
-    };
-    result.babel = {
-      ...result.babel,
-      ...otherConfig.babel,
-      conditions: [...(result.babel?.conditions ?? []), ...(otherConfig.babel?.conditions ?? [])],
-    };
-    result.swc = {
-      plugins: [...(result.swc?.plugins ?? []), ...(otherConfig.swc?.plugins ?? [])],
-    };
-    result.resolver = {
-      alias: [...(result.resolver?.alias ?? []), ...(otherConfig.resolver?.alias ?? [])],
-      protocols: { ...result.resolver?.protocols, ...otherConfig.resolver?.protocols },
-    };
-    result.platform = otherConfig.platform ?? result.platform;
-    result.extra = otherConfig.extra ?? result.extra;
-  }
-
-  return result;
+  return mergedConfig as BuildConfig;
 }

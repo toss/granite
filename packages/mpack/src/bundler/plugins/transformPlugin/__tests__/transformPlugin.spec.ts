@@ -21,15 +21,11 @@ describe('transformPlugin', () => {
           context: {
             id: 'id' as INTERNAL__Id,
             config: {
-              tag: 'test',
-              appName: 'test',
-              scheme: 'test',
               cache: false,
               dev: false,
               metafile: false,
               rootDir: __dirname,
               buildConfig,
-              services: {},
             },
           },
         }),

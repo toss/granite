@@ -4,43 +4,37 @@ import Debug from 'debug';
 import { StartMenuHandler } from './StartMenuHandler';
 import { DEV_SERVER_DEFAULT_PORT } from '../../constants';
 import { DevServer } from '../../server/DevServer';
-import type { DevServerPlugin } from '../../server/types';
-import type { DevServerConfig } from '../../types/DevServerConfig';
+import type { DevServerOptions } from '../../server/types';
+import type { Middleware } from '../../types';
 import { printLogo } from '../../utils/printLogo';
 import { openDebugger } from '../openDebugger';
 
 const debug = Debug('cli:start');
 
 interface RunServerArgs {
-  appName: string;
-  scheme: string;
-  devServerConfig: DevServerConfig;
   host?: string;
   port?: number;
-  plugins?: DevServerPlugin[];
+  buildConfig: DevServerOptions['buildConfig'];
+  middlewares?: Middleware[];
   onServerReady?: () => Promise<void> | void;
 }
 
 const chromeInstanceMap: Map<string, ChromeLauncher.LaunchedChrome> = new Map();
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export async function experimental_runServer({
-  appName,
-  scheme,
-  devServerConfig,
+export async function EXPERIMENTAL__runServer({
   host,
   port = DEV_SERVER_DEFAULT_PORT,
-  plugins,
+  buildConfig,
+  middlewares,
   onServerReady,
 }: RunServerArgs) {
   const rootDir = process.cwd();
   const server = new DevServer({
-    appName,
-    scheme,
-    build: devServerConfig.build,
+    buildConfig,
     host,
     port,
-    plugins,
+    middlewares,
     rootDir,
   });
 
@@ -54,23 +48,23 @@ export async function experimental_runServer({
   const menuHandler = new StartMenuHandler([
     {
       key: 'r',
-      description: '새로고침',
+      description: 'Refresh',
       action: () => {
-        console.log('새로고침 중...');
+        console.log('Refreshing...');
         server.broadcastCommand('reload');
       },
     },
     {
       key: 'd',
-      description: '개발자 메뉴 열기',
+      description: 'Open Developer Menu',
       action: () => {
-        console.log('개발자 메뉴 여는 중...');
+        console.log('Opening developer menu...');
         server.broadcastCommand('devMenu');
       },
     },
     {
       key: 'j',
-      description: 'Debugger 열기',
+      description: 'Open Debugger',
       action: async () => {
         const devices = server.getInspectorProxy()?.getDevices();
         const connectedDevices = Array.from(devices?.entries() ?? []);

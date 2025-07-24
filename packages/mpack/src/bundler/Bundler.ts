@@ -146,8 +146,8 @@ export class Bundler {
         requireContextPlugin(),
         transformPlugin({
           context: pluginContext,
-          transformSync: buildConfig.transformSync,
-          transformAsync: buildConfig.transformAsync,
+          transformSync: buildConfig.transformer?.transformSync,
+          transformAsync: buildConfig.transformer?.transformAsync,
         }),
         ...(esbuildOptions?.plugins ?? []),
       ].filter(isNotNil),

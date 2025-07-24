@@ -3,8 +3,6 @@ import type { MetroConfig } from './types';
 import Metro from '../vendors/metro/src';
 
 export async function runBuild({
-  appName,
-  scheme,
   rootPath,
   entry,
   platform,
@@ -13,8 +11,6 @@ export async function runBuild({
   dev,
   additionalConfig,
 }: {
-  appName: string;
-  scheme: string;
   rootPath: string;
   entry: string;
   platform: 'ios' | 'android';
@@ -23,14 +19,7 @@ export async function runBuild({
   dev: boolean;
   additionalConfig?: MetroConfig;
 }) {
-  const config = await getMetroConfig(
-    {
-      appName,
-      rootPath,
-      scheme,
-    },
-    additionalConfig
-  );
+  const config = await getMetroConfig({ rootPath }, additionalConfig);
 
   await Metro.runBuild(config, {
     entry,

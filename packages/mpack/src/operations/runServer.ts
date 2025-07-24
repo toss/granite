@@ -1,21 +1,19 @@
 import { createDevServerMiddleware, indexPageMiddleware } from '@react-native-community/cli-server-api';
-import type { HandleFunction } from 'connect';
 import Debug from 'debug';
 import { setupDevToolsProxy } from 'react-native-devtools-standalone/backend';
-import { Config } from '..';
 import { createDebuggerMiddleware } from './createDebuggerMiddleware';
 import { DEV_SERVER_DEFAULT_PORT } from '../constants';
 import { getMetroConfig, type AdditionalMetroConfig } from '../metro/getMetroConfig';
+import type { MetroMiddleware } from '../types';
 import { printLogo } from '../utils/printLogo';
 import { getModule } from '../vendors';
 
 const debug = Debug('cli:start');
 
 interface RunServerConfig {
-  config: Config;
   host?: string;
   port?: number;
-  middlewares?: HandleFunction[];
+  middlewares?: MetroMiddleware[];
   enableEmbeddedReactDevTools?: boolean;
   onServerReady?: () => Promise<void> | void;
   cwd?: string;
@@ -27,16 +25,16 @@ const { Terminal } = getModule('metro-core');
 const { mergeConfig } = getModule('metro-config');
 
 export async function runServer({
-  config,
+  cwd = process.cwd(),
   host,
   port = DEV_SERVER_DEFAULT_PORT,
   middlewares = [],
   enableEmbeddedReactDevTools = true,
   onServerReady,
-  cwd = process.cwd(),
   additionalConfig,
 }: RunServerConfig) {
-  // 제어흐름상 `eventsSocketEndpoint.reportEvent` 을 먼저 할당할 수 없기에, 객체를 통해 참조하도록 합니다
+  // Since eventsSocketEndpoint.reportEvent cannot be assigned first due to the control flow,
+  // we reference it through an object
   const ref: Partial<{
     reportEvent: (event: any) => void;
     enableStdinWatchMode: () => void;
@@ -71,10 +69,7 @@ export async function runServer({
     },
   };
 
-  const baseConfig = await getMetroConfig(
-    { rootPath: cwd, appName: config.appName, scheme: config.scheme },
-    additionalConfig
-  );
+  const baseConfig = await getMetroConfig({ rootPath: cwd }, additionalConfig);
   const metroConfig = mergeConfig(baseConfig, {
     server: { port },
     reporter,
