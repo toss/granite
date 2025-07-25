@@ -37,7 +37,7 @@
     "vitest": "^3.0.9"
   },
   "dependencies": {
-    "es-toolkit": "^1.39.7",
+    "es-toolkit": "^1.39.8",
     "zod": "^4.0.10"
   },
   "sideEffects": false

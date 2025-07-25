@@ -39,7 +39,7 @@
     "@granite-js/plugin-core": "workspace:*",
     "@swc/core": "1.5.24",
     "chokidar": "4.0.1",
-    "es-toolkit": "^1.26.1"
+    "es-toolkit": "^1.39.8"
   },
   "sideEffects": false
 }

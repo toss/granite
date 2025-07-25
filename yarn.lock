@@ -5121,7 +5121,7 @@ __metadata:
     cosmiconfig-typescript-loader: "npm:^5.1.0"
     debug: "npm:^4.3.7"
     enquirer: "npm:^2.4.1"
-    es-toolkit: "npm:^1.32.0"
+    es-toolkit: "npm:^1.39.8"
     esbuild: "npm:0.25.8"
     eslint: "npm:^9.7.0"
     execa: "npm:^5"
@@ -5145,7 +5145,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:^3.1.4"
     aws-lambda: "npm:^1.0.7"
     aws-sdk-client-mock: "npm:^4.1.0"
-    es-toolkit: "npm:^1.38.0"
+    es-toolkit: "npm:^1.39.8"
     tsup: "npm:^8.5.0"
     typescript: "npm:^5.8.3"
     valibot: "npm:^1.1.0"
@@ -5312,7 +5312,7 @@ __metadata:
     denodeify: "npm:^1.2.1"
     enhanced-resolve: "npm:^5.17.1"
     error-stack-parser: "npm:^2.0.6"
-    es-toolkit: "npm:^1.26.1"
+    es-toolkit: "npm:^1.39.8"
     esbuild: "npm:0.25.8"
     eslint: "npm:9.7.0"
     events: "npm:3.3.0"
@@ -5425,7 +5425,7 @@ __metadata:
     "@types/babel__core": "npm:^7"
     "@types/connect": "npm:^3"
     connect: "npm:^3.7.0"
-    es-toolkit: "npm:^1.39.7"
+    es-toolkit: "npm:^1.39.8"
     esbuild: "npm:^0.25.8"
     fastify: "npm:4.14.0"
     tsdown: "npm:^0.11.12"
@@ -5459,7 +5459,7 @@ __metadata:
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/utils": "workspace:*"
     "@vitest/coverage-v8": "npm:^3.1.3"
-    es-toolkit: "npm:^1.38.0"
+    es-toolkit: "npm:^1.39.8"
     execa: "npm:^5"
     source-map: "npm:^0.8.0-beta.0"
     tsdown: "npm:^0.11.13"
@@ -5474,7 +5474,7 @@ __metadata:
   dependencies:
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/utils": "workspace:*"
-    es-toolkit: "npm:^1.38.0"
+    es-toolkit: "npm:^1.39.8"
     picocolors: "npm:^1.1.1"
     tsdown: "npm:^0.11.11"
     typescript: "npm:^5.8.3"
@@ -5491,7 +5491,7 @@ __metadata:
     "@types/node": "npm:^22.10.2"
     "@vitest/coverage-v8": "npm:^2.1.8"
     chokidar: "npm:4.0.1"
-    es-toolkit: "npm:^1.26.1"
+    es-toolkit: "npm:^1.39.8"
     tsdown: "npm:^0.11.12"
     typescript: "npm:5.8.3"
     vitest: "npm:^2.1.8"
@@ -5505,7 +5505,7 @@ __metadata:
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/utils": "workspace:*"
     "@sentry/cli": "npm:^2.45.0"
-    es-toolkit: "npm:^1.38.0"
+    es-toolkit: "npm:^1.39.8"
     execa: "npm:^5"
     tsdown: "npm:^0.11.11"
     typescript: "npm:^5.8.3"
@@ -5527,7 +5527,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:^3.1.4"
     aws-lambda: "npm:^1.0.7"
     aws-sdk-client-mock: "npm:^4.1.0"
-    es-toolkit: "npm:^1.38.0"
+    es-toolkit: "npm:^1.39.8"
     oxc-transform: "npm:^0.71.0"
     tsup: "npm:^8.5.0"
     typescript: "npm:^5.8.3"
@@ -5561,7 +5561,7 @@ __metadata:
     "@types/react": "npm:18.3.3"
     "@types/react-dom": "npm:^18"
     "@vitest/coverage-v8": "npm:^2.1.8"
-    es-toolkit: "npm:^1.34.1"
+    es-toolkit: "npm:^1.39.8"
     esbuild: "npm:0.25.8"
     eslint: "npm:^9.7.0"
     jsdom: "npm:^25.0.1"
@@ -13115,7 +13115,7 @@ __metadata:
     "@types/node": "npm:^22.10.2"
     "@types/yargs": "npm:^17.0.33"
     "@vitest/coverage-v8": "npm:^2.1.8"
-    es-toolkit: "npm:^1.30.1"
+    es-toolkit: "npm:^1.39.8"
     execa: "npm:^9.5.2"
     kill-port: "npm:^2.0.1"
     tsup: "npm:^8.5.0"
@@ -14104,27 +14104,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"es-toolkit@npm:^1.26.1, es-toolkit@npm:^1.30.1, es-toolkit@npm:^1.32.0, es-toolkit@npm:^1.34.1, es-toolkit@npm:^1.38.0":
-  version: 1.38.0
-  resolution: "es-toolkit@npm:1.38.0"
+"es-toolkit@npm:^1.39.8":
+  version: 1.39.8
+  resolution: "es-toolkit@npm:1.39.8"
   dependenciesMeta:
     "@trivago/prettier-plugin-sort-imports@4.3.0":
       unplugged: true
     prettier-plugin-sort-re-exports@0.0.1:
       unplugged: true
-  checksum: 10c0/1bffc2d8dbe8db45969cf6674a674bdf9d40d803c923b01645b8a433f43f9304b1d369b6cde2a6ef3889a5aa71ddc741bf8e4103b4d4b48a366e04b4b3d30519
-  languageName: node
-  linkType: hard
-
-"es-toolkit@npm:^1.39.7":
-  version: 1.39.7
-  resolution: "es-toolkit@npm:1.39.7"
-  dependenciesMeta:
-    "@trivago/prettier-plugin-sort-imports@4.3.0":
-      unplugged: true
-    prettier-plugin-sort-re-exports@0.0.1:
-      unplugged: true
-  checksum: 10c0/dde082b76d22430bdef383bf60abb893ec4ebb50da9a900005e9b57481837b9118398897670cf33c5cdf473375345dc1e897820ede4ee58482407e9626b67ba3
+  checksum: 10c0/a13f50433959ae784d9eef467c7a3883f28bd40c651d6f62a11c93a0b7460b070a72a8c9c8d4423039d5d441a777cf2b9850113d9b3d04d1f65a79dccec04f31
   languageName: node
   linkType: hard
 
