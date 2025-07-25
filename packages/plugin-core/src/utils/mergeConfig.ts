@@ -1,7 +1,12 @@
-import { mergeResolver, mergeTransformer, mergeEsbuild, mergeBabel, mergeSwc, mergeExtra } from '@granite-js/mpack';
 import type { PluginConfig } from '../types';
+import { mergeBabel } from './mergeBabel';
 import { mergeDevServer } from './mergeDevServer';
+import { mergeEsbuild } from './mergeEsbuild';
+import { mergeExtra } from './mergeExtra';
 import { mergeMetro } from './mergeMetro';
+import { mergeResolver } from './mergeResolver';
+import { mergeSwc } from './mergeSwc';
+import { mergeTransformer } from './mergeTransformer';
 
 export function mergeConfig(base: PluginConfig, ...configs: PluginConfig[]) {
   if (!(base || configs.length)) {

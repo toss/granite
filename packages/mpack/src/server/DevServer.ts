@@ -1,4 +1,5 @@
 import assert from 'assert';
+import type { BundleData } from '@granite-js/plugin-core';
 import Fastify, {
   type DoneFuncWithErrOrRes,
   type FastifyInstance,
@@ -13,7 +14,6 @@ import { createLiveReloadMiddleware } from './middlewares';
 import * as serverPlugins from './plugins';
 import type { BroadcastCommand, DevServerContext, DevServerOptions, Platform } from './types';
 import { WebSocketServerDelegate, WebSocketServerRouter } from './wss';
-import type { BundleData } from '../bundler/types';
 import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../constants';
 import { logger, clientLogger } from '../logger';
 import { statusPlugin } from '../plugins/statusPlugin';

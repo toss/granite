@@ -1,4 +1,4 @@
-import { BuildConfig } from '../types';
+import type { BuildConfig } from '../types';
 
 type Banner = { [type: string]: string };
 

@@ -1,14 +1,7 @@
-import type {
-  BabelConfig,
-  BuildResult,
-  EsbuildConfig,
-  SwcConfig,
-  ResolverConfig,
-  AdditionalMetroConfig,
-  MetroDevServerConfig,
-  DevServerConfig,
-  BuildConfig as InternalBuildConfig,
-} from '@granite-js/mpack';
+import type { BuildConfig } from './BuildConfig';
+import type { BuildResult } from './BuildResult';
+import type { DevServerConfig, MetroDevServerConfig } from './DevServerConfig';
+import type { AdditionalMetroConfig } from './MetroConfig';
 
 export interface GranitePluginConfig {
   entryFile: string;
@@ -32,10 +25,22 @@ export interface PluginContext {
   meta: any;
 }
 
-export type GranitePluginDevPreHandler = (this: PluginContext, args: GranitePluginDevHandlerArgs) => void | Promise<void>;
-export type GranitePluginDevPostHandler = (this: PluginContext, args: GranitePluginDevHandlerArgs) => void | Promise<void>;
-export type GranitePluginBuildPreHandler = (this: PluginContext, args: GranitePluginPreHandlerArgs) => void | Promise<void>;
-export type GranitePluginBuildPostHandler = (this: PluginContext, args: GranitePluginPostHandlerArgs) => void | Promise<void>;
+export type GranitePluginDevPreHandler = (
+  this: PluginContext,
+  args: GranitePluginDevHandlerArgs
+) => void | Promise<void>;
+export type GranitePluginDevPostHandler = (
+  this: PluginContext,
+  args: GranitePluginDevHandlerArgs
+) => void | Promise<void>;
+export type GranitePluginBuildPreHandler = (
+  this: PluginContext,
+  args: GranitePluginPreHandlerArgs
+) => void | Promise<void>;
+export type GranitePluginBuildPostHandler = (
+  this: PluginContext,
+  args: GranitePluginPostHandlerArgs
+) => void | Promise<void>;
 
 export interface GranitePluginCore {
   /**
@@ -69,14 +74,17 @@ export interface GranitePluginCore {
   config?: PluginConfig;
 }
 
-export type PluginConfig = Omit<BuildConfig, 'platform' | 'outfile'> & {
+export type PluginConfig = Omit<PluginBuildConfig, 'platform' | 'outfile'> & {
   devServer?: DevServerConfig;
-  metro?: MetroConfig;
+  metro?: PluginMetroConfig;
 };
 
-export type MetroConfig = Omit<AdditionalMetroConfig, 'babelConfig' | 'transformSync'> & MetroDevServerConfig;
-
-export type GranitePlugin = GranitePluginCore | Promise<GranitePluginCore>;
+export type PluginMetroConfig = Omit<
+  AdditionalMetroConfig,
+  // This options are configured by `BuildConfig['babel']`, `BuildConfig['transformer']`
+  'babelConfig' | 'transformSync'
+> &
+  MetroDevServerConfig;
 
 export type PluginResolvable =
   | GranitePlugin // Plugin definition (e.g. { name: string; config?: any })
@@ -86,6 +94,6 @@ export type PluginResolvable =
 
 export type PluginInput = PluginResolvable | PluginInput[];
 
-export type BuildConfig = Omit<InternalBuildConfig, 'platform' | 'entry' | 'outfile'>;
+export type PluginBuildConfig = Omit<BuildConfig, 'platform' | 'entry' | 'outfile'>;
 
-export type { BabelConfig, EsbuildConfig, SwcConfig, ResolverConfig };
+export type GranitePlugin = GranitePluginCore | Promise<GranitePluginCore>;

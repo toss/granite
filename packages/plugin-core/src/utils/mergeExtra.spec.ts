@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mergeExtra } from '../mergeExtra';
+import { mergeExtra } from './mergeExtra';
 
 describe('mergeExtra', () => {
   it('should return undefined when both source and target are undefined', () => {

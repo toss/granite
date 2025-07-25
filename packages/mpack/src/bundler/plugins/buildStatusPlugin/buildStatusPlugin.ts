@@ -1,9 +1,9 @@
+import type { BuildResult } from '@granite-js/plugin-core';
 import * as esbuild from 'esbuild';
 import { logger } from '../../../logger';
 import { getBundleOutputs } from '../../../utils/getBundleOutputs';
 import { getSourcemapName } from '../../../utils/getSourcemapName';
-import { BuildResult } from '../../types';
-import { PluginOptions } from '../types';
+import type { PluginOptions } from '../types';
 
 export interface BuildStatusPluginOptions {
   onPrepare: () => void | Promise<void>;

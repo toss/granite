@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mergeEsbuild } from '../mergeEsbuild';
+import { mergeEsbuild } from './mergeEsbuild';
 
 describe('mergeEsbuild', () => {
   it('returns undefined when both source and target are undefined', () => {

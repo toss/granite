@@ -1,4 +1,4 @@
-import { DevServerConfig } from '@granite-js/mpack';
+import type { DevServerConfig } from '../types';
 
 export function mergeDevServer(source?: DevServerConfig, target?: DevServerConfig) {
   if (!(source || target)) {

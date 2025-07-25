@@ -1,5 +1,5 @@
+import type { AdditionalMetroConfig } from '@granite-js/plugin-core';
 import { getMetroConfig } from './getMetroConfig';
-import type { MetroConfig } from './types';
 import Metro from '../vendors/metro/src';
 
 export async function runBuild({
@@ -17,7 +17,7 @@ export async function runBuild({
   minify: boolean;
   out: string;
   dev: boolean;
-  additionalConfig?: MetroConfig;
+  additionalConfig?: AdditionalMetroConfig;
 }) {
   const config = await getMetroConfig({ rootPath }, additionalConfig);
 

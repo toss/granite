@@ -1,9 +1,8 @@
 import path from 'path';
-import type * as babel from '@babel/core';
+import type { AdditionalMetroConfig } from '@granite-js/plugin-core';
 import { getPackageRoot } from '@granite-js/utils';
 import { createResolver } from './enhancedResolver';
 import { getMonorepoRoot } from './getMonorepoRoot';
-import type { MetroConfig } from './types';
 import { DEV_SERVER_DEFAULT_PORT, SOURCE_EXTENSIONS } from '../constants';
 import { getDefaultValues } from '../vendors/metro-config/src/defaults';
 import exclusionList from '../vendors/metro-config/src/defaults/exclusionList';
@@ -11,24 +10,6 @@ import { mergeConfig } from '../vendors/metro-config/src/loadConfig';
 
 export interface GetMetroConfig {
   rootPath: string;
-}
-
-export interface AdditionalMetroConfig extends MetroConfig {
-  /**
-   * Partial support for some options only
-   *
-   * - `getPolyfills`
-   */
-  serializer?: MetroConfig['serializer'];
-  /**
-   * Partial support for some options only
-   *
-   * - `blockList`
-   */
-  resolver?: MetroConfig['resolver'];
-  reporter?: MetroConfig['reporter'];
-  babelConfig?: babel.TransformOptions;
-  transformSync?: (id: string, code: string) => string;
 }
 
 const INTERNAL_CALLSITES_REGEX = new RegExp(

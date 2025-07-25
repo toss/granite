@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { BuildConfig } from '../../types';
-import { mergeBuildConfigs } from '../mergeBuildConfigs';
+import type { BuildConfig } from '../types';
+import { mergeBuildConfigs } from './mergeBuildConfigs';
 
 describe('mergeBuildConfigs', () => {
   it('빌드 설정 2개를 머지할 수 있다.', () => {

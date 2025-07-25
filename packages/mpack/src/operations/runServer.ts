@@ -1,9 +1,10 @@
+import type { AdditionalMetroConfig } from '@granite-js/plugin-core';
 import { createDevServerMiddleware, indexPageMiddleware } from '@react-native-community/cli-server-api';
 import Debug from 'debug';
 import { setupDevToolsProxy } from 'react-native-devtools-standalone/backend';
 import { createDebuggerMiddleware } from './createDebuggerMiddleware';
 import { DEV_SERVER_DEFAULT_PORT } from '../constants';
-import { getMetroConfig, type AdditionalMetroConfig } from '../metro/getMetroConfig';
+import { getMetroConfig } from '../metro/getMetroConfig';
 import type { MetroMiddleware } from '../types';
 import { printLogo } from '../utils/printLogo';
 import { getModule } from '../vendors';

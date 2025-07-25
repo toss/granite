@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mergeBabel } from '../mergeBabel';
+import { mergeBabel } from './mergeBabel';
 
 describe('mergeBabel', () => {
   it('returns undefined when both source and target are undefined', () => {

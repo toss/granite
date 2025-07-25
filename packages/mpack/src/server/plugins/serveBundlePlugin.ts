@@ -1,8 +1,8 @@
 import path from 'path';
-import { FastifyInstance } from 'fastify';
+import type { BundleData } from '@granite-js/plugin-core';
+import type { FastifyInstance } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import { invalidRequest, notFound } from './reply';
-import { BundleData } from '../../bundler/types';
 import { logger } from '../../logger';
 import { stripExtension } from '../../utils/stripExtension';
 import { DEV_SERVER_BUNDLE_NAME } from '../constants';

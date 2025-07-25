@@ -1,7 +1,7 @@
 import { isNotNil } from 'es-toolkit';
-import type { MetroConfig } from '../types';
+import type { PluginMetroConfig } from '../types';
 
-export function mergeMetro(source?: MetroConfig, target?: MetroConfig): MetroConfig | undefined {
+export function mergeMetro(source?: PluginMetroConfig, target?: PluginMetroConfig): PluginMetroConfig | undefined {
   if (!(source || target)) {
     return undefined;
   }
@@ -24,7 +24,10 @@ export function mergeMetro(source?: MetroConfig, target?: MetroConfig): MetroCon
   };
 }
 
-function mergeResolver(source?: MetroConfig['resolver'], target?: MetroConfig['resolver']): MetroConfig['resolver'] {
+function mergeResolver(
+  source?: PluginMetroConfig['resolver'],
+  target?: PluginMetroConfig['resolver']
+): PluginMetroConfig['resolver'] {
   if (!(source || target)) {
     return undefined;
   }
@@ -48,9 +51,9 @@ function mergeResolver(source?: MetroConfig['resolver'], target?: MetroConfig['r
 }
 
 function mergeSerializer(
-  source?: MetroConfig['serializer'],
-  target?: MetroConfig['serializer']
-): MetroConfig['serializer'] {
+  source?: PluginMetroConfig['serializer'],
+  target?: PluginMetroConfig['serializer']
+): PluginMetroConfig['serializer'] {
   if (!(source || target)) {
     return undefined;
   }
@@ -70,7 +73,10 @@ function mergeSerializer(
   };
 }
 
-function mergeReporter(source?: MetroConfig['reporter'], target?: MetroConfig['reporter']): MetroConfig['reporter'] {
+function mergeReporter(
+  source?: PluginMetroConfig['reporter'],
+  target?: PluginMetroConfig['reporter']
+): PluginMetroConfig['reporter'] {
   if (!(source || target)) {
     return undefined;
   }

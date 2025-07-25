@@ -1,6 +1,6 @@
 export { Bundler } from './bundler';
 export { DevServer } from './server';
-export { getMetroConfig, runBuild as metroBuild, type MetroConfig } from './metro';
+export { getMetroConfig, runBuild as metroBuild } from './metro';
 export {
   DEV_SERVER_DEFAULT_HOST,
   DEV_SERVER_DEFAULT_PORT,
@@ -9,9 +9,5 @@ export {
   BUNDLE_NAME,
 } from './constants';
 export * from './operations';
-export * from './types/schemas';
-export * from './types';
-export * from './utils';
 
-export type { AdditionalMetroConfig } from './metro/getMetroConfig';
-export type { BuildResult } from './bundler/types';
+export type * from './types';

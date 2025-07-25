@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mergeSwc } from '../mergeSwc';
+import { mergeSwc } from './mergeSwc';
 
 describe('mergeSwc', () => {
   it('returns undefined when both source and target are undefined', () => {

@@ -1,5 +1,5 @@
 import { vitest, describe, expect, it } from 'vitest';
-import { mergeTransformer } from '../mergeTransformer';
+import { mergeTransformer } from './mergeTransformer';
 
 describe('mergeTransformer', () => {
   it('returns undefined when both source and target are undefined', () => {
@@ -30,7 +30,7 @@ describe('mergeTransformer', () => {
     const result = mergeTransformer(source, target);
 
     const output = result?.transformSync?.('test.js', 'original code');
-    
+
     expect(mockTransformSync1).toHaveBeenCalledWith('test.js', 'original code');
     expect(mockTransformSync2).toHaveBeenCalledWith('test.js', 'transformed1(original code)');
     expect(output).toBe('transformed2(transformed1(original code))');
@@ -45,7 +45,7 @@ describe('mergeTransformer', () => {
     const result = mergeTransformer(source, target);
 
     const output = await result?.transformAsync?.('test.js', 'original code');
-    
+
     expect(mockTransformAsync1).toHaveBeenCalledWith('test.js', 'original code');
     expect(mockTransformAsync2).toHaveBeenCalledWith('test.js', 'asyncTransformed1(original code)');
     expect(output).toBe('asyncTransformed2(asyncTransformed1(original code))');
@@ -53,7 +53,7 @@ describe('mergeTransformer', () => {
 
   it('uses target transformSync when source has no transformSync', () => {
     const mockTransformSync = vitest.fn((_id: string, code: string) => `transformed(${code})`);
-    
+
     const source = {};
     const target = { transformSync: mockTransformSync };
     const result = mergeTransformer(source, target);
@@ -63,7 +63,7 @@ describe('mergeTransformer', () => {
 
   it('uses source transformSync when target has no transformSync', () => {
     const mockTransformSync = vitest.fn((_id: string, code: string) => `transformed(${code})`);
-    
+
     const source = { transformSync: mockTransformSync };
     const target = {};
     const result = mergeTransformer(source, target);
@@ -73,7 +73,7 @@ describe('mergeTransformer', () => {
 
   it('uses target transformAsync when source has no transformAsync', async () => {
     const mockTransformAsync = vitest.fn(async (_id: string, code: string) => `asyncTransformed(${code})`);
-    
+
     const source = {};
     const target = { transformAsync: mockTransformAsync };
     const result = mergeTransformer(source, target);
@@ -83,7 +83,7 @@ describe('mergeTransformer', () => {
 
   it('uses source transformAsync when target has no transformAsync', async () => {
     const mockTransformAsync = vitest.fn(async (_id: string, code: string) => `asyncTransformed(${code})`);
-    
+
     const source = { transformAsync: mockTransformAsync };
     const target = {};
     const result = mergeTransformer(source, target);
@@ -116,7 +116,7 @@ describe('mergeTransformer', () => {
     const result = mergeTransformer(source, target);
 
     const output = result?.transformSync?.('test.js', 'original code');
-    
+
     expect(output).toBe('original code');
   });
 
@@ -129,7 +129,7 @@ describe('mergeTransformer', () => {
     const result = mergeTransformer(source, target);
 
     const output = await result?.transformAsync?.('test.js', 'original code');
-    
+
     expect(output).toBe('original code');
   });
 
@@ -151,19 +151,19 @@ describe('mergeTransformer', () => {
     const mockTransformAsync1 = vitest.fn(async (_id: string, code: string) => `async1(${code})`);
     const mockTransformAsync2 = vitest.fn(async (_id: string, code: string) => `async2(${code})`);
 
-    const source = { 
+    const source = {
       transformSync: mockTransformSync1,
-      transformAsync: mockTransformAsync1
+      transformAsync: mockTransformAsync1,
     };
-    const target = { 
+    const target = {
       transformSync: mockTransformSync2,
-      transformAsync: mockTransformAsync2
+      transformAsync: mockTransformAsync2,
     };
     const result = mergeTransformer(source, target);
 
     expect(result?.transformSync).toBeDefined();
     expect(result?.transformAsync).toBeDefined();
-    
+
     // Test that both chaining works
     const syncOutput = result?.transformSync?.('test.js', 'code');
     expect(syncOutput).toBe('sync2(sync1(code))');

@@ -1,7 +1,7 @@
-import * as esbuild from 'esbuild';
-import type { BuildConfig } from '..';
+import type * as esbuild from 'esbuild';
+import type { BuildConfig } from './BuildConfig';
 
-export type BuildResult = esbuild.BuildResult & {
+export interface BuildResult extends esbuild.BuildResult {
   bundle: BundleData;
   outfile: BuildConfig['outfile'];
   sourcemapOutfile: NonNullable<BuildConfig['sourcemapOutfile']>;
@@ -10,7 +10,7 @@ export type BuildResult = esbuild.BuildResult & {
   totalModuleCount: number;
   duration: number;
   size: number;
-};
+}
 
 export interface BundleData {
   source: esbuild.OutputFile;

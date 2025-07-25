@@ -1,5 +1,5 @@
+import type { BuildResult } from '@granite-js/plugin-core';
 import * as Frogress from 'frogress-bar';
-import type { BuildResult } from '../bundler/types';
 
 export interface BuildStatusProgressBar {
   start: (moduleCount: number, totalModuleCount: number) => void;

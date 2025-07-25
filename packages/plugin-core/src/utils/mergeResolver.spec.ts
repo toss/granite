@@ -1,5 +1,5 @@
 import { vitest, describe, expect, it } from 'vitest';
-import { mergeResolver } from '../mergeResolver';
+import { mergeResolver } from './mergeResolver';
 
 describe('mergeResolver', () => {
   it('returns undefined when both source and target are undefined', () => {

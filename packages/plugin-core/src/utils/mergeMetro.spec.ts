@@ -1,6 +1,6 @@
 import { vitest, describe, expect, it } from 'vitest';
 import { mergeMetro } from './mergeMetro';
-import type { MetroConfig } from '../types';
+import type { PluginMetroConfig } from '../types';
 
 describe('mergeMetro', () => {
   it('should return undefined when both source and target are undefined', () => {
@@ -14,13 +14,13 @@ describe('mergeMetro', () => {
   });
 
   it('should return target when source is undefined', () => {
-    const target: MetroConfig = { middlewares: [] };
+    const target: PluginMetroConfig = { middlewares: [] };
     const result = mergeMetro(undefined, target);
     expect(result).toBe(target);
   });
 
   it('should return source when target is undefined', () => {
-    const source: MetroConfig = { middlewares: [] };
+    const source: PluginMetroConfig = { middlewares: [] };
     const result = mergeMetro(source, undefined);
     expect(result).toBe(source);
   });
@@ -30,10 +30,10 @@ describe('mergeMetro', () => {
     const middleware2 = vitest.fn();
     const middleware3 = vitest.fn();
 
-    const source: MetroConfig = {
+    const source: PluginMetroConfig = {
       middlewares: [middleware1, middleware2],
     };
-    const target: MetroConfig = {
+    const target: PluginMetroConfig = {
       middlewares: [middleware3],
     };
 
@@ -47,8 +47,8 @@ describe('mergeMetro', () => {
   });
 
   it('should handle empty middlewares arrays', () => {
-    const source: MetroConfig = { middlewares: [] };
-    const target: MetroConfig = { middlewares: [] };
+    const source: PluginMetroConfig = { middlewares: [] };
+    const target: PluginMetroConfig = { middlewares: [] };
 
     const result = mergeMetro(source, target);
 
@@ -62,8 +62,8 @@ describe('mergeMetro', () => {
 
   it('should handle undefined middlewares in source', () => {
     const middleware1 = vitest.fn();
-    const source: MetroConfig = {};
-    const target: MetroConfig = { middlewares: [middleware1] };
+    const source: PluginMetroConfig = {};
+    const target: PluginMetroConfig = { middlewares: [middleware1] };
 
     const result = mergeMetro(source, target);
 
@@ -77,8 +77,8 @@ describe('mergeMetro', () => {
 
   it('should handle undefined middlewares in target', () => {
     const middleware1 = vitest.fn();
-    const source: MetroConfig = { middlewares: [middleware1] };
-    const target: MetroConfig = {};
+    const source: PluginMetroConfig = { middlewares: [middleware1] };
+    const target: PluginMetroConfig = {};
 
     const result = mergeMetro(source, target);
 
@@ -96,7 +96,7 @@ describe('mergeMetro', () => {
     const update1 = vitest.fn();
     const update2 = vitest.fn();
 
-    const source: MetroConfig = {
+    const source: PluginMetroConfig = {
       middlewares: [middleware1],
       resolver: {
         blockList: [/foo/, /bar/],
@@ -108,7 +108,7 @@ describe('mergeMetro', () => {
         update: update1,
       },
     };
-    const target: MetroConfig = {
+    const target: PluginMetroConfig = {
       middlewares: [middleware2],
       resolver: {
         blockList: /baz/,

@@ -1,18 +1,16 @@
 import path from 'path';
-import type {
-  DevServerConfig,
-  MetroDevServerConfig,
-  AdditionalMetroConfig,
-  BuildConfig as InternalBuildConfig,
-} from '@granite-js/mpack';
 import {
   resolvePlugins,
   mergeConfig,
+  type BuildConfig,
+  type DevServerConfig,
+  type MetroDevServerConfig,
+  type AdditionalMetroConfig,
   type GranitePluginBuildPostHandler,
   type GranitePluginBuildPreHandler,
   type GranitePluginDevPostHandler,
   type GranitePluginDevPreHandler,
-  type BuildConfig,
+  type PluginBuildConfig,
   type PluginInput,
 } from '@granite-js/plugin-core';
 import { getPackageRoot } from '@granite-js/utils';
@@ -26,7 +24,7 @@ const graniteConfigSchema = z.object({
   scheme: z.string(),
   outdir: z.string().default('dist'),
   entryFile: z.string().default('./src/_app.tsx'),
-  build: z.custom<BuildConfig>().optional(),
+  build: z.custom<PluginBuildConfig>().optional(),
   devServer: z.custom<DevServerConfig>().optional(),
   metro: z.custom<AdditionalMetroConfig & MetroDevServerConfig>().optional(),
   plugins: z.custom<PluginInput>(),
@@ -34,7 +32,7 @@ const graniteConfigSchema = z.object({
 
 export type GraniteConfig = z.input<typeof graniteConfigSchema>;
 export type CompleteGraniteConfig = Omit<z.output<typeof graniteConfigSchema>, 'build' | 'plugins'> & {
-  build: Omit<InternalBuildConfig, 'platform' | 'outfile'>;
+  build: Omit<BuildConfig, 'platform' | 'outfile'>;
   pluginHooks: GranitePluginHooks;
 };
 
