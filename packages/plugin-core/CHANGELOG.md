@@ -1,5 +1,11 @@
 # @granite-js/plugin-core
 
+## 0.1.8
+
+### Patch Changes
+
+- b69366c: improve config structure
+
 ## 0.1.7
 
 ## 0.1.6
