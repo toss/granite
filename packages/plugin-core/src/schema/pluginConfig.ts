@@ -25,8 +25,12 @@ export const pluginConfigSchema = z.object({
 });
 
 export type GraniteConfig = z.input<typeof pluginConfigSchema>;
-export type CompleteGraniteConfig = Omit<z.output<typeof pluginConfigSchema>, 'build' | 'plugins'> & {
-  build: Omit<BuildConfig, 'platform' | 'outfile'>;
+export type ParsedGraniteConfig = z.output<typeof pluginConfigSchema>;
+export type CompleteGraniteConfig = Pick<
+  ParsedGraniteConfig,
+  'cwd' | 'appName' | 'entryFile' | 'outdir' | 'devServer' | 'metro'
+> & {
+  build: Omit<BuildConfig, 'platform' | 'entry' | 'outfile'>;
   pluginHooks: GranitePluginHooks;
 };
 

@@ -10,6 +10,7 @@ import { Semaphore } from 'es-toolkit';
 import { Bundler } from '../bundler';
 import { Performance, printSummary } from '../performance';
 import type { BundlerConfig, PluginFactory } from '../types';
+import { getDefaultOutfileName } from '../utils/getDefaultOutfileName';
 import { writeBundle } from '../utils/writeBundle';
 
 type CommonBuildOptions = Omit<BundlerConfig, 'rootDir' | 'buildConfig'> & Pick<BuildConfig, 'platform' | 'outfile'>;
@@ -65,9 +66,10 @@ export async function buildAll(
 async function buildImpl(
   config: CompleteGraniteConfig,
   plugins: PluginFactory[],
-  { platform, outfile = `bundle.${platform}.js`, cache = true, dev = true, metafile = false }: CommonBuildOptions
+  { platform, outfile, cache = true, dev = true, metafile = false }: CommonBuildOptions
 ) {
-  const resolvedOutfile = path.join(config.outdir, outfile);
+  const outfileName = outfile == null ? getDefaultOutfileName(config.entryFile, platform) : outfile;
+  const outfilePath = path.resolve(config.outdir, outfileName);
   const bundler = new Bundler({
     rootDir: config.cwd,
     cache,
@@ -75,7 +77,8 @@ async function buildImpl(
     metafile,
     buildConfig: {
       platform,
-      outfile: resolvedOutfile,
+      entry: config.entryFile,
+      outfile: outfilePath,
       ...config.build,
     },
   });

@@ -31,7 +31,7 @@ export async function EXPERIMENTAL__server({
 
   const rootDir = config.cwd;
   const server = new DevServer({
-    buildConfig: config.build,
+    buildConfig: { entry: config.entryFile, ...config.build },
     middlewares: config.devServer?.middlewares ?? [],
     host,
     port,

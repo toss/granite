@@ -5,9 +5,6 @@ const mpack = require('@granite-js/mpack');
   const rootDir = __dirname;
   const bundler = new mpack.Bundler({
     rootDir,
-    tag: 'test',
-    scheme: 'test',
-    appName: 'test',
     cache: false,
     dev: false,
     metafile: false,

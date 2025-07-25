@@ -77,20 +77,16 @@ export const defineConfig = async (config: GraniteConfig): Promise<CompleteGrani
   const { configs, pluginHooks } = await resolvePlugins(parsed.plugins);
   const globalsScriptConfig = prepareGraniteGlobalsScript({ rootDir: cwd, appName, scheme });
   const mergedConfig = mergeConfig(parsedConfig, ...[globalsScriptConfig, ...configs].filter(isNotNil));
-  const { metro, devServer, ...buildConfig } = mergedConfig ?? {};
+  const { metro, devServer, ...build } = mergedConfig ?? {};
 
   return {
     cwd,
-    entryFile,
     appName,
-    scheme,
+    entryFile,
     outdir,
+    build,
     devServer,
     pluginHooks,
-    build: {
-      ...buildConfig,
-      entry: entryFile,
-    },
     metro: {
       ...metro,
       babelConfig: mergedConfig?.babel,
