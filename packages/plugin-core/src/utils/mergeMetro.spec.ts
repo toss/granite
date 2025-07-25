@@ -41,8 +41,8 @@ describe('mergeMetro', () => {
 
     expect(result).toEqual({
       middlewares: [middleware1, middleware2, middleware3],
-      prelude: [],
       reporter: undefined,
+      serializer: undefined,
     });
   });
 
@@ -54,7 +54,8 @@ describe('mergeMetro', () => {
 
     expect(result).toEqual({
       middlewares: [],
-      prelude: [],
+      resolver: undefined,
+      serializer: undefined,
       reporter: undefined,
     });
   });
@@ -68,7 +69,8 @@ describe('mergeMetro', () => {
 
     expect(result).toEqual({
       middlewares: [middleware1],
-      prelude: [],
+      resolver: undefined,
+      serializer: undefined,
       reporter: undefined,
     });
   });
@@ -82,7 +84,8 @@ describe('mergeMetro', () => {
 
     expect(result).toEqual({
       middlewares: [middleware1],
-      prelude: [],
+      resolver: undefined,
+      serializer: undefined,
       reporter: undefined,
     });
   });
@@ -95,14 +98,24 @@ describe('mergeMetro', () => {
 
     const source: MetroConfig = {
       middlewares: [middleware1],
-      prelude: ['./prelude-1.js'],
+      resolver: {
+        blockList: [/foo/, /bar/],
+      },
+      serializer: {
+        getPolyfills: () => ['./polyfill-1.js'],
+      },
       reporter: {
         update: update1,
       },
     };
     const target: MetroConfig = {
       middlewares: [middleware2],
-      prelude: ['./prelude-2.js'],
+      resolver: {
+        blockList: /baz/,
+      },
+      serializer: {
+        getPolyfills: () => ['./polyfill-2.js', './polyfill-3.js'],
+      },
       reporter: {
         update: update2,
       },
@@ -110,15 +123,24 @@ describe('mergeMetro', () => {
 
     const result = mergeMetro(source, target);
 
-    result?.reporter?.update?.({} as any);
-
     expect(result).toEqual({
       middlewares: [middleware1, middleware2],
-      prelude: ['./prelude-1.js', './prelude-2.js'],
+      resolver: {
+        blockList: [/foo/, /bar/, /baz/],
+      },
+      serializer: {
+        getPolyfills: expect.any(Function),
+      },
       reporter: {
         update: expect.any(Function),
       },
     });
+
+    // Serializer
+    expect(result?.serializer?.getPolyfills?.()).toEqual(['./polyfill-1.js', './polyfill-2.js', './polyfill-3.js']);
+
+    // Reporter
+    result?.reporter?.update?.({} as any);
     expect(update1).toHaveBeenCalledTimes(1);
     expect(update2).toHaveBeenCalledTimes(1);
   });

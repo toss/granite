@@ -17,7 +17,9 @@ export function prepareGraniteGlobalsScript(config: GraniteGlobalsConfig): Grani
       prelude: [filePath],
     },
     metro: {
-      prelude: [filePath],
+      serializer: {
+        getPolyfills: () => [filePath],
+      },
     },
   };
 }

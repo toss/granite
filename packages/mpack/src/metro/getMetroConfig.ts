@@ -27,10 +27,6 @@ export interface AdditionalMetroConfig extends MetroConfig {
    */
   resolver?: MetroConfig['resolver'];
   reporter?: MetroConfig['reporter'];
-  /**
-   * Script paths to be executed before the main module is run
-   */
-  prelude?: string[];
   babelConfig?: babel.TransformOptions;
   transformSync?: (id: string, code: string) => string;
 }
@@ -100,11 +96,9 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
     },
     serializer: {
       getModulesRunBeforeMainModule: () => [resolveFromRoot('react-native/Libraries/Core/InitializeCore', rootPath)],
-
       getPolyfills: () => [
         ...require(path.join(reactNativePath, 'rn-get-polyfills'))(),
         ...(additionalConfig?.serializer?.getPolyfills?.() ?? []),
-        ...(additionalConfig?.prelude ?? []),
       ],
     },
     symbolicator: {

@@ -46,7 +46,12 @@ describe('mergeConfig', () => {
       },
       metro: {
         middlewares: [mockMiddleware2],
-        prelude: ['metro-prelude-1.js'],
+        resolver: {
+          blockList: [/foo/, /bar/],
+        },
+        serializer: {
+          getPolyfills: () => ['metro-prelude-1.js'],
+        },
       },
     };
 
@@ -82,10 +87,15 @@ describe('mergeConfig', () => {
       },
       metro: {
         middlewares: [mockMiddleware4],
+        resolver: {
+          blockList: /baz/,
+        },
+        serializer: {
+          getPolyfills: () => ['metro-prelude-2.js'],
+        },
         reporter: {
           update: mockUpdate,
         },
-        prelude: ['metro-prelude-2.js'],
       },
     };
 
@@ -133,13 +143,20 @@ describe('mergeConfig', () => {
       },
       metro: {
         middlewares: [mockMiddleware2, mockMiddleware4],
+        resolver: {
+          blockList: [/foo/, /bar/, /baz/],
+        },
         reporter: {
           update: mockUpdate,
         },
-        prelude: ['metro-prelude-1.js', 'metro-prelude-2.js'],
+        serializer: {
+          getPolyfills: expect.any(Function),
+        },
       },
       extra: undefined,
     });
+
+    expect(result?.metro?.serializer?.getPolyfills?.()).toEqual(['metro-prelude-1.js', 'metro-prelude-2.js']);
   });
 
   it('handles partial configurations', () => {
@@ -287,7 +304,9 @@ describe('mergeConfig', () => {
       },
       metro: {
         middlewares: [mockMiddleware1],
-        prelude: ['metro-prelude-1.js'],
+        serializer: {
+          getPolyfills: () => ['metro-prelude-1.js'],
+        },
       },
     };
 
@@ -306,6 +325,9 @@ describe('mergeConfig', () => {
       },
       metro: {
         middlewares: [mockMiddleware2],
+        resolver: {
+          blockList: [/foo/, /bar/],
+        },
       },
       devServer: {
         middlewares: [mockMiddleware3],
@@ -321,7 +343,9 @@ describe('mergeConfig', () => {
         plugins: ['swc-plugin' as any],
       },
       metro: {
-        prelude: ['metro-prelude-2.js'],
+        serializer: {
+          getPolyfills: () => ['metro-prelude-2.js'],
+        },
       },
       extra: { target2: '2' },
     };
@@ -341,6 +365,9 @@ describe('mergeConfig', () => {
         },
       },
       metro: {
+        resolver: {
+          blockList: /baz/,
+        },
         reporter: {
           update: mockUpdate,
         },
@@ -389,7 +416,12 @@ describe('mergeConfig', () => {
         reporter: {
           update: mockUpdate,
         },
-        prelude: ['metro-prelude-1.js', 'metro-prelude-2.js'],
+        resolver: {
+          blockList: [/foo/, /bar/, /baz/],
+        },
+        serializer: {
+          getPolyfills: expect.any(Function),
+        },
       },
       devServer: {
         middlewares: [mockMiddleware3, mockMiddleware4],
