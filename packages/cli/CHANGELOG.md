@@ -1,5 +1,15 @@
 # @granite-js/cli
 
+## 0.1.9
+
+### Patch Changes
+
+- 935bb36: fix `BuildUtils` errors and incorrect plugin types
+- Updated dependencies [935bb36]
+  - @granite-js/plugin-core@0.1.9
+  - @granite-js/mpack@0.1.9
+  - @granite-js/utils@0.1.9
+
 ## 0.1.8
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @granite-js/plugin-router
 
+## 0.1.9
+
+### Patch Changes
+
+- Updated dependencies [935bb36]
+  - @granite-js/plugin-core@0.1.9
+
 ## 0.1.8
 
 ### Patch Changes
