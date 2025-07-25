@@ -1,28 +1,15 @@
 import path from 'path';
-import type * as babel from '@babel/core';
+import type { AdditionalMetroConfig } from '@granite-js/plugin-core';
 import { getPackageRoot } from '@granite-js/utils';
 import { createResolver } from './enhancedResolver';
 import { getMonorepoRoot } from './getMonorepoRoot';
-import { writeEnvScript } from './runtime';
-import type { MetroConfig } from './types';
 import { DEV_SERVER_DEFAULT_PORT, SOURCE_EXTENSIONS } from '../constants';
-import type { ReportableEvent } from '../vendors/metro/src/lib/ReportableEvent';
 import { getDefaultValues } from '../vendors/metro-config/src/defaults';
 import exclusionList from '../vendors/metro-config/src/defaults/exclusionList';
 import { mergeConfig } from '../vendors/metro-config/src/loadConfig';
 
 export interface GetMetroConfig {
   rootPath: string;
-  appName: string;
-  scheme: string;
-}
-
-export interface AdditionalMetroConfig extends MetroConfig {
-  transformSync?: (id: string, code: string) => string;
-  babelConfig?: babel.TransformOptions;
-  reporter?: {
-    update: (event: ReportableEvent) => void;
-  };
 }
 
 const INTERNAL_CALLSITES_REGEX = new RegExp(
@@ -45,16 +32,11 @@ const INTERNAL_CALLSITES_REGEX = new RegExp(
   ].join('|')
 );
 
-export async function getMetroConfig(
-  { rootPath, appName, scheme }: GetMetroConfig,
-  additionalConfig?: AdditionalMetroConfig
-) {
+export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalConfig?: AdditionalMetroConfig) {
   const defaultConfig = getDefaultValues(rootPath);
   const reactNativePath = path.dirname(resolveFromRoot('react-native/package.json', rootPath));
   const resolvedRootPath = await getMonorepoRoot(rootPath);
-
   const packageRootPath = await getPackageRoot();
-  const { path: envFilePath } = await writeEnvScript(packageRootPath, appName, scheme);
 
   return mergeConfig(defaultConfig, {
     watchFolders: [resolvedRootPath, packageRootPath],
@@ -95,11 +77,9 @@ export async function getMetroConfig(
     },
     serializer: {
       getModulesRunBeforeMainModule: () => [resolveFromRoot('react-native/Libraries/Core/InitializeCore', rootPath)],
-       
       getPolyfills: () => [
-        envFilePath,
-        ...(additionalConfig?.serializer?.getPolyfills?.() ?? []),
         ...require(path.join(reactNativePath, 'rn-get-polyfills'))(),
+        ...(additionalConfig?.serializer?.getPolyfills?.() ?? []),
       ],
     },
     symbolicator: {

@@ -1,6 +1,6 @@
 import path from 'path';
+import type { AliasConfig } from '@granite-js/plugin-core';
 import type { JscConfig } from '@swc/core';
-import type { AliasConfig } from '../../../types';
 
 /**
  * `@swc/helpers`를 사용하여 번들 크기를 최적화 하기 위한 구성입니다.

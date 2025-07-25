@@ -1,5 +1,5 @@
+import type { BundleData } from '@granite-js/plugin-core';
 import * as esbuild from 'esbuild';
-import { BundleData } from '../../bundler/types';
 import { INTERNAL_LOAD_REMOTE_IDENTIFIER, INTERNAL_NAMESPACE_IDENTIFIER } from '../../constants';
 import { getBundleName } from '../../utils/getBundleName';
 import { getSourcemapName } from '../../utils/getSourcemapName';

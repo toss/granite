@@ -1,7 +1,7 @@
 import path from 'path';
+import type { AliasConfig } from '@granite-js/plugin-core';
 import type { PluginBuild, ResolveOptions } from 'esbuild';
 import { Performance } from '../../../performance';
-import type { AliasConfig } from '../../../types';
 import { normalizePath } from '../../../utils/esbuildUtils';
 import { replaceModulePath } from '../../../utils/replaceModulePath';
 import { swcHelperOptimizationRules } from '../shared/swc';

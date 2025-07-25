@@ -17,7 +17,7 @@ export const MPACK_CACHE_DIR = path.join(TEMP_DIR, 'cache');
 export const SOURCE_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js', '.json'] as const;
 export const ASSET_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'] as const;
 
-export const DEV_SERVER_DEFAULT_HOST = 'localhost';
+export const DEV_SERVER_DEFAULT_HOST = '0.0.0.0';
 export const DEV_SERVER_DEFAULT_PORT = 8081;
 
 /**

@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as esbuild from 'esbuild';
 import { getSourcemapName } from './getSourcemapName';
-import type { BuildResult } from '../bundler/types';
 
 export function getBundleOutputs(outputFile: string, buildResult: esbuild.BuildResult) {
   const filename = path.basename(outputFile);
@@ -12,6 +11,6 @@ export function getBundleOutputs(outputFile: string, buildResult: esbuild.BuildR
   return { source, sourcemap };
 }
 
-function findOutputFile(targetFile: string, outputFiles: BuildResult['outputFiles']) {
+function findOutputFile(targetFile: string, outputFiles: esbuild.BuildResult['outputFiles']) {
   return outputFiles?.find((outfile) => outfile.path.endsWith(targetFile));
 }

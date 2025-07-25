@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { flattenPlugins } from './flattenPlugins';
-import type { PluginInput } from '../core';
+import type { PluginInput } from '../types';
 
 describe('flattenPlugins', () => {
   it('단일 플러그인을 처리할 수 있다', async () => {

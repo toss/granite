@@ -1,9 +1,9 @@
 import * as url from 'url';
-import { FastifyInstance } from 'fastify';
+import type { BundleData } from '@granite-js/plugin-core';
+import type { FastifyInstance } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import { parseStackFrame } from './parseStackFrame';
 import { symbolicate } from './symbolicate';
-import { BundleData } from '../../../bundler/types';
 import { logger } from '../../../logger';
 import { stripExtension } from '../../../utils/stripExtension';
 import { DEV_SERVER_BUNDLE_NAME } from '../../constants';

@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import type { BundleData } from '@granite-js/plugin-core';
 import { getSourcemapName } from './getSourcemapName';
-import type { BundleData } from '../bundler/types';
 
 export async function writeBundle(outputPath: string, { source, sourcemap }: BundleData) {
   await createDirectories(path.dirname(outputPath));

@@ -1,4 +1,10 @@
-export * from './core.js';
-export * from './utils/flattenPlugins.js';
-export * from './utils/resolvePlugins.js';
-export * from './types/mpackConfig.js';
+export * from './createContext';
+export * from './utils/flattenPlugins';
+export * from './utils/resolvePlugins';
+export * from './utils/mergeConfig';
+export * from './utils/mergeBuildConfigs';
+export * from './utils/createPluginHooksDriver';
+
+export { pluginConfigSchema } from './schema/pluginConfig';
+export type * from './schema/pluginConfig';
+export type * from './types';

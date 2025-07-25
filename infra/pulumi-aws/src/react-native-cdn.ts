@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { getPackageRoot } from '@granite-js/utils';
+import { getPackageRoot, prepareLocalDirectory } from '@granite-js/utils';
 import * as aws from '@pulumi/aws';
 import * as pulumi from '@pulumi/pulumi';
 import { transform } from 'oxc-transform';
@@ -108,7 +108,7 @@ export class ReactNativeBundleCDN extends pulumi.ComponentResource {
 
     const bundlePath = path.join(__dirname, 'prebuilt-shared');
     const packageRoot = getPackageRoot();
-    const granitePath = path.join(packageRoot, '.granite');
+    const granitePath = prepareLocalDirectory(packageRoot);
     const prebuiltSharedPath = path.join(granitePath, 'prebuilt-shared');
     fs.mkdirSync(prebuiltSharedPath, { recursive: true });
 

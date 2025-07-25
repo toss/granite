@@ -1,9 +1,9 @@
+import type { BuildResult } from '@granite-js/plugin-core';
 import * as esbuild from 'esbuild';
 import { logger } from '../../../logger';
 import { getBundleOutputs } from '../../../utils/getBundleOutputs';
 import { getSourcemapName } from '../../../utils/getSourcemapName';
-import { BuildResult } from '../../types';
-import { PluginOptions } from '../types';
+import type { PluginOptions } from '../types';
 
 export interface BuildStatusPluginOptions {
   onPrepare: () => void | Promise<void>;
@@ -20,12 +20,12 @@ export function buildStatusPlugin({ context, ...hooks }: PluginOptions<BuildStat
       let moduleCount = 0;
 
       build.onStart(async () => {
-        logger.debug('빌드 준비 중', { id: context.id });
+        logger.debug('Preparing build', { id: context.id });
         await hooks.onPrepare();
 
         moduleCount = 0;
         buildStartedAt = performance.now();
-        logger.debug('빌드 시작', { id: context.id, buildStartedAt });
+        logger.debug('Build started', { id: context.id, buildStartedAt });
 
         await hooks.onStart();
       });
@@ -37,7 +37,7 @@ export function buildStatusPlugin({ context, ...hooks }: PluginOptions<BuildStat
 
       build.onEnd(async (result) => {
         const endAt = performance.now();
-        const { tag, buildConfig } = context.config;
+        const { buildConfig } = context.config;
         const { outfile, sourcemapOutfile, platform, extra } = buildConfig;
         const { source, sourcemap } = getBundleOutputs(outfile, result);
         const duration = endAt - buildStartedAt;
@@ -49,7 +49,6 @@ export function buildStatusPlugin({ context, ...hooks }: PluginOptions<BuildStat
            * @see {@link https://esbuild.github.io/plugins/#on-end}
            */
           Object.defineProperties(result, {
-            tag: { value: tag, enumerable: true },
             bundle: { value: { source, sourcemap }, enumerable: true },
             outfile: { value: outfile, enumerable: true },
             sourcemapOutfile: { value: sourcemapOutfile ?? getSourcemapName(outfile), enumerable: true },
@@ -60,7 +59,7 @@ export function buildStatusPlugin({ context, ...hooks }: PluginOptions<BuildStat
             size: { value: source.contents.byteLength, enumerable: true },
           });
 
-          logger.debug('빌드 완료', { id: context.id, tag });
+          logger.debug('Build completed', { id: context.id });
 
           await hooks.onEnd(result as unknown as BuildResult);
         } else {

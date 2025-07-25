@@ -1,22 +1,19 @@
-import type { FastifyPluginAsync, FastifyPluginCallback } from 'fastify';
+import type { Middleware, BuildConfig } from '@granite-js/plugin-core';
 import type { Bundler } from '../bundler';
-import type { DevServerConfig } from '../types';
 import type { BuildStatusProgressBar } from '../utils/progressBar';
 
 export type Platform = 'android' | 'ios';
 
-export interface DevServerOptions extends DevServerConfig {
+export interface DevServerOptions {
   rootDir: string;
-  appName: string;
-  scheme: string;
   host?: string;
   port?: number;
-  plugins?: DevServerPlugin[];
+  buildConfig: Omit<BuildConfig, 'platform' | 'outfile'>;
+  middlewares?: Middleware[];
 }
 
 export interface DevServerContext {
   rootDir: string;
-  config: DevServerConfig;
   android: {
     bundler: Bundler;
     progressBar: BuildStatusProgressBar;
@@ -31,18 +28,18 @@ type ClientLogLevel =
   | 'trace'
   | 'info'
   | 'warn'
-  /**
-   * React Native 에는 ReportableEvent['level'] 에 `error` 타입이 정의되어있지 않은데,
-   * Flipper 에서는 error 타입을 지원하기에 이를 추가함.
-   *
-   * @see {@link https://github.com/facebook/flipper/blob/v0.211.0/desktop/flipper-common/src/server-types.tsx#L76}
-   */
-  | 'error'
   | 'log'
   | 'group'
   | 'groupCollapsed'
   | 'groupEnd'
-  | 'debug';
+  | 'debug'
+  /**
+   * In React Native, `error` type is not defined in ReportableEvent['level'],
+   * Flipper supports `error` type, so we add it.
+   *
+   * @see {@link https://github.com/facebook/flipper/blob/v0.211.0/desktop/flipper-common/src/server-types.tsx#L76}
+   */
+  | 'error';
 
 /**
  * @see {@link https://github.com/facebook/metro/blob/v0.78.0/packages/metro/src/lib/reporting.js#L36}
@@ -55,7 +52,7 @@ export interface ClientLogEvent {
 }
 
 /**
- * HMR 웹소켓 메시지 타입
+ * HMR WebSocket message type
  *
  * @see {@link https://github.com/facebook/metro/blob/v0.77.0/packages/metro-runtime/src/modules/types.flow.js#L68}
  */
@@ -116,5 +113,3 @@ export type BroadcastCommand = 'reload' | 'devMenu';
 export interface MessageBroadcaster {
   (command: BroadcastCommand, params?: Record<string, unknown>): void;
 }
-
-export type DevServerPlugin = FastifyPluginCallback | FastifyPluginAsync;

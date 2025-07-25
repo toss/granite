@@ -1,6 +1,6 @@
+import type { ProtocolConfig } from '@granite-js/plugin-core';
 import type { PluginBuild } from 'esbuild';
 import { Performance } from '../../../performance';
-import type { ProtocolConfig } from '../../../types';
 
 export function setupProtocolResolver(build: PluginBuild, protocolConfig: ProtocolConfig) {
   const protocols = Object.entries(protocolConfig);

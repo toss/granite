@@ -1,47 +1,14 @@
 import path from 'path';
 import {
-  babelConfigSchema,
-  esbuildConfigSchema,
-  resolverConfigSchema,
-  type AdditionalMetroConfig,
-  type Config as MpackConfig,
-  type TaskConfig,
-} from '@granite-js/mpack';
-import { flattenPlugins, mpackConfigScheme, type PluginInput } from '@granite-js/plugin-core';
+  resolvePlugins,
+  mergeConfig,
+  pluginConfigSchema,
+  GraniteConfig,
+  CompleteGraniteConfig,
+} from '@granite-js/plugin-core';
 import { getPackageRoot } from '@granite-js/utils';
-import { HandleFunction } from 'connect';
-import { merge } from 'es-toolkit';
-import { z } from 'zod';
-import { mergeConfigFromPlugins } from './mergeConfigFromPlugins';
-import { mergeTransformFromPlugins } from './mergeTransformFromPlugins';
-
-const graniteConfigSchema = z.object({
-  appName: z.string(),
-  scheme: z.string(),
-  plugins: z.custom<PluginInput>(),
-  outdir: z.string().default('dist'),
-  entryFile: z.string().default('./src/_app.tsx'),
-  cwd: z.string().default(process.cwd()),
-  resolver: resolverConfigSchema.optional(),
-  mpack: mpackConfigScheme.optional(),
-  babel: babelConfigSchema.optional(),
-  esbuild: esbuildConfigSchema.optional(),
-  metro: z.custom<Partial<AdditionalMetroConfig>>().optional(),
-});
-
-export type GraniteConfigInput = z.input<typeof graniteConfigSchema>;
-
-export interface GraniteConfigResponse extends z.infer<typeof graniteConfigSchema> {
-  mpack: {
-    devServer: {
-      middlewares: HandleFunction[];
-      config: MpackConfig;
-    };
-    build: {
-      config: MpackConfig;
-    };
-  };
-}
+import { isNotNil } from 'es-toolkit';
+import { prepareGraniteGlobalsScript } from './graniteGlobals';
 
 /**
  * @public
@@ -58,16 +25,15 @@ export interface GraniteConfigResponse extends z.infer<typeof graniteConfigSchem
  * - Additional functionality through Granite plugins
  *
  * @param config - Configuration options
+ * @param config.cwd - Working directory for build process (defaults to process.cwd())
  * @param config.appName - Your app's unique identifier
  * @param config.scheme - URL scheme for launching your app (e.g. 'granite')
- * @param config.plugins - Granite plugins to enhance functionality
  * @param config.outdir - Where to output build files (defaults to 'dist')
  * @param config.entryFile - Your app's entry point (defaults to './src/_app.tsx')
- * @param config.cwd - Working directory for build process (defaults to process.cwd())
- * @param config.mpack - Fine-tune mpack bundler behavior
- * @param config.babel - Customize Babel transpilation
- * @param config.esbuild - Adjust ESBuild bundling
+ * @param config.build - Customize build settings
  * @param config.metro - Configure Metro bundler settings
+ * @param config.devServer - Configure Mpack dev server settings
+ * @param config.plugins - Granite plugins to enhance functionality
  * @returns The processed configuration
  *
  * @example
@@ -92,75 +58,43 @@ export interface GraniteConfigResponse extends z.infer<typeof graniteConfigSchem
  * });
  * ```
  */
-export const defineConfig = async (config: GraniteConfigInput): Promise<GraniteConfigResponse> => {
-  const parsedConfig = graniteConfigSchema.parse(config);
+export const defineConfig = async (config: GraniteConfig): Promise<CompleteGraniteConfig> => {
+  const parsed = pluginConfigSchema.parse(config);
+  const cwd = parsed.cwd ?? getPackageRoot();
+  const appName = parsed.appName;
+  const scheme = parsed.scheme;
+  const entryFile = path.resolve(cwd, parsed.entryFile);
+  const outdir = path.join(cwd, parsed.outdir);
+  const parsedBuildConfig = parsed.build;
+  const parsedDevServerConfig = parsed.devServer;
+  const parsedMetroConfig = parsed.metro;
+  const parsedConfig = {
+    ...parsedBuildConfig,
+    devServer: parsedDevServerConfig,
+    metro: parsedMetroConfig,
+  };
 
-  const appName = parsedConfig.appName;
-  const scheme = parsedConfig.scheme;
-  const outdir = path.join(getPackageRoot(), parsedConfig.outdir);
-  const entryFile = parsedConfig.entryFile;
-
-  const plugins = await flattenPlugins(parsedConfig.plugins);
-  const mergedConfig = await mergeConfigFromPlugins(plugins);
-  const mergedTransform = await mergeTransformFromPlugins(plugins);
-
-  const resolver = mergedConfig?.resolver ? merge(mergedConfig.resolver, parsedConfig?.resolver ?? {}) : void 0;
-  const esbuild = mergedConfig?.esbuild ? merge(mergedConfig.esbuild, parsedConfig?.esbuild ?? {}) : void 0;
-  const metro = mergedConfig?.metro ? merge(mergedConfig.metro, parsedConfig?.metro ?? {}) : void 0;
-  const babel = mergedConfig?.babel ? merge(mergedConfig.babel, parsedConfig?.babel ?? {}) : void 0;
-  const mpackDevServer = mergedConfig?.mpack?.devServer
-    ? merge(mergedConfig?.mpack?.devServer ?? {}, parsedConfig?.mpack?.devServer ?? {})
-    : void 0;
-
-  const createTask = (platform: 'ios' | 'android'): TaskConfig => ({
-    tag: `${appName}-${platform}`,
-    build: {
-      resolver,
-      esbuild,
-      babel,
-      platform,
-      entry: entryFile,
-      outfile: path.join(outdir, `bundle.${platform}.js`),
-      transformSync: mergedTransform?.transformSync,
-      transformAsync: mergedTransform?.transformAsync,
-    },
-  });
+  const { configs, pluginHooks } = await resolvePlugins(parsed.plugins);
+  const globalsScriptConfig = prepareGraniteGlobalsScript({ rootDir: cwd, appName, scheme });
+  const mergedConfig = mergeConfig(parsedConfig, ...[globalsScriptConfig, ...configs].filter(isNotNil));
+  const { metro, devServer, ...buildConfig } = mergedConfig ?? {};
 
   return {
-    ...parsedConfig,
+    cwd,
+    entryFile,
+    appName,
+    scheme,
     outdir,
-    mpack: {
-      devServer: {
-        middlewares: (mpackDevServer?.middlewares as HandleFunction[]) ?? [],
-        config: {
-          appName,
-          scheme,
-          devServer: {
-            build: {
-              entry: entryFile,
-              resolver,
-              esbuild,
-              babel,
-              transformSync: mergedTransform?.transformSync,
-              transformAsync: mergedTransform?.transformAsync,
-            },
-          },
-          tasks: [],
-        },
-      },
-      build: {
-        config: {
-          appName,
-          scheme,
-          concurrency: 2,
-          tasks: [createTask('ios'), createTask('android')],
-        },
-      },
+    devServer,
+    pluginHooks,
+    build: {
+      ...buildConfig,
+      entry: entryFile,
     },
     metro: {
       ...metro,
-      babelConfig: babel,
-      transformSync: mergedTransform?.transformSync,
+      babelConfig: mergedConfig?.babel,
+      transformSync: mergedConfig?.transformer?.transformSync,
     },
   };
 };

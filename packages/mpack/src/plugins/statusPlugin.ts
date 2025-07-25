@@ -15,7 +15,7 @@ export function statusPlugin(handlers?: PluginHandlers): Plugin {
         return;
       }
 
-      progressBar = createProgressBar(`${config.appName}:${config.buildConfig.platform}`);
+      progressBar = createProgressBar(config.buildConfig.platform);
       totalModuleCount = persistentStorage.getData()[this.id]?.totalModuleCount;
     },
     buildStart() {
