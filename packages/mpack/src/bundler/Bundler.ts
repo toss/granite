@@ -1,9 +1,9 @@
 import * as path from 'path';
+import type { BuildResult } from '@granite-js/plugin-core';
 import { isNotNil } from 'es-toolkit';
 import * as esbuild from 'esbuild';
 import { PluginDriver } from './PluginDriver';
 import { buildStatusPlugin, dependencyAliasPlugin, requireContextPlugin, transformPlugin } from './plugins';
-import type { BuildResult } from './types';
 import {
   SOURCE_EXTENSIONS,
   ASSET_EXTENSIONS,
@@ -146,8 +146,8 @@ export class Bundler {
         requireContextPlugin(),
         transformPlugin({
           context: pluginContext,
-          transformSync: buildConfig.transformSync,
-          transformAsync: buildConfig.transformAsync,
+          transformSync: buildConfig.transformer?.transformSync,
+          transformAsync: buildConfig.transformer?.transformAsync,
         }),
         ...(esbuildOptions?.plugins ?? []),
       ].filter(isNotNil),

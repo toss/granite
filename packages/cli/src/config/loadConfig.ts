@@ -1,11 +1,11 @@
+import type { CompleteGraniteConfig } from '@granite-js/plugin-core';
 import { getPackageRoot } from '@granite-js/utils';
 import { cosmiconfig } from 'cosmiconfig';
 import { TypeScriptLoader } from 'cosmiconfig-typescript-loader';
-import type { GraniteConfigResponse } from '../index';
 
 const MODULE_NAME = 'granite';
 
-export const loadConfig = async (): Promise<GraniteConfigResponse> => {
+export const loadConfig = async (): Promise<CompleteGraniteConfig> => {
   const explorer = cosmiconfig(MODULE_NAME, {
     searchPlaces: [
       `${MODULE_NAME}.config.ts`,

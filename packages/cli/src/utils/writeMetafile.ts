@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { BuildResult } from '@granite-js/mpack';
+import type { BuildResult } from '@granite-js/plugin-core';
 
 export async function writeMetafile(buildResult: BuildResult) {
   if (buildResult.metafile == null) {

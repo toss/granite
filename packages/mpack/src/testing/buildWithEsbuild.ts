@@ -1,7 +1,7 @@
 import assert from 'assert';
+import type { BuildConfig } from '@granite-js/plugin-core';
 import { omit, toMerged } from 'es-toolkit';
 import * as esbuild from 'esbuild';
-import type { BuildConfig } from '../types';
 
 export async function buildWithEsbuild(buildConfig: BuildConfig, options?: esbuild.BuildOptions) {
   let esbuildOptions = options;

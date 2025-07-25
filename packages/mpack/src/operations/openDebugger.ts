@@ -4,8 +4,10 @@ import * as path from 'path';
 import { getChromePath, launch } from 'chrome-launcher';
 import { DEBUGGER_FRONTEND_PATH, DEBUGGER_TEMP_DIR, REACT_NATIVE_INSPECTOR_PAGE } from './constants';
 
-export async function openDebugger(host = 'localhost', port: number, deviceId: string) {
-  const appUrl = getDevToolsFrontendUrl(host, port, deviceId);
+const DEBUGGER_HOST = 'localhost';
+
+export async function openDebugger(port: number, deviceId: string) {
+  const appUrl = getDevToolsFrontendUrl(DEBUGGER_HOST, port, deviceId);
   const tempDir = await createTemporaryDirectory();
   const chromePath = getChromePath();
 

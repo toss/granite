@@ -1,7 +1,8 @@
 import path from 'path';
+import type { BuildConfig } from '@granite-js/plugin-core';
 import { describe, expect, it } from 'vitest';
 import { buildWithEsbuild, evaluate } from '../../../../testing';
-import type { BuildConfig, INTERNAL__Id } from '../../../../types';
+import type { INTERNAL__Id } from '../../../../types';
 import { transformPlugin } from '../transformPlugin';
 
 describe('transformPlugin', () => {
@@ -21,15 +22,11 @@ describe('transformPlugin', () => {
           context: {
             id: 'id' as INTERNAL__Id,
             config: {
-              tag: 'test',
-              appName: 'test',
-              scheme: 'test',
               cache: false,
               dev: false,
               metafile: false,
               rootDir: __dirname,
               buildConfig,
-              services: {},
             },
           },
         }),

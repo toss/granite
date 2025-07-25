@@ -1,6 +1,6 @@
 import path from 'path';
-import { BuildConfig, BundlerConfig } from '../../types';
-import { mergeBuildConfigs } from '../../utils/mergeBuildConfigs';
+import { mergeBuildConfigs, type BuildConfig } from '@granite-js/plugin-core';
+import type { BundlerConfig } from '../../types';
 
 export function getReactNativeSetupScripts({ rootDir }: { rootDir: string }) {
   const reactNativePath = path.dirname(
@@ -46,8 +46,6 @@ export function combineWithBaseBuildConfig(
         banner: {
           js: [
             globalVariables({ dev: context.dev }),
-            'global.__granite = global.__granite || {};',
-            `global.__granite.app = { name: ${JSON.stringify(config.appName)}, scheme: ${JSON.stringify(config.scheme)} };`,
             // symbol-asynciterator polyfill (ES5)
             `(function(){if(typeof Symbol!=="undefined"&&!Symbol.asyncIterator){Symbol.asyncIterator=Symbol.for("@@asyncIterator")}})();`,
           ].join('\n'),

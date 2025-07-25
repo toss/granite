@@ -1,22 +1,10 @@
-import { BuildConfig } from './BuildConfig';
+import type { BuildConfig } from '@granite-js/plugin-core';
 
 export interface BundlerConfig {
-  /**
-   * Task indentifier
-   */
-  tag: string;
   /**
    * Project root path
    */
   rootDir: string;
-  /**
-   * Application name
-   */
-  appName: string;
-  /**
-   * Scheme prefix
-   */
-  scheme: string;
   /**
    * Development mode
    */
@@ -33,25 +21,4 @@ export interface BundlerConfig {
    * Build configuration
    */
   buildConfig: BuildConfig;
-  /**
-   * @deprecated
-   *
-   * Configuration for integrating external services
-   */
-  services?: ServiceConfig;
-}
-
-interface ServiceConfig {
-  sentry?: {
-    /**
-     * Defaults to `true`
-     */
-    enabled?: boolean;
-    /**
-     * Defaults to `process.env.SENTRY_AUTH_TOKEN`
-     */
-    authToken?: string;
-    org?: string;
-    project?: string;
-  };
 }

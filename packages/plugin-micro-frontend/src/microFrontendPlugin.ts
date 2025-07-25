@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { GranitePluginCore } from '@granite-js/plugin-core';
+import { prepareLocalDirectory } from '@granite-js/utils';
 import { getPreludeConfig } from './prelude';
 import { fetchRemoteBundle } from './remote';
 import { virtualInitializeCoreConfig, virtualSharedConfig } from './resolver';
@@ -13,9 +14,10 @@ export const microFrontendPlugin = async (options: MicroFrontendPluginOptions): 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .filter(([_, config]) => config.eager !== true);
 
+  const rootDir = process.cwd();
   const preludeConfig = getPreludeConfig(options);
-  const preludePath = path.join(process.cwd(), '.granite', 'shared-modules-prelude.js');
-  fs.mkdirSync(path.dirname(preludePath), { recursive: true });
+  const localDir = prepareLocalDirectory(rootDir);
+  const preludePath = path.join(localDir, 'micro-frontend-runtime.js');
   fs.writeFileSync(preludePath, preludeConfig.preludeScript);
 
   /**

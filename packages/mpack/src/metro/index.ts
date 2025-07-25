@@ -1,3 +1,2 @@
 export * from './getMetroConfig';
-export * from './runBuild';
-export type { MetroConfig } from './types';
+export * as MetroBuildUtils from './build';

@@ -1,45 +1,29 @@
+import type { BuildConfig } from '@granite-js/plugin-core';
 import { Bundler } from '../../bundler';
-import { DevServerConfig } from '../../types';
 import { getBundleName } from '../../utils/getBundleName';
 import { DEV_SERVER_BUNDLE_NAME } from '../constants';
 import { Platform } from '../types';
 
-export async function createDevServerForDevServer({
+export async function createBundlerForDevServer({
   rootDir,
-  appName,
-  scheme,
   platform,
-  config,
+  buildConfig,
 }: {
   rootDir: string;
-  appName: string;
-  scheme: string;
   platform: Platform;
-  config: DevServerConfig;
+  buildConfig: Omit<BuildConfig, 'outfile' | 'platform'>;
 }) {
-  const tag = 'dev-server';
-  const dev = true;
   const bundleName = getBundleName(DEV_SERVER_BUNDLE_NAME);
 
-  const bundler = new Bundler({
-    tag,
+  return new Bundler({
     rootDir,
-    appName,
-    scheme,
-    dev,
+    dev: true,
     cache: true,
     metafile: false,
     buildConfig: {
-      ...config.build,
+      ...buildConfig,
       platform,
       outfile: bundleName,
     },
-    services: {
-      sentry: {
-        enabled: false,
-      },
-    },
   });
-
-  return bundler;
 }

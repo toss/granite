@@ -36,7 +36,7 @@
     "@types/debug": "^4",
     "@types/node": "^22.10.2",
     "@types/serve-static": "^1",
-    "esbuild": "^0.25.4",
+    "esbuild": "0.25.8",
     "eslint": "^9.7.0",
     "ts-prune": "^0.10.3",
     "tsup": "^8.5.0",

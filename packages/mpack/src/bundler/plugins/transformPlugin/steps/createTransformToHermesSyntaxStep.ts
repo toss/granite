@@ -1,8 +1,8 @@
 import path from 'path';
+import type { BuildConfig } from '@granite-js/plugin-core';
 import * as swc from '@swc/core';
 import { isNotNil } from 'es-toolkit';
 import { AsyncTransformStep } from '../../../../transformer/TransformPipeline';
-import { BuildConfig } from '../../../../types';
 import { defineStepName } from '../../../../utils/defineStepName';
 import { swcHelperOptimizationRules } from '../../shared/swc';
 

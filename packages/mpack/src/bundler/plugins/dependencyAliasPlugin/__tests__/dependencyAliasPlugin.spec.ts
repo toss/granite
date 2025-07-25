@@ -1,7 +1,8 @@
 import path from 'path';
+import type { BuildConfig } from '@granite-js/plugin-core';
 import { describe, expect, it } from 'vitest';
 import { buildWithEsbuild, evaluate } from '../../../../testing';
-import { BuildConfig, INTERNAL__Id } from '../../../../types';
+import type { INTERNAL__Id } from '../../../../types';
 import { dependencyAliasPlugin } from '../dependencyAliasPlugin';
 
 describe('dependencyAliasPlugin', () => {
@@ -33,15 +34,11 @@ describe('dependencyAliasPlugin', () => {
           context: {
             id: 'id' as INTERNAL__Id,
             config: {
-              tag: 'test',
-              appName: 'test',
-              scheme: 'test',
               cache: false,
               dev: false,
               metafile: false,
               rootDir: __dirname,
               buildConfig,
-              services: {},
             },
           },
         }),
@@ -77,15 +74,11 @@ describe('dependencyAliasPlugin', () => {
           context: {
             id: 'id' as INTERNAL__Id,
             config: {
-              tag: 'test',
-              appName: 'test',
-              scheme: 'test',
               cache: false,
               dev: false,
               metafile: false,
               rootDir: __dirname,
               buildConfig,
-              services: {},
             },
           },
         }),

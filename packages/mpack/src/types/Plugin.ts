@@ -1,5 +1,5 @@
-import type { INTERNAL__Id } from './TaskConfig';
-import type { BuildResult } from '../bundler/types';
+import type { BuildResult } from '@granite-js/plugin-core';
+import type { INTERNAL__Id } from './Id';
 import type { BundlerConfig } from '../types/BundlerConfig';
 
 export interface Plugin extends Partial<BindThis<PluginHooks, PluginContext>> {
