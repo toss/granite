@@ -42,15 +42,17 @@ export async function buildAll(
   const driver = createPluginHooksDriver(config);
   await driver.build.pre();
 
-  for (const options of optionsList) {
-    await semaphore.acquire();
-    try {
-      const buildResult = await buildImpl(config, options);
-      buildResults.push(buildResult);
-    } catch {
-      semaphore.release();
-    }
-  }
+  await Promise.all(
+    optionsList.map(async (options) => {
+      await semaphore.acquire();
+      try {
+        const buildResult = await buildImpl(config, options);
+        buildResults.push(buildResult);
+      } catch {
+        semaphore.release();
+      }
+    })
+  );
 
   await driver.build.post({ buildResults });
 
