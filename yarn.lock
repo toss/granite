@@ -5424,7 +5424,6 @@ __metadata:
     "@swc/core": "npm:1.5.24"
     "@types/babel__core": "npm:^7"
     "@types/connect": "npm:^3"
-    connect: "npm:^3.7.0"
     es-toolkit: "npm:^1.39.8"
     esbuild: "npm:^0.25.8"
     fastify: "npm:4.14.0"
