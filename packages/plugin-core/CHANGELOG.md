@@ -1,5 +1,11 @@
 # @granite-js/plugin-core
 
+## 0.1.9
+
+### Patch Changes
+
+- 935bb36: fix `BuildUtils` errors and incorrect plugin types
+
 ## 0.1.8
 
 ### Patch Changes
