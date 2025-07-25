@@ -1,40 +1,40 @@
+import { CompleteGraniteConfig, createPluginHooksDriver } from '@granite-js/plugin-core';
 import { select } from '@inquirer/prompts';
 import * as ChromeLauncher from 'chrome-launcher';
 import Debug from 'debug';
 import { StartMenuHandler } from './StartMenuHandler';
-import { DEV_SERVER_DEFAULT_PORT } from '../../constants';
+import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../../constants';
 import { DevServer } from '../../server/DevServer';
-import type { DevServerOptions } from '../../server/types';
-import type { Middleware } from '../../types';
 import { printLogo } from '../../utils/printLogo';
 import { openDebugger } from '../openDebugger';
 
 const debug = Debug('cli:start');
 
 interface RunServerArgs {
+  config: CompleteGraniteConfig;
   host?: string;
   port?: number;
-  buildConfig: DevServerOptions['buildConfig'];
-  middlewares?: Middleware[];
   onServerReady?: () => Promise<void> | void;
 }
 
 const chromeInstanceMap: Map<string, ChromeLauncher.LaunchedChrome> = new Map();
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export async function EXPERIMENTAL__runServer({
-  host,
+export async function EXPERIMENTAL__server({
+  config,
+  host = DEV_SERVER_DEFAULT_HOST,
   port = DEV_SERVER_DEFAULT_PORT,
-  buildConfig,
-  middlewares,
   onServerReady,
 }: RunServerArgs) {
-  const rootDir = process.cwd();
+  const driver = createPluginHooksDriver(config);
+  await driver.devServer.pre({ host, port });
+
+  const rootDir = config.cwd;
   const server = new DevServer({
-    buildConfig,
+    buildConfig: config.build,
+    middlewares: config.devServer?.middlewares ?? [],
     host,
     port,
-    middlewares,
     rootDir,
   });
 
@@ -43,6 +43,7 @@ export async function EXPERIMENTAL__runServer({
   await server.initialize();
   await server.listen();
 
+  await driver.devServer.post({ host, port });
   await onServerReady?.();
 
   const menuHandler = new StartMenuHandler([
@@ -98,7 +99,7 @@ export async function EXPERIMENTAL__runServer({
 
         chromeInstanceMap.get(targetDevice.id)?.kill();
 
-        openDebugger(server.host, server.port, targetDevice.id)
+        openDebugger(server.port, targetDevice.id)
           .then((chrome) => {
             chromeInstanceMap.set(targetDevice.id, chrome);
           })

@@ -1,6 +1,7 @@
 export { Bundler } from './bundler';
 export { DevServer } from './server';
-export { getMetroConfig, runBuild as metroBuild } from './metro';
+export { BuildUtils, runServer, EXPERIMENTAL__server } from './operations';
+export { getMetroConfig, MetroBuildUtils } from './metro';
 export {
   DEV_SERVER_DEFAULT_HOST,
   DEV_SERVER_DEFAULT_PORT,
@@ -8,6 +9,5 @@ export {
   SERVICE_BUNDLE_NAME,
   BUNDLE_NAME,
 } from './constants';
-export * from './operations';
 
 export type * from './types';

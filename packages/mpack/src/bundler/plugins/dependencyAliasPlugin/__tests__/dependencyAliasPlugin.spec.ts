@@ -1,7 +1,8 @@
 import path from 'path';
+import type { BuildConfig } from '@granite-js/plugin-core';
 import { describe, expect, it } from 'vitest';
 import { buildWithEsbuild, evaluate } from '../../../../testing';
-import { BuildConfig, INTERNAL__Id } from '../../../../types';
+import type { INTERNAL__Id } from '../../../../types';
 import { dependencyAliasPlugin } from '../dependencyAliasPlugin';
 
 describe('dependencyAliasPlugin', () => {

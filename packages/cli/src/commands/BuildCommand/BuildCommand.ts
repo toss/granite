@@ -1,5 +1,6 @@
+import { BuildUtils } from '@granite-js/mpack';
+import { statusPlugin } from '@granite-js/mpack/plugins';
 import { Command, Option } from 'clipanion';
-import { build } from './build';
 import { loadConfig } from '../../config/loadConfig';
 
 export class BuildCommand extends Command {
@@ -11,18 +12,31 @@ export class BuildCommand extends Command {
     examples: [['Build Granite App', 'granite build']],
   });
 
-  disableCache = Option.Boolean('--disable-cache', {
-    description: 'Disable cache',
+  dev = Option.Boolean('--dev', {
+    description: 'Build in development mode',
+  });
+
+  metafile = Option.Boolean('--metafile', {
+    description: 'Generate metafile',
+  });
+
+  cache = Option.Boolean('--cache', {
+    description: 'Enable cache',
   });
 
   async execute() {
     try {
-      const { disableCache = false } = this;
+      const { cache = true, metafile = false, dev = false } = this;
       const config = await loadConfig();
+      const options = (['android', 'ios'] as const).map((platform) => ({
+        dev,
+        cache,
+        metafile,
+        platform,
+        outfile: `bundle.${platform}.js`,
+      }));
 
-      await build(config, {
-        cache: !disableCache,
-      });
+      await BuildUtils.buildAll(options, { config, plugins: [statusPlugin] });
 
       return 0;
     } catch (error: any) {

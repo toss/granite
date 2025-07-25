@@ -1,6 +1,6 @@
 import path from 'path';
-import { mergeBuildConfigs } from '@granite-js/plugin-core';
-import type { BuildConfig, BundlerConfig } from '../../types';
+import { mergeBuildConfigs, type BuildConfig } from '@granite-js/plugin-core';
+import type { BundlerConfig } from '../../types';
 
 export function getReactNativeSetupScripts({ rootDir }: { rootDir: string }) {
   const reactNativePath = path.dirname(

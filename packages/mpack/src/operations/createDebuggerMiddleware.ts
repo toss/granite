@@ -14,7 +14,6 @@ import { getModule } from '../vendors';
 const debug = Debug('cli:start');
 
 interface DebuggerMiddlewareConfig {
-  host?: string;
   port: number;
   broadcastMessage: (method: string, params?: Record<string, unknown>) => void;
 }
@@ -22,7 +21,7 @@ interface DebuggerMiddlewareConfig {
 const { InspectorProxy } = getModule('metro-inspector-proxy');
 const chromeInstanceMap: Map<number, ChromeLauncher.LaunchedChrome> = new Map();
 
-export function createDebuggerMiddleware({ host, port, broadcastMessage }: DebuggerMiddlewareConfig) {
+export function createDebuggerMiddleware({ port, broadcastMessage }: DebuggerMiddlewareConfig) {
   const middleware = connect().use(`/${DEBUGGER_FRONTEND_PATH}`, serveStatic(path.resolve(devtoolsFrontendPath)));
 
   function enableStdinWatchMode() {
@@ -70,7 +69,7 @@ export function createDebuggerMiddleware({ host, port, broadcastMessage }: Debug
           break;
 
         case 'j':
-          openReactNativeDebugger(host, port);
+          openReactNativeDebugger(port);
           break;
       }
     });
@@ -79,7 +78,7 @@ export function createDebuggerMiddleware({ host, port, broadcastMessage }: Debug
   return { middleware, enableStdinWatchMode };
 }
 
-async function openReactNativeDebugger(host = 'localhost', port: number) {
+async function openReactNativeDebugger(port: number) {
   const connectedDevices = Array.from(InspectorProxy.devices.entries());
   let targetDevice: { id: number; name: string };
 
@@ -109,7 +108,7 @@ async function openReactNativeDebugger(host = 'localhost', port: number) {
 
   console.log(`Opening debugger for '${targetDevice.name}'...`);
   chromeInstanceMap.get(targetDevice.id)?.kill();
-  openDebugger(host, port, targetDevice.id.toString())
+  openDebugger(port, targetDevice.id.toString())
     .then((chrome) => {
       chromeInstanceMap.set(targetDevice.id, chrome);
     })

@@ -1,13 +1,9 @@
-import * as mpack from '@granite-js/mpack';
+import { runServer, EXPERIMENTAL__server } from '@granite-js/mpack';
 import { Command, Option } from 'clipanion';
 import Debug from 'debug';
-import { startDevServer } from './startDevServer';
 import { loadConfig } from '../../config/loadConfig';
 
 const debug = Debug('cli');
-
-const DEFAULT_HOST = '0.0.0.0';
-const DEFAULT_LOCALHOST_PORT = 8081;
 
 export class DevCommand extends Command {
   static paths = [[`dev`]];
@@ -46,20 +42,13 @@ export class DevCommand extends Command {
         /**
          * @TODO Invoke pre and post handlers of devServer plugin hooks in experimental mode
          */
-        await mpack.EXPERIMENTAL__runServer({
-          buildConfig: config.build,
-          host: serverOptions.host,
-          port: serverOptions.port,
-        });
+        await EXPERIMENTAL__server({ config, ...serverOptions });
       } else {
-        await startDevServer(
-          {
-            host: serverOptions.host || DEFAULT_HOST,
-            port: serverOptions.port || DEFAULT_LOCALHOST_PORT,
-            disableEmbeddedReactDevTools: this.disableEmbeddedReactDevTools,
-          },
-          config
-        );
+        await runServer({
+          config,
+          enableEmbeddedReactDevTools: !this.disableEmbeddedReactDevTools,
+          ...serverOptions,
+        });
       }
     } catch (error: any) {
       console.log(`ERROR OCCURRED`);

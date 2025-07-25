@@ -2,50 +2,13 @@ import path from 'path';
 import {
   resolvePlugins,
   mergeConfig,
-  type BuildConfig,
-  type DevServerConfig,
-  type MetroDevServerConfig,
-  type AdditionalMetroConfig,
-  type GranitePluginBuildPostHandler,
-  type GranitePluginBuildPreHandler,
-  type GranitePluginDevPostHandler,
-  type GranitePluginDevPreHandler,
-  type PluginBuildConfig,
-  type PluginInput,
+  pluginConfigSchema,
+  GraniteConfig,
+  CompleteGraniteConfig,
 } from '@granite-js/plugin-core';
 import { getPackageRoot } from '@granite-js/utils';
 import { isNotNil } from 'es-toolkit';
-import { z } from 'zod';
 import { prepareGraniteGlobalsScript } from './graniteGlobals';
-
-const graniteConfigSchema = z.object({
-  cwd: z.string().default(process.cwd()),
-  appName: z.string(),
-  scheme: z.string(),
-  outdir: z.string().default('dist'),
-  entryFile: z.string().default('./src/_app.tsx'),
-  build: z.custom<PluginBuildConfig>().optional(),
-  devServer: z.custom<DevServerConfig>().optional(),
-  metro: z.custom<AdditionalMetroConfig & MetroDevServerConfig>().optional(),
-  plugins: z.custom<PluginInput>(),
-});
-
-export type GraniteConfig = z.input<typeof graniteConfigSchema>;
-export type CompleteGraniteConfig = Omit<z.output<typeof graniteConfigSchema>, 'build' | 'plugins'> & {
-  build: Omit<BuildConfig, 'platform' | 'outfile'>;
-  pluginHooks: GranitePluginHooks;
-};
-
-export interface GranitePluginHooks {
-  devServer: {
-    preHandlers: GranitePluginDevPreHandler[];
-    postHandlers: GranitePluginDevPostHandler[];
-  };
-  build: {
-    preHandlers: GranitePluginBuildPreHandler[];
-    postHandlers: GranitePluginBuildPostHandler[];
-  };
-}
 
 /**
  * @public
@@ -96,8 +59,7 @@ export interface GranitePluginHooks {
  * ```
  */
 export const defineConfig = async (config: GraniteConfig): Promise<CompleteGraniteConfig> => {
-  const parsed = graniteConfigSchema.parse(config);
-
+  const parsed = pluginConfigSchema.parse(config);
   const cwd = parsed.cwd ?? getPackageRoot();
   const appName = parsed.appName;
   const scheme = parsed.scheme;

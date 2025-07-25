@@ -1,5 +1,5 @@
+import type { Middleware, BuildConfig } from '@granite-js/plugin-core';
 import type { Bundler } from '../bundler';
-import type { BuildConfig, Middleware } from '../types';
 import type { BuildStatusProgressBar } from '../utils/progressBar';
 
 export type Platform = 'android' | 'ios';
@@ -52,7 +52,7 @@ export interface ClientLogEvent {
 }
 
 /**
- * HMR 웹소켓 메시지 타입
+ * HMR WebSocket message type
  *
  * @see {@link https://github.com/facebook/metro/blob/v0.77.0/packages/metro-runtime/src/modules/types.flow.js#L68}
  */

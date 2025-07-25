@@ -8,6 +8,7 @@ const CONSTRAINTS_PACKAGE_VERSIONS = {
   esbuild: '^0.25.8',
   // FIXED Versions
   '@swc/core': '1.5.24',
+  fastify: '4.14.0',
 };
 
 function uniq(arr) {

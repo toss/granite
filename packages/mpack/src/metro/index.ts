@@ -1,2 +1,2 @@
 export * from './getMetroConfig';
-export * from './runBuild';
+export * as MetroBuildUtils from './build';

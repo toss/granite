@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
+import type { BuildConfig } from '@granite-js/plugin-core';
 import execa from 'execa';
 import { createTmpDir } from './tempDir';
 import { Cache } from '../cache';
-import type { BuildConfig } from '../types';
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const PACKED_PATH = path.resolve(ROOT, 'package.tgz');

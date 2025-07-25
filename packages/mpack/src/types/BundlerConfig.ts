@@ -1,4 +1,4 @@
-import { BuildConfig } from './BuildConfig';
+import type { BuildConfig } from '@granite-js/plugin-core';
 
 export interface BundlerConfig {
   /**
