@@ -110,7 +110,7 @@
     "denodeify": "^1.2.1",
     "enhanced-resolve": "^5.17.1",
     "error-stack-parser": "^2.0.6",
-    "es-toolkit": "^1.26.1",
+    "es-toolkit": "^1.39.8",
     "esbuild": "0.25.8",
     "events": "3.3.0",
     "fastify": "4.14.0",

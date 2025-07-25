@@ -2,6 +2,7 @@ import path from 'path';
 import { BuildResult, createPluginHooksDriver, type CompleteGraniteConfig } from '@granite-js/plugin-core';
 import { Semaphore } from 'es-toolkit';
 import { getMetroConfig } from './getMetroConfig';
+import { getDefaultOutfileName } from '../utils/getDefaultOutfileName';
 import Metro from '../vendors/metro/src';
 
 interface CommonMetroBuildOptions {
@@ -42,15 +43,17 @@ export async function buildAll(
   const driver = createPluginHooksDriver(config);
   await driver.build.pre();
 
-  for (const options of optionsList) {
-    await semaphore.acquire();
-    try {
-      const buildResult = await buildImpl(config, options);
-      buildResults.push(buildResult);
-    } catch {
-      semaphore.release();
-    }
-  }
+  await Promise.all(
+    optionsList.map(async (options) => {
+      await semaphore.acquire();
+      try {
+        const buildResult = await buildImpl(config, options);
+        buildResults.push(buildResult);
+      } catch {
+        semaphore.release();
+      }
+    })
+  );
 
   await driver.build.post({ buildResults });
 
@@ -59,20 +62,21 @@ export async function buildAll(
 
 async function buildImpl(
   config: CompleteGraniteConfig,
-  { platform, outfile = `bundle.${platform}.js`, minify = false, dev = true }: CommonMetroBuildOptions
+  { platform, outfile, minify = false, dev = true }: CommonMetroBuildOptions
 ) {
   const metroConfig = await getMetroConfig({ rootPath: config.cwd }, config.metro);
-  const out = path.join(config.outdir, outfile);
+  const outfileName = outfile == null ? getDefaultOutfileName(config.entryFile, platform) : outfile;
+  const outfilePath = path.join(config.outdir, outfileName);
 
   await Metro.runBuild(metroConfig, {
-    entry: config.entryFile,
-    out,
     platform,
+    entry: config.entryFile,
+    out: outfilePath,
     minify: minify,
     dev: dev,
   });
 
-  return buildResultShim(config, { outfile, platform, minify, dev });
+  return buildResultShim(config, { outfile: outfilePath, platform, minify, dev });
 }
 
 function buildResultShim(config: CompleteGraniteConfig, options: Required<CommonMetroBuildOptions>): BuildResult {
