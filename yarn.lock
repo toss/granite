@@ -5117,8 +5117,6 @@ __metadata:
     chalk: "npm:^4"
     clipanion: "npm:^4.0.0-rc.4"
     connect: "npm:^3.7.0"
-    cosmiconfig: "npm:^9.0.0"
-    cosmiconfig-typescript-loader: "npm:^5.1.0"
     debug: "npm:^4.3.7"
     enquirer: "npm:^2.4.1"
     es-toolkit: "npm:^1.39.8"
@@ -5421,9 +5419,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@granite-js/plugin-core@workspace:packages/plugin-core"
   dependencies:
+    "@granite-js/utils": "workspace:*"
     "@swc/core": "npm:1.5.24"
     "@types/babel__core": "npm:^7"
     "@types/connect": "npm:^3"
+    cosmiconfig: "npm:^9.0.0"
+    cosmiconfig-typescript-loader: "npm:^6.1.0"
     es-toolkit: "npm:^1.39.8"
     esbuild: "npm:^0.25.8"
     fastify: "npm:4.14.0"
@@ -5551,6 +5552,7 @@ __metadata:
     "@granite-js/lottie": "workspace:*"
     "@granite-js/mpack": "workspace:*"
     "@granite-js/native": "workspace:*"
+    "@granite-js/plugin-core": "workspace:*"
     "@granite-js/style-utils": "workspace:*"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/react": "npm:^16.1.0"
@@ -13050,16 +13052,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cosmiconfig-typescript-loader@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "cosmiconfig-typescript-loader@npm:5.1.0"
+"cosmiconfig-typescript-loader@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "cosmiconfig-typescript-loader@npm:6.1.0"
   dependencies:
-    jiti: "npm:^1.21.6"
+    jiti: "npm:^2.4.1"
   peerDependencies:
     "@types/node": "*"
-    cosmiconfig: ">=8.2"
-    typescript: ">=4"
-  checksum: 10c0/9c87ade7b0960e6f15711e880df987237c20eabb3088c2bcc558e821f85aecee97c6340d428297a0241d3df4e3c6be66501468aef1e9a719722931a479865f3c
+    cosmiconfig: ">=9"
+    typescript: ">=5"
+  checksum: 10c0/5e3baf85a9da7dcdd7ef53a54d1293400eed76baf0abb3a41bf9fcc789f1a2653319443471f9a1dc32951f1de4467a6696ccd0f88640e7827f1af6ff94ceaf1a
   languageName: node
   linkType: hard
 
@@ -17826,12 +17828,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jiti@npm:^1.21.6":
-  version: 1.21.7
-  resolution: "jiti@npm:1.21.7"
+"jiti@npm:^2.4.1":
+  version: 2.5.1
+  resolution: "jiti@npm:2.5.1"
   bin:
-    jiti: bin/jiti.js
-  checksum: 10c0/77b61989c758ff32407cdae8ddc77f85e18e1a13fc4977110dbd2e05fc761842f5f71bce684d9a01316e1c4263971315a111385759951080bbfe17cbb5de8f7a
+    jiti: lib/jiti-cli.mjs
+  checksum: 10c0/f0a38d7d8842cb35ffe883038166aa2d52ffd21f1a4fc839ae4076ea7301c22a1f11373f8fc52e2667de7acde8f3e092835620dd6f72a0fbe9296b268b0874bb
   languageName: node
   linkType: hard
 

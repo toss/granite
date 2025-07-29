@@ -1,7 +1,7 @@
 import { BuildUtils } from '@granite-js/mpack';
 import { statusPlugin } from '@granite-js/mpack/plugins';
+import { loadConfig } from '@granite-js/plugin-core';
 import { Command, Option } from 'clipanion';
-import { loadConfig } from '../../config/loadConfig';
 
 export class BuildCommand extends Command {
   static paths = [[`build`]];

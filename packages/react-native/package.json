@@ -87,6 +87,7 @@
     "@granite-js/jest": "workspace:*",
     "@granite-js/lottie": "workspace:*",
     "@granite-js/mpack": "workspace:*",
+    "@granite-js/plugin-core": "workspace:*",
     "@granite-js/style-utils": "workspace:*",
     "es-toolkit": "^1.39.8",
     "react-native-url-polyfill": "1.3.0"

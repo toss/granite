@@ -1,7 +1,7 @@
 import { runServer, EXPERIMENTAL__server } from '@granite-js/mpack';
+import { loadConfig } from '@granite-js/plugin-core';
 import { Command, Option } from 'clipanion';
 import Debug from 'debug';
-import { loadConfig } from '../../config/loadConfig';
 
 const debug = Debug('cli');
 

@@ -1,2 +1,2 @@
-export * from '@granite-js/cli';
+export * from '@granite-js/plugin-core';
 export { Config as MpackConfig } from '@granite-js/mpack';
