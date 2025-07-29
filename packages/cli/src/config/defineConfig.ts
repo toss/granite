@@ -5,6 +5,7 @@ import {
   pluginConfigSchema,
   GraniteConfig,
   CompleteGraniteConfig,
+  LazyCompleteGraniteConfig,
 } from '@granite-js/plugin-core';
 import { getPackageRoot } from '@granite-js/utils';
 import { isNotNil } from 'es-toolkit';
@@ -58,7 +59,15 @@ import { prepareGraniteGlobalsScript } from './graniteGlobals';
  * });
  * ```
  */
-export const defineConfig = async (config: GraniteConfig): Promise<CompleteGraniteConfig> => {
+export const defineConfig = async <Params = any>(
+  config: GraniteConfig | ((params: Params) => GraniteConfig) | ((params: Params) => Promise<GraniteConfig>)
+): Promise<CompleteGraniteConfig | LazyCompleteGraniteConfig<Params>> => {
+  return typeof config === 'function'
+    ? async (params: Params) => evaluateConfig(await config(params))
+    : evaluateConfig(config);
+};
+
+async function evaluateConfig(config: GraniteConfig) {
   const parsed = pluginConfigSchema.parse(config);
   const cwd = parsed.cwd ?? getPackageRoot();
   const appName = parsed.appName;
@@ -93,4 +102,4 @@ export const defineConfig = async (config: GraniteConfig): Promise<CompleteGrani
       transformSync: mergedConfig?.transformer?.transformSync,
     },
   };
-};
+}

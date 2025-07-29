@@ -33,6 +33,7 @@ export type CompleteGraniteConfig = Pick<
   build: Omit<BuildConfig, 'platform' | 'entry' | 'outfile'>;
   pluginHooks: GranitePluginHooks;
 };
+export type LazyCompleteGraniteConfig<Params = any> = (params: Params) => Promise<CompleteGraniteConfig>;
 
 export interface GranitePluginHooks {
   devServer: {
