@@ -1,14 +1,10 @@
 import path from 'path';
-import {
-  resolvePlugins,
-  mergeConfig,
-  pluginConfigSchema,
-  GraniteConfig,
-  CompleteGraniteConfig,
-} from '@granite-js/plugin-core';
 import { getPackageRoot } from '@granite-js/utils';
 import { isNotNil } from 'es-toolkit';
 import { prepareGraniteGlobalsScript } from './graniteGlobals';
+import { pluginConfigSchema, type CompleteGraniteConfig, type GraniteConfig } from '../schema/pluginConfig';
+import { mergeConfig } from '../utils/mergeConfig';
+import { resolvePlugins } from '../utils/resolvePlugins';
 
 /**
  * @public

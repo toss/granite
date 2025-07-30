@@ -1,7 +1,7 @@
 import { BuildUtils } from '@granite-js/mpack';
 import { statusPlugin } from '@granite-js/mpack/plugins';
+import { loadConfig } from '@granite-js/plugin-core';
 import { Command, Option } from 'clipanion';
-import { loadConfig } from '../../config/loadConfig';
 
 export class BuildCommand extends Command {
   static paths = [[`build`]];
@@ -10,6 +10,10 @@ export class BuildCommand extends Command {
     category: 'Build',
     description: 'Build Granite App',
     examples: [['Build Granite App', 'granite build']],
+  });
+
+  configFile = Option.String('--config', {
+    description: 'Path to config file',
   });
 
   dev = Option.Boolean('--dev', {
@@ -26,8 +30,8 @@ export class BuildCommand extends Command {
 
   async execute() {
     try {
-      const { cache = true, metafile = false, dev = false } = this;
-      const config = await loadConfig();
+      const { configFile, cache = true, metafile = false, dev = false } = this;
+      const config = await loadConfig({ configFile });
       const options = (['android', 'ios'] as const).map((platform) => ({
         dev,
         cache,

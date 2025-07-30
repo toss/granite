@@ -12,7 +12,7 @@ export default defineConfig({
   appName: 'showcase',
   plugins: [
     router(),
-    env({ MY_ENV: 'test' }),
+    env({ MY_ENV: 'from granite.config.ts' }),
     hermes(),
     microFrontend({
       name: 'remoteApp',
