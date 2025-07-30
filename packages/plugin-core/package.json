@@ -36,7 +36,7 @@
     "@types/babel__core": "^7",
     "@types/connect": "^3",
     "cosmiconfig": "^9.0.0",
-    "cosmiconfig-typescript-loader": "^6.1.0",
+    "cosmiconfig-typescript-loader": "^5.1.0",
     "es-toolkit": "^1.39.8",
     "esbuild": "^0.25.8",
     "fastify": "4.14.0",
