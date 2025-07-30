@@ -2,6 +2,7 @@ import type { CompleteGraniteConfig } from '@granite-js/plugin-core';
 import { getPackageRoot } from '@granite-js/utils';
 import { cosmiconfig } from 'cosmiconfig';
 import { TypeScriptLoader } from 'cosmiconfig-typescript-loader';
+import { assert } from 'es-toolkit';
 import type { defineConfig } from './defineConfig';
 
 const MODULE_NAME = 'granite';
@@ -21,7 +22,9 @@ export const loadConfig = async <Params = any>(params?: Params): Promise<Complet
   });
 
   const result = await explorer.search(getPackageRoot());
-  const config: Awaited<ReturnType<typeof defineConfig>> = await result?.config;
+  assert(result, 'Config file not found');
+
+  const config: Awaited<ReturnType<typeof defineConfig>> = await result.config;
 
   return typeof config === 'function' ? config(params) : config;
 };
