@@ -5,6 +5,9 @@ export * from './utils/mergeConfig';
 export * from './utils/mergeBuildConfigs';
 export * from './utils/createPluginHooksDriver';
 
+export { defineConfig } from './config/defineConfig';
+export { loadConfig } from './config/loadConfig';
+
 export { pluginConfigSchema } from './schema/pluginConfig';
 export type * from './schema/pluginConfig';
 export type * from './types';

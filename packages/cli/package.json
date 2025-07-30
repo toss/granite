@@ -52,8 +52,6 @@
     "chalk": "^4",
     "clipanion": "^4.0.0-rc.4",
     "connect": "^3.7.0",
-    "cosmiconfig": "^9.0.0",
-    "cosmiconfig-typescript-loader": "^5.1.0",
     "debug": "^4.3.7",
     "enquirer": "^2.4.1",
     "es-toolkit": "^1.39.8",

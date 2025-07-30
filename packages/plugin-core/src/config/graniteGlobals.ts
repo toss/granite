@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import type { GranitePluginCore } from '@granite-js/plugin-core';
 import { getLocalTempDirectoryPath, prepareLocalDirectory } from '@granite-js/utils';
+import type { PluginConfig } from '../types';
 
 interface GraniteGlobalsConfig {
   rootDir: string;
@@ -9,7 +9,7 @@ interface GraniteGlobalsConfig {
   scheme: string;
 }
 
-export function prepareGraniteGlobalsScript(config: GraniteGlobalsConfig): GranitePluginCore['config'] {
+export function prepareGraniteGlobalsScript(config: GraniteGlobalsConfig): PluginConfig {
   const filePath = writeGraniteGlobalsScript(config);
 
   return {

@@ -3,8 +3,8 @@ import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { loadSharedConfigFiles } from '@aws-sdk/shared-ini-file-loader';
 import * as p from '@clack/prompts';
 import { Command } from '@commander-js/extra-typings';
-import { loadConfig } from '@granite-js/cli';
 import { S3Client } from '@granite-js/deployment-manager';
+import { loadConfig } from '@granite-js/plugin-core';
 import * as v from 'valibot';
 import { deploy as deployOperation } from '../operations/deploy';
 
@@ -22,11 +22,10 @@ export function deploy() {
     .description('Deploy a Granite application')
     .requiredOption('--bucket <BUCKET>', 'AWS bucket')
     .action(async (options) => {
-      
       const [config, awsCredentials, region] = await Promise.all([
         loadConfig(),
         awsCredentialsProvider(),
-        getRegion()
+        getRegion(),
       ]);
 
       const envResult = v.safeParse(envSchema, {
@@ -69,7 +68,6 @@ export function deploy() {
       );
     });
 }
-
 
 async function getRegion() {
   const { configFile } = await loadSharedConfigFiles();

@@ -29,8 +29,8 @@
     "@aws-sdk/shared-ini-file-loader": "^3.374.0",
     "@clack/prompts": "^0.10.1",
     "@commander-js/extra-typings": "^14.0.0",
-    "@granite-js/cli": "workspace:*",
     "@granite-js/deployment-manager": "workspace:*",
+    "@granite-js/plugin-core": "workspace:*",
     "commander": "^14.0.0",
     "uuid": "^11.1.0",
     "valibot": "^1.1.0"

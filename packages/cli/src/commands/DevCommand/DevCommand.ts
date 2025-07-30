@@ -1,7 +1,7 @@
 import { runServer, EXPERIMENTAL__server } from '@granite-js/mpack';
+import { loadConfig } from '@granite-js/plugin-core';
 import { Command, Option } from 'clipanion';
 import Debug from 'debug';
-import { loadConfig } from '../../config/loadConfig';
 
 const debug = Debug('cli');
 
@@ -12,6 +12,10 @@ export class DevCommand extends Command {
     category: 'Development',
     description: 'Run Granite development server',
     examples: [['Run Granite development server', 'granite dev']],
+  });
+
+  configFile = Option.String('--config', {
+    description: 'Path to config file',
   });
 
   host = Option.String('--host');
@@ -26,7 +30,7 @@ export class DevCommand extends Command {
     try {
       process.env.MPACK_DEV_SERVER = 'true';
 
-      const config = await loadConfig();
+      const config = await loadConfig({ configFile: this.configFile });
       const serverOptions = {
         host: this.host,
         port: this.port ? parseInt(this.port, 10) : undefined,
