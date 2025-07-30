@@ -1,5 +1,14 @@
 # @granite-js/mpack
 
+## 0.1.10
+
+### Patch Changes
+
+- Updated dependencies [9438be5]
+  - @granite-js/plugin-core@0.1.10
+  - @granite-js/devtools-frontend@0.1.10
+  - @granite-js/utils@0.1.10
+
 ## 0.1.9
 
 ### Patch Changes

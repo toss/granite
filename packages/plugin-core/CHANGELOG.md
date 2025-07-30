@@ -1,5 +1,12 @@
 # @granite-js/plugin-core
 
+## 0.1.10
+
+### Patch Changes
+
+- 9438be5: add dynamic config support
+  - @granite-js/utils@0.1.10
+
 ## 0.1.9
 
 ### Patch Changes
