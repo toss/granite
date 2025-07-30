@@ -12,6 +12,10 @@ export class BuildCommand extends Command {
     examples: [['Build Granite App', 'granite build']],
   });
 
+  configFile = Option.String('--config', {
+    description: 'Path to config file',
+  });
+
   dev = Option.Boolean('--dev', {
     description: 'Build in development mode',
   });
@@ -26,8 +30,8 @@ export class BuildCommand extends Command {
 
   async execute() {
     try {
-      const { cache = true, metafile = false, dev = false } = this;
-      const config = await loadConfig();
+      const { configFile, cache = true, metafile = false, dev = false } = this;
+      const config = await loadConfig({ configFile });
       const options = (['android', 'ios'] as const).map((platform) => ({
         dev,
         cache,

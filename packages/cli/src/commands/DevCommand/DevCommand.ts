@@ -14,6 +14,10 @@ export class DevCommand extends Command {
     examples: [['Run Granite development server', 'granite dev']],
   });
 
+  configFile = Option.String('--config', {
+    description: 'Path to config file',
+  });
+
   host = Option.String('--host');
   port = Option.String('--port');
 
@@ -26,7 +30,7 @@ export class DevCommand extends Command {
     try {
       process.env.MPACK_DEV_SERVER = 'true';
 
-      const config = await loadConfig();
+      const config = await loadConfig({ configFile: this.configFile });
       const serverOptions = {
         host: this.host,
         port: this.port ? parseInt(this.port, 10) : undefined,
