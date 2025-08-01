@@ -1,12 +1,12 @@
 import type { ProtocolConfig } from '@granite-js/plugin-core';
 import type { PluginBuild } from 'esbuild';
-import { Performance } from '../../../performance';
+import { Performance } from '../../../../performance';
 
 export function setupProtocolResolver(build: PluginBuild, protocolConfig: ProtocolConfig) {
   const protocols = Object.entries(protocolConfig);
 
   protocols.forEach(([protocol, { resolve, load }]) => {
-    // 모듈 경로가 'protocol:' 형태인 경우만 필터링하기 위한 정규표현식
+    // Regexp to filter only module paths that start with 'protocol:'
     const protocolRegExp = new RegExp(`^${protocol}:`);
 
     build.onResolve({ filter: protocolRegExp }, async (args) => {

@@ -1,1 +1,0 @@
-export { dependencyAliasPlugin } from './dependencyAliasPlugin';

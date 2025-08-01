@@ -3,7 +3,7 @@ import type { BuildResult } from '@granite-js/plugin-core';
 import { isNotNil } from 'es-toolkit';
 import * as esbuild from 'esbuild';
 import { PluginDriver } from './PluginDriver';
-import { buildStatusPlugin, dependencyAliasPlugin, requireContextPlugin, transformPlugin } from './plugins';
+import { buildStatusPlugin, resolvePlugin, requireContextPlugin, transformPlugin } from './plugins';
 import {
   SOURCE_EXTENSIONS,
   ASSET_EXTENSIONS,
@@ -142,7 +142,7 @@ export class Bundler {
           onLoad: (moduleCount) => this.handleLoad(moduleCount),
           onEnd: (buildResult) => this.handleEnd(buildResult),
         }),
-        dependencyAliasPlugin({ context: pluginContext }),
+        resolvePlugin({ context: pluginContext }),
         requireContextPlugin(),
         transformPlugin({
           context: pluginContext,
