@@ -80,7 +80,7 @@ export interface ResolverConfig {
   protocols?: ProtocolConfig;
 }
 
-export interface AliasConfig {
+export interface AliasConfig extends Pick<esbuild.ResolveOptions, 'importer' | 'kind' | 'resolveDir' | 'with'> {
   /**
    * Replacement target module path
    */
@@ -88,9 +88,7 @@ export interface AliasConfig {
   /**
    * Replacement module path or function that returns module path
    */
-  to:
-    | string
-    | ((context: { args: esbuild.OnResolveArgs; resolve: esbuild.PluginBuild['resolve'] }) => string | Promise<string>);
+  to: ResolveResult | AliasResolver;
   /**
    * - `false`: (default) replace even if subpath exists (`^name(?:$|/)`)
    * - `true`: replace only if the target is exactly matched (`^name$`)
@@ -118,6 +116,17 @@ export interface AliasConfig {
    */
   exact?: boolean;
 }
+
+export type ResolveResult = string | ResolveResultWithOptions;
+
+export interface ResolveResultWithOptions extends Omit<esbuild.ResolveOptions, 'pluginName' | 'pluginData'> {
+  path: string;
+}
+
+export type AliasResolver = (context: {
+  args: esbuild.OnResolveArgs;
+  resolve: esbuild.PluginBuild['resolve'];
+}) => ResolveResult | Promise<ResolveResult>;
 
 /**
  * Custom protocol resolve configuration

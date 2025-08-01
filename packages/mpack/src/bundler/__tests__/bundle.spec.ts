@@ -40,7 +40,7 @@ describe('bundle', () => {
     await context.installDependencies(
       'react@18.2.0',
       'react-native@0.72.6',
-      `react-native-0.76.0@npm:react-native@${nextReactNativeVersion}`
+      `other-react-native@npm:react-native@${nextReactNativeVersion}`
     );
     await context.loadFixtures(__dirname, 'alias');
     await context.buildWithConfig({
@@ -48,7 +48,7 @@ describe('bundle', () => {
       entry: './index.js',
       outfile,
       resolver: {
-        alias: [{ from: 'react-native', to: 'react-native-0.76.0' }],
+        alias: [{ from: 'react-native', to: 'other-react-native' }],
       },
     });
 
