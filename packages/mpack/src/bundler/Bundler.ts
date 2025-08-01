@@ -14,7 +14,7 @@ import { logger } from '../logger';
 import { BundlerConfig, INTERNAL__Id } from '../types';
 import { Plugin } from '../types/Plugin';
 import { getId } from '../utils/getId';
-import { PromiseHandler } from '../utils/promiseHandler';
+import { PromiseHandler } from '../utils/promise';
 import { combineWithBaseBuildConfig } from './internal/presets';
 
 type BundlerStatus = 'idle' | 'prepared' | 'building';

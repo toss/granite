@@ -1,6 +1,8 @@
 import path from 'path';
 import chalk from 'chalk';
 import { Command, Option } from 'clipanion';
+import { EXIT_CODE } from '../../constants';
+import { errorHandler } from '../../utils/command';
 import { compileHbc } from '../../utils/compileHbc';
 
 export class HermesCommand extends Command {
@@ -28,17 +30,15 @@ export class HermesCommand extends Command {
 
       const { outfile, sourcemapOutfile } = await compileHbc({ rootDir, filePath, sourcemap: this.sourcemap });
 
-      console.log(`✅ 컴파일 완료: ${chalk.gray(outfile)}`);
+      console.log(`✅ Compiled successfully: ${chalk.gray(outfile)}`);
 
       if (sourcemapOutfile) {
-        console.log(`✅ 소스맵 생성 완료: ${chalk.gray(sourcemapOutfile)}`);
+        console.log(`✅ Source map generated successfully: ${chalk.gray(sourcemapOutfile)}`);
       }
 
-      return 0;
-    } catch (error: any) {
-      console.error(error.stack);
-
-      return 1;
+      return EXIT_CODE.SUCCESS;
+    } catch (error: unknown) {
+      return errorHandler(error);
     }
   }
 }
