@@ -221,24 +221,28 @@ export class DevServer {
 
   private async getBundle(platform: Platform) {
     const { bundler } = this.getContext()[platform];
-    const { bundle } = await bundler.build({ withDispose: false });
+    const buildResult = await bundler.build({ withDispose: false });
     let targetBundle: BundleData;
 
-    if (globalThis.remoteBundles != null) {
-      const hostBundleContent = bundle.source.text;
-      const remoteBundleContent = globalThis.remoteBundles[platform];
-      const mergedBundle = await mergeBundles({
-        platform,
-        hostBundleContent,
-        remoteBundleContent,
-      });
+    if ('bundle' in buildResult) {
+      if (globalThis.remoteBundles != null) {
+        const hostBundleContent = buildResult.bundle.source.text;
+        const remoteBundleContent = globalThis.remoteBundles[platform];
+        const mergedBundle = await mergeBundles({
+          platform,
+          hostBundleContent,
+          remoteBundleContent,
+        });
 
-      targetBundle = mergedBundle;
+        targetBundle = mergedBundle;
+      } else {
+        targetBundle = buildResult.bundle;
+      }
+
+      return targetBundle;
     } else {
-      targetBundle = bundle;
+      throw new Error('Build failed');
     }
-
-    return targetBundle;
   }
 }
 

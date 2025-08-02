@@ -37,35 +37,40 @@ export function buildStatusPlugin({ context, ...hooks }: PluginOptions<BuildStat
 
       build.onEnd(async (result) => {
         const endAt = performance.now();
+        const duration = endAt - buildStartedAt;
         const { buildConfig } = context.config;
         const { outfile, sourcemapOutfile, platform, extra } = buildConfig;
         const { source, sourcemap } = getBundleOutputs(outfile, result);
-        const duration = endAt - buildStartedAt;
+        const buildResult = extendBuildResult(
+          result,
+          source && sourcemap
+            ? {
+                bundle: { source, sourcemap },
+                outfile,
+                sourcemapOutfile: sourcemapOutfile ?? getSourcemapName(outfile),
+                platform,
+                extra,
+                duration,
+                size: source.contents.byteLength,
+                totalModuleCount: moduleCount,
+              }
+            : { platform, extra, duration }
+        );
 
-        if (source && sourcemap) {
-          /**
-           * esbuild promise 가 fulfilled 처리되기 전에 onEnd 콜백에서 결과를 조작할 수 있음.
-           *
-           * @see {@link https://esbuild.github.io/plugins/#on-end}
-           */
-          Object.defineProperties(result, {
-            bundle: { value: { source, sourcemap }, enumerable: true },
-            outfile: { value: outfile, enumerable: true },
-            sourcemapOutfile: { value: sourcemapOutfile ?? getSourcemapName(outfile), enumerable: true },
-            platform: { value: platform, enumerable: true },
-            extra: { value: extra, enumerable: true },
-            totalModuleCount: { value: moduleCount, enumerable: true },
-            duration: { value: duration, enumerable: true },
-            size: { value: source.contents.byteLength, enumerable: true },
-          });
-
-          logger.debug('Build completed', { id: context.id });
-
-          await hooks.onEnd(result as unknown as BuildResult);
-        } else {
-          throw new Error('invalid bundle result');
-        }
+        await hooks.onEnd(buildResult);
       });
     },
   };
+}
+
+function extendBuildResult(result: esbuild.BuildResult, properties: Record<string, unknown>): BuildResult {
+  /**
+   * Can define properties to the result object before it is fulfilled.
+   *
+   * @see {@link https://esbuild.github.io/plugins/#on-end}
+   */
+  return Object.defineProperties(
+    result,
+    Object.fromEntries(Object.entries(properties).map(([property, value]) => [property, { value, enumerable: true }]))
+  ) as BuildResult;
 }

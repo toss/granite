@@ -1,4 +1,4 @@
-import type { GranitePluginCore } from '@granite-js/plugin-core';
+import { isBuildSuccess, type GranitePluginCore } from '@granite-js/plugin-core';
 import { compileHbc, type CompileHbcResult } from './compileHbc';
 import { writeComposedSourcemap } from './composeSourcemap';
 import { resolveHermesBinaryPath } from './resolveHermesBinaryPath';
@@ -13,7 +13,7 @@ export const hermesPlugin = (options?: HermesPluginOptions): GranitePluginCore =
       order: 'post',
       handler: async function (config) {
         const hermesResult: CompileHbcResult[] = [];
-        const files = config.buildResults.map(({ outfile, sourcemapOutfile }) => ({
+        const files = config.buildResults.filter(isBuildSuccess).map(({ outfile, sourcemapOutfile }) => ({
           jsBundle: outfile,
           jsSourcemap: sourcemapOutfile,
           hermesBytecode: `${outfile.replace('.js', '')}.hbc`,

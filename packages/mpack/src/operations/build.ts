@@ -1,16 +1,13 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import {
-  createPluginHooksDriver,
-  type BuildConfig,
-  type BuildResult,
-  type CompleteGraniteConfig,
-} from '@granite-js/plugin-core';
+import { createPluginHooksDriver, type BuildConfig, type CompleteGraniteConfig } from '@granite-js/plugin-core';
 import { Semaphore } from 'es-toolkit';
 import { Bundler } from '../bundler';
 import { Performance, printSummary } from '../performance';
 import type { BundlerConfig, PluginFactory } from '../types';
+import { isBuildSuccess } from '../utils/buildResult';
 import { getDefaultOutfileName } from '../utils/getDefaultOutfileName';
+import { isFulfilled, isRejected } from '../utils/promise';
 import { writeBundle } from '../utils/writeBundle';
 
 type CommonBuildOptions = Omit<BundlerConfig, 'rootDir' | 'buildConfig'> & Pick<BuildConfig, 'platform' | 'outfile'>;
@@ -41,22 +38,27 @@ export async function buildAll(
   optionsList: CommonBuildOptions[],
   { config, plugins = [], concurrency = 2 }: BuildAllOptions
 ) {
-  const buildResults: BuildResult[] = [];
   const semaphore = new Semaphore(Math.min(concurrency, optionsList.length));
   const driver = createPluginHooksDriver(config);
   await driver.build.pre();
 
-  await Promise.all(
+  const taskResults = await Promise.allSettled(
     optionsList.map(async (options) => {
       await semaphore.acquire();
       try {
         const buildResult = await buildImpl(config, plugins, options);
-        buildResults.push(buildResult);
-      } catch {
+        return buildResult;
+      } finally {
         semaphore.release();
       }
     })
   );
+
+  if (taskResults.some(isRejected)) {
+    throw new Error('Build failed');
+  }
+
+  const buildResults = taskResults.filter(isFulfilled).map((result) => result.value);
 
   await driver.build.post({ buildResults });
 
@@ -88,13 +90,18 @@ async function buildImpl(
   }
 
   const buildResult = await bundler.build();
-  await writeBundle(buildResult.outfile, buildResult.bundle);
 
-  const performanceSummary = Performance.getSummary();
-  if (performanceSummary != null) {
-    printSummary(performanceSummary);
-    await fs.writeFile(path.join(config.cwd, 'perf.json'), JSON.stringify(performanceSummary, null, 2), 'utf-8');
+  if (isBuildSuccess(buildResult)) {
+    await writeBundle(buildResult.outfile, buildResult.bundle);
+
+    const performanceSummary = Performance.getSummary();
+    if (performanceSummary != null) {
+      printSummary(performanceSummary);
+      await fs.writeFile(path.join(config.cwd, 'perf.json'), JSON.stringify(performanceSummary, null, 2), 'utf-8');
+    }
+
+    return buildResult;
+  } else {
+    throw new Error('Build failed');
   }
-
-  return buildResult;
 }

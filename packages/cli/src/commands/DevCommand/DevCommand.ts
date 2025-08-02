@@ -2,6 +2,8 @@ import { runServer, EXPERIMENTAL__server } from '@granite-js/mpack';
 import { loadConfig } from '@granite-js/plugin-core';
 import { Command, Option } from 'clipanion';
 import Debug from 'debug';
+import { EXIT_CODE } from '../../constants';
+import { errorHandler } from '../../utils/command';
 
 const debug = Debug('cli');
 
@@ -54,12 +56,10 @@ export class DevCommand extends Command {
           ...serverOptions,
         });
       }
-    } catch (error: any) {
-      console.log(`ERROR OCCURRED`);
-      console.log(error);
-      console.log(error.message);
-      console.error(error.stack);
-      process.exit(1);
+
+      return EXIT_CODE.SUCCESS;
+    } catch (error: unknown) {
+      return errorHandler(error);
     }
   }
 }

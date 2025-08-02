@@ -1,5 +1,5 @@
 import * as fs from 'fs/promises';
-import type { GranitePluginCore } from '@granite-js/plugin-core';
+import { isBuildSuccess, type GranitePluginCore } from '@granite-js/plugin-core';
 import { noop } from 'es-toolkit';
 import { extractSentryDebugId } from './extractSentryDebugId';
 import { writeDebugIdInjectedSourcemap } from './injectSentryDebugId';
@@ -25,7 +25,7 @@ export const sentryPlugin = ({ enabled = true, ...options }: SentryPluginOptions
       order: 'post',
       handler: async function (config) {
         const sentryResults: SentryPluginResult[] = [];
-        const files = config.buildResults.map(({ outfile, sourcemapOutfile }) => ({
+        const files = config.buildResults.filter(isBuildSuccess).map(({ outfile, sourcemapOutfile }) => ({
           bundle: outfile,
           sourcemap: sourcemapOutfile,
         }));
