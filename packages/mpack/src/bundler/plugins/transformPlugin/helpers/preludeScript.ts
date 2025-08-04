@@ -3,34 +3,41 @@ import { isNotNil } from 'es-toolkit';
 import { OnLoadArgs, PluginBuild } from 'esbuild';
 import { PRELUDE_PROTOCOL } from '../../../../constants';
 import { normalizePath } from '../../../../utils/esbuildUtils';
+import { createNonRecursiveResolver } from '../../resolveHelpers';
 
-const skipResolve = Symbol.for('skipResolve');
-const isEntry = Symbol.for('isEntry');
+const IS_ENTRY_FLAG = Symbol.for('mpack:IS_ENTRY_FLAG');
 
 /**
- * Entry Point 모듈을 찾아 마킹하기 위한 `onResolve` 콜백 등록
+ * Register `onResolve` callback to mark the module as entry point module
  */
 export function registerEntryPointMarker(build: PluginBuild) {
-  build.onResolve({ filter: /\.([mc]js|[tj]sx?)$/ }, async (args) => {
-    if (args.pluginData !== skipResolve && args.kind === 'entry-point') {
-      const { path, errors } = await build.resolve(args.path, {
-        importer: args.importer,
-        kind: args.kind,
-        resolveDir: args.resolveDir,
-        // 한 번만 resolve 하기 위한 플래그 값
-        pluginData: skipResolve,
-      });
+  const resolver = createNonRecursiveResolver(build);
 
-      // enrty-point 파일인 경우 isEntry 플래그 추가
-      return errors.length === 0 ? { path, pluginData: isEntry } : { errors };
+  build.onResolve({ filter: /\.([mc]js|[tj]sx?)$/ }, async (args) => {
+    if (args.kind !== 'entry-point') {
+      return null;
     }
 
-    return null;
+    const result = await resolver(args, {
+      importer: args.importer,
+      kind: args.kind,
+      resolveDir: args.resolveDir,
+    });
+
+    return result ? { ...result, pluginData: IS_ENTRY_FLAG } : null;
   });
 }
 
 /**
- * 가상의 Prelude script 경로를 Tree Shaking 없이 직접 resolve 하기 위한 `onResolve` 콜백 등록
+ * Register `onResolve` callback to resolve the virtual prelude script path
+ *
+ * This callback is used to resolve the virtual prelude script path without tree shaking.
+ *
+ * ```ts
+ * import 'prelude:foo';
+ * import 'prelude:bar';
+ * import 'prelude:baz';
+ * ```
  */
 export function registerPreludeScriptResolver(build: PluginBuild) {
   build.onResolve({ filter: new RegExp(`^${PRELUDE_PROTOCOL}.*`) }, (args) => {
@@ -42,11 +49,11 @@ export function registerPreludeScriptResolver(build: PluginBuild) {
 }
 
 export function isEntryPoint(args: OnLoadArgs) {
-  return args.pluginData === isEntry;
+  return args.pluginData === IS_ENTRY_FLAG;
 }
 
 /**
- * 코드 최상단에 prelude 스크립트 추가
+ * Returns string that inject prelude script at the top of the code
  *
  * ```ts
  * import 'prelude:foo';
