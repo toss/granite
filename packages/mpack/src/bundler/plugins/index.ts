@@ -1,4 +1,4 @@
 export * from './buildStatusPlugin';
-export * from './dependencyAliasPlugin';
+export * from './resolvePlugin';
 export * from './requireContextPlugin';
 export * from './transformPlugin';

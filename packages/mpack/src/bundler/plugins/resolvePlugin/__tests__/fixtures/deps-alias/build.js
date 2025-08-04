@@ -6,7 +6,7 @@ esbuild.build({
   outfile: process.env.OUTFILE,
   bundle: true,
   plugins: [
-    plugins.dependencyAliasPlugin({
+    plugins.resolvePlugin({
       context: {
         buildOptions: {
           rootDir: __dirname,
