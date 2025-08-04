@@ -1,4 +1,4 @@
-import { delay } from 'es-toolkit';
+import { delay, noop } from 'es-toolkit';
 import { persistentStorage } from '../shared/PersistentStorage';
 import { Plugin, PluginHandlers } from '../types';
 import { printSummary } from '../utils/printSummary';
@@ -24,18 +24,21 @@ export function statusPlugin(handlers?: PluginHandlers): Plugin {
       handlers?.onStart?.();
     },
     buildEnd(result) {
-      progressBar.update(result.totalModuleCount);
-      progressBar.hide();
-      progressBar.remove();
-
-      if (result.errors.length === 0) {
+      if ('bundle' in result) {
         totalModuleCount = result.totalModuleCount;
         persistentStorage.setData({ [this.id]: { totalModuleCount: result.totalModuleCount } });
         persistentStorage.saveData();
-        handlers?.onEnd?.();
+      } else {
+        totalModuleCount = undefined;
       }
 
-      delay(100).then(() => printSummary(result));
+      progressBar.hide();
+      progressBar.remove();
+      handlers?.onEnd?.();
+
+      delay(100)
+        .then(() => printSummary(result))
+        .catch(noop);
     },
     load: (moduleCount) => {
       progressBar.update(moduleCount, totalModuleCount);

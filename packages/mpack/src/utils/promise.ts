@@ -30,3 +30,11 @@ export class PromiseHandler<T> {
     this.rejector(reason);
   }
 }
+
+export function isFulfilled<T>(task: PromiseSettledResult<T>): task is PromiseFulfilledResult<T> {
+  return task.status === 'fulfilled';
+}
+
+export function isRejected<T>(task: PromiseSettledResult<T>): task is PromiseRejectedResult {
+  return task.status === 'rejected';
+}
