@@ -13,8 +13,8 @@
   },
   "exports": {
     "./@react-native-async-storage/async-storage": {
-      "types": "./dist/@react-native-async-storage/async-storage.d.ts",
-      "default": "./src/@react-native-async-storage/async-storage.ts"
+      "types": "./dist/@react-native-async-storage/async-storage/index.d.ts",
+      "default": "./src/@react-native-async-storage/async-storage/index.ts"
     },
     "./@react-native-community/blur": {
       "types": "./dist/@react-native-community/blur.d.ts",
