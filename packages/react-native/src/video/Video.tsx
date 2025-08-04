@@ -62,7 +62,7 @@ type VideoProps = ComponentProps<typeof AnimatedRNVideo>;
  * }
  * ```
  */
-const Video = forwardRef<VideoRef, instance.VideoNativeProps>((props, ref) => {
+const VideoImpl = forwardRef<VideoRef, instance.VideoNativeProps>((props, ref) => {
   const [isFocused, setIsFocused] = useState(props.muted || props.paused);
   const visible = useVisibility();
 
@@ -93,12 +93,18 @@ const Video = forwardRef<VideoRef, instance.VideoNativeProps>((props, ref) => {
   );
 });
 
-Object.defineProperty(Video, 'isAvailable', {
-  value: instance.isAvailable,
+Object.defineProperty(VideoImpl, 'isAvailable', {
+  get: () => instance.isAvailable,
   enumerable: true,
   writable: false,
   configurable: false,
 });
 
-export { Video };
+export const Video = Object.defineProperty(VideoImpl, 'isAvailable', {
+  get: () => instance.isAvailable,
+  enumerable: true,
+  writable: false,
+  configurable: false,
+}) as typeof VideoImpl & { isAvailable: boolean };
+
 export type { VideoRef, VideoProps };
