@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { EXIT_CODE } from '../constants';
+import { ExitCode } from '../constants';
 
 export function errorHandler(error: unknown) {
   const label = chalk.red('Error');
@@ -10,5 +10,5 @@ export function errorHandler(error: unknown) {
     console.error(label, 'Unknown error', (error ?? '')?.toString());
   }
 
-  return EXIT_CODE.ERROR;
+  return ExitCode.ERROR;
 }

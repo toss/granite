@@ -1,7 +1,7 @@
 import path from 'path';
 import chalk from 'chalk';
 import { Command, Option } from 'clipanion';
-import { EXIT_CODE } from '../../constants';
+import { ExitCode } from '../../constants';
 import { errorHandler } from '../../utils/command';
 import { compileHbc } from '../../utils/compileHbc';
 
@@ -36,7 +36,7 @@ export class HermesCommand extends Command {
         console.log(`✅ Source map generated successfully: ${chalk.gray(sourcemapOutfile)}`);
       }
 
-      return EXIT_CODE.SUCCESS;
+      return ExitCode.SUCCESS;
     } catch (error: unknown) {
       return errorHandler(error);
     }

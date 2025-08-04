@@ -2,7 +2,7 @@ import { BuildUtils } from '@granite-js/mpack';
 import { statusPlugin } from '@granite-js/mpack/plugins';
 import { loadConfig } from '@granite-js/plugin-core';
 import { Command, Option } from 'clipanion';
-import { EXIT_CODE } from '../../constants';
+import { ExitCode } from '../../constants';
 import { errorHandler } from '../../utils/command';
 
 export class BuildCommand extends Command {
@@ -44,7 +44,7 @@ export class BuildCommand extends Command {
 
       await BuildUtils.buildAll(options, { config, plugins: [statusPlugin] });
 
-      return EXIT_CODE.SUCCESS;
+      return ExitCode.SUCCESS;
     } catch (error: unknown) {
       return errorHandler(error);
     }

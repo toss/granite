@@ -1,4 +1,4 @@
-export const EXIT_CODE = {
-  SUCCESS: 0,
-  ERROR: 1,
-};
+export enum ExitCode {
+  SUCCESS = 0,
+  ERROR = 1,
+}
