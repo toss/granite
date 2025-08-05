@@ -1,5 +1,16 @@
 # @granite-js/mpack
 
+## 0.1.11
+
+### Patch Changes
+
+- 12f568f: improve error handler
+- d3a2b58: improve resolver plugin
+- Updated dependencies [d3a2b58]
+  - @granite-js/plugin-core@0.1.11
+  - @granite-js/devtools-frontend@0.1.11
+  - @granite-js/utils@0.1.11
+
 ## 0.1.10
 
 ### Patch Changes
