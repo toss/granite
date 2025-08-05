@@ -1,5 +1,5 @@
 import { createRoute, Video, VisibilityProvider, Stack } from '@granite-js/react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { Button } from '../../components/Button';
 import { TextInput } from '../../components/TextInput';
@@ -12,6 +12,10 @@ export const Route = createRoute('/showcase/video', {
 function ShowcaseVideo() {
   const [url, setUrl] = useState('');
   const [load, setLoad] = useState(false);
+
+  useEffect(() => {
+    console.log('Video.isAvailable', Video.isAvailable);
+  }, []);
 
   return (
     // @FIXME: Sandbox app doesn't provide visibility state in the `initialProps`.

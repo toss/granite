@@ -93,17 +93,8 @@ const VideoImpl = forwardRef<VideoRef, instance.VideoNativeProps>((props, ref) =
   );
 });
 
-Object.defineProperty(VideoImpl, 'isAvailable', {
-  get: () => instance.isAvailable,
-  enumerable: true,
-  writable: false,
-  configurable: false,
-});
-
 export const Video = Object.defineProperty(VideoImpl, 'isAvailable', {
   get: () => instance.isAvailable,
-  enumerable: true,
-  writable: false,
   configurable: false,
 }) as typeof VideoImpl & { isAvailable: boolean };
 
