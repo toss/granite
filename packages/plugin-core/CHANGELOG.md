@@ -1,5 +1,12 @@
 # @granite-js/plugin-core
 
+## 0.1.11
+
+### Patch Changes
+
+- d3a2b58: improve resolver plugin
+  - @granite-js/utils@0.1.11
+
 ## 0.1.10
 
 ### Patch Changes
