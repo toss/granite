@@ -15,7 +15,4 @@ declare global {
 
   // @internal
   var Page: ComponentType<any>;
-
-  var window: { __granite: GraniteGlobal };
-  var global: { __granite: GraniteGlobal };
 }
