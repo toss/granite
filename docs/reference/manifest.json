@@ -104,6 +104,10 @@
                 {
                   "text": "useWaitForReturnNavigator",
                   "link": "/reference/react-native/screen-control/useWaitForReturnNavigator"
+                },
+                {
+                  "text": "useRouterBackHandler",
+                  "link": "/reference/react-native/screen-control/useRouterBackHandler"
                 }
               ]
             },
@@ -144,6 +148,10 @@
                 {
                   "text": "Video",
                   "link": "/reference/react-native/ui/Video"
+                },
+                {
+                  "text": "BackButton",
+                  "link": "/reference/react-native/ui/BackButton"
                 }
               ]
             },

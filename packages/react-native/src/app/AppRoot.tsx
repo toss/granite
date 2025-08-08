@@ -1,10 +1,10 @@
 import { SafeAreaProvider } from '@granite-js/native/react-native-safe-area-context';
 import type { ComponentType, PropsWithChildren } from 'react';
-import type { GraniteProps } from './Granite';
 import type { InitialProps } from '../initial-props';
+import { Router } from '../router';
 import { BackEventProvider, useBackEventState } from '../use-back-event';
 import { App } from './App';
-import { Router } from '../router';
+import type { GraniteProps } from './Granite';
 
 /**
  * @internal
@@ -23,15 +23,7 @@ export function AppRoot({ appName, context, container: Container, initialProps, 
     <App {...initialProps}>
       <SafeAreaProvider>
         <BackEventProvider backEvent={backEventState}>
-          <Router
-            context={context}
-            initialProps={initialProps}
-            container={Container}
-            canGoBack={!backEventState.hasBackEvent}
-            onBack={backEventState.onBack}
-            prefix={baseScheme}
-            {...router}
-          />
+          <Router context={context} initialProps={initialProps} container={Container} prefix={baseScheme} {...router} />
         </BackEventProvider>
       </SafeAreaProvider>
     </App>
