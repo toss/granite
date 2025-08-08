@@ -55,6 +55,7 @@ export interface InternalRouterProps {
    */
   container: ComponentType<PropsWithChildren<InitialProps>>;
   initialProps: InitialProps;
+  initialScheme: string;
 }
 
 export type RouterProps = StackNavigatorProps & NavigationContainerProps;
@@ -122,6 +123,7 @@ export function Router({
   context,
   container: Container = Fragment,
   initialProps,
+  initialScheme,
   // Public props (NavigationContainer)
   navigationContainerRef,
   defaultScreenOption,
@@ -129,8 +131,13 @@ export function Router({
   // Public props (StackNavigator)
   ...navigationContainerProps
 }: InternalRouterProps & RouterProps): ReactElement {
-  const initialRouteName = useInitialRouteName(prefix);
-  const { Screens, linkingOptions } = useRouterControls({ prefix, context, screenContainer });
+  const initialRouteName = useInitialRouteName({ prefix, initialScheme });
+  const { Screens, linkingOptions } = useRouterControls({
+    prefix,
+    context,
+    screenContainer,
+    initialScheme,
+  });
 
   const ref = useMemo(() => navigationContainerRef ?? createNavigationContainerRef<any>(), [navigationContainerRef]);
 

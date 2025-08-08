@@ -1,6 +1,5 @@
 import { NavigationContainer } from '@granite-js/native/@react-navigation/native';
 import { useMemo, type ComponentProps, type ComponentType, type PropsWithChildren } from 'react';
-import { getSchemeUri } from '../../native-modules';
 import { StackNavigator } from '../components/StackNavigator';
 import { RESERVED_KEYWORDS } from '../constants';
 import { RequireContext } from '../types/RequireContext';
@@ -13,11 +12,17 @@ type NavigationContainerProps = ComponentProps<typeof NavigationContainer>;
 
 export interface RouterControlsConfig {
   prefix: string;
+  initialScheme: string;
   context: RequireContext;
   screenContainer?: ComponentType<PropsWithChildren<any>>;
 }
 
-export function useRouterControls({ prefix, context, screenContainer: ScreenContainer }: RouterControlsConfig) {
+export function useRouterControls({
+  prefix,
+  context,
+  screenContainer: ScreenContainer,
+  initialScheme,
+}: RouterControlsConfig) {
   const routeScreens = useMemo(() => getRouteScreens(context), [context]);
 
   const registerScreens = useMemo(() => {
@@ -56,17 +61,15 @@ export function useRouterControls({ prefix, context, screenContainer: ScreenCont
         screens: getScreenPathMapConfig(registerScreens),
       },
       async getInitialURL() {
-        const initialURL = getSchemeUri();
-
-        if (initialURL == null) {
+        if (initialScheme == null) {
           return;
         }
 
         /** @NOTE Korean paths need to be decoded. */
-        return decodeURI(initialURL);
+        return decodeURI(initialScheme);
       },
     };
-  }, [prefix, registerScreens]);
+  }, [initialScheme, prefix, registerScreens]);
 
   return { Screens, linkingOptions };
 }

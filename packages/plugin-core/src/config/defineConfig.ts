@@ -23,6 +23,7 @@ import { resolvePlugins } from '../utils/resolvePlugins';
  * @param config - Configuration options
  * @param config.cwd - Working directory for build process (defaults to process.cwd())
  * @param config.appName - Your app's unique identifier
+ * @param config.host - Host name for your app (e.g. 'scheme://host/app-name')
  * @param config.scheme - URL scheme for launching your app (e.g. 'granite')
  * @param config.outdir - Where to output build files (defaults to 'dist')
  * @param config.entryFile - Your app's entry point (defaults to './src/_app.tsx')
@@ -45,6 +46,8 @@ import { resolvePlugins } from '../utils/resolvePlugins';
  * export default defineConfig({
  *   // The name of your microservice
  *   appName: 'my-app',
+ *   // (Optional) The host name for your app (e.g. 'scheme://host/app-name')
+ *   host: 'super',
  *   // The URL scheme for deep linking
  *   scheme: 'granite',
  *   // Entry file path
@@ -58,6 +61,7 @@ export const defineConfig = async (config: GraniteConfig): Promise<CompleteGrani
   const parsed = pluginConfigSchema.parse(config);
   const cwd = parsed.cwd ?? getPackageRoot();
   const appName = parsed.appName;
+  const host = parsed.host ?? '';
   const scheme = parsed.scheme;
   const entryFile = path.resolve(cwd, parsed.entryFile);
   const outdir = path.join(cwd, parsed.outdir);
@@ -71,7 +75,7 @@ export const defineConfig = async (config: GraniteConfig): Promise<CompleteGrani
   };
 
   const { configs, pluginHooks } = await resolvePlugins(parsed.plugins);
-  const globalsScriptConfig = prepareGraniteGlobalsScript({ rootDir: cwd, appName, scheme });
+  const globalsScriptConfig = prepareGraniteGlobalsScript({ rootDir: cwd, appName, scheme, host });
   const mergedConfig = mergeConfig(parsedConfig, ...[globalsScriptConfig, ...configs].filter(isNotNil));
   const { metro, devServer, ...build } = mergedConfig ?? {};
 

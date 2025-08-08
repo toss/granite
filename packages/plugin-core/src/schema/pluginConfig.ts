@@ -15,6 +15,7 @@ import type {
 export const pluginConfigSchema = z.object({
   cwd: z.string().default(process.cwd()),
   appName: z.string(),
+  host: z.string().optional(),
   scheme: z.string(),
   outdir: z.string().default('dist'),
   entryFile: z.string().default('./src/_app.tsx'),
