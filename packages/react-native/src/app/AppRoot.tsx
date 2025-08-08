@@ -5,6 +5,7 @@ import { Router } from '../router';
 import { BackEventProvider, useBackEventState } from '../use-back-event';
 import { App } from './App';
 import type { GraniteProps } from './Granite';
+import { getSchemePrefix } from '../utils/getSchemePrefix';
 
 /**
  * @internal
@@ -17,9 +18,12 @@ interface AppRootProps extends GraniteProps {
 
 export function AppRoot({ appName, context, container: Container, initialProps, initialScheme, router }: AppRootProps) {
   const backEventState = useBackEventState();
-  const scheme = global.__granite.app.scheme;
-  const host = global.__granite.app.host;
-  const prefix = `${scheme}://${host.length > 0 ? `${host}/` : ''}${appName}`;
+
+  const prefix = getSchemePrefix({
+    appName,
+    scheme: global.__granite.app.scheme,
+    host: global.__granite.app.host,
+  });
 
   return (
     <App {...initialProps}>
