@@ -27,17 +27,35 @@
       "types": "./src/constant-bridges.ts",
       "default": "./src/constant-bridges.ts"
     },
-    "./jest": {
-      "types": "./dist/jest/index.d.ts",
-      "default": "./dist/jest/index.js"
+    "./config": {
+      "import": {
+        "types": "./dist/config.d.mts",
+        "default": "./dist/config.mjs"
+      },
+      "require": {
+        "types": "./dist/config.d.ts",
+        "default": "./dist/config.js"
+      }
     },
     "./cli": {
-      "types": "./cli.d.ts",
-      "default": "./cli.js"
+      "import": {
+        "types": "./dist/cli.d.mts",
+        "default": "./dist/cli.mjs"
+      },
+      "require": {
+        "types": "./dist/cli.d.ts",
+        "default": "./dist/cli.js"
+      }
     },
-    "./config": {
-      "types": "./config.d.ts",
-      "default": "./config.js"
+    "./jest": {
+      "import": {
+        "types": "./dist/jest.d.mts",
+        "default": "./dist/jest.mjs"
+      },
+      "require": {
+        "types": "./dist/jest.d.ts",
+        "default": "./dist/jest.js"
+      }
     },
     "./types": {
       "types": "./dist/types/global.d.ts"
