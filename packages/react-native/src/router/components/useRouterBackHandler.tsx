@@ -7,10 +7,10 @@ import { useBackEventState } from '../../use-back-event';
  * @name useRouterBackHandler
  * @category Screen Control
  * @description
- * A hook that provides a handler for handling back navigation actions. This can be used when you need to close a view directly when the back button is pressed in modals or independent screens where there's no navigation stack. This hook uses `NavigationContainerRef` from `@react-navigation/native` to navigate to the previous screen if there's a remaining navigation stack, or executes the user-defined `closeFn` function if the stack is empty.
+ * A hook that provides a handler for handling back navigation actions. This can be used when you need to close a view directly when the back button is pressed in modals or independent screens where there's no navigation stack. This hook uses `NavigationContainerRef` from `@react-navigation/native` to navigate to the previous screen if there's a remaining navigation stack, or executes the user-defined `onClose` function if the stack is empty.
  *
  * @param {NavigationContainerRefWithCurrent<any>} navigationContainerRef - A `NavigationContainerRef` that can reference the current navigation state. Used when executing back navigation actions.
- * @param {() => void} [closeFn] - A function to execute when the navigation stack is empty. For example, you can pass a function that closes a React Native View.
+ * @param {() => void} [onClose] - A function to execute when the navigation stack is empty. For example, you can pass a function that closes a React Native View.
  *
  * @returns {{ handler: () => void }} A handler function that can be used in back buttons or similar components.
  *
@@ -30,7 +30,7 @@ import { useBackEventState } from '../../use-back-event';
  *
  *   const { handler } = useRouterBackHandler({
  *     navigationContainerRef,
- *     closeFn: () => {
+ *     onClose: () => {
  *       // close the view
  *     },
  *   });
@@ -46,22 +46,22 @@ import { useBackEventState } from '../../use-back-event';
  */
 export function useRouterBackHandler({
   navigationContainerRef,
-  closeFn,
+  onClose,
 }: {
   navigationContainerRef: NavigationContainerRefWithCurrent<any>;
-  closeFn?: () => void;
+  onClose?: () => void;
 }) {
-  const { handler } = useInternalRouterBackHandler({ navigationContainerRef, closeFn });
+  const { handler } = useInternalRouterBackHandler({ navigationContainerRef, onClose });
 
   return { handler };
 }
 
 export function useInternalRouterBackHandler({
   navigationContainerRef,
-  closeFn,
+  onClose,
 }: {
   navigationContainerRef: NavigationContainerRefWithCurrent<any>;
-  closeFn?: () => void;
+  onClose?: () => void;
 }) {
   const { onBack, hasBackEvent } = useBackEventState();
   const canGoBack = !hasBackEvent;
@@ -76,9 +76,9 @@ export function useInternalRouterBackHandler({
     if (navigationContainerRef.canGoBack()) {
       navigationContainerRef.goBack();
     } else {
-      closeFn?.();
+      onClose?.();
     }
-  }, [canGoBack, closeFn, navigationContainerRef, onBack]);
+  }, [canGoBack, onClose, navigationContainerRef, onBack]);
 
   return useMemo(
     () => ({

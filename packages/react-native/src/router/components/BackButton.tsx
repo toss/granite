@@ -32,7 +32,7 @@ interface BackButtonProps extends TouchableOpacityProps {
  *
  *   const { handler } = useRouterBackHandler({
  *     navigationContainerRef,
- *     closeFn: () => {
+ *     onClose: () => {
  *       // close the view
  *     },
  *   });

@@ -60,7 +60,7 @@ function MyBackButton() {
 
   const { handler } = useRouterBackHandler({
     navigationContainerRef,
-    closeFn: () => {
+    onClose: () => {
       // close the view
     },
   });

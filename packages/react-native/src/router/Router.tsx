@@ -136,7 +136,7 @@ export function Router({
 
   const { handler, canGoBack, onBack } = useInternalRouterBackHandler({
     navigationContainerRef: ref,
-    closeFn: closeView,
+    onClose: closeView,
   });
 
   const headerLeft = useCallback(
