@@ -1,5 +1,11 @@
 # @granite-js/lottie
 
+## 1.0.0
+
+### Patch Changes
+
+- @granite-js/native@1.0.0
+
 ## 0.1.11
 
 ### Patch Changes

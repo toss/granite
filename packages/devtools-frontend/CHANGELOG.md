@@ -1,5 +1,7 @@
 # @granite-js/devtools-frontend
 
+## 1.0.0
+
 ## 0.1.11
 
 ## 0.1.10

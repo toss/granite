@@ -1,5 +1,22 @@
 # @granite-js/react-native
 
+## 1.0.0
+
+### Minor Changes
+
+- bc69cc7: Add useRouterBackHandler Hook, Add BackButton Component.
+
+### Patch Changes
+
+- @granite-js/cli@1.0.0
+- @granite-js/image@1.0.0
+- @granite-js/jest@1.0.0
+- @granite-js/lottie@1.0.0
+- @granite-js/mpack@1.0.0
+- @granite-js/native@1.0.0
+- @granite-js/plugin-core@1.0.0
+- @granite-js/style-utils@1.0.0
+
 ## 0.1.11
 
 ### Patch Changes
