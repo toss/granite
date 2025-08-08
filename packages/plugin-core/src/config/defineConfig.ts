@@ -46,7 +46,7 @@ import { resolvePlugins } from '../utils/resolvePlugins';
  * export default defineConfig({
  *   // The name of your microservice
  *   appName: 'my-app',
- *   // The host name for your app (e.g. 'scheme://host/app-name')
+ *   // (Optional) The host name for your app (e.g. 'scheme://host/app-name')
  *   host: 'super',
  *   // The URL scheme for deep linking
  *   scheme: 'granite',
