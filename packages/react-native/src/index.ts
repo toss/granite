@@ -20,5 +20,7 @@ export * from './video';
 export * from './status-bar';
 export * from './blur';
 
+export { BackButton, useRouterBackHandler } from './router';
+
 export type { InitialProps, ColorPreference } from './initial-props';
 export type { GraniteProps } from './app';
