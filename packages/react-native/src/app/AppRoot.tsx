@@ -12,18 +12,27 @@ import type { GraniteProps } from './Granite';
 interface AppRootProps extends GraniteProps {
   container: ComponentType<PropsWithChildren<InitialProps>>;
   initialProps: InitialProps;
+  initialScheme: string;
 }
 
-export function AppRoot({ appName, context, container: Container, initialProps, router }: AppRootProps) {
+export function AppRoot({ appName, context, container: Container, initialProps, initialScheme, router }: AppRootProps) {
   const backEventState = useBackEventState();
   const scheme = global.__granite.app.scheme;
-  const baseScheme = `${scheme}://${appName}`;
+  const host = global.__granite.app.host;
+  const prefix = `${scheme}://${host.length > 0 ? `${host}/` : ''}${appName}`;
 
   return (
     <App {...initialProps}>
       <SafeAreaProvider>
         <BackEventProvider backEvent={backEventState}>
-          <Router context={context} initialProps={initialProps} container={Container} prefix={baseScheme} {...router} />
+          <Router
+            context={context}
+            initialProps={initialProps}
+            initialScheme={initialScheme}
+            container={Container}
+            prefix={prefix}
+            {...router}
+          />
         </BackEventProvider>
       </SafeAreaProvider>
     </App>
