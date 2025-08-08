@@ -2,7 +2,7 @@ import { NativeStackNavigationOptions } from '@granite-js/native/@react-navigati
 import { Platform } from 'react-native';
 
 export const DEFAULT_BACKGROUND_COLOR = '#ffffff';
-export const DEFAULT_HEADER_TINT_COLOR = '#333d4b';
+export const DEFAULT_HEADER_TINT_COLOR = '#191f28';
 export const BASE_STACK_NAVIGATOR_STYLE: NativeStackNavigationOptions = {
   contentStyle: {
     backgroundColor: DEFAULT_BACKGROUND_COLOR,

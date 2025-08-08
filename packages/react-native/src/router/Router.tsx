@@ -1,3 +1,4 @@
+import { HeaderBackButtonProps } from '@granite-js/native/@react-navigation/elements';
 import {
   createNavigationContainerRef,
   NavigationContainer,
@@ -8,9 +9,11 @@ import {
 import { NativeStackNavigationOptions } from '@granite-js/native/@react-navigation/native-stack';
 import { ComponentProps, ComponentType, Fragment, PropsWithChildren, ReactElement, useCallback, useMemo } from 'react';
 import { InitialProps } from '..';
+import { closeView } from '../native-modules';
+import { BackButton } from './components/BackButton';
 import { CanGoBackGuard } from './components/CanGoBackGuard';
-import { RouterBackButton, RouterBackButtonProps } from './components/RouterBackButton';
 import { StackNavigator } from './components/StackNavigator';
+import { useInternalRouterBackHandler } from './components/useRouterBackHandler';
 import { useInitialRouteName } from './hooks/useInitialRouteName';
 import { useRouterControls } from './hooks/useRouterControls';
 import { RequireContext } from './types';
@@ -117,8 +120,6 @@ export function Router({
   // Internal props
   prefix,
   context,
-  canGoBack = true,
-  onBack,
   container: Container = Fragment,
   initialProps,
   // Public props (NavigationContainer)
@@ -133,11 +134,14 @@ export function Router({
 
   const ref = useMemo(() => navigationContainerRef ?? createNavigationContainerRef<any>(), [navigationContainerRef]);
 
+  const { handler, canGoBack, onBack } = useInternalRouterBackHandler({
+    navigationContainerRef: ref,
+    closeFn: closeView,
+  });
+
   const headerLeft = useCallback(
-    (backButtonProps: Omit<RouterBackButtonProps, 'navigationContainerRef'>) => (
-      <RouterBackButton {...backButtonProps} onBack={onBack} canGoBack={canGoBack} navigationContainerRef={ref} />
-    ),
-    [onBack, canGoBack, ref]
+    (backButtonProps: HeaderBackButtonProps) => <BackButton {...backButtonProps} onPress={handler} />,
+    [handler]
   );
 
   const screenOptions = useCallback(
