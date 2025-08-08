@@ -1,1 +1,1 @@
-export { initialize } from '@granite-js/cli';
+export * from './dist/cli';

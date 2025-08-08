@@ -11,9 +11,7 @@
   },
   "main": "./dist/index.cjs",
   "exports": {
-    ".": {
-      "default": "./dist/index.cjs"
-    },
+    ".": "./dist/index.cjs",
     "./package.json": "./package.json"
   },
   "dependencies": {
