@@ -5,6 +5,7 @@ import type { InitialProps } from '../initial-props';
 import type { RouterProps, RequireContext } from '../router';
 import { AppRoot } from './AppRoot';
 import { HostAppRoot } from './HostAppRoot';
+import { getSchemeUri } from '../constant-bridges';
 
 export interface GraniteProps {
   /**
@@ -24,6 +25,12 @@ export interface GraniteProps {
    * Configuration object to be passed to the router.
    */
   router?: RouterProps;
+
+  /**
+   * @description
+   * The initial scheme of the app.
+   */
+  initialScheme?: string;
 }
 
 const createApp = () => {
@@ -40,7 +47,7 @@ const createApp = () => {
   return {
     registerApp(
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
-      { appName, context, router }: GraniteProps
+      { appName, context, router, initialScheme }: GraniteProps
     ): (initialProps: InitialProps) => JSX.Element {
       if (appName === ENTRY_BUNDLE_NAME) {
         throw new Error(`Reserved app name 'shared' cannot be used`);
@@ -51,6 +58,7 @@ const createApp = () => {
           <AppRoot
             container={AppContainer}
             initialProps={initialProps}
+            initialScheme={initialScheme ?? getSchemeUri()}
             appName={appName}
             context={context}
             router={router}

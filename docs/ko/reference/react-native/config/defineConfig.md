@@ -19,6 +19,7 @@ Granite 애플리케이션의 주요 설정을 정의해요. `granite.config.ts`
 ```typescript
 function defineConfig({
   appName,
+  host,
   scheme,
   plugins,
   outdir,
@@ -28,7 +29,7 @@ function defineConfig({
   babel,
   esbuild,
   metro,
-}: GraniteConfigInput): Promise<GraniteConfigResponse>
+}: GraniteConfigInput): Promise<GraniteConfigResponse>;
 ```
 
 ## 매개변수
@@ -44,6 +45,8 @@ function defineConfig({
 설정 옵션에는 다음과 같은 것들이 있어요:
 
 - `appName`: URL에 표시될 앱의 고유 식별자예요 (예: `my-service`)
+- `host`: URL 스킴에서 호스트(`host`) 부분을 설정할 수 있어요. 선택 사항이며, 지정하지 않아도 동작해요. 이 값을 설정하면 `appName` 앞에 호스트가 포함된 경로로 구성돼요.  
+  예를 들어, `host`를 `super`로 설정하면 스킴 구조는 `{scheme}://super/{appName}`이 돼요.
 - `scheme`: 앱을 실행하기 위한 URL 스킴이에요 (예: `granite`)
 - `plugins`: 기능을 확장하기 위한 Granite 플러그인이에요
 - `outdir`: 빌드 파일이 출력될 위치예요 (기본값: `dist`)
@@ -71,6 +74,8 @@ import { hermes } from '@granite-js/plugin-hermes';
 export default defineConfig({
   // 마이크로서비스의 이름
   appName: 'my-app',
+  // (선택) URL Host 스킴
+  host: 'super',
   // 딥링크를 위한 URL 스킴
   scheme: 'granite',
   // 진입점 파일 경로
