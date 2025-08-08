@@ -1,5 +1,13 @@
 # @granite-js/lottie
 
+## 0.1.12
+
+### Patch Changes
+
+- d1e6585: fix module resolutions
+- Updated dependencies [d1e6585]
+  - @granite-js/native@0.1.12
+
 ## 0.1.11
 
 ### Patch Changes

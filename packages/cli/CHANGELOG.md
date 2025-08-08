@@ -1,5 +1,16 @@
 # @granite-js/cli
 
+## 0.1.12
+
+### Patch Changes
+
+- d1e6585: fix module resolutions
+- Updated dependencies [d1e6585]
+- Updated dependencies [1e99fe1]
+  - @granite-js/mpack@0.1.12
+  - @granite-js/plugin-core@0.1.12
+  - @granite-js/utils@0.1.12
+
 ## 0.1.11
 
 ### Patch Changes
