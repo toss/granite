@@ -1,5 +1,11 @@
 # @granite-js/style-utils
 
+## 0.1.12
+
+### Patch Changes
+
+- d1e6585: fix module resolutions
+
 ## 0.1.11
 
 ## 0.1.10
