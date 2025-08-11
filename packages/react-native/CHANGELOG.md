@@ -1,5 +1,19 @@
 # @granite-js/react-native
 
+## 0.1.13
+
+### Patch Changes
+
+- 6838797: Make backEventState a singleton
+  - @granite-js/cli@0.1.13
+  - @granite-js/image@0.1.13
+  - @granite-js/jest@0.1.13
+  - @granite-js/lottie@0.1.13
+  - @granite-js/mpack@0.1.13
+  - @granite-js/native@0.1.13
+  - @granite-js/plugin-core@0.1.13
+  - @granite-js/style-utils@0.1.13
+
 ## 0.1.12
 
 ### Patch Changes
