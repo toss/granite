@@ -1,6 +1,6 @@
 import { NavigationContainerRefWithCurrent } from '@granite-js/native/@react-navigation/native';
 import { useCallback, useMemo } from 'react';
-import { useBackEventState } from '../../use-back-event';
+import { useBackEventContext } from '../../use-back-event';
 
 /**
  * @public
@@ -63,7 +63,7 @@ export function useInternalRouterBackHandler({
   navigationContainerRef: NavigationContainerRefWithCurrent<any>;
   onClose?: () => void;
 }) {
-  const { onBack, hasBackEvent } = useBackEventState();
+  const { hasBackEvent, onBack } = useBackEventContext();
   const canGoBack = !hasBackEvent;
 
   const handler = useCallback(() => {

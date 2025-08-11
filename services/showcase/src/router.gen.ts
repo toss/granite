@@ -6,6 +6,7 @@ import { Route as _ShowcaseImageRoute } from '../pages/showcase/image';
 import { Route as _ShowcaseRoute } from '../pages/showcase';
 import { Route as _ShowcaseLottieRoute } from '../pages/showcase/lottie';
 import { Route as _ShowcaseStatusBarRoute } from '../pages/showcase/status-bar';
+import { Route as _ShowcaseUseBackEventRoute } from '../pages/showcase/use-back-event';
 import { Route as _ShowcaseVideoRoute } from '../pages/showcase/video';
 import { Route as _ShowcaseWebviewRoute } from '../pages/showcase/webview';
 
@@ -17,6 +18,7 @@ declare module '@granite-js/react-native' {
     '/showcase': ReturnType<typeof _ShowcaseRoute.useParams>;
     '/showcase/lottie': ReturnType<typeof _ShowcaseLottieRoute.useParams>;
     '/showcase/status-bar': ReturnType<typeof _ShowcaseStatusBarRoute.useParams>;
+    '/showcase/use-back-event': ReturnType<typeof _ShowcaseUseBackEventRoute.useParams>;
     '/showcase/video': ReturnType<typeof _ShowcaseVideoRoute.useParams>;
     '/showcase/webview': ReturnType<typeof _ShowcaseWebviewRoute.useParams>;
   }

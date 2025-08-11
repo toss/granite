@@ -38,14 +38,10 @@ const BackEventContext = createContext<PrivateBackEventControls | null>(null);
  * </BackEventProvider>
  * ```
  */
-export function BackEventProvider({
-  children,
-  backEvent,
-}: {
-  children: ReactNode;
-  backEvent: PrivateBackEventControls;
-}) {
-  return <BackEventContext.Provider value={backEvent}>{children}</BackEventContext.Provider>;
+export function BackEventProvider({ children }: { children: ReactNode }) {
+  const backEventState = useBackEventState();
+
+  return <BackEventContext.Provider value={backEventState}>{children}</BackEventContext.Provider>;
 }
 
 /**
@@ -253,8 +249,5 @@ export function useBackEventContext() {
     throw new Error('useBackEvent must be used within a BackEventProvider');
   }
 
-  return {
-    onGoBack: context.onBack,
-    hasBackEvent: context.hasBackEvent,
-  };
+  return context;
 }
