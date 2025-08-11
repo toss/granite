@@ -1,5 +1,11 @@
 # @granite-js/image
 
+## 0.1.13
+
+### Patch Changes
+
+- @granite-js/native@0.1.13
+
 ## 0.1.12
 
 ### Patch Changes
