@@ -1,5 +1,23 @@
 # @granite-js/react-native
 
+## 0.1.12
+
+### Patch Changes
+
+- bc69cc7: Add useRouterBackHandler Hook, Add BackButton Component.
+- d1e6585: fix module resolutions
+- 1e99fe1: support initialScheme, support host
+- Updated dependencies [d1e6585]
+- Updated dependencies [1e99fe1]
+  - @granite-js/cli@0.1.12
+  - @granite-js/image@0.1.12
+  - @granite-js/jest@0.1.12
+  - @granite-js/lottie@0.1.12
+  - @granite-js/mpack@0.1.12
+  - @granite-js/native@0.1.12
+  - @granite-js/plugin-core@0.1.12
+  - @granite-js/style-utils@0.1.12
+
 ## 0.1.11
 
 ### Patch Changes
