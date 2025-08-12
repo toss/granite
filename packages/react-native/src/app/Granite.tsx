@@ -48,7 +48,7 @@ const createApp = () => {
     registerApp(
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
       { appName, context, router, initialScheme }: GraniteProps
-    ): (initialProps: InitialProps) => JSX.Element {
+    ): (initialProps: InitialProps) => React.JSX.Element {
       if (appName === ENTRY_BUNDLE_NAME) {
         throw new Error(`Reserved app name 'shared' cannot be used`);
       }
@@ -75,7 +75,7 @@ const createApp = () => {
     registerHostApp(
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
       { appName }: Pick<GraniteProps, 'appName'>
-    ): (initialProps: InitialProps) => JSX.Element {
+    ): (initialProps: InitialProps) => React.JSX.Element {
       if (appName !== ENTRY_BUNDLE_NAME) {
         throw new Error(`Host appName must be 'shared'`);
       }
