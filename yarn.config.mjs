@@ -1,5 +1,4 @@
 /** @type {import('@yarnpkg/types')} */
-const { REACT_NATIVE_RUNTIME_VERSION } = require('./shared/runtime');
 const { defineConfig } = require('@yarnpkg/types');
 
 const defaultMinimumPeerDependencyVersion = {};
@@ -48,12 +47,6 @@ function getPeerDependenciesOfPackage(pkgName, { Yarn }) {
 
 module.exports = defineConfig({
   async constraints({ Yarn }) {
-    for (const dep of Yarn.dependencies({ ident: 'react-native' })) {
-      if (dep.type === 'dependencies' || dep.type === 'devDependencies') {
-        dep.update(REACT_NATIVE_RUNTIME_VERSION);
-      }
-    }
-
     for (const [packageName, version] of Object.entries(CONSTRAINTS_PACKAGE_VERSIONS)) {
       for (const dep of Yarn.dependencies({ ident: packageName })) {
         dep.update(version);
