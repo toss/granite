@@ -13,7 +13,6 @@ export * from './keyboard';
 export * from './intersection-observer';
 export * from './impression-area';
 export * from './scroll-view-inertial-background';
-export * from './react';
 export * from './router/createRoute';
 export * from './event';
 export * from './video';
