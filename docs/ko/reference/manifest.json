@@ -100,10 +100,6 @@
                   "link": "/reference/react-native/screen-control/useVisibilityChange"
                 },
                 {
-                  "text": "useWaitForReturnNavigator",
-                  "link": "/reference/react-native/screen-control/useWaitForReturnNavigator"
-                },
-                {
                   "text": "useRouterBackHandler",
                   "link": "/reference/react-native/screen-control/useRouterBackHandler"
                 }
