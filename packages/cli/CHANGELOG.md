@@ -1,5 +1,13 @@
 # @granite-js/cli
 
+## 0.1.14
+
+### Patch Changes
+
+- @granite-js/mpack@0.1.14
+- @granite-js/plugin-core@0.1.14
+- @granite-js/utils@0.1.14
+
 ## 0.1.13
 
 ### Patch Changes

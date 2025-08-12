@@ -1,5 +1,21 @@
 # @granite-js/react-native
 
+## 0.1.14
+
+### Patch Changes
+
+- 0520d19: Fix type error
+- a06bb7d: Remove useWaitForReturnNavigator
+- 6d38bc5: Clarify error message for missing \_404 Page
+  - @granite-js/cli@0.1.14
+  - @granite-js/image@0.1.14
+  - @granite-js/jest@0.1.14
+  - @granite-js/lottie@0.1.14
+  - @granite-js/mpack@0.1.14
+  - @granite-js/native@0.1.14
+  - @granite-js/plugin-core@0.1.14
+  - @granite-js/style-utils@0.1.14
+
 ## 0.1.13
 
 ### Patch Changes
