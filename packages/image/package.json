@@ -18,10 +18,10 @@
   },
   "devDependencies": {
     "@granite-js/native": "workspace:*",
-    "@types/react": "catalog:rn0_81_0",
+    "@types/react": "catalog:rn0_80_2",
     "eslint": "^9.7.0",
-    "react": "catalog:rn0_81_0",
-    "react-native": "catalog:rn0_81_0",
+    "react": "catalog:rn0_80_2",
+    "react-native": "catalog:rn0_80_2",
     "typescript": "5.8.3"
   },
   "peerDependencies": {
