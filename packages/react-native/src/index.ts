@@ -1,6 +1,6 @@
 import './types/global';
 
-export { Granite } from './app';
+export { Granite, useInitialSearchParams, useInitialProps } from './app';
 export * from '@granite-js/style-utils';
 export * from '@granite-js/image';
 export * from '@granite-js/lottie';
