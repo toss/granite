@@ -28,7 +28,7 @@
     },
     "react-native": {
       "name": "react-native",
-      "itemCount": 30,
+      "itemCount": 32,
       "firstItemPath": "/reference/react-native/ui/ColorPreference",
       "items": [
         {
@@ -56,6 +56,10 @@
                 {
                   "text": "InitialProps",
                   "link": "/reference/react-native/core/InitialProps"
+                },
+                {
+                  "text": "useInitialProps",
+                  "link": "/reference/react-native/core/useInitialProps"
                 }
               ]
             },
@@ -157,6 +161,10 @@
                 {
                   "text": "getSchemeUri",
                   "link": "/reference/react-native/environment-check/getSchemeUri"
+                },
+                {
+                  "text": "useInitialSearchParams",
+                  "link": "/reference/react-native/environment-check/useInitialSearchParams"
                 }
               ]
             }
