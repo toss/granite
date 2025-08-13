@@ -11,7 +11,7 @@ interface LoadResult {
 const global = getGlobal();
 
 function getCoreModule() {
-  const module = ReactNative.TurboModuleRegistry.getEnforcing('GraniteCoreModule');
+  const module = ReactNative.TurboModuleRegistry.get('GraniteCoreModule');
 
   return module as ReactNative.TurboModule & {
     /**
