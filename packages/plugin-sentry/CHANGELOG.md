@@ -1,5 +1,14 @@
 # @granite-js/plugin-sentry
 
+## 0.1.15
+
+### Patch Changes
+
+- d16ee87: Add useInitialProps, useInitialSearchParams hook.
+- Updated dependencies [d16ee87]
+  - @granite-js/plugin-core@0.1.15
+  - @granite-js/utils@0.1.15
+
 ## 0.1.14
 
 ### Patch Changes
