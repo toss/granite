@@ -1,5 +1,5 @@
-import { Text, View } from 'react-native';
 import { createRoute, useInitialProps } from '@granite-js/react-native';
+import { Text, View } from 'react-native';
 
 export const Route = createRoute('/showcase/initial-props', {
   validateParams: (params) => params,

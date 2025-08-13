@@ -1,5 +1,5 @@
-import { Text, View } from 'react-native';
 import { createRoute, useInitialSearchParams } from '@granite-js/react-native';
+import { Text, View } from 'react-native';
 
 export const Route = createRoute('/showcase/search-params', {
   validateParams: (params) => params,
