@@ -1,4 +1,5 @@
 import { useInitialProps } from './InitialPropsContext';
+import { getSchemeUri } from '../../native-modules';
 
 /**
  * @public
@@ -21,7 +22,8 @@ import { useInitialProps } from './InitialPropsContext';
  * ```
  */
 export function useInitialSearchParams() {
-  const scheme = useInitialProps().scheme ?? '';
+  const scheme = useInitialProps().scheme ?? getSchemeUri();
+
   try {
     return Object.fromEntries(new URL(scheme).searchParams);
   } catch {
