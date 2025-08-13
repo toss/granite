@@ -1,13 +1,12 @@
 ---
 sourcePath: packages/react-native/src/app/context/useInitialSearchParams.tsx
 ---
+
 # useInitialSearchParams
 
+A hook that returns the query parameters from the URL passed when the app is first launched, directly as an object. This allows immediate application of initial entry handling like login or theme settings, enabling quick customization of user experience. If an invalid URL is provided, it safely returns an empty object. When the native platform (Android or iOS) passes a URL with query parameters to the app on first launch, you can easily read each parameter value using this hook.
 
-
-앱을 처음 실행할 때 전달된 URL의 쿼리 파라미터를 바로 객체 형태로 반환하는 Hook이에요. 로그인이나 테마 설정 같은 초기 진입 처리를 즉시 적용할 수 있어서 사용자 경험을 빠르게 맞출 수 있어요. 잘못된 URL이 들어오면 안전하게 빈 객체를 반환해요. 네이티브 플랫폼(Android 또는 iOS)에서 앱으로 처음 전달한 URL에 쿼리 파라미터가 포함되어 있다면, 이 Hook을 사용해서 각 파라미터 값을 쉽게 읽을 수 있어요.
-
-## 시그니처
+## Signature
 
 ```typescript
 function useInitialSearchParams(): {
@@ -15,34 +14,24 @@ function useInitialSearchParams(): {
 };
 ```
 
+### Return Value
 
-
-
-
-
-
-### 반환 값
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--type">Record&lt;string, string&gt;</span>
     <br />
-    <p class="post-parameters--description">초기 URL에 포함된 쿼리 파라미터를 키-값 쌍으로 담은 객체예요. 쿼리 파라미터가 없거나 URL이 유효하지 않으면 빈 객체를 반환해요.</p>
+    <p class="post-parameters--description">An object containing key-value pairs of query parameters from the initial URL. Returns an empty object if there are no query parameters or if the URL is invalid.</p>
   </li>
 </ul>
 
-
-
-
-
-
-## 예제
+## Example
 
 ```tsx
 import { useInitialSearchParams } from '@granite-js/react-native';
 
 function Page() {
   const params = useInitialSearchParams();
-  // 예: 초기 URL이 myapp://home?userId=42&theme=dark 인 경우
+  // Example: if initial URL is myapp://home?userId=42&theme=dark
   console.log(params.userId); // "42"
   console.log(params.theme);  // "dark"
   return <></>;

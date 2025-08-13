@@ -1,48 +1,37 @@
 ---
 sourcePath: packages/react-native/src/app/context/InitialPropsContext.tsx
 ---
+
 # useInitialProps
 
+Provides initial data passed from the native platform (Android or iOS) when entering a specific screen in React Native apps. This data can be used to immediately apply themes or user settings right after app launch. For example, you can receive dark mode settings from the native platform and apply dark mode immediately when the React Native app starts.
 
-
-React Native 앱에서 특정 화면에 진입할 때 네이티브(Android 또는 iOS)가 전달한 초기 데이터를 객체로 알려줘요. 이 데이터를 사용해 앱 실행 직후 테마나 사용자 설정을 바로 적용할 수 있어요. 예를 들어 네이티브에서 다크 모드를 사용하고 있다는 설정을 받아서 React Native 앱이 실행되면 다크 모드로 바로 사용할 수 있어요.
-
-## 시그니처
+## Signature
 
 ```typescript
 function useInitialProps<T extends InitialProps>(): T;
 ```
 
+### Return Value
 
-
-
-
-
-
-### 반환 값
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--type">InitialProps</span>
     <br />
-    <p class="post-parameters--description">앱의 초기 데이터</p>
+    <p class="post-parameters--description">Initial data for the app</p>
   </li>
 </ul>
 
+## Example
 
-
-
-
-
-## 예제
-
-### 초기 데이터로 다크 모드 여부 확인하기
+### Checking dark mode status with initial data
 
 ```tsx
 import { useInitialProps } from '@granite-js/react-native';
 
 function Page() {
   const initialProps = useInitialProps();
-  // 'light' 또는 'dark'
+  // 'light' or 'dark'
   console.log(initialProps.initialColorPreference);
   return <></>;
 }

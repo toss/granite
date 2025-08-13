@@ -165,7 +165,7 @@
                 },
                 {
                   "text": "useInitialSearchParams",
-                  "link": "/reference/react-naive/environment-check/useInitialSearchParams"
+                  "link": "/reference/react-native/environment-check/useInitialSearchParams"
                 }
               ]
             }
