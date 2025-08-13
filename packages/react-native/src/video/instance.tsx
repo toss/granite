@@ -1,8 +1,8 @@
-import type { VideoProperties } from '@granite-js/native/react-native-video';
+import type { ReactVideoProps } from '@granite-js/native/react-native-video';
 import { Component as ReactComponent, forwardRef, type ComponentType, type ForwardedRef } from 'react';
 import { View } from 'react-native';
 
-export type VideoNativeProps = Omit<VideoProperties, 'onAudioFocusChanged'> & {
+export type VideoNativeProps = Omit<ReactVideoProps, 'onAudioFocusChanged'> & {
   onAudioFocusChanged?: (event: { hasAudioFocus: boolean }) => void;
 };
 

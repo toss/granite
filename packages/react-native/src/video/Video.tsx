@@ -62,7 +62,7 @@ type VideoProps = ComponentProps<typeof AnimatedRNVideo>;
  * }
  * ```
  */
-const VideoImpl = forwardRef<VideoRef, instance.VideoNativeProps>((props, ref) => {
+const VideoImpl = forwardRef<typeof VideoRef, instance.VideoNativeProps>((props, ref) => {
   const [isFocused, setIsFocused] = useState(props.muted || props.paused);
   const visible = useVisibility();
 
