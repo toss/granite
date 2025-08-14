@@ -21,4 +21,10 @@ export interface HermesPluginOptions {
    * Defaults to `true`.
    */
   sourcemap?: boolean;
+  /**
+   * Path to hermesc binary.
+   *
+   * Defaults to `hermesc` in `react-native/sdks/hermesc/<platform>/hermesc`.
+   */
+  binaryPath?: string;
 }
