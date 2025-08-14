@@ -16,7 +16,7 @@ export const hermesPlugin = (options?: HermesPluginOptions): GranitePluginCore =
         const files = config.buildResults.filter(isBuildSuccess).map(({ outfile, sourcemapOutfile }) => ({
           jsBundle: outfile,
           jsSourcemap: sourcemapOutfile,
-          hermesBytecode: `${outfile.replace('.js', '')}.hbc`,
+          hermesBytecode: outfile.replace(/\.js$/, '.hbc'),
         }));
 
         for (const file of files) {
