@@ -1,16 +1,12 @@
 import * as path from 'path';
 import type { ResolverConfig } from '@granite-js/plugin-core';
+import { resolveReactNativeBasePath } from './utils/resolveReactNativeBasePath';
 
 const VIRTUAL_INITIALIZE_CORE_PROTOCOL = 'virtual-initialize-core';
 const VIRTUAL_SHARED_PROTOCOL = 'virtual-shared';
 
-export function virtualInitializeCoreConfig() {
-  const reactNativePath = path.dirname(
-    require.resolve('react-native/package.json', {
-      paths: [process.cwd()],
-    })
-  );
-  const initializeCorePath = path.join(reactNativePath, 'Libraries/Core/InitializeCore.js');
+export function virtualInitializeCoreConfig(reactNativeBasePath = resolveReactNativeBasePath()) {
+  const initializeCorePath = path.join(reactNativeBasePath, 'Libraries/Core/InitializeCore.js');
 
   const alias: ResolverConfig['alias'] = [
     {

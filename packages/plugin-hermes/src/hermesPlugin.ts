@@ -5,7 +5,7 @@ import { resolveHermesBinaryPath } from './resolveHermesBinaryPath';
 import type { HermesPluginOptions } from './types';
 
 export const hermesPlugin = (options?: HermesPluginOptions): GranitePluginCore => {
-  const hermesc = resolveHermesBinaryPath();
+  const hermesc = options?.binaryPath ?? resolveHermesBinaryPath();
 
   return {
     name: 'hermes-plugin',
