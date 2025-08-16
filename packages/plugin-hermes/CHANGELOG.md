@@ -1,5 +1,14 @@
 # @granite-js/plugin-hermes
 
+## 0.1.16
+
+### Patch Changes
+
+- c9b4fff: replace .js to .hbc
+- 1678419: improve plugin options
+  - @granite-js/plugin-core@0.1.16
+  - @granite-js/utils@0.1.16
+
 ## 0.1.15
 
 ### Patch Changes
