@@ -6,6 +6,7 @@ import { createDebuggerMiddleware } from './createDebuggerMiddleware';
 import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../constants';
 import { getMetroConfig } from '../metro/getMetroConfig';
 import { printLogo } from '../utils/printLogo';
+import { printServerUrl } from '../utils/printServerUrl';
 import { getModule } from '../vendors';
 
 const debug = Debug('cli:start');
@@ -58,6 +59,7 @@ export async function runServer({
         case 'initialize_done':
           enableStdinWatchMode();
           await driver.devServer.post({ host, port });
+          printServerUrl({ host, port });
           await onServerReady?.();
           break;
 
