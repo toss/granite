@@ -1,77 +1,36 @@
-import path from 'path';
-import * as babel from '@babel/core';
-import * as sucrase from 'sucrase';
+import { transformFromAstAsync } from '@babel/core';
+import flowRemoveTypes from 'flow-remove-types';
+import * as HermesParser from 'hermes-parser';
 import { AsyncTransformStep } from '../../../../transformer/TransformPipeline';
 import { defineStepName } from '../../../../utils/defineStepName';
 
-interface StripFlowStepConfig {
-  dev: boolean;
-}
-
-export function createStripFlowStep(config: StripFlowStepConfig): AsyncTransformStep {
-  /**
-   * 아래 flow 구문(import typeof)은 변환되지 않기에 import typeof 구문을 직접 필터링하여 제거
-   *
-   * ```js
-   * import typeof foo from '...';
-   * ```
-   */
-  const stripImportTypeofStatements = (code: string): string => {
-    return code
-      .split('\n')
-      .filter((line) => !line.startsWith('import typeof '))
-      .join('\n');
-  };
-
+export function createStripFlowStep(): AsyncTransformStep {
   const stripFlowStep: AsyncTransformStep = async function stripFlow(code, args) {
-    // .js 확장자인 경우에만 flow 구문 변환
-    const shouldTransform = args.path.endsWith('.js');
+    const shouldTransform = args.path.endsWith('.js') || args.path.endsWith('.jsx');
 
     if (!shouldTransform) {
       return { code };
     }
 
-    try {
-      const result = sucrase.transform(code, {
-        transforms: ['flow', 'jsx'],
-        jsxRuntime: 'preserve',
-        disableESTransforms: true,
-      });
+    const codeWithoutFlowTypes = flowRemoveTypes(code, {});
 
-      return { code: stripImportTypeofStatements(result.code) };
-    } catch {
-      // sucrase 에서 처리할 수 없는 구문인 경우 babel 로 처리
-      const result = await babel.transformAsync(code, {
-        configFile: false,
-        minified: false,
-        compact: false,
-        babelrc: false,
-        envName: config.dev ? 'development' : 'production',
-        caller: {
-          name: 'mpack-strip-flow-plugin',
-          supportsStaticESM: true,
-        },
-        presets: [
-          /**
-           * flow 구문과 jsx 구문이 함께 존재하는 경우가 있기에 preset-react 사용
-           */
-          [require.resolve('@babel/preset-react'), { runtime: 'automatic' }],
-        ],
-        plugins: [
-          /**
-           * flow 구문 변환을 위해 flow-strip-types 사용
-           */
-          require.resolve('@babel/plugin-transform-flow-strip-types'),
-        ],
-        filename: path.basename(args.path),
-      });
+    // @see https://flow.org/en/docs/react/component-syntax/
+    // This is necessary to transform component syntax, etc.
+    const parsedAst = HermesParser.parse(codeWithoutFlowTypes.toString(), {
+      flow: 'all',
+      babel: true,
+    });
 
-      if (result?.code != null) {
-        return { code: result.code };
-      }
+    const transformedResult = await transformFromAstAsync(parsedAst as any, undefined, {
+      minified: false,
+      compact: false,
+      babelrc: false,
+      configFile: false,
+    });
 
-      throw new Error('babel transform result is null');
-    }
+    const finalCode = transformedResult?.code ?? code;
+
+    return { code: finalCode };
   };
 
   defineStepName(stripFlowStep, 'strip-flow');

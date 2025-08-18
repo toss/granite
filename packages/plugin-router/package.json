@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@granite-js/plugin-core": "workspace:*",
-    "@swc/core": "1.5.24",
+    "@swc/core": "catalog:swc",
     "chokidar": "4.0.1",
     "es-toolkit": "^1.39.8"
   },
