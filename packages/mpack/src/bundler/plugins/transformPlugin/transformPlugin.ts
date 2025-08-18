@@ -1,14 +1,15 @@
 import assert from 'assert';
 import * as fs from 'fs/promises';
 import { Plugin } from 'esbuild';
+import { PluginOptions } from '../types';
 import * as preludeScript from './helpers/preludeScript';
 import { createCacheSteps } from './steps/createCacheSteps';
+import { createCodegenStep } from './steps/createCodegenStep';
+import { createFlowStripStep } from './steps/createFlowStripStep';
 import { createFullyTransformStep } from './steps/createFullyTransformStep';
-import { createStripFlowStep } from './steps/createStripFlowStep';
 import { createTransformToHermesSyntaxStep } from './steps/createTransformToHermesSyntaxStep';
 import { Performance } from '../../../performance';
 import { AsyncTransformPipeline } from '../../../transformer';
-import { PluginOptions } from '../types';
 
 interface TransformPluginOptions {
   transformSync?: (id: string, code: string) => string;
@@ -43,11 +44,16 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
 
           return { code };
         })
-        .addStep(createFullyTransformStep({ dev, additionalBabelOptions: babel }), {
-          conditions: babel?.conditions,
-          skipOtherSteps: true,
+        .addStep({
+          if: ({ path, code }) => babel?.conditions?.some((cond) => cond(code, path)) ?? false,
+          then: createFullyTransformStep({ dev, additionalBabelOptions: babel }),
+          stopAfter: true,
         })
-        .addStep(createStripFlowStep())
+        .addStep({
+          if: ({ path }) => /(?:^|[\\/])(?:Native\w+|(\w+)NativeComponent)\.[jt]sx?$/.test(path),
+          then: createCodegenStep(),
+          else: createFlowStripStep(),
+        })
         .addStep(createTransformToHermesSyntaxStep({ dev, additionalSwcOptions: swc }))
         .afterStep(cacheSteps.afterTransform);
 
@@ -58,20 +64,39 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
        * 구성한 transform pipeline 에 원본 코드를 전달하여 변환 처리
        */
       build.onLoad({ filter: sourceRegExp }, async (args) => {
-        let code = await fs.readFile(args.path, 'utf-8');
+        try {
+          let code = await fs.readFile(args.path, 'utf-8');
 
-        if (preludeScript.isEntryPoint(args)) {
-          code = preludeScript.injectPreludeScript(code, {
-            preludeScriptPaths: esbuild?.prelude ?? [],
+          if (preludeScript.isEntryPoint(args)) {
+            code = preludeScript.injectPreludeScript(code, {
+              preludeScriptPaths: esbuild?.prelude ?? [],
+            });
+          }
+
+          const result = await Performance.withTrace(() => transformPipeline.transform(code, args), {
+            name: 'transform',
+            startOptions: { detail: { file: args.path } },
           });
+
+          return { contents: result.code, loader: 'js' };
+        } catch (error) {
+          const err = error as any;
+
+          return {
+            errors: [
+              {
+                text: err.message || 'Transform failed',
+                location: err.location || {
+                  file: args.path,
+                  namespace: 'file',
+                  line: 1,
+                  column: 0,
+                },
+                detail: err.detail,
+              },
+            ],
+          };
         }
-
-        const result = await Performance.withTrace(() => transformPipeline.transform(code, args), {
-          name: 'transform',
-          startOptions: { detail: { file: args.path } },
-        });
-
-        return { contents: result.code, loader: 'js' };
       });
     },
   };
