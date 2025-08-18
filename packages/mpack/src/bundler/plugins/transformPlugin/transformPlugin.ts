@@ -47,7 +47,7 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
           conditions: babel?.conditions,
           skipOtherSteps: true,
         })
-        .addStep(createStripFlowStep({ dev }))
+        .addStep(createStripFlowStep())
         .addStep(createTransformToHermesSyntaxStep({ dev, additionalSwcOptions: swc }))
         .afterStep(cacheSteps.afterTransform);
 
