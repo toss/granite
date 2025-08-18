@@ -75,7 +75,6 @@ export function createFullyTransformStep({
       },
     }) as babel.TransformOptions | null;
 
-    console.log('babel', args.path);
     if (!babelOptions) {
       return { code };
     }
