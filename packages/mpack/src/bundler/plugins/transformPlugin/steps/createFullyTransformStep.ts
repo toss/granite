@@ -51,7 +51,6 @@ export function createFullyTransformStep({
       /**
        * react-native에서 직접 export 하는 flow 파일 대응을 위해 strip types 추가 필요
        */
-      require.resolve('@babel/plugin-transform-flow-strip-types'),
       [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
       [require.resolve('@babel/plugin-proposal-private-property-in-object'), { loose: true }],
       [require.resolve('@babel/plugin-proposal-private-methods'), { loose: true }],
@@ -75,6 +74,7 @@ export function createFullyTransformStep({
       },
     }) as babel.TransformOptions | null;
 
+    console.log('babel', args.path);
     if (!babelOptions) {
       return { code };
     }
