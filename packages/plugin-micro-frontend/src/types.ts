@@ -1,4 +1,13 @@
-export interface MicroFrontendPluginOptions {
+export interface MicroFrontendPluginOptions extends MicroFrontendOptions {
+  /**
+   * Path to react-native base directory.
+   *
+   * Defaults to project's `react-native` directory.
+   */
+  reactNativeBasePath?: string;
+}
+
+export interface MicroFrontendOptions {
   /**
    * Container name
    */

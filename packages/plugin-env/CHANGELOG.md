@@ -1,5 +1,28 @@
 # @granite-js/plugin-env
 
+## 0.1.16
+
+### Patch Changes
+
+- @granite-js/plugin-core@0.1.16
+- @granite-js/utils@0.1.16
+
+## 0.1.15
+
+### Patch Changes
+
+- d16ee87: Add useInitialProps, useInitialSearchParams hook.
+- Updated dependencies [d16ee87]
+  - @granite-js/plugin-core@0.1.15
+  - @granite-js/utils@0.1.15
+
+## 0.1.14
+
+### Patch Changes
+
+- @granite-js/plugin-core@0.1.14
+- @granite-js/utils@0.1.14
+
 ## 0.1.13
 
 ### Patch Changes

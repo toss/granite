@@ -1,5 +1,15 @@
 # @granite-js/style-utils
 
+## 0.1.16
+
+## 0.1.15
+
+### Patch Changes
+
+- d16ee87: Add useInitialProps, useInitialSearchParams hook.
+
+## 0.1.14
+
 ## 0.1.13
 
 ## 0.1.12
