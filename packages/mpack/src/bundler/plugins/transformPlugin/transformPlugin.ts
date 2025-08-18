@@ -64,39 +64,20 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
        * 구성한 transform pipeline 에 원본 코드를 전달하여 변환 처리
        */
       build.onLoad({ filter: sourceRegExp }, async (args) => {
-        try {
-          let code = await fs.readFile(args.path, 'utf-8');
+        let code = await fs.readFile(args.path, 'utf-8');
 
-          if (preludeScript.isEntryPoint(args)) {
-            code = preludeScript.injectPreludeScript(code, {
-              preludeScriptPaths: esbuild?.prelude ?? [],
-            });
-          }
-
-          const result = await Performance.withTrace(() => transformPipeline.transform(code, args), {
-            name: 'transform',
-            startOptions: { detail: { file: args.path } },
+        if (preludeScript.isEntryPoint(args)) {
+          code = preludeScript.injectPreludeScript(code, {
+            preludeScriptPaths: esbuild?.prelude ?? [],
           });
-
-          return { contents: result.code, loader: 'js' };
-        } catch (error) {
-          const err = error as any;
-
-          return {
-            errors: [
-              {
-                text: err.message || 'Transform failed',
-                location: err.location || {
-                  file: args.path,
-                  namespace: 'file',
-                  line: 1,
-                  column: 0,
-                },
-                detail: err.detail,
-              },
-            ],
-          };
         }
+
+        const result = await Performance.withTrace(() => transformPipeline.transform(code, args), {
+          name: 'transform',
+          startOptions: { detail: { file: args.path } },
+        });
+
+        return { contents: result.code, loader: 'js' };
       });
     },
   };
