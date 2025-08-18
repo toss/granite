@@ -6,4 +6,4 @@ function AppContainer({ children }: PropsWithChildren<InitialProps>) {
   return <>{children}</>;
 }
 
-export default Granite.registerApp(AppContainer, { context, appName: 'showcase' });
+export default Granite.registerApp(AppContainer, { context, appName: 'AwesomeProject0_81_0' });
