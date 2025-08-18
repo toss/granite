@@ -2,7 +2,7 @@ import { transformAsync } from '@babel/core';
 import { AsyncTransformStep } from '../../../../transformer/TransformPipeline';
 import { defineStepName } from '../../../../utils/defineStepName';
 
-export function createCodegenStep(): AsyncTransformStep {
+export function createTransformCodegenStep(): AsyncTransformStep {
   const codegenStep: AsyncTransformStep = async function codegen(code, args) {
     const transformedResult = await transformAsync(code, {
       test: /(?:^|[\\/])(?:Native\w+|(\w+)NativeComponent)\.[jt]sx?$/,
@@ -31,7 +31,7 @@ export function createCodegenStep(): AsyncTransformStep {
     return { code: transformedResult?.code ?? code };
   };
 
-  defineStepName(codegenStep, 'codegen');
+  defineStepName(codegenStep, 'transform-codegen');
 
   return codegenStep;
 }
