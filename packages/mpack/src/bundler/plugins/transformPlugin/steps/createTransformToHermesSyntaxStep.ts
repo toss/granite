@@ -6,17 +6,9 @@ import { AsyncTransformStep } from '../../../../transformer/TransformPipeline';
 import { defineStepName } from '../../../../utils/defineStepName';
 import { swcHelperOptimizationRules } from '../../shared/swc';
 
-interface TransformToHermesSyntaxStepConfig {
+export interface TransformToHermesSyntaxStepConfig {
   dev: boolean;
   additionalSwcOptions?: BuildConfig['swc'];
-}
-
-function getParserConfig() {
-  return {
-    syntax: 'typescript',
-    tsx: true,
-    dynamicImport: true,
-  } as swc.TsParserConfig;
 }
 
 export function createTransformToHermesSyntaxStep({
@@ -33,7 +25,11 @@ export function createTransformToHermesSyntaxStep({
       isModule: true,
       jsc: {
         ...swcHelperOptimizationRules.jsc,
-        parser: getParserConfig(),
+        parser: {
+          syntax: 'typescript',
+          tsx: true,
+          dynamicImport: true,
+        },
         target: 'es5',
         keepClassNames: true,
         transform: {
