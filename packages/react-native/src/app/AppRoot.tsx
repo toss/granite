@@ -6,6 +6,7 @@ import { BackEventProvider } from '../use-back-event';
 import { App } from './App';
 import type { GraniteProps } from './Granite';
 import { getSchemePrefix } from '../utils/getSchemePrefix';
+import { InitialPropsProvider } from './context/InitialPropsContext';
 
 /**
  * @internal
@@ -24,19 +25,21 @@ export function AppRoot({ appName, context, container: Container, initialProps, 
   });
 
   return (
-    <App {...initialProps}>
-      <SafeAreaProvider>
-        <BackEventProvider>
-          <Router
-            context={context}
-            initialProps={initialProps}
-            initialScheme={initialScheme}
-            container={Container}
-            prefix={prefix}
-            {...router}
-          />
-        </BackEventProvider>
-      </SafeAreaProvider>
-    </App>
+    <InitialPropsProvider initialProps={initialProps}>
+      <App {...initialProps}>
+        <SafeAreaProvider>
+          <BackEventProvider>
+            <Router
+              context={context}
+              initialProps={initialProps}
+              initialScheme={initialScheme}
+              container={Container}
+              prefix={prefix}
+              {...router}
+            />
+          </BackEventProvider>
+        </SafeAreaProvider>
+      </App>
+    </InitialPropsProvider>
   );
 }

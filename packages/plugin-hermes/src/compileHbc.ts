@@ -22,7 +22,7 @@ export interface CompileHbcResult {
   hbcSourcemap: string | null;
 }
 
-const DEFAULT_OPTIONS: Required<Omit<HermesPluginOptions, 'outfile'>> = {
+const DEFAULT_OPTIONS: Required<Omit<HermesPluginOptions, 'binaryPath'>> = {
   disableWarning: true,
   optimization: 'O',
   sourcemap: true,

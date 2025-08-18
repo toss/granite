@@ -35,7 +35,9 @@ export const microFrontendPlugin = async (options: MicroFrontendPluginOptions): 
     nonEagerEntries.find(([libName]) => libName === 'react-native')
   );
 
-  const virtualInitializeCore = shouldExcludeReactNativeInitializeCore ? virtualInitializeCoreConfig() : undefined;
+  const virtualInitializeCore = shouldExcludeReactNativeInitializeCore
+    ? virtualInitializeCoreConfig(options.reactNativeBasePath)
+    : undefined;
   const virtualShared = virtualSharedConfig(nonEagerEntries);
 
   return {
