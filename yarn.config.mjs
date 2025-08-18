@@ -4,9 +4,7 @@ const { defineConfig } = require('@yarnpkg/types');
 const defaultMinimumPeerDependencyVersion = {};
 const CONSTRAINTS_PACKAGE_VERSIONS = {
   '@types/node': '^22.10.2',
-  esbuild: '^0.25.8',
-  // FIXED Versions
-  '@swc/core': '1.5.24',
+  esbuild: '^0.25.9',
   fastify: '4.14.0',
 };
 

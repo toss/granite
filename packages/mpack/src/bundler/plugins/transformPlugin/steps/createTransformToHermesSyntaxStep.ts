@@ -11,18 +11,12 @@ interface TransformToHermesSyntaxStepConfig {
   additionalSwcOptions?: BuildConfig['swc'];
 }
 
-function getParserConfig(filepath: string) {
-  return /\.tsx?$/.test(filepath)
-    ? ({
-        syntax: 'typescript',
-        tsx: true,
-        dynamicImport: true,
-      } as swc.TsParserConfig)
-    : ({
-        syntax: 'ecmascript',
-        jsx: true,
-        exportDefaultFrom: true,
-      } as swc.EsParserConfig);
+function getParserConfig() {
+  return {
+    syntax: 'typescript',
+    tsx: true,
+    dynamicImport: true,
+  } as swc.TsParserConfig;
 }
 
 export function createTransformToHermesSyntaxStep({
@@ -39,7 +33,7 @@ export function createTransformToHermesSyntaxStep({
       isModule: true,
       jsc: {
         ...swcHelperOptimizationRules.jsc,
-        parser: getParserConfig(args.path),
+        parser: getParserConfig(),
         target: 'es5',
         keepClassNames: true,
         transform: {
@@ -50,13 +44,6 @@ export function createTransformToHermesSyntaxStep({
         },
         experimental: { plugins },
         loose: false,
-        /**
-         * 타입정의가 없지만 실제로는 동작하는 것이 스펙
-         *
-         * @see {@link https://github.com/swc-project/swc/blob/v1.4.10/crates/swc_ecma_transforms_base/src/assumptions.rs#L11}
-         */
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         assumptions: {
           setPublicClassFields: true,
           privateFieldsAsProperties: true,
@@ -71,7 +58,6 @@ export function createTransformToHermesSyntaxStep({
     };
 
     const result = await swc.transform(code, options);
-
     return { code: result.code };
   };
 
