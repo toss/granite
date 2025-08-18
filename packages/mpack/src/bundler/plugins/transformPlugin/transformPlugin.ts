@@ -4,9 +4,9 @@ import { Plugin } from 'esbuild';
 import { PluginOptions } from '../types';
 import * as preludeScript from './helpers/preludeScript';
 import { createCacheSteps } from './steps/createCacheSteps';
-import { createCodegenStep } from './steps/createCodegenStep';
 import { createFlowStripStep } from './steps/createFlowStripStep';
 import { createFullyTransformStep } from './steps/createFullyTransformStep';
+import { createTransformCodegenStep } from './steps/createTransformCodegenStep';
 import { createTransformToHermesSyntaxStep } from './steps/createTransformToHermesSyntaxStep';
 import { Performance } from '../../../performance';
 import { AsyncTransformPipeline } from '../../../transformer';
@@ -51,7 +51,7 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
         })
         .addStep({
           if: ({ path }) => /(?:^|[\\/])(?:Native\w+|(\w+)NativeComponent)\.[jt]sx?$/.test(path),
-          then: createCodegenStep(),
+          then: createTransformCodegenStep(),
           else: createFlowStripStep(),
         })
         .addStep(createTransformToHermesSyntaxStep({ dev, additionalSwcOptions: swc }))
