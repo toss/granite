@@ -28,7 +28,7 @@
     },
     "react-native": {
       "name": "react-native",
-      "itemCount": 17,
+      "itemCount": 19,
       "firstItemPath": "/reference/react-native/core/Granite",
       "items": [
         {
@@ -57,6 +57,10 @@
                 {
                   "text": "InitialProps",
                   "link": "/reference/react-native/core/InitialProps"
+                },
+                {
+                  "text": "useInitialProps",
+                  "link": "/reference/react-native/core/useInitialProps"
                 }
               ]
             },
@@ -100,10 +104,6 @@
                 {
                   "text": "useVisibilityChange",
                   "link": "/reference/react-native/screen-control/useVisibilityChange"
-                },
-                {
-                  "text": "useWaitForReturnNavigator",
-                  "link": "/reference/react-native/screen-control/useWaitForReturnNavigator"
                 },
                 {
                   "text": "useRouterBackHandler",
@@ -162,6 +162,10 @@
                 {
                   "text": "getSchemeUri",
                   "link": "/reference/react-native/environment-check/getSchemeUri"
+                },
+                {
+                  "text": "useInitialSearchParams",
+                  "link": "/reference/react-native/environment-check/useInitialSearchParams"
                 }
               ]
             }

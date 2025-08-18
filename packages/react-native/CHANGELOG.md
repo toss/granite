@@ -1,5 +1,50 @@
 # @granite-js/react-native
 
+## 0.1.16
+
+### Patch Changes
+
+- Updated dependencies [db8727a]
+  - @granite-js/mpack@0.1.16
+  - @granite-js/cli@0.1.16
+  - @granite-js/image@0.1.16
+  - @granite-js/jest@0.1.16
+  - @granite-js/lottie@0.1.16
+  - @granite-js/native@0.1.16
+  - @granite-js/plugin-core@0.1.16
+  - @granite-js/style-utils@0.1.16
+
+## 0.1.15
+
+### Patch Changes
+
+- d16ee87: Add useInitialProps, useInitialSearchParams hook.
+- Updated dependencies [d16ee87]
+  - @granite-js/plugin-core@0.1.15
+  - @granite-js/style-utils@0.1.15
+  - @granite-js/lottie@0.1.15
+  - @granite-js/native@0.1.15
+  - @granite-js/image@0.1.15
+  - @granite-js/mpack@0.1.15
+  - @granite-js/jest@0.1.15
+  - @granite-js/cli@0.1.15
+
+## 0.1.14
+
+### Patch Changes
+
+- 0520d19: Fix type error
+- a06bb7d: Remove useWaitForReturnNavigator
+- 6d38bc5: Clarify error message for missing \_404 Page
+  - @granite-js/cli@0.1.14
+  - @granite-js/image@0.1.14
+  - @granite-js/jest@0.1.14
+  - @granite-js/lottie@0.1.14
+  - @granite-js/mpack@0.1.14
+  - @granite-js/native@0.1.14
+  - @granite-js/plugin-core@0.1.14
+  - @granite-js/style-utils@0.1.14
+
 ## 0.1.13
 
 ### Patch Changes
