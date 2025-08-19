@@ -57,8 +57,8 @@ export const sentryPlugin = ({ enabled = true, ...options }: SentryPluginOptions
           );
 
           sentryResults.push({
-            bundle,
-            sourcemap,
+            bundle: targetBundle,
+            sourcemap: targetSourcemap,
             debugId,
           });
         }
