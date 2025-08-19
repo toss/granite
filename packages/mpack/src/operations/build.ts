@@ -1,6 +1,11 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { createPluginHooksDriver, type BuildConfig, type CompleteGraniteConfig } from '@granite-js/plugin-core';
+import {
+  createPluginHooksDriver,
+  resolveConfig,
+  type BuildConfig,
+  type CompleteGraniteConfig,
+} from '@granite-js/plugin-core';
 import { Semaphore } from 'es-toolkit';
 import { Bundler } from '../bundler';
 import { Performance, printSummary } from '../performance';
@@ -70,6 +75,7 @@ async function buildImpl(
   plugins: PluginFactory[],
   { platform, outfile, cache = true, dev = true, metafile = false }: CommonBuildOptions
 ) {
+  const { metro: _metroConfig, devServer: _devServerConfig, ...buildConfig } = await resolveConfig(config);
   const outfileName = outfile == null ? getDefaultOutfileName(config.entryFile, platform) : outfile;
   const outfilePath = path.resolve(config.outdir, outfileName);
   const bundler = new Bundler({
@@ -81,7 +87,7 @@ async function buildImpl(
       platform,
       entry: config.entryFile,
       outfile: outfilePath,
-      ...config.build,
+      ...buildConfig,
     },
   });
 
