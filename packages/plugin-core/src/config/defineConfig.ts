@@ -3,7 +3,6 @@ import { getPackageRoot } from '@granite-js/utils';
 import { isNotNil } from 'es-toolkit';
 import { prepareGraniteGlobalsScript } from './graniteGlobals';
 import { pluginConfigSchema, type CompleteGraniteConfig, type GraniteConfig } from '../schema/pluginConfig';
-import { mergeConfig } from '../utils/mergeConfig';
 import { resolvePlugins } from '../utils/resolvePlugins';
 
 /**
@@ -76,21 +75,13 @@ export const defineConfig = async (config: GraniteConfig): Promise<CompleteGrani
 
   const { configs, pluginHooks } = await resolvePlugins(parsed.plugins);
   const globalsScriptConfig = prepareGraniteGlobalsScript({ rootDir: cwd, appName, scheme, host });
-  const mergedConfig = mergeConfig(parsedConfig, ...[globalsScriptConfig, ...configs].filter(isNotNil));
-  const { metro, devServer, ...build } = mergedConfig ?? {};
 
   return {
     cwd,
     appName,
     entryFile,
     outdir,
-    build,
-    devServer,
     pluginHooks,
-    metro: {
-      ...metro,
-      babelConfig: mergedConfig?.babel,
-      transformSync: mergedConfig?.transformer?.transformSync,
-    },
+    pluginConfigs: [parsedConfig, globalsScriptConfig, ...configs].filter(isNotNil),
   };
 };
