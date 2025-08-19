@@ -1,0 +1,50 @@
+"docs":
+  - "docs/**/*"
+"@granite-js/deployment-manager":
+  - "infra/deployment-manager/**/*"
+"@granite-js/forge-cli":
+  - "infra/forge-cli/**/*"
+"@granite-js/pulumi-aws":
+  - "infra/pulumi-aws/**/*"
+"babel-preset-granite":
+  - "packages/babel-preset-granite/**/*"
+"@granite-js/cli":
+  - "packages/cli/**/*"
+"create-granite-app":
+  - "packages/create-granite-app/**/*"
+"@granite-js/devtools-frontend":
+  - "packages/devtools-frontend/**/*"
+"@granite-js/image":
+  - "packages/image/**/*"
+"@granite-js/jest":
+  - "packages/jest/**/*"
+"@granite-js/mpack":
+  - "packages/mpack/**/*"
+"@granite-js/native":
+  - "packages/native/**/*"
+"@granite-js/plugin-core":
+  - "packages/plugin-core/**/*"
+"@granite-js/plugin-env":
+  - "packages/plugin-env/**/*"
+"@granite-js/plugin-hermes":
+  - "packages/plugin-hermes/**/*"
+"@granite-js/plugin-router":
+  - "packages/plugin-router/**/*"
+"@granite-js/plugin-sentry":
+  - "packages/plugin-sentry/**/*"
+"@granite-js/react-native":
+  - "packages/react-native/**/*"
+"@granite-js/style-utils":
+  - "packages/style-utils/**/*"
+"services":
+  - "services/**/*"
+"shared":
+  - "shared/**/*"
+"@granite-internal/tools":
+  - "tools/**/*"
+"@granite-js/utils":
+  - "packages/utils/**/*"
+"dependencies":
+  - "yarn.lock"
+"workflows":
+  - ".github/workflows/**/*"
