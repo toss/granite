@@ -45,6 +45,6 @@
 "@granite-js/utils":
   - "packages/utils/**/*"
 "dependencies":
-  - "pnpm-lock.yaml"
+  - "yarn.lock"
 "workflows":
   - ".github/workflows/**/*"
