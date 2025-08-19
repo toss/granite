@@ -23,6 +23,7 @@
     "@granite-js/plugin-hermes": "workspace:*",
     "@granite-js/plugin-micro-frontend": "workspace:*",
     "@granite-js/plugin-router": "workspace:*",
+    "@granite-js/plugin-sentry": "workspace:*",
     "@testing-library/react-native": "^12.9.0",
     "@types/babel__core": "^7.20.5",
     "@types/jest": "^29.5.14",
