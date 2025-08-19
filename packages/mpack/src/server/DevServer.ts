@@ -17,7 +17,6 @@ import { WebSocketServerDelegate, WebSocketServerRouter } from './wss';
 import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../constants';
 import { logger, clientLogger } from '../logger';
 import { statusPlugin } from '../plugins/statusPlugin';
-import { persistentStorage } from '../shared/PersistentStorage';
 import { isDebugMode } from '../utils/isDebugMode';
 import { createProgressBar } from '../utils/progressBar';
 import { InspectorProxy } from '../vendors/@react-native/dev-middleware';
@@ -55,8 +54,6 @@ export class DevServer {
   async initialize() {
     logger.trace('DevServer.initialize');
     const { rootDir, buildConfig } = this.devServerOptions;
-
-    await persistentStorage.loadData();
     this.context = await this.createDevServerContext(rootDir, buildConfig);
   }
 
