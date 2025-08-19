@@ -26,9 +26,10 @@ export interface LoadConfigOptions {
 
 export const loadConfig = async (options: LoadConfigOptions = {}): Promise<CompleteGraniteConfig> => {
   let result: CosmiconfigResult;
+  const resolveRoot = options.root ?? getPackageRoot();
 
   if (options.configFile) {
-    result = await getConfigExplorer().load(path.resolve(options.root ?? getPackageRoot(), options.configFile));
+    result = await getConfigExplorer().load(path.resolve(resolveRoot, options.configFile));
   } else {
     result = await getConfigExplorer({
       searchPlaces: [
@@ -37,7 +38,7 @@ export const loadConfig = async (options: LoadConfigOptions = {}): Promise<Compl
         `${MODULE_NAME}.config.js`,
         `${MODULE_NAME}.config.cjs`,
       ],
-    }).search(options.root);
+    }).search(resolveRoot);
   }
 
   assert(result, 'Config file not found');

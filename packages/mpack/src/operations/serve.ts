@@ -1,4 +1,4 @@
-import { createPluginHooksDriver, type CompleteGraniteConfig } from '@granite-js/plugin-core';
+import { createPluginHooksDriver, resolveConfig, type CompleteGraniteConfig } from '@granite-js/plugin-core';
 import { createDevServerMiddleware, indexPageMiddleware } from '@react-native-community/cli-server-api';
 import Debug from 'debug';
 import { setupDevToolsProxy } from 'react-native-devtools-standalone/backend';
@@ -69,7 +69,8 @@ export async function runServer({
     },
   };
 
-  const { middlewares = [], ...additionalMetroConfig } = config.metro ?? {};
+  const resolvedConfig = await resolveConfig(config);
+  const { middlewares = [], ...additionalMetroConfig } = resolvedConfig?.metro ?? {};
   const baseConfig = await getMetroConfig({ rootPath: config.cwd }, additionalMetroConfig);
   const metroConfig = mergeConfig(baseConfig, {
     server: { port },

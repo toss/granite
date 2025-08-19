@@ -1,7 +1,6 @@
 import * as z from 'zod';
 import type {
   AdditionalMetroConfig,
-  BuildConfig,
   DevServerConfig,
   GranitePluginBuildPostHandler,
   GranitePluginBuildPreHandler,
@@ -9,6 +8,7 @@ import type {
   GranitePluginDevPreHandler,
   MetroDevServerConfig,
   PluginBuildConfig,
+  PluginConfig,
   PluginInput,
 } from '../types';
 
@@ -27,12 +27,13 @@ export const pluginConfigSchema = z.object({
 
 export type GraniteConfig = z.input<typeof pluginConfigSchema>;
 export type ParsedGraniteConfig = z.output<typeof pluginConfigSchema>;
-export type CompleteGraniteConfig = Pick<
-  ParsedGraniteConfig,
-  'cwd' | 'appName' | 'entryFile' | 'outdir' | 'devServer' | 'metro'
-> & {
-  build: Omit<BuildConfig, 'platform' | 'entry' | 'outfile'>;
+export type CompleteGraniteConfig = {
+  cwd: ParsedGraniteConfig['cwd'];
+  appName: ParsedGraniteConfig['appName'];
+  entryFile: ParsedGraniteConfig['entryFile'];
+  outdir: ParsedGraniteConfig['outdir'];
   pluginHooks: GranitePluginHooks;
+  pluginConfigs: PluginConfig[];
 };
 
 export interface GranitePluginHooks {
