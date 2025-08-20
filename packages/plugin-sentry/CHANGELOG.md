@@ -1,5 +1,15 @@
 # @granite-js/plugin-sentry
 
+## 0.1.17
+
+### Patch Changes
+
+- 9c415df: supports dynamic plugin config
+- 7a81746: fix wrong metadata
+- Updated dependencies [9c415df]
+  - @granite-js/plugin-core@0.1.17
+  - @granite-js/utils@0.1.17
+
 ## 0.1.16
 
 ### Patch Changes

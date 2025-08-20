@@ -1,5 +1,12 @@
 # @granite-js/plugin-core
 
+## 0.1.17
+
+### Patch Changes
+
+- 9c415df: supports dynamic plugin config
+  - @granite-js/utils@0.1.17
+
 ## 0.1.16
 
 ### Patch Changes
