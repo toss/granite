@@ -74,3 +74,7 @@ export function createProgressBar(label: string): BuildStatusProgressBar {
     },
   };
 }
+
+export function cleanup() {
+  Frogress.removeAll();
+}

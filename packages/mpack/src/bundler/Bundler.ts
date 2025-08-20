@@ -16,6 +16,7 @@ import { Plugin } from '../types/Plugin';
 import { getId } from '../utils/getId';
 import { PromiseHandler } from '../utils/promise';
 import { combineWithBaseBuildConfig } from './internal/presets';
+import { cleanup } from '../utils/progressBar';
 
 type BundlerStatus = 'idle' | 'prepared' | 'building';
 
@@ -28,6 +29,8 @@ export class Bundler {
   private bundleTask: PromiseHandler<BuildResult> | null = null;
 
   constructor(private config: BundlerConfig) {
+    this.setupUncaughtExceptionHandler();
+
     const id = getId(config);
 
     this.id = id;
@@ -70,6 +73,18 @@ export class Bundler {
   addPlugin(plugin: Plugin) {
     this.pluginDriver.addPlugin(plugin);
     return this;
+  }
+
+  private setupUncaughtExceptionHandler() {
+    if (process.hasUncaughtExceptionCaptureCallback()) {
+      return;
+    }
+
+    process.setUncaughtExceptionCaptureCallback((error) => {
+      cleanup();
+      logger.error(`Uncaught exception occurred\n\n${error.stack ?? error.message}`);
+      process.exit(1);
+    });
   }
 
   private getBaseBuildOptions(): esbuild.BuildOptions {
