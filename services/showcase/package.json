@@ -23,6 +23,7 @@
     "@granite-js/plugin-hermes": "workspace:*",
     "@granite-js/plugin-micro-frontend": "workspace:*",
     "@granite-js/plugin-router": "workspace:*",
+    "@granite-js/plugin-sentry": "workspace:*",
     "@react-native/babel-preset": "catalog:rn0_81_0",
     "@testing-library/react-native": "^12.9.0",
     "@types/babel__core": "^7.20.5",

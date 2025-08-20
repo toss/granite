@@ -3,7 +3,7 @@ import { mergeConfig } from './mergeConfig';
 import { GranitePluginCore } from '../types';
 
 describe('mergeConfig', () => {
-  it('merges all configuration sections', () => {
+  it('merges all configuration sections', async () => {
     const mockLoad1 = vitest.fn();
     const mockLoad2 = vitest.fn();
 
@@ -99,7 +99,7 @@ describe('mergeConfig', () => {
       },
     };
 
-    const result = mergeConfig(source, target);
+    const result = await mergeConfig(source, target);
 
     expect(result).toEqual({
       resolver: {
@@ -159,7 +159,7 @@ describe('mergeConfig', () => {
     expect(result?.metro?.serializer?.getPolyfills?.()).toEqual(['metro-prelude-1.js', 'metro-prelude-2.js']);
   });
 
-  it('handles partial configurations', () => {
+  it('handles partial configurations', async () => {
     const source: GranitePluginCore['config'] = {
       babel: { presets: ['preset1'] },
     };
@@ -168,7 +168,7 @@ describe('mergeConfig', () => {
       esbuild: { minify: true },
     };
 
-    const result = mergeConfig(source, target);
+    const result = await mergeConfig(source, target);
 
     expect(result).toEqual({
       babel: { presets: ['preset1'] },
@@ -182,7 +182,7 @@ describe('mergeConfig', () => {
     });
   });
 
-  it('preserves top-level properties', () => {
+  it('preserves top-level properties', async () => {
     const source: GranitePluginCore['config'] = {
       extra: { customOption: 'source' },
     };
@@ -191,7 +191,7 @@ describe('mergeConfig', () => {
       extra: { anotherOption: 'target' },
     };
 
-    const result = mergeConfig(source, target);
+    const result = await mergeConfig(source, target);
 
     expect(result?.extra).toEqual({
       customOption: 'source',
@@ -199,7 +199,7 @@ describe('mergeConfig', () => {
     });
   });
 
-  it('handles complex nested configuration merge', () => {
+  it('handles complex nested configuration merge', async () => {
     const mockLoad = vitest.fn();
     const mockTransform = vitest.fn();
 
@@ -248,7 +248,7 @@ describe('mergeConfig', () => {
       },
     };
 
-    const result = mergeConfig(source, target);
+    const result = await mergeConfig(source, target);
 
     expect(result?.resolver?.alias).toHaveLength(2);
     expect(result?.babel?.presets).toEqual(['@babel/preset-react']);
@@ -259,7 +259,7 @@ describe('mergeConfig', () => {
     expect(result?.metro?.middlewares).toEqual([mockMiddleware1, mockMiddleware2]);
   });
 
-  it('merges multiple configs', () => {
+  it('merges multiple configs', async () => {
     const mockLoad1 = vitest.fn();
     const mockLoad2 = vitest.fn();
 
@@ -378,7 +378,7 @@ describe('mergeConfig', () => {
       extra: { target3: '3' },
     };
 
-    const result = mergeConfig(source, target1, target2, target3);
+    const result = await mergeConfig(source, target1, target2, target3);
 
     expect(result).toEqual({
       resolver: {
@@ -428,5 +428,23 @@ describe('mergeConfig', () => {
       },
       extra: { target2: '2', target3: '3' },
     });
+  });
+
+  it('merges dynamic configs', async () => {
+    const source: GranitePluginCore['config'] = () => ({
+      babel: { presets: ['preset1'] },
+    });
+
+    const target1: GranitePluginCore['config'] = () => ({
+      babel: { presets: ['preset2'] },
+    });
+
+    const target2: GranitePluginCore['config'] = async () => ({
+      babel: { presets: ['preset3'] },
+    });
+
+    const result = await mergeConfig(source, target1, target2);
+
+    expect(result?.babel?.presets).toEqual(['preset1', 'preset2', 'preset3']);
   });
 });

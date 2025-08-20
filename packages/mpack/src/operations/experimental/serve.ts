@@ -1,4 +1,4 @@
-import { CompleteGraniteConfig, createPluginHooksDriver } from '@granite-js/plugin-core';
+import { CompleteGraniteConfig, createPluginHooksDriver, resolveConfig } from '@granite-js/plugin-core';
 import { select } from '@inquirer/prompts';
 import * as ChromeLauncher from 'chrome-launcher';
 import Debug from 'debug';
@@ -30,9 +30,10 @@ export async function EXPERIMENTAL__server({
   await driver.devServer.pre({ host, port });
 
   const rootDir = config.cwd;
+  const { metro: _, devServer, ...buildConfig } = (await resolveConfig(config)) ?? {};
   const server = new DevServer({
-    buildConfig: { entry: config.entryFile, ...config.build },
-    middlewares: config.devServer?.middlewares ?? [],
+    buildConfig: { entry: config.entryFile, ...buildConfig },
+    middlewares: devServer?.middlewares ?? [],
     host,
     port,
     rootDir,

@@ -1,5 +1,5 @@
 import path from 'path';
-import { BuildResult, createPluginHooksDriver, type CompleteGraniteConfig } from '@granite-js/plugin-core';
+import { BuildResult, createPluginHooksDriver, resolveConfig, type CompleteGraniteConfig } from '@granite-js/plugin-core';
 import { Semaphore } from 'es-toolkit';
 import { getMetroConfig } from './getMetroConfig';
 import { getDefaultOutfileName } from '../utils/getDefaultOutfileName';
@@ -64,7 +64,8 @@ async function buildImpl(
   config: CompleteGraniteConfig,
   { platform, outfile, minify = false, dev = true }: CommonMetroBuildOptions
 ) {
-  const metroConfig = await getMetroConfig({ rootPath: config.cwd }, config.metro);
+  const resolvedConfig = await resolveConfig(config);
+  const metroConfig = await getMetroConfig({ rootPath: config.cwd }, resolvedConfig?.metro ?? {});
   const outfileName = outfile == null ? getDefaultOutfileName(config.entryFile, platform) : outfile;
   const outfilePath = path.join(config.outdir, outfileName);
 
