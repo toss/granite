@@ -12,6 +12,7 @@ import { Performance, printSummary } from '../performance';
 import type { BundlerConfig, PluginFactory } from '../types';
 import { isBuildSuccess } from '../utils/buildResult';
 import { getDefaultOutfileName } from '../utils/getDefaultOutfileName';
+import { printErrors } from '../utils/printErrors';
 import { isFulfilled, isRejected } from '../utils/promise';
 import { writeBundle } from '../utils/writeBundle';
 
@@ -59,7 +60,9 @@ export async function buildAll(
     })
   );
 
-  if (taskResults.some(isRejected)) {
+  const errors = taskResults.filter(isRejected);
+  if (errors.length) {
+    printErrors(errors);
     throw new Error('Build failed');
   }
 
