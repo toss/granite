@@ -1,5 +1,5 @@
+import { BrickModule } from 'brick-module';
 import type { ComponentType } from 'react';
-import * as ReactNative from 'react-native';
 import { getGlobal } from './getGlobal';
 import { isMetro } from './isMetro';
 import { resolveAppContent } from './resolveAppContent';
@@ -11,14 +11,12 @@ interface LoadResult {
 const global = getGlobal();
 
 function getCoreModule() {
-  const module = ReactNative.TurboModuleRegistry.get('GraniteCoreModule');
-
-  return module as ReactNative.TurboModule & {
-    /**
-     * @internal
-     */
+  const module = BrickModule.get<{
+    moduleName: 'GraniteScreen';
     importLazy: () => Promise<void>;
-  };
+  }>('GraniteScreen');
+
+  return module;
 }
 
 export function loadAppContent(remotePath: string): Promise<LoadResult> {
