@@ -48,7 +48,7 @@ export interface GranitePluginCore {
    */
   name: string;
   /**
-   * Dev handler
+   * Dev handler (granite dev command)
    */
   dev?:
     | {
@@ -60,7 +60,7 @@ export interface GranitePluginCore {
         handler: GranitePluginDevPostHandler;
       };
   /**
-   * Build handler
+   * Build handler (granite build command)
    */
   build?:
     | {
@@ -71,13 +71,19 @@ export interface GranitePluginCore {
         order: 'post';
         handler: GranitePluginBuildPostHandler;
       };
+  /**
+   * Plugin config
+   */
   config?: PluginConfig;
 }
+export type PluginConfig = StaticPluginConfig | DynamicPluginConfig;
 
-export type PluginConfig = Omit<PluginBuildConfig, 'platform' | 'outfile'> & {
+export type StaticPluginConfig = Omit<PluginBuildConfig, 'platform' | 'outfile'> & {
   devServer?: DevServerConfig;
   metro?: PluginMetroConfig;
 };
+
+export type DynamicPluginConfig = (() => StaticPluginConfig) | (() => Promise<StaticPluginConfig>);
 
 export type PluginMetroConfig = Omit<
   AdditionalMetroConfig,

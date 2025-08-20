@@ -8,24 +8,33 @@ import { mergeResolver } from './mergeResolver';
 import { mergeSwc } from './mergeSwc';
 import { mergeTransformer } from './mergeTransformer';
 
-export function mergeConfig(base: PluginConfig, ...configs: PluginConfig[]) {
+export async function mergeConfig(base: PluginConfig, ...configs: PluginConfig[]) {
   if (!(base || configs.length)) {
     return undefined;
   }
 
-  return configs.reduce(
-    (acc, curr) => ({
-      ...acc,
-      ...curr,
-      resolver: mergeResolver(acc?.resolver, curr?.resolver),
-      transformer: mergeTransformer(acc?.transformer, curr?.transformer),
-      esbuild: mergeEsbuild(acc?.esbuild, curr?.esbuild),
-      babel: mergeBabel(acc?.babel, curr?.babel),
-      swc: mergeSwc(acc?.swc, curr?.swc),
-      devServer: mergeDevServer(acc?.devServer, curr?.devServer),
-      metro: mergeMetro(acc?.metro, curr?.metro),
-      extra: mergeExtra(acc?.extra, curr?.extra),
-    }),
-    base
-  );
+  return configs.reduce(async (acc, curr) => {
+    const [resolvedAcc, resolvedCurr] = await Promise.all([acc, resolveDynamicConfig(curr)]);
+
+    return {
+      ...resolvedAcc,
+      ...resolvedCurr,
+      resolver: mergeResolver(resolvedAcc?.resolver, resolvedCurr?.resolver),
+      transformer: mergeTransformer(resolvedAcc?.transformer, resolvedCurr?.transformer),
+      esbuild: mergeEsbuild(resolvedAcc?.esbuild, resolvedCurr?.esbuild),
+      babel: mergeBabel(resolvedAcc?.babel, resolvedCurr?.babel),
+      swc: mergeSwc(resolvedAcc?.swc, resolvedCurr?.swc),
+      devServer: mergeDevServer(resolvedAcc?.devServer, resolvedCurr?.devServer),
+      metro: mergeMetro(resolvedAcc?.metro, resolvedCurr?.metro),
+      extra: mergeExtra(resolvedAcc?.extra, resolvedCurr?.extra),
+    };
+  }, resolveDynamicConfig(base));
+}
+
+async function resolveDynamicConfig(config: PluginConfig) {
+  if (typeof config === 'function') {
+    return await config();
+  }
+
+  return config;
 }

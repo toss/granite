@@ -16,7 +16,6 @@ export const sentryPlugin = ({ enabled = true, ...options }: SentryPluginOptions
     return PLUGIN_SHIM;
   }
 
-  const { injectionScript, sourceMappingComment } = getSentryDebugIdSnippets();
   const sentryActions = createClientActions(options);
 
   return {
@@ -58,8 +57,8 @@ export const sentryPlugin = ({ enabled = true, ...options }: SentryPluginOptions
           );
 
           sentryResults.push({
-            bundle,
-            sourcemap,
+            bundle: targetBundle,
+            sourcemap: targetSourcemap,
             debugId,
           });
         }
@@ -67,15 +66,20 @@ export const sentryPlugin = ({ enabled = true, ...options }: SentryPluginOptions
         this.meta.sentry = sentryResults;
       },
     },
-    config: {
-      esbuild: {
-        banner: {
-          js: injectionScript,
+    config: () => {
+      // Generate sentry debug id by dynamic config to ensure that the debug id is unique for each build
+      const { injectionScript, sourceMappingComment } = getSentryDebugIdSnippets();
+
+      return {
+        esbuild: {
+          banner: {
+            js: injectionScript,
+          },
+          footer: {
+            js: sourceMappingComment,
+          },
         },
-        footer: {
-          js: sourceMappingComment,
-        },
-      },
+      };
     },
   };
 };
