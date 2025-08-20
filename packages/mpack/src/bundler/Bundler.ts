@@ -82,7 +82,7 @@ export class Bundler {
 
     process.setUncaughtExceptionCaptureCallback((error) => {
       cleanup();
-      logger.error(`Uncaught exception occurred\n\n${error.message}\n${error.stack ?? ''}`, );
+      logger.error(`Uncaught exception occurred\n\n${error.stack ?? error.message}`);
       process.exit(1);
     });
   }
