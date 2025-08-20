@@ -5451,6 +5451,7 @@ __metadata:
     "@granite-js/plugin-hermes": "workspace:*"
     "@granite-js/plugin-micro-frontend": "workspace:*"
     "@granite-js/plugin-router": "workspace:*"
+    "@granite-js/plugin-sentry": "workspace:*"
     "@granite-js/react-native": "workspace:*"
     "@react-native/babel-preset": "catalog:rn0_81_0"
     "@testing-library/react-native": "npm:^12.9.0"
@@ -5892,7 +5893,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@granite-js/plugin-sentry@workspace:packages/plugin-sentry":
+"@granite-js/plugin-sentry@workspace:*, @granite-js/plugin-sentry@workspace:packages/plugin-sentry":
   version: 0.0.0-use.local
   resolution: "@granite-js/plugin-sentry@workspace:packages/plugin-sentry"
   dependencies:
