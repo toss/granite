@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-sentry",
   "type": "module",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "Plugin for integrating Sentry with Granite applications",
   "scripts": {
     "prepack": "yarn build",
