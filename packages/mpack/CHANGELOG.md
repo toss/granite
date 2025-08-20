@@ -1,5 +1,13 @@
 # @granite-js/mpack
 
+## 0.1.18
+
+### Patch Changes
+
+- @granite-js/devtools-frontend@0.1.18
+- @granite-js/plugin-core@0.1.18
+- @granite-js/utils@0.1.18
+
 ## 0.1.17
 
 ### Patch Changes

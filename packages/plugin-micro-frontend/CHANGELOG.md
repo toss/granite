@@ -1,5 +1,13 @@
 # @granite-js/plugin-micro-frontend
 
+## 0.1.18
+
+### Patch Changes
+
+- 58e4df9: define \_\_esModule flag safety
+  - @granite-js/plugin-core@0.1.18
+  - @granite-js/utils@0.1.18
+
 ## 0.1.17
 
 ### Patch Changes
