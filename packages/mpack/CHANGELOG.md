@@ -1,5 +1,17 @@
 # @granite-js/mpack
 
+## 0.1.17
+
+### Patch Changes
+
+- 07d4020: fix getId generation
+- 9c415df: supports dynamic plugin config
+- dfd1a1e: improve uncaught exception
+- Updated dependencies [9c415df]
+  - @granite-js/plugin-core@0.1.17
+  - @granite-js/devtools-frontend@0.1.17
+  - @granite-js/utils@0.1.17
+
 ## 0.1.16
 
 ### Patch Changes
