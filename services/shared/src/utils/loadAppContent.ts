@@ -12,9 +12,9 @@ const global = getGlobal();
 
 function getCoreModule() {
   const module = BrickModule.get<{
-    moduleName: 'GraniteScreen';
+    moduleName: 'GraniteBundleLoader';
     importLazy: () => Promise<void>;
-  }>('GraniteScreen');
+  }>('GraniteBundleLoader');
 
   return module;
 }
