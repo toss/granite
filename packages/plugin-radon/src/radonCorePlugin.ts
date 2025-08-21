@@ -16,16 +16,19 @@ const DEFAULT_OPTIONS: Required<RadonCorePluginOptions> = {
 
 export const radonCore = (options: RadonCorePluginOptions = DEFAULT_OPTIONS): GranitePluginCore => {
   const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
-  
+
   return {
     name: 'radon-core-plugin',
     config: {
       babel: {
         plugins: [
-          [require.resolve('@granite-js/plugin-radon/dist/babel.cjs'), {
-            ...mergedOptions
-          }],
-        ]
+          [
+            require.resolve('@granite-js/plugin-radon/dist/babel.cjs'),
+            {
+              ...mergedOptions,
+            },
+          ],
+        ],
       },
       metro: {
         serializer: {
@@ -33,28 +36,30 @@ export const radonCore = (options: RadonCorePluginOptions = DEFAULT_OPTIONS): Gr
             if (!(global as any).RADON_WATCH_FOLDERS_OUTPUTTED) {
               const extensionLib = process.env.RADON_IDE_LIB_PATH;
               if (extensionLib) {
-                process.stdout.write(JSON.stringify({
-                  type: "RNIDE_watch_folders",
-                  watchFolders: [extensionLib]
-                }) + "\n");
+                process.stdout.write(
+                  JSON.stringify({
+                    type: 'RNIDE_watch_folders',
+                    watchFolders: [extensionLib],
+                  }) + '\n'
+                );
                 (global as any).RADON_WATCH_FOLDERS_OUTPUTTED = true;
               }
             }
-          return [];
-        }
-      },
+            return [];
+          },
+        },
         reporter: {
-          update(event:any) {
-            if (Object.prototype.toString.call(event.error) === "[object Error]") {
+          update(event: any) {
+            if (Object.prototype.toString.call(event.error) === '[object Error]') {
               event = Object.assign(event, {
                 message: event.error.message,
                 stack: event.error.stack,
               });
             }
-            process.stdout.write(JSON.stringify(event) + "\n");
-          }
-        }
-      }
-    }
+            process.stdout.write(JSON.stringify(event) + '\n');
+          },
+        },
+      },
+    },
   };
 };
