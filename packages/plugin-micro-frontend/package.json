@@ -36,7 +36,8 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "*.d.ts"
   ],
   "devDependencies": {
     "tsdown": "^0.11.11",
