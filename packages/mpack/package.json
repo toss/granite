@@ -21,6 +21,7 @@
   },
   "files": [
     "dist",
+    "*.d.ts",
     "!**/testing",
     "!**/__tests__"
   ],
