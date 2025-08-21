@@ -1,5 +1,18 @@
 // jsx-source-visitor.js
-module.exports = function createJSXSourceVisitor(t) {
+
+// Babel plugin factory function
+function createJSXSourcePlugin(api) {
+  api.assertVersion(7);
+  const { types: t } = api;
+  
+  return {
+    name: 'jsx-source-visitor',
+    visitor: createJSXSourceVisitor(t)
+  };
+}
+
+// Visitor factory function
+function createJSXSourceVisitor(t) {
     return {
       JSXElement(path, state) {        
         const isProduction = process.env.NODE_ENV === 'production';
@@ -65,4 +78,8 @@ module.exports = function createJSXSourceVisitor(t) {
         }
       }
     };
-  };
+  }
+
+// Export both the plugin and the visitor factory
+module.exports = createJSXSourcePlugin;
+module.exports.createJSXSourceVisitor = createJSXSourceVisitor;

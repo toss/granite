@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { getPackageRoot } = require('@granite-js/utils');
-const createJSXSourceVisitor = require('./jsx-source-visitor');
+const { createJSXSourceVisitor } = require('./jsx-source-visitor');
 const { injectGraniteGlobals } = require('./lib/granite_router/global_injector');
 const { processPageFile } = require('./lib/granite_router/navigation_injector');
 const { parseRouterGenFile } = require('./lib/granite_router/router_parser');
