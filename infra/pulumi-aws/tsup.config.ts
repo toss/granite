@@ -8,7 +8,6 @@ export default defineConfig([
     format: ['esm', 'cjs'],
     outDir: 'dist',
     dts: true,
-    clean: true,
     shims: true,
     external: ['@granite-js/pulumi-aws'],
     publicDir: './public',
@@ -19,8 +18,8 @@ export default defineConfig([
       'lambda/origin-response': './src/lambda/origin-response.ts',
       'lambda/auto-cache-removal': './src/lambda/auto-cache-removal.ts',
     },
-    format: ['cjs'],
+    format: ['esm', 'cjs'],
     outDir: 'dist',
-    clean: true,
+    dts: true,
   },
 ]);

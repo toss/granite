@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { createProjectGraphAsync, type ProjectGraph } from '@nx/devkit';
+import { isNotNil } from 'es-toolkit';
 import { $ } from 'zx';
 import { ensureExecuteCommand } from './utils';
 
@@ -174,6 +175,31 @@ async function packAndLinkWorkspacePackages(targetPackage: string, additionalPac
   return packResults;
 }
 
+async function getPackages({ ignorePrivate = false }: { ignorePrivate?: boolean } = {}) {
+  const { projectGraph } = await loadProject();
+  const packages = Object.keys(projectGraph.nodes);
+
+  return packages
+    .map((name) => {
+      const targetPackage = projectGraph.nodes[name];
+
+      if (targetPackage == null) {
+        return;
+      }
+
+      if (ignorePrivate) {
+        const isPrivate = targetPackage?.data?.tags?.includes('npm:private');
+
+        if (isPrivate) {
+          return;
+        }
+      }
+
+      return targetPackage;
+    })
+    .filter(isNotNil);
+}
+
 const utils = {
   toGlobPattern: (packages: string[]) => (packages.length === 1 ? packages[0] : `{${packages.join(',')}}`),
 };
@@ -185,4 +211,5 @@ export const Project = {
   build,
   pack,
   packAndLinkWorkspacePackages,
+  getPackages,
 };

@@ -20,12 +20,24 @@
       "default": "./src/index.ts"
     },
     "./async-bridges": {
-      "types": "./src/async-bridges.ts",
-      "default": "./src/async-bridges.ts"
+      "import": {
+        "types": "./dist/async-bridges.d.mts",
+        "default": "./dist/async-bridges.mjs"
+      },
+      "require": {
+        "types": "./dist/async-bridges.d.ts",
+        "default": "./dist/async-bridges.js"
+      }
     },
     "./constant-bridges": {
-      "types": "./src/constant-bridges.ts",
-      "default": "./src/constant-bridges.ts"
+      "import": {
+        "types": "./dist/constant-bridges.d.mts",
+        "default": "./dist/constant-bridges.mjs"
+      },
+      "require": {
+        "types": "./dist/constant-bridges.d.ts",
+        "default": "./dist/constant-bridges.js"
+      }
     },
     "./config": {
       "import": {

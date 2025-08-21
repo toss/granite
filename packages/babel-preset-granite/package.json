@@ -10,8 +10,12 @@
     "build": "tsdown"
   },
   "main": "./dist/index.cjs",
+  "types": "./dist/index.d.cts",
   "exports": {
-    ".": "./dist/index.cjs",
+    ".": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    },
     "./package.json": "./package.json"
   },
   "dependencies": {
@@ -33,6 +37,7 @@
   "sideEffects": false,
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "tsdown": "^0.12.0"
+    "tsdown": "^0.12.0",
+    "typescript": "5.8.3"
   }
 }
