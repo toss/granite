@@ -33,6 +33,14 @@ describe('resolveConfig', () => {
               js: `console.log('dynamic config resolved #${++count}');`,
             },
           },
+          babel: {
+            plugins: ['foo', 'bar', 'baz'],
+          },
+          transformer: {
+            transformSync: (_id, code) => {
+              return [code + '// replaced code'].join('\n');
+            },
+          },
         };
       },
     };
@@ -50,5 +58,20 @@ describe('resolveConfig', () => {
     expect(value1).toMatchInlineSnapshot(`"console.log('dynamic config resolved #1');"`);
     expect(value2).toMatchInlineSnapshot(`"console.log('dynamic config resolved #2');"`);
     expect(value1).not.toEqual(value2);
+  });
+
+  it('should resolve metro config', async () => {
+    const { configs } = await resolvePlugins([dummyPlugin()]);
+
+    const result = await resolveConfig({ ...CONFIG_SHIMS, pluginConfigs: configs });
+
+    // Granite config
+    expect(result.transformer?.transformSync).toBeDefined();
+    expect(result.babel?.plugins).toEqual(['foo', 'bar', 'baz']);
+
+    // Metro config (compatibilities)
+    expect(result.metro?.transformSync).toBeDefined();
+    expect(result.transformer?.transformSync?.('file.js', 'ident')).toEqual('ident// replaced code');
+    expect(result.metro?.babelConfig?.plugins).toEqual(['foo', 'bar', 'baz']);
   });
 });
