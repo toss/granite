@@ -85,12 +85,11 @@ export type StaticPluginConfig = Omit<PluginBuildConfig, 'platform' | 'outfile'>
 
 export type DynamicPluginConfig = (() => StaticPluginConfig) | (() => Promise<StaticPluginConfig>);
 
-export type PluginMetroConfig = Omit<
-  AdditionalMetroConfig,
-  // This options are configured by `BuildConfig['babel']`, `BuildConfig['transformer']`
-  'babelConfig' | 'transformSync'
-> &
-  MetroDevServerConfig;
+// Omitted options are configured by `PluginBuildConfig['babel']`, `PluginBuildConfig['transformer']`
+export type PluginMetroConfig = Omit<ResolvedMetroConfig, 'babelConfig' | 'transformSync'>;
+
+export type ResolvedPluginConfig = Omit<StaticPluginConfig, 'metro'> & { metro?: ResolvedMetroConfig };
+export type ResolvedMetroConfig = AdditionalMetroConfig & MetroDevServerConfig;
 
 export type PluginResolvable =
   | GranitePlugin // Plugin definition (e.g. { name: string; config?: any })
