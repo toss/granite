@@ -7,7 +7,7 @@ import {
   RouteProp,
 } from '@granite-js/native/@react-navigation/native';
 import { NativeStackNavigationOptions } from '@granite-js/native/@react-navigation/native-stack';
-import { ComponentProps, ComponentType, Fragment, PropsWithChildren, ReactElement, useCallback, useMemo } from 'react';
+import { ComponentProps, ComponentType, Fragment, PropsWithChildren, ReactElement, useCallback } from 'react';
 import { InitialProps } from '..';
 import { closeView } from '../native-modules';
 import { BackButton } from './components/BackButton';
@@ -88,6 +88,8 @@ type NavigationContainerProps = Pick<
   'ref' | 'documentTitle' | 'fallback' | 'onReady' | 'onUnhandledAction' | 'onStateChange'
 >;
 
+export const navigationRef = createNavigationContainerRef<never>();
+
 /**
  * @category Components
  * @kind function
@@ -139,10 +141,8 @@ export function Router({
     initialScheme,
   });
 
-  const ref = useMemo(() => navigationContainerRef ?? createNavigationContainerRef<any>(), [navigationContainerRef]);
-
   const { handler, canGoBack, onBack } = useInternalRouterBackHandler({
-    navigationContainerRef: ref,
+    navigationContainerRef: navigationRef,
     onClose: closeView,
   });
 
@@ -162,7 +162,7 @@ export function Router({
   );
 
   return (
-    <NavigationContainer ref={ref} {...navigationContainerProps} linking={linkingOptions}>
+    <NavigationContainer ref={navigationRef} {...navigationContainerProps} linking={linkingOptions}>
       <CanGoBackGuard canGoBack={canGoBack} onBack={onBack}>
         <Container {...initialProps}>
           <StackNavigator.Navigator initialRouteName={initialRouteName} screenOptions={screenOptions}>

@@ -15,4 +15,15 @@ interface EventEmitter {
   ): EmitterSubscription;
 }
 
-export const nativeEventEmitter = new NativeEventEmitter(GraniteCoreModule) as unknown as EventEmitter;
+export const nativeEventEmitter = GraniteCoreModule
+  ? (new NativeEventEmitter(GraniteCoreModule) as unknown as EventEmitter)
+  : {
+      addListener: () => {
+        console.warn('[GraniteCoreModule] is not registered');
+        return {
+          remove: () => {
+            console.warn('[GraniteCoreModule] is not registered');
+          },
+        };
+      },
+    };
