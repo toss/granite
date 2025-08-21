@@ -38,7 +38,7 @@ describe('resolveConfig', () => {
           },
           transformer: {
             transformSync: (_id, code) => {
-              return code + '\n// replaced code';
+              return [code + '// replaced code'].join('\n');
             },
           },
         };
@@ -71,6 +71,7 @@ describe('resolveConfig', () => {
 
     // Metro config (compatibilities)
     expect(result.metro?.transformSync).toBeDefined();
+    expect(result.transformer?.transformSync?.('file.js', 'ident')).toEqual('ident// replaced code');
     expect(result.metro?.babelConfig?.plugins).toEqual(['foo', 'bar', 'baz']);
   });
 });
