@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/lottie",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
