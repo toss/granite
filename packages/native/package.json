@@ -72,14 +72,18 @@
       "types": "./dist/react-native-pager-view.d.ts",
       "default": "./src/react-native-pager-view.ts"
     },
-    "./react-native-gesture-handler/jestSetup": "./src/react-native-gesture-handler/jestSetup.js",
+    "./react-native-gesture-handler/jestSetup": {
+      "types": "./dist/react-native-gesture-handler/jestSetup.d.ts",
+      "default": "./src/react-native-gesture-handler/jestSetup.js"
+    },
     "./react-native-video": {
       "types": "./dist/react-native-video.d.ts",
       "default": "./src/react-native-video.ts"
     },
     "./fingerprint": {
-      "types": "./dist/fingerprint.d.ts",
-      "default": "./src/fingerprint.ts"
+      "types": "./fingerprint/index.d.ts",
+      "import": "./fingerprint/index.mjs",
+      "require": "./fingerprint/index.js"
     },
     "./package.json": "./package.json"
   },
