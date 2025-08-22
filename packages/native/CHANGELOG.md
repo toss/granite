@@ -1,5 +1,11 @@
 # @granite-js/native
 
+## 0.1.20
+
+### Patch Changes
+
+- 1df5883: update package.json meta to supports any moduleResolutions
+
 ## 0.1.19
 
 ## 0.1.18
