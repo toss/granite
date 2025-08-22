@@ -1,5 +1,7 @@
 # @granite-js/style-utils
 
+## 0.1.20
+
 ## 0.1.19
 
 ## 0.1.18
