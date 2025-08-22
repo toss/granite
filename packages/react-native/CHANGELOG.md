@@ -1,5 +1,21 @@
 # @granite-js/react-native
 
+## 0.1.20
+
+### Patch Changes
+
+- 1df5883: update package.json meta to supports any moduleResolutions
+- Updated dependencies [1df5883]
+- Updated dependencies [a93bf1e]
+  - @granite-js/native@0.1.20
+  - @granite-js/image@0.1.20
+  - @granite-js/mpack@0.1.20
+  - @granite-js/jest@0.1.20
+  - @granite-js/lottie@0.1.20
+  - @granite-js/style-utils@0.1.20
+  - @granite-js/cli@0.1.20
+  - @granite-js/plugin-core@0.1.20
+
 ## 0.1.19
 
 ### Patch Changes
