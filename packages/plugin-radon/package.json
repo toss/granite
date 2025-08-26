@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-radon",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.20",
   "description": "Radon compilation plugin for Granite",
   "scripts": {
     "prepack": "yarn build",

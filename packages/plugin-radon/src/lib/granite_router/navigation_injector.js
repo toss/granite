@@ -1,5 +1,3 @@
-// Navigation auto-registration utilities for RadonIDE
-
 /**
  * Generate navigation registration code
  * @param {string} navigationVariableName - Name of the navigation variable
@@ -28,22 +26,22 @@ const generateNavigationRegistrationCode = (navigationVariableName) => {
 const analyzePageImports = (programPath) => {
   let usesNavigation = false;
   let hasReactDefaultImport = false;
-  
+
   programPath.traverse({
     ImportDeclaration(importPath) {
       const source = importPath.node.source.value;
-      
+
       if (source === 'react') {
-        importPath.node.specifiers.forEach(spec => {
+        importPath.node.specifiers.forEach((spec) => {
           if (spec.type === 'ImportDefaultSpecifier') {
             hasReactDefaultImport = true;
           }
         });
       }
-      
+
       // Check for createRoute import (to prepare for Route.useNavigation pattern)
       if (source === '@granite-js/react-native') {
-        importPath.node.specifiers.forEach(spec => {
+        importPath.node.specifiers.forEach((spec) => {
           if (spec.type === 'ImportSpecifier' && spec.imported.name === 'useNavigation') {
             usesNavigation = true;
           }
@@ -52,9 +50,9 @@ const analyzePageImports = (programPath) => {
           }
         });
       }
-    }
+    },
   });
-  
+
   return { usesNavigation, hasReactDefaultImport };
 };
 
@@ -69,60 +67,58 @@ const processNavigationVariables = (programPath, parse) => {
     VariableDeclarator(variablePath) {
       let isNavigationVariable = false;
       let variableName = null;
-      
+
       if (variablePath.node.init && variablePath.node.id.type === 'Identifier') {
         variableName = variablePath.node.id.name;
-        
+
         // Pattern 1: const navigation = useNavigation()
-        if (variablePath.node.init.type === 'CallExpression' &&
-            variablePath.node.init.callee.name === 'useNavigation') {
+        if (
+          variablePath.node.init.type === 'CallExpression' &&
+          variablePath.node.init.callee.name === 'useNavigation'
+        ) {
           isNavigationVariable = true;
         }
-        
+
         // Pattern 2: const navigation = Route.useNavigation()
-        else if (variablePath.node.init.type === 'CallExpression' &&
-                 variablePath.node.init.callee.type === 'MemberExpression' &&
-                 variablePath.node.init.callee.property.name === 'useNavigation') {
+        else if (
+          variablePath.node.init.type === 'CallExpression' &&
+          variablePath.node.init.callee.type === 'MemberExpression' &&
+          variablePath.node.init.callee.property.name === 'useNavigation'
+        ) {
           isNavigationVariable = true;
         }
       }
-      
+
       if (isNavigationVariable && variableName) {
-        // Find the function or block where this variable is declared
         const parentFunction = variablePath.getFunctionParent();
         if (parentFunction) {
-          
-          // Generate navigation registration code
           const registrationCode = generateNavigationRegistrationCode(variableName);
-          
-          // Parse as AST
-          const registrationAST = parse(registrationCode, { 
-            sourceType: 'module', 
+
+          const registrationAST = parse(registrationCode, {
+            sourceType: 'module',
             filename: 'navigation-registration.js',
-            parserOpts: { allowReturnOutsideFunction: true }
+            parserOpts: { allowReturnOutsideFunction: true },
           });
-          
-          // Add right after variable declaration
+
           const statement = variablePath.getStatementParent();
           statement.insertAfter(registrationAST.program.body);
         }
       }
-    }
+    },
   });
 };
 
 const processPageFile = (filename, programPath, parse, t, state) => {
   const isPageFile = filename.includes('/pages/') && /\.(tsx|ts|jsx|js)$/.test(filename);
-  
+
   if (!isPageFile || state.file.metadata.radonPageInjected) {
     return false;
   }
-  
+
   try {
     const { usesNavigation, hasReactDefaultImport } = analyzePageImports(programPath);
-    
+
     if (usesNavigation) {
-      // Add React import (if needed)
       if (!hasReactDefaultImport) {
         const reactImport = t.importDeclaration(
           [t.importDefaultSpecifier(t.identifier('React'))],
@@ -130,14 +126,13 @@ const processPageFile = (filename, programPath, parse, t, state) => {
         );
         programPath.unshiftContainer('body', reactImport);
       }
-      
-      // Process navigation variables and inject registration code
+
       processNavigationVariables(programPath, parse, t);
-      
+
       state.file.metadata.radonPageInjected = true;
       return true;
     }
-    
+
     return false;
   } catch (error) {
     console.error('🔥 RADON BABEL PLUGIN: Failed to process page file:', error);
@@ -149,5 +144,5 @@ module.exports = {
   generateNavigationRegistrationCode,
   analyzePageImports,
   processNavigationVariables,
-  processPageFile
+  processPageFile,
 };

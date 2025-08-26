@@ -1,5 +1,3 @@
-// Granite Router global variable injection utilities
-
 /**
  * Generate code to inject Granite Router detection and routes into global scope
  * @param {Array} routes - Array of route objects from parseRouterGenFile
@@ -7,7 +5,7 @@
  */
 const generateGraniteInjectionCode = (routes) => {
   const routesJson = JSON.stringify(routes, null, 2);
-  
+
   return `
 // Mark that Granite Router is being used
 globalThis.__GRANITE_ROUTER_DETECTED__ = true;
@@ -36,5 +34,5 @@ const injectGraniteGlobals = (injectCode, programPath, routes) => {
 
 module.exports = {
   generateGraniteInjectionCode,
-  injectGraniteGlobals
+  injectGraniteGlobals,
 };

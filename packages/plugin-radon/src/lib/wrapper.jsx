@@ -1,17 +1,8 @@
-const { useContext, useState, useEffect, useRef, useCallback } = require("react");
-const {
-  LogBox,
-  AppRegistry,
-  Dimensions,
-  RootTagContext,
-  View,
-  Linking,
-  findNodeHandle,
-} = require("react-native");
+const { useContext, useState, useEffect, useRef, useCallback } = require('react');
+const { LogBox, AppRegistry, Dimensions, RootTagContext, View, Linking, findNodeHandle } = require('react-native');
 
 const inspectorBridge = globalThis.__RADON_INSPECTOR_BRIDGE__;
-const RNInternals = require("./vendor/rn-internals/rn-internals-0.72.js");
-
+const RNInternals = require('./vendor/rn-internals/rn-internals-0.72.js');
 
 const OffscreenComponentReactTag = 22;
 
@@ -24,21 +15,20 @@ let graniteNavigationPlugin = null;
 if (globalThis.__GRANITE_ROUTER_DETECTED__) {
   try {
     graniteNavigationPlugin = require('./granite_router/granite_navigation_plugin.js');
-    
+
     // Register plugin immediately
     if (graniteNavigationPlugin && graniteNavigationPlugin.useGraniteRouterPluginMainHook) {
-      console.log("🔥 Radon Runtime: Registering Granite navigation plugin immediately");
-      registerNavigationPlugin("granite-router", { 
-        mainHook: graniteNavigationPlugin.useGraniteRouterPluginMainHook 
+      console.log('🔥 Radon Runtime: Registering Granite navigation plugin immediately');
+      registerNavigationPlugin('granite-router', {
+        mainHook: graniteNavigationPlugin.useGraniteRouterPluginMainHook,
       });
     }
   } catch (error) {
-    console.log("⚠️ Radon Runtime: Could not load Granite navigation plugin:", error.message);
+    console.log('⚠️ Radon Runtime: Could not load Granite navigation plugin:', error.message);
   }
 }
 
-
-const devtoolPlugins = new Set(["network"]);
+const devtoolPlugins = new Set(['network']);
 let devtoolPluginsChanged = undefined;
 export function registerDevtoolPlugin(name) {
   devtoolPlugins.add(name);
@@ -49,16 +39,16 @@ let navigationHistory = new Map();
 
 const InternalImports = {
   get PREVIEW_APP_KEY() {
-    return require("./preview").PREVIEW_APP_KEY;
+    return require('./preview').PREVIEW_APP_KEY;
   },
   get setupNetworkPlugin() {
-    return require("./network").setup;
+    return require('./network').setup;
   },
   get reduxDevtoolsExtensionCompose() {
-    return require("./vendor/plugins/redux-devtools").compose;
+    return require('./vendor/plugins/redux-devtools').compose;
   },
   get setupRenderOutlinesPlugin() {
-    return require("./render_outlines").setup;
+    return require('./render_outlines').setup;
   },
 };
 
@@ -92,42 +82,39 @@ function getRendererConfig() {
 
 function extractComponentStack(startNode, viewDataHierarchy) {
   const componentStack = [];
-  
+
   // Detect React Native version
-  let rnVersion = '0.72'; // 기본값
+  let rnVersion = '0.72';
   try {
     const rnPackage = require('react-native/package.json');
     rnVersion = rnPackage.version;
-  } catch (e) {
-    // Fallback: Use default value if React Native is not installed
-  }
-  
+  } catch (e) {}
+
   const majorMinor = rnVersion.split('.').slice(0, 2).join('.');
   const versionNumber = parseFloat(majorMinor);
-  
+
   // Internal component filtering function
   const isInternalComponent = (fileName) => {
-    return fileName.includes('node_modules/react-native/') ||
-           fileName.includes('node_modules/@react-navigation/') ||
-           fileName.includes('/react-native/Libraries/') ||
-           fileName.includes('react-native/index.js') ||
-           fileName.includes('react-native/Libraries/');
+    return (
+      fileName.includes('node_modules/react-native/') ||
+      fileName.includes('node_modules/@react-navigation/') ||
+      fileName.includes('/react-native/Libraries/') ||
+      fileName.includes('react-native/index.js') ||
+      fileName.includes('react-native/Libraries/')
+    );
   };
-  
+
   // RN 0.72 specific measure function generator
   const createMeasureFunction = (fiberNode) => {
     return (callback) => {
       try {
         const stateNode = fiberNode.stateNode;
         if (stateNode && stateNode.measure) {
-          // When native view directly has measure function
           stateNode.measure(callback);
         } else if (stateNode && stateNode._nativeTag) {
-          // Measure through UIManager
           const UIManager = require('react-native').UIManager;
           UIManager.measure(stateNode._nativeTag, callback);
         } else {
-          // Return 0,0,0,0 as fallback
           callback(0, 0, 0, 0, 0, 0);
         }
       } catch (e) {
@@ -135,13 +122,11 @@ function extractComponentStack(startNode, viewDataHierarchy) {
       }
     };
   };
-  
+
   switch (true) {
     case versionNumber <= 0.72:
-      // RN 0.72: Extract user component source info by directly traversing Fiber tree
       let fiberNode = startNode;
-      
-      // Find Fiber node if startNode is publicInstance
+
       if (startNode && !startNode.tag && startNode._reactInternalFiber) {
         fiberNode = startNode._reactInternalFiber;
       } else if (startNode && !startNode.tag && startNode._reactInternalInstance) {
@@ -151,10 +136,9 @@ function extractComponentStack(startNode, viewDataHierarchy) {
       if (fiberNode && typeof fiberNode.tag === 'number') {
         let node = fiberNode;
         while (node && node.tag !== OffscreenComponentReactTag) {
-          // Check _source info directly from Fiber node
           if (node.memoizedProps && node.memoizedProps._source) {
             const source = node.memoizedProps._source;
-            
+
             if (!isInternalComponent(source.fileName)) {
               // Collect only user components
               componentStack.push({
@@ -164,18 +148,17 @@ function extractComponentStack(startNode, viewDataHierarchy) {
               });
             }
           }
-          
-          // Move to parent node (Fiber tree traversal)
+
           node = node.return;
         }
       }
       break;
-      
+
     default:
       // RN 0.73+: instanceCache available, use React DevTools method
       const rendererConfig = getRendererConfig();
       let stackItems = [];
-      
+
       if (rendererConfig) {
         let node = startNode;
         while (node && node.tag !== OffscreenComponentReactTag) {
@@ -197,7 +180,7 @@ function extractComponentStack(startNode, viewDataHierarchy) {
           const inspectorData = item.getInspectorData(findNodeHandle);
           if (inspectorData.props._source) {
             const source = inspectorData.props._source;
-            
+
             if (!isInternalComponent(source.fileName)) {
               componentStack.push({
                 name: item.name,
@@ -207,32 +190,31 @@ function extractComponentStack(startNode, viewDataHierarchy) {
             }
           }
         } catch (e) {
-          // Skip items that can't be processed
+          console.error(e);
         }
       });
       break;
   }
-  
+
   return componentStack;
 }
 
 function getInspectorDataForCoordinates(mainContainerRef, x, y, requestStack, callback) {
-  const { width: screenWidth, height: screenHeight } = Dimensions.get("screen");
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
 
   // Detect React Native version
-  let rnVersion = '0.72'; // 기본값
+  let rnVersion = '0.72';
   try {
     const rnPackage = require('react-native/package.json');
     rnVersion = rnPackage.version;
   } catch (e) {
-    // Fallback: Use default value if React Native is not installed
+    console.error(e);
   }
-  
+
   try {
     const hook = globalThis.__REACT_DEVTOOLS_GLOBAL_HOOK__;
     const renderer = hook?.renderers?.get(1);
-    
-    // Try getInspectorDataForViewAtPoint first in all versions
+
     if (renderer && renderer.rendererConfig && renderer.rendererConfig.getInspectorDataForViewAtPoint) {
       try {
         renderer.rendererConfig.getInspectorDataForViewAtPoint(
@@ -253,10 +235,7 @@ function getInspectorDataForCoordinates(mainContainerRef, x, y, requestStack, ca
               return;
             }
 
-            const inspectorDataStack = extractComponentStack(
-              viewData.closestInstance,
-              viewData.hierarchy
-            );
+            const inspectorDataStack = extractComponentStack(viewData.closestInstance, viewData.hierarchy);
             Promise.all(
               inspectorDataStack.map(
                 (inspectorData) =>
@@ -294,14 +273,14 @@ function getInspectorDataForCoordinates(mainContainerRef, x, y, requestStack, ca
           }
         );
       } catch (error) {
-        console.error("🔥 Radon Runtime: getInspectorDataForViewAtPoint failed:", error);
+        console.error('🔥 Radon Runtime: getInspectorDataForViewAtPoint failed:', error);
         callback({ frame: { x: 0, y: 0, width: 0, height: 0 } });
       }
     } else {
       callback({ frame: { x: 0, y: 0, width: 0, height: 0 } });
     }
   } catch (error) {
-    console.error("🔥 Radon Runtime: getInspectorDataForCoordinates error:", error);
+    console.error('🔥 Radon Runtime: getInspectorDataForCoordinates error:', error);
     callback({ frame: { x: 0, y: 0, width: 0, height: 0 } });
   }
 }
@@ -325,9 +304,9 @@ export function AppWrapper({ children, initialProps, fabric }) {
 
   const handleNavigationChange = useCallback((navigationDescriptor) => {
     navigationHistory.set(navigationDescriptor.id, navigationDescriptor);
-    
+
     const message = {
-      type: "navigationChanged",
+      type: 'navigationChanged',
       data: {
         displayName: navigationDescriptor.name,
         id: navigationDescriptor.id,
@@ -338,32 +317,31 @@ export function AppWrapper({ children, initialProps, fabric }) {
 
   const handleRouteListChange = useCallback((routeList) => {
     const message = {
-      type: "navigationRouteListUpdated",
+      type: 'navigationRouteListUpdated',
       data: routeList,
     };
     inspectorBridge.sendMessage(message);
   }, []);
 
   const useNavigationMainHook = navigationPlugins[0]?.plugin.mainHook || emptyNavigationHook;
-  
+
   const { requestNavigationChange } = useNavigationMainHook({
     onNavigationChange: handleNavigationChange,
     onRouteListChange: handleRouteListChange,
   });
-  
 
   const openPreview = useCallback(
     (previewKey) => {
       const preview = global.__RNIDE_previews.get(previewKey);
       if (!preview) {
-        throw new Error("Preview not found");
+        throw new Error('Preview not found');
       }
       AppRegistry.runApplication(InternalImports.PREVIEW_APP_KEY, {
         rootTag,
         initialProps: { ...initialProps, previewKey },
         fabric,
       });
-      const urlPrefix = previewKey.startsWith("sb://") ? "sb:" : "preview:";
+      const urlPrefix = previewKey.startsWith('sb://') ? 'sb:' : 'preview:';
       handleNavigationChange({ id: previewKey, name: urlPrefix + preview.name });
     },
     [rootTag, handleNavigationChange, initialProps, fabric]
@@ -375,7 +353,7 @@ export function AppWrapper({ children, initialProps, fabric }) {
       closePromiseResolve = resolve;
     });
     if (getCurrentScene() === InternalImports.PREVIEW_APP_KEY) {
-      AppRegistry.runApplication("main", {
+      AppRegistry.runApplication('main', {
         rootTag,
         initialProps: {
           __RNIDE_onLayout: closePromiseResolve,
@@ -390,7 +368,7 @@ export function AppWrapper({ children, initialProps, fabric }) {
 
   const openNavigation = useCallback(
     (message) => {
-      const isPreviewUrl = message.id.startsWith("preview://") || message.id.startsWith("sb://");
+      const isPreviewUrl = message.id.startsWith('preview://') || message.id.startsWith('sb://');
       if (isPreviewUrl) {
         openPreview(message.id);
         return;
@@ -414,23 +392,23 @@ export function AppWrapper({ children, initialProps, fabric }) {
     const listener = (message) => {
       const { type, data } = message;
       switch (type) {
-        case "openPreview":
+        case 'openPreview':
           openPreview(data.previewId);
           break;
-        case "openUrl":
+        case 'openUrl':
           closePreview().then(() => {
             const url = data.url;
             Linking.openURL(url);
           });
           break;
-        case "openNavigation":
+        case 'openNavigation':
           openNavigation(data);
           break;
-        case "inspect":
+        case 'inspect':
           const { id, x, y, requestStack } = data;
           getInspectorDataForCoordinates(mainContainerRef, x, y, requestStack, (inspectorData) => {
             inspectorBridge.sendMessage({
-              type: "inspectData",
+              type: 'inspectData',
               data: {
                 id,
                 ...inspectorData,
@@ -449,14 +427,14 @@ export function AppWrapper({ children, initialProps, fabric }) {
     if (LoadingView) {
       LoadingView.showMessage = (message) => {
         inspectorBridge.sendMessage({
-          type: "fastRefreshStarted",
+          type: 'fastRefreshStarted',
         });
       };
       const originalHide = LoadingView.hide;
       LoadingView.hide = () => {
         originalHide();
         inspectorBridge.sendMessage({
-          type: "fastRefreshComplete",
+          type: 'fastRefreshComplete',
         });
       };
     }
@@ -484,16 +462,16 @@ export function AppWrapper({ children, initialProps, fabric }) {
     if (hasLayout) {
       const appKey = getCurrentScene();
       inspectorBridge.sendMessage({
-        type: "appReady",
+        type: 'appReady',
         data: {
           appKey,
           navigationPlugins: navigationPlugins.map((plugin) => plugin.name),
         },
       });
-      
+
       devtoolPluginsChanged = () => {
         inspectorBridge.sendMessage({
-          type: "devtoolPluginsChanged",
+          type: 'devtoolPluginsChanged',
           data: {
             plugins: Array.from(devtoolPlugins.values()),
           },

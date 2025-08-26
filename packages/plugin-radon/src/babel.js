@@ -37,8 +37,6 @@ module.exports = function (api, options = {}) {
     return require(resolvedPath);
   };
 
-  // --- Helper Functions ---
-
   // Function to generate paths for bundled renderer files
   const createRendererPath = (rendererFileName, version) => {
     try {
@@ -116,8 +114,6 @@ module.exports = function (api, options = {}) {
 
           let injected = false;
 
-          // This MUST be the first check.
-
           if (
             isTransforming('react-native/Libraries/Renderer/implementations/ReactFabric-dev.js') ||
             isTransforming('react-native/Libraries/Renderer/implementations/ReactNativeRenderer-dev.js')
@@ -130,7 +126,6 @@ module.exports = function (api, options = {}) {
             if (rendererPath && fs.existsSync(rendererPath)) {
               try {
                 const rendererCode = fs.readFileSync(rendererPath, 'utf8');
-                // Add a fingerprint to verify the custom renderer is loaded.
                 const fingerprint = `globalThis.__RADON_RENDERER_LOADED__ = '${path.basename(rendererPath)}';`;
                 const finalRendererCode = `${fingerprint}\n${rendererCode}`;
 
@@ -168,8 +163,6 @@ module.exports = function (api, options = {}) {
 
               const finalCodeToInject = `${portInjectionCode}\n${runtimeCode}`;
 
-              // By appending the code to the end of the file and wrapping in setImmediate,
-              // we ensure all polyfills are ready before our code runs.
               const finalSafeCode = `setImmediate(() => { try { \n${finalCodeToInject}\n } catch (e) { console.error('Radon runtime error:', e); } });`;
 
               injectCode(programPath, finalSafeCode, false); // Append to the end
@@ -179,7 +172,6 @@ module.exports = function (api, options = {}) {
               console.error('🔥 RADON BABEL PLUGIN: 🚨 FAILED TO READ RUNTIME BUNDLE.', e);
               throw e;
             }
-            // Once handled, we are done with this file.
             return;
           }
 
@@ -196,7 +188,6 @@ module.exports = function (api, options = {}) {
             }
           }
 
-          // Process page files for navigation auto-registration
           processPageFile(filename, programPath, parse, t, state);
         },
       },
