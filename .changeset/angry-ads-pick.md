@@ -2,4 +2,4 @@
 '@granite-js/plugin-radon': patch
 ---
 
-add radon-ide plugin
+add radon plugin
