@@ -31,6 +31,12 @@ export interface GraniteProps {
    * The initial scheme of the app.
    */
   initialScheme?: string;
+
+  /**
+   * @description
+   * The function to set the iOS swipe gesture enabled.
+   */
+  setIosSwipeGestureEnabled?: ({ isEnabled }: { isEnabled: boolean }) => void;
 }
 
 const createApp = () => {
@@ -47,7 +53,7 @@ const createApp = () => {
   return {
     registerApp(
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
-      { appName, context, router, initialScheme }: GraniteProps
+      { appName, context, router, initialScheme, setIosSwipeGestureEnabled }: GraniteProps
     ): (initialProps: InitialProps) => JSX.Element {
       if (appName === ENTRY_BUNDLE_NAME) {
         throw new Error(`Reserved app name 'shared' cannot be used`);
@@ -59,6 +65,7 @@ const createApp = () => {
             container={AppContainer}
             initialProps={initialProps}
             initialScheme={initialScheme ?? getSchemeUri()}
+            setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
             appName={appName}
             context={context}
             router={router}
