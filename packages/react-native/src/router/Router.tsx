@@ -56,6 +56,7 @@ export interface InternalRouterProps {
   container: ComponentType<PropsWithChildren<InitialProps>>;
   initialProps: InitialProps;
   initialScheme: string;
+  setIosSwipeGestureEnabled?: ({ isEnabled }: { isEnabled: boolean }) => Promise<void> | void;
 }
 
 export type RouterProps = StackNavigatorProps & NavigationContainerProps;
@@ -129,6 +130,7 @@ export function Router({
   defaultScreenOption,
   screenContainer,
   // Public props (StackNavigator)
+  setIosSwipeGestureEnabled,
   ...navigationContainerProps
 }: InternalRouterProps & RouterProps): ReactElement {
   const initialRouteName = useInitialRouteName({ prefix, initialScheme });
@@ -163,7 +165,7 @@ export function Router({
 
   return (
     <NavigationContainer ref={ref} {...navigationContainerProps} linking={linkingOptions}>
-      <CanGoBackGuard canGoBack={canGoBack} onBack={onBack}>
+      <CanGoBackGuard canGoBack={canGoBack} onBack={onBack} setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}>
         <Container {...initialProps}>
           <StackNavigator.Navigator initialRouteName={initialRouteName} screenOptions={screenOptions}>
             {Screens}
