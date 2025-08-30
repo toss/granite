@@ -1,5 +1,11 @@
 # babel-preset-granite
 
+## 0.1.22
+
+### Patch Changes
+
+- 487600d: apply plugin-transform-flow-strip-types first
+
 ## 0.1.21
 
 ## 0.1.20
