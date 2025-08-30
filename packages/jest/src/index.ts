@@ -1,4 +1,3 @@
- 
 import type { Config } from 'jest';
 import originalConfig from './jest.config';
 import { setup as originalSetup } from './setup';

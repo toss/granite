@@ -1,9 +1,8 @@
 ---
 sourcePath: packages/react-native/src/native-modules/natives/closeView.ts
 ---
+
 # closeView
-
-
 
 현재 화면을 닫는 함수에요. 예를 들어, "닫기" 버튼을 눌러서 서비스를 종료할 때 사용할 수 있어요.
 
@@ -13,13 +12,8 @@ sourcePath: packages/react-native/src/native-modules/natives/closeView.ts
 function closeView(): Promise<void>;
 ```
 
-
-
-
-
-
-
 ### 반환 값
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--type">Promise&lt;void&gt;</span>
@@ -27,11 +21,6 @@ function closeView(): Promise<void>;
     <p class="post-parameters--description"></p>
   </li>
 </ul>
-
-
-
-
-
 
 ## 예제
 
@@ -42,6 +31,6 @@ import { Button } from 'react-native';
 import { closeView } from '@granite-js/react-native';
 
 function CloseButton() {
- return <Button title="닫기" onPress={closeView} />;
+  return <Button title="닫기" onPress={closeView} />;
 }
 ```

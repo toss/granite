@@ -6,8 +6,7 @@ A Pulumi package for managing React Native CDN infrastructure on AWS.
 
 Follow the official Pulumi installation guide to install the Pulumi CLI:
 
-* [Pulumi Installation Guide](https://www.pulumi.com/docs/iac/download-install/)
-
+- [Pulumi Installation Guide](https://www.pulumi.com/docs/iac/download-install/)
 
 ## Pulumi Configuration
 
@@ -37,8 +36,8 @@ import { ReactNativeBundleCDN } from '@granite-js/pulumi-aws';
 const config = new pulumi.Config();
 
 const reactNativeCdn = new ReactNativeBundleCDN('myReactNativeBundleCDN', {
-    bucketName: config.require('bucketName'),
-    region: config.require('region')
+  bucketName: config.require('bucketName'),
+  region: config.require('region'),
 });
 
 // Print to CLi
@@ -51,7 +50,6 @@ Ensure your configuration variables (`bucketName` and `region`) are set in the P
 pulumi config set bucketName your-bucket-name
 pulumi config set region us-west-2
 ```
-
 
 ## AWS Credentials Setup
 

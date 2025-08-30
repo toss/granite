@@ -1,9 +1,8 @@
 ---
 sourcePath: packages/style-utils/src/flex.tsx
 ---
+
 # FlexCenterHorizontal
-
-
 
 `Flex.CenterHorizontal`는 자식 요소들을 [**Flexbox 레이아웃**](https://reactnative.dev/docs/0.72/flexbox) 기준으로 **가로 방향으로 중앙에 정렬**하기 위한 컴포넌트예요.
 `alignItems` 속성이 `'center'`로 설정되어, 자식 요소들이 부모 컴포넌트의 가로 중앙에 배치돼요.
@@ -11,12 +10,11 @@ sourcePath: packages/style-utils/src/flex.tsx
 ## 시그니처
 
 ```typescript
-FlexCenterHorizontal: import("react").ForwardRefExoticComponent<Props & import("react").RefAttributes<View>>
+FlexCenterHorizontal: import('react').ForwardRefExoticComponent<Props & import('react').RefAttributes<View>>;
 ```
 
-
-
 ### 파라미터
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">props</span><span class="post-parameters--type">object</span>
@@ -46,15 +44,6 @@ FlexCenterHorizontal: import("react").ForwardRefExoticComponent<Props & import("
     </ul>
   </li>
 </ul>
-
-
-
-
-
-
-
-
-
 
 ## 예제
 

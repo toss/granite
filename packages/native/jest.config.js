@@ -1,4 +1,3 @@
- 
 const sharedConfig = require('../jest.config.js');
 
 /**

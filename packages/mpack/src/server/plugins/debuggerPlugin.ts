@@ -9,7 +9,6 @@ interface DebuggerPluginConfig {
   onReload: () => void;
 }
 
- 
 async function debuggerPluginImpl(app: FastifyInstance, config: DebuggerPluginConfig) {
   logger.debug('debugger-plugin', { root: debuggerFrontendPath, prefix: DEBUGGER_FRONTEND_PATH });
 

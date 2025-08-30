@@ -1,21 +1,21 @@
 ---
 sourcePath: packages/style-utils/src/stack.tsx
 ---
+
 # StackHorizontal
-
-
 
 `Stack.Horizontal`은 자식 요소를 가로로 쌓아 배치하는 컴포넌트에요. 이 컴포넌트를 사용하면, 자식 요소 간의 간격을 `gutter` 속성으로 쉽게 조절할 수 있어, 가로 방향으로 일관된 레이아웃을 유지할 수 있어요.
 
 ## 시그니처
 
 ```typescript
-StackHorizontal: import("react").ForwardRefExoticComponent<StackWithoutDirectionProps & import("react").RefAttributes<View>>
+StackHorizontal: import('react').ForwardRefExoticComponent<
+  StackWithoutDirectionProps & import('react').RefAttributes<View>
+>;
 ```
 
-
-
 ### 파라미터
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">props</span><span class="post-parameters--type">object</span>
@@ -41,15 +41,6 @@ StackHorizontal: import("react").ForwardRefExoticComponent<StackWithoutDirection
   </li>
 </ul>
 
-
-
-
-
-
-
-
-
-
 ## 예제
 
 ### 가로 방향으로 요소들을 배치하고, 간격을 16으로 설정한 예제예요.
@@ -60,12 +51,12 @@ import { View, Text } from 'react-native';
 
 function StackHorizontalExample() {
   return (
-       <Stack.Horizontal gutter={16}>
-        <Text>16간격을 두고 가로 방향으로 배치해요</Text>
-        <Text>1</Text>
-        <Text>2</Text>
-        <Text>3</Text>
-      </Stack.Horizontal>
+    <Stack.Horizontal gutter={16}>
+      <Text>16간격을 두고 가로 방향으로 배치해요</Text>
+      <Text>1</Text>
+      <Text>2</Text>
+      <Text>3</Text>
+    </Stack.Horizontal>
   );
 }
 ```

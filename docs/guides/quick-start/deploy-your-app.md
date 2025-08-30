@@ -143,29 +143,29 @@ export default defineConfig({
 
 Click Submit and watch your app load instantly from your AWS infrastructure! Your app is now being served through a global CDN, ready for users worldwide. 🌍
 
-
 ## Example Videos
 
 | iOS                                                                                                                                                                                                             | Android                                                                                                                                                                                                             |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | <video autoplay loop muted style="max-width:400px; width:100%; height:auto; margin-top:1rem;"> <source src="/videos/ios_showcase.mp4" type="video/mp4" /> Your browser does not support the video tag. </video> | <video autoplay loop muted style="max-width:400px; width:100%; height:auto; margin-top:1rem;"> <source src="/videos/android_showcase.mov" type="video/mp4" /> Your browser does not support the video tag. </video> |
 
-
 ## Understanding Deployment URLs
 
 Your app is deployed to specific URLs based on platform and version:
 
 ### URL Structure
+
 ```
 https://<your-cdn>/[platform]/[appName]/[version]/bundle
 ```
 
 ### Example URLs
+
 ```bash
 # iOS bundles
 https://d1234567890123.cloudfront.net/ios/my-granite-app/100/bundle
 
-# Android bundles  
+# Android bundles
 https://d1234567890123.cloudfront.net/android/my-granite-app/100/bundle
 ```
 

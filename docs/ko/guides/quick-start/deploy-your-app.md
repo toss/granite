@@ -154,11 +154,13 @@ export default defineConfig({
 앱은 플랫폼과 버전에 따라 특정 URL에 배포돼요.
 
 ### URL 구조
+
 ```
 https://<your-cdn>/[platform]/[appName]/[version]/bundle
 ```
 
 ### URL 예시
+
 ```bash
 # iOS 번들
 https://d1234567890123.cloudfront.net/ios/my-granite-app/100/bundle

@@ -26,8 +26,8 @@ ${thirdPartyLibraries}
 
 ================================================================================
 
-For further details about each license, please refer to the provided links. If there are updates to these dependencies, this file should also be updated.`
-}
+For further details about each license, please refer to the provided links. If there are updates to these dependencies, this file should also be updated.`;
+};
 
 export const gpl3 = function (projectName, year, thirdPartyLibraries) {
   return `NOTICE
@@ -57,5 +57,5 @@ ${thirdPartyLibraries}
 
 ================================================================================
 
-For further details about each license, please refer to the provided links. If there are updates to these dependencies, this file should also be updated.`
-}
+For further details about each license, please refer to the provided links. If there are updates to these dependencies, this file should also be updated.`;
+};

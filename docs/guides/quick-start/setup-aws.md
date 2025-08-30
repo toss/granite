@@ -5,6 +5,7 @@ Set up an on-premise React Native CDN infrastructure on AWS in 15 minutes.
 ## What You'll Build
 
 By the end of this guide, you'll have:
+
 - S3 Bucket for storing your app bundles
 - CloudFront CDN for fast global delivery
 - Production-ready infrastructure that scales with your users
@@ -58,9 +59,10 @@ aws configure
 ```
 
 Enter your credentials when prompted:
+
 ```
 AWS Access Key ID: [Your access key]
-AWS Secret Access Key: [Your secret key]  
+AWS Secret Access Key: [Your secret key]
 Default region: [Your region]
 Default output format: json
 ```
@@ -170,13 +172,13 @@ pulumi config set bucketName {your-bucket-name}
 pulumi config set region {your-region}
 ```
 
-::: info 
+::: info
 
-Bucket names must be globally unique. 
+Bucket names must be globally unique.
 
 :::
 
-## 7. Deploy Your Infrastructure  
+## 7. Deploy Your Infrastructure
 
 Let's proceed with creating your AWS infrastructure:
 
@@ -201,9 +203,9 @@ Previewing update (dev)
 
 View Live: https://app.pulumi.com/yourname/my-granite-infrastructure/dev/previews/...
 
-     Type                              Name                              Plan       
- +   pulumi:pulumi:Stack               my-granite-infrastructure-dev     create     
- +   └─ {The infrastructure to create}   
+     Type                              Name                              Plan
+ +   pulumi:pulumi:Stack               my-granite-infrastructure-dev     create
+ +   └─ {The infrastructure to create}
 
 Resources:
     + * to create
@@ -218,9 +220,9 @@ Updating (dev)
 
 View Live: https://app.pulumi.com/yourname/my-granite-infrastructure/dev/updates/1
 
-     Type                              Name                              Status      
- +   pulumi:pulumi:Stack               my-granite-infrastructure-dev     created     
- +   └─ {The infrastructure to create}     
+     Type                              Name                              Status
+ +   pulumi:pulumi:Stack               my-granite-infrastructure-dev     created
+ +   └─ {The infrastructure to create}
 
 Resources:
     + * created
@@ -228,7 +230,7 @@ Resources:
 Duration: {duration}
 ```
 
-> **✅ Success indicator:** You see "Resources: + * created" and your CDN URL
+> **✅ Success indicator:** You see "Resources: + \* created" and your CDN URL
 
 ## 🎉 Congratulations!
 

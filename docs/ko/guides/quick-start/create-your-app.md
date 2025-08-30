@@ -108,7 +108,7 @@ Granite 프로젝트의 중요한 디렉토리와 파일은 다음과 같아요.
 
 - **'pages/'** - 각 파일이 앱의 화면이 돼요
 - **'granite.config.ts'** - Granite 앱 설정 ([참고](../../reference/react-native/config/defineConfig))
-- **'src/_app.tsx'** - 마이크로서비스의 모든 화면에서 공유하는 로직을 추가할 수 있는 메인 진입점
+- **'src/\_app.tsx'** - 마이크로서비스의 모든 화면에서 공유하는 로직을 추가할 수 있는 메인 진입점
 
 ## 4. 개발 서버 실행
 
@@ -135,8 +135,8 @@ yarn dev
 ```
  ██████╗ ██████╗  █████╗ ███╗   ██╗██╗████████╗███████╗
 ██╔════╝ ██╔══██╗██╔══██╗████╗  ██║██║╚══██╔══╝██╔════╝
-██║  ███╗██████╔╝███████║██╔██╗ ██║██║   ██║   █████╗  
-██║   ██║██╔══██╗██╔══██║██║╚██╗██║██║   ██║   ██╔══╝  
+██║  ███╗██████╔╝███████║██╔██╗ ██║██║   ██║   █████╗
+██║   ██║██╔══██╗██╔══██║██║╚██╗██║██║   ██║   ██╔══╝
 ╚██████╔╝██║  ██║██║  ██║██║ ╚████║██║   ██║   ███████╗
  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝   ╚══════╝
 
@@ -187,9 +187,7 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>프로필 화면</Text>
-      <Text style={styles.description}>
-        여기는 프로필 서비스
-      </Text>
+      <Text style={styles.description}>여기는 프로필 서비스</Text>
     </View>
   );
 }
@@ -229,11 +227,8 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Granite</Text>
-      
-      <TouchableOpacity 
-        style={styles.button}
-        onPress={() => router.push('/profile')}
-      >
+
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/profile')}>
         <Text style={styles.buttonText}>프로필로 가기</Text>
       </TouchableOpacity>
     </View>

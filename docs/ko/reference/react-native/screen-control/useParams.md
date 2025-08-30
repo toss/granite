@@ -1,9 +1,8 @@
 ---
 sourcePath: packages/react-native/src/router/createRoute.ts
 ---
+
 # useParams
-
-
 
 `useParams`는 지정된 라우트에서 파라미터를 가져오는 훅이에요.
 이 훅을 사용하면 현재 라우트의 파라미터에 쉽게 접근할 수 있어요.
@@ -13,14 +12,13 @@ sourcePath: packages/react-native/src/router/createRoute.ts
 
 ```typescript
 function useParams<TScreen extends keyof RegisterScreen>(options: {
-    from: TScreen;
-    strict?: true;
+  from: TScreen;
+  strict?: true;
 }): RegisterScreen[TScreen];
 ```
 
-
-
 ### 파라미터
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">options</span><span class="post-parameters--required">필수</span> · <span class="post-parameters--type">GraniteRouteHooksOptions&lt;TScreen&gt;</span>
@@ -41,19 +39,9 @@ function useParams<TScreen extends keyof RegisterScreen>(options: {
   </li>
 </ul>
 
-
-
-
-
-
-
-
-
-
 ## 예제
 
 ### 라우트 파라미터 가져오기
-
 
 ::: code-group
 
@@ -88,4 +76,5 @@ function UseParamsExample() {
   );
 }
 ```
+
 :::

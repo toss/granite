@@ -95,7 +95,7 @@ function PageB() {
     if (navigation.canGoBack()) {
       navigation.goBack();
     } else {
-      console.warn("Cannot go back to the previous screen.");
+      console.warn('Cannot go back to the previous screen.');
     }
   };
 
@@ -261,7 +261,6 @@ const styles = StyleSheet.create({
 
 <UsageSection assetType="image" assetPath="/usage/navigation/navigate-2.gif">
 
-
 You can use the [`goBack`](https://reactnavigation.org/docs/navigation-actions/#goback) method to return to the previous screen. However, an error may occur if there is no previous screen history, so you should first check with [`canGoBack`](https://reactnavigation.org/docs/navigation-object/#cangoback).
 
 ```tsx
@@ -282,7 +281,7 @@ function PageB() {
     if (navigation.canGoBack()) {
       navigation.goBack();
     } else {
-      console.warn("Cannot go back to the previous screen.");
+      console.warn('Cannot go back to the previous screen.');
     }
   };
 
@@ -456,6 +455,5 @@ navigation.dispatch(
 ## References
 
 - [React Navigation Official Documentation](https://reactnavigation.org/)
-
 
 Using React Navigation in this way makes it easy to handle navigation between screens, and you can implement various UX features through functions for passing data or manipulating history. Also, using it with TypeScript allows you to write safe and robust code.

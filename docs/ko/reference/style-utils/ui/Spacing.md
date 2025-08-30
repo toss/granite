@@ -1,21 +1,19 @@
 ---
 sourcePath: packages/style-utils/src/spacing.tsx
 ---
+
 # Spacing
-
-
 
 `Spacing`은 빈 공간을 차지해서 여백을 추가하는 컴포넌트예요. 가로 혹은 세로 방향으로 여백의 크기를 지정할 수 있어요.
 
 ## 시그니처
 
 ```typescript
-Spacing: import("react").NamedExoticComponent<Props>
+Spacing: import('react').NamedExoticComponent<Props>;
 ```
 
-
-
 ### 파라미터
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">props</span><span class="post-parameters--type">object</span>
@@ -40,15 +38,6 @@ Spacing: import("react").NamedExoticComponent<Props>
     </ul>
   </li>
 </ul>
-
-
-
-
-
-
-
-
-
 
 ## 예제
 

@@ -23,8 +23,6 @@
   "typescript.tsdk": ".yarn/sdks/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "jest.enable": false,
-  "rust-analyzer.linkedProjects": [
-    "Cargo.toml"
-  ],
+  "rust-analyzer.linkedProjects": ["Cargo.toml"],
   "git.ignoreLimitWarning": true
 }

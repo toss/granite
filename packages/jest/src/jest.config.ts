@@ -47,7 +47,6 @@ function handleDisplayName(extraSettings: Config | undefined): Config['displayNa
     const packageJSONPath = path.resolve(extraSettings.rootDir, 'package.json');
 
     if (fs.existsSync(packageJSONPath)) {
-       
       return require(packageJSONPath).name;
     }
   }

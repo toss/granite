@@ -1,9 +1,8 @@
 ---
 sourcePath: packages/style-utils/src/flex.tsx
 ---
+
 # Flex
-
-
 
 `Flex`는 자식 요소들을 [**Flexbox 레이아웃**](https://reactnative.dev/docs/0.72/flexbox)을 기준으로 배치하는 컴포넌트예요. Flexbox를 사용하면, 가로 및 세로 방향으로 요소들을 쉽게 정렬하고, 중앙 정렬을 간편하게 설정할 수 있어요.
 자식 요소를 정 중앙에 배치할 때에는 `Flex.Center`, 세로 중앙에 배치할 때에는 `Flex.CenterVertical`, 가로 중앙에 배치할 때에는 `Flex.CenterHorizontal`을 사용해요.
@@ -11,12 +10,11 @@ sourcePath: packages/style-utils/src/flex.tsx
 ## 시그니처
 
 ```typescript
-Flex: FlexType
+Flex: FlexType;
 ```
 
-
-
 ### 파라미터
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">props</span><span class="post-parameters--type">object</span>
@@ -47,10 +45,8 @@ Flex: FlexType
   </li>
 </ul>
 
-
-
-
 ### 프로퍼티
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">Center</span><span class="post-parameters--type">FlexCenter</span>
@@ -72,13 +68,6 @@ Flex: FlexType
     <p class="post-parameters--description"><code>Flex.CenterHorizontal</code>는 자식 요소들을 Flex Layout 기준으로 <strong>가로 방향으로 중앙에 정렬</strong>하기 위한 컴포넌트예요.</p>
   </li>
 </ul>
-
-
-
-
-
-
-
 
 ## 예제
 

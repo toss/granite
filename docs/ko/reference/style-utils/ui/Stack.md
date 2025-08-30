@@ -1,9 +1,8 @@
 ---
 sourcePath: packages/style-utils/src/stack.tsx
 ---
+
 # Stack
-
-
 
 `Stack`은 자식 요소들을 Stack 방식으로 가로 혹은 세로로 배치하고, 자식 요소 사이에 간격을 설정할 수 있는 컴포넌트예요.
 `direction` 속성으로 가로(`horizontal`) 또는 세로(`vertical`) 방향을 지정할 수 있고, 자식 요소들 사이의 간격을 `gutter` 속성으로 조절할 수 있어요.
@@ -12,12 +11,11 @@ sourcePath: packages/style-utils/src/stack.tsx
 ## 시그니처
 
 ```typescript
-Stack: StackType
+Stack: StackType;
 ```
 
-
-
 ### 파라미터
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">props</span><span class="post-parameters--type">object</span>
@@ -48,10 +46,8 @@ Stack: StackType
   </li>
 </ul>
 
-
-
-
 ### 프로퍼티
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">Horizontal</span><span class="post-parameters--type">StackHorizontal</span>
@@ -66,13 +62,6 @@ Stack: StackType
     <p class="post-parameters--description"><code>Stack.Vertical</code>은 자식 요소들을 <strong>세로 방향</strong>으로 정렬하여 쌓는 컴포넌트예요.</p>
   </li>
 </ul>
-
-
-
-
-
-
-
 
 ## 예제
 

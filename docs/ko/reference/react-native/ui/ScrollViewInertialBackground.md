@@ -1,9 +1,8 @@
 ---
 sourcePath: packages/react-native/src/scroll-view-inertial-background/ScrollViewInertialBackground.tsx
 ---
+
 # ScrollViewInertialBackground
-
-
 
 iOS `ScrollView` 콘텐츠의 위, 아래 공간에 배경색을 추가해서, 스크롤 했을 때 자연스러운 시각 효과를 제공해요.
 iOS에서는 스크롤이 끝에 도달했을 때 살짝 튕기는 듯한 [Bounce 효과](https://medium.com/@wcandillon/ios-bounce-list-effect-with-react-native-5102e3a83999)가 발생해요. 이때 콘텐츠 위, 아래 공간에 배경색을 설정하면 더 일관된 유저 경험을 제공할 수 있어요.
@@ -11,12 +10,15 @@ iOS에서는 스크롤이 끝에 도달했을 때 살짝 튕기는 듯한 [Bounc
 ## 시그니처
 
 ```typescript
-function ScrollViewInertialBackground({ topColor, bottomColor, spacer: _spacer, }: ScrollViewInertialBackgroundProps): import("react/jsx-runtime").JSX.Element;
+function ScrollViewInertialBackground({
+  topColor,
+  bottomColor,
+  spacer: _spacer,
+}: ScrollViewInertialBackgroundProps): import('react/jsx-runtime').JSX.Element;
 ```
 
-
-
 ### 파라미터
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">props</span><span class="post-parameters--type">object</span>
@@ -41,15 +43,6 @@ function ScrollViewInertialBackground({ topColor, bottomColor, spacer: _spacer, 
     </ul>
   </li>
 </ul>
-
-
-
-
-
-
-
-
-
 
 ## 예제
 

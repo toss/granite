@@ -38,10 +38,8 @@ function sidebar(): DefaultTheme.Sidebar {
         },
         {
           text: 'Miscellaneous',
-          items: [
-            { text: 'Install Test App', link: '/guides/miscellaneous/install-native-app' },
-          ]
-        }
+          items: [{ text: 'Install Test App', link: '/guides/miscellaneous/install-native-app' }],
+        },
       ],
     },
     {
@@ -56,11 +54,11 @@ function nav(): DefaultTheme.NavItem[] {
     { text: 'Introduction', link: '/guides/introduction' },
     {
       text: 'Guide',
-      link: '/guides/quick-start/create-your-app'
+      link: '/guides/quick-start/create-your-app',
     },
     {
       text: 'Reference',
-      link: '/reference/react-native/config/defineConfig'
+      link: '/reference/react-native/config/defineConfig',
     },
-  ]
+  ];
 }

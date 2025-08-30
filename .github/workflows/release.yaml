@@ -41,4 +41,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          YARN_NPM_REGISTRY_SERVER: "https://registry.npmjs.org"
+          YARN_NPM_REGISTRY_SERVER: 'https://registry.npmjs.org'
