@@ -2,3 +2,4 @@
 .yarn
 **/coverage
 **/dist
+packages/devtools-frontend/src/front_end
