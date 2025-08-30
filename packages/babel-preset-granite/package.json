@@ -7,7 +7,9 @@
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
-    "build": "tsdown"
+    "build": "tsdown",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.cts",
@@ -36,8 +38,10 @@
   ],
   "sideEffects": false,
   "devDependencies": {
-    "@types/node": "^22.10.2",
+    "@types/babel__core": "^7.20.5",
+    "@types/node": "^24.3.0",
     "tsdown": "^0.12.0",
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "vitest": "^3.2.4"
   }
 }
