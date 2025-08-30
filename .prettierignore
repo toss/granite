@@ -1,1 +1,4 @@
 .github
+.yarn
+**/coverage
+**/dist
