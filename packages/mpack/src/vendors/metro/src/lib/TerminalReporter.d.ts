@@ -1,4 +1,4 @@
-import type { ReportableEvent } from "./ReportableEvent";
+import type { ReportableEvent } from './ReportableEvent';
 type Terminal = any;
 type TerminalReportableEvent =
   | ReportableEvent

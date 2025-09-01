@@ -38,10 +38,8 @@ function sidebar(): DefaultTheme.Sidebar {
         },
         {
           text: '기타',
-          items: [
-            { text: '테스트 앱 설치하기', link: '/ko/guides/miscellaneous/install-native-app' },
-          ]
-        }
+          items: [{ text: '테스트 앱 설치하기', link: '/ko/guides/miscellaneous/install-native-app' }],
+        },
       ],
     },
     {
@@ -82,11 +80,11 @@ function nav(): DefaultTheme.NavItem[] {
     { text: '소개', link: '/ko/guides/introduction' },
     {
       text: '가이드',
-      link: '/ko/guides/quick-start/create-your-app'
+      link: '/ko/guides/quick-start/create-your-app',
     },
     {
       text: '레퍼런스',
-      link: '/ko/reference/react-native/config/defineConfig'
+      link: '/ko/reference/react-native/config/defineConfig',
     },
-  ]
+  ];
 }

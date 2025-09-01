@@ -26,7 +26,7 @@ export class WebSocketServerRouter {
 
     for (const [path, wss] of this.webSocketServers.entries()) {
       if (path === pathname) {
-        wss.handleUpgrade(request, socket, head, client => {
+        wss.handleUpgrade(request, socket, head, (client) => {
           wss.emit('connection', client, request);
         });
         upgraded = true;
