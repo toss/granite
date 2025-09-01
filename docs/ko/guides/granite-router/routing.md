@@ -29,7 +29,7 @@ root
 ::: details `page-a.tsx` 소스코드
 
 ```tsx
-// page-a.tsx 
+// page-a.tsx
 import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { createRoute, useNavigation } from '@granite-js/react-native';
 
@@ -455,6 +455,5 @@ navigation.dispatch(
 ## 레퍼런스
 
 - [React Navigation 공식 문서](https://reactnavigation.org/)
-
 
 이렇게 React Navigation을 사용하면 화면 간 이동을 쉽게 처리할 수 있고, 데이터를 전달하거나 기록을 조작하는 기능을 통해 다양한 UX를 구현할 수 있어요. 또한 타입스크립트와 함께 사용하면 안전하고 견고한 코드를 작성할 수 있답니다.

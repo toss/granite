@@ -38,7 +38,6 @@ export default defineConfig({
     router(), // [!code highlight]
   ],
 });
-
 ```
 
 ## Development Mode

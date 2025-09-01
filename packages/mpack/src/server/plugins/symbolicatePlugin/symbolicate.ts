@@ -28,8 +28,8 @@ export async function symbolicate(rawSourcemap: Uint8Array, stackFrame: StackFra
   const { stack, codeFrame } = await sourceMap.SourceMapConsumer.with(
     Buffer.from(rawSourcemap).toString('utf-8'),
     null,
-    consumer => {
-      const originalStackFrame = stackFrame.map(frame => {
+    (consumer) => {
+      const originalStackFrame = stackFrame.map((frame) => {
         const originalPosition = consumer.originalPositionFor({
           column: frame.column,
           line: frame.lineNumber,
@@ -49,7 +49,7 @@ export async function symbolicate(rawSourcemap: Uint8Array, stackFrame: StackFra
       /**
        * @see {@link https://github.com/facebook/metro/blob/v0.80.8/packages/metro/src/Server.js#L1127-L1166}
        */
-      const targetFrame = originalStackFrame.find(frame => !('collapse' in frame));
+      const targetFrame = originalStackFrame.find((frame) => !('collapse' in frame));
       const content = targetFrame?.source && consumer.sourceContentFor(targetFrame?.source);
       let codeFrame: CodeFrame | null = null;
 
