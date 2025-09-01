@@ -1,9 +1,8 @@
 ---
 sourcePath: packages/style-utils/src/flex.tsx
 ---
+
 # FlexCenter
-
-
 
 `Flex.Center`는 자식 요소들을 [**Flexbox 레이아웃**](https://reactnative.dev/docs/0.72/flexbox) 기준으로 가로와 세로 모두 정 중앙에 배치하는 컴포넌트예요.
 `alignItems`와 `justifyContent` 속성 모두 `'center'`로 설정되어, 자식 요소들이 부모 컴포넌트의 중앙에 배치돼요.
@@ -12,12 +11,11 @@ sourcePath: packages/style-utils/src/flex.tsx
 ## 시그니처
 
 ```typescript
-FlexCenter: import("react").ForwardRefExoticComponent<Props & import("react").RefAttributes<View>>
+FlexCenter: import('react').ForwardRefExoticComponent<Props & import('react').RefAttributes<View>>;
 ```
 
-
-
 ### 파라미터
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">props</span><span class="post-parameters--type">object</span>
@@ -47,15 +45,6 @@ FlexCenter: import("react").ForwardRefExoticComponent<Props & import("react").Re
     </ul>
   </li>
 </ul>
-
-
-
-
-
-
-
-
-
 
 ## 예제
 
