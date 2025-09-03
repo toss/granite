@@ -1,5 +1,19 @@
 # @granite-js/react-native
 
+## 0.1.23
+
+### Patch Changes
+
+- d9b7d7c: avoid multiple app registrations without throwing errors
+  - @granite-js/cli@0.1.23
+  - @granite-js/image@0.1.23
+  - @granite-js/jest@0.1.23
+  - @granite-js/lottie@0.1.23
+  - @granite-js/mpack@0.1.23
+  - @granite-js/native@0.1.23
+  - @granite-js/plugin-core@0.1.23
+  - @granite-js/style-utils@0.1.23
+
 ## 0.1.22
 
 ### Patch Changes
