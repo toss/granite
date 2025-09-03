@@ -44,7 +44,8 @@ const createApp = () => {
 
   function registerComponent(appKey: string, component: React.ComponentType<any>): string {
     if (AppRegistry.getAppKeys().includes(appKey)) {
-      throw new Error(`App with key '${appKey}' already registered`);
+      // `AppRegistry.registerComponent` returns the app key.
+      return appKey;
     }
 
     return AppRegistry.registerComponent(appKey, () => component);
