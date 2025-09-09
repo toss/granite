@@ -65,12 +65,10 @@ describe('AsyncTransformPipeline', () => {
       it('해당 step 이 실행되어야 한다', async () => {
         const pipeline = new AsyncTransformPipeline()
           .addStep(async (code) => ({ code: code + ';state.value++;' })) // 1
-          .addStep(
-            async (code) => ({ code: code + ';state.value++;' }), // 2
-            {
-              conditions: [() => false, () => false, () => true],
-            }
-          );
+          .addStep({
+            if: () => true,
+            then: async (code) => ({ code: code + ';state.value++;' }),
+          });
 
         const result = await pipeline.transform(entryCode, { path: entryFile });
         const code = toPrintState(result.code);
@@ -83,12 +81,10 @@ describe('AsyncTransformPipeline', () => {
       it('해당 step 이 실행되지 않아야 한다', async () => {
         const pipeline = new AsyncTransformPipeline()
           .addStep(async (code) => ({ code: code + ';state.value++;' })) // 1
-          .addStep(
-            async (code) => ({ code: code + ';state.value++;' }), // 2
-            {
-              conditions: [() => false, () => false, () => false],
-            }
-          );
+          .addStep({
+            if: () => false,
+            then: async (code) => ({ code: code + ';state.value++;' }),
+          });
 
         const result = await pipeline.transform(entryCode, { path: entryFile });
         const code = toPrintState(result.code);
@@ -103,12 +99,11 @@ describe('AsyncTransformPipeline', () => {
       const pipeline = new AsyncTransformPipeline()
         .addStep(async (code) => ({ code: code + ';state.value++;' })) // 1
         .addStep(async (code) => ({ code: code + ';state.value++;' })) // 2
-        .addStep(
-          async (code) => ({ code: code + ';state.value++;' }), // 3
-          {
-            skipOtherSteps: true,
-          }
-        )
+        .addStep({
+          if: () => false,
+          then: async (code) => ({ code: code + ';state.value++;' }),
+          stopAfter: true,
+        })
         .addStep(async (code) => ({ code: code + ';state.value++;' })); // 4
 
       const result = await pipeline.transform(entryCode, { path: entryFile });
