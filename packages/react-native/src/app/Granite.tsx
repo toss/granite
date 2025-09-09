@@ -1,4 +1,4 @@
-import { ComponentType, PropsWithChildren } from 'react';
+import { ComponentType, type JSX, PropsWithChildren } from 'react';
 import { AppRegistry } from 'react-native';
 import { ENTRY_BUNDLE_NAME } from '../constants';
 import type { InitialProps } from '../initial-props';
