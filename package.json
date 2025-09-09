@@ -24,6 +24,7 @@
     "consistency-check-licenses": "node .scripts/licenses.mjs consistency-check",
     "build:all": "nx run-many --targets=build,build:release",
     "build:shared": "tsdown --config shared/tsdown.config.ts",
+    "attw:all": "yarn tools attw",
     "clear": "rimraf --glob \"**/*/dist\" .nx",
     "tools": "./bin/tools"
   },
@@ -31,6 +32,7 @@
     "typescript": "5.8.3"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
     "@changesets/cli": "^2.29.3",
     "@clack/prompts": "^0.9.0",
     "@eslint/compat": "^1.1.1",

@@ -172,13 +172,13 @@ pulumi config set bucketName {버킷 이름}
 pulumi config set region {리전}
 ```
 
-::: info 
+::: info
 
 버킷 이름은 전체 AWS에서 유일해야 해요. 다른 사람과 겹치지 않는 이름을 사용하세요.
 
 :::
 
-## 7. 인프라 배포하기  
+## 7. 인프라 배포하기
 
 이제 Granite 앱을 서빙할 AWS 인프라를 만들어볼게요.
 
@@ -203,9 +203,9 @@ Previewing update (dev)
 
 View Live: https://app.pulumi.com/yourname/my-granite-infrastructure/dev/previews/...
 
-     Type                              Name                              Plan       
- +   pulumi:pulumi:Stack               my-granite-infrastructure-dev     create     
- +   └─ {생성될 인프라}   
+     Type                              Name                              Plan
+ +   pulumi:pulumi:Stack               my-granite-infrastructure-dev     create
+ +   └─ {생성될 인프라}
 
 Resources:
     + * to create
@@ -220,9 +220,9 @@ Updating (dev)
 
 View Live: https://app.pulumi.com/yourname/my-granite-infrastructure/dev/updates/1
 
-     Type                              Name                              Status      
- +   pulumi:pulumi:Stack               my-granite-infrastructure-dev     created     
- +   └─ {생성된 인프라}     
+     Type                              Name                              Status
+ +   pulumi:pulumi:Stack               my-granite-infrastructure-dev     created
+ +   └─ {생성된 인프라}
 
 Resources:
     + * created
@@ -230,7 +230,7 @@ Resources:
 Duration: {소요 시간}
 ```
 
-> **✅ 성공했다면:** "Resources: + * created"와 CDN URL이 보여요
+> **✅ 성공했다면:** "Resources: + \* created"와 CDN URL이 보여요
 
 ## 🎉 축하해요!
 

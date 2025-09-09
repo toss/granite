@@ -22,11 +22,7 @@ export function deploy() {
     .description('Deploy a Granite application')
     .requiredOption('--bucket <BUCKET>', 'AWS bucket')
     .action(async (options) => {
-      const [config, awsCredentials, region] = await Promise.all([
-        loadConfig(),
-        awsCredentialsProvider(),
-        getRegion(),
-      ]);
+      const [config, awsCredentials, region] = await Promise.all([loadConfig(), awsCredentialsProvider(), getRegion()]);
 
       const envResult = v.safeParse(envSchema, {
         AWS_REGION: region,

@@ -25,7 +25,7 @@ const operations: { [key: Operation]: (number, number) => number } = {
   add,
   sub,
   mul,
-  div
+  div,
 };
 
 const op: mixed = 'mul';
