@@ -31,7 +31,8 @@
     "@babel/plugin-transform-flow-strip-types": "catalog:react-native",
     "@babel/preset-env": "7.15.0",
     "@babel/preset-react": "7.16.7",
-    "@babel/preset-typescript": "7.16.7"
+    "@babel/preset-typescript": "7.16.7",
+    "@react-native/babel-preset": "catalog:react-native"
   },
   "files": [
     "dist"
