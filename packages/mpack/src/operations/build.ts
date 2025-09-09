@@ -14,7 +14,7 @@ import { isBuildSuccess } from '../utils/buildResult';
 import { getDefaultOutfileName } from '../utils/getDefaultOutfileName';
 import { printErrors } from '../utils/printErrors';
 import { isFulfilled, isRejected } from '../utils/promise';
-import { writeBundle } from '../utils/writeBundle';
+import { writeBundle, writeMetafile } from '../utils/writeBundle';
 
 type CommonBuildOptions = Omit<BundlerConfig, 'rootDir' | 'buildConfig'> & Pick<BuildConfig, 'platform' | 'outfile'>;
 
@@ -102,6 +102,10 @@ async function buildImpl(
 
   if (isBuildSuccess(buildResult)) {
     await writeBundle(buildResult.outfile, buildResult.bundle);
+
+    if (buildResult.metafile != null) {
+      await writeMetafile(buildResult.outfile, buildResult.metafile);
+    }
 
     const performanceSummary = Performance.getSummary();
     if (performanceSummary != null) {

@@ -1,5 +1,5 @@
 import type { Container, Module } from './types';
-import { normalizePath } from './utils';
+import { normalizePath, toESM } from './utils';
 
 export function exposeModule(container: Container, exposeName: string, module: Module) {
   const normalizedExposeName = normalizePath(exposeName);
@@ -9,7 +9,7 @@ export function exposeModule(container: Container, exposeName: string, module: M
   }
 
   Object.defineProperty(container.exposeMap, normalizedExposeName, {
-    get: () => Object.assign(module, { __esModule: true }),
+    get: () => toESM(module),
     enumerable: true,
   });
 }

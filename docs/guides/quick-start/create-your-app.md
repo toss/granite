@@ -105,6 +105,7 @@ my-granite-app/
 ```
 
 **Key files:**
+
 - **`pages/`** - Each file becomes a screen in your app
 - **`granite.config.ts`** - Configure your Granite app ([Reference](../../reference/react-native/config/defineConfig))
 - **`src/_app.tsx`** - The main entry point where you can add logic that's shared across all screens in your microservice
@@ -134,8 +135,8 @@ You'll see the Granite welcome screen:
 ```
  ██████╗ ██████╗  █████╗ ███╗   ██╗██╗████████╗███████╗
 ██╔════╝ ██╔══██╗██╔══██╗████╗  ██║██║╚══██╔══╝██╔════╝
-██║  ███╗██████╔╝███████║██╔██╗ ██║██║   ██║   █████╗  
-██║   ██║██╔══██╗██╔══██║██║╚██╗██║██║   ██║   ██╔══╝  
+██║  ███╗██████╔╝███████║██╔██╗ ██║██║   ██║   █████╗
+██║   ██║██╔══██╗██╔══██║██║╚██╗██║██║   ██║   ██╔══╝
 ╚██████╔╝██║  ██║██║  ██║██║ ╚████║██║   ██║   ███████╗
  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝   ╚══════╝
 
@@ -155,6 +156,7 @@ Now let's see your app running in the Granite test app:
 ### 5.1 Install Granite Test App
 
 If you haven't already, install the Granite test app on your simulator:
+
 - Follow our [installation guide](../miscellaneous/install-native-app)
 
 ### 5.2 Run Your App
@@ -187,9 +189,7 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Profile Screen</Text>
-      <Text style={styles.description}>
-        This is your profile microservice!
-      </Text>
+      <Text style={styles.description}>This is your profile microservice!</Text>
     </View>
   );
 }
@@ -219,10 +219,9 @@ const styles = StyleSheet.create({
 Update your `pages/index.tsx` to add navigation:
 
 ```tsx
-
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@granite-js/react-native'
+import { useNavigation } from '@granite-js/react-native';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -230,11 +229,8 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome to Granite!</Text>
-      
-      <TouchableOpacity 
-        style={styles.button}
-        onPress={() => navigation.navigate('/profile')}
-      >
+
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('/profile')}>
         <Text style={styles.buttonText}>Go to Profile</Text>
       </TouchableOpacity>
     </View>
@@ -302,7 +298,7 @@ Granite will create optimized microservice bundles, and your optimized bundles a
 You've successfully created your first Granite app! Here's what you accomplished:
 
 - ✅ Created a new Granite project
-- ✅ Set up the development environment  
+- ✅ Set up the development environment
 - ✅ Built your first microservice screens
 - ✅ Added navigation between screens
 - ✅ Generated production-ready bundles

@@ -1,9 +1,8 @@
 ---
 sourcePath: packages/style-utils/src/box-spacing.tsx
 ---
+
 # padding
-
-
 
 `padding` 함수는 컴포넌트의 안쪽 여백을 설정함으로써 콘텐츠와 경계 사이에 적절한 간격을 확보해요. 가로(x), 세로(y), 그리고 각 방향(top, right, bottom, left)별로 외부 여백을 숫자로 지정할 수 있어요.
 숫자를 입력하면 모든 방향에 동일한 값을 적용하거나, 각 방향별로 개별 설정이 가능해요. 또한 자주 쓰는 값에 대한 프리셋이 있어 쉽게 적용할 수 있어요.
@@ -11,12 +10,11 @@ sourcePath: packages/style-utils/src/box-spacing.tsx
 ## 시그니처
 
 ```typescript
-padding: BoxSpacing
+padding: BoxSpacing;
 ```
 
-
-
 ### 파라미터
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">option</span><span class="post-parameters--required">필수</span> · <span class="post-parameters--type">BoxSpacingOption</span>
@@ -27,8 +25,8 @@ padding: BoxSpacing
 
 각 방향에 대해 개별 값을 설정할 수도 있어요.
 
-
 ### 프로퍼티
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">x</span><span class="post-parameters--required">필수</span> · <span class="post-parameters--type">(value: number) =&gt; ViewStyle</span>
@@ -323,13 +321,6 @@ padding: BoxSpacing
     <p class="post-parameters--description">왼쪽에 32px의 안쪽 여백을 적용하는 스타일 객체예요.</p>
   </li>
 </ul>
-
-
-
-
-
-
-
 
 ## 예제
 

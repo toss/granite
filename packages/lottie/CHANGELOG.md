@@ -1,5 +1,36 @@
 # @granite-js/lottie
 
+## 0.1.22
+
+### Patch Changes
+
+- @granite-js/native@0.1.22
+
+## 0.1.21
+
+### Patch Changes
+
+- @granite-js/native@0.1.21
+
+## 0.1.20
+
+### Patch Changes
+
+- Updated dependencies [1df5883]
+  - @granite-js/native@0.1.20
+
+## 0.1.19
+
+### Patch Changes
+
+- @granite-js/native@0.1.19
+
+## 0.1.18
+
+### Patch Changes
+
+- @granite-js/native@0.1.18
+
 ## 0.1.17
 
 ### Patch Changes
