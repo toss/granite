@@ -17,6 +17,7 @@ export default function (api: { env: (env: string) => boolean }) {
       ],
       [require.resolve('@babel/preset-react'), { runtime: 'automatic' }],
       require.resolve('@babel/preset-typescript'),
+      require.resolve('@react-native/babel-preset'),
     ],
     plugins: [
       require.resolve('@babel/plugin-transform-flow-strip-types'),

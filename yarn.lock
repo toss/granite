@@ -12936,6 +12936,7 @@ __metadata:
     "@babel/preset-env": "npm:7.15.0"
     "@babel/preset-react": "npm:7.16.7"
     "@babel/preset-typescript": "npm:7.16.7"
+    "@react-native/babel-preset": "catalog:react-native"
     "@types/babel__core": "npm:^7.20.5"
     "@types/node": "npm:^24.3.0"
     tsdown: "npm:^0.12.0"
