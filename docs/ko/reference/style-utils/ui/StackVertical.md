@@ -1,21 +1,21 @@
 ---
 sourcePath: packages/style-utils/src/stack.tsx
 ---
+
 # StackVertical
-
-
 
 `Stack.Vertical`은 자식 요소를 세로로 쌓아 배치하는 컴포넌트에요. 이 컴포넌트를 사용하면 자식 요소 간의 간격을 `gutter` 속성으로 쉽게 조절할 수 있어, 세로 방향으로 일관된 레이아웃을 유지할 수 있어요.
 
 ## 시그니처
 
 ```typescript
-StackVertical: import("react").ForwardRefExoticComponent<StackWithoutDirectionProps & import("react").RefAttributes<View>>
+StackVertical: import('react').ForwardRefExoticComponent<
+  StackWithoutDirectionProps & import('react').RefAttributes<View>
+>;
 ```
 
-
-
 ### 파라미터
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--name">props</span><span class="post-parameters--type">object</span>
@@ -41,20 +41,11 @@ StackVertical: import("react").ForwardRefExoticComponent<StackWithoutDirectionPr
   </li>
 </ul>
 
-
-
-
-
-
-
-
-
-
 ## 예제
 
 ### 가로 방향으로 요소들을 배치하고 간격으로 16만큼 설정한 예제예요.
 
-```tsx
+````tsx
 import { Stack } from '@granite-js/react-native';
 import { View, Text } from 'react-native';
 
@@ -72,4 +63,4 @@ function StackVerticalExample() {
       </Stack.Vertical>
   );
 }
-```
+````

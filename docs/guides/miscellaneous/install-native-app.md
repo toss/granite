@@ -64,10 +64,10 @@ Follow the guide below to install the app.
 
 When you first run the app, you need to enter the CDN address for loading bundles and the deep link scheme. Granite provides values that you can use for testing.
 
-| Setting Item   | Value                                   | Description                                     |
-| -------------- | --------------------------------------- | ----------------------------------------------- |
-| **Host**       | `https://d2dzky5bdhec40.cloudfront.net` | Trial bundle CDN address. Provided for testing. |
-| **URL Scheme** | `granite://showcase` <br> `granite://counter`  | Scheme used for handling deep links in the app. |
+| Setting Item   | Value                                         | Description                                     |
+| -------------- | --------------------------------------------- | ----------------------------------------------- |
+| **Host**       | `https://d2dzky5bdhec40.cloudfront.net`       | Trial bundle CDN address. Provided for testing. |
+| **URL Scheme** | `granite://showcase` <br> `granite://counter` | Scheme used for handling deep links in the app. |
 
 Enter these values in the Granite test settings and run the app.
 

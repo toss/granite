@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { createContainer } from './createContainer';
 import { exposeModule } from './exposeModule';
-import { normalizePath, parseRemotePath, importRemoteModule, getContainer } from './utils';
+import { normalizePath, parseRemotePath, importRemoteModule, getContainer, toESM } from './utils';
 
 describe('utils', () => {
   describe('getContainer', () => {
@@ -81,6 +81,40 @@ describe('utils', () => {
           default: Button,
         })
       );
+    });
+  });
+
+  describe('toESM', () => {
+    it('should return the ESM compatible module', () => {
+      // Non-ESM compatible module
+      const module1 = { foo: 'foo' };
+
+      // ESM Compatible modules
+      const module2 = { bar: 'bar', default: {} };
+      const module3 = { baz: 'baz', default: {} };
+
+      Object.defineProperty(module2, '__esModule', { value: true, configurable: false });
+      Object.defineProperty(module3, '__esModule', { get: () => true, configurable: true });
+      expect(() => Object.defineProperty(module2, '__esModule', { value: false })).toThrowErrorMatchingInlineSnapshot(
+        `[TypeError: Cannot redefine property: __esModule]`
+      );
+      expect(() => Object.assign(module3, { __esModule: true })).toThrowErrorMatchingInlineSnapshot(
+        `[TypeError: Cannot set property __esModule of #<Object> which has only a getter]`
+      );
+
+      const result1 = toESM(module1);
+      const result2 = toESM(module2);
+      const result3 = toESM(module3);
+
+      expect(result1.__esModule).toEqual(true);
+      expect(result1.foo).toEqual('foo');
+      expect(result1.default).toEqual(module1);
+
+      expect(result2.__esModule).toEqual(true);
+      expect(result2.bar).toEqual('bar');
+
+      expect(result3.__esModule).toEqual(true);
+      expect(result3.baz).toEqual('baz');
     });
   });
 });

@@ -1,5 +1,10 @@
 import path from 'path';
-import { BuildResult, createPluginHooksDriver, resolveConfig, type CompleteGraniteConfig } from '@granite-js/plugin-core';
+import {
+  BuildResult,
+  createPluginHooksDriver,
+  resolveConfig,
+  type CompleteGraniteConfig,
+} from '@granite-js/plugin-core';
 import { Semaphore } from 'es-toolkit';
 import { getMetroConfig } from './getMetroConfig';
 import { getDefaultOutfileName } from '../utils/getDefaultOutfileName';

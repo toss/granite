@@ -15,9 +15,18 @@ interface AppRootProps extends GraniteProps {
   container: ComponentType<PropsWithChildren<InitialProps>>;
   initialProps: InitialProps;
   initialScheme: string;
+  setIosSwipeGestureEnabled?: ({ isEnabled }: { isEnabled: boolean }) => void;
 }
 
-export function AppRoot({ appName, context, container: Container, initialProps, initialScheme, router }: AppRootProps) {
+export function AppRoot({
+  appName,
+  context,
+  container: Container,
+  initialProps,
+  initialScheme,
+  router,
+  setIosSwipeGestureEnabled,
+}: AppRootProps) {
   const prefix = getSchemePrefix({
     appName,
     scheme: global.__granite.app.scheme,
@@ -35,6 +44,7 @@ export function AppRoot({ appName, context, container: Container, initialProps, 
               initialScheme={initialScheme}
               container={Container}
               prefix={prefix}
+              setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
               {...router}
             />
           </BackEventProvider>

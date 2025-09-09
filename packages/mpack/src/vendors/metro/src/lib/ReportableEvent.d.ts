@@ -8,24 +8,24 @@ interface BundleDetails {
 }
 
 type WatcherStatus =
-| {
-    type: 'watchman_slow_command';
-    timeElapsed: number;
-    command: 'watch-project' | 'query';
-}
-| {
-    type: 'watchman_slow_command_complete';
-    timeElapsed: number;
-    command: 'watch-project' | 'query';
-}
-| {
-    type: 'watchman_warning';
-    warning: unknown;
-    command: 'watch-project' | 'query';
-};
+  | {
+      type: 'watchman_slow_command';
+      timeElapsed: number;
+      command: 'watch-project' | 'query';
+    }
+  | {
+      type: 'watchman_slow_command_complete';
+      timeElapsed: number;
+      command: 'watch-project' | 'query';
+    }
+  | {
+      type: 'watchman_warning';
+      warning: unknown;
+      command: 'watch-project' | 'query';
+    };
 
 type HealthCheckResult =
-  | {type: 'error'; timeout: number; error: Error; watcher: string | null}
+  | { type: 'error'; timeout: number; error: Error; watcher: string | null }
   | {
       type: 'success';
       timeout: number;
@@ -80,7 +80,7 @@ export type ReportableEvent =
       type: 'dep_graph_loading';
       hasReducedPerformance: boolean;
     }
-  | {type: 'dep_graph_loaded'}
+  | { type: 'dep_graph_loaded' }
   | {
       buildID: string;
       type: 'bundle_transform_progressed';
@@ -95,7 +95,7 @@ export type ReportableEvent =
       type: 'cache_write_error';
       error: Error;
     }
-  | {type: 'transform_cache_reset'}
+  | { type: 'transform_cache_reset' }
   | {
       type: 'worker_stdout_chunk';
       chunk: string;
@@ -110,15 +110,7 @@ export type ReportableEvent =
     }
   | {
       type: 'client_log';
-      level:
-        | 'trace'
-        | 'info'
-        | 'warn'
-        | 'log'
-        | 'group'
-        | 'groupCollapsed'
-        | 'groupEnd'
-        | 'debug';
+      level: 'trace' | 'info' | 'warn' | 'log' | 'group' | 'groupCollapsed' | 'groupEnd' | 'debug';
       data: Array<unknown>;
       mode: 'BRIDGE' | 'NOBRIDGE';
     }

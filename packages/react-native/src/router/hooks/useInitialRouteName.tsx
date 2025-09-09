@@ -1,8 +1,12 @@
 import { Platform } from 'react-native';
 
-export function useInitialRouteName({ prefix, initialScheme }: { prefix: string; initialScheme: string }) {
+export function useInitialRouteName({ prefix, initialScheme }: { prefix: string; initialScheme?: string }) {
+  if (!initialScheme) {
+    return '/';
+  }
+
   const pathname = removeTrailingSlash(initialScheme).slice(prefix.length).split('?')[0];
-  const shouldUseIndex = initialScheme == null || pathname?.length === 0;
+  const shouldUseIndex = pathname?.length === 0;
 
   return shouldUseIndex ? '/' : pathname;
 }

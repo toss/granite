@@ -1,3 +1,5 @@
+import type { Module } from './types';
+
 export function getContainer(instanceName: string) {
   const containerIndex = __MICRO_FRONTEND__.__INSTANCES__[instanceName];
 
@@ -40,4 +42,23 @@ export function importRemoteModule(remoteRequestPath: string) {
   }
 
   return module;
+}
+
+export function toESM(module: Module) {
+  if (module.__esModule) {
+    return module;
+  }
+
+  // Add `__esModule` flag to ensure compatibility between ESM and CJS.
+  return Object.defineProperties(module, {
+    __esModule: { value: true },
+    ...(module.default == null
+      ? {
+          default: {
+            value: module,
+            enumerable: true,
+          },
+        }
+      : null),
+  });
 }

@@ -10,7 +10,7 @@ A hook that returns the query parameters from the URL passed when the app is fir
 
 ```typescript
 function useInitialSearchParams(): {
-    [k: string]: string;
+  [k: string]: string;
 };
 ```
 
@@ -33,7 +33,7 @@ function Page() {
   const params = useInitialSearchParams();
   // Example: if initial URL is myapp://home?userId=42&theme=dark
   console.log(params.userId); // "42"
-  console.log(params.theme);  // "dark"
+  console.log(params.theme); // "dark"
   return <></>;
 }
 ```
