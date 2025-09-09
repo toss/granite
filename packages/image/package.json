@@ -28,10 +28,10 @@
   ],
   "devDependencies": {
     "@granite-js/native": "workspace:*",
-    "@types/react": "catalog:rn0_81_0",
+    "@types/react": "catalog:react-native",
     "eslint": "^9.7.0",
-    "react": "catalog:rn0_81_0",
-    "react-native": "catalog:rn0_81_0",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
     "tsdown": "^0.14.1",
     "typescript": "5.8.3"
   },

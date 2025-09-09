@@ -11,8 +11,8 @@
   "dependencies": {
     "@granite-js/native": "workspace:*",
     "@granite-js/react-native": "workspace:*",
-    "react": "catalog:rn0_81_0",
-    "react-native": "catalog:rn0_81_0"
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native"
   },
   "devDependencies": {
     "@babel/core": "7.23.9",
@@ -24,12 +24,12 @@
     "@granite-js/plugin-micro-frontend": "workspace:*",
     "@granite-js/plugin-router": "workspace:*",
     "@granite-js/plugin-sentry": "workspace:*",
-    "@react-native/babel-preset": "catalog:rn0_81_0",
+    "@react-native/babel-preset": "catalog:react-native",
     "@testing-library/react-native": "^12.9.0",
     "@types/babel__core": "^7.20.5",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.2",
-    "@types/react": "catalog:rn0_81_0",
+    "@types/react": "catalog:react-native",
     "babel-preset-granite": "workspace:*",
     "jest": "^29.7.0",
     "react-test-renderer": "18.2.0",
