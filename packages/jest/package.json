@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/jest",
-  "version": "0.1.23-next.0",
+  "version": "0.1.23-next.4",
   "description": "Jest presets for Granite",
   "scripts": {
     "prepack": "yarn build",
@@ -32,7 +32,7 @@
     "typescript": "5.8.3"
   },
   "peerDependencies": {
-    "@granite-js/native": "0.1.23-next.0",
+    "@granite-js/native": "0.1.23-next.4",
     "react": "*",
     "react-native": "*"
   }
