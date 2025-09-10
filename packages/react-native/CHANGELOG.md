@@ -1,5 +1,35 @@
 # @granite-js/react-native
 
+## 0.1.23-next.4
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.4
+  - @granite-js/style-utils@0.1.23-next.4
+  - @granite-js/lottie@0.1.23-next.4
+  - @granite-js/native@0.1.23-next.4
+  - @granite-js/image@0.1.23-next.4
+  - @granite-js/mpack@0.1.23-next.4
+  - @granite-js/jest@0.1.23-next.4
+  - @granite-js/cli@0.1.23-next.4
+
+## 0.1.23-next.3
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.3
+  - @granite-js/style-utils@0.1.23-next.3
+  - @granite-js/lottie@0.1.23-next.3
+  - @granite-js/native@0.1.23-next.3
+  - @granite-js/image@0.1.23-next.3
+  - @granite-js/mpack@0.1.23-next.3
+  - @granite-js/jest@0.1.23-next.3
+  - @granite-js/cli@0.1.23-next.3
+
 ## 0.1.23-next.0
 
 ### Patch Changes

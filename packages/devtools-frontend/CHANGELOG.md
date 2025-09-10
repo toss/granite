@@ -1,5 +1,17 @@
 # @granite-js/devtools-frontend
 
+## 0.1.23-next.4
+
+### Patch Changes
+
+- test
+
+## 0.1.23-next.3
+
+### Patch Changes
+
+- test
+
 ## 0.1.23-next.0
 
 ## 0.1.22
