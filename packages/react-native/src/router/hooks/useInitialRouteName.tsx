@@ -6,7 +6,6 @@ export function useInitialRouteName({ prefix, initialScheme }: { prefix: string;
   }
 
   if (!initialScheme.startsWith(prefix)) {
-    console.error("initialScheme's wrong in useInitialRouteName");
     return '_404';
   }
 
