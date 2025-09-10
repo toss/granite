@@ -24,5 +24,8 @@
     "@granite-js/style-utils": "0.1.22",
     "@granite-js/utils": "0.1.22"
   },
-  "changesets": ["fair-snakes-drive"]
+  "changesets": [
+    "fair-snakes-drive",
+    "red-chicken-notice"
+  ]
 }

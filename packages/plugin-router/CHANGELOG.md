@@ -1,5 +1,21 @@
 # @granite-js/plugin-router
 
+## 0.1.23-next.4
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.4
+
+## 0.1.23-next.3
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.3
+
 ## 0.1.23-next.0
 
 ### Patch Changes
