@@ -1,5 +1,15 @@
 # @granite-js/mpack
 
+## 0.1.23-next.5
+
+### Patch Changes
+
+- temp
+- Updated dependencies
+  - @granite-js/devtools-frontend@0.1.23-next.5
+  - @granite-js/plugin-core@0.1.23-next.5
+  - @granite-js/utils@0.1.23-next.5
+
 ## 0.1.23-next.4
 
 ### Patch Changes
