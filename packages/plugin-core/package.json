@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-core",
   "type": "module",
-  "version": "0.1.22",
+  "version": "0.1.23-next.5",
   "description": "The core plugin module for Granite",
   "scripts": {
     "prepack": "yarn build",
@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@granite-js/utils": "workspace:*",
-    "@swc/core": "1.5.24",
+    "@swc/core": "catalog:swc",
     "@types/babel__core": "^7",
     "@types/connect": "^3",
     "cosmiconfig": "^9.0.0",

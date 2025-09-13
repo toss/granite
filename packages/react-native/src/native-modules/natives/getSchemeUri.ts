@@ -23,5 +23,5 @@ import { GraniteModule } from './GraniteModule';
  * ```
  */
 export function getSchemeUri() {
-  return GraniteModule.schemeUri;
+  return GraniteModule?.schemeUri ?? 'unknown';
 }

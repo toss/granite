@@ -1,5 +1,39 @@
 # @granite-js/plugin-micro-frontend
 
+## 0.1.23-next.5
+
+### Patch Changes
+
+- temp
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.5
+  - @granite-js/utils@0.1.23-next.5
+
+## 0.1.23-next.4
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.4
+  - @granite-js/utils@0.1.23-next.4
+
+## 0.1.23-next.3
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.3
+  - @granite-js/utils@0.1.23-next.3
+
+## 0.1.23-next.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@0.1.23-next.0
+- @granite-js/utils@0.1.23-next.0
+
 ## 0.1.22
 
 ### Patch Changes

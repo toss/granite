@@ -6,4 +6,4 @@ interface GraniteCoreModule extends TurboModule {
   importLazy: () => Promise<void>;
 }
 
-export const GraniteCoreModule = TurboModuleRegistry.getEnforcing<GraniteCoreModule>('GraniteCoreModule');
+export const GraniteCoreModule = TurboModuleRegistry.get<GraniteCoreModule>('GraniteCoreModule');

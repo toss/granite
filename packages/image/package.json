@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/image",
-  "version": "0.1.22",
+  "version": "0.1.23-next.5",
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
@@ -28,15 +28,15 @@
   ],
   "devDependencies": {
     "@granite-js/native": "workspace:*",
-    "@types/react": "18.3.3",
+    "@types/react": "catalog:react-native",
     "eslint": "^9.7.0",
-    "react": "18.2.0",
-    "react-native": "0.72.6",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
     "tsdown": "^0.14.1",
     "typescript": "5.8.3"
   },
   "peerDependencies": {
-    "@granite-js/native": "*",
+    "@granite-js/native": "0.1.23-next.5",
     "@types/react": "*",
     "react": "*",
     "react-native": "*"

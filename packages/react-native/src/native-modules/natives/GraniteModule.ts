@@ -5,4 +5,7 @@ interface GraniteModuleSpec extends TurboModule {
   schemeUri: string;
 }
 
-export const GraniteModule = TurboModuleRegistry.getEnforcing<GraniteModuleSpec>('GraniteModule');
+export const GraniteModule = TurboModuleRegistry.get<GraniteModuleSpec>('GraniteModule');
+if (!GraniteModule) {
+  console.warn('[GraniteModule] is not registered');
+}

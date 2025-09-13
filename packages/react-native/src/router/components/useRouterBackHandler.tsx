@@ -48,7 +48,7 @@ export function useRouterBackHandler({
   navigationContainerRef,
   onClose,
 }: {
-  navigationContainerRef: NavigationContainerRefWithCurrent<any>;
+  navigationContainerRef: NavigationContainerRefWithCurrent<never>;
   onClose?: () => void;
 }) {
   const { handler } = useInternalRouterBackHandler({ navigationContainerRef, onClose });
@@ -60,7 +60,7 @@ export function useInternalRouterBackHandler({
   navigationContainerRef,
   onClose,
 }: {
-  navigationContainerRef: NavigationContainerRefWithCurrent<any>;
+  navigationContainerRef: NavigationContainerRefWithCurrent<never>;
   onClose?: () => void;
 }) {
   const { hasBackEvent, onBack } = useBackEventContext();
