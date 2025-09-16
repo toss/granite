@@ -3,7 +3,7 @@ import { BrickModule, BrickModuleSpec } from 'brick-module';
 interface GraniteModuleSpec extends BrickModuleSpec {
   readonly moduleName: 'GraniteModule';
 
-  closeView(): void;
+  closeView(): Promise<void>;
   schemeUri: string;
 }
 
