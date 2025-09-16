@@ -5674,7 +5674,7 @@ __metadata:
     tsdown: "npm:^0.14.1"
     typescript: "npm:5.8.3"
   peerDependencies:
-    "@granite-js/native": 0.1.23-next.5
+    "@granite-js/native": 0.1.23-next.6
     "@types/react": "*"
     react: "*"
     react-native: "*"
@@ -5693,7 +5693,7 @@ __metadata:
     tsup: "npm:^8.5.0"
     typescript: "npm:5.8.3"
   peerDependencies:
-    "@granite-js/native": 0.1.23-next.5
+    "@granite-js/native": 0.1.23-next.6
     react: "*"
     react-native: "*"
   languageName: unknown
@@ -5711,7 +5711,7 @@ __metadata:
     tsup: "npm:^8.5.0"
     typescript: "npm:5.8.3"
   peerDependencies:
-    "@granite-js/native": 0.1.23-next.5
+    "@granite-js/native": 0.1.23-next.6
     "@types/react": "*"
     react: "*"
     react-native: "*"
@@ -6058,7 +6058,7 @@ __metadata:
     typescript: "npm:5.8.3"
     vitest: "npm:^2.1.8"
   peerDependencies:
-    "@granite-js/native": 0.1.23-next.5
+    "@granite-js/native": 0.1.23-next.6
     "@types/react": "*"
     brick-module: "*"
     react: "*"
