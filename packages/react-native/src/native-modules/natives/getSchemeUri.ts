@@ -1,4 +1,4 @@
-import { GraniteModule } from './GraniteModule';
+import { GraniteModule } from './GraniteModule.brick';
 
 /**
  * @public
@@ -23,5 +23,5 @@ import { GraniteModule } from './GraniteModule';
  * ```
  */
 export function getSchemeUri() {
-  return GraniteModule?.schemeUri ?? 'unknown';
+  return GraniteModule.schemeUri;
 }
