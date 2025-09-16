@@ -1,4 +1,4 @@
-import { GraniteModule } from './GraniteModule';
+import { GraniteModule } from './GraniteModule.brick';
 
 /**
  * @public
