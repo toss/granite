@@ -1,5 +1,14 @@
 # @granite-js/plugin-hermes
 
+## 0.1.23-next.6
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.6
+  - @granite-js/utils@0.1.23-next.6
+
 ## 0.1.23-next.5
 
 ### Patch Changes

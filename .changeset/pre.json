@@ -24,5 +24,10 @@
     "@granite-js/style-utils": "0.1.22",
     "@granite-js/utils": "0.1.22"
   },
-  "changesets": ["fair-snakes-drive", "light-pans-chew", "red-chicken-notice"]
+  "changesets": [
+    "fair-snakes-drive",
+    "light-pans-chew",
+    "red-chicken-notice",
+    "upset-spoons-rush"
+  ]
 }

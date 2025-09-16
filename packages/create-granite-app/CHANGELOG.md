@@ -1,5 +1,11 @@
 # create-granite-app
 
+## 0.1.23-next.6
+
+### Patch Changes
+
+- test
+
 ## 0.1.23-next.5
 
 ### Patch Changes
