@@ -47,5 +47,24 @@ export default defineConfig({
         },
       },
     },
+    {
+      name: 'inspector-proxy-test',
+      config: {
+        metro: {
+          inspectorProxy: {
+            delegate: {
+              onDebuggerMessage(message, socket) {
+                console.log('On debugger', message);
+                return false;
+              },
+              onDeviceMessage(message, socket) {
+                console.log('On device', message);
+                return false;
+              },
+            },
+          },
+        },
+      },
+    },
   ],
 });

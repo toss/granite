@@ -70,7 +70,7 @@ export async function runServer({
   };
 
   const resolvedConfig = await resolveConfig(config);
-  const { middlewares = [], ...additionalMetroConfig } = resolvedConfig?.metro ?? {};
+  const { middlewares = [], inspectorProxy, ...additionalMetroConfig } = resolvedConfig?.metro ?? {};
   const baseConfig = await getMetroConfig({ rootPath: config.cwd }, additionalMetroConfig);
   const metroConfig = mergeConfig(baseConfig, {
     server: { port },
@@ -130,6 +130,7 @@ export async function runServer({
   const serverInstance = await Metro.runServer(metroConfig, {
     host,
     websocketEndpoints,
+    inspectorProxyDelegate: inspectorProxy?.delegate,
   });
 
   // In Node 8, the default keep-alive for an HTTP connection is 5 seconds. In

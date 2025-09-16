@@ -30,6 +30,9 @@ class InspectorProxy {
   // MARK: - GRANITE
   static devices;
 
+  // MARK: - GRANITE
+  _delegate;
+
   // Root of the project used for relative to absolute source path conversion.
   _projectRoot;
 
@@ -46,8 +49,11 @@ class InspectorProxy {
   // by debugger to know where to connect.
   _serverAddressWithPort = '';
 
-  constructor(projectRoot) {
+  constructor(projectRoot, delegate) {
     this._projectRoot = projectRoot;
+
+    // MARK: - GRANITE
+    this._delegate = delegate;
 
     // MARK: - GRANITE
     InspectorProxy.devices = new Map();
@@ -143,7 +149,7 @@ class InspectorProxy {
         const deviceId = this._deviceCounter++;
 
         // MARK: - GRANITE
-        InspectorProxy.devices.set(deviceId, new Device(deviceId, deviceName, appName, socket, this._projectRoot));
+        InspectorProxy.devices.set(deviceId, new Device(deviceId, deviceName, appName, socket, this._projectRoot, this._delegate));
 
         debug(`Got new connection: device=${deviceName}, app=${appName}`);
 
