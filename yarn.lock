@@ -6046,6 +6046,7 @@ __metadata:
     "@types/node": "npm:^22.10.2"
     "@types/react": "catalog:react-native"
     "@vitest/coverage-v8": "npm:^2.1.8"
+    brick-module: "npm:^0.1.12"
     es-toolkit: "npm:^1.39.8"
     esbuild: "npm:0.25.9"
     eslint: "npm:^9.7.0"
@@ -6059,6 +6060,7 @@ __metadata:
   peerDependencies:
     "@granite-js/native": 0.1.23-next.5
     "@types/react": "*"
+    brick-module: "*"
     react: "*"
     react-native: "*"
   bin:
@@ -13101,6 +13103,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"brick-codegen@npm:0.1.12":
+  version: 0.1.12
+  resolution: "brick-codegen@npm:0.1.12::__archiveUrl=http%3A%2F%2Fregistry.npmjs.org%2Frepository%2Fnpm-group%2Fbrick-codegen%2F-%2Fbrick-codegen-0.1.12.tgz"
+  dependencies:
+    "@babel/parser": "npm:^7.27.5"
+    "@babel/types": "npm:^7.27.6"
+    "@commander-js/extra-typings": "npm:^14.0.0"
+    chalk: "npm:^5.4.1"
+    commander: "npm:^14.0.0"
+    execa: "npm:^9.6.0"
+    fs-extra: "npm:^11.3.0"
+    glob: "npm:^11.0.3"
+    picocolors: "npm:^1.1.1"
+    semver: "npm:^7.7.2"
+    typescript: "npm:^5.9.2"
+  bin:
+    brick-codegen: dist/cli.js
+  checksum: 10c0/42bee8fab348be39e89ee5f77bb74c74b40a0b83bae06e87b686445de2a9bb9123da8e4d899bf26e88f256d88ad936da9b1c841418b49ef23f057a3d5957978e
+  languageName: node
+  linkType: hard
+
 "brick-codegen@npm:0.1.5":
   version: 0.1.5
   resolution: "brick-codegen@npm:0.1.5"
@@ -13119,6 +13142,20 @@ __metadata:
   bin:
     brick-codegen: dist/cli.js
   checksum: 10c0/5e879121dec9b7795533256815c7d2a367a55230f7ff12fc59bddc40191cd1e5f587617f5bb4128f090c5c1b85e7113979e3d458c7458aa19d42ced08e4407ae
+  languageName: node
+  linkType: hard
+
+"brick-module@npm:^0.1.12":
+  version: 0.1.12
+  resolution: "brick-module@npm:0.1.12::__archiveUrl=http%3A%2F%2Fregistry.npmjs.org%2Frepository%2Fnpm-group%2Fbrick-module%2F-%2Fbrick-module-0.1.12.tgz"
+  dependencies:
+    brick-codegen: "npm:0.1.12"
+  peerDependencies:
+    react: ">=18.2.0"
+    react-native: ">=0.70.0"
+  bin:
+    brick-codegen: bin/brick-codegen.js
+  checksum: 10c0/33e378bc05138752e1aaa0b0df98837037fcc794d84a379e75bb6fc7aad319e106caad0e94a580b62c20766e11b8755494d9c1faf4d2116b740af51d356a394f
   languageName: node
   linkType: hard
 
