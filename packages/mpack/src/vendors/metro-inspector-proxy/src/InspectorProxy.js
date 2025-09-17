@@ -149,7 +149,10 @@ class InspectorProxy {
         const deviceId = this._deviceCounter++;
 
         // MARK: - GRANITE
-        InspectorProxy.devices.set(deviceId, new Device(deviceId, deviceName, appName, socket, this._projectRoot, this._delegate));
+        InspectorProxy.devices.set(
+          deviceId,
+          new Device(deviceId, deviceName, appName, socket, this._projectRoot, this._delegate)
+        );
 
         debug(`Got new connection: device=${deviceName}, app=${appName}`);
 
