@@ -1,3 +1,4 @@
+import type { InspectorProxyConfig } from '@granite-js/plugin-core';
 import Debug from 'debug';
 import * as ws from 'ws';
 import { parseDomain } from './parseDomain';
@@ -15,6 +16,8 @@ type NetworkResponseDataPayload = Pick<NetworkResponseData['params'], 'base64Enc
 
 export class DebuggerEventHandler {
   private networkResponseData = new Map<string, NetworkResponseDataPayload>();
+
+  constructor(private delegate?: InspectorProxyConfig['delegate']) {}
 
   setDeviceWebSocketHandler(socket: ws.WebSocket) {
     socket.on('message', (message) => this.handleDeviceMessage(socket, message));
@@ -80,7 +83,7 @@ export class DebuggerEventHandler {
     }
   }
 
-  private handleDeviceMessage(_socket: ws.WebSocket, message: ws.RawData) {
+  private handleDeviceMessage(socket: ws.WebSocket, message: ws.RawData) {
     const customEvent = this.safetyParseCustomEvent(message);
 
     if (customEvent == null) {
@@ -88,6 +91,10 @@ export class DebuggerEventHandler {
     }
 
     debug('handleDeviceMessage', customEvent);
+
+    if (this.delegate?.onDeviceMessage?.(customEvent, socket)) {
+      return;
+    }
 
     switch (customEvent.method) {
       case 'Bedrock.networkResponseData':
@@ -98,20 +105,25 @@ export class DebuggerEventHandler {
   }
 
   private handleDebuggerMessage(socket: ws.WebSocket, message: ws.RawData) {
-    let handled = true;
+    let handled: boolean;
     const debuggerEvent = this.safetyParseDebuggerEvent(message);
 
     if (debuggerEvent == null) {
       return;
     }
 
-    switch (debuggerEvent.method) {
-      case 'Network.getResponseBody':
-        this.handleGetResponseBody(socket, debuggerEvent);
-        break;
+    if (this.delegate?.onDebuggerMessage?.(debuggerEvent, socket)) {
+      handled = true;
+    } else {
+      switch (debuggerEvent.method) {
+        case 'Network.getResponseBody':
+          this.handleGetResponseBody(socket, debuggerEvent);
+          handled = true;
+          break;
 
-      default:
-        handled = false;
+        default:
+          handled = false;
+      }
     }
 
     /**
