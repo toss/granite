@@ -1,5 +1,13 @@
 # @granite-js/lottie
 
+## 0.1.23-next.7
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/native@0.1.23-next.7
+
 ## 0.1.23-next.6
 
 ### Patch Changes
