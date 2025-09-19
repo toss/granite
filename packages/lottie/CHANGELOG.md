@@ -1,5 +1,13 @@
 # @granite-js/lottie
 
+## 0.1.23-next.8
+
+### Patch Changes
+
+- router
+- Updated dependencies
+  - @granite-js/native@0.1.23-next.8
+
 ## 0.1.23-next.7
 
 ### Patch Changes
