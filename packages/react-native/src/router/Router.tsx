@@ -7,7 +7,16 @@ import {
   RouteProp,
 } from '@granite-js/native/@react-navigation/native';
 import { NativeStackNavigationOptions } from '@granite-js/native/@react-navigation/native-stack';
-import { ComponentProps, ComponentType, Fragment, PropsWithChildren, ReactElement, useCallback, useState } from 'react';
+import {
+  ComponentProps,
+  ComponentType,
+  Fragment,
+  PropsWithChildren,
+  ReactElement,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react';
 import { InitialProps } from '..';
 import { closeView } from '../native-modules';
 import { BackButton } from './components/BackButton';
@@ -67,7 +76,7 @@ interface StackNavigatorProps {
    * @description
    * You can create and pass a NavigationContainerRef from @react-navigation/native externally. This allows external control of the router.
    */
-  navigationContainerRef?: NavigationContainerRefWithCurrent<any>;
+  navigationContainerRef?: NavigationContainerRefWithCurrent<never>;
   /**
    * @name defaultScreenOption
    * @description
@@ -89,8 +98,6 @@ type NavigationContainerProps = Pick<
   'ref' | 'documentTitle' | 'fallback' | 'onReady' | 'onUnhandledAction' | 'onStateChange'
 >;
 
-export const navigationRef = createNavigationContainerRef<never>();
-
 /**
  * @category Components
  * @kind function
@@ -102,7 +109,7 @@ export const navigationRef = createNavigationContainerRef<never>();
  *
  * @param {string} prefix Prefix to use when the scheme is executed. For example, to enter 'scheme://my-service/intro', you need to set 'scheme://my-service' as the prefix.
  * @param {RequireContext} context Object containing information about screens for file-based routing.
- * @param {NavigationContainerRefWithCurrent<any>} [navigationContainerRef] You can create and pass a NavigationContainerRef from @react-navigation/native externally. This allows external control of the router.
+ * @param {NavigationContainerRefWithCurrent<never>} [navigationContainerRef] You can create and pass a NavigationContainerRef from @react-navigation/native externally. This allows external control of the router.
  * @param {NativeStackNavigationOptions | ((props: { route: RouteProp<ParamListBase>; navigation: any }) => NativeStackNavigationOptions)} [defaultScreenOption] Default options for screens. You can set options to be applied commonly to screens, such as title or headerStyle.
  * @param {boolean} [canGoBack=true] Whether navigation back is possible. Default is true, and when set to true, you can use the back gesture or back button from @react-navigation/native.
  * @param {() => void} [onBack] Callback function called when the user presses the back button or uses the back gesture. For example, you can set it to log when the user presses the back button.
@@ -143,8 +150,10 @@ export function Router({
     initialScheme,
   });
 
+  const ref = useMemo(() => navigationContainerRef ?? createNavigationContainerRef<never>(), [navigationContainerRef]);
+
   const { handler, canGoBack, onBack } = useInternalRouterBackHandler({
-    navigationContainerRef: navigationRef,
+    navigationContainerRef: ref,
     onClose: closeView,
   });
 
@@ -170,7 +179,7 @@ export function Router({
       onStateChange={(state) => {
         setIsInitialScreen(state ? state?.index === 0 : true);
       }}
-      ref={navigationRef}
+      ref={ref}
       {...navigationContainerProps}
       linking={linkingOptions}
     >

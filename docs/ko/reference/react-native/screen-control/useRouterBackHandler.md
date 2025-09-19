@@ -13,7 +13,7 @@ function useRouterBackHandler({
   navigationContainerRef,
   onClose,
 }: {
-  navigationContainerRef: NavigationContainerRefWithCurrent<any>;
+  navigationContainerRef: NavigationContainerRefWithCurrent<never>;
   onClose?: () => void;
 }): { handler: any };
 ```
