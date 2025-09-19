@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/react-native",
-  "version": "0.1.23-next.8",
+  "version": "0.1.23-next.9",
   "description": "The Granite Framework",
   "bin": {
     "granite": "./bin/cli.js"
@@ -105,7 +105,7 @@
     "vitest": "^2.1.8"
   },
   "peerDependencies": {
-    "@granite-js/native": "0.1.23-next.8",
+    "@granite-js/native": "0.1.23-next.9",
     "@types/react": "*",
     "brick-module": "*",
     "react": "*",

@@ -1,5 +1,15 @@
 # @granite-js/mpack
 
+## 0.1.23-next.9
+
+### Patch Changes
+
+- tollback
+- Updated dependencies
+  - @granite-js/devtools-frontend@0.1.23-next.9
+  - @granite-js/plugin-core@0.1.23-next.9
+  - @granite-js/utils@0.1.23-next.9
+
 ## 0.1.23-next.8
 
 ### Patch Changes
