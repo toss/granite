@@ -7,16 +7,7 @@ import {
   RouteProp,
 } from '@granite-js/native/@react-navigation/native';
 import { NativeStackNavigationOptions } from '@granite-js/native/@react-navigation/native-stack';
-import {
-  ComponentProps,
-  ComponentType,
-  Fragment,
-  PropsWithChildren,
-  ReactElement,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
+import { ComponentProps, ComponentType, Fragment, PropsWithChildren, ReactElement, useCallback, useMemo } from 'react';
 import { InitialProps } from '..';
 import { closeView } from '../native-modules';
 import { BackButton } from './components/BackButton';
@@ -172,23 +163,9 @@ export function Router({
     [canGoBack, defaultScreenOption, headerLeft]
   );
 
-  const [isInitialScreen, setIsInitialScreen] = useState(true);
-
   return (
-    <NavigationContainer
-      onStateChange={(state) => {
-        setIsInitialScreen(state ? state?.index === 0 : true);
-      }}
-      ref={ref}
-      {...navigationContainerProps}
-      linking={linkingOptions}
-    >
-      <CanGoBackGuard
-        canGoBack={canGoBack}
-        isInitialScreen={isInitialScreen}
-        onBack={onBack}
-        setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
-      >
+    <NavigationContainer ref={ref} {...navigationContainerProps} linking={linkingOptions}>
+      <CanGoBackGuard canGoBack={canGoBack} onBack={onBack} setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}>
         <Container {...initialProps}>
           <StackNavigator.Navigator initialRouteName={initialRouteName} screenOptions={screenOptions}>
             {Screens}
