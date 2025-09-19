@@ -25,6 +25,7 @@
     "@granite-js/utils": "0.1.22"
   },
   "changesets": [
+    "bitter-shirts-fail",
     "fair-snakes-drive",
     "light-pans-chew",
     "nasty-results-carry",
