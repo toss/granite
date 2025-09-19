@@ -9,7 +9,7 @@ import { useBackEventContext } from '../../use-back-event';
  * @description
  * A hook that provides a handler for handling back navigation actions. This can be used when you need to close a view directly when the back button is pressed in modals or independent screens where there's no navigation stack. This hook uses `NavigationContainerRef` from `@react-navigation/native` to navigate to the previous screen if there's a remaining navigation stack, or executes the user-defined `onClose` function if the stack is empty.
  *
- * @param {NavigationContainerRefWithCurrent<any>} navigationContainerRef - A `NavigationContainerRef` that can reference the current navigation state. Used when executing back navigation actions.
+ * @param {NavigationContainerRefWithCurrent<never>} navigationContainerRef - A `NavigationContainerRef` that can reference the current navigation state. Used when executing back navigation actions.
  * @param {() => void} [onClose] - A function to execute when the navigation stack is empty. For example, you can pass a function that closes a React Native View.
  *
  * @returns {{ handler: () => void }} A handler function that can be used in back buttons or similar components.
