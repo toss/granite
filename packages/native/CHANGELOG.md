@@ -1,5 +1,11 @@
 # @granite-js/native
 
+## 0.1.23-next.8
+
+### Patch Changes
+
+- router
+
 ## 0.1.23-next.7
 
 ### Patch Changes
