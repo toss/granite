@@ -1,5 +1,19 @@
 # @granite-js/react-native
 
+## 0.1.25
+
+### Patch Changes
+
+- 6717901: add getInitialUrl option
+  - @granite-js/cli@0.1.25
+  - @granite-js/image@0.1.25
+  - @granite-js/jest@0.1.25
+  - @granite-js/lottie@0.1.25
+  - @granite-js/mpack@0.1.25
+  - @granite-js/native@0.1.25
+  - @granite-js/plugin-core@0.1.25
+  - @granite-js/style-utils@0.1.25
+
 ## 0.1.24
 
 ### Patch Changes
