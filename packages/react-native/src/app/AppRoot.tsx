@@ -1,7 +1,7 @@
 import { SafeAreaProvider } from '@granite-js/native/react-native-safe-area-context';
 import type { ComponentType, PropsWithChildren } from 'react';
 import type { InitialProps } from '../initial-props';
-import { Router } from '../router';
+import { Router, type InternalRouterProps } from '../router';
 import { BackEventProvider } from '../use-back-event';
 import { App } from './App';
 import type { GraniteProps } from './Granite';
@@ -16,6 +16,7 @@ interface AppRootProps extends GraniteProps {
   initialProps: InitialProps;
   initialScheme: string;
   setIosSwipeGestureEnabled?: ({ isEnabled }: { isEnabled: boolean }) => void;
+  getInitialUrl: InternalRouterProps['getInitialUrl'];
 }
 
 export function AppRoot({
@@ -26,6 +27,7 @@ export function AppRoot({
   initialScheme,
   router,
   setIosSwipeGestureEnabled,
+  getInitialUrl,
 }: AppRootProps) {
   const prefix = getSchemePrefix({
     appName,
@@ -45,6 +47,7 @@ export function AppRoot({
               container={Container}
               prefix={prefix}
               setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
+              getInitialUrl={getInitialUrl}
               {...router}
             />
           </BackEventProvider>
