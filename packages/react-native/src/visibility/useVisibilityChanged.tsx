@@ -1,5 +1,5 @@
 import { createContext, PropsWithChildren, ReactElement, useContext, useEffect, useState } from 'react';
-import { nativeEventEmitter } from '../native-event-emitter';
+import { GraniteModule } from '../native-modules/natives/GraniteModule.brick';
 
 const VisibilityChangedContext = createContext<boolean | undefined>(undefined);
 
@@ -31,13 +31,9 @@ export function VisibilityChangedProvider({
   const [visible, setVisible] = useState(isVisible);
 
   useEffect(() => {
-    const subscription = nativeEventEmitter.addListener('visibilityChanged', (nextVisible) => {
+    return GraniteModule.addEventListener('visibilityChanged', (nextVisible: boolean) => {
       setVisible(nextVisible);
     });
-
-    return () => {
-      subscription.remove();
-    };
   }, []);
 
   return <VisibilityChangedContext.Provider value={visible}>{children}</VisibilityChangedContext.Provider>;

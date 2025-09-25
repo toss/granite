@@ -1,46 +1,153 @@
 # @granite-js/react-native
 
-## 0.1.25
+## 0.1.23-next.11
 
 ### Patch Changes
 
-- 6717901: add getInitialUrl option
-  - @granite-js/cli@0.1.25
-  - @granite-js/image@0.1.25
-  - @granite-js/jest@0.1.25
-  - @granite-js/lottie@0.1.25
-  - @granite-js/mpack@0.1.25
-  - @granite-js/native@0.1.25
-  - @granite-js/plugin-core@0.1.25
-  - @granite-js/style-utils@0.1.25
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.11
+  - @granite-js/style-utils@0.1.23-next.11
+  - @granite-js/lottie@0.1.23-next.11
+  - @granite-js/native@0.1.23-next.11
+  - @granite-js/image@0.1.23-next.11
+  - @granite-js/mpack@0.1.23-next.11
+  - @granite-js/jest@0.1.23-next.11
+  - @granite-js/cli@0.1.23-next.11
 
-## 0.1.24
+## 0.1.23-next.10
 
 ### Patch Changes
 
-- Updated dependencies [6e42c3d]
-  - @granite-js/plugin-core@0.1.24
-  - @granite-js/mpack@0.1.24
-  - @granite-js/cli@0.1.24
-  - @granite-js/image@0.1.24
-  - @granite-js/jest@0.1.24
-  - @granite-js/lottie@0.1.24
-  - @granite-js/native@0.1.24
-  - @granite-js/style-utils@0.1.24
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.10
+  - @granite-js/style-utils@0.1.23-next.10
+  - @granite-js/lottie@0.1.23-next.10
+  - @granite-js/native@0.1.23-next.10
+  - @granite-js/image@0.1.23-next.10
+  - @granite-js/mpack@0.1.23-next.10
+  - @granite-js/jest@0.1.23-next.10
+  - @granite-js/cli@0.1.23-next.10
 
-## 0.1.23
+## 0.1.23-next.9
+
+### Patch Changes
+
+- tollback
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.9
+  - @granite-js/style-utils@0.1.23-next.9
+  - @granite-js/lottie@0.1.23-next.9
+  - @granite-js/native@0.1.23-next.9
+  - @granite-js/image@0.1.23-next.9
+  - @granite-js/mpack@0.1.23-next.9
+  - @granite-js/jest@0.1.23-next.9
+  - @granite-js/cli@0.1.23-next.9
+
+## 0.1.23-next.8
+
+### Patch Changes
+
+- router
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.8
+  - @granite-js/style-utils@0.1.23-next.8
+  - @granite-js/lottie@0.1.23-next.8
+  - @granite-js/native@0.1.23-next.8
+  - @granite-js/image@0.1.23-next.8
+  - @granite-js/mpack@0.1.23-next.8
+  - @granite-js/jest@0.1.23-next.8
+  - @granite-js/cli@0.1.23-next.8
+
+## 0.1.23-next.7
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.7
+  - @granite-js/style-utils@0.1.23-next.7
+  - @granite-js/lottie@0.1.23-next.7
+  - @granite-js/native@0.1.23-next.7
+  - @granite-js/image@0.1.23-next.7
+  - @granite-js/mpack@0.1.23-next.7
+  - @granite-js/jest@0.1.23-next.7
+  - @granite-js/cli@0.1.23-next.7
+
+## 0.1.23-next.6
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.6
+  - @granite-js/style-utils@0.1.23-next.6
+  - @granite-js/lottie@0.1.23-next.6
+  - @granite-js/native@0.1.23-next.6
+  - @granite-js/image@0.1.23-next.6
+  - @granite-js/mpack@0.1.23-next.6
+  - @granite-js/jest@0.1.23-next.6
+  - @granite-js/cli@0.1.23-next.6
+
+## 0.1.23-next.5
+
+### Patch Changes
+
+- temp
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.5
+  - @granite-js/style-utils@0.1.23-next.5
+  - @granite-js/lottie@0.1.23-next.5
+  - @granite-js/native@0.1.23-next.5
+  - @granite-js/image@0.1.23-next.5
+  - @granite-js/mpack@0.1.23-next.5
+  - @granite-js/jest@0.1.23-next.5
+  - @granite-js/cli@0.1.23-next.5
+
+## 0.1.23-next.4
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.4
+  - @granite-js/style-utils@0.1.23-next.4
+  - @granite-js/lottie@0.1.23-next.4
+  - @granite-js/native@0.1.23-next.4
+  - @granite-js/image@0.1.23-next.4
+  - @granite-js/mpack@0.1.23-next.4
+  - @granite-js/jest@0.1.23-next.4
+  - @granite-js/cli@0.1.23-next.4
+
+## 0.1.23-next.3
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.23-next.3
+  - @granite-js/style-utils@0.1.23-next.3
+  - @granite-js/lottie@0.1.23-next.3
+  - @granite-js/native@0.1.23-next.3
+  - @granite-js/image@0.1.23-next.3
+  - @granite-js/mpack@0.1.23-next.3
+  - @granite-js/jest@0.1.23-next.3
+  - @granite-js/cli@0.1.23-next.3
+
+## 0.1.23-next.0
 
 ### Patch Changes
 
 - d9b7d7c: avoid multiple app registrations without throwing errors
-  - @granite-js/cli@0.1.23
-  - @granite-js/image@0.1.23
-  - @granite-js/jest@0.1.23
-  - @granite-js/lottie@0.1.23
-  - @granite-js/mpack@0.1.23
-  - @granite-js/native@0.1.23
-  - @granite-js/plugin-core@0.1.23
-  - @granite-js/style-utils@0.1.23
+  - @granite-js/cli@0.1.23-next.0
+  - @granite-js/image@0.1.23-next.0
+  - @granite-js/jest@0.1.23-next.0
+  - @granite-js/lottie@0.1.23-next.0
+  - @granite-js/mpack@0.1.23-next.0
+  - @granite-js/native@0.1.23-next.0
+  - @granite-js/plugin-core@0.1.23-next.0
+  - @granite-js/style-utils@0.1.23-next.0
 
 ## 0.1.22
 

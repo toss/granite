@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/react-native",
-  "version": "0.1.25",
+  "version": "0.1.23-next.11",
   "description": "The Granite Framework",
   "bin": {
     "granite": "./bin/cli.js"
@@ -92,22 +92,22 @@
     "@types/babel__core": "^7",
     "@types/babel__preset-env": "^7",
     "@types/node": "^22.10.2",
-    "@types/react": "18.3.3",
-    "@types/react-dom": "^18",
+    "@types/react": "catalog:react-native",
     "@vitest/coverage-v8": "^2.1.8",
-    "esbuild": "0.25.8",
+    "brick-module": "^0.1.19",
+    "esbuild": "0.25.9",
     "eslint": "^9.7.0",
     "jsdom": "^25.0.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-native": "0.72.6",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
     "tsup": "^8.5.0",
     "typescript": "5.8.3",
     "vitest": "^2.1.8"
   },
   "peerDependencies": {
-    "@granite-js/native": "*",
+    "@granite-js/native": "0.1.23-next.11",
     "@types/react": "*",
+    "brick-module": "*",
     "react": "*",
     "react-native": "*"
   },

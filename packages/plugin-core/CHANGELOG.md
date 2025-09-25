@@ -1,23 +1,82 @@
 # @granite-js/plugin-core
 
-## 0.1.25
+## 0.1.23-next.11
 
 ### Patch Changes
 
-- @granite-js/utils@0.1.25
+- fix
+- Updated dependencies
+  - @granite-js/utils@0.1.23-next.11
 
-## 0.1.24
-
-### Patch Changes
-
-- 6e42c3d: add inspectorProxy options
-  - @granite-js/utils@0.1.24
-
-## 0.1.23
+## 0.1.23-next.10
 
 ### Patch Changes
 
-- @granite-js/utils@0.1.23
+- fix
+- Updated dependencies
+  - @granite-js/utils@0.1.23-next.10
+
+## 0.1.23-next.9
+
+### Patch Changes
+
+- tollback
+- Updated dependencies
+  - @granite-js/utils@0.1.23-next.9
+
+## 0.1.23-next.8
+
+### Patch Changes
+
+- router
+- Updated dependencies
+  - @granite-js/utils@0.1.23-next.8
+
+## 0.1.23-next.7
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/utils@0.1.23-next.7
+
+## 0.1.23-next.6
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/utils@0.1.23-next.6
+
+## 0.1.23-next.5
+
+### Patch Changes
+
+- temp
+- Updated dependencies
+  - @granite-js/utils@0.1.23-next.5
+
+## 0.1.23-next.4
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/utils@0.1.23-next.4
+
+## 0.1.23-next.3
+
+### Patch Changes
+
+- test
+- Updated dependencies
+  - @granite-js/utils@0.1.23-next.3
+
+## 0.1.23-next.0
+
+### Patch Changes
+
+- @granite-js/utils@0.1.23-next.0
 
 ## 0.1.22
 

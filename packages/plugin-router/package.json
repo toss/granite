@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-router",
   "type": "module",
-  "version": "0.1.25",
+  "version": "0.1.23-next.11",
   "description": "A Route Generator for Granite project",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@granite-js/plugin-core": "workspace:*",
-    "@swc/core": "1.5.24",
+    "@swc/core": "catalog:swc",
     "chokidar": "4.0.1",
     "es-toolkit": "^1.39.8"
   },
