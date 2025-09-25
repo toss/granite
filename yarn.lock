@@ -5674,7 +5674,7 @@ __metadata:
     tsdown: "npm:^0.14.1"
     typescript: "npm:5.8.3"
   peerDependencies:
-    "@granite-js/native": 0.1.23-next.10
+    "@granite-js/native": "workspace:*"
     "@types/react": "*"
     react: "*"
     react-native: "*"
