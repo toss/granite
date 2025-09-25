@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/lottie",
-  "version": "0.1.23-next.9",
+  "version": "0.1.23-next.10",
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
@@ -30,7 +30,7 @@
     "typescript": "5.8.3"
   },
   "peerDependencies": {
-    "@granite-js/native": "0.1.23-next.9",
+    "@granite-js/native": "0.1.23-next.10",
     "@types/react": "*",
     "react": "*",
     "react-native": "*"
