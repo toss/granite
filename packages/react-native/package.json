@@ -121,5 +121,9 @@
     "@granite-js/style-utils": "workspace:*",
     "es-toolkit": "^1.39.8",
     "react-native-url-polyfill": "1.3.0"
-  }
+  },
+  "sideEffects": [
+    "dist/async-bridges.*",
+    "dist/constant-bridges.*"
+  ]
 }
