@@ -1,5 +1,11 @@
 # @granite-js/style-utils
 
+## 0.1.26
+
+### Patch Changes
+
+- 41f9ab3: ensure polyfill setup during initialization and update package.json config for improve tree shaking
+
 ## 0.1.25
 
 ## 0.1.24
