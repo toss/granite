@@ -1,5 +1,11 @@
 # @granite-js/utils
 
+## 0.1.23-next.11
+
+### Patch Changes
+
+- fix
+
 ## 0.1.23-next.10
 
 ### Patch Changes
