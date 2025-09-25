@@ -1,4 +1,4 @@
-import type { BuildResult, BuildSuccessResult, BuildFailureResult } from '@granite-js/plugin-core';
+import type { BuildFailureResult, BuildResult, BuildSuccessResult } from '../types';
 
 export function isBuildSuccess(result: BuildResult): result is BuildSuccessResult {
   return 'bundle' in result;

@@ -121,6 +121,7 @@ exports.runServer = async (
     secure, //deprecated
     secureCert, // deprecated
     secureKey, // deprecated
+    inspectorProxyDelegate, // MARK: - GRANITE
     waitForBundler = false,
     websocketEndpoints = {},
   }
@@ -150,7 +151,7 @@ exports.runServer = async (
 
   let inspectorProxy = null;
   if (config.server.runInspectorProxy) {
-    inspectorProxy = new InspectorProxy(config.projectRoot);
+    inspectorProxy = new InspectorProxy(config.projectRoot, inspectorProxyDelegate);
   }
 
   let httpServer;

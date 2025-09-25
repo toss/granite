@@ -24,7 +24,7 @@ import { CanGoBackGuard } from './components/CanGoBackGuard';
 import { StackNavigator } from './components/StackNavigator';
 import { useInternalRouterBackHandler } from './components/useRouterBackHandler';
 import { useInitialRouteName } from './hooks/useInitialRouteName';
-import { useRouterControls } from './hooks/useRouterControls';
+import { useRouterControls, type RouterControlsConfig } from './hooks/useRouterControls';
 import { RequireContext } from './types';
 import { BASE_STACK_NAVIGATOR_STYLE } from './types/screen-option';
 
@@ -66,6 +66,7 @@ export interface InternalRouterProps {
   initialProps: InitialProps;
   initialScheme: string;
   setIosSwipeGestureEnabled?: ({ isEnabled }: { isEnabled: boolean }) => Promise<void> | void;
+  getInitialUrl?: RouterControlsConfig['getInitialUrl'];
 }
 
 export type RouterProps = StackNavigatorProps & NavigationContainerProps;
@@ -140,6 +141,7 @@ export function Router({
   screenContainer,
   // Public props (StackNavigator)
   setIosSwipeGestureEnabled,
+  getInitialUrl,
   ...navigationContainerProps
 }: InternalRouterProps & RouterProps): ReactElement {
   const initialRouteName = useInitialRouteName({ prefix, initialScheme });
@@ -148,6 +150,7 @@ export function Router({
     context,
     screenContainer,
     initialScheme,
+    getInitialUrl,
   });
 
   const ref = useMemo(() => navigationContainerRef ?? createNavigationContainerRef<never>(), [navigationContainerRef]);

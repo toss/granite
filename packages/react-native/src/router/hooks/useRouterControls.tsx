@@ -14,6 +14,7 @@ export interface RouterControlsConfig {
   prefix: string;
   initialScheme: string;
   context: RequireContext;
+  getInitialUrl?: (initialScheme: string) => string | undefined | Promise<string | undefined>;
   screenContainer?: ComponentType<PropsWithChildren<any>>;
 }
 
@@ -21,6 +22,7 @@ export function useRouterControls({
   prefix,
   context,
   screenContainer: ScreenContainer,
+  getInitialUrl = defaultGetInitialUrl,
   initialScheme,
 }: RouterControlsConfig) {
   const routeScreens = useMemo(() => getRouteScreens(context), [context]);
@@ -61,15 +63,19 @@ export function useRouterControls({
         screens: getScreenPathMapConfig(registerScreens),
       },
       async getInitialURL() {
-        if (initialScheme == null) {
-          return;
-        }
-
-        /** @NOTE Korean paths need to be decoded. */
-        return decodeURI(initialScheme);
+        return (getInitialUrl ?? defaultGetInitialUrl)(initialScheme);
       },
     };
-  }, [initialScheme, prefix, registerScreens]);
+  }, [initialScheme, prefix, registerScreens, getInitialUrl]);
 
   return { Screens, linkingOptions };
+}
+
+function defaultGetInitialUrl(initialScheme: string) {
+  if (initialScheme == null) {
+    return;
+  }
+
+  /** @NOTE Korean paths need to be decoded. */
+  return decodeURI(initialScheme);
 }

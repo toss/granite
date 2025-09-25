@@ -89,7 +89,7 @@ export class DevServer {
     const baseRoot = this.devServerOptions.rootDir;
     const serverBaseUrl = this.getBaseUrl();
 
-    const debuggerEventHandler = new DebuggerEventHandler();
+    const debuggerEventHandler = new DebuggerEventHandler(this.devServerOptions.inspectorProxy?.delegate);
     const inspectorProxy = new InspectorProxy({ root: baseRoot, serverBaseUrl });
     const inspectorProxyWss = inspectorProxy.createWebSocketServers({
       onDeviceWebSocketConnected: (socket) => {

@@ -5908,6 +5908,7 @@ __metadata:
     "@types/babel__core": "npm:^7"
     "@types/connect": "npm:^3"
     "@types/node": "npm:^24.3.0"
+    "@types/ws": "npm:^8.18.0"
     cosmiconfig: "npm:^9.0.0"
     cosmiconfig-typescript-loader: "npm:^5.1.0"
     es-toolkit: "npm:^1.39.8"
@@ -11075,7 +11076,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ws@npm:^8":
+"@types/ws@npm:^8, @types/ws@npm:^8.18.0":
   version: 8.18.1
   resolution: "@types/ws@npm:8.18.1"
   dependencies:
