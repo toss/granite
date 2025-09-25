@@ -5508,7 +5508,7 @@ __metadata:
     "@types/node": "npm:^22.10.2"
     "@types/react": "catalog:react-native"
     "@types/react-native-video": "npm:^5.0.20"
-    brick-module: "npm:^0.1.5"
+    brick-module: "npm:^0.1.19"
     lottie-react-native: "catalog:react-native"
     react: "catalog:react-native"
     react-native: "catalog:react-native"
@@ -6046,7 +6046,7 @@ __metadata:
     "@types/node": "npm:^22.10.2"
     "@types/react": "catalog:react-native"
     "@vitest/coverage-v8": "npm:^2.1.8"
-    brick-module: "npm:^0.1.12"
+    brick-module: "npm:^0.1.19"
     es-toolkit: "npm:^1.39.8"
     esbuild: "npm:0.25.9"
     eslint: "npm:^9.7.0"
@@ -13102,9 +13102,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"brick-codegen@npm:0.1.12":
-  version: 0.1.12
-  resolution: "brick-codegen@npm:0.1.12::__archiveUrl=http%3A%2F%2Fregistry.npmjs.org%2Frepository%2Fnpm-group%2Fbrick-codegen%2F-%2Fbrick-codegen-0.1.12.tgz"
+"brick-codegen@npm:0.1.19":
+  version: 0.1.19
+  resolution: "brick-codegen@npm:0.1.19::__archiveUrl=http%3A%2F%2Fregistry.npmjs.org%2Frepository%2Fnpm-group%2Fbrick-codegen%2F-%2Fbrick-codegen-0.1.19.tgz"
   dependencies:
     "@babel/parser": "npm:^7.27.5"
     "@babel/types": "npm:^7.27.6"
@@ -13119,56 +13119,21 @@ __metadata:
     typescript: "npm:^5.9.2"
   bin:
     brick-codegen: dist/cli.js
-  checksum: 10c0/42bee8fab348be39e89ee5f77bb74c74b40a0b83bae06e87b686445de2a9bb9123da8e4d899bf26e88f256d88ad936da9b1c841418b49ef23f057a3d5957978e
+  checksum: 10c0/1018bf9a6bd88fe7e80705ec361bcd875f63055dbdae6434ac02a1c1755645b33af82267d4379ad8be3db604243aacbac0318b9cfa8ab17176f60489587e62bb
   languageName: node
   linkType: hard
 
-"brick-codegen@npm:0.1.5":
-  version: 0.1.5
-  resolution: "brick-codegen@npm:0.1.5"
+"brick-module@npm:^0.1.19":
+  version: 0.1.19
+  resolution: "brick-module@npm:0.1.19::__archiveUrl=http%3A%2F%2Fregistry.npmjs.org%2Frepository%2Fnpm-group%2Fbrick-module%2F-%2Fbrick-module-0.1.19.tgz"
   dependencies:
-    "@babel/parser": "npm:^7.27.5"
-    "@babel/types": "npm:^7.27.6"
-    "@commander-js/extra-typings": "npm:^14.0.0"
-    chalk: "npm:^5.4.1"
-    commander: "npm:^14.0.0"
-    execa: "npm:^9.6.0"
-    fs-extra: "npm:^11.3.0"
-    glob: "npm:^11.0.3"
-    picocolors: "npm:^1.1.1"
-    semver: "npm:^7.7.2"
-    typescript: "npm:^5.9.2"
-  bin:
-    brick-codegen: dist/cli.js
-  checksum: 10c0/5e879121dec9b7795533256815c7d2a367a55230f7ff12fc59bddc40191cd1e5f587617f5bb4128f090c5c1b85e7113979e3d458c7458aa19d42ced08e4407ae
-  languageName: node
-  linkType: hard
-
-"brick-module@npm:^0.1.12":
-  version: 0.1.12
-  resolution: "brick-module@npm:0.1.12::__archiveUrl=http%3A%2F%2Fregistry.npmjs.org%2Frepository%2Fnpm-group%2Fbrick-module%2F-%2Fbrick-module-0.1.12.tgz"
-  dependencies:
-    brick-codegen: "npm:0.1.12"
+    brick-codegen: "npm:0.1.19"
   peerDependencies:
     react: ">=18.2.0"
     react-native: ">=0.70.0"
   bin:
     brick-codegen: bin/brick-codegen.js
-  checksum: 10c0/33e378bc05138752e1aaa0b0df98837037fcc794d84a379e75bb6fc7aad319e106caad0e94a580b62c20766e11b8755494d9c1faf4d2116b740af51d356a394f
-  languageName: node
-  linkType: hard
-
-"brick-module@npm:^0.1.5":
-  version: 0.1.5
-  resolution: "brick-module@npm:0.1.5"
-  dependencies:
-    brick-codegen: "npm:0.1.5"
-  peerDependencies:
-    react: ">=18.2.0"
-    react-native: ">=0.70.0"
-  bin:
-    brick-codegen: bin/brick-codegen.js
-  checksum: 10c0/35d4f9c2358cc0376138bbab33f217117a0e258d08686a18f089f8e0050a5d928d0c4ba1335a3165e6d38f784b4f864874433d5a22ebd8a89473ae81154f5ce3
+  checksum: 10c0/50b5f0a9918ece3b69f8daec2dfe91baa742a65d6baa4e6e50c6c4cc0181ea2c20c487a124feb42cdb2ffd1f211f61fd955245cabd8330df2d7e533c6cbe1019
   languageName: node
   linkType: hard
 
