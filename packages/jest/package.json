@@ -35,5 +35,6 @@
     "@granite-js/native": "*",
     "react": "*",
     "react-native": "*"
-  }
+  },
+  "sideEffects": false
 }
