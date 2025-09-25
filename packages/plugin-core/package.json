@@ -39,6 +39,7 @@
     "@swc/core": "catalog:swc",
     "@types/babel__core": "^7",
     "@types/connect": "^3",
+    "@types/ws": "^8.18.0",
     "cosmiconfig": "^9.0.0",
     "cosmiconfig-typescript-loader": "^5.1.0",
     "es-toolkit": "^1.39.8",

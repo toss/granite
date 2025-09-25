@@ -66,16 +66,20 @@ class Device {
   _projectRoot;
 
   // MARK: - GRANITE
+  _delegate;
+
+  // MARK: - GRANITE
   // 네트워크 응답 데이터 저장하기 위한 변수 (key: requestId, value: { data: string, base64Encoded: bool })
   _networkResponseData = new Map();
 
-  constructor(id, name, app, socket, projectRoot) {
+  constructor(id, name, app, socket, projectRoot, delegate) {
     this._id = id;
     this._name = name;
     this._app = app;
     this._pages = [];
     this._deviceSocket = socket;
     this._projectRoot = projectRoot;
+    this._delegate = delegate;
 
     this._deviceSocket.on('message', (message) => {
       const parsedMessage = JSON.parse(message);
@@ -316,6 +320,10 @@ class Device {
 
   // Allows to make changes in incoming message from device.
   _processMessageFromDevice(payload, debuggerInfo) {
+    if (this._delegate?.onDeviceMessage?.(payload, debuggerInfo.socket)) {
+      return;
+    }
+
     // Replace Android addresses for scriptParsed event.
     if (payload.method === 'Debugger.scriptParsed') {
       const params = payload.params || {};
@@ -403,6 +411,11 @@ class Device {
   // Allows to make changes in incoming messages from debugger.
   _interceptMessageFromDebugger(req, debuggerInfo) {
     let response = null;
+
+    if (this._delegate?.onDebuggerMessage?.(req, debuggerInfo.socket)) {
+      return null;
+    }
+
     if (req.method === 'Debugger.setBreakpointByUrl') {
       this._processDebuggerSetBreakpointByUrl(req, debuggerInfo);
     } else if (req.method === 'Debugger.getScriptSource') {
@@ -412,28 +425,25 @@ class Device {
       };
     } else if (req.method === 'Network.getResponseBody') {
       // MARK: - GRANITE
-      return this._processDebuggerGetResponseBody(req, debuggerInfo.socket);
+      response = this._processDebuggerGetResponseBody(req, debuggerInfo.socket);
     }
     return response;
   }
 
   // MARK: - GRANITE
-  _processDebuggerGetResponseBody(req, socket) {
+  _processDebuggerGetResponseBody(req) {
     // `networkResponseData` 이벤트로부터 수신한 데이터를 꺼내 응답
     // https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-getResponseBody
     const { requestId } = req.params;
     if (this._networkResponseData.has(requestId)) {
       const responseData = this._networkResponseData.get(requestId);
       this._networkResponseData.delete(requestId);
-      socket.send(
-        JSON.stringify({
-          id: req.id,
-          result: this._createNetworkResponseData(responseData),
-        })
-      );
-      return true;
+      return {
+        id: req.id,
+        result: this._createNetworkResponseData(responseData),
+      };
     }
-    return false;
+    return null;
   }
 
   // MARK: - GRANITE
