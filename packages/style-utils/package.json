@@ -48,5 +48,6 @@
     "@types/react": "*",
     "react": "*",
     "react-native": "*"
-  }
+  },
+  "sideEffects": false
 }

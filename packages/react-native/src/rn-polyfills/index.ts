@@ -1,7 +1,7 @@
 import { setup as setupSymbolAsyncIterator } from './symbol-asynciterator';
 import { setup as setupURLPolyfill } from './url';
 
-export function setup() {
+export function setupPolyfills() {
   setupSymbolAsyncIterator();
   setupURLPolyfill();
 }

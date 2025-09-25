@@ -43,5 +43,6 @@
   },
   "dependencies": {
     "react-simplikit": "^0.0.40"
-  }
+  },
+  "sideEffects": false
 }
