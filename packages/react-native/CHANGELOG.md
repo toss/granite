@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 0.1.26
+
+### Patch Changes
+
+- 41f9ab3: ensure polyfill setup during initialization and update package.json config for improve tree shaking
+- Updated dependencies [41f9ab3]
+  - @granite-js/style-utils@0.1.26
+  - @granite-js/lottie@0.1.26
+  - @granite-js/image@0.1.26
+  - @granite-js/jest@0.1.26
+  - @granite-js/cli@0.1.26
+  - @granite-js/mpack@0.1.26
+  - @granite-js/native@0.1.26
+  - @granite-js/plugin-core@0.1.26
+
 ## 0.1.25
 
 ### Patch Changes

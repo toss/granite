@@ -1,5 +1,12 @@
 # @granite-js/plugin-sentry
 
+## 0.1.26
+
+### Patch Changes
+
+- @granite-js/plugin-core@0.1.26
+- @granite-js/utils@0.1.26
+
 ## 0.1.25
 
 ### Patch Changes

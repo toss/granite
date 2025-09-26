@@ -1,5 +1,12 @@
 # @granite-js/image
 
+## 0.1.26
+
+### Patch Changes
+
+- 41f9ab3: ensure polyfill setup during initialization and update package.json config for improve tree shaking
+  - @granite-js/native@0.1.26
+
 ## 0.1.25
 
 ### Patch Changes
