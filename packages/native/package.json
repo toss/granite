@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/native",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "description": "A native module hub package for Granite",
   "scripts": {
     "prepack": "yarn build",
