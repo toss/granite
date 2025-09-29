@@ -133,15 +133,14 @@ export function useParams<TScreen extends keyof RegisterScreen>(
   const routeOptions = useMatchOptions(options);
   const route = useRoute();
 
-  const isStrict = typeof options.from === 'string' ? true : options.strict;
   const params = useMemo(() => {
     if (!routeOptions) {
       return (route.params ?? {}) as Readonly<object | undefined>;
     }
 
     const parsedParams = routeOptions.parserParams(route.params as Record<string, string>);
-    return isStrict && routeOptions.validateParams ? routeOptions.validateParams(parsedParams) : parsedParams;
-  }, [routeOptions, route.params, isStrict]);
+    return options.strict && routeOptions.validateParams ? routeOptions.validateParams(parsedParams) : parsedParams;
+  }, [routeOptions, route.params, options.strict]);
 
   return params;
 }
