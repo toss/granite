@@ -9,6 +9,11 @@
     "build": "tsup"
   },
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/jest"
+  },
   "main": "./dist/index.js",
   "exports": {
     ".": {

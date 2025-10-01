@@ -4,6 +4,11 @@
   "description": "A debugger frontend for Granite",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/devtools-frontend"
+  },
   "scripts": {
     "cleanup": "node scripts/remove-unnecessary-files.mjs",
     "prepack": "yarn cleanup"
