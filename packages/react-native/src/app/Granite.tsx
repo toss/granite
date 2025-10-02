@@ -6,7 +6,7 @@ import type { RouterProps, RequireContext } from '../router';
 import { AppRoot } from './AppRoot';
 import { HostAppRoot } from './HostAppRoot';
 import { getSchemeUri } from '../constant-bridges';
-import { setupPolyfills } from '../rn-polyfills';
+import { setupPolyfills } from '../polyfills';
 
 export interface GraniteProps {
   /**
