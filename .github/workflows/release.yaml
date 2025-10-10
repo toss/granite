@@ -3,10 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - main
-
-env:
-  BASE_BRANCH: 'main'
+      - '*'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -27,24 +24,11 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup-node-yarn
 
-      - name: Update npm
-        run: npm install -g npm@11.5.1
-
       - name: Run Build with Nx
         run: |
           yarn build:all
 
       - name: Create PR or Publish
-        id: release
-        uses: changesets/action@v1
-        with:
-          title: |
-            chore: version packages ${{ env.BASE_BRANCH }}
-          commit: 'chore: version packages'
-          version: yarn changeset version
-          publish: yarn workspaces foreach --all --no-private exec yarn npm publish --access public
+        run: yarn workspaces foreach --all --no-private exec yarn npm publish --access public --tag dev
         env:
-          BASE_BRANCH: ${{ env.BASE_BRANCH }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          YARN_NPM_REGISTRY_SERVER: 'https://registry.npmjs.org'
