@@ -27,9 +27,6 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup-node-yarn
 
-      - name: Update npm
-        run: npm install -g npm@11.5.1
-
       - name: Run Build with Nx
         run: |
           yarn build:all
@@ -46,5 +43,3 @@ jobs:
         env:
           BASE_BRANCH: ${{ env.BASE_BRANCH }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          YARN_NPM_REGISTRY_SERVER: 'https://registry.npmjs.org'
