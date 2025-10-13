@@ -1,5 +1,13 @@
 # @granite-js/plugin-router
 
+## 0.1.28
+
+### Patch Changes
+
+- 1d958cc: ci: provenance
+- Updated dependencies [1d958cc]
+  - @granite-js/plugin-core@0.1.28
+
 ## 0.1.27
 
 ### Patch Changes
