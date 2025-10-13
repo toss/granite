@@ -6,6 +6,11 @@
     "cba": "./bin.js",
     "create-granite-app": "./bin.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/create-granite-app"
+  },
   "files": [
     "templates",
     "tool-templates",

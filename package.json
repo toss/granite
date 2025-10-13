@@ -1,7 +1,7 @@
 {
   "name": "granite-monorepo",
   "private": true,
-  "packageManager": "yarn@4.9.1",
+  "packageManager": "yarn@4.10.3",
   "workspaces": [
     "packages/*",
     "services/*",

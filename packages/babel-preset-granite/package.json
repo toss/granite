@@ -13,6 +13,11 @@
   },
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.cts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/babel-preset-granite"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.cts",

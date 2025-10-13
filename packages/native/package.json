@@ -2,6 +2,11 @@
   "name": "@granite-js/native",
   "version": "0.1.26",
   "description": "A native module hub package for Granite",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/native"
+  },
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
