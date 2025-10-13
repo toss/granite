@@ -1,5 +1,13 @@
 # @granite-js/lottie
 
+## 0.1.28
+
+### Patch Changes
+
+- 2c6e027: ci: provenance
+- Updated dependencies [2c6e027]
+  - @granite-js/native@0.1.28
+
 ## 0.1.27
 
 ### Patch Changes
