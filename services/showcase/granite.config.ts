@@ -2,18 +2,21 @@ import { env } from '@granite-js/plugin-env';
 import { hermes } from '@granite-js/plugin-hermes';
 import { microFrontend } from '@granite-js/plugin-micro-frontend';
 import { router } from '@granite-js/plugin-router';
+import { sentry } from '@granite-js/plugin-sentry';
 import { defineConfig } from '@granite-js/react-native/config';
 
 export default defineConfig({
   /**
    * granite://showcase
    */
-  scheme: 'granite',
+  scheme: 'supertoss',
+  host:'m',
   appName: 'showcase',
   plugins: [
     router(),
     env({ MY_ENV: 'from granite.config.ts' }),
     hermes(),
+    sentry({ useClient: false }),
     microFrontend({
       name: 'remoteApp',
       exposes: {
