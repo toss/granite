@@ -1,6 +1,7 @@
 ---
 sourcePath: packages/react-native/src/router/hooks/useIsInitialScreen.ts
 ---
+
 # useIsInitialScreen
 
 A hook that checks whether the current screen is the first screen in the navigation stack.
@@ -14,6 +15,7 @@ function useIsInitialScreen(): boolean;
 ```
 
 ### Return Value
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--type">boolean</span>
@@ -37,9 +39,7 @@ function MyScreen() {
 
   return (
     <View>
-      {isInitialScreen && (
-        <Text>Welcome! This is the initial screen.</Text>
-      )}
+      {isInitialScreen && <Text>Welcome! This is the initial screen.</Text>}
       <Text>Screen content</Text>
     </View>
   );

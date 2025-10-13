@@ -1,6 +1,7 @@
 ---
 sourcePath: packages/react-native/src/router/hooks/useIsInitialScreen.ts
 ---
+
 # useIsInitialScreen
 
 현재 화면이 네비게이션 스택의 첫 번째 화면인지 확인하는 Hook이에요.
@@ -14,6 +15,7 @@ function useIsInitialScreen(): boolean;
 ```
 
 ### 반환 값
+
 <ul class="post-parameters-ul">
   <li class="post-parameters-li post-parameters-li-root">
     <span class="post-parameters--type">boolean</span>
@@ -37,9 +39,7 @@ function MyScreen() {
 
   return (
     <View>
-      {isInitialScreen && (
-        <Text>환영합니다! 첫 화면입니다.</Text>
-      )}
+      {isInitialScreen && <Text>환영합니다! 첫 화면입니다.</Text>}
       <Text>화면 내용</Text>
     </View>
   );
