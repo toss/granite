@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/image",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",

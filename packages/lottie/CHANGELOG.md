@@ -1,5 +1,14 @@
 # @granite-js/lottie
 
+## 0.1.27
+
+### Patch Changes
+
+- e32b020: ci: oidc
+- Updated dependencies [e32b020]
+- Updated dependencies [1dd9179]
+  - @granite-js/native@0.1.27
+
 ## 0.1.26
 
 ### Patch Changes
