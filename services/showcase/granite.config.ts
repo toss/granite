@@ -9,8 +9,7 @@ export default defineConfig({
   /**
    * granite://showcase
    */
-  scheme: 'supertoss',
-  host:'m',
+  scheme: 'granite',
   appName: 'showcase',
   plugins: [
     router(),
