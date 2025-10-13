@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 0.1.28
+
+### Patch Changes
+
+- 1d958cc: ci: provenance
+- Updated dependencies [1d958cc]
+  - @granite-js/cli@0.1.28
+  - @granite-js/image@0.1.28
+  - @granite-js/jest@0.1.28
+  - @granite-js/lottie@0.1.28
+  - @granite-js/mpack@0.1.28
+  - @granite-js/native@0.1.28
+  - @granite-js/plugin-core@0.1.28
+  - @granite-js/style-utils@0.1.28
+
 ## 0.1.27
 
 ### Patch Changes

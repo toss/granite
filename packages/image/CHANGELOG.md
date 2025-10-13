@@ -1,5 +1,13 @@
 # @granite-js/image
 
+## 0.1.28
+
+### Patch Changes
+
+- 1d958cc: ci: provenance
+- Updated dependencies [1d958cc]
+  - @granite-js/native@0.1.28
+
 ## 0.1.27
 
 ### Patch Changes
