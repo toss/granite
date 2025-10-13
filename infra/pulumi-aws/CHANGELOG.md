@@ -1,5 +1,11 @@
 # @granite-js/pulumi-aws
 
+## 0.1.27
+
+### Patch Changes
+
+- e32b020: ci: oidc
+
 ## 0.1.26
 
 ## 0.1.25
