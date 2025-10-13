@@ -6,6 +6,11 @@
   "bin": {
     "granite-forge": "./bin/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "infra/forge-cli"
+  },
   "files": [
     "dist",
     "bin",
