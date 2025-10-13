@@ -1,5 +1,5 @@
 import { type ComponentProps, PureComponent, RefObject, createRef } from 'react';
-import { LayoutChangeEvent, NativeScrollEvent, NativeSyntheticEvent, ScrollView, findNodeHandle } from 'react-native';
+import { LayoutChangeEvent, NativeScrollEvent, NativeSyntheticEvent, ScrollView } from 'react-native';
 import IOContext, { IOContextValue } from './IOContext';
 import IOManager from './IOManager';
 import { Root, RootMargin } from './IntersectionObserver';
@@ -82,7 +82,9 @@ function withIO<
     }
 
     componentDidMount() {
-      this.node = findNodeHandle(this.scroller.current);
+      // Use the host component ref directly for RN 0.81/React 19 compatibility.
+      // This avoids relying on numeric node handles and works with Fabric.
+      this.node = this.scroller.current;
       methods.forEach((method) => {
         (this as any)[method] = (...args: any) => {
           this.scroller.current?.[method]?.(...args);
