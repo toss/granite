@@ -14,6 +14,7 @@ export * from './intersection-observer';
 export * from './impression-area';
 export * from './scroll-view-inertial-background';
 export * from './router/createRoute';
+export * from './router/hooks/useIsInitialScreen';
 export * from './event';
 export * from './video';
 export * from './status-bar';
