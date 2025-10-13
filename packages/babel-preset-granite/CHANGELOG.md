@@ -1,11 +1,5 @@
 # babel-preset-granite
 
-## 0.1.28
-
-### Patch Changes
-
-- 2c6e027: ci: provenance
-
 ## 0.1.27
 
 ### Patch Changes
