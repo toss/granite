@@ -14,14 +14,18 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: ./.github/actions/setup-node-yarn
-        name: Setup
+      - name: Setup
+        uses: ./.github/actions/setup-node-yarn
 
       - name: Run Build with Nx
         run: |
@@ -39,6 +43,3 @@ jobs:
         env:
           BASE_BRANCH: ${{ env.BASE_BRANCH }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          YARN_NPM_REGISTRY_SERVER: 'https://registry.npmjs.org'
