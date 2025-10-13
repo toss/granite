@@ -1,14 +1,5 @@
 # @granite-js/plugin-micro-frontend
 
-## 0.1.28
-
-### Patch Changes
-
-- 2c6e027: ci: provenance
-- Updated dependencies [2c6e027]
-  - @granite-js/plugin-core@0.1.28
-  - @granite-js/utils@0.1.28
-
 ## 0.1.27
 
 ### Patch Changes
