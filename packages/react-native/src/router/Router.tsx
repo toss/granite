@@ -23,7 +23,6 @@ import { BackButton } from './components/BackButton';
 import { CanGoBackGuard } from './components/CanGoBackGuard';
 import { StackNavigator } from './components/StackNavigator';
 import { useInternalRouterBackHandler } from './components/useRouterBackHandler';
-import { useInitialRouteName } from './hooks/useInitialRouteName';
 import { useRouterControls, type RouterControlsConfig } from './hooks/useRouterControls';
 import { RequireContext } from './types';
 import { BASE_STACK_NAVIGATOR_STYLE } from './types/screen-option';
@@ -144,7 +143,6 @@ export function Router({
   getInitialUrl,
   ...navigationContainerProps
 }: InternalRouterProps & RouterProps): ReactElement {
-  const initialRouteName = useInitialRouteName({ prefix, initialScheme });
   const { Screens, linkingOptions } = useRouterControls({
     prefix,
     context,
@@ -193,7 +191,7 @@ export function Router({
         setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
       >
         <Container {...initialProps}>
-          <StackNavigator.Navigator initialRouteName={initialRouteName} screenOptions={screenOptions}>
+          <StackNavigator.Navigator screenOptions={screenOptions} >
             {Screens}
           </StackNavigator.Navigator>
         </Container>
