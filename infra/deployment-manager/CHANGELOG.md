@@ -1,5 +1,11 @@
 # @granite-js/deployment-manager
 
+## 0.1.28
+
+### Patch Changes
+
+- 1d958cc: ci: provenance
+
 ## 0.1.27
 
 ### Patch Changes
