@@ -1,5 +1,11 @@
 # @granite-js/style-utils
 
+## 0.1.27
+
+### Patch Changes
+
+- e32b020: ci: oidc
+
 ## 0.1.26
 
 ### Patch Changes

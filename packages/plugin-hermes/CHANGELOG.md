@@ -1,5 +1,14 @@
 # @granite-js/plugin-hermes
 
+## 0.1.27
+
+### Patch Changes
+
+- e32b020: ci: oidc
+- Updated dependencies [e32b020]
+  - @granite-js/plugin-core@0.1.27
+  - @granite-js/utils@0.1.27
+
 ## 0.1.26
 
 ### Patch Changes
