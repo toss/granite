@@ -39,7 +39,8 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
   const packageRootPath = await getPackageRoot();
 
   return mergeConfig(defaultConfig, {
-    watchFolders: [resolvedRootPath, packageRootPath],
+    projectRoot: additionalConfig?.projectRoot || rootPath,
+    watchFolders: [resolvedRootPath, packageRootPath, ...(additionalConfig?.watchFolders || [])],
     transformerPath: resolveVendors('metro-transform-worker/src'),
     transformer: {
       allowOptionalDependencies: true,
@@ -74,6 +75,9 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
       blockList: exclusionList(
         additionalConfig?.resolver?.blockList ? asArray(additionalConfig.resolver.blockList) : []
       ),
+      nodeModulesPaths: additionalConfig?.resolver?.nodeModulesPaths || [],
+      extraNodeModules: additionalConfig?.resolver?.extraNodeModules || {},
+      disableHierarchicalLookup: additionalConfig?.resolver?.disableHierarchicalLookup,
     },
     serializer: {
       getModulesRunBeforeMainModule: () => [resolveFromRoot('react-native/Libraries/Core/InitializeCore', rootPath)],
