@@ -220,6 +220,7 @@ export type ReportableEvent =
     };
 
 export interface MetroConfig {
+  readonly projectRoot?: string;
   readonly watchFolders?: string[];
   readonly cacheStores?: any;
   readonly resolver?: Partial<ResolverConfig>;

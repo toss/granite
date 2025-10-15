@@ -17,4 +17,5 @@ export interface AdditionalMetroConfig extends MetroConfig {
   reporter?: MetroConfig['reporter'];
   babelConfig?: babel.TransformOptions;
   transformSync?: (id: string, code: string) => string;
+  projectRoot?: MetroConfig['projectRoot']
 }
