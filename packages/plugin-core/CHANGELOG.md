@@ -1,5 +1,12 @@
 # @granite-js/plugin-core
 
+## 0.1.29
+
+### Patch Changes
+
+- ed4cdbf: support additional metro config options from granite.config.ts
+  - @granite-js/utils@0.1.29
+
 ## 0.1.28
 
 ### Patch Changes

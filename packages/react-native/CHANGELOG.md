@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 0.1.29
+
+### Patch Changes
+
+- 2dee8d3: add initialState in router spec
+- Updated dependencies [ed4cdbf]
+  - @granite-js/plugin-core@0.1.29
+  - @granite-js/mpack@0.1.29
+  - @granite-js/cli@0.1.29
+  - @granite-js/image@0.1.29
+  - @granite-js/jest@0.1.29
+  - @granite-js/lottie@0.1.29
+  - @granite-js/native@0.1.29
+  - @granite-js/style-utils@0.1.29
+
 ## 0.1.28
 
 ### Patch Changes
