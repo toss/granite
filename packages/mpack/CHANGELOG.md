@@ -1,5 +1,15 @@
 # @granite-js/mpack
 
+## 0.1.29
+
+### Patch Changes
+
+- ed4cdbf: support additional metro config options from granite.config.ts
+- Updated dependencies [ed4cdbf]
+  - @granite-js/plugin-core@0.1.29
+  - @granite-js/devtools-frontend@0.1.29
+  - @granite-js/utils@0.1.29
+
 ## 0.1.28
 
 ### Patch Changes
