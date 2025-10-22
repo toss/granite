@@ -9,7 +9,7 @@ export const ko = defineConfig({
   themeConfig: {
     sidebar: sidebar(),
     nav: nav(),
-    darkModeSwitchLabel: "테마"
+    darkModeSwitchLabel: '테마',
   },
 });
 
