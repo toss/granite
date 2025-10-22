@@ -13105,7 +13105,7 @@ __metadata:
 
 "brick-codegen@npm:0.1.19":
   version: 0.1.19
-  resolution: "brick-codegen@npm:0.1.19::__archiveUrl=http%3A%2F%2Fnexus.toss.bz%2Frepository%2Fnpm-group%2Fbrick-codegen%2F-%2Fbrick-codegen-0.1.19.tgz"
+  resolution: "brick-codegen@npm:0.1.19"
   dependencies:
     "@babel/parser": "npm:^7.27.5"
     "@babel/types": "npm:^7.27.6"
@@ -13126,7 +13126,7 @@ __metadata:
 
 "brick-module@npm:^0.1.19":
   version: 0.1.19
-  resolution: "brick-module@npm:0.1.19::__archiveUrl=http%3A%2F%2Fnexus.toss.bz%2Frepository%2Fnpm-group%2Fbrick-module%2F-%2Fbrick-module-0.1.19.tgz"
+  resolution: "brick-module@npm:0.1.19"
   dependencies:
     brick-codegen: "npm:0.1.19"
   peerDependencies:
@@ -23499,9 +23499,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-svg@npm:15.12.1":
-  version: 15.12.1
-  resolution: "react-native-svg@npm:15.12.1"
+"react-native-svg@npm:15.14.0":
+  version: 15.14.0
+  resolution: "react-native-svg@npm:15.14.0"
   dependencies:
     css-select: "npm:^5.1.0"
     css-tree: "npm:^1.1.3"
@@ -23509,7 +23509,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10c0/ed94b57007125c715283fc760438ac8eac0677ced3201f6e272a7cd4459f3fecb672a8eed2c32664e5b8e6e0367585353b0f83f99b231f603d75094bb052c01f
+  checksum: 10c0/5855bee2a76313f580ac3f8c476d07bb63d1a8e5e0883154275be5a1f4224e35f2416b0ba3b03f5d4c637c3b2f9320df34ede918da27188adb6881b3b8ac96c8
   languageName: node
   linkType: hard
 
