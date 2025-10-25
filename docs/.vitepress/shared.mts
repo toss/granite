@@ -7,6 +7,10 @@ const require = createRequire(import.meta.url);
 
 export const shared = defineConfig({
   title: 'Granite',
+  head: [
+    ['link', { rel: 'icon', href: '/favicon.ico' }],
+    ['meta', { name: 'theme-color', content: '#0064FF' }],
+  ],
   lastUpdated: true,
   metaChunk: true,
   themeConfig: {
