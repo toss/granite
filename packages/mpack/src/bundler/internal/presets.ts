@@ -1,14 +1,15 @@
 import path from 'path';
 import { mergeBuildConfigs, type BuildConfig } from '@granite-js/plugin-core';
 import type { BundlerConfig } from '../../types';
+import { getDefaultReactNativePath } from '../../utils/getDefaultReactNativePath';
 
-export function getReactNativeSetupScripts({ rootDir }: { rootDir: string }) {
-  const reactNativePath = path.dirname(
-    require.resolve('react-native/package.json', {
-      paths: [rootDir],
-    })
-  );
-
+export function getReactNativeSetupScripts({
+  rootDir,
+  reactNativePath = getDefaultReactNativePath(rootDir),
+}: {
+  rootDir: string;
+  reactNativePath?: string;
+}) {
   return [
     ...require(path.join(reactNativePath, 'rn-get-polyfills'))(),
     path.join(reactNativePath, 'Libraries/Core/InitializeCore.js'),
@@ -42,7 +43,10 @@ export function combineWithBaseBuildConfig(
       platform: config.buildConfig.platform,
       esbuild: {
         define: defineGlobalVariables({ dev: context.dev }),
-        prelude: getReactNativeSetupScripts({ rootDir: context.rootDir }),
+        prelude: getReactNativeSetupScripts({
+          rootDir: context.rootDir,
+          reactNativePath: config.buildConfig.reactNativePath,
+        }),
         banner: {
           js: [
             globalVariables({ dev: context.dev }),
