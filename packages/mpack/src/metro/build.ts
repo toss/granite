@@ -54,7 +54,7 @@ export async function buildAll(
       try {
         const buildResult = await buildImpl(config, options);
         buildResults.push(buildResult);
-      } catch {
+      } finally {
         semaphore.release();
       }
     })
