@@ -67,7 +67,8 @@ export function setupAliasResolver(build: PluginBuild, aliasConfig: AliasConfig[
 
 function resolveAliasConfig(build: PluginBuild, aliasConfig: AliasConfig) {
   const { from, to, exact } = aliasConfig;
-  const filter = new RegExp(exact ? `^${from}$` : `^${from}(?:$|/)`);
+  const escapedFrom = escapeRegExpString(from);
+  const filter = new RegExp(exact ? `^${escapedFrom}$` : `^${escapedFrom}(?:$|/)`);
   const resolver = createNonRecursiveResolver(build);
 
   const aliasResolver = (boundArgs: OnResolveArgs, path: string, options: ResolveOptions) => {
@@ -90,6 +91,10 @@ function resolveAliasConfig(build: PluginBuild, aliasConfig: AliasConfig) {
   };
 
   return { filter, resolveAlias };
+}
+
+function escapeRegExpString(str: string) {
+  return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
 }
 
 function normalizeResolveResult(result: ResolveResult) {
