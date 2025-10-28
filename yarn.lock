@@ -5711,7 +5711,7 @@ __metadata:
     tsup: "npm:^8.5.0"
     typescript: "npm:5.8.3"
   peerDependencies:
-    "@granite-js/native": 0.1.23-next.14
+    "@granite-js/native": 0.1.23-next.15
     "@types/react": "*"
     react: "*"
     react-native: "*"
@@ -6059,7 +6059,7 @@ __metadata:
     typescript: "npm:5.8.3"
     vitest: "npm:^2.1.8"
   peerDependencies:
-    "@granite-js/native": 0.1.23-next.14
+    "@granite-js/native": 0.1.23-next.15
     "@types/react": "*"
     brick-module: "*"
     react: "*"
