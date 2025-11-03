@@ -45,7 +45,6 @@ export function createFullyTransformStep({
        * @babel/preset-react 포함 필요
        */
       [require.resolve('@babel/preset-react'), { runtime: 'automatic' }],
-      [require.resolve('@react-native/babel-preset')],
       ...(additionalBabelOptions?.presets ?? []),
     ],
     plugins: [
