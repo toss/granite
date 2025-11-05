@@ -49,6 +49,14 @@ export interface CustomResolutionContext extends ResolutionContext {
 type CustomResolver = (context: CustomResolutionContext, moduleName: string, platform: string | null) => any;
 
 interface ResolverConfig {
+  /**
+   * Defaults to `['react-native', 'browser', 'main']`
+   */
+  resolverMainFields: string[];
+  /**
+   * Defaults to `['react-native', 'require', 'node', 'default']`
+   */
+  unstable_conditionNames: string[];
   assetExts: string[];
   assetResolutions: string[];
   blacklistRE?: RegExp | RegExp[];
@@ -62,10 +70,8 @@ interface ResolverConfig {
   nodeModulesPaths: string[];
   platforms: string[];
   resolveRequest?: CustomResolver;
-  resolverMainFields: string[];
   sourceExts: string[];
   unstable_enableSymlinks: boolean;
-  unstable_conditionNames: string[];
   unstable_conditionsByPlatform: Readonly<{
     [platform: string]: string[];
   }>;
