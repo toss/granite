@@ -1,5 +1,6 @@
 import Module from 'module';
 import path from 'path';
+import type { AdditionalMetroConfig } from '@granite-js/plugin-core';
 import enhancedResolve from 'enhanced-resolve';
 import { RESOLVER_EXPORTS_MAP_CONDITIONS, RESOLVER_MAIN_FIELDS } from '../constants';
 
@@ -27,7 +28,7 @@ const SUPPORTED_BUILTIN_FALLBACKS: Record<string, string> = {
 const builtinModules = new Set(Module.builtinModules);
 const resolvers = new Map();
 
-export function createResolver(rootPath: string) {
+export function createResolver(rootPath: string, resolverConfig?: AdditionalMetroConfig['resolver']) {
   function createResolverImpl(context: CustomResolutionContext, platform: string | null, rootPath: string) {
     const baseExtensions = context.sourceExts.map((extension) => `.${extension}`);
     let finalExtensions = [...baseExtensions];
@@ -42,9 +43,14 @@ export function createResolver(rootPath: string) {
 
     const resolver = enhancedResolve.create.sync({
       extensions: finalExtensions,
-      mainFields: RESOLVER_MAIN_FIELDS,
+      mainFields: resolverConfig?.resolverMainFields ?? RESOLVER_MAIN_FIELDS,
       mainFiles: ['index'],
-      conditionNames: [...RESOLVER_EXPORTS_MAP_CONDITIONS, 'require', 'node', 'default'],
+      conditionNames: resolverConfig?.unstable_conditionNames ?? [
+        ...RESOLVER_EXPORTS_MAP_CONDITIONS,
+        'require',
+        'node',
+        'default',
+      ],
       modules: ['node_modules', path.join(rootPath, 'src')],
     });
 
