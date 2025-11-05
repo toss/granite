@@ -69,7 +69,7 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
       // metro
       platforms: ['android', 'ios'],
       useWatchman: false,
-      resolveRequest: createResolver(rootPath),
+      resolveRequest: createResolver(rootPath, additionalConfig?.resolver),
       // metro-file-map
       sourceExts: [...SOURCE_EXTENSIONS.map((extension) => extension.replace(/^\.?/, '')), 'cjs', 'mjs'],
       blockList: exclusionList(

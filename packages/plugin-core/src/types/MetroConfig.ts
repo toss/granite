@@ -12,6 +12,8 @@ export interface AdditionalMetroConfig extends MetroConfig {
    * Partial support for some options only
    *
    * - `blockList`
+   * - `resolverMainFields`
+   * - `unstable_conditionNames`
    */
   resolver?: MetroConfig['resolver'];
   reporter?: MetroConfig['reporter'];
