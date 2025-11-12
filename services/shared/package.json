@@ -18,7 +18,7 @@
     "@react-navigation/native-stack": "catalog:react-native",
     "@shopify/flash-list": "catalog:react-native",
     "@toss/error-boundary": "^1.5.2",
-    "brick-module": "^0.1.19",
+    "brick-module": "catalog:brick-module",
     "lottie-react-native": "catalog:react-native",
     "react": "catalog:react-native",
     "react-native": "catalog:react-native",
