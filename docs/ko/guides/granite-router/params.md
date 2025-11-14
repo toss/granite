@@ -210,9 +210,15 @@ export const Route = createRoute('/user', {
   component: User,
   validateParams: v.object({
     // 문자열을 숫자로 변환
-    id: v.pipe(v.string(), v.transform(v => parseInt(v))),
+    id: v.pipe(
+      v.string(),
+      v.transform((v) => parseInt(v))
+    ),
     // ISO 문자열을 Date 객체로 변환
-    createdAt: v.pipe(v.string(), v.transform(v => new Date(v))),
+    createdAt: v.pipe(
+      v.string(),
+      v.transform((v) => new Date(v))
+    ),
   }),
 });
 ```
@@ -256,9 +262,9 @@ export const Route = createRoute('/user', {
   component: User,
   validateParams: z.object({
     // 문자열을 숫자로 변환
-    id: z.string().transform(v => parseInt(v)),
+    id: z.string().transform((v) => parseInt(v)),
     // ISO 문자열을 Date 객체로 변환
-    createdAt: z.string().transform(v => new Date(v)),
+    createdAt: z.string().transform((v) => new Date(v)),
   }),
 });
 

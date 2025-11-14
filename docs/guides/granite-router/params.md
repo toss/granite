@@ -210,9 +210,15 @@ export const Route = createRoute('/user', {
   component: User,
   validateParams: v.object({
     // Converts string to number
-    id: v.pipe(v.string(), v.transform(v => parseInt(v))),
+    id: v.pipe(
+      v.string(),
+      v.transform((v) => parseInt(v))
+    ),
     // Converts ISO string to Date object
-    createdAt: v.pipe(v.string(), v.transform(v => new Date(v))),
+    createdAt: v.pipe(
+      v.string(),
+      v.transform((v) => new Date(v))
+    ),
   }),
 });
 ```
@@ -256,9 +262,9 @@ export const Route = createRoute('/user', {
   component: User,
   validateParams: z.object({
     // Converts string to number
-    id: z.string().transform(v => parseInt(v)),
+    id: z.string().transform((v) => parseInt(v)),
     // Converts ISO string to Date object
-    createdAt: z.string().transform(v => new Date(v)),
+    createdAt: z.string().transform((v) => new Date(v)),
   }),
 });
 
