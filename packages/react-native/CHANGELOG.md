@@ -1,5 +1,22 @@
 # @granite-js/react-native
 
+## 0.1.31
+
+### Patch Changes
+
+- 0ff9b13: feat(router): screenOptions in Route
+- Updated dependencies [0ff9b13]
+- Updated dependencies [9bf8b50]
+- Updated dependencies [e957833]
+  - @granite-js/native@0.1.31
+  - @granite-js/plugin-core@0.1.31
+  - @granite-js/mpack@0.1.31
+  - @granite-js/image@0.1.31
+  - @granite-js/jest@0.1.31
+  - @granite-js/lottie@0.1.31
+  - @granite-js/style-utils@0.1.31
+  - @granite-js/cli@0.1.31
+
 ## 0.1.30
 
 ### Patch Changes
