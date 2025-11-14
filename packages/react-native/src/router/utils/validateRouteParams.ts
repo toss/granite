@@ -32,5 +32,9 @@ export function validateRouteParams(
   }
 
   // Function pattern
-  return (validateParams as (params: Readonly<object | undefined>) => any)(parsedParams);
+  if (typeof validateParams === 'function') {
+    return validateParams(parsedParams);
+  }
+
+  return parsedParams;
 }

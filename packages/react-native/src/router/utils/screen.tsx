@@ -44,23 +44,19 @@ export function getRouteScreens(context: RequireContext): RouteScreen[] {
     const screenOptions =
       typeof rawScreenOptions === 'function'
         ? ({ route }: { route: { params?: Record<string, unknown> }; navigation: unknown }) => {
+            const rawParams = route.params ?? {};
+            const parserParams = routeMapEntry?.options?.parserParams;
+            const validateParams = routeMapEntry?.options?.validateParams;
+
+            // Apply parserParams if available
+            const parsedParams = parserParams ? parserParams(rawParams) : rawParams;
+
+            // Apply validateParams if available
             try {
-              const rawParams = route.params ?? {};
-              const parserParams = routeMapEntry?.options?.parserParams;
-              const validateParams = routeMapEntry?.options?.validateParams;
-
-              // Apply parserParams if available
-              const parsedParams = parserParams ? parserParams(rawParams) : rawParams;
-
-              // Apply validateParams if available
-              const validatedParams = validateParams
-                ? validateRouteParams(validateParams, parsedParams)
-                : parsedParams;
-
-              // Call user's screenOptions function with context object
+              const validatedParams = validateParams ? validateRouteParams(validateParams, parsedParams) : parsedParams;
               return rawScreenOptions({ params: validatedParams });
             } catch {
-              return {};
+              return rawScreenOptions({ params: { _error: true } });
             }
           }
         : rawScreenOptions;
