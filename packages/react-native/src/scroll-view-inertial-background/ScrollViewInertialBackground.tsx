@@ -96,4 +96,4 @@ function HiddenView({ style, pointerEvents = 'none', ...props }: ComponentProps<
  * Gradient value for BottomCTA. Set as a fixed value to avoid peerDeps.
  */
 const GRADIENT_HEIGHT = 37;
-const DEFAULT_BACKGROUND_COLOR = '#ffffff';
+const DEFAULT_BACKGROUND_COLOR = 'transparent';
