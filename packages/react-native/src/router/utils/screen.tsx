@@ -1,6 +1,7 @@
 import { getRoutePath } from './path';
 import { routeMap } from '../createRoute';
 import { RequireContext, RouteScreen } from '../types';
+import { isStandardSchema } from './standardSchema';
 
 /**
  * @kind function
@@ -52,7 +53,21 @@ export function getRouteScreens(context: RequireContext): RouteScreen[] {
               const parsedParams = parserParams ? parserParams(rawParams) : rawParams;
 
               // Apply validateParams if available
-              const validatedParams = validateParams ? validateParams(parsedParams) : parsedParams;
+              let validatedParams: unknown = parsedParams;
+              if (validateParams) {
+                if (isStandardSchema(validateParams)) {
+                  const result = validateParams['~standard'].validate(parsedParams);
+                  if (result instanceof Promise) {
+                    throw new Error('Async validation is not supported in screenOptions');
+                  }
+                  if ('issues' in result && result.issues) {
+                    throw new Error('Validation failed');
+                  }
+                  validatedParams = result.value;
+                } else {
+                  validatedParams = (validateParams as (params: any) => any)(parsedParams);
+                }
+              }
 
               // Call user's screenOptions function with context object
               return rawScreenOptions({ params: validatedParams });
