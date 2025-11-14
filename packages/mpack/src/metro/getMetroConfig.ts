@@ -3,7 +3,7 @@ import type { AdditionalMetroConfig } from '@granite-js/plugin-core';
 import { getPackageRoot } from '@granite-js/utils';
 import { createResolver } from './enhancedResolver';
 import { getMonorepoRoot } from './getMonorepoRoot';
-import { DEV_SERVER_DEFAULT_PORT, SOURCE_EXTENSIONS } from '../constants';
+import { DEV_SERVER_DEFAULT_PORT, RESOLVER_MAIN_FIELDS, SOURCE_EXTENSIONS } from '../constants';
 import { getDefaultValues } from '../vendors/metro-config/src/defaults';
 import exclusionList from '../vendors/metro-config/src/defaults/exclusionList';
 import { mergeConfig } from '../vendors/metro-config/src/loadConfig';
@@ -38,6 +38,12 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
   const resolvedRootPath = await getMonorepoRoot(rootPath);
   const packageRootPath = await getPackageRoot();
 
+  const resolveRequest =
+    additionalConfig?.resolver?.resolveRequest ??
+    createResolver(rootPath, {
+      conditionNames: additionalConfig?.resolver?.conditionNames,
+    });
+
   return mergeConfig(defaultConfig, {
     projectRoot: additionalConfig?.projectRoot || rootPath,
     watchFolders: [resolvedRootPath, packageRootPath, ...(additionalConfig?.watchFolders || [])],
@@ -69,7 +75,7 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
       // metro
       platforms: ['android', 'ios'],
       useWatchman: false,
-      resolveRequest: createResolver(rootPath, additionalConfig?.resolver),
+      resolveRequest,
       // metro-file-map
       sourceExts: [...SOURCE_EXTENSIONS.map((extension) => extension.replace(/^\.?/, '')), 'cjs', 'mjs'],
       blockList: exclusionList(
@@ -78,6 +84,7 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
       nodeModulesPaths: additionalConfig?.resolver?.nodeModulesPaths || [],
       extraNodeModules: additionalConfig?.resolver?.extraNodeModules || {},
       disableHierarchicalLookup: additionalConfig?.resolver?.disableHierarchicalLookup,
+      resolverMainFields: additionalConfig?.resolver?.resolverMainFields ?? RESOLVER_MAIN_FIELDS,
     },
     serializer: {
       getModulesRunBeforeMainModule: () => [resolveFromRoot('react-native/Libraries/Core/InitializeCore', rootPath)],
