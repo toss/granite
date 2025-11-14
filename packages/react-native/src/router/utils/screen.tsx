@@ -54,8 +54,8 @@ export function getRouteScreens(context: RequireContext): RouteScreen[] {
               // Apply validateParams if available
               const validatedParams = validateParams ? validateParams(parsedParams) : parsedParams;
 
-              // Call user's screenOptions function with validated params only
-              return rawScreenOptions(validatedParams);
+              // Call user's screenOptions function with context object
+              return rawScreenOptions({ params: validatedParams });
             } catch {
               return {};
             }

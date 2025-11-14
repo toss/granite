@@ -15,7 +15,7 @@ export interface RouteOptions<T extends Readonly<object | undefined>> {
   parserParams?: (params: Record<string, unknown>) => Record<string, unknown>;
   validateParams?: (params: Readonly<object | undefined>) => T;
   component: React.FC<any>;
-  screenOptions?: NativeStackNavigationOptions | ((params: T) => NativeStackNavigationOptions);
+  screenOptions?: NativeStackNavigationOptions | ((context: { params: T }) => NativeStackNavigationOptions);
 }
 
 export type NavigationProps = NativeStackNavigationProp<
@@ -45,7 +45,7 @@ export const routeMap = new Map<
   {
     options: Omit<RouteOptions<any>, 'component' | 'screenOptions'>;
     component: React.FC<any>;
-    screenOptions?: NativeStackNavigationOptions | ((params: any) => NativeStackNavigationOptions);
+    screenOptions?: NativeStackNavigationOptions | ((context: { params: any }) => NativeStackNavigationOptions);
   }
 >();
 
