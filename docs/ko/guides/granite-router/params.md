@@ -184,9 +184,14 @@ export const Route = createRoute('/profile', {
     isActive: v.fallback(v.boolean(), true),
   }),
 });
+```
+
+```tsx [valibot - optional]
+import { createRoute } from '@granite-js/react-native';
+import * as v from 'valibot';
 
 // v.optional()로 기본값 설정
-export const SettingsRoute = createRoute('/settings', {
+export const Route = createRoute('/settings', {
   component: Settings,
   validateParams: v.object({
     theme: v.optional(v.picklist(['light', 'dark']), 'light'),
@@ -194,9 +199,14 @@ export const SettingsRoute = createRoute('/settings', {
     fontSize: v.optional(v.number(), 16),
   }),
 });
+```
+
+```tsx [valibot - transform]
+import { createRoute } from '@granite-js/react-native';
+import * as v from 'valibot';
 
 // v.transform()으로 타입 변환
-export const UserRoute = createRoute('/user', {
+export const Route = createRoute('/user', {
   component: User,
   validateParams: v.object({
     // 문자열을 숫자로 변환
@@ -220,9 +230,14 @@ export const Route = createRoute('/profile', {
     isActive: z.boolean().catch(true),
   }),
 });
+```
+
+```tsx [zod - default]
+import { createRoute } from '@granite-js/react-native';
+import { z } from 'zod';
 
 // .default()로 기본값 설정
-export const SettingsRoute = createRoute('/settings', {
+export const Route = createRoute('/settings', {
   component: Settings,
   validateParams: z.object({
     theme: z.enum(['light', 'dark']).default('light'),
@@ -230,9 +245,14 @@ export const SettingsRoute = createRoute('/settings', {
     fontSize: z.number().default(16),
   }),
 });
+```
+
+```tsx [zod - transform]
+import { createRoute } from '@granite-js/react-native';
+import { z } from 'zod';
 
 // .transform()으로 타입 변환
-export const UserRoute = createRoute('/user', {
+export const Route = createRoute('/user', {
   component: User,
   validateParams: z.object({
     // 문자열을 숫자로 변환
@@ -243,7 +263,7 @@ export const UserRoute = createRoute('/user', {
 });
 
 function User() {
-  const params = UserRoute.useParams();
+  const params = Route.useParams();
   // params.id는 number 타입 (string이 아님)
   // params.createdAt은 Date 객체
 }

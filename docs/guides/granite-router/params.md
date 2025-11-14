@@ -184,9 +184,14 @@ export const Route = createRoute('/profile', {
     isActive: v.fallback(v.boolean(), true),
   }),
 });
+```
+
+```tsx [valibot - optional]
+import { createRoute } from '@granite-js/react-native';
+import * as v from 'valibot';
 
 // Using v.optional() with default values
-export const SettingsRoute = createRoute('/settings', {
+export const Route = createRoute('/settings', {
   component: Settings,
   validateParams: v.object({
     theme: v.optional(v.picklist(['light', 'dark']), 'light'),
@@ -194,9 +199,14 @@ export const SettingsRoute = createRoute('/settings', {
     fontSize: v.optional(v.number(), 16),
   }),
 });
+```
+
+```tsx [valibot - transform]
+import { createRoute } from '@granite-js/react-native';
+import * as v from 'valibot';
 
 // Using v.transform() for type conversion
-export const UserRoute = createRoute('/user', {
+export const Route = createRoute('/user', {
   component: User,
   validateParams: v.object({
     // Converts string to number
@@ -220,9 +230,14 @@ export const Route = createRoute('/profile', {
     isActive: z.boolean().catch(true),
   }),
 });
+```
+
+```tsx [zod - default]
+import { createRoute } from '@granite-js/react-native';
+import { z } from 'zod';
 
 // Using .default() for optional parameters
-export const SettingsRoute = createRoute('/settings', {
+export const Route = createRoute('/settings', {
   component: Settings,
   validateParams: z.object({
     theme: z.enum(['light', 'dark']).default('light'),
@@ -230,9 +245,14 @@ export const SettingsRoute = createRoute('/settings', {
     fontSize: z.number().default(16),
   }),
 });
+```
+
+```tsx [zod - transform]
+import { createRoute } from '@granite-js/react-native';
+import { z } from 'zod';
 
 // Using .transform() for type conversion
-export const UserRoute = createRoute('/user', {
+export const Route = createRoute('/user', {
   component: User,
   validateParams: z.object({
     // Converts string to number
@@ -243,7 +263,7 @@ export const UserRoute = createRoute('/user', {
 });
 
 function User() {
-  const params = UserRoute.useParams();
+  const params = Route.useParams();
   // params.id is number (not string)
   // params.createdAt is Date object
 }
