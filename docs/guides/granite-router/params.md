@@ -118,15 +118,10 @@ import * as v from 'valibot';
 
 export const Route = createRoute('/', {
   component: Index,
-  validateParams: (params) => {
-    return v.parse(
-      v.object({
-        name: v.string(),
-        age: v.number(),
-      }),
-      params
-    );
-  },
+  validateParams: v.object({
+    name: v.string(),
+    age: v.number(),
+  }),
 });
 
 function Index() {
@@ -148,14 +143,10 @@ import { z } from 'zod';
 
 export const Route = createRoute('/', {
   component: Index,
-  validateParams: (params) => {
-    return z
-      .object({
-        name: z.string(),
-        age: z.number(),
-      })
-      .parse(params);
-  },
+  validateParams: z.object({
+    name: z.string(),
+    age: z.number(),
+  }),
 });
 
 function Index() {
@@ -173,6 +164,118 @@ function Index() {
 :::
 
 </UsageSection>
+
+## Advanced Validation
+
+Validation libraries provide powerful features for handling validation errors and transforming values.
+
+::: code-group
+
+```tsx [valibot]
+import { createRoute } from '@granite-js/react-native';
+import * as v from 'valibot';
+
+// Using v.fallback() for error resilience
+export const Route = createRoute('/profile', {
+  component: Profile,
+  validateParams: v.object({
+    name: v.fallback(v.string(), 'Anonymous'),
+    age: v.fallback(v.number(), 0),
+    isActive: v.fallback(v.boolean(), true),
+  }),
+});
+```
+
+```tsx [valibot - optional]
+import { createRoute } from '@granite-js/react-native';
+import * as v from 'valibot';
+
+// Using v.optional() with default values
+export const Route = createRoute('/settings', {
+  component: Settings,
+  validateParams: v.object({
+    theme: v.optional(v.picklist(['light', 'dark']), 'light'),
+    animation: v.optional(v.boolean(), true),
+    fontSize: v.optional(v.number(), 16),
+  }),
+});
+```
+
+```tsx [valibot - transform]
+import { createRoute } from '@granite-js/react-native';
+import * as v from 'valibot';
+
+// Using v.transform() for type conversion
+export const Route = createRoute('/user', {
+  component: User,
+  validateParams: v.object({
+    // Converts string to number
+    id: v.pipe(
+      v.string(),
+      v.transform((v) => parseInt(v))
+    ),
+    // Converts ISO string to Date object
+    createdAt: v.pipe(
+      v.string(),
+      v.transform((v) => new Date(v))
+    ),
+  }),
+});
+```
+
+```tsx [zod]
+import { createRoute } from '@granite-js/react-native';
+import { z } from 'zod';
+
+// Using .catch() for error resilience
+export const Route = createRoute('/profile', {
+  component: Profile,
+  validateParams: z.object({
+    name: z.string().catch('Anonymous'),
+    age: z.number().catch(0),
+    isActive: z.boolean().catch(true),
+  }),
+});
+```
+
+```tsx [zod - default]
+import { createRoute } from '@granite-js/react-native';
+import { z } from 'zod';
+
+// Using .default() for optional parameters
+export const Route = createRoute('/settings', {
+  component: Settings,
+  validateParams: z.object({
+    theme: z.enum(['light', 'dark']).default('light'),
+    animation: z.boolean().default(true),
+    fontSize: z.number().default(16),
+  }),
+});
+```
+
+```tsx [zod - transform]
+import { createRoute } from '@granite-js/react-native';
+import { z } from 'zod';
+
+// Using .transform() for type conversion
+export const Route = createRoute('/user', {
+  component: User,
+  validateParams: z.object({
+    // Converts string to number
+    id: z.string().transform((v) => parseInt(v)),
+    // Converts ISO string to Date object
+    createdAt: z.string().transform((v) => new Date(v)),
+  }),
+});
+
+function User() {
+  const params = Route.useParams();
+  // params.id is number (not string)
+  // params.createdAt is Date object
+}
+```
+
+:::
 
 ## Transforming Parameter Values
 

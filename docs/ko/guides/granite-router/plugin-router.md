@@ -97,10 +97,16 @@ import { Route as _PageBRoute } from '../pages/page-b';
 import { Route as _PageCRoute } from '../pages/page-c';
 
 declare module '@granite-js/react-native' {
+  interface RegisterScreenInput {
+    '/page-a': (typeof _PageARoute)['_inputType'];
+    '/page-b': (typeof _PageBRoute)['_inputType'];
+    '/page-c': (typeof _PageCRoute)['_inputType'];
+  }
+
   interface RegisterScreen {
-    '/page-a': ReturnType<typeof _PageARoute.useParams>;
-    '/page-b': ReturnType<typeof _PageBRoute.useParams>;
-    '/page-c': ReturnType<typeof _PageCRoute.useParams>;
+    '/page-a': (typeof _PageARoute)['_outputType'];
+    '/page-b': (typeof _PageBRoute)['_outputType'];
+    '/page-c': (typeof _PageCRoute)['_outputType'];
   }
 }
 ```

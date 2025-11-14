@@ -21,6 +21,10 @@ export const ROUTER_GEN_TEMPLATE = `/* eslint-disable */
 %%pageImports%%
 
 declare module '@granite-js/react-native' {
+  interface RegisterScreenInput {
+%%pageInputRoutes%%
+  }
+
   interface RegisterScreen {
 %%pageRoutes%%
   }

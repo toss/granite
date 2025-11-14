@@ -4,8 +4,13 @@ import { Route as _AboutRoute } from '../pages/about';
 import { Route as _IndexRoute } from '../pages/';
 
 declare module '@granite-js/react-native' {
+  interface RegisterScreenInput {
+    '/about': (typeof _AboutRoute)['_inputType'];
+    '/': (typeof _IndexRoute)['_inputType'];
+  }
+
   interface RegisterScreen {
-    '/about': ReturnType<typeof _AboutRoute.useParams>;
-    '/': ReturnType<typeof _IndexRoute.useParams>;
+    '/about': (typeof _AboutRoute)['_outputType'];
+    '/': (typeof _IndexRoute)['_outputType'];
   }
 }
