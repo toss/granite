@@ -118,15 +118,10 @@ import * as v from 'valibot';
 
 export const Route = createRoute('/', {
   component: Index,
-  validateParams: (params) => {
-    return v.parse(
-      v.object({
-        name: v.string(),
-        age: v.number(),
-      }),
-      params
-    );
-  },
+  validateParams: v.object({
+    name: v.string(),
+    age: v.number(),
+  }),
 });
 
 function Index() {
@@ -148,14 +143,10 @@ import { z } from 'zod';
 
 export const Route = createRoute('/', {
   component: Index,
-  validateParams: (params) => {
-    return z
-      .object({
-        name: z.string(),
-        age: z.number(),
-      })
-      .parse(params);
-  },
+  validateParams: z.object({
+    name: z.string(),
+    age: z.number(),
+  }),
 });
 
 function Index() {
@@ -173,6 +164,92 @@ function Index() {
 :::
 
 </UsageSection>
+
+## 고급 검증 기능
+
+검증 라이브러리는 검증 에러를 처리하고 값을 변환하는 강력한 기능을 제공해요.
+
+::: code-group
+
+```tsx [valibot]
+import { createRoute } from '@granite-js/react-native';
+import * as v from 'valibot';
+
+// v.fallback()으로 에러 안전성 확보
+export const Route = createRoute('/profile', {
+  component: Profile,
+  validateParams: v.object({
+    name: v.fallback(v.string(), 'Anonymous'),
+    age: v.fallback(v.number(), 0),
+    isActive: v.fallback(v.boolean(), true),
+  }),
+});
+
+// v.optional()로 기본값 설정
+export const SettingsRoute = createRoute('/settings', {
+  component: Settings,
+  validateParams: v.object({
+    theme: v.optional(v.picklist(['light', 'dark']), 'light'),
+    animation: v.optional(v.boolean(), true),
+    fontSize: v.optional(v.number(), 16),
+  }),
+});
+
+// v.transform()으로 타입 변환
+export const UserRoute = createRoute('/user', {
+  component: User,
+  validateParams: v.object({
+    // 문자열을 숫자로 변환
+    id: v.pipe(v.string(), v.transform(v => parseInt(v))),
+    // ISO 문자열을 Date 객체로 변환
+    createdAt: v.pipe(v.string(), v.transform(v => new Date(v))),
+  }),
+});
+```
+
+```tsx [zod]
+import { createRoute } from '@granite-js/react-native';
+import { z } from 'zod';
+
+// .catch()로 에러 안전성 확보
+export const Route = createRoute('/profile', {
+  component: Profile,
+  validateParams: z.object({
+    name: z.string().catch('Anonymous'),
+    age: z.number().catch(0),
+    isActive: z.boolean().catch(true),
+  }),
+});
+
+// .default()로 기본값 설정
+export const SettingsRoute = createRoute('/settings', {
+  component: Settings,
+  validateParams: z.object({
+    theme: z.enum(['light', 'dark']).default('light'),
+    animation: z.boolean().default(true),
+    fontSize: z.number().default(16),
+  }),
+});
+
+// .transform()으로 타입 변환
+export const UserRoute = createRoute('/user', {
+  component: User,
+  validateParams: z.object({
+    // 문자열을 숫자로 변환
+    id: z.string().transform(v => parseInt(v)),
+    // ISO 문자열을 Date 객체로 변환
+    createdAt: z.string().transform(v => new Date(v)),
+  }),
+});
+
+function User() {
+  const params = UserRoute.useParams();
+  // params.id는 number 타입 (string이 아님)
+  // params.createdAt은 Date 객체
+}
+```
+
+:::
 
 ## 파라미터 값 변환하기
 
