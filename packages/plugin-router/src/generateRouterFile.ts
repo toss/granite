@@ -46,7 +46,7 @@ export function generateRouterFile() {
     .map((page) => {
       const componentName = getComponentName(page);
       const pagePath = getPath(page);
-      return transformTemplate("    '%%pagePath%%': typeof _%%componentName%%Route['_inputType'];", {
+      return transformTemplate("    '%%pagePath%%': (typeof _%%componentName%%Route)['_inputType'];", {
         componentName,
         pagePath,
       });
@@ -57,7 +57,7 @@ export function generateRouterFile() {
     .map((page) => {
       const componentName = getComponentName(page);
       const pagePath = getPath(page);
-      return transformTemplate("    '%%pagePath%%': typeof _%%componentName%%Route['_outputType'];", {
+      return transformTemplate("    '%%pagePath%%': (typeof _%%componentName%%Route)['_outputType'];", {
         componentName,
         pagePath,
       });
