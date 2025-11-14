@@ -11,7 +11,8 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { useMemo } from 'react';
 import { RESERVED_PATHS } from './constants';
 import { defaultParserParams } from './utils/defaultParserParams';
-import { isStandardSchema, type InferOutput, type InferInput } from './utils/standardSchema';
+import { type InferOutput, type InferInput } from './utils/standardSchema';
+import { validateRouteParams } from './utils/validateRouteParams';
 
 export interface RouteOptions<T extends Readonly<object | undefined>> {
   parserParams?: (params: Record<string, unknown>) => Record<string, unknown>;
@@ -158,28 +159,7 @@ export function useParams<TScreen extends keyof RegisterScreen>(
       return parsedParams;
     }
 
-    const validateParams = routeOptions.validateParams;
-
-    // Check if validateParams is a StandardSchema
-    if (isStandardSchema(validateParams)) {
-      const result = validateParams['~standard'].validate(parsedParams);
-
-      // Handle async results
-      if (result instanceof Promise) {
-        throw new Error('Async validation is not supported in useParams');
-      }
-
-      // Handle validation failures
-      if ('issues' in result && result.issues) {
-        const messages = result.issues.map((i) => i.message).join(', ');
-        throw new Error(`Parameter validation failed: ${messages}`);
-      }
-
-      return result.value;
-    }
-
-    // Function pattern - at this point TypeScript knows it's a function
-    return (validateParams as (params: Readonly<object | undefined>) => any)(parsedParams);
+    return validateRouteParams(routeOptions.validateParams, parsedParams);
   }, [routeOptions, route.params, isStrict]);
 
   return params;
