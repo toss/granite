@@ -1,5 +1,13 @@
 # @granite-js/plugin-core
 
+## 0.1.31
+
+### Patch Changes
+
+- 9bf8b50: expose resolveRequest option
+- e957833: expose `resolver.resolverMainFields` and `resolver.unstable_conditionNames` options
+  - @granite-js/utils@0.1.31
+
 ## 0.1.30
 
 ### Patch Changes
