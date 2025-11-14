@@ -50,9 +50,9 @@ export function useRouterControls({
       };
 
       const routePath = routeScreen.path;
-      const screenOptions = routeScreen.component?.screenOptions ?? {};
+      const options = routeScreen.screenOptions ?? {};
 
-      return <StackNavigator.Screen key={routePath} name={routePath} component={Component} options={screenOptions} />;
+      return <StackNavigator.Screen key={routePath} name={routePath} component={Component} options={options} />;
     });
   }, [registerScreens, layoutScreenMap, ScreenContainer]);
 
