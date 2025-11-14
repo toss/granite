@@ -4,13 +4,7 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
  * Type guard to check if a value is a StandardSchema v1 compliant schema
  */
 export function isStandardSchema(value: unknown): value is StandardSchemaV1 {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    '~standard' in value &&
-    typeof (value as any)['~standard'] === 'object' &&
-    (value as any)['~standard'].version === 1
-  );
+  return typeof value === 'object' && value !== null && '~standard' in value;
 }
 
 /**
