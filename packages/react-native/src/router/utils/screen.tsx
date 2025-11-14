@@ -33,9 +33,39 @@ export function getRouteScreens(context: RequireContext): RouteScreen[] {
       throw new Error(`Page component not found in ${key}.`);
     }
 
+    // Retrieve route configuration from routeMap
+    const routeMapEntry = routeMap.get(context(key)?.Route?._path);
+
+    // Get screenOptions from routeMap or component (routeMap takes priority)
+    const rawScreenOptions = routeMapEntry?.screenOptions ?? component.screenOptions;
+
+    // If screenOptions is a function, wrap it to apply parserParams and validateParams
+    const screenOptions =
+      typeof rawScreenOptions === 'function'
+        ? ({ route }: { route: { params?: Record<string, unknown> }; navigation: unknown }) => {
+            try {
+              const rawParams = route.params ?? {};
+              const parserParams = routeMapEntry?.options?.parserParams;
+              const validateParams = routeMapEntry?.options?.validateParams;
+
+              // Apply parserParams if available
+              const parsedParams = parserParams ? parserParams(rawParams) : rawParams;
+
+              // Apply validateParams if available
+              const validatedParams = validateParams ? validateParams(parsedParams) : parsedParams;
+
+              // Call user's screenOptions function with context object
+              return rawScreenOptions({ params: validatedParams });
+            } catch {
+              return {};
+            }
+          }
+        : rawScreenOptions;
+
     return {
       path,
       component,
+      screenOptions,
     };
   });
 

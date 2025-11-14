@@ -3,7 +3,10 @@ import {
   useNavigation as useNavigationNative,
   useRoute,
 } from '@granite-js/native/@react-navigation/native';
-import { NativeStackNavigationProp } from '@granite-js/native/@react-navigation/native-stack';
+import {
+  NativeStackNavigationOptions,
+  NativeStackNavigationProp,
+} from '@granite-js/native/@react-navigation/native-stack';
 import { useMemo } from 'react';
 import { RESERVED_PATHS } from './constants';
 import { defaultParserParams } from './utils/defaultParserParams';
@@ -12,6 +15,7 @@ export interface RouteOptions<T extends Readonly<object | undefined>> {
   parserParams?: (params: Record<string, unknown>) => Record<string, unknown>;
   validateParams?: (params: Readonly<object | undefined>) => T;
   component: React.FC<any>;
+  screenOptions?: NativeStackNavigationOptions | ((context: { params: T }) => NativeStackNavigationOptions);
 }
 
 export type NavigationProps = NativeStackNavigationProp<
@@ -38,7 +42,11 @@ export type RouteHooksOptions<TScreen extends keyof RegisterScreen> =
 
 export const routeMap = new Map<
   keyof RegisterScreen,
-  { options: Omit<RouteOptions<any>, 'component'>; component: React.FC<any> }
+  {
+    options: Omit<RouteOptions<any>, 'component' | 'screenOptions'>;
+    component: React.FC<any>;
+    screenOptions?: NativeStackNavigationOptions | ((context: { params: any }) => NativeStackNavigationOptions);
+  }
 >();
 
 export function useMatchOptions<TScreen extends keyof RegisterScreen>(options: RouteHooksOptions<TScreen>) {
@@ -150,8 +158,12 @@ export const createRoute = <T extends Readonly<object | undefined>>(
   path: keyof RegisterScreen,
   options: RouteOptions<T>
 ) => {
-  const { component, ...restOptions } = options;
-  routeMap.set(path, { options: restOptions, component });
+  const { component, screenOptions, ...restOptions } = options;
+  routeMap.set(path, {
+    options: restOptions,
+    component,
+    screenOptions: screenOptions,
+  });
 
   const _path = path as keyof RegisterScreen;
   return {
