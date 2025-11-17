@@ -1,5 +1,14 @@
 # @granite-js/plugin-env
 
+## 0.1.31
+
+### Patch Changes
+
+- Updated dependencies [9bf8b50]
+- Updated dependencies [e957833]
+  - @granite-js/plugin-core@0.1.31
+  - @granite-js/utils@0.1.31
+
 ## 0.1.30
 
 ### Patch Changes

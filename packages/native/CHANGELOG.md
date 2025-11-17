@@ -1,5 +1,12 @@
 # @granite-js/native
 
+## 0.1.31
+
+### Patch Changes
+
+- 0ff9b13: feat(router): screenOptions in Route
+- 37ae3f3: feat(router): supports standard schema
+
 ## 0.1.30
 
 ## 0.1.29
