@@ -13,17 +13,31 @@ import { Route as _ShowcaseVideoRoute } from '../pages/showcase/video';
 import { Route as _ShowcaseWebviewRoute } from '../pages/showcase/webview';
 
 declare module '@granite-js/react-native' {
+  interface RegisterScreenInput {
+    '/about': (typeof _AboutRoute)['_inputType'];
+    '/': (typeof _IndexRoute)['_inputType'];
+    '/showcase/image': (typeof _ShowcaseImageRoute)['_inputType'];
+    '/showcase': (typeof _ShowcaseRoute)['_inputType'];
+    '/showcase/initial-props': (typeof _ShowcaseInitialPropsRoute)['_inputType'];
+    '/showcase/lottie': (typeof _ShowcaseLottieRoute)['_inputType'];
+    '/showcase/search-params': (typeof _ShowcaseSearchParamsRoute)['_inputType'];
+    '/showcase/status-bar': (typeof _ShowcaseStatusBarRoute)['_inputType'];
+    '/showcase/use-back-event': (typeof _ShowcaseUseBackEventRoute)['_inputType'];
+    '/showcase/video': (typeof _ShowcaseVideoRoute)['_inputType'];
+    '/showcase/webview': (typeof _ShowcaseWebviewRoute)['_inputType'];
+  }
+
   interface RegisterScreen {
-    '/about': ReturnType<typeof _AboutRoute.useParams>;
-    '/': ReturnType<typeof _IndexRoute.useParams>;
-    '/showcase/image': ReturnType<typeof _ShowcaseImageRoute.useParams>;
-    '/showcase': ReturnType<typeof _ShowcaseRoute.useParams>;
-    '/showcase/initial-props': ReturnType<typeof _ShowcaseInitialPropsRoute.useParams>;
-    '/showcase/lottie': ReturnType<typeof _ShowcaseLottieRoute.useParams>;
-    '/showcase/search-params': ReturnType<typeof _ShowcaseSearchParamsRoute.useParams>;
-    '/showcase/status-bar': ReturnType<typeof _ShowcaseStatusBarRoute.useParams>;
-    '/showcase/use-back-event': ReturnType<typeof _ShowcaseUseBackEventRoute.useParams>;
-    '/showcase/video': ReturnType<typeof _ShowcaseVideoRoute.useParams>;
-    '/showcase/webview': ReturnType<typeof _ShowcaseWebviewRoute.useParams>;
+    '/about': (typeof _AboutRoute)['_outputType'];
+    '/': (typeof _IndexRoute)['_outputType'];
+    '/showcase/image': (typeof _ShowcaseImageRoute)['_outputType'];
+    '/showcase': (typeof _ShowcaseRoute)['_outputType'];
+    '/showcase/initial-props': (typeof _ShowcaseInitialPropsRoute)['_outputType'];
+    '/showcase/lottie': (typeof _ShowcaseLottieRoute)['_outputType'];
+    '/showcase/search-params': (typeof _ShowcaseSearchParamsRoute)['_outputType'];
+    '/showcase/status-bar': (typeof _ShowcaseStatusBarRoute)['_outputType'];
+    '/showcase/use-back-event': (typeof _ShowcaseUseBackEventRoute)['_outputType'];
+    '/showcase/video': (typeof _ShowcaseVideoRoute)['_outputType'];
+    '/showcase/webview': (typeof _ShowcaseWebviewRoute)['_outputType'];
   }
 }
