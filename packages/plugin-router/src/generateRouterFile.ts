@@ -42,11 +42,22 @@ export function generateRouterFile() {
     })
     .join('\n');
 
+  const pageInputRoutes = pageFiles
+    .map((page) => {
+      const componentName = getComponentName(page);
+      const pagePath = getPath(page);
+      return transformTemplate("    '%%pagePath%%': (typeof _%%componentName%%Route)['_inputType'];", {
+        componentName,
+        pagePath,
+      });
+    })
+    .join('\n');
+
   const pageRoutes = pageFiles
     .map((page) => {
       const componentName = getComponentName(page);
       const pagePath = getPath(page);
-      return transformTemplate("    '%%pagePath%%': ReturnType<typeof _%%componentName%%Route.useParams>;", {
+      return transformTemplate("    '%%pagePath%%': (typeof _%%componentName%%Route)['_outputType'];", {
         componentName,
         pagePath,
       });
@@ -55,6 +66,7 @@ export function generateRouterFile() {
 
   const generatedContent = transformTemplate(ROUTER_GEN_TEMPLATE, {
     pageImports,
+    pageInputRoutes,
     pageRoutes,
   });
 
