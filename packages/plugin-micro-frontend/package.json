@@ -45,9 +45,9 @@
     "*.d.ts"
   ],
   "devDependencies": {
-    "tsdown": "^0.11.11",
+    "tsdown": "^0.16.5",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.10"
   },
   "dependencies": {
     "@granite-js/plugin-core": "workspace:*",

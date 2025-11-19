@@ -88,9 +88,9 @@
     "*.d.ts"
   ],
   "devDependencies": {
-    "@babel/core": "^7.24.9",
-    "@babel/preset-env": "^7.24.8",
-    "@babel/preset-typescript": "^7.24.7",
+    "@babel/core": "7.28.5",
+    "@babel/preset-env": "7.28.5",
+    "@babel/preset-typescript": "7.28.5",
     "@granite-js/native": "workspace:*",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.1.0",
@@ -108,7 +108,7 @@
     "react-native": "0.72.6",
     "tsup": "^8.5.0",
     "typescript": "5.8.3",
-    "vitest": "^2.1.8",
+    "vitest": "^4.0.10",
     "zod": "^4.1.12"
   },
   "peerDependencies": {

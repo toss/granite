@@ -38,7 +38,7 @@
     "kill-port": "^2.0.1",
     "tsup": "^8.5.0",
     "typescript": "5.8.3",
-    "vitest": "^2.1.8",
+    "vitest": "^4.0.10",
     "wait-port": "^1.1.0",
     "workspace-tools": "^0.38.1",
     "yargs": "^17.7.2"
