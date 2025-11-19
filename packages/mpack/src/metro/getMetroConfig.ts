@@ -1,12 +1,12 @@
-import path from 'path';
 import type { AdditionalMetroConfig } from '@granite-js/plugin-core';
 import { getPackageRoot } from '@granite-js/utils';
-import { createResolver } from './enhancedResolver';
-import { getMonorepoRoot } from './getMonorepoRoot';
+import path from 'path';
 import { DEV_SERVER_DEFAULT_PORT, RESOLVER_MAIN_FIELDS, SOURCE_EXTENSIONS } from '../constants';
 import { getDefaultValues } from '../vendors/metro-config/src/defaults';
 import exclusionList from '../vendors/metro-config/src/defaults/exclusionList';
 import { mergeConfig } from '../vendors/metro-config/src/loadConfig';
+import { createResolver } from './enhancedResolver';
+import { getMonorepoRoot } from './getMonorepoRoot';
 
 export interface GetMetroConfig {
   rootPath: string;
@@ -78,12 +78,15 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
       resolveRequest,
       // metro-file-map
       sourceExts: [...SOURCE_EXTENSIONS.map((extension) => extension.replace(/^\.?/, '')), 'cjs', 'mjs'],
-      blockList: exclusionList(
-        additionalConfig?.resolver?.blockList ? asArray(additionalConfig.resolver.blockList) : []
-      ),
-      nodeModulesPaths: additionalConfig?.resolver?.nodeModulesPaths || [],
+      blockList: exclusionList([
+        ...(additionalConfig?.resolver?.blockList ? asArray(additionalConfig.resolver.blockList) : []),
+      ]),
+      nodeModulesPaths: [
+        path.join(rootPath, 'node_modules'),
+        ...(additionalConfig?.resolver?.nodeModulesPaths || []),
+      ],
       extraNodeModules: additionalConfig?.resolver?.extraNodeModules || {},
-      disableHierarchicalLookup: additionalConfig?.resolver?.disableHierarchicalLookup,
+      disableHierarchicalLookup: additionalConfig?.resolver?.disableHierarchicalLookup ?? true,
       resolverMainFields: additionalConfig?.resolver?.resolverMainFields ?? RESOLVER_MAIN_FIELDS,
     },
     serializer: {
