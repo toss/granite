@@ -5455,7 +5455,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@granite-js/plugin-core@workspace:packages/plugin-core"
   dependencies:
-    "@granite-js/utils": "npm:0.1.31"
+    "@granite-js/utils": "workspace:*"
     "@swc/core": "npm:1.5.24"
     "@types/babel__core": "npm:^7"
     "@types/connect": "npm:^3"
@@ -5655,7 +5655,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@granite-js/utils@npm:0.1.31, @granite-js/utils@workspace:*, @granite-js/utils@workspace:packages/utils":
+"@granite-js/utils@workspace:*, @granite-js/utils@workspace:packages/utils":
   version: 0.0.0-use.local
   resolution: "@granite-js/utils@workspace:packages/utils"
   dependencies:
