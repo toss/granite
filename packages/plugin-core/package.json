@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@granite-js/utils": "workspace:*",
-    "@swc/core": "1.5.24",
+    "@swc/core": "^1.15.8",
     "@types/babel__core": "^7",
     "@types/connect": "^3",
     "@types/ws": "^8.18.0",
