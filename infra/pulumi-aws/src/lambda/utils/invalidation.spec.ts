@@ -1,14 +1,18 @@
+import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
+import { noop } from 'es-toolkit';
 import { describe, it, expect, vi } from 'vitest';
 import { getPathsToInvalidate } from './invalidation';
 
-vi.mock('@aws-sdk/client-cloudfront', () => {
-  return {
-    CloudFrontClient: vi.fn(() => ({
-      send: vi.fn(),
-    })),
-    CreateInvalidationCommand: vi.fn(),
-  };
-});
+const classes = {
+  CloudFrontClient,
+  CreateInvalidationCommand,
+};
+
+vi.spyOn(classes, 'CloudFrontClient').mockImplementation(() => ({
+  send: vi.fn(),
+}));
+
+vi.spyOn(classes, 'CreateInvalidationCommand').mockImplementation(noop);
 
 describe('invalidation', () => {
   describe('getPathsToInvalidate', () => {

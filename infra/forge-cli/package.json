@@ -24,10 +24,10 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "@vitest/coverage-v8": "^3.1.4",
-    "tsdown": "^0.11.13",
+    "@vitest/coverage-v8": "^4.0.12",
+    "tsdown": "^0.16.5",
     "typescript": "^5.8.3",
-    "vitest": "^3.1.4"
+    "vitest": "^4.0.12"
   },
   "dependencies": {
     "@aws-sdk/credential-providers": "^3.817.0",

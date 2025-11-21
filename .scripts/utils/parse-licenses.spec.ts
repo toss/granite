@@ -1,5 +1,5 @@
-import { parseLicenses } from './licenses.mjs';
 import { describe, it, expect } from 'vitest';
+import { parseLicenses } from './licenses.mjs';
 
 describe('parseLicenses', () => {
   //  yarn licenses list --json  --focus @granite-js/react-native
