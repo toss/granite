@@ -62,7 +62,7 @@
     "@types/serve-static": "^1",
     "@types/temp": "^0",
     "@types/ws": "^8",
-    "@vitest/coverage-v8": "^2.1.8",
+    "@vitest/coverage-v8": "^4.0.12",
     "eslint": "9.7.0",
     "execa": "^5.0.0",
     "fast-glob": "^3.3.2",
@@ -70,7 +70,7 @@
     "prettier-2": "npm:prettier@^2",
     "ts-prune": "^0.10.3",
     "typescript": "5.8.3",
-    "vitest": "^4.0.10"
+    "vitest": "^4.0.12"
   },
   "dependencies": {
     "@babel/code-frame": "7.27.1",

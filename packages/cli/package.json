@@ -46,12 +46,13 @@
     "@types/debug": "^4",
     "@types/node": "^22.10.2",
     "@types/serve-static": "^1",
+    "@vitest/coverage-v8": "^4.0.12",
     "esbuild": "0.25.8",
     "eslint": "^9.7.0",
     "ts-prune": "^0.10.3",
     "tsup": "^8.5.0",
     "typescript": "5.8.3",
-    "vitest": "^4.0.10"
+    "vitest": "^4.0.12"
   },
   "dependencies": {
     "@granite-js/mpack": "workspace:*",

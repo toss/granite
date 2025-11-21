@@ -45,8 +45,9 @@
   "devDependencies": {
     "@types/babel__core": "^7.20.5",
     "@types/node": "^24.3.0",
+    "@vitest/coverage-v8": "^4.0.12",
     "tsdown": "^0.16.5",
     "typescript": "5.8.3",
-    "vitest": "^4.0.10"
+    "vitest": "^4.0.12"
   }
 }
