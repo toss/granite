@@ -4,12 +4,13 @@ import { CodegenTypes } from 'react-native';
 interface GraniteBrownfieldModuleSpec extends BrickModuleSpec {
   readonly moduleName: 'GraniteBrownfieldModule';
 
-  readonly supportedEvents: ['visibilityChanged'];
+  getConstants(): {
+    schemeUri: string;
+  };
 
   onVisibilityChanged: CodegenTypes.EventEmitter<boolean>;
 
   closeView(): Promise<void>;
-  schemeUri: string;
 }
 
 export const GraniteModule = BrickModule.get<GraniteBrownfieldModuleSpec>('GraniteBrownfieldModule');
