@@ -23,5 +23,5 @@ import { GraniteModule } from './GraniteBrownfieldModule.brick';
  * ```
  */
 export function getSchemeUri() {
-  return GraniteModule.schemeUri;
+  return GraniteModule.getConstants().schemeUri;
 }
