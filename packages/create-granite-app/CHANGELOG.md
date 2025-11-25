@@ -1,5 +1,11 @@
 # create-granite-app
 
+## 0.1.32
+
+### Patch Changes
+
+- 7572713: bump version up babel
+
 ## 0.1.31
 
 ## 0.1.30
