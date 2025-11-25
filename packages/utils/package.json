@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/utils",
   "type": "module",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "description": "Utilities for Granite",
   "scripts": {
     "prepack": "yarn build",

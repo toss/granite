@@ -1,5 +1,14 @@
 # @granite-js/plugin-micro-frontend
 
+## 0.1.32
+
+### Patch Changes
+
+- 7572713: bump version up babel
+- Updated dependencies [7572713]
+  - @granite-js/plugin-core@0.1.32
+  - @granite-js/utils@0.1.32
+
 ## 0.1.31
 
 ### Patch Changes

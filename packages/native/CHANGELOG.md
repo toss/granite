@@ -1,5 +1,12 @@
 # @granite-js/native
 
+## 0.1.32
+
+### Patch Changes
+
+- 74b2223: fix(react-native): VisibilityChangedProvider only provider
+- 7572713: bump version up babel
+
 ## 0.1.31
 
 ### Patch Changes
