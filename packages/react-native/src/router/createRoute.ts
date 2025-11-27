@@ -175,8 +175,8 @@ export function createRoute<TSchema extends StandardSchemaV1<any, any>>(
   _path: keyof RegisterScreenInput;
   useNavigation: typeof useNavigation;
   useParams: () => InferOutput<TSchema>;
-  _inputType?: InferInput<TSchema>;
-  _outputType?: InferOutput<TSchema>;
+  _inputType: InferInput<TSchema>;
+  _outputType: InferOutput<TSchema>;
 };
 
 // Overload 2: Function pattern
@@ -187,8 +187,8 @@ export function createRoute<T extends Readonly<object | undefined>>(
   _path: keyof RegisterScreenInput;
   useNavigation: typeof useNavigation;
   useParams: () => T;
-  _inputType?: T;
-  _outputType?: T;
+  _inputType: T;
+  _outputType: T;
 };
 
 // Implementation
@@ -205,5 +205,10 @@ export function createRoute(path: keyof RegisterScreenInput, options: RouteOptio
     _path,
     useNavigation,
     useParams: () => useParams({ from: _path as keyof RegisterScreen, strict: true }),
+
+    // These properties are only used for type inference in the generated router files
+    // The actual values are never accessed at runtime
+    _inputType: {},
+    _outputType: {},
   };
 }

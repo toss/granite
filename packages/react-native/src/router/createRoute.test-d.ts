@@ -77,6 +77,30 @@ describe('createRoute', () => {
     // @ts-expect-error Type error should occur since 'from' and 'strict: false' are conflicting options
     assertType(useParams({ from: '/test', strict: false }));
   });
+
+  it('should infer _inputType and _outputType without undefined for function pattern', () => {
+    type InputType = (typeof Route)['_inputType'];
+    type OutputType = (typeof Route)['_outputType'];
+
+    // _inputType should be inferred as the exact type, not a union with undefined
+    assertType<{
+      id: string;
+      name: string;
+    }>({} as InputType);
+
+    // _outputType should be inferred as the exact type, not a union with undefined
+    assertType<{
+      id: string;
+      name: string;
+    }>({} as OutputType);
+
+    // Verify that undefined is not part of the union
+    type InputHasUndefined = undefined extends InputType ? true : false;
+    type OutputHasUndefined = undefined extends OutputType ? true : false;
+
+    assertType<false>({} as InputHasUndefined);
+    assertType<false>({} as OutputHasUndefined);
+  });
 });
 
 describe('createRoute with StandardSchema', () => {
@@ -95,7 +119,56 @@ describe('createRoute with StandardSchema', () => {
     }>(RouteWithSchema.useParams());
   });
 
+  it('should infer _inputType and _outputType without undefined', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const RouteWithSchema = createRoute('/test-schema', {
+      component: () => null,
+      validateParams: z.object({
+        id: z.string(),
+        count: z.number(),
+      }),
+    });
+
+    type InputType = (typeof RouteWithSchema)['_inputType'];
+    type OutputType = (typeof RouteWithSchema)['_outputType'];
+    type UseParamsReturnType = ReturnType<(typeof RouteWithSchema)['useParams']>;
+
+    // _inputType should be inferred as the exact type, not a union with undefined
+    assertType<{
+      id: string;
+      count: number;
+    }>({} as InputType);
+
+    // _outputType should be inferred as the exact type, not a union with undefined
+    assertType<{
+      id: string;
+      count: number;
+    }>({} as OutputType);
+
+    // useParams should return the exact type, not a union with undefined
+    assertType<{
+      id: string;
+      count: number;
+    }>({} as UseParamsReturnType);
+
+    // Verify that undefined is not part of the union for all types
+    type InputHasUndefined = undefined extends InputType ? true : false;
+    type OutputHasUndefined = undefined extends OutputType ? true : false;
+    type UseParamsHasUndefined = undefined extends UseParamsReturnType ? true : false;
+
+    assertType<false>({} as InputHasUndefined);
+    assertType<false>({} as OutputHasUndefined);
+    assertType<false>({} as UseParamsHasUndefined);
+
+    // useNavigation should accept input type for navigate parameters
+    const navigation = useNavigation();
+
+    // Should accept exact input type
+    navigation.navigate('/test-schema', { id: 'test', count: 123 });
+  });
+
   it('should infer output type from transformation', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const RouteWithTransform = createRoute('/test-transform', {
       component: () => null,
       validateParams: z.object({
@@ -103,10 +176,35 @@ describe('createRoute with StandardSchema', () => {
       }),
     });
 
-    // Should be number (output), not string (input)
+    type InputType = (typeof RouteWithTransform)['_inputType'];
+    type OutputType = (typeof RouteWithTransform)['_outputType'];
+    type UseParamsReturnType = ReturnType<(typeof RouteWithTransform)['useParams']>;
+
+    // _inputType should be string (before transformation)
+    assertType<{
+      id: string;
+    }>({} as InputType);
+
+    // _outputType should be number (after transformation)
     assertType<{
       id: number;
-    }>(RouteWithTransform.useParams());
+    }>({} as OutputType);
+
+    // useParams should return output type (number)
+    assertType<{
+      id: number;
+    }>({} as UseParamsReturnType);
+
+    // useNavigation should accept input type (string)
+    const navigation = useNavigation();
+    navigation.navigate('/test-transform', { id: 'test-id' });
+
+    // Verify that input and output types are different
+    type InputIsString = InputType extends { id: string } ? true : false;
+    type OutputIsNumber = OutputType extends { id: number } ? true : false;
+
+    assertType<true>({} as InputIsString);
+    assertType<true>({} as OutputIsNumber);
   });
 
   it('should work with useParams hook', () => {
