@@ -1,5 +1,11 @@
 # @granite-js/plugin-core
 
+## 0.1.33
+
+### Patch Changes
+
+- @granite-js/utils@0.1.33
+
 ## 0.1.32
 
 ### Patch Changes
