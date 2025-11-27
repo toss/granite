@@ -1,5 +1,11 @@
 # @granite-js/native
 
+## 0.1.33
+
+### Patch Changes
+
+- fdf55a6: fix(router): type infer incorrect undefined
+
 ## 0.1.32
 
 ### Patch Changes
