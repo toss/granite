@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/style-utils",
-  "version": "0.1.23-next.19",
+  "version": "0.1.33",
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
@@ -10,6 +10,11 @@
   },
   "main": "./src/index.ts",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/style-utils"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -22,12 +27,12 @@
     "src"
   ],
   "devDependencies": {
-    "@babel/core": "^7.24.9",
+    "@babel/core": "7.28.5",
     "@babel/plugin-transform-flow-strip-types": "catalog:react-native",
     "@babel/plugin-transform-private-methods": "^7.24.7",
-    "@babel/preset-env": "^7.24.8",
-    "@babel/preset-react": "^7.24.7",
-    "@babel/preset-typescript": "^7.24.7",
+    "@babel/preset-env": "7.28.5",
+    "@babel/preset-react": "7.28.5",
+    "@babel/preset-typescript": "7.28.5",
     "@granite-js/native": "workspace:*",
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^12.5.3",
@@ -48,5 +53,6 @@
     "@types/react": "*",
     "react": "*",
     "react-native": "*"
-  }
+  },
+  "sideEffects": false
 }

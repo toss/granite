@@ -50,7 +50,14 @@ export function combineWithBaseBuildConfig(
         banner: {
           js: [
             globalVariables({ dev: context.dev }),
-            // symbol-asynciterator polyfill (ES5)
+            /**
+             * Polyfill for `@swc/helpers` build compatibility
+             *
+             * @see https://github.com/swc-project/swc/blob/v1.4.15/packages/helpers/esm/_async_iterator.js#L3
+             *
+             * - babel: No runtime issues after build as there is a fallback for `Symbol.asyncIterator`
+             * - swc: No fallback for `Symbol.asyncIterator`, so it needs to be defined in advance
+             */
             `(function(){if(typeof Symbol!=="undefined"&&!Symbol.asyncIterator){Symbol.asyncIterator=Symbol.for("@@asyncIterator")}})();`,
           ].join('\n'),
         },

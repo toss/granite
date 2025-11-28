@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/lottie",
-  "version": "0.1.23-next.19",
+  "version": "0.1.33",
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
@@ -9,6 +9,11 @@
   },
   "main": "./src/index.ts",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/lottie"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -34,5 +39,6 @@
     "@types/react": "*",
     "react": "*",
     "react-native": "*"
-  }
+  },
+  "sideEffects": false
 }

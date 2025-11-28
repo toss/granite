@@ -12,9 +12,18 @@ export interface AdditionalMetroConfig extends MetroConfig {
    * Partial support for some options only
    *
    * - `blockList`
+   * - `resolverMainFields`
+   * - `resolveRequest`
+   * - `conditionNames`
    */
-  resolver?: MetroConfig['resolver'];
+  resolver?: MetroConfig['resolver'] & {
+    /**
+     * Defaults to `['react-native', 'require', 'node', 'default']`
+     */
+    conditionNames?: string[];
+  };
   reporter?: MetroConfig['reporter'];
   babelConfig?: babel.TransformOptions;
   transformSync?: (id: string, code: string) => string;
+  projectRoot?: MetroConfig['projectRoot'];
 }

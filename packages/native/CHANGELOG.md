@@ -1,6 +1,47 @@
 # @granite-js/native
 
-## 0.1.23-next.19
+## 0.1.33
+
+### Patch Changes
+
+- fdf55a6: fix(router): type infer incorrect undefined
+
+## 0.1.32
+
+### Patch Changes
+
+- 74b2223: fix(react-native): VisibilityChangedProvider only provider
+- 7572713: bump version up babel
+
+## 0.1.31
+
+### Patch Changes
+
+- 0ff9b13: feat(router): screenOptions in Route
+- 37ae3f3: feat(router): supports standard schema
+
+## 0.1.30
+
+## 0.1.29
+
+## 0.1.28
+
+### Patch Changes
+
+- 1d958cc: ci: provenance
+
+## 0.1.27
+
+### Patch Changes
+
+- e32b020: ci: oidc
+- 1dd9179: feat(native): add named exports for native modules
+
+  Add explicit named exports for lottie-react-native, react-native-fast-image, react-native-pager-view, and react-native-video to improve tree-shaking and provide better TypeScript support.
+
+## 0.1.26
+
+## 0.1.25
 
 ### Patch Changes
 

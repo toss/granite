@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-micro-frontend",
   "type": "module",
-  "version": "0.1.23-next.19",
+  "version": "0.1.33",
   "description": "Plugin for micro frontend",
   "scripts": {
     "prepack": "yarn build",
@@ -12,6 +12,11 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/plugin-micro-frontend"
+  },
   "exports": {
     ".": {
       "import": {
@@ -40,9 +45,10 @@
     "*.d.ts"
   ],
   "devDependencies": {
-    "tsdown": "^0.11.11",
+    "@vitest/coverage-v8": "^4.0.12",
+    "tsdown": "^0.16.5",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.12"
   },
   "dependencies": {
     "@granite-js/plugin-core": "workspace:*",

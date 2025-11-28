@@ -13,7 +13,7 @@ interface PackageInfo {
 
 type ResolveAsset = (dirPath: string, assetName: string, extension: string) => string[] | undefined;
 
-interface ResolutionContext {
+export interface ResolutionContext {
   readonly assetExts: string[];
   readonly allowHaste: boolean;
   readonly customResolverOptions: Untyped;
@@ -33,13 +33,6 @@ interface ResolutionContext {
   readonly resolveHastePackage: (name: string) => string | undefined;
   readonly resolveRequest?: CustomResolver;
   readonly sourceExts: string[];
-  readonly unstable_conditionsByPlatform: {
-    [platform: string]: string[];
-  };
-  unstable_conditionNames: string[];
-  unstable_enablePackageExports: boolean;
-  unstable_getRealPath?: any;
-  unstable_logWarning: (message: string) => void;
 }
 
 export interface CustomResolutionContext extends ResolutionContext {
@@ -49,6 +42,10 @@ export interface CustomResolutionContext extends ResolutionContext {
 type CustomResolver = (context: CustomResolutionContext, moduleName: string, platform: string | null) => any;
 
 interface ResolverConfig {
+  /**
+   * Defaults to `['react-native', 'browser', 'main']`
+   */
+  resolverMainFields: string[];
   assetExts: string[];
   assetResolutions: string[];
   blacklistRE?: RegExp | RegExp[];
@@ -62,14 +59,7 @@ interface ResolverConfig {
   nodeModulesPaths: string[];
   platforms: string[];
   resolveRequest?: CustomResolver;
-  resolverMainFields: string[];
   sourceExts: string[];
-  unstable_enableSymlinks: boolean;
-  unstable_conditionNames: string[];
-  unstable_conditionsByPlatform: Readonly<{
-    [platform: string]: string[];
-  }>;
-  unstable_enablePackageExports: boolean;
   useWatchman: boolean;
   requireCycleIgnorePatterns: ReadonlyArray<RegExp>;
 }
@@ -220,6 +210,7 @@ export type ReportableEvent =
     };
 
 export interface MetroConfig {
+  readonly projectRoot?: string;
   readonly watchFolders?: string[];
   readonly cacheStores?: any;
   readonly resolver?: Partial<ResolverConfig>;

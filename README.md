@@ -1,5 +1,7 @@
 # Granite &middot; [![Apache 2.0 License](https://img.shields.io/badge/license-Apache-blue.svg)](https://github.com/toss/slash/blob/main/LICENSE) [![NPM badge](https://img.shields.io/npm/v/@granite-js/react-native?logo=npm)](https://www.npmjs.com/package/@granite-js/react-native) [![codecov](https://codecov.io/gh/toss/granite/graph/badge.svg?token=LCP519I5BN)](https://codecov.io/gh/toss/granite)
 
+English | [한국어](https://github.com/toss/granite/blob/main/README-ko_kr.md)
+
 Granite is an enterprise-grade React Native framework for microservice apps with brownfield integration, 200KB bundle sizes, and AWS-ready infrastructure.
 
 - **Add React Native to existing apps** - Easily integrate React Native screens into your current iOS and Android apps.

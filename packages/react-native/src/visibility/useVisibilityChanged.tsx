@@ -1,5 +1,4 @@
-import { createContext, PropsWithChildren, ReactElement, useContext, useEffect, useState } from 'react';
-import { GraniteModule } from '../native-modules/natives/GraniteBrownfieldModule.brick';
+import { createContext, PropsWithChildren, ReactElement, useContext } from 'react';
 
 const VisibilityChangedContext = createContext<boolean | undefined>(undefined);
 
@@ -7,8 +6,7 @@ const VisibilityChangedContext = createContext<boolean | undefined>(undefined);
  * @name VisibilityChangedProvider
  * @kind function
  * @description
- * A Provider that manages whether a React Native screen is visible.
- * It subscribes to the app's `visibilityChanged` event to detect and manage screen visibility.
+ * A Provider that manages whether a React Native screen is visible provider.
  *
  * @param {ReactNode | undefined} children - Child components that check screen visibility.
  * @param {boolean} isVisible - A boolean value indicating whether the screen is visible.
@@ -28,19 +26,7 @@ export function VisibilityChangedProvider({
   children,
   isVisible,
 }: PropsWithChildren<{ isVisible: boolean }>): ReactElement {
-  const [visible, setVisible] = useState(isVisible);
-
-  useEffect(() => {
-    const subscription = GraniteModule.onVisibilityChanged((nextVisible: boolean) => {
-      setVisible(nextVisible);
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
-
-  return <VisibilityChangedContext.Provider value={visible}>{children}</VisibilityChangedContext.Provider>;
+  return <VisibilityChangedContext.Provider value={isVisible}>{children}</VisibilityChangedContext.Provider>;
 }
 
 /**

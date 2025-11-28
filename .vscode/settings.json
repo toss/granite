@@ -1,6 +1,7 @@
 {
   "search.exclude": {
     "**/.yarn": true,
+    "**/.nx": true,
     "**/.pnp.*": true,
     "**/devtools-frontend": true,
     "**/dist": true,

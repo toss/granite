@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-core",
   "type": "module",
-  "version": "0.1.23-next.19",
+  "version": "0.1.33",
   "description": "The core plugin module for Granite",
   "scripts": {
     "prepack": "yarn build",
@@ -12,6 +12,11 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/plugin-core"
+  },
   "exports": {
     ".": {
       "import": {
@@ -30,9 +35,10 @@
   ],
   "devDependencies": {
     "@types/node": "^24.3.0",
-    "tsdown": "^0.11.12",
+    "@vitest/coverage-v8": "^4.0.12",
+    "tsdown": "^0.16.5",
     "typescript": "^5.6.3",
-    "vitest": "^3.0.9"
+    "vitest": "^4.0.12"
   },
   "dependencies": {
     "@granite-js/utils": "workspace:*",

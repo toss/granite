@@ -1,7 +1,12 @@
 {
   "name": "@granite-js/native",
-  "version": "0.1.23-next.19",
+  "version": "0.1.33",
   "description": "A native module hub package for Granite",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/native"
+  },
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
@@ -112,10 +117,10 @@
     "react-native-webview": "catalog:react-native"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.9",
-    "@babel/preset-env": "^7.24.8",
-    "@babel/preset-typescript": "^7.24.7",
-    "@babel/runtime": "^7",
+    "@babel/core": "7.28.5",
+    "@babel/preset-env": "7.28.5",
+    "@babel/preset-typescript": "7.28.5",
+    "@babel/runtime": "7.28.4",
     "@types/babel__core": "^7",
     "@types/babel__preset-env": "^7",
     "@types/jest": "^29.5.12",

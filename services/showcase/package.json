@@ -12,10 +12,12 @@
     "@granite-js/native": "workspace:*",
     "@granite-js/react-native": "workspace:*",
     "react": "catalog:react-native",
-    "react-native": "catalog:react-native"
+    "react-native": "catalog:react-native",
+    "valibot": "^1.1.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@babel/core": "7.23.9",
+    "@babel/core": "7.28.5",
     "@babel/runtime": "7.18.9",
     "@biomejs/biome": "^1.9.4",
     "@granite-js/forge-cli": "workspace:*",
