@@ -1,7 +1,7 @@
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { AppStateProvider } from './useIsAppForeground';
 import { VisibilityChangedProvider } from './useVisibilityChanged';
-import { nativeEventEmitter } from '../native-event-emitter/nativeEventEmitter';
+import { GraniteModule } from '../native-modules/natives/GraniteBrownfieldModule.brick';
 
 interface Props {
   isVisible: boolean;
@@ -33,7 +33,7 @@ export function VisibilityProvider({ isVisible, children }: Props): ReactElement
   const [visible, setVisible] = useState(isVisible);
 
   useEffect(() => {
-    const subscription = nativeEventEmitter.addListener('visibilityChanged', (nextVisible) => {
+    const subscription = GraniteModule.onVisibilityChanged((nextVisible) => {
       setVisible(nextVisible);
     });
 

@@ -30,6 +30,7 @@ import { resolvePlugins } from '../utils/resolvePlugins';
  * @param config.metro - Configure Metro bundler settings
  * @param config.devServer - Configure Mpack dev server settings
  * @param config.plugins - Granite plugins to enhance functionality
+ * @param config.reactNativePath - Path to `react-native` directory (defaults to project's `react-native` package path)
  * @returns The processed configuration
  *
  * @example
@@ -83,5 +84,6 @@ export const defineConfig = async (config: GraniteConfig): Promise<CompleteGrani
     outdir,
     pluginHooks,
     pluginConfigs: [parsedConfig, globalsScriptConfig, ...configs].filter(isNotNil),
+    reactNativePath: parsed.reactNativePath,
   };
 };

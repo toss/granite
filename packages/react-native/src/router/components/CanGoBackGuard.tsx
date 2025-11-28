@@ -1,20 +1,19 @@
 import { ReactNode, useEffect } from 'react';
 import { BackHandler } from 'react-native';
-import { useIsInitialScreen } from '../hooks/useIsInitialScreen';
 
 export function CanGoBackGuard({
   children,
   canGoBack,
   onBack,
+  isInitialScreen,
   setIosSwipeGestureEnabled,
 }: {
   canGoBack: boolean;
+  isInitialScreen: boolean;
   children: ReactNode;
   onBack?: () => void;
   setIosSwipeGestureEnabled?: ({ isEnabled }: { isEnabled: boolean }) => void;
 }) {
-  const isInitialScreen = useIsInitialScreen();
-
   const shouldBlockGoingBack = !canGoBack;
 
   useEffect(() => {

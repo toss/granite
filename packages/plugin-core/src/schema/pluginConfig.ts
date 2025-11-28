@@ -23,6 +23,7 @@ export const pluginConfigSchema = z.object({
   devServer: z.custom<DevServerConfig>().optional(),
   metro: z.custom<AdditionalMetroConfig & MetroDevServerConfig>().optional(),
   plugins: z.custom<PluginInput>(),
+  reactNativePath: z.string().optional(),
 });
 
 export type GraniteConfig = z.input<typeof pluginConfigSchema>;
@@ -34,6 +35,7 @@ export type CompleteGraniteConfig = {
   outdir: ParsedGraniteConfig['outdir'];
   pluginHooks: GranitePluginHooks;
   pluginConfigs: PluginConfig[];
+  reactNativePath?: string;
 };
 
 export interface GranitePluginHooks {
