@@ -1,6 +1,62 @@
 # @granite-js/plugin-core
 
-## 0.1.23-next.19
+## 0.1.33
+
+### Patch Changes
+
+- @granite-js/utils@0.1.33
+
+## 0.1.32
+
+### Patch Changes
+
+- 7572713: bump version up babel
+  - @granite-js/utils@0.1.32
+
+## 0.1.31
+
+### Patch Changes
+
+- 9bf8b50: expose resolveRequest option
+- e957833: expose `resolver.resolverMainFields` and `resolver.unstable_conditionNames` options
+  - @granite-js/utils@0.1.31
+
+## 0.1.30
+
+### Patch Changes
+
+- @granite-js/utils@0.1.30
+
+## 0.1.29
+
+### Patch Changes
+
+- ed4cdbf: support additional metro config options from granite.config.ts
+  - @granite-js/utils@0.1.29
+
+## 0.1.28
+
+### Patch Changes
+
+- 1d958cc: ci: provenance
+- Updated dependencies [1d958cc]
+  - @granite-js/utils@0.1.28
+
+## 0.1.27
+
+### Patch Changes
+
+- e32b020: ci: oidc
+- Updated dependencies [e32b020]
+  - @granite-js/utils@0.1.27
+
+## 0.1.26
+
+### Patch Changes
+
+- @granite-js/utils@0.1.26
+
+## 0.1.25
 
 ### Patch Changes
 

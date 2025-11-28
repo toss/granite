@@ -95,7 +95,7 @@ interface StackNavigatorProps {
 
 type NavigationContainerProps = Pick<
   ComponentProps<typeof NavigationContainer>,
-  'ref' | 'documentTitle' | 'fallback' | 'onReady' | 'onUnhandledAction' | 'onStateChange'
+  'ref' | 'documentTitle' | 'fallback' | 'onReady' | 'onUnhandledAction' | 'onStateChange' | 'initialState'
 >;
 
 /**

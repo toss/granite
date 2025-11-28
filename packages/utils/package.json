@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/utils",
   "type": "module",
-  "version": "0.1.23-next.19",
+  "version": "0.1.33",
   "description": "Utilities for Granite",
   "scripts": {
     "prepack": "yarn build",
@@ -11,6 +11,11 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/utils"
+  },
   "exports": {
     ".": {
       "import": {

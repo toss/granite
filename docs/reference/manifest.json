@@ -61,6 +61,10 @@
                 {
                   "text": "useInitialProps",
                   "link": "/reference/react-native/core/useInitialProps"
+                },
+                {
+                  "text": "useIsInitialScreen",
+                  "link": "/reference/react-native/core/useIsInitialScreen"
                 }
               ]
             },

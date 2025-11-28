@@ -1,6 +1,34 @@
 # babel-preset-granite
 
-## 0.1.23-next.19
+## 0.1.33
+
+## 0.1.32
+
+### Patch Changes
+
+- 7572713: bump version up babel
+
+## 0.1.31
+
+## 0.1.30
+
+## 0.1.29
+
+## 0.1.28
+
+### Patch Changes
+
+- 1d958cc: ci: provenance
+
+## 0.1.27
+
+### Patch Changes
+
+- e32b020: ci: oidc
+
+## 0.1.26
+
+## 0.1.25
 
 ### Patch Changes
 

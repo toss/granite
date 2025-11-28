@@ -1,6 +1,134 @@
 # @granite-js/react-native
 
-## 0.1.23-next.19
+## 0.1.33
+
+### Patch Changes
+
+- fdf55a6: fix(router): type infer incorrect undefined
+- Updated dependencies [fdf55a6]
+  - @granite-js/native@0.1.33
+  - @granite-js/image@0.1.33
+  - @granite-js/jest@0.1.33
+  - @granite-js/lottie@0.1.33
+  - @granite-js/style-utils@0.1.33
+  - @granite-js/cli@0.1.33
+  - @granite-js/mpack@0.1.33
+  - @granite-js/plugin-core@0.1.33
+
+## 0.1.32
+
+### Patch Changes
+
+- 74b2223: fix(react-native): VisibilityChangedProvider only provider
+- 7572713: bump version up babel
+- Updated dependencies [74b2223]
+- Updated dependencies [7572713]
+  - @granite-js/native@0.1.32
+  - @granite-js/plugin-core@0.1.32
+  - @granite-js/style-utils@0.1.32
+  - @granite-js/image@0.1.32
+  - @granite-js/mpack@0.1.32
+  - @granite-js/cli@0.1.32
+  - @granite-js/jest@0.1.32
+  - @granite-js/lottie@0.1.32
+
+## 0.1.31
+
+### Patch Changes
+
+- 0ff9b13: feat(router): screenOptions in Route
+- 37ae3f3: feat(router): supports standard schema
+- Updated dependencies [0ff9b13]
+- Updated dependencies [9bf8b50]
+- Updated dependencies [e957833]
+- Updated dependencies [37ae3f3]
+  - @granite-js/native@0.1.31
+  - @granite-js/plugin-core@0.1.31
+  - @granite-js/mpack@0.1.31
+  - @granite-js/image@0.1.31
+  - @granite-js/jest@0.1.31
+  - @granite-js/lottie@0.1.31
+  - @granite-js/style-utils@0.1.31
+  - @granite-js/cli@0.1.31
+
+## 0.1.30
+
+### Patch Changes
+
+- Updated dependencies [9e9ea71]
+  - @granite-js/mpack@0.1.30
+  - @granite-js/cli@0.1.30
+  - @granite-js/image@0.1.30
+  - @granite-js/jest@0.1.30
+  - @granite-js/lottie@0.1.30
+  - @granite-js/native@0.1.30
+  - @granite-js/plugin-core@0.1.30
+  - @granite-js/style-utils@0.1.30
+
+## 0.1.29
+
+### Patch Changes
+
+- 2dee8d3: add initialState in router spec
+- Updated dependencies [ed4cdbf]
+  - @granite-js/plugin-core@0.1.29
+  - @granite-js/mpack@0.1.29
+  - @granite-js/cli@0.1.29
+  - @granite-js/image@0.1.29
+  - @granite-js/jest@0.1.29
+  - @granite-js/lottie@0.1.29
+  - @granite-js/native@0.1.29
+  - @granite-js/style-utils@0.1.29
+
+## 0.1.28
+
+### Patch Changes
+
+- 1d958cc: ci: provenance
+- Updated dependencies [1d958cc]
+  - @granite-js/cli@0.1.28
+  - @granite-js/image@0.1.28
+  - @granite-js/jest@0.1.28
+  - @granite-js/lottie@0.1.28
+  - @granite-js/mpack@0.1.28
+  - @granite-js/native@0.1.28
+  - @granite-js/plugin-core@0.1.28
+  - @granite-js/style-utils@0.1.28
+
+## 0.1.27
+
+### Patch Changes
+
+- 664f2a1: add useIsInitialScreen export in index(for user's import)
+- d13ddeb: fix(router): useParams used from is strict: true
+- e32b020: ci: oidc
+- Updated dependencies [e32b020]
+- Updated dependencies [1dd9179]
+  - @granite-js/cli@0.1.27
+  - @granite-js/image@0.1.27
+  - @granite-js/jest@0.1.27
+  - @granite-js/lottie@0.1.27
+  - @granite-js/mpack@0.1.27
+  - @granite-js/native@0.1.27
+  - @granite-js/plugin-core@0.1.27
+  - @granite-js/style-utils@0.1.27
+
+## 0.1.26
+
+### Patch Changes
+
+- 41f9ab3: ensure polyfill setup during initialization and update package.json config for improve tree shaking
+- Updated dependencies [41f9ab3]
+  - @granite-js/style-utils@0.1.26
+  - @granite-js/lottie@0.1.26
+  - @granite-js/image@0.1.26
+  - @granite-js/jest@0.1.26
+  - @granite-js/cli@0.1.26
+  - @granite-js/mpack@0.1.26
+  - @granite-js/native@0.1.26
+  - @granite-js/plugin-core@0.1.26
+
+## 0.1.25
 
 ### Patch Changes
 

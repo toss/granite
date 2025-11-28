@@ -3,24 +3,34 @@ import {
   useNavigation as useNavigationNative,
   useRoute,
 } from '@granite-js/native/@react-navigation/native';
-import { NativeStackNavigationProp } from '@granite-js/native/@react-navigation/native-stack';
+import {
+  NativeStackNavigationOptions,
+  NativeStackNavigationProp,
+} from '@granite-js/native/@react-navigation/native-stack';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { useMemo } from 'react';
 import { RESERVED_PATHS } from './constants';
 import { defaultParserParams } from './utils/defaultParserParams';
+import { type InferOutput, type InferInput } from './utils/standardSchema';
+import { validateRouteParams } from './utils/validateRouteParams';
 
 export interface RouteOptions<T extends Readonly<object | undefined>> {
   parserParams?: (params: Record<string, unknown>) => Record<string, unknown>;
-  validateParams?: (params: Readonly<object | undefined>) => T;
+  validateParams?: ((params: Readonly<object | undefined>) => T) | StandardSchemaV1<any, T>;
   component: React.FC<any>;
+  screenOptions?: NativeStackNavigationOptions | ((context: { params: T }) => NativeStackNavigationOptions);
 }
 
-export type NavigationProps = NativeStackNavigationProp<
-  // @ts-expect-error - override type
-  keyof RegisterScreen extends never ? ParamListBase : RegisterScreen
->;
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface RegisterScreenInput {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface RegisterScreen {}
+
+export type NavigationProps = NativeStackNavigationProp<
+  // @ts-expect-error - override type
+  keyof RegisterScreenInput extends never ? ParamListBase : RegisterScreenInput
+>;
 
 export function useNavigation() {
   return useNavigationNative<NavigationProps>();
@@ -37,8 +47,12 @@ export type RouteHooksOptions<TScreen extends keyof RegisterScreen> =
     };
 
 export const routeMap = new Map<
-  keyof RegisterScreen,
-  { options: Omit<RouteOptions<any>, 'component'>; component: React.FC<any> }
+  keyof RegisterScreenInput,
+  {
+    options: Omit<RouteOptions<any>, 'component' | 'screenOptions'>;
+    component: React.FC<any>;
+    screenOptions?: NativeStackNavigationOptions | ((context: { params: any }) => NativeStackNavigationOptions);
+  }
 >();
 
 export function useMatchOptions<TScreen extends keyof RegisterScreen>(options: RouteHooksOptions<TScreen>) {
@@ -133,29 +147,68 @@ export function useParams<TScreen extends keyof RegisterScreen>(
   const routeOptions = useMatchOptions(options);
   const route = useRoute();
 
+  const isStrict = typeof options.from === 'string' ? true : options.strict;
   const params = useMemo(() => {
     if (!routeOptions) {
       return (route.params ?? {}) as Readonly<object | undefined>;
     }
 
     const parsedParams = routeOptions.parserParams(route.params as Record<string, string>);
-    return options.strict && routeOptions.validateParams ? routeOptions.validateParams(parsedParams) : parsedParams;
-  }, [routeOptions, route.params, options.strict]);
+
+    if (!isStrict || !routeOptions.validateParams) {
+      return parsedParams;
+    }
+
+    return validateRouteParams(routeOptions.validateParams, parsedParams);
+  }, [routeOptions, route.params, isStrict]);
 
   return params;
 }
 
-export const createRoute = <T extends Readonly<object | undefined>>(
-  path: keyof RegisterScreen,
-  options: RouteOptions<T>
-) => {
-  const { component, ...restOptions } = options;
-  routeMap.set(path, { options: restOptions, component });
+// Overload 1: StandardSchema pattern
+export function createRoute<TSchema extends StandardSchemaV1<any, any>>(
+  path: keyof RegisterScreenInput,
+  options: Omit<RouteOptions<any>, 'validateParams'> & {
+    validateParams: TSchema;
+  }
+): {
+  _path: keyof RegisterScreenInput;
+  useNavigation: typeof useNavigation;
+  useParams: () => InferOutput<TSchema>;
+  _inputType: InferInput<TSchema>;
+  _outputType: InferOutput<TSchema>;
+};
 
-  const _path = path as keyof RegisterScreen;
+// Overload 2: Function pattern
+export function createRoute<T extends Readonly<object | undefined>>(
+  path: keyof RegisterScreenInput,
+  options: RouteOptions<T>
+): {
+  _path: keyof RegisterScreenInput;
+  useNavigation: typeof useNavigation;
+  useParams: () => T;
+  _inputType: T;
+  _outputType: T;
+};
+
+// Implementation
+export function createRoute(path: keyof RegisterScreenInput, options: RouteOptions<any>) {
+  const { component, screenOptions, ...restOptions } = options;
+  routeMap.set(path, {
+    options: restOptions,
+    component,
+    screenOptions: screenOptions,
+  });
+
+  const _path = path as keyof RegisterScreenInput;
   return {
     _path,
     useNavigation,
-    useParams: () => useParams({ from: _path, strict: true }) as T,
+    useParams: () => useParams({ from: _path as keyof RegisterScreen, strict: true }),
+
+    // These properties are only used for type inference in the generated router files
+    // The actual values are never accessed at runtime
+    _inputType: {},
+    _outputType: {},
   };
-};
+}

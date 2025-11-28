@@ -1,11 +1,16 @@
 {
   "name": "@granite-js/cli",
   "type": "module",
-  "version": "0.1.23-next.19",
+  "version": "0.1.33",
   "description": "The Granite CLI",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/cli"
+  },
   "exports": {
     ".": {
       "import": {
@@ -32,21 +37,22 @@
     "package.json"
   ],
   "devDependencies": {
-    "@babel/core": "^7.24.9",
-    "@babel/preset-env": "^7.24.8",
-    "@babel/preset-typescript": "^7.24.7",
+    "@babel/core": "7.28.5",
+    "@babel/preset-env": "7.28.5",
+    "@babel/preset-typescript": "7.28.5",
     "@types/babel__core": "^7",
     "@types/babel__preset-env": "^7",
     "@types/connect": "^3",
     "@types/debug": "^4",
     "@types/node": "^22.10.2",
     "@types/serve-static": "^1",
+    "@vitest/coverage-v8": "^4.0.12",
     "esbuild": "0.25.8",
     "eslint": "^9.7.0",
     "ts-prune": "^0.10.3",
     "tsup": "^8.5.0",
     "typescript": "5.8.3",
-    "vitest": "^3.0.7"
+    "vitest": "^4.0.12"
   },
   "dependencies": {
     "@granite-js/mpack": "workspace:*",
