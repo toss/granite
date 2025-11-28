@@ -1,3 +1,34 @@
+
+<div align="right">
+  <details>
+    <summary >🌐 Language</summary>
+    <div>
+      <div align="center">
+        <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=en">English</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=zh-CN">简体中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=zh-TW">繁體中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=ja">日本語</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=ko">한국어</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=hi">हिन्दी</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=th">ไทย</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=fr">Français</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=de">Deutsch</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=es">Español</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=it">Itapano</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=ru">Русский</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=pt">Português</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=nl">Nederlands</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=pl">Polski</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=ar">العربية</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=fa">فارسی</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=tr">Türkçe</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=vi">Tiếng Việt</a>
+        | <a href="https://openaitx.github.io/view.html?user=toss&project=granite&lang=id">Bahasa Indonesia</a>
+      </div>
+    </div>
+  </details>
+</div>
+
 # Granite &middot; [![Apache 2.0 License](https://img.shields.io/badge/license-Apache-blue.svg)](https://github.com/toss/slash/blob/main/LICENSE) [![NPM badge](https://img.shields.io/npm/v/@granite-js/react-native?logo=npm)](https://www.npmjs.com/package/@granite-js/react-native) [![codecov](https://codecov.io/gh/toss/granite/graph/badge.svg?token=LCP519I5BN)](https://codecov.io/gh/toss/granite)
 
 English | [한국어](https://github.com/toss/granite/blob/main/README-ko_kr.md)
