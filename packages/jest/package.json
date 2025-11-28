@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/jest",
-  "version": "0.1.23-next.19",
+  "version": "0.1.33",
   "description": "Jest presets for Granite",
   "scripts": {
     "prepack": "yarn build",
@@ -9,6 +9,11 @@
     "build": "tsup"
   },
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/jest"
+  },
   "main": "./dist/index.js",
   "exports": {
     ".": {
@@ -35,5 +40,6 @@
     "@granite-js/native": "workspace:*",
     "react": "*",
     "react-native": "*"
-  }
+  },
+  "sideEffects": false
 }

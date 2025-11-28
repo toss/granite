@@ -6,6 +6,7 @@ import type { RouterProps, RequireContext } from '../router';
 import { AppRoot } from './AppRoot';
 import { HostAppRoot } from './HostAppRoot';
 import { getSchemeUri } from '../constant-bridges';
+import { setupPolyfills } from '../polyfills';
 
 export interface GraniteProps {
   /**
@@ -49,6 +50,8 @@ export interface GraniteProps {
 
 const createApp = () => {
   let _appName: string | null = null;
+
+  setupPolyfills();
 
   function registerComponent(appKey: string, component: React.ComponentType<any>): string {
     if (AppRegistry.getAppKeys().includes(appKey)) {

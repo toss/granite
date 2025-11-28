@@ -5,5 +5,5 @@ export default defineConfig({
   outDir: 'dist',
   format: ['esm', 'cjs'],
   dts: true,
-  unbundle: true,
+  fixedExtension: false,
 });

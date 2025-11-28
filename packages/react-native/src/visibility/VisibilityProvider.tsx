@@ -1,6 +1,7 @@
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { AppStateProvider } from './useIsAppForeground';
 import { VisibilityChangedProvider } from './useVisibilityChanged';
+import { GraniteModule } from '../native-modules/natives/GraniteBrownfieldModule.brick';
 
 interface Props {
   isVisible: boolean;
@@ -11,8 +12,9 @@ interface Props {
  * @name VisibilityProvider
  * @description
  * A Provider that manages whether a ReactNative view is currently in the foreground state.
+ * It subscribes to the app's `visibilityChanged` event to detect and manage screen visibility.
  * @param {boolean} isVisible - Whether the app is in the foreground state.
- * @param {ReactNode | undefined} children - Child components that observe `AppState`.
+ * @param {ReactNode | undefined} children - Child components that observe `visibilityChanged` and `AppState` event.
  * @returns {ReactElement} - A React Provider component wrapped with `VisibilityChangedProvider`.
  * @example
  * ```typescript
@@ -28,8 +30,20 @@ interface Props {
  * ```
  */
 export function VisibilityProvider({ isVisible, children }: Props): ReactElement {
+  const [visible, setVisible] = useState(isVisible);
+
+  useEffect(() => {
+    const subscription = GraniteModule.onVisibilityChanged((nextVisible) => {
+      setVisible(nextVisible);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   return (
-    <VisibilityChangedProvider isVisible={isVisible}>
+    <VisibilityChangedProvider isVisible={visible}>
       <AppStateProvider>{children}</AppStateProvider>
     </VisibilityChangedProvider>
   );

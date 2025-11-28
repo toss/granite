@@ -1,9 +1,6 @@
 import type { ComponentType } from 'react';
 import { AppRegistry } from 'react-native';
 import { ENTRY_BUNDLE_NAME } from '../constants';
-import { setup } from '../rn-polyfills';
-
-setup();
 
 export function register(Component: ComponentType<any>) {
   if (AppRegistry.getAppKeys().includes(ENTRY_BUNDLE_NAME)) {

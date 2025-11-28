@@ -2,9 +2,14 @@
   "name": "@granite-js/forge-cli",
   "description": "A CLI tool for managing Granite applications",
   "type": "module",
-  "version": "0.1.23-next.19",
+  "version": "0.1.33",
   "bin": {
     "granite-forge": "./bin/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "infra/forge-cli"
   },
   "files": [
     "dist",
@@ -19,10 +24,10 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "@vitest/coverage-v8": "^3.1.4",
-    "tsdown": "^0.11.13",
+    "@vitest/coverage-v8": "^4.0.12",
+    "tsdown": "^0.16.5",
     "typescript": "^5.8.3",
-    "vitest": "^3.1.4"
+    "vitest": "^4.0.12"
   },
   "dependencies": {
     "@aws-sdk/credential-providers": "^3.817.0",

@@ -1,6 +1,65 @@
 # @granite-js/jest
 
-## 0.1.23-next.19
+## 0.1.33
+
+### Patch Changes
+
+- Updated dependencies [fdf55a6]
+  - @granite-js/native@0.1.33
+
+## 0.1.32
+
+### Patch Changes
+
+- Updated dependencies [74b2223]
+- Updated dependencies [7572713]
+  - @granite-js/native@0.1.32
+
+## 0.1.31
+
+### Patch Changes
+
+- Updated dependencies [0ff9b13]
+- Updated dependencies [37ae3f3]
+  - @granite-js/native@0.1.31
+
+## 0.1.30
+
+### Patch Changes
+
+- @granite-js/native@0.1.30
+
+## 0.1.29
+
+### Patch Changes
+
+- @granite-js/native@0.1.29
+
+## 0.1.28
+
+### Patch Changes
+
+- 1d958cc: ci: provenance
+- Updated dependencies [1d958cc]
+  - @granite-js/native@0.1.28
+
+## 0.1.27
+
+### Patch Changes
+
+- e32b020: ci: oidc
+- Updated dependencies [e32b020]
+- Updated dependencies [1dd9179]
+  - @granite-js/native@0.1.27
+
+## 0.1.26
+
+### Patch Changes
+
+- 41f9ab3: ensure polyfill setup during initialization and update package.json config for improve tree shaking
+  - @granite-js/native@0.1.26
+
+## 0.1.25
 
 ### Patch Changes
 

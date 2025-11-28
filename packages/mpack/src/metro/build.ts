@@ -43,35 +43,22 @@ export async function buildAll(
   optionsList: CommonMetroBuildOptions[],
   { config, concurrency = 2 }: MetroBuildAllOptions
 ) {
+  const buildResults: BuildResult[] = [];
   const semaphore = new Semaphore(Math.min(concurrency, optionsList.length));
   const driver = createPluginHooksDriver(config);
   await driver.build.pre();
 
-  const taskResults = await Promise.allSettled(
+  await Promise.all(
     optionsList.map(async (options) => {
       await semaphore.acquire();
       try {
         const buildResult = await buildImpl(config, options);
-        return buildResult;
+        buildResults.push(buildResult);
       } finally {
         semaphore.release();
       }
     })
   );
-
-  const errors = taskResults.filter((result) => result.status === 'rejected');
-  if (errors.length) {
-    console.error('Build errors:');
-    let index = 1;
-    for (const error of errors) {
-      console.error(`  [${index++}]`, error.reason);
-    }
-    throw new Error('Build failed');
-  }
-
-  const buildResults = taskResults
-    .filter((result): result is PromiseFulfilledResult<BuildResult> => result.status === 'fulfilled')
-    .map((result) => result.value);
 
   await driver.build.post({ buildResults });
 

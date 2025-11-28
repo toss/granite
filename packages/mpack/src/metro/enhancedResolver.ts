@@ -1,13 +1,8 @@
 import Module from 'module';
 import path from 'path';
+import type { MetroResolutionContext } from '@granite-js/plugin-core';
 import enhancedResolve from 'enhanced-resolve';
-import { RESOLVER_EXPORTS_MAP_CONDITIONS, RESOLVER_MAIN_FIELDS } from '../constants';
-
-interface CustomResolutionContext {
-  sourceExts: string[];
-  originModulePath: string;
-  preferNativePlatform?: boolean;
-}
+import { RESOLVER_EXPORTS_MAP_CONDITIONS } from '../constants';
 
 const SINGLETON_MODULES = ['@babel/runtime'];
 const NATIVE_MODULES = ['react-native', 'react'];
@@ -27,8 +22,12 @@ const SUPPORTED_BUILTIN_FALLBACKS: Record<string, string> = {
 const builtinModules = new Set(Module.builtinModules);
 const resolvers = new Map();
 
-export function createResolver(rootPath: string) {
-  function createResolverImpl(context: CustomResolutionContext, platform: string | null, rootPath: string) {
+interface CreateResolverOptions {
+  conditionNames?: string[];
+}
+
+export function createResolver(rootPath: string, options?: CreateResolverOptions) {
+  function createResolverImpl(context: MetroResolutionContext, platform: string | null, rootPath: string) {
     const baseExtensions = context.sourceExts.map((extension) => `.${extension}`);
     let finalExtensions = [...baseExtensions];
 
@@ -42,13 +41,13 @@ export function createResolver(rootPath: string) {
 
     const resolver = enhancedResolve.create.sync({
       extensions: finalExtensions,
-      mainFields: RESOLVER_MAIN_FIELDS,
+      mainFields: context.mainFields,
+      conditionNames: options?.conditionNames ?? [...RESOLVER_EXPORTS_MAP_CONDITIONS, 'require', 'node', 'default'],
       mainFiles: ['index'],
-      conditionNames: [...RESOLVER_EXPORTS_MAP_CONDITIONS, 'require', 'node', 'default'],
       modules: ['node_modules', path.join(rootPath, 'src')],
     });
 
-    function resolve(context: CustomResolutionContext, request: string) {
+    function resolve(context: MetroResolutionContext, request: string) {
       for (const nativeModule of NATIVE_MODULES) {
         if (request === nativeModule) {
           return {
@@ -101,7 +100,7 @@ export function createResolver(rootPath: string) {
     return resolve;
   }
 
-  return function resolve(context: CustomResolutionContext, request: string, platform: string | null) {
+  return function resolve(context: MetroResolutionContext, request: string, platform: string | null) {
     let resolver = resolvers.get(platform);
 
     if (resolver == null) {

@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/image",
-  "version": "0.1.23-next.19",
+  "version": "0.1.33",
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
@@ -10,6 +10,11 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/image"
+  },
   "exports": {
     ".": {
       "import": {
@@ -32,7 +37,7 @@
     "eslint": "^9.7.0",
     "react": "catalog:react-native",
     "react-native": "catalog:react-native",
-    "tsdown": "^0.14.1",
+    "tsdown": "^0.16.5",
     "typescript": "5.8.3"
   },
   "peerDependencies": {
@@ -43,5 +48,6 @@
   },
   "dependencies": {
     "react-simplikit": "^0.0.40"
-  }
+  },
+  "sideEffects": false
 }

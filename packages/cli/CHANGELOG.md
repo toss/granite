@@ -1,6 +1,80 @@
 # @granite-js/cli
 
-## 0.1.23-next.19
+## 0.1.33
+
+### Patch Changes
+
+- @granite-js/mpack@0.1.33
+- @granite-js/plugin-core@0.1.33
+- @granite-js/utils@0.1.33
+
+## 0.1.32
+
+### Patch Changes
+
+- 7572713: bump version up babel
+- Updated dependencies [7572713]
+  - @granite-js/plugin-core@0.1.32
+  - @granite-js/mpack@0.1.32
+  - @granite-js/utils@0.1.32
+
+## 0.1.31
+
+### Patch Changes
+
+- Updated dependencies [9bf8b50]
+- Updated dependencies [e957833]
+  - @granite-js/plugin-core@0.1.31
+  - @granite-js/mpack@0.1.31
+  - @granite-js/utils@0.1.31
+
+## 0.1.30
+
+### Patch Changes
+
+- Updated dependencies [9e9ea71]
+  - @granite-js/mpack@0.1.30
+  - @granite-js/plugin-core@0.1.30
+  - @granite-js/utils@0.1.30
+
+## 0.1.29
+
+### Patch Changes
+
+- Updated dependencies [ed4cdbf]
+  - @granite-js/plugin-core@0.1.29
+  - @granite-js/mpack@0.1.29
+  - @granite-js/utils@0.1.29
+
+## 0.1.28
+
+### Patch Changes
+
+- 1d958cc: ci: provenance
+- Updated dependencies [1d958cc]
+  - @granite-js/mpack@0.1.28
+  - @granite-js/plugin-core@0.1.28
+  - @granite-js/utils@0.1.28
+
+## 0.1.27
+
+### Patch Changes
+
+- e32b020: ci: oidc
+- Updated dependencies [e32b020]
+  - @granite-js/mpack@0.1.27
+  - @granite-js/plugin-core@0.1.27
+  - @granite-js/utils@0.1.27
+
+## 0.1.26
+
+### Patch Changes
+
+- @granite-js/mpack@0.1.26
+- @granite-js/plugin-core@0.1.26
+- @granite-js/utils@0.1.26
+
+## 0.1.25
 
 ### Patch Changes
 
