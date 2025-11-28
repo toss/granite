@@ -35,7 +35,7 @@
     "typescript": "5.8.3"
   },
   "peerDependencies": {
-    "@granite-js/native": "0.1.23-next.19",
+    "@granite-js/native": "workspace:*",
     "@types/react": "*",
     "react": "*",
     "react-native": "*"
