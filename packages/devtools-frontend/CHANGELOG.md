@@ -1,5 +1,11 @@
 # @granite-js/devtools-frontend
 
+## 0.1.34-next.0
+
+### Patch Changes
+
+- fix
+
 ## 0.1.33
 
 ## 0.1.32
