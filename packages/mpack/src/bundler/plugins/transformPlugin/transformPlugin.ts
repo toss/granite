@@ -49,8 +49,8 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
           skipOtherSteps: true,
         })
         .addStep(createStripFlowStep({ dev }))
-        .addStep(createAdditionalBabelStep({ dev, additionalBabelOptions: babel }))
         .addStep(createTransformToHermesSyntaxStep({ dev, additionalSwcOptions: swc }))
+        .addStep(createAdditionalBabelStep({ dev, additionalBabelOptions: babel }))
         .afterStep(cacheSteps.afterTransform);
 
       preludeScript.registerEntryPointMarker(build);
