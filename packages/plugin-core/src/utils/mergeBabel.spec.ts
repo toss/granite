@@ -53,21 +53,16 @@ describe('mergeBabel', () => {
   });
 
   it('performs complete merge with all properties', () => {
-    const condition1 = (code: string) => code.includes('test1');
-    const condition2 = (code: string) => code.includes('test2');
-
     const source = {
       configFile: 'babel.config.js',
       presets: ['preset1'],
       plugins: ['plugin1'],
-      conditions: [condition1],
     };
 
     const target = {
       configFile: 'babel.config.json',
       presets: ['preset2'],
       plugins: ['plugin2'],
-      conditions: [condition2],
     };
 
     const result = mergeBabel(source, target);
@@ -76,7 +71,6 @@ describe('mergeBabel', () => {
       configFile: 'babel.config.json',
       presets: ['preset1', 'preset2'],
       plugins: ['plugin1', 'plugin2'],
-      conditions: [condition1, condition2],
     });
   });
 });

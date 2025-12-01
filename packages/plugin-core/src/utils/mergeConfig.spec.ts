@@ -259,8 +259,6 @@ describe('mergeConfig', () => {
     const mockLoad2 = vitest.fn();
 
     const mockPluginOption = {};
-    const mockCondition1 = vitest.fn();
-    const mockCondition2 = vitest.fn();
 
     const mockMiddleware1 = vitest.fn();
     const mockMiddleware2 = vitest.fn();
@@ -402,7 +400,6 @@ describe('mergeConfig', () => {
       babel: {
         presets: ['preset1', 'preset2'],
         plugins: [['plugin1', {}], 'plugin2', 'plugin3', 'plugin4'],
-        conditions: [mockCondition1, mockCondition2],
       },
       metro: {
         middlewares: [mockMiddleware1, mockMiddleware2],
