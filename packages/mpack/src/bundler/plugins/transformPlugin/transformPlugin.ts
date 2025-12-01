@@ -1,14 +1,15 @@
 import assert from 'assert';
 import * as fs from 'fs/promises';
 import { Plugin } from 'esbuild';
+import { PluginOptions } from '../types';
 import * as preludeScript from './helpers/preludeScript';
+import { createAdditionalBabelStep } from './steps/createAdditionalBabelStep';
 import { createCacheSteps } from './steps/createCacheSteps';
 import { createFullyTransformStep } from './steps/createFullyTransformStep';
 import { createStripFlowStep } from './steps/createStripFlowStep';
 import { createTransformToHermesSyntaxStep } from './steps/createTransformToHermesSyntaxStep';
 import { Performance } from '../../../performance';
 import { AsyncTransformPipeline } from '../../../transformer';
-import { PluginOptions } from '../types';
 
 interface TransformPluginOptions {
   transformSync?: (id: string, code: string) => string;
@@ -48,6 +49,7 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
           skipOtherSteps: true,
         })
         .addStep(createStripFlowStep({ dev }))
+        .addStep(createAdditionalBabelStep({ dev, additionalBabelOptions: babel }))
         .addStep(createTransformToHermesSyntaxStep({ dev, additionalSwcOptions: swc }))
         .afterStep(cacheSteps.afterTransform);
 
