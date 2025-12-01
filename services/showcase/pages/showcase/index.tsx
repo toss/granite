@@ -1,1 +1,1 @@
-export { Route } from 'pages/showcase/index';
+export { Route } from '../../src/pages/showcase';
