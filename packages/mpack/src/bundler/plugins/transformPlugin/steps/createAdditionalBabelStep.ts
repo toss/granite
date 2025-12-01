@@ -32,7 +32,7 @@ export function createAdditionalBabelStep({
       filename: path.basename(args.path),
       caller: {
         name: 'mpack-additional-babel-plugin',
-        supportsStaticESM: true,
+        supportsStaticESM: false,
       },
     }) as babel.TransformOptions | null;
 
