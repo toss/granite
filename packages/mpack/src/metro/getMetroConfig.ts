@@ -81,10 +81,7 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
       blockList: exclusionList([
         ...(additionalConfig?.resolver?.blockList ? asArray(additionalConfig.resolver.blockList) : []),
       ]),
-      nodeModulesPaths: [
-        path.join(rootPath, 'node_modules'),
-        ...(additionalConfig?.resolver?.nodeModulesPaths || []),
-      ],
+      nodeModulesPaths: [path.join(rootPath, 'node_modules'), ...(additionalConfig?.resolver?.nodeModulesPaths || [])],
       extraNodeModules: additionalConfig?.resolver?.extraNodeModules || {},
       disableHierarchicalLookup: additionalConfig?.resolver?.disableHierarchicalLookup ?? true,
       resolverMainFields: additionalConfig?.resolver?.resolverMainFields ?? RESOLVER_MAIN_FIELDS,

@@ -47,7 +47,7 @@ export function createResolver(rootPath: string, options?: CreateResolverOptions
       modules: ['node_modules', path.join(rootPath, 'src')],
       alias: {
         'react-native': path.join(rootPath, 'node_modules', 'react-native'),
-        'react': path.join(rootPath, 'node_modules', 'react'),
+        react: path.join(rootPath, 'node_modules', 'react'),
       },
     });
 
