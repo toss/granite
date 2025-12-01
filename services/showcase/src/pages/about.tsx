@@ -1,12 +1,17 @@
 import { createRoute, Stack } from '@granite-js/react-native';
 import { StyleSheet, Text } from 'react-native';
 import { Button } from '../components/Button';
+import * as v from 'valibot';
 
 export const Route = createRoute('/about', {
   component: Page,
+  validateParams: v.object({
+    name: v.string(),
+  }),
 });
 
 function Page() {
+  const params = Route.useParams();
   const navigation = Route.useNavigation();
 
   const handleGoShowcase = () => {
@@ -19,7 +24,7 @@ function Page() {
 
   return (
     <Stack.Vertical style={styles.container} gutter={16}>
-      <Text style={styles.title}>About Granite</Text>
+      <Text style={styles.title}>About {params.name}</Text>
       <Text style={styles.description}>Granite is a powerful and flexible React Native Framework 🚀</Text>
       <Button label="Show more" onPress={handleGoShowcase} />
       <Button label="Go Back" appearance="text" onPress={handleGoBack} />

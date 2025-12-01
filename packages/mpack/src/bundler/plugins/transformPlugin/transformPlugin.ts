@@ -3,9 +3,9 @@ import * as fs from 'fs/promises';
 import { Plugin } from 'esbuild';
 import * as preludeScript from './helpers/preludeScript';
 import { createCacheSteps } from './steps/createCacheSteps';
-import { createFullyTransformStep } from './steps/createFullyTransformStep';
 import { createStripFlowStep } from './steps/createStripFlowStep';
 import { createTransformToHermesSyntaxStep } from './steps/createTransformToHermesSyntaxStep';
+import { createTransformUnicodePropertyEscapeStep } from './steps/createTransformUnicodePropertyEscapeStep';
 import { Performance } from '../../../performance';
 import { AsyncTransformPipeline } from '../../../transformer';
 import { PluginOptions } from '../types';
@@ -23,7 +23,7 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
     setup(build) {
       const { id, config } = context;
       const { dev, cache, buildConfig } = config;
-      const { esbuild, swc, babel } = buildConfig;
+      const { esbuild, swc } = buildConfig;
 
       assert(id, 'id 값이 존재하지 않습니다');
       assert(typeof dev === 'boolean', 'dev 값이 존재하지 않습니다');
@@ -43,10 +43,7 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
 
           return { code };
         })
-        .addStep(createFullyTransformStep({ dev, additionalBabelOptions: babel }), {
-          conditions: babel?.conditions,
-          skipOtherSteps: true,
-        })
+        .addStep(createTransformUnicodePropertyEscapeStep())
         .addStep(createStripFlowStep({ dev }))
         .addStep(createTransformToHermesSyntaxStep({ dev, additionalSwcOptions: swc }))
         .afterStep(cacheSteps.afterTransform);
