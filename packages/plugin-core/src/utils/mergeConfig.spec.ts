@@ -8,8 +8,6 @@ describe('mergeConfig', () => {
     const mockLoad2 = vitest.fn();
 
     const mockPluginOption = {};
-    const mockCondition1 = vitest.fn();
-    const mockCondition2 = vitest.fn();
 
     const mockMiddleware1 = vitest.fn();
     const mockMiddleware2 = vitest.fn();
@@ -32,7 +30,6 @@ describe('mergeConfig', () => {
       babel: {
         presets: ['preset1'],
         plugins: [['plugin1', mockPluginOption], 'plugin2'],
-        conditions: [mockCondition1],
       },
       esbuild: {
         minify: true,
@@ -70,7 +67,6 @@ describe('mergeConfig', () => {
       babel: {
         presets: ['preset2'],
         plugins: ['plugin3'],
-        conditions: [mockCondition2],
       },
       esbuild: {
         sourcemap: true,
@@ -122,7 +118,6 @@ describe('mergeConfig', () => {
       },
       babel: {
         presets: ['preset1', 'preset2'],
-        conditions: [mockCondition1, mockCondition2],
         plugins: [['plugin1', mockPluginOption], 'plugin2', 'plugin3'],
       },
       esbuild: {
@@ -337,7 +332,6 @@ describe('mergeConfig', () => {
     const target2: GranitePluginCore['config'] = {
       babel: {
         plugins: ['plugin3'],
-        conditions: [mockCondition1],
       },
       swc: {
         plugins: ['swc-plugin' as any],
@@ -356,7 +350,6 @@ describe('mergeConfig', () => {
       },
       babel: {
         plugins: ['plugin4'],
-        conditions: [mockCondition2],
       },
       esbuild: {
         prelude: ['source-2.js'],

@@ -35,19 +35,6 @@ describe('mergeBabel', () => {
     expect(result?.plugins).toEqual(['plugin1', 'plugin2']);
   });
 
-  it('merges conditions arrays', () => {
-    const condition1 = (code: string) => code.includes('test1');
-    const condition2 = (code: string) => code.includes('test2');
-
-    const source = { conditions: [condition1] };
-    const target = { conditions: [condition2] };
-    const result = mergeBabel(source, target);
-
-    expect(result?.conditions).toHaveLength(2);
-    expect(result?.conditions).toContain(condition1);
-    expect(result?.conditions).toContain(condition2);
-  });
-
   it('handles missing arrays gracefully', () => {
     const source = { presets: ['preset1'] };
     const target = { plugins: ['plugin1'] };
