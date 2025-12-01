@@ -10,7 +10,7 @@ function Page() {
   const navigation = Route.useNavigation();
 
   const goToAboutPage = () => {
-    navigation.navigate({ name: '/about', params: { name: 'John' } });
+    navigation.navigate('/about', { name: 'John' });
   };
 
   return (
