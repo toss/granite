@@ -21,7 +21,7 @@ function Showcase() {
   );
 
   const handlePressShowcaseItem = (page: keyof RegisterScreen) => {
-    navigation.navigate(page);
+    navigation.navigate(page, { name: 'John' });
   };
 
   return (

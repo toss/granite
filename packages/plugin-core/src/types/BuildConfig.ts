@@ -199,13 +199,6 @@ export interface SwcConfig {
 }
 
 export interface BabelConfig {
-  /**
-   * List of rules for Babel transform processing
-   * (option to skip Babel transform only when certain conditions are met)
-   *
-   * If all rules return `false`, Babel transform is skipped
-   */
-  conditions?: Array<(code: string, path: string) => boolean>;
   configFile?: string;
   presets?: string[];
   plugins?: (string | [string, any])[];

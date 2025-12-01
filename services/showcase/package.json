@@ -13,8 +13,8 @@
     "@granite-js/react-native": "workspace:*",
     "react": "18.2.0",
     "react-native": "0.72.6",
-    "valibot": "^1.1.0",
-    "zod": "^4.1.12"
+    "valibot": "^1.2.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@babel/core": "7.28.5",
