@@ -3,12 +3,11 @@ import { CodegenTypes } from 'react-native';
 
 interface GraniteBrownfieldModuleSpec extends BrickModuleSpec {
   readonly moduleName: 'GraniteBrownfieldModule';
+  readonly onVisibilityChanged: CodegenTypes.EventEmitter<boolean>;
 
   getConstants(): {
     schemeUri: string;
   };
-
-  onVisibilityChanged: CodegenTypes.EventEmitter<boolean>;
 
   closeView(): Promise<void>;
 }
