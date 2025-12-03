@@ -12263,9 +12263,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"brick-codegen@npm:0.2.1-next.1":
-  version: 0.2.1-next.1
-  resolution: "brick-codegen@npm:0.2.1-next.1"
+"brick-codegen@npm:0.3.1":
+  version: 0.3.1
+  resolution: "brick-codegen@npm:0.3.1"
   dependencies:
     "@babel/parser": "npm:^7.27.5"
     "@babel/types": "npm:^7.27.6"
@@ -12281,21 +12281,21 @@ __metadata:
     typescript: "npm:^5.9.2"
   bin:
     brick-codegen: dist/cli.js
-  checksum: 10c0/834e8ac0b00ddd76f1c5adc3031f3aed8725a11b582553e4db575f25adc59c9cbfa45941e30da331b5f10be5ee1a90dfa4f2609b84d06f31cdbdafb71cd32cd7
+  checksum: 10c0/c64da5e9b7663a5ab2f903ac74182dfe0f1942de1627f2c7b7658a532bdf7872f3638fbd4f350ea8b9d2fe87b364ac95404457578f13aba1e1d53b83586d1302
   languageName: node
   linkType: hard
 
-"brick-module@npm:0.2.1-next.1":
-  version: 0.2.1-next.1
-  resolution: "brick-module@npm:0.2.1-next.1"
+"brick-module@npm:0.3.1":
+  version: 0.3.1
+  resolution: "brick-module@npm:0.3.1"
   dependencies:
-    brick-codegen: "npm:0.2.1-next.1"
+    brick-codegen: "npm:0.3.1"
   peerDependencies:
     react: ">=18.2.0"
     react-native: ">=0.70.0"
   bin:
     brick-codegen: bin/brick-codegen.js
-  checksum: 10c0/58142931f1e17cab64ab60fa55906839c57e6ef6beb86c3ded7586e7346a13285c0c91b896f524358ffd40b51e3854d638f49c8113d1e0ab61b35aeef2165452
+  checksum: 10c0/8f8a051492b84840d449e320657deee4f300ccb74a0811d61da1b5aaec156666d4e64df1f615fa3aec46d4ad8d9dcc1d449ab1c342a148176b1ad2ec411758b1
   languageName: node
   linkType: hard
 
