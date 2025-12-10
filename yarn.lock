@@ -2998,7 +2998,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:7.28.4":
+"@babel/runtime@npm:7.28.4, @babel/runtime@npm:^7.28.4":
   version: 7.28.4
   resolution: "@babel/runtime@npm:7.28.4"
   checksum: 10c0/792ce7af9750fb9b93879cc9d1db175701c4689da890e6ced242ea0207c9da411ccf16dc04e689cc01158b28d7898c40d75598f4559109f761c12ce01e959bf7
@@ -5337,7 +5337,7 @@ __metadata:
   resolution: "@granite-app/showcase@workspace:services/showcase"
   dependencies:
     "@babel/core": "npm:7.28.5"
-    "@babel/runtime": "npm:7.18.9"
+    "@babel/runtime": "npm:^7.28.4"
     "@biomejs/biome": "npm:^1.9.4"
     "@granite-js/forge-cli": "workspace:*"
     "@granite-js/native": "workspace:*"
@@ -5541,11 +5541,13 @@ __metadata:
     "@babel/plugin-proposal-private-methods": "npm:7.18.6"
     "@babel/plugin-proposal-private-property-in-object": "npm:7.21.11"
     "@babel/plugin-syntax-typescript": "npm:^7.27.1"
+    "@babel/plugin-transform-export-namespace-from": "npm:^7.27.1"
     "@babel/plugin-transform-flow-strip-types": "catalog:react-native"
+    "@babel/plugin-transform-regenerator": "npm:^7.28.4"
     "@babel/preset-env": "npm:7.28.5"
     "@babel/preset-react": "npm:7.28.5"
     "@babel/preset-typescript": "npm:7.28.5"
-    "@babel/runtime": "npm:7.28.4"
+    "@babel/runtime": "npm:^7.28.4"
     "@babel/template": "npm:7.27.2"
     "@babel/traverse": "npm:7.28.5"
     "@babel/types": "npm:7.28.5"
