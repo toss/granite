@@ -244,6 +244,6 @@ export class DevServer {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
+   
   var remoteBundles: Record<'android' | 'ios', string> | null;
 }
