@@ -9,13 +9,13 @@ describe('getMatchingBabelOptions', () => {
   });
 
   it('returns empty arrays when babel config is undefined', () => {
-    const result = getMatchingBabelOptions(undefined, 'const x = 1;', '/path/to/file.ts');
+    const result = getMatchingBabelOptions(undefined, 'const x = 1;', '/path/to/file.ts', true);
     expect(result).toEqual({ plugins: [], presets: [] });
   });
 
   it('returns empty arrays when babel rules is empty', () => {
     const babel: BabelConfig = { rules: [] };
-    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/path/to/file.ts');
+    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/path/to/file.ts', true);
     expect(result).toEqual({ plugins: [], presets: [] });
   });
 
@@ -23,7 +23,7 @@ describe('getMatchingBabelOptions', () => {
     const babel: BabelConfig = {
       rules: [createRule('zod', { plugins: ['babel-plugin-hermes'] })],
     };
-    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/path/to/yup/file.ts');
+    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/path/to/yup/file.ts', true);
     expect(result).toEqual({ plugins: [], presets: [] });
   });
 
@@ -31,7 +31,7 @@ describe('getMatchingBabelOptions', () => {
     const babel: BabelConfig = {
       rules: [createRule('zod', { plugins: ['babel-plugin-hermes'] })],
     };
-    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/node_modules/zod/index.js');
+    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/node_modules/zod/index.js', true);
     expect(result).toEqual({ plugins: ['babel-plugin-hermes'], presets: [] });
   });
 
@@ -39,7 +39,7 @@ describe('getMatchingBabelOptions', () => {
     const babel: BabelConfig = {
       rules: [createRule('legacy', { presets: ['@babel/preset-env'] })],
     };
-    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/node_modules/legacy/index.js');
+    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/node_modules/legacy/index.js', true);
     expect(result).toEqual({ plugins: [], presets: ['@babel/preset-env'] });
   });
 
@@ -52,7 +52,7 @@ describe('getMatchingBabelOptions', () => {
         }),
       ],
     };
-    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/node_modules/legacy/index.js');
+    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/node_modules/legacy/index.js', true);
     expect(result).toEqual({
       plugins: ['babel-plugin-decorators'],
       presets: ['@babel/preset-env'],
@@ -66,7 +66,7 @@ describe('getMatchingBabelOptions', () => {
         createRule('node_modules', { plugins: ['common-plugin'], presets: ['common-preset'] }),
       ],
     };
-    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/node_modules/zod/index.js');
+    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/node_modules/zod/index.js', true);
     expect(result).toEqual({
       plugins: ['babel-plugin-hermes', 'common-plugin'],
       presets: ['common-preset'],
@@ -81,7 +81,7 @@ describe('getMatchingBabelOptions', () => {
         createRule('/', { plugins: ['third-plugin'], presets: ['third-preset'] }),
       ],
     };
-    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/node_modules/zod/index.js');
+    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/node_modules/zod/index.js', true);
     expect(result).toEqual({
       plugins: ['first-plugin', 'second-plugin', 'third-plugin'],
       presets: ['first-preset', 'second-preset', 'third-preset'],
@@ -98,7 +98,7 @@ describe('getMatchingBabelOptions', () => {
         },
       ],
     };
-    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/node_modules/zod/index.js');
+    const result = getMatchingBabelOptions(babel, 'const x = 1;', '/node_modules/zod/index.js', true);
     expect(result).toEqual({
       plugins: ['simple-plugin', ['plugin-with-options', { option1: true }]],
       presets: ['simple-preset', ['preset-with-options', { loose: true }]],
@@ -118,11 +118,11 @@ describe('getMatchingBabelOptions', () => {
     const flowCode = '// @flow\nconst x = 1;';
     const tsCode = 'const x: number = 1;';
 
-    expect(getMatchingBabelOptions(babel, flowCode, '/file.js')).toEqual({
+    expect(getMatchingBabelOptions(babel, flowCode, '/file.js', true)).toEqual({
       plugins: ['flow-plugin'],
       presets: [],
     });
-    expect(getMatchingBabelOptions(babel, tsCode, '/file.ts')).toEqual({
+    expect(getMatchingBabelOptions(babel, tsCode, '/file.ts', true)).toEqual({
       plugins: [],
       presets: [],
     });
@@ -142,31 +142,31 @@ describe('getMatchingBabelOptions', () => {
     };
 
     // File in zod - only zod-plugin
-    expect(getMatchingBabelOptions(babel, '', '/node_modules/zod/lib/index.js')).toEqual({
+    expect(getMatchingBabelOptions(babel, '', '/node_modules/zod/lib/index.js', true)).toEqual({
       plugins: ['zod-plugin'],
       presets: [],
     });
 
     // File in react-native - only rn-plugin
-    expect(getMatchingBabelOptions(babel, '', '/node_modules/react-native/index.js')).toEqual({
+    expect(getMatchingBabelOptions(babel, '', '/node_modules/react-native/index.js', true)).toEqual({
       plugins: ['rn-plugin'],
       presets: [],
     });
 
     // File in legacy-lib - both preset and plugin
-    expect(getMatchingBabelOptions(babel, '', '/node_modules/legacy-lib/index.js')).toEqual({
+    expect(getMatchingBabelOptions(babel, '', '/node_modules/legacy-lib/index.js', true)).toEqual({
       plugins: ['decorators-plugin'],
       presets: ['@babel/preset-env'],
     });
 
     // Flow file in react-native - both rn-plugin and flow-plugin
-    expect(getMatchingBabelOptions(babel, '', '/node_modules/react-native/lib/file.flow.js')).toEqual({
+    expect(getMatchingBabelOptions(babel, '', '/node_modules/react-native/lib/file.flow.js', true)).toEqual({
       plugins: ['rn-plugin', 'flow-plugin'],
       presets: [],
     });
 
     // Regular src file - no plugins or presets
-    expect(getMatchingBabelOptions(babel, '', '/src/App.tsx')).toEqual({
+    expect(getMatchingBabelOptions(babel, '', '/src/App.tsx', true)).toEqual({
       plugins: [],
       presets: [],
     });
@@ -180,14 +180,122 @@ describe('getMatchingBabelOptions', () => {
       ],
     };
 
-    expect(getMatchingBabelOptions(babel, '', '/only-plugins/file.js')).toEqual({
+    expect(getMatchingBabelOptions(babel, '', '/only-plugins/file.js', true)).toEqual({
       plugins: ['some-plugin'],
       presets: [],
     });
 
-    expect(getMatchingBabelOptions(babel, '', '/only-presets/file.js')).toEqual({
+    expect(getMatchingBabelOptions(babel, '', '/only-presets/file.js', true)).toEqual({
       plugins: [],
       presets: ['some-preset'],
+    });
+  });
+
+  describe('dev mode condition', () => {
+    it('applies rule only in dev mode when condition checks dev: true', () => {
+      const babel: BabelConfig = {
+        rules: [
+          {
+            if: ({ dev }) => dev,
+            plugins: ['dev-only-plugin'],
+          },
+        ],
+      };
+
+      // dev: true - should match
+      expect(getMatchingBabelOptions(babel, '', '/src/file.js', true)).toEqual({
+        plugins: ['dev-only-plugin'],
+        presets: [],
+      });
+
+      // dev: false - should not match
+      expect(getMatchingBabelOptions(babel, '', '/src/file.js', false)).toEqual({
+        plugins: [],
+        presets: [],
+      });
+    });
+
+    it('applies rule only in production mode when condition checks dev: false', () => {
+      const babel: BabelConfig = {
+        rules: [
+          {
+            if: ({ dev }) => !dev,
+            plugins: ['prod-only-plugin'],
+          },
+        ],
+      };
+
+      // dev: true - should not match
+      expect(getMatchingBabelOptions(babel, '', '/src/file.js', true)).toEqual({
+        plugins: [],
+        presets: [],
+      });
+
+      // dev: false - should match
+      expect(getMatchingBabelOptions(babel, '', '/src/file.js', false)).toEqual({
+        plugins: ['prod-only-plugin'],
+        presets: [],
+      });
+    });
+
+    it('combines dev condition with path condition', () => {
+      const babel: BabelConfig = {
+        rules: [
+          {
+            if: ({ dev, path }) => dev && path.includes('node_modules'),
+            plugins: ['dev-node-modules-plugin'],
+          },
+        ],
+      };
+
+      // dev: true + node_modules - should match
+      expect(getMatchingBabelOptions(babel, '', '/node_modules/lib/index.js', true)).toEqual({
+        plugins: ['dev-node-modules-plugin'],
+        presets: [],
+      });
+
+      // dev: false + node_modules - should not match
+      expect(getMatchingBabelOptions(babel, '', '/node_modules/lib/index.js', false)).toEqual({
+        plugins: [],
+        presets: [],
+      });
+
+      // dev: true + src - should not match
+      expect(getMatchingBabelOptions(babel, '', '/src/App.tsx', true)).toEqual({
+        plugins: [],
+        presets: [],
+      });
+    });
+
+    it('handles multiple rules with different dev conditions', () => {
+      const babel: BabelConfig = {
+        rules: [
+          {
+            if: ({ dev }) => dev,
+            plugins: ['dev-plugin'],
+          },
+          {
+            if: ({ dev }) => !dev,
+            plugins: ['prod-plugin'],
+          },
+          {
+            if: () => true,
+            plugins: ['always-plugin'],
+          },
+        ],
+      };
+
+      // dev: true - dev-plugin and always-plugin
+      expect(getMatchingBabelOptions(babel, '', '/src/file.js', true)).toEqual({
+        plugins: ['dev-plugin', 'always-plugin'],
+        presets: [],
+      });
+
+      // dev: false - prod-plugin and always-plugin
+      expect(getMatchingBabelOptions(babel, '', '/src/file.js', false)).toEqual({
+        plugins: ['prod-plugin', 'always-plugin'],
+        presets: [],
+      });
     });
   });
 });

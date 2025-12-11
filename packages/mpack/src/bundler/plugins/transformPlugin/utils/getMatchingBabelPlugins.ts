@@ -11,7 +11,8 @@ export interface MatchedBabelOptions {
 export function getMatchingBabelOptions(
   babel: BabelConfig | undefined,
   code: string,
-  path: string
+  path: string,
+  dev: boolean
 ): MatchedBabelOptions {
   if (!babel?.rules?.length) {
     return { plugins: [], presets: [] };
@@ -21,7 +22,7 @@ export function getMatchingBabelOptions(
   const matchedPresets: (string | [string, any])[] = [];
 
   for (const rule of babel.rules) {
-    if (rule.if({ code, path })) {
+    if (rule.if({ code, path, dev })) {
       if (rule.plugins) {
         matchedPlugins.push(...rule.plugins);
       }

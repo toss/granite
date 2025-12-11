@@ -25,7 +25,7 @@ function resolveMetroConfig(pluginConfig: StaticPluginConfig): ResolvedMetroConf
 
   return {
     ...metroConfig,
-    babelConfig: pluginConfig.babel,
+    babel: pluginConfig.babel,
     transformSync: pluginConfig?.transformer?.transformSync,
   };
 }

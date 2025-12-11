@@ -229,8 +229,11 @@ export interface SwcConfig {
 export interface BabelRule {
   /**
    * Condition to match files for this rule
+   * @param args.code - The source code of the file
+   * @param args.path - The file path
+   * @param args.dev - Whether the build is in development mode
    */
-  if: (args: { code: string; path: string }) => boolean;
+  if: (args: { code: string; path: string; dev: boolean }) => boolean;
   /**
    * Babel plugins to apply when condition matches
    */

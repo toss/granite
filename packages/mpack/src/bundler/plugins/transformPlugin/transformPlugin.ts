@@ -75,11 +75,11 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
         // Step 1: Full Babel transform for files matching babel rules (stopAfter: skip remaining steps)
         .addStep({
           if: ({ path, code }) => {
-            const { plugins, presets } = getMatchingBabelOptions(babel, code, path);
+            const { plugins, presets } = getMatchingBabelOptions(babel, code, path, dev);
             return plugins.length > 0 || presets.length > 0;
           },
           then: async (code, args, context) => {
-            const { plugins, presets } = getMatchingBabelOptions(babel, code, args.path);
+            const { plugins, presets } = getMatchingBabelOptions(babel, code, args.path, dev);
             const step = createFullyBabelTransformStep({ dev, plugins, presets });
             return step(code, args, context);
           },

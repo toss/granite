@@ -1,4 +1,5 @@
 import * as babel from '@babel/core';
+import type { BabelConfig } from './BuildConfig';
 import type { MetroConfig } from './vendors/metro';
 
 export interface AdditionalMetroConfig extends MetroConfig {
@@ -23,7 +24,15 @@ export interface AdditionalMetroConfig extends MetroConfig {
     conditionNames?: string[];
   };
   reporter?: MetroConfig['reporter'];
+  /**
+   * @deprecated Use `babel` instead. This field is kept for backward compatibility.
+   */
   babelConfig?: babel.TransformOptions;
+  /**
+   * Rules-based Babel configuration for Metro bundler.
+   * Each rule applies its plugins/presets only to files matching its condition.
+   */
+  babel?: BabelConfig;
   transformSync?: (id: string, code: string) => string;
   projectRoot?: MetroConfig['projectRoot'];
 }

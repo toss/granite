@@ -58,14 +58,18 @@ export const envPlugin = (environments: SerializableObject, options?: EnvPluginO
         },
       },
       babel: {
-        plugins: [
-          /**
-           * This babel plugin is only using in Metro environment (CommonJS).
-           * Resolve `.cjs` file to avoid the error below.
-           *
-           * - `[BABEL]: You appear to be using a native ECMAScript module plugin, which is only supported when running Babel asynchronously.
-           */
-          require.resolve('./plugins/babel.cjs'),
+        rules: [
+          {
+            /**
+             * Apply env babel plugin to all files in dev mode.
+             * This babel plugin is only using in Metro environment (CommonJS).
+             * Resolve `.cjs` file to avoid the error below.
+             *
+             * - `[BABEL]: You appear to be using a native ECMAScript module plugin, which is only supported when running Babel asynchronously.
+             */
+            if: ({ dev }) => dev,
+            plugins: [require.resolve('./plugins/babel.cjs')],
+          },
         ],
       },
     },
