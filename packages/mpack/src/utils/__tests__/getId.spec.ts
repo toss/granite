@@ -13,7 +13,7 @@ describe('getId', () => {
       outfile: './dist/index.js',
       platform: 'android',
       babel: {
-        plugins: ['plugin-b'],
+        rules: [{ if: ({ path }) => path.includes('test'), plugins: ['plugin-b'] }],
       },
     },
   };

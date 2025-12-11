@@ -1,21 +1,25 @@
 import { vitest, describe, expect, it } from 'vitest';
 import { mergeConfig } from './mergeConfig';
-import { GranitePluginCore } from '../types';
+import { GranitePluginCore, BabelRule } from '../types';
 
 describe('mergeConfig', () => {
+  const createBabelRule = (name: string): BabelRule => ({
+    if: ({ path }) => path.includes(name),
+    plugins: [`${name}-plugin`],
+  });
+
   it('merges all configuration sections', async () => {
     const mockLoad1 = vitest.fn();
     const mockLoad2 = vitest.fn();
-
-    const mockPluginOption = {};
-    const mockCondition1 = vitest.fn();
-    const mockCondition2 = vitest.fn();
 
     const mockMiddleware1 = vitest.fn();
     const mockMiddleware2 = vitest.fn();
     const mockMiddleware3 = vitest.fn();
     const mockMiddleware4 = vitest.fn();
     const mockUpdate = vitest.fn();
+
+    const rule1 = createBabelRule('foo');
+    const rule2 = createBabelRule('bar');
 
     const source: GranitePluginCore['config'] = {
       resolver: {
@@ -30,9 +34,7 @@ describe('mergeConfig', () => {
         transformSync: vitest.fn(),
       },
       babel: {
-        presets: ['preset1'],
-        plugins: [['plugin1', mockPluginOption], 'plugin2'],
-        conditions: [mockCondition1],
+        rules: [rule1],
       },
       esbuild: {
         minify: true,
@@ -68,9 +70,7 @@ describe('mergeConfig', () => {
         transformAsync: vitest.fn(),
       },
       babel: {
-        presets: ['preset2'],
-        plugins: ['plugin3'],
-        conditions: [mockCondition2],
+        rules: [rule2],
       },
       esbuild: {
         sourcemap: true,
@@ -121,9 +121,7 @@ describe('mergeConfig', () => {
         transformAsync: expect.any(Function),
       },
       babel: {
-        presets: ['preset1', 'preset2'],
-        conditions: [mockCondition1, mockCondition2],
-        plugins: [['plugin1', mockPluginOption], 'plugin2', 'plugin3'],
+        rules: [rule1, rule2],
       },
       esbuild: {
         minify: true,
@@ -154,14 +152,16 @@ describe('mergeConfig', () => {
         },
       },
       extra: undefined,
+      reactNativePath: undefined,
     });
 
     expect(result?.metro?.serializer?.getPolyfills?.()).toEqual(['metro-prelude-1.js', 'metro-prelude-2.js']);
   });
 
   it('handles partial configurations', async () => {
+    const rule = createBabelRule('foo');
     const source: GranitePluginCore['config'] = {
-      babel: { presets: ['preset1'] },
+      babel: { rules: [rule] },
     };
 
     const target: GranitePluginCore['config'] = {
@@ -171,7 +171,7 @@ describe('mergeConfig', () => {
     const result = await mergeConfig(source, target);
 
     expect(result).toEqual({
-      babel: { presets: ['preset1'] },
+      babel: { rules: [rule] },
       esbuild: { minify: true },
       resolver: undefined,
       transformer: undefined,
@@ -179,6 +179,7 @@ describe('mergeConfig', () => {
       devServer: undefined,
       metro: undefined,
       extra: undefined,
+      reactNativePath: undefined,
     });
   });
 
@@ -206,6 +207,9 @@ describe('mergeConfig', () => {
     const mockMiddleware1 = vitest.fn();
     const mockMiddleware2 = vitest.fn();
 
+    const rule1 = createBabelRule('react');
+    const rule2 = createBabelRule('utils');
+
     const source: GranitePluginCore['config'] = {
       resolver: {
         alias: [{ from: '@components', to: './src/components' }],
@@ -217,8 +221,7 @@ describe('mergeConfig', () => {
         transformSync: mockTransform,
       },
       babel: {
-        presets: ['@babel/preset-react'],
-        plugins: ['babel-plugin-transform-imports'],
+        rules: [rule1],
       },
       esbuild: {
         target: 'es2020',
@@ -237,7 +240,7 @@ describe('mergeConfig', () => {
         alias: [{ from: '@utils', to: './src/utils' }],
       },
       babel: {
-        plugins: ['babel-plugin-module-resolver'],
+        rules: [rule2],
       },
       esbuild: {
         minify: true,
@@ -251,8 +254,9 @@ describe('mergeConfig', () => {
     const result = await mergeConfig(source, target);
 
     expect(result?.resolver?.alias).toHaveLength(2);
-    expect(result?.babel?.presets).toEqual(['@babel/preset-react']);
-    expect(result?.babel?.plugins).toEqual(['babel-plugin-transform-imports', 'babel-plugin-module-resolver']);
+    expect(result?.babel?.rules).toHaveLength(2);
+    expect(result?.babel?.rules).toContain(rule1);
+    expect(result?.babel?.rules).toContain(rule2);
     expect(result?.esbuild?.target).toBe('es2020');
     expect(result?.esbuild?.minify).toBe(true);
     expect(result?.esbuild?.prelude).toEqual(['react-polyfill.js', 'core-js-polyfill.js']);
@@ -262,10 +266,6 @@ describe('mergeConfig', () => {
   it('merges multiple configs', async () => {
     const mockLoad1 = vitest.fn();
     const mockLoad2 = vitest.fn();
-
-    const mockPluginOption = {};
-    const mockCondition1 = vitest.fn();
-    const mockCondition2 = vitest.fn();
 
     const mockMiddleware1 = vitest.fn();
     const mockMiddleware2 = vitest.fn();
@@ -281,6 +281,11 @@ describe('mergeConfig', () => {
       return '// from transform 2\n' + code;
     });
 
+    const rule1 = createBabelRule('foo');
+    const rule2 = createBabelRule('bar');
+    const rule3 = createBabelRule('baz');
+    const rule4 = createBabelRule('qux');
+
     const source: GranitePluginCore['config'] = {
       resolver: {
         alias: [{ from: 'src', to: './src' }],
@@ -294,7 +299,7 @@ describe('mergeConfig', () => {
         transformSync: mockTransform1,
       },
       babel: {
-        presets: ['preset1'],
+        rules: [rule1],
       },
       esbuild: {
         banner: {
@@ -320,8 +325,7 @@ describe('mergeConfig', () => {
         },
       },
       babel: {
-        presets: ['preset2'],
-        plugins: [['plugin1', mockPluginOption], 'plugin2'],
+        rules: [rule2],
       },
       metro: {
         middlewares: [mockMiddleware2],
@@ -336,8 +340,7 @@ describe('mergeConfig', () => {
 
     const target2: GranitePluginCore['config'] = {
       babel: {
-        plugins: ['plugin3'],
-        conditions: [mockCondition1],
+        rules: [rule3],
       },
       swc: {
         plugins: ['swc-plugin' as any],
@@ -355,8 +358,7 @@ describe('mergeConfig', () => {
         transformSync: mockTransform2,
       },
       babel: {
-        plugins: ['plugin4'],
-        conditions: [mockCondition2],
+        rules: [rule4],
       },
       esbuild: {
         prelude: ['source-2.js'],
@@ -407,9 +409,7 @@ describe('mergeConfig', () => {
         plugins: ['swc-plugin'],
       },
       babel: {
-        presets: ['preset1', 'preset2'],
-        plugins: [['plugin1', {}], 'plugin2', 'plugin3', 'plugin4'],
-        conditions: [mockCondition1, mockCondition2],
+        rules: [rule1, rule2, rule3, rule4],
       },
       metro: {
         middlewares: [mockMiddleware1, mockMiddleware2],
@@ -427,24 +427,32 @@ describe('mergeConfig', () => {
         middlewares: [mockMiddleware3, mockMiddleware4],
       },
       extra: { target2: '2', target3: '3' },
+      reactNativePath: undefined,
     });
   });
 
   it('merges dynamic configs', async () => {
+    const rule1 = createBabelRule('foo');
+    const rule2 = createBabelRule('bar');
+    const rule3 = createBabelRule('baz');
+
     const source: GranitePluginCore['config'] = () => ({
-      babel: { presets: ['preset1'] },
+      babel: { rules: [rule1] },
     });
 
     const target1: GranitePluginCore['config'] = () => ({
-      babel: { presets: ['preset2'] },
+      babel: { rules: [rule2] },
     });
 
     const target2: GranitePluginCore['config'] = async () => ({
-      babel: { presets: ['preset3'] },
+      babel: { rules: [rule3] },
     });
 
     const result = await mergeConfig(source, target1, target2);
 
-    expect(result?.babel?.presets).toEqual(['preset1', 'preset2', 'preset3']);
+    expect(result?.babel?.rules).toHaveLength(3);
+    expect(result?.babel?.rules).toContain(rule1);
+    expect(result?.babel?.rules).toContain(rule2);
+    expect(result?.babel?.rules).toContain(rule3);
   });
 });

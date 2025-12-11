@@ -5,8 +5,10 @@ import { PluginOptions } from '../types';
 import * as preludeScript from './helpers/preludeScript';
 import { createCacheSteps } from './steps/createCacheSteps';
 import { createFlowStripStep } from './steps/createFlowStripStep';
+import { createFullyBabelTransformStep } from './steps/createFullyBabelTransformStep';
 import { createSwcOnlyStep } from './steps/createSwcOnlyStep';
 import { createTransformCodegenStep } from './steps/createTransformCodegenStep';
+import { getMatchingBabelOptions } from './utils/getMatchingBabelPlugins';
 import { Performance } from '../../../performance';
 import { AsyncTransformPipeline } from '../../../transformer';
 
@@ -38,7 +40,7 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
     setup(build) {
       const { id, config } = context;
       const { dev, cache, buildConfig } = config;
-      const { esbuild, swc, flow } = buildConfig;
+      const { esbuild, swc, flow, babel } = buildConfig;
 
       assert(id, 'id 값이 존재하지 않습니다');
       assert(typeof dev === 'boolean', 'dev 값이 존재하지 않습니다');
@@ -70,13 +72,26 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
           }
           return { code };
         })
-        // Step 1: Codegen for NativeComponents, otherwise flow strip (if enabled)
+        // Step 1: Full Babel transform for files matching babel rules (stopAfter: skip remaining steps)
+        .addStep({
+          if: ({ path, code }) => {
+            const { plugins, presets } = getMatchingBabelOptions(babel, code, path);
+            return plugins.length > 0 || presets.length > 0;
+          },
+          then: async (code, args, context) => {
+            const { plugins, presets } = getMatchingBabelOptions(babel, code, args.path);
+            const step = createFullyBabelTransformStep({ dev, plugins, presets });
+            return step(code, args, context);
+          },
+          stopAfter: true,
+        })
+        // Step 2: Codegen for NativeComponents, otherwise flow strip (if enabled)
         .addStep({
           if: ({ path }) => isNativeComponentPath(path),
           then: createTransformCodegenStep(),
           else: flowStripStep,
         })
-        // Step 2: SWC transform for all files
+        // Step 3: SWC transform for all files
         .addStep(createSwcOnlyStep({ dev, swc }))
         .afterStep(cacheSteps.afterTransform);
 

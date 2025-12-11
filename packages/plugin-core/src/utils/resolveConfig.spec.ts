@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { resolveConfig } from './resolveConfig';
-import { GranitePluginCore } from '../types';
+import type { GranitePluginCore, BabelRule } from '../types';
 import { resolvePlugins } from './resolvePlugins';
 
 describe('resolveConfig', () => {
@@ -21,8 +21,14 @@ describe('resolveConfig', () => {
     },
   };
 
+  const createBabelRule = (name: string): BabelRule => ({
+    if: ({ path }) => path.includes(name),
+    plugins: [`${name}-plugin`],
+  });
+
   function dummyPlugin(): GranitePluginCore {
     let count = 0;
+    const rule = createBabelRule('foo');
 
     return {
       name: 'dummy-plugin',
@@ -34,7 +40,7 @@ describe('resolveConfig', () => {
             },
           },
           babel: {
-            plugins: ['foo', 'bar', 'baz'],
+            rules: [rule],
           },
           transformer: {
             transformSync: (_id, code) => {
@@ -67,11 +73,10 @@ describe('resolveConfig', () => {
 
     // Granite config
     expect(result.transformer?.transformSync).toBeDefined();
-    expect(result.babel?.plugins).toEqual(['foo', 'bar', 'baz']);
+    expect(result.babel?.rules).toHaveLength(1);
 
     // Metro config (compatibilities)
     expect(result.metro?.transformSync).toBeDefined();
     expect(result.transformer?.transformSync?.('file.js', 'ident')).toEqual('ident// replaced code');
-    expect(result.metro?.babelConfig?.plugins).toEqual(['foo', 'bar', 'baz']);
   });
 });

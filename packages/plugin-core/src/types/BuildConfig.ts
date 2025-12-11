@@ -226,17 +226,28 @@ export interface SwcConfig {
   lazyImports?: boolean | string[];
 }
 
+export interface BabelRule {
+  /**
+   * Condition to match files for this rule
+   */
+  if: (args: { code: string; path: string }) => boolean;
+  /**
+   * Babel plugins to apply when condition matches
+   */
+  plugins?: (string | [string, any])[];
+  /**
+   * Babel presets to apply when condition matches
+   */
+  presets?: (string | [string, any])[];
+}
+
 export interface BabelConfig {
   /**
-   * List of rules for Babel transform processing
-   * (option to skip Babel transform only when certain conditions are met)
-   *
-   * If all rules return `false`, Babel transform is skipped
+   * List of isolated Babel transform rules
+   * Each rule applies its plugins/presets only to files matching its condition
+   * When multiple rules match, all their plugins and presets are merged and applied
    */
-  conditions?: Array<(code: string, path: string) => boolean>;
-  configFile?: string;
-  presets?: string[];
-  plugins?: (string | [string, any])[];
+  rules?: BabelRule[];
 }
 
 export interface FlowConfig {

@@ -10,8 +10,8 @@ export default async () => {
 
   await execa('pwd');
   await execa(toolsPath, ['linked-pack', TARGET_PACKAGE_NAME]);
-  await execa('git', ['reset', '--hard']);
-  await execa('git', ['clean', '-fd']);
+  // await execa('git', ['reset', '--hard']);
+  // await execa('git', ['clean', '-fd']);
 
   console.log('✅ Global setup completed successfully');
 };

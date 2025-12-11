@@ -48,10 +48,12 @@ export function createFlowStripStep(config: FlowStripStepConfig = {}): AsyncTran
       return { code };
     }
 
-    console.log("BB",args.path)
-
-    // Check if this file should be processed based on FLOW_TYPED_MODULES pattern
-    if (checkFlowTypedModules && !isFlowTypedModule(args.path, { include, exclude })) {
+    // Check if this file should be processed:
+    // 1. If checkFlowTypedModules is false, process all JS files
+    // 2. If file matches FLOW_TYPED_MODULES pattern, process it
+    // 3. If file has @flow pragma, process it (for user code with Flow types)
+    const hasFlowPragma = /^\s*\/[/*]\s*@flow/.test(code);
+    if (checkFlowTypedModules && !isFlowTypedModule(args.path, { include, exclude }) && !hasFlowPragma) {
       return { code };
     }
 

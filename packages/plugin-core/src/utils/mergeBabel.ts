@@ -14,10 +14,6 @@ export function mergeBabel(source: BuildConfig['babel'], target: BuildConfig['ba
   }
 
   return {
-    ...source,
-    ...target,
-    presets: [...(source.presets ?? []), ...(target.presets ?? [])],
-    plugins: [...(source.plugins ?? []), ...(target.plugins ?? [])],
-    conditions: [...(source.conditions ?? []), ...(target.conditions ?? [])],
+    rules: [...(source.rules ?? []), ...(target.rules ?? [])],
   };
 }
