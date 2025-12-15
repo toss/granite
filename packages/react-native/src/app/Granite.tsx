@@ -67,9 +67,9 @@ const createApp = () => {
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
       { appName, context, router, initialScheme, setIosSwipeGestureEnabled, getInitialUrl }: GraniteProps
     ): (initialProps: InitialProps) => JSX.Element {
-      // if (appName === ENTRY_BUNDLE_NAME) {
-      //   throw new Error(`Reserved app name 'shared' cannot be used`);
-      // }
+      if (appName === ENTRY_BUNDLE_NAME) {
+        throw new Error(`Reserved app name 'shared' cannot be used`);
+      }
 
       function Root(initialProps: InitialProps) {
         return (

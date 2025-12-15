@@ -44,10 +44,6 @@ export interface BuildConfig {
    */
   swc?: SwcConfig;
   /**
-   * Flow transform configuration
-   */
-  flow?: FlowConfig;
-  /**
    * Additional data
    *
    * Included in the build result data, used for post-processing based on specific values
@@ -204,26 +200,6 @@ export interface SwcConfig {
    * Plugin binary(wasm) path, plugin configuration
    */
   plugins?: NonNullable<swc.JscConfig['experimental']>['plugins'];
-  /**
-   * Whether to disable transformation of import/export statements
-   */
-  disableImportExportTransform?: boolean;
-  /**
-   * Whether to use external helpers for transformations (equivalent of `@babel/runtime`)
-   */
-  externalHelpers?: boolean;
-  /**
-   * The JSX runtime to use ('automatic' for React 17+ new JSX transform or 'classic' for traditional JSX transform)
-   */
-  jsxRuntime?: 'automatic' | 'classic';
-  /**
-   * The source module for JSX runtime imports (defaults to 'react')
-   */
-  importSource?: string;
-  /**
-   * Enable lazy loading for all imports or specific modules
-   */
-  lazyImports?: boolean | string[];
 }
 
 export interface BabelConfig {
@@ -237,31 +213,4 @@ export interface BabelConfig {
   configFile?: string;
   presets?: string[];
   plugins?: (string | [string, any])[];
-}
-
-export interface FlowConfig {
-  /**
-   * Whether to enable Flow transformations
-   * @default true
-   */
-  enabled?: boolean;
-  /**
-   * Array of module names to include for Flow transformation.
-   * Defaults to predefined FLOW_TYPED_MODULES list.
-   */
-  include?: string[];
-  /**
-   * Array of module names to exclude from Flow transformation.
-   */
-  exclude?: string[];
-  /**
-   * Whether to bypass looking for @flow pragma comment before parsing.
-   * @default true
-   */
-  all?: boolean;
-  /**
-   * Whether to remove empty import statements which were only used for importing Flow types.
-   * @default true
-   */
-  removeEmptyImports?: boolean;
 }

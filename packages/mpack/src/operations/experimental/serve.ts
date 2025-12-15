@@ -3,7 +3,6 @@ import { select } from '@inquirer/prompts';
 import * as ChromeLauncher from 'chrome-launcher';
 import Debug from 'debug';
 import { StartMenuHandler } from './StartMenuHandler';
-import { Cache } from '../../cache';
 import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../../constants';
 import { DevServer } from '../../server/DevServer';
 import { printLogo } from '../../utils/printLogo';
@@ -27,8 +26,6 @@ export async function EXPERIMENTAL__server({
   port = DEV_SERVER_DEFAULT_PORT,
   onServerReady,
 }: RunServerArgs) {
-  Cache.clearAll();
-
   const driver = createPluginHooksDriver(config);
   await driver.devServer.pre({ host, port });
 
