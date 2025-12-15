@@ -5337,7 +5337,7 @@ __metadata:
   resolution: "@granite-app/showcase@workspace:services/showcase"
   dependencies:
     "@babel/core": "npm:7.28.5"
-    "@babel/runtime": "npm:^7.28.4"
+    "@babel/runtime": "npm:7.18.9"
     "@biomejs/biome": "npm:^1.9.4"
     "@granite-js/forge-cli": "workspace:*"
     "@granite-js/native": "workspace:*"
