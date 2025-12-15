@@ -62,6 +62,18 @@ export function combineWithBaseBuildConfig(
           ].join('\n'),
         },
       },
+      babel: {
+        conditions: [
+          /**
+           * @TODO
+           * We're using a RegExp in Zod that's not supported by Hermes,
+           * so we're switching to Babel for transpilation since there's no compatible SWC config or plugin available.
+           *
+           * @see zod {@link https://github.com/colinhacks/zod/issues/2302}
+           */
+          (_code: string, path: string) => path.includes('node_modules/zod'),
+        ],
+      },
     },
     config.buildConfig
   );

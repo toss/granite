@@ -18,17 +18,6 @@ export class Cache<T> {
   private cache: Record<string, T> = {};
   private cachePath: string;
 
-  /**
-   * 전체 캐시 디렉토리를 삭제합니다.
-   */
-  static clearAll() {
-    try {
-      fs.rmSync(Cache.BASE_CACHE_DIR, { recursive: true, force: true });
-    } catch {
-      // 캐시 디렉토리가 없는 경우 무시
-    }
-  }
-
   constructor(
     cacheDirectoryName: string,
     private config: CacheConfig<T>
