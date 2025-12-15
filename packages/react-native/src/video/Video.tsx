@@ -1,10 +1,9 @@
-import type { default as VideoRef } from '@granite-js/native/react-native-video';
+import { Video as VideoBase, VideoRef } from '@granite-js/video';
 import { ComponentProps, forwardRef, useMemo, useState } from 'react';
 import { Animated, Platform } from 'react-native';
-import * as instance from './instance';
 import { useVisibility } from '../visibility';
 
-const AnimatedRNVideo = Animated.createAnimatedComponent(instance.Component);
+const AnimatedRNVideo = Animated.createAnimatedComponent(VideoBase);
 
 type VideoProps = ComponentProps<typeof AnimatedRNVideo>;
 
@@ -62,7 +61,7 @@ type VideoProps = ComponentProps<typeof AnimatedRNVideo>;
  * }
  * ```
  */
-const VideoImpl = forwardRef<typeof VideoRef, instance.VideoNativeProps>((props, ref) => {
+const VideoImpl = forwardRef<typeof VideoRef, VideoProps>((props, ref) => {
   const [isFocused, setIsFocused] = useState(props.muted || props.paused);
   const visible = useVisibility();
 
@@ -77,11 +76,11 @@ const VideoImpl = forwardRef<typeof VideoRef, instance.VideoNativeProps>((props,
 
   return (
     <AnimatedRNVideo
-      ref={ref as any}
+      ref={ref}
       progressUpdateInterval={16}
       disableFocus={Platform.OS === 'ios' ? false : disableFocus}
       playWhenInactive
-      onAudioFocusChanged={(event: any) => {
+      onAudioFocusChanged={(event: { hasAudioFocus: boolean }) => {
         setIsFocused(event.hasAudioFocus);
         props.onAudioFocusChanged?.(event);
       }}
@@ -94,7 +93,7 @@ const VideoImpl = forwardRef<typeof VideoRef, instance.VideoNativeProps>((props,
 });
 
 export const Video = Object.defineProperty(VideoImpl, 'isAvailable', {
-  get: () => instance.isAvailable,
+  get: () => VideoBase.isAvailable,
   configurable: false,
 }) as typeof VideoImpl & { isAvailable: boolean };
 

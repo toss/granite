@@ -18,7 +18,7 @@ export * from './router/hooks/useIsInitialScreen';
 export * from './event';
 export * from './video';
 export * from './status-bar';
-export * from './blur';
+export * from '@granite-js/blur-view';
 
 export { BackButton, useRouterBackHandler } from './router';
 
