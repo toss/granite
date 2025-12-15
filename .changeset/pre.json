@@ -24,7 +24,5 @@
     "@granite-js/style-utils": "0.1.33",
     "@granite-js/utils": "0.1.33"
   },
-  "changesets": [
-    "crisp-poets-hope"
-  ]
+  "changesets": ["crisp-poets-hope"]
 }
