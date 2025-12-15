@@ -2,7 +2,6 @@
 import type { RemoteConfig, SharedConfig } from '../types';
 
 declare global {
-   
   var __MICRO_FRONTEND__: RuntimeContext;
 }
 

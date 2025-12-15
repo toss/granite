@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
- 
+
 import type { ComponentType } from 'react';
 
 export interface GraniteGlobal {
