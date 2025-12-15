@@ -1,4 +1,4 @@
-import { NativeStackNavigationOptions } from '@granite-js/native/@react-navigation/native-stack';
+import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { Screen } from './Screen';
 
 /**

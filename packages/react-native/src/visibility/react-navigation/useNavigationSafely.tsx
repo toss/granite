@@ -1,8 +1,4 @@
-import {
-  NavigationContainerRefContext,
-  NavigationContext,
-  NavigationProp,
-} from '@granite-js/native/@react-navigation/native';
+import { NavigationContainerRefContext, NavigationContext, NavigationProp } from '@react-navigation/native';
 import { useContext } from 'react';
 
 /**

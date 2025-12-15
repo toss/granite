@@ -1,4 +1,4 @@
-import { NativeStackNavigationOptions } from '@granite-js/native/@react-navigation/native-stack';
+import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { Platform } from 'react-native';
 
 export const DEFAULT_BACKGROUND_COLOR = '#ffffff';

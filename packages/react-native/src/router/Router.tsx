@@ -1,12 +1,12 @@
-import { HeaderBackButtonProps } from '@granite-js/native/@react-navigation/elements';
+import { HeaderBackButtonProps } from '@react-navigation/elements';
 import {
   createNavigationContainerRef,
   NavigationContainer,
   NavigationContainerRefWithCurrent,
   ParamListBase,
   RouteProp,
-} from '@granite-js/native/@react-navigation/native';
-import { NativeStackNavigationOptions } from '@granite-js/native/@react-navigation/native-stack';
+} from '@react-navigation/native';
+import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import {
   ComponentProps,
   ComponentType,
@@ -191,9 +191,7 @@ export function Router({
         setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
       >
         <Container {...initialProps}>
-          <StackNavigator.Navigator screenOptions={screenOptions} >
-            {Screens}
-          </StackNavigator.Navigator>
+          <StackNavigator.Navigator screenOptions={screenOptions}>{Screens}</StackNavigator.Navigator>
         </Container>
       </CanGoBackGuard>
     </NavigationContainer>
