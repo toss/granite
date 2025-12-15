@@ -30,6 +30,5 @@ async function fetchBundle(remote: RemoteConfig, platform: 'android' | 'ios') {
 }
 
 declare global {
-   
   var remoteBundles: Record<'android' | 'ios', string> | null;
 }

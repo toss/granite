@@ -191,9 +191,7 @@ export function Router({
         setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
       >
         <Container {...initialProps}>
-          <StackNavigator.Navigator screenOptions={screenOptions} >
-            {Screens}
-          </StackNavigator.Navigator>
+          <StackNavigator.Navigator screenOptions={screenOptions}>{Screens}</StackNavigator.Navigator>
         </Container>
       </CanGoBackGuard>
     </NavigationContainer>
