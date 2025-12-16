@@ -71,20 +71,6 @@ export async function runServer({
 
   const resolvedConfig = await resolveConfig(config);
   const { middlewares = [], inspectorProxy, ...additionalMetroConfig } = resolvedConfig?.metro ?? {};
-
-  console.log('[Granite] additionalMetroConfig:', JSON.stringify({
-    serializer: additionalMetroConfig.serializer ? 'present' : 'missing',
-    watchFolders: additionalMetroConfig.watchFolders,
-    resolver: {
-      blockList: additionalMetroConfig.resolver?.blockList,
-      extraNodeModules: additionalMetroConfig.resolver?.extraNodeModules,
-      nodeModulesPaths: additionalMetroConfig.resolver?.nodeModulesPaths?.length,
-    },
-    transformer: {
-      babelTransformerPath: additionalMetroConfig.transformer?.babelTransformerPath,
-    },
-  }, null, 2));
-
   const baseConfig = await getMetroConfig({ rootPath: config.cwd }, additionalMetroConfig);
 
   console.log('[Granite] Final metroConfig paths:', {
