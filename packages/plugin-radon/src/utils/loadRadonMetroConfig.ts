@@ -1,8 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import type { AdditionalMetroConfig } from '@granite-js/plugin-core';
 
-export const loadRadonMetroConfig = (): any => {
+type MetroHelpers = {
+  adaptMetroConfig: (config: AdditionalMetroConfig) => AdditionalMetroConfig;
+}
+
+export const loadRadonMetroConfig = () => {
     const nodeRequire = require;
     const requireCache = nodeRequire.cache;
     const requireResolve = nodeRequire.resolve;
@@ -14,7 +19,7 @@ export const loadRadonMetroConfig = (): any => {
   
     const metroHelpersPath = path.join(radonIdeLibPath, 'metro_helpers.js');
   
-    const loadCjsFile = (filePath: string): any => {
+    const loadCjsFile = (filePath: string): MetroHelpers => {
       const resolvedFilePath = path.isAbsolute(filePath) ? filePath : path.resolve(filePath);
       const cached = requireCache[resolvedFilePath];
       if (cached) {
@@ -22,6 +27,7 @@ export const loadRadonMetroConfig = (): any => {
       }
   
       const code = fs.readFileSync(resolvedFilePath, 'utf8');
+      // biome-ignore lint/suspicious/noExplicitAny: NodeRequire module is deprecated
       const module: any = { exports: {}, filename: resolvedFilePath };
       requireCache[resolvedFilePath] = module;
   
