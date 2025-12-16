@@ -13,13 +13,10 @@ function detectRadonIdeExtensionPath(): string | undefined {
   // Check VSCode extensions
   const vscodeExtPath = path.join(homeDir, '.vscode', 'extensions');
   
-  // Check Cursor extensions (multiple possible locations)
-  const cursorExtPaths = [
-    path.join(homeDir, '.cursor', 'extensions'),
-    path.join(homeDir, 'Library', 'Application Support', 'Cursor', 'extensions'),
-  ];
+  // Check Cursor extensions
+  const cursorExtPaths = path.join(homeDir, '.cursor', 'extensions')
 
-  const searchPaths = [vscodeExtPath, ...cursorExtPaths];
+  const searchPaths = [vscodeExtPath, cursorExtPaths];
 
   for (const searchPath of searchPaths) {
     if (fs.existsSync(searchPath)) {
@@ -51,6 +48,7 @@ function ensureRadonIdeEnv() {
   const metroConfigPath = path.join(radonIdeLibPath, 'metro_config.js');
 
   process.env.RN_IDE_METRO_CONFIG_PATH = metroConfigPath;
+  //TODO: 어디서 쓰이는지 확인하기
   process.env.NODE_PATH = path.join(appRoot, 'node_modules');
   process.env.RCT_METRO_PORT = '8081';
   process.env.RADON_IDE_LIB_PATH = radonIdeLibPath;
@@ -58,7 +56,7 @@ function ensureRadonIdeEnv() {
   process.env.RADON_IDE_ORIG_BABEL_TRANSFORMER_PATH = require.resolve('metro-react-native-babel-transformer');
 }
 
-// Ensure RADON_IDE_LIB_PATH is set as early as possible
+// import와 동시에 넣어주기
 ensureRadonIdeEnv();
 
 export const radonCorePlugin = (): GranitePluginCore => {
