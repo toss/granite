@@ -1,12 +1,12 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const { getPackageRoot } = require('@granite-js/utils');
 const { createJSXSourceVisitor } = require('./jsx-source-visitor');
 const { injectGraniteGlobals } = require('./lib/granite_router/global_injector');
 const { processPageFile } = require('./lib/granite_router/navigation_injector');
 const { parseRouterGenFile } = require('./lib/granite_router/router_parser');
 
-module.exports = function (api, options = {}) {
+module.exports = (api, options = {}) => {
   api.assertVersion(7);
 
   const { parse, types: t } = api;
@@ -30,63 +30,6 @@ module.exports = function (api, options = {}) {
         },
       ];
     }
-  };
-
-  const requireFromAppDir = (module) => {
-    const resolvedPath = require.resolve(module, { paths: [appRoot] });
-    return require(resolvedPath);
-  };
-
-  // Function to generate paths for bundled renderer files
-  const createRendererPath = (rendererFileName, version) => {
-    try {
-      const pluginPackageJsonPath = require.resolve('@granite-js/plugin-radon/package.json', { paths: [appRoot] });
-      const pluginRoot = path.dirname(pluginPackageJsonPath);
-
-      let versionFolder;
-      if (version.startsWith('0.72')) {
-        versionFolder = 'react-native-72';
-      }
-
-      if (versionFolder) {
-        const rendererPath = path.join(
-          pluginRoot,
-          'dist',
-          'lib',
-          'rn-renderer',
-          rendererFileName.replace('.js', '.cjs')
-        );
-        return rendererPath;
-      }
-
-      return null;
-    } catch (e) {
-      console.error('🔥 RADON BABEL PLUGIN: Failed to resolve renderer path:', e);
-      return null;
-    }
-  };
-
-  const injectCode = (programPath, code, prepend = false) => {
-    const ast = parse(code, {
-      sourceType: 'module',
-      filename: 'radon.injection.js',
-      parserOpts: { allowReturnOutsideFunction: true },
-    });
-    if (prepend) {
-      programPath.unshiftContainer('body', ast.program.body);
-    } else {
-      programPath.pushContainer('body', ast.program.body);
-    }
-  };
-
-  const replaceModuleWith = (programPath, code) => {
-    const ast = parse(code, {
-      sourceType: 'module',
-      filename: 'radon.injection.js',
-      parserOpts: { allowReturnOutsideFunction: true },
-    });
-    programPath.get('body').forEach((p) => p.remove());
-    programPath.pushContainer('body', ast.program.body);
   };
 
   const jsxSourceVisitor = createJSXSourceVisitor(t);
@@ -113,36 +56,6 @@ module.exports = function (api, options = {}) {
           };
 
           let injected = false;
-
-          if (
-            isTransforming('react-native/Libraries/Renderer/implementations/ReactFabric-dev.js') ||
-            isTransforming('react-native/Libraries/Renderer/implementations/ReactNativeRenderer-dev.js')
-          ) {
-            const { version } = requireFromAppDir('react-native/package.json');
-            const rendererFileName = path.basename(filename);
-
-            const rendererPath = createRendererPath(rendererFileName, version);
-
-            if (rendererPath && fs.existsSync(rendererPath)) {
-              try {
-                const rendererCode = fs.readFileSync(rendererPath, 'utf8');
-                const fingerprint = `globalThis.__RADON_RENDERER_LOADED__ = '${path.basename(rendererPath)}';`;
-                const finalRendererCode = `${fingerprint}\n${rendererCode}`;
-
-                replaceModuleWith(programPath, finalRendererCode);
-                injected = true;
-              } catch (e) {
-                console.error('🔥 RADON BABEL PLUGIN: 🚨 Failed to read custom renderer:', e);
-              }
-            } else {
-              console.warn(`🔥 RADON BABEL PLUGIN: ⚠️ Custom renderer not found: ${rendererPath}`);
-              if (version.startsWith('0.72')) {
-                console.log(
-                  `🔥 RADON BABEL PLUGIN: ⚠️ 0.72 version detected but no custom renderer found. This might be the issue!`
-                );
-              }
-            }
-          }
 
           if (injected) {
             state.file.metadata.radonInjected = true;
