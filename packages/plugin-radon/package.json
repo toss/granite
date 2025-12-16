@@ -23,7 +23,8 @@
     "dist"
   ],
   "dependencies": {
-    "@granite-js/utils": "workspace:*"
+    "@granite-js/utils": "workspace:*",
+    "metro-react-native-babel-transformer": "0.76.8"
   },
   "peerDependencies": {
     "react": ">=16.8.0",

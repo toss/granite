@@ -31,13 +31,41 @@ module.exports = (api) => {
     }
   };
 
+  // Helper to check if we're transforming a file from a specific package
+  const isTransforming = (packageName, filename) => {
+    if (!filename) {
+      return false;
+    }
+    // Check if filename includes the package name (could be in node_modules or package path)
+    return filename.includes(packageName);
+  };
+
+  // Helper to inject code into the program
+  const injectCode = (programPath, codeString, _prepend = false) => {
+    try {
+      const ast = parse(codeString, {
+        sourceType: 'module',
+        filename: 'injected-code.js',
+      });
+      if (_prepend) {
+        programPath.unshiftContainer('body', ast.program.body);
+      } else {
+        programPath.pushContainer('body', ast.program.body);
+      }
+    } catch (error) {
+      console.error('🔥 RADON BABEL PLUGIN: Failed to parse injected code:', error);
+      throw error;
+    }
+  };
 
   return {
     name: 'radon-injector-plugin',
     visitor: {
       Program: {
         enter(programPath, state) {
-          if (isTransforming('@granite-js/react-native')) {
+          const filename = state.file.opts.filename || state.filename || '';
+
+          if (isTransforming('@granite-js/react-native', filename)) {
             try {
               const scannedRoutes = scanGraniteRoutes();
               const injected = injectGraniteGlobals(injectCode, programPath, scannedRoutes);
