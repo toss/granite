@@ -1,13 +1,15 @@
-import FastImage, { FastImageProps, Source as FastImageSource } from '@granite-js/native/react-native-fast-image';
 import { StyleSheet } from 'react-native';
 import { SvgImage } from './SvgImage';
+import { GraniteImage, type GraniteImageProps, type GraniteImageSource } from './GraniteImage';
 
 type Source = {
   uri?: string;
-  cache?: FastImageSource['cache'];
+  headers?: Record<string, string>;
+  priority?: 'low' | 'normal' | 'high';
+  cache?: 'immutable' | 'web' | 'cacheOnly';
 };
 
-export interface ImageProps extends Omit<FastImageProps, 'source'> {
+export interface ImageProps extends Omit<GraniteImageProps, 'source'> {
   source?: Source;
 }
 
@@ -16,7 +18,6 @@ export interface ImageProps extends Omit<FastImageProps, 'source'> {
  * @category UI
  * @name Image
  * @description You can use the `Image` component to load and render bitmap images (such as PNG, JPG) or vector images (SVG). It automatically renders with the appropriate method depending on the image format.
- * @link https://github.com/DylanVann/react-native-fast-image/tree/v8.6.3/README.md
  *
  * @param {object} [props] - The `props` object passed to the component.
  * @param {object} [props.style] - An object that defines the style for the image component. It can include layout-related properties like `width` and `height`.
@@ -87,7 +88,29 @@ function Image(props: ImageProps) {
     );
   }
 
-  return <FastImage {...props} />;
+  // Convert source to GraniteImageSource format
+  const graniteSource: GraniteImageSource | string | undefined = props.source
+    ? props.source.uri
+      ? {
+          uri: props.source.uri,
+          headers: props.source.headers,
+          priority: props.source.priority,
+          cache: props.source.cache,
+        }
+      : undefined
+    : undefined;
+
+  if (!graniteSource) {
+    return null;
+  }
+
+  return (
+    <GraniteImage
+      {...props}
+      source={graniteSource}
+      onError={props.onError ? (error) => props.onError?.() : undefined}
+    />
+  );
 }
 
 export { Image };
