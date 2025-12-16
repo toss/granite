@@ -1,27 +1,13 @@
 import type { GranitePlugin } from '@granite-js/plugin-core';
-import { radonCore, type RadonCorePluginOptions } from './radonCorePlugin.js';
-import { radonPolyfill, type RadonPolyfillPluginOptions } from './radonPolyfillPlugin.js';
+import { radonCore } from './radonCorePlugin.js';
+import { radonGraniteRouter } from './radonGraniteRouterPlugin.js';
 
-interface RadonPluginOptions {
-  core?: RadonCorePluginOptions;
-  polyfill?: RadonPolyfillPluginOptions;
-  enablePolyfill?: boolean;
-}
-
-const DEFAULT_OPTIONS: Required<Pick<RadonPluginOptions, 'enablePolyfill'>> = {
-  enablePolyfill: true,
-};
-
-export const radon = (options: RadonPluginOptions = {}): GranitePlugin[] => {
-  const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
+export const radon = (): GranitePlugin[] => {
 
   const plugins: GranitePlugin[] = [];
 
-  if (mergedOptions.enablePolyfill) {
-    plugins.push(radonPolyfill(mergedOptions.polyfill));
-  }
-
-  plugins.push(radonCore(mergedOptions.core));
+  plugins.push(radonCore());
+  plugins.push(radonGraniteRouter());
 
   return plugins;
 };

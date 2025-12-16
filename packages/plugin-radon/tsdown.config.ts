@@ -8,7 +8,7 @@ export default defineConfig([
     minify: true,
   },
   {
-    entry: 'src/babel.js',
+    entry: 'src/routerBabel.js',
     outDir: 'dist',
     format: ['cjs'],
     dts: false,
