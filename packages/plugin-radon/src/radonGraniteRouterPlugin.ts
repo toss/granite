@@ -23,7 +23,7 @@ export const radonGraniteRouter = (options: RadonGraniteRouterPluginOptions = DE
       babel: {
         plugins: [
           [
-            require.resolve('@granite-js/plugin-radon/dist/routerBable.cjs'),
+            require.resolve('@granite-js/plugin-radon/dist/routerBabel.js'),
             {
               ...mergedOptions,
             },

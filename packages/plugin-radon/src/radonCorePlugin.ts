@@ -1,8 +1,6 @@
 import type { GranitePluginCore } from '@granite-js/plugin-core';
 
 export const radonCore = (): GranitePluginCore => {
-
-
   return {
     name: 'radon-metro-reporter',
     config: {

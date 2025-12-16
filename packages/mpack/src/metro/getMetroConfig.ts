@@ -58,7 +58,9 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
           inlineRequires: false,
         },
       }),
-      babelTransformerPath: require.resolve('metro-react-native-babel-transformer'),
+      babelTransformerPath:
+        additionalConfig?.transformer?.babelTransformerPath ||
+        require.resolve('metro-react-native-babel-transformer'),
       asyncRequireModulePath: require.resolve('metro-runtime/src/modules/asyncRequire'),
       unstable_collectDependenciesPath: resolveVendors('metro/src/ModuleGraph/worker/collectDependencies'),
       unstable_allowRequireContext: true,
@@ -92,6 +94,7 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
         ...require(path.join(reactNativePath, 'rn-get-polyfills'))(),
         ...(additionalConfig?.serializer?.getPolyfills?.() ?? []),
       ],
+      processModuleFilter: additionalConfig?.serializer?.processModuleFilter,
     },
     symbolicator: {
       customizeFrame: (frame: { file: string }) => {
@@ -103,6 +106,7 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
       port: DEV_SERVER_DEFAULT_PORT,
     },
     reporter: additionalConfig?.reporter,
+    cacheVersion: additionalConfig?.cacheVersion,
     ...(process.env.METRO_RESET_CACHE !== 'false' ? { resetCache: true } : {}),
   });
 }
