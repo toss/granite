@@ -1,14 +1,9 @@
-import type {ViewProps, ColorValue} from 'react-native';
-import type {HostComponent} from 'react-native';
+import { type ViewProps, type ColorValue } from 'react-native';
+import type { WithDefault, Int32, DirectEventHandler } from 'react-native/Libraries/Types/CodegenTypes';
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
-import type {
-  WithDefault,
-  Int32,
-  DirectEventHandler,
-} from 'react-native/Libraries/Types/CodegenTypes';
 
 // Event payload types
-export type OnLoadStartEvent = Readonly<{}>;
+export type OnLoadStartEvent = Readonly<object>;
 
 export type OnProgressEvent = Readonly<{
   loaded: Int32;
@@ -24,7 +19,7 @@ export type OnErrorEvent = Readonly<{
   error: string;
 }>;
 
-export type OnLoadEndEvent = Readonly<{}>;
+export type OnLoadEndEvent = Readonly<object>;
 
 export interface GraniteImageProps extends ViewProps {
   // Source
@@ -51,6 +46,4 @@ export interface GraniteImageProps extends ViewProps {
   onGraniteLoadEnd?: DirectEventHandler<OnLoadEndEvent>;
 }
 
-export default codegenNativeComponent<GraniteImageProps>(
-  'GraniteImage',
-) as HostComponent<GraniteImageProps>;
+export default codegenNativeComponent<GraniteImageProps>('GraniteImage');

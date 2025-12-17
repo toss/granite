@@ -1,3 +1,7 @@
+import {GraniteImage,type 
+  OnLoadEventData,type 
+  OnProgressEventData,
+} from 'granite-image';
 import React, {useState, useCallback} from 'react';
 import {
   StyleSheet,
@@ -5,14 +9,8 @@ import {
   Text,
   View,
   Button,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
-import {GraniteImage} from 'granite-image';
-import type {
-  OnLoadEventData,
-  OnProgressEventData,
-} from 'granite-image';
 
 // Test image URLs
 const TEST_IMAGES = {

@@ -1,9 +1,8 @@
-import type {TurboModule} from 'react-native';
-import {TurboModuleRegistry} from 'react-native';
+import { type TurboModule, TurboModuleRegistry } from 'react-native';
 
 export interface ImageSource {
   uri: string;
-  headers?: {[key: string]: string};
+  headers?: { [key: string]: string };
   priority?: string;
   cache?: string;
 }

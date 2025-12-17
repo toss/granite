@@ -1,6 +1,5 @@
-import React, {useCallback} from 'react';
-import type {StyleProp, ViewStyle, ColorValue, ImageRequireSource} from 'react-native';
-import {NativeModules} from 'react-native';
+import React, { useCallback } from 'react';
+import { type StyleProp, type ViewStyle, type ColorValue, type ImageRequireSource, NativeModules } from 'react-native';
 import GraniteImageNativeComponent, {
   type OnLoadStartEvent,
   type OnProgressEvent,
@@ -9,7 +8,7 @@ import GraniteImageNativeComponent, {
   type OnLoadEndEvent,
 } from './GraniteImageNativeComponent';
 
-const {GraniteImageModule} = NativeModules;
+const { GraniteImageModule } = NativeModules;
 
 // Source types matching FastImage
 export interface GraniteImageSource {
@@ -53,27 +52,23 @@ export interface GraniteImageProps {
   cachePolicy?: CachePolicy;
 
   // Callbacks
-  onLoadStart?: () => void;
+  onLoadStart?: (event: OnLoadStartEvent) => void;
   onProgress?: (event: OnProgressEventData) => void;
   onLoad?: (event: OnLoadEventData) => void;
-  onError?: (error: {nativeEvent: {error: string}}) => void;
-  onLoadEnd?: () => void;
+  onError?: (error: { nativeEvent: { error: string } }) => void;
+  onLoadEnd?: (event: OnLoadEndEvent) => void;
 
   // Accessibility
   testID?: string;
 }
 
 // Map resizeMode to contentMode for native
-const resizeModeToContentMode = (
-  resizeMode?: ResizeMode,
-): 'cover' | 'contain' | 'stretch' | 'center' => {
+const resizeModeToContentMode = (resizeMode?: ResizeMode): 'cover' | 'contain' | 'stretch' | 'center' => {
   return resizeMode || 'cover';
 };
 
 // Map FastImage cache to native cachePolicy
-const mapCachePolicy = (
-  cache?: 'immutable' | 'web' | 'cacheOnly',
-): CachePolicy => {
+const mapCachePolicy = (cache?: 'immutable' | 'web' | 'cacheOnly'): CachePolicy => {
   switch (cache) {
     case 'cacheOnly':
       return 'disk';
@@ -139,12 +134,8 @@ const GraniteImageBase: React.FC<GraniteImageProps> = ({
 }) => {
   // Parse source
   const uri = typeof source === 'string' ? source : source.uri;
-  const headers =
-    typeof source === 'object' && source.headers
-      ? JSON.stringify(source.headers)
-      : undefined;
-  const sourcePriority =
-    typeof source === 'object' ? source.priority : undefined;
+  const headers = typeof source === 'object' && source.headers ? JSON.stringify(source.headers) : undefined;
+  const sourcePriority = typeof source === 'object' ? source.priority : undefined;
   const sourceCache = typeof source === 'object' ? source.cache : undefined;
 
   // Handle defaultSource
@@ -165,44 +156,44 @@ const GraniteImageBase: React.FC<GraniteImageProps> = ({
 
   // Event handlers
   const handleLoadStart = useCallback(
-    (_event: {nativeEvent: OnLoadStartEvent}) => {
-      onLoadStart?.();
+    (event: { nativeEvent: OnLoadStartEvent }) => {
+      onLoadStart?.(event);
     },
-    [onLoadStart],
+    [onLoadStart]
   );
 
   const handleProgress = useCallback(
-    (event: {nativeEvent: OnProgressEvent}) => {
+    (event: { nativeEvent: OnProgressEvent }) => {
       onProgress?.({
         loaded: event.nativeEvent.loaded,
         total: event.nativeEvent.total,
       });
     },
-    [onProgress],
+    [onProgress]
   );
 
   const handleLoad = useCallback(
-    (event: {nativeEvent: OnLoadEvent}) => {
+    (event: { nativeEvent: OnLoadEvent }) => {
       onLoad?.({
         width: event.nativeEvent.width,
         height: event.nativeEvent.height,
       });
     },
-    [onLoad],
+    [onLoad]
   );
 
   const handleError = useCallback(
-    (event: {nativeEvent: OnErrorEvent}) => {
-      onError?.({nativeEvent: {error: event.nativeEvent.error}});
+    (event: { nativeEvent: OnErrorEvent }) => {
+      onError?.({ nativeEvent: { error: event.nativeEvent.error } });
     },
-    [onError],
+    [onError]
   );
 
   const handleLoadEnd = useCallback(
-    (_event: {nativeEvent: OnLoadEndEvent}) => {
-      onLoadEnd?.();
+    (event: { nativeEvent: OnLoadEndEvent }) => {
+      onLoadEnd?.(event);
     },
-    [onLoadEnd],
+    [onLoadEnd]
   );
 
   return (
@@ -226,13 +217,10 @@ const GraniteImageBase: React.FC<GraniteImageProps> = ({
   );
 };
 
-export const GraniteImage: GraniteImageComponent = Object.assign(
-  GraniteImageBase,
-  {
-    clearMemoryCache,
-    clearDiskCache,
-    preload,
-  },
-);
+export const GraniteImage: GraniteImageComponent = Object.assign(GraniteImageBase, {
+  clearMemoryCache,
+  clearDiskCache,
+  preload,
+});
 
 export default GraniteImage;

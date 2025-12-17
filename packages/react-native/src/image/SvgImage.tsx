@@ -1,8 +1,8 @@
-import { SvgUri, SvgXml } from '@granite-js/native/react-native-svg';
 import { createElement, useEffect, useCallback, useState } from 'react';
 import { View, type ViewStyle, type StyleProp } from 'react-native';
-import { usePreservedCallback } from 'react-simplikit';
+import { SvgUri, SvgXml } from 'react-native-svg';
 import type { DimensionValue, NumberValue } from './types';
+import { usePreservedCallback } from '../utils/usePreservedCallback';
 
 export interface SvgImageProps {
   url: string;

@@ -2,7 +2,21 @@ import './types/global';
 
 export { Granite, useInitialSearchParams, useInitialProps } from './app';
 export * from '@granite-js/style-utils';
-export * from '@granite-js/image';
+export {
+  GraniteImage,
+  type GraniteImageProps,
+  type GraniteImageSource,
+  type GraniteImageStatic,
+  type ResizeMode,
+  type CachePolicy,
+  type Priority,
+  type OnLoadEventData,
+  type OnProgressEventData,
+} from '@granite-js/image';
+export { GraniteImageDefault } from '@granite-js/image';
+
+// Image with SVG support
+export * from './image';
 export * from '@granite-js/lottie';
 
 export * from './dev-entrypoint';
