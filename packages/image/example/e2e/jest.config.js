@@ -10,13 +10,16 @@ module.exports = {
   testEnvironment: 'detox/runners/jest/testEnvironment',
   verbose: true,
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      tsconfig: {
-        module: 'CommonJS',
-        moduleResolution: 'node',
-        esModuleInterop: true,
-        verbatimModuleSyntax: false,
+    '^.+\\.(ts|tsx)$': [
+      'ts-jest',
+      {
+        tsconfig: {
+          module: 'CommonJS',
+          moduleResolution: 'node',
+          esModuleInterop: true,
+          verbatimModuleSyntax: false,
+        },
       },
-    }],
+    ],
   },
 };

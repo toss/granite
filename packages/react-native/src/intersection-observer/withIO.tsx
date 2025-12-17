@@ -114,12 +114,16 @@ function withIO<
     }
 
     private toView(v: RefObject<View> | View | null | undefined): View | null {
-      if (!v) {return null;}
-      return this.isRefObject<View>(v) ? v.current ?? null : v;
+      if (!v) {
+        return null;
+      }
+      return this.isRefObject<View>(v) ? (v.current ?? null) : v;
     }
 
     private callIfFunction<T extends object, K extends string>(obj: T | null | undefined, key: K): unknown {
-      if (!obj) {return null;}
+      if (!obj) {
+        return null;
+      }
       const rec = obj as unknown as Record<string, unknown>;
       const fn = rec[String(key)];
       if (typeof fn === 'function') {
@@ -134,12 +138,16 @@ function withIO<
       // 1) Prefer native scroll ref (FlatList/VirtualizedList on Fabric)
       const viaNativeRef = this.callIfFunction(instance as object, 'getNativeScrollRef');
       const nativeFromNativeRef = this.toView(viaNativeRef as RefObject<View> | View | null | undefined);
-      if (nativeFromNativeRef) {return nativeFromNativeRef;}
+      if (nativeFromNativeRef) {
+        return nativeFromNativeRef;
+      }
 
       // 2) Fallback to getScrollRef
       const viaScrollRef = this.callIfFunction(instance as object, 'getScrollRef');
       const nativeFromScrollRef = this.toView(viaScrollRef as RefObject<View> | View | null | undefined);
-      if (nativeFromScrollRef) {return nativeFromScrollRef;}
+      if (nativeFromScrollRef) {
+        return nativeFromScrollRef;
+      }
 
       // 3) Fallback to getScrollableNode (exclude numeric handles)
       const scrollable = this.callIfFunction(instance as object, 'getScrollableNode');
@@ -150,7 +158,6 @@ function withIO<
       // 4) Lastly, treat the instance itself as a View or RefObject<View>
       return this.toView(instance as RefObject<View> | View | null | undefined);
     };
-
 
     protected handleContentSizeChange = (width: number, height: number) => {
       const { contentSize } = this.root.current;
@@ -190,7 +197,6 @@ function withIO<
         onScroll(event);
       }
     };
-
   };
 
   return IOScrollableComponent as typeof BaseComponent;

@@ -1,16 +1,6 @@
-import {GraniteImage,type 
-  OnLoadEventData,type 
-  OnProgressEventData,
-} from 'granite-image';
-import React, {useState, useCallback} from 'react';
-import {
-  StyleSheet,
-  ScrollView,
-  Text,
-  View,
-  Button,
-  TouchableOpacity,
-} from 'react-native';
+import { GraniteImage, type OnLoadEventData, type OnProgressEventData } from 'granite-image';
+import React, { useState, useCallback } from 'react';
+import { StyleSheet, ScrollView, Text, View, Button, TouchableOpacity } from 'react-native';
 
 // Test image URLs
 const TEST_IMAGES = {
@@ -27,8 +17,7 @@ type CachePolicy = 'memory' | 'disk' | 'none';
 
 export default function App() {
   const [logs, setLogs] = useState<string[]>([]);
-  const [selectedResizeMode, setSelectedResizeMode] =
-    useState<ResizeMode>('cover');
+  const [selectedResizeMode, setSelectedResizeMode] = useState<ResizeMode>('cover');
   const [selectedPriority, setSelectedPriority] = useState<Priority>('normal');
   const [selectedCache, setSelectedCache] = useState<CachePolicy>('disk');
   const [showTint, setShowTint] = useState(false);
@@ -36,7 +25,7 @@ export default function App() {
 
   const addLog = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString();
-    setLogs(prev => [`[${timestamp}] ${message}`, ...prev.slice(0, 19)]);
+    setLogs((prev) => [`[${timestamp}] ${message}`, ...prev.slice(0, 19)]);
   }, []);
 
   const handleLoadStart = useCallback(() => {
@@ -45,26 +34,24 @@ export default function App() {
 
   const handleProgress = useCallback(
     (event: OnProgressEventData) => {
-      const percent = event.total > 0
-        ? Math.round((event.loaded / event.total) * 100)
-        : 0;
+      const percent = event.total > 0 ? Math.round((event.loaded / event.total) * 100) : 0;
       addLog(`onProgress: ${event.loaded}/${event.total} (${percent}%)`);
     },
-    [addLog],
+    [addLog]
   );
 
   const handleLoad = useCallback(
     (event: OnLoadEventData) => {
       addLog(`onLoad: ${event.width}x${event.height}`);
     },
-    [addLog],
+    [addLog]
   );
 
   const handleError = useCallback(
-    (error: {nativeEvent: {error: string}}) => {
+    (error: { nativeEvent: { error: string } }) => {
       addLog(`onError: ${error.nativeEvent.error}`);
     },
-    [addLog],
+    [addLog]
   );
 
   const handleLoadEnd = useCallback(() => {
@@ -75,11 +62,11 @@ export default function App() {
     addLog('Preloading images...');
     try {
       await GraniteImage.preload([
-        {uri: 'https://picsum.photos/500/500'},
-        {uri: 'https://picsum.photos/600/400', priority: 'high'},
+        { uri: 'https://picsum.photos/500/500' },
+        { uri: 'https://picsum.photos/600/400', priority: 'high' },
         {
           uri: 'https://picsum.photos/700/700',
-          headers: {'X-Custom-Header': 'test'},
+          headers: { 'X-Custom-Header': 'test' },
         },
       ]);
       addLog('Preload completed!');
@@ -107,7 +94,7 @@ export default function App() {
   }, [addLog]);
 
   const reloadImages = useCallback(() => {
-    setImageKey(prev => prev + 1);
+    setImageKey((prev) => prev + 1);
     addLog('Reloading images...');
   }, [addLog]);
 
@@ -122,7 +109,7 @@ export default function App() {
         <Text style={styles.sectionTitle}>1. Basic Image Loading</Text>
         <GraniteImage
           key={`basic-${imageKey}`}
-          source={{uri: TEST_IMAGES.basic}}
+          source={{ uri: TEST_IMAGES.basic }}
           style={styles.image}
           resizeMode="cover"
           testID="basic-image"
@@ -137,28 +124,20 @@ export default function App() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>2. ResizeMode: {selectedResizeMode}</Text>
         <View style={styles.buttonRow}>
-          {(['cover', 'contain', 'stretch', 'center'] as ResizeMode[]).map(mode => (
+          {(['cover', 'contain', 'stretch', 'center'] as ResizeMode[]).map((mode) => (
             <TouchableOpacity
               key={mode}
-              style={[
-                styles.optionButton,
-                selectedResizeMode === mode && styles.optionButtonActive,
-              ]}
+              style={[styles.optionButton, selectedResizeMode === mode && styles.optionButtonActive]}
               onPress={() => setSelectedResizeMode(mode)}
-              testID={`resize-${mode}`}>
-              <Text
-                style={[
-                  styles.optionText,
-                  selectedResizeMode === mode && styles.optionTextActive,
-                ]}>
-                {mode}
-              </Text>
+              testID={`resize-${mode}`}
+            >
+              <Text style={[styles.optionText, selectedResizeMode === mode && styles.optionTextActive]}>{mode}</Text>
             </TouchableOpacity>
           ))}
         </View>
         <GraniteImage
           key={`resize-${selectedResizeMode}-${imageKey}`}
-          source={{uri: 'https://picsum.photos/600/300'}}
+          source={{ uri: 'https://picsum.photos/600/300' }}
           style={styles.wideImage}
           resizeMode={selectedResizeMode}
           testID="resize-image"
@@ -169,20 +148,14 @@ export default function App() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>3. Priority: {selectedPriority}</Text>
         <View style={styles.buttonRow}>
-          {(['low', 'normal', 'high'] as Priority[]).map(priority => (
+          {(['low', 'normal', 'high'] as Priority[]).map((priority) => (
             <TouchableOpacity
               key={priority}
-              style={[
-                styles.optionButton,
-                selectedPriority === priority && styles.optionButtonActive,
-              ]}
+              style={[styles.optionButton, selectedPriority === priority && styles.optionButtonActive]}
               onPress={() => setSelectedPriority(priority)}
-              testID={`priority-${priority}`}>
-              <Text
-                style={[
-                  styles.optionText,
-                  selectedPriority === priority && styles.optionTextActive,
-                ]}>
+              testID={`priority-${priority}`}
+            >
+              <Text style={[styles.optionText, selectedPriority === priority && styles.optionTextActive]}>
                 {priority}
               </Text>
             </TouchableOpacity>
@@ -190,7 +163,7 @@ export default function App() {
         </View>
         <GraniteImage
           key={`priority-${selectedPriority}-${imageKey}`}
-          source={{uri: 'https://picsum.photos/400/400', priority: selectedPriority}}
+          source={{ uri: 'https://picsum.photos/400/400', priority: selectedPriority }}
           style={styles.image}
           testID="priority-image"
         />
@@ -200,28 +173,20 @@ export default function App() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>4. Cache Policy: {selectedCache}</Text>
         <View style={styles.buttonRow}>
-          {(['memory', 'disk', 'none'] as CachePolicy[]).map(cache => (
+          {(['memory', 'disk', 'none'] as CachePolicy[]).map((cache) => (
             <TouchableOpacity
               key={cache}
-              style={[
-                styles.optionButton,
-                selectedCache === cache && styles.optionButtonActive,
-              ]}
+              style={[styles.optionButton, selectedCache === cache && styles.optionButtonActive]}
               onPress={() => setSelectedCache(cache)}
-              testID={`cache-${cache}`}>
-              <Text
-                style={[
-                  styles.optionText,
-                  selectedCache === cache && styles.optionTextActive,
-                ]}>
-                {cache}
-              </Text>
+              testID={`cache-${cache}`}
+            >
+              <Text style={[styles.optionText, selectedCache === cache && styles.optionTextActive]}>{cache}</Text>
             </TouchableOpacity>
           ))}
         </View>
         <GraniteImage
           key={`cache-${selectedCache}-${imageKey}`}
-          source={{uri: 'https://picsum.photos/450/300'}}
+          source={{ uri: 'https://picsum.photos/450/300' }}
           style={styles.image}
           cachePolicy={selectedCache}
           testID="cache-image"
@@ -234,14 +199,15 @@ export default function App() {
         <TouchableOpacity
           style={[styles.optionButton, showTint && styles.optionButtonActive]}
           onPress={() => setShowTint(!showTint)}
-          testID="tint-toggle">
+          testID="tint-toggle"
+        >
           <Text style={[styles.optionText, showTint && styles.optionTextActive]}>
             {showTint ? 'Tint ON (Blue)' : 'Tint OFF'}
           </Text>
         </TouchableOpacity>
         <GraniteImage
           key={`tint-${showTint}-${imageKey}`}
-          source={{uri: 'https://picsum.photos/400/250'}}
+          source={{ uri: 'https://picsum.photos/400/250' }}
           style={styles.image}
           tintColor={showTint ? '#0066CC' : undefined}
           testID="tint-image"
@@ -257,7 +223,7 @@ export default function App() {
             uri: TEST_IMAGES.withHeaders,
             headers: {
               'X-Custom-Header': 'GraniteImage-Test',
-              'Accept': 'image/*',
+              Accept: 'image/*',
             },
           }}
           style={styles.image}
@@ -273,7 +239,7 @@ export default function App() {
         <Text style={styles.hint}>Shows placeholder while loading large image</Text>
         <GraniteImage
           key={`default-source-${imageKey}`}
-          source={{uri: 'https://picsum.photos/1200/800'}}
+          source={{ uri: 'https://picsum.photos/1200/800' }}
           defaultSource="placeholder"
           style={styles.image}
           testID="default-source-image"
@@ -286,7 +252,7 @@ export default function App() {
           testID="reload-placeholder-button"
           onPress={() => {
             addLog('Reloading defaultSource image...');
-            setImageKey(prev => prev + 1);
+            setImageKey((prev) => prev + 1);
           }}
         />
       </View>
@@ -296,7 +262,7 @@ export default function App() {
         <Text style={styles.sectionTitle}>8. Error Handling with Fallback</Text>
         <GraniteImage
           key={`error-${imageKey}`}
-          source={{uri: TEST_IMAGES.error}}
+          source={{ uri: TEST_IMAGES.error }}
           fallbackSource="https://picsum.photos/400/200"
           style={styles.image}
           testID="error-image"
@@ -311,7 +277,7 @@ export default function App() {
         <Text style={styles.sectionTitle}>9. GIF Support</Text>
         <GraniteImage
           key={`gif-${imageKey}`}
-          source={{uri: TEST_IMAGES.gif}}
+          source={{ uri: TEST_IMAGES.gif }}
           style={styles.image}
           testID="gif-image"
           onLoad={handleLoad}
@@ -322,31 +288,23 @@ export default function App() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>10. Static Methods</Text>
         <View style={styles.buttonColumn}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={handlePreload}
-            testID="preload-button">
+          <TouchableOpacity style={styles.actionButton} onPress={handlePreload} testID="preload-button">
             <Text style={styles.actionButtonText}>Preload Images</Text>
           </TouchableOpacity>
           <View style={styles.buttonSpacer} />
           <TouchableOpacity
             style={styles.actionButton}
             onPress={handleClearMemoryCache}
-            testID="clear-memory-cache-button">
+            testID="clear-memory-cache-button"
+          >
             <Text style={styles.actionButtonText}>Clear Memory Cache</Text>
           </TouchableOpacity>
           <View style={styles.buttonSpacer} />
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={handleClearDiskCache}
-            testID="clear-disk-cache-button">
+          <TouchableOpacity style={styles.actionButton} onPress={handleClearDiskCache} testID="clear-disk-cache-button">
             <Text style={styles.actionButtonText}>Clear Disk Cache</Text>
           </TouchableOpacity>
           <View style={styles.buttonSpacer} />
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={reloadImages}
-            testID="reload-all-button">
+          <TouchableOpacity style={styles.actionButton} onPress={reloadImages} testID="reload-all-button">
             <Text style={styles.actionButtonText}>Reload All Images</Text>
           </TouchableOpacity>
         </View>
@@ -357,7 +315,7 @@ export default function App() {
         <Text style={styles.sectionTitle}>11. All Callbacks Test</Text>
         <GraniteImage
           key={`callbacks-${imageKey}`}
-          source={{uri: `https://picsum.photos/400/300?random=${imageKey}`}}
+          source={{ uri: `https://picsum.photos/400/300?random=${imageKey}` }}
           style={styles.image}
           testID="callbacks-image"
           onLoadStart={handleLoadStart}
@@ -366,11 +324,7 @@ export default function App() {
           onError={handleError}
           onLoadEnd={handleLoadEnd}
         />
-        <Button
-          title="Load New Image"
-          testID="load-new-image-button"
-          onPress={() => setImageKey(prev => prev + 1)}
-        />
+        <Button title="Load New Image" testID="load-new-image-button" onPress={() => setImageKey((prev) => prev + 1)} />
       </View>
 
       {/* Logs Section */}
@@ -415,7 +369,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,

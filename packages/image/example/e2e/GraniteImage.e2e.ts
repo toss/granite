@@ -1,4 +1,4 @@
-import {by, device, element, expect, waitFor} from 'detox';
+import { by, device, element, expect, waitFor } from 'detox';
 
 describe('GraniteImage E2E Tests', () => {
   beforeAll(async () => {
@@ -250,7 +250,7 @@ describe('GraniteImage E2E Tests', () => {
       await element(by.id('load-new-image-button')).tap();
 
       // Wait for log to appear
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Scroll to log container and check
       await scrollToElement('log-container');
@@ -263,7 +263,7 @@ describe('GraniteImage E2E Tests', () => {
       await element(by.id('load-new-image-button')).tap();
 
       // Wait for image to load
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       await scrollToElement('log-container');
       // Verify log entries exist (onLoad logs dimensions like "onLoad: 400x300")
@@ -276,7 +276,7 @@ describe('GraniteImage E2E Tests', () => {
       await element(by.id('load-new-image-button')).tap();
 
       // Wait for image to load completely
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       await scrollToElement('log-container');
       await expect(element(by.id('log-container'))).toBeVisible();
@@ -287,7 +287,7 @@ describe('GraniteImage E2E Tests', () => {
       await scrollToElement('error-image');
 
       // Wait for error to be logged
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       await scrollToElement('log-container');
       await expect(element(by.id('log-container'))).toBeVisible();
@@ -307,7 +307,7 @@ describe('GraniteImage E2E Tests', () => {
         await element(by.id('preload-button')).tap();
 
         // Wait a moment for log to appear
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         await scrollToElement('log-container');
         await expect(element(by.id('log-container'))).toBeVisible();
@@ -318,7 +318,7 @@ describe('GraniteImage E2E Tests', () => {
         await element(by.id('preload-button')).tap();
 
         // Wait for preload to complete
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
 
         await scrollToElement('log-container');
         await expect(element(by.id('log-container'))).toBeVisible();
@@ -336,7 +336,7 @@ describe('GraniteImage E2E Tests', () => {
         await element(by.id('clear-memory-cache-button')).tap();
 
         // Wait for action to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         await scrollToElement('log-container');
         await expect(element(by.id('log-container'))).toBeVisible();
@@ -354,7 +354,7 @@ describe('GraniteImage E2E Tests', () => {
         await element(by.id('clear-disk-cache-button')).tap();
 
         // Wait for action to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         await scrollToElement('log-container');
         await expect(element(by.id('log-container'))).toBeVisible();
@@ -411,7 +411,7 @@ describe('GraniteImage E2E Tests', () => {
       await element(by.id('reload-all-button')).tap();
 
       // Wait for reload
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Scroll back to top and verify basic image still works
       await device.reloadReactNative();
@@ -424,19 +424,19 @@ describe('GraniteImage E2E Tests', () => {
     it('should remain stable after all static method calls', async () => {
       await scrollToElement('preload-button');
       await element(by.id('preload-button')).tap();
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       await scrollToElement('clear-memory-cache-button');
       await element(by.id('clear-memory-cache-button')).tap();
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       await scrollToElement('clear-disk-cache-button');
       await element(by.id('clear-disk-cache-button')).tap();
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       await scrollToElement('reload-all-button');
       await element(by.id('reload-all-button')).tap();
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Verify app is still responsive
       await scrollToElement('log-container');

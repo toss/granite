@@ -2,7 +2,7 @@
 module.exports = {
   testRunner: {
     args: {
-      '$0': 'jest',
+      $0: 'jest',
       config: 'e2e/jest.config.js',
     },
     jest: {
@@ -13,12 +13,14 @@ module.exports = {
     'ios.debug': {
       type: 'ios.app',
       binaryPath: 'ios/build/Build/Products/Debug-iphonesimulator/GraniteImageExample.app',
-      build: 'xcodebuild -workspace ios/GraniteImageExample.xcworkspace -scheme GraniteImageExample -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build',
+      build:
+        'xcodebuild -workspace ios/GraniteImageExample.xcworkspace -scheme GraniteImageExample -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build',
     },
     'ios.release': {
       type: 'ios.app',
       binaryPath: 'ios/build/Build/Products/Release-iphonesimulator/GraniteImageExample.app',
-      build: 'xcodebuild -workspace ios/GraniteImageExample.xcworkspace -scheme GraniteImageExample -configuration Release -sdk iphonesimulator -derivedDataPath ios/build',
+      build:
+        'xcodebuild -workspace ios/GraniteImageExample.xcworkspace -scheme GraniteImageExample -configuration Release -sdk iphonesimulator -derivedDataPath ios/build',
     },
     'android.debug': {
       type: 'android.apk',
