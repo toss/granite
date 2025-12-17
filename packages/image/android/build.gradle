@@ -1,0 +1,112 @@
+buildscript {
+  ext.safeExtGet = {prop, fallback ->
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+  }
+  ext.getExtOrDefault = {name ->
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['GraniteImage_' + name]
+  }
+
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:8.7.2"
+    // noinspection DifferentKotlinGradleVersion
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}"
+  }
+}
+
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+apply plugin: "com.facebook.react"
+
+// ============================================================
+// GraniteImage Provider Selection
+// ============================================================
+// Set ONE of the following in gradle.properties or command line:
+//   GRANITE_PROVIDER=okhttp   - OkHttp (default, minimal dependencies)
+//   GRANITE_PROVIDER=glide    - Glide library
+//   GRANITE_PROVIDER=coil     - Coil library
+//
+// Example: ./gradlew assembleDebug -PGRANITE_PROVIDER=glide
+// ============================================================
+def graniteProvider = project.hasProperty('GRANITE_PROVIDER') ? project.property('GRANITE_PROVIDER') : 'okhttp'
+println "GraniteImage: Using ${graniteProvider} provider"
+
+def getExtOrIntegerDefault(name) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["GraniteImage_" + name]).toInteger()
+}
+
+android {
+  namespace "com.graniteimage"
+
+  compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
+
+  defaultConfig {
+    minSdkVersion getExtOrIntegerDefault("minSdkVersion")
+    targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
+
+    buildConfigField "String", "GRANITE_PROVIDER", "\"${graniteProvider}\""
+  }
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+    }
+  }
+
+  lintOptions {
+    disable "GradleCompatible"
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+
+  kotlinOptions {
+    jvmTarget = '17'
+  }
+
+  sourceSets {
+    main {
+      java.srcDirs += [
+        "generated/java",
+        "generated/jni",
+        "src/${graniteProvider}/java"
+      ]
+    }
+  }
+}
+
+repositories {
+  mavenCentral()
+  google()
+}
+
+def kotlin_version = getExtOrDefault("kotlinVersion")
+
+dependencies {
+  implementation "com.facebook.react:react-android"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+  // Provider-specific dependencies (only selected one is included)
+  if (graniteProvider == 'okhttp') {
+    implementation "com.squareup.okhttp3:okhttp:4.12.0"
+  }
+  if (graniteProvider == 'glide') {
+    implementation "com.github.bumptech.glide:glide:4.16.0"
+    annotationProcessor "com.github.bumptech.glide:compiler:4.16.0"
+  }
+  if (graniteProvider == 'coil') {
+    implementation "io.coil-kt:coil:2.5.0"
+  }
+}

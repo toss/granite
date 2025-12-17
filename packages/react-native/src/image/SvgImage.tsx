@@ -1,8 +1,8 @@
-import { SvgUri, SvgXml } from '@granite-js/native/react-native-svg';
 import { createElement, useEffect, useCallback, useState } from 'react';
 import { View, type ViewStyle, type StyleProp } from 'react-native';
-import { usePreservedCallback } from 'react-simplikit';
+import { SvgUri, SvgXml } from 'react-native-svg';
 import type { DimensionValue, NumberValue } from './types';
+import { usePreservedCallback } from '../utils/usePreservedCallback';
 
 export interface SvgImageProps {
   url: string;
@@ -10,8 +10,8 @@ export interface SvgImageProps {
   height?: DimensionValue;
   style?: StyleProp<any>;
   testID?: string;
-  onLoadStart?: () => void;
-  onLoadEnd?: () => void;
+  onLoadStart?: (event: object) => void;
+  onLoadEnd?: (event: object) => void;
   onError?: () => void;
 }
 
@@ -63,8 +63,8 @@ export function SvgImage({
   const [data, setData] = useState<string | undefined>(undefined);
   const [isError, setIsError] = useState(false);
 
-  const onLoadStart = usePreservedCallback(() => _onLoadStart?.());
-  const onLoadEnd = usePreservedCallback(() => _onLoadEnd?.());
+  const onLoadStart = usePreservedCallback(() => _onLoadStart?.({}));
+  const onLoadEnd = usePreservedCallback(() => _onLoadEnd?.({}));
   const onError = usePreservedCallback(() => _onError?.());
 
   // Component to occupy layout space when the image is not yet rendered

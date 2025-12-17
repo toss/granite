@@ -244,6 +244,5 @@ export class DevServer {
 }
 
 declare global {
-   
   var remoteBundles: Record<'android' | 'ios', string> | null;
 }
