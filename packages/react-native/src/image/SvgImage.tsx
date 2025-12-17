@@ -10,8 +10,8 @@ export interface SvgImageProps {
   height?: DimensionValue;
   style?: StyleProp<any>;
   testID?: string;
-  onLoadStart?: () => void;
-  onLoadEnd?: () => void;
+  onLoadStart?: (event: object) => void;
+  onLoadEnd?: (event: object) => void;
   onError?: () => void;
 }
 
@@ -63,8 +63,8 @@ export function SvgImage({
   const [data, setData] = useState<string | undefined>(undefined);
   const [isError, setIsError] = useState(false);
 
-  const onLoadStart = usePreservedCallback(() => _onLoadStart?.());
-  const onLoadEnd = usePreservedCallback(() => _onLoadEnd?.());
+  const onLoadStart = usePreservedCallback(() => _onLoadStart?.({}));
+  const onLoadEnd = usePreservedCallback(() => _onLoadEnd?.({}));
   const onError = usePreservedCallback(() => _onError?.());
 
   // Component to occupy layout space when the image is not yet rendered
