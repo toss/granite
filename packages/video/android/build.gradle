@@ -1,0 +1,96 @@
+buildscript {
+  ext.getExtOrDefault = {name ->
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['GraniteVideo_' + name]
+  }
+
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:8.7.2"
+    // noinspection DifferentKotlinGradleVersion
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}"
+  }
+}
+
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+apply plugin: "com.facebook.react"
+
+def getExtOrIntegerDefault(name) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["GraniteVideo_" + name]).toInteger()
+}
+
+android {
+  namespace "com.anthropic.reactnativegranitevideo"
+
+  compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
+
+  defaultConfig {
+    minSdkVersion getExtOrIntegerDefault("minSdkVersion")
+    targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
+  }
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+    }
+  }
+
+  lintOptions {
+    disable "GradleCompatible"
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  sourceSets {
+    main {
+      java.srcDirs += [
+        "generated/java",
+        "generated/jni"
+      ]
+    }
+  }
+}
+
+repositories {
+  mavenCentral()
+  google()
+}
+
+def kotlin_version = getExtOrDefault("kotlinVersion")
+
+// Provider selection via gradle properties
+def useExoPlayer = project.hasProperty('graniteVideoUseExoPlayer') ? project.graniteVideoUseExoPlayer.toBoolean() : true
+def useVLC = project.hasProperty('graniteVideoUseVLC') ? project.graniteVideoUseVLC.toBoolean() : false
+
+dependencies {
+  implementation "com.facebook.react:react-android"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+  // Default: ExoPlayer (Media3)
+  if (useExoPlayer) {
+    implementation "androidx.media3:media3-exoplayer:1.2.1"
+    implementation "androidx.media3:media3-exoplayer-dash:1.2.1"
+    implementation "androidx.media3:media3-exoplayer-hls:1.2.1"
+    implementation "androidx.media3:media3-exoplayer-smoothstreaming:1.2.1"
+    implementation "androidx.media3:media3-datasource:1.2.1"
+    implementation "androidx.media3:media3-ui:1.2.1"
+  }
+
+  // Optional: VLC
+  if (useVLC) {
+    implementation "org.videolan.android:libvlc-all:3.6.0"
+  }
+}

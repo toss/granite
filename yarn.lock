@@ -5988,15 +5988,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@granite-js/video@workspace:packages/video"
   dependencies:
-    "@granite-js/native": "workspace:*"
     "@types/react": "catalog:react-native"
+    del-cli: "npm:^6.0.0"
+    eslint: "npm:^9.7.0"
     react: "catalog:react-native"
     react-native: "catalog:react-native"
-    react-native-builder-bob: "npm:^0.40.15"
     typescript: "npm:5.8.3"
   peerDependencies:
-    "@granite-js/native": "workspace:*"
-    "@types/react": "*"
     react: "*"
     react-native: "*"
   languageName: unknown
@@ -10262,13 +10260,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/kill-port@npm:^2.0.1":
-  version: 2.0.3
-  resolution: "@types/kill-port@npm:2.0.3"
+"@types/kill-port@npm:2.0.1":
+  version: 2.0.1
+  resolution: "@types/kill-port@npm:2.0.1"
   dependencies:
     "@types/node": "npm:*"
     shell-exec: "npm:^1"
-  checksum: 10c0/e48aa96134f01770ec729e0cc0da6388a0fbbf659e69a3e993fad9d12c48a258b3a70741699b51e5b35f664fa065ebde5a2fe25fea98dcc5eed2abdeb2b76c47
+  checksum: 10c0/809f049be96ea839dcde8daebf69ca72421807eec6b48cc14321f439fb7bf6495104d30051f0d84aa09f6ccd5e5fcf6f4d7aac31b89ea210e77827afd10f742d
   languageName: node
   linkType: hard
 
@@ -13435,13 +13433,13 @@ __metadata:
   resolution: "create-granite-app@workspace:packages/create-granite-app"
   dependencies:
     "@clack/prompts": "npm:^0.8.2"
-    "@types/kill-port": "npm:^2.0.1"
+    "@types/kill-port": "npm:2.0.1"
     "@types/node": "npm:^22.10.2"
     "@types/yargs": "npm:^17.0.33"
     "@vitest/coverage-v8": "npm:^4.0.12"
     es-toolkit: "npm:^1.39.8"
     execa: "npm:^9.5.2"
-    kill-port: "npm:^2.0.1"
+    kill-port: "npm:2.0.1"
     tsup: "npm:^8.5.0"
     typescript: "npm:5.8.3"
     vitest: "npm:^4.0.12"
@@ -19052,7 +19050,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"kill-port@npm:^2.0.1":
+"kill-port@npm:2.0.1":
   version: 2.0.1
   resolution: "kill-port@npm:2.0.1"
   dependencies:

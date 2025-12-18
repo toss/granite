@@ -1,58 +1,89 @@
 {
   "name": "@granite-js/video",
   "version": "0.1.34-next.0",
-  "type": "module",
-  "main": "./dist/module/index.js",
-  "types": "./dist/typescript/index.d.ts",
-  "react-native": "./src/index.ts",
+  "description": "Pluggable video component for React Native with provider selection",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
-      "types": "./dist/typescript/index.d.ts",
-      "react-native": "./src/index.ts",
-      "default": "./dist/module/index.js"
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     },
     "./package.json": "./package.json"
   },
+  "files": [
+    "src",
+    "lib",
+    "android",
+    "ios",
+    "*.podspec",
+    "react-native.config.js",
+    "!example/**",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*"
+  ],
   "scripts": {
-    "prepack": "yarn build",
+    "example": "yarn workspace @granite-js/video-example",
+    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
-    "build": "bob build && tsc --project tsconfig.build.json"
+    "lint": "eslint ."
   },
+  "keywords": [
+    "react-native",
+    "ios",
+    "android",
+    "video",
+    "player",
+    "exoplayer",
+    "avplayer",
+    "vlc",
+    "streaming",
+    "hls",
+    "dash",
+    "drm",
+    "pluggable",
+    "provider"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/toss/granite.git",
-    "directory": "packages/blur-view"
+    "directory": "packages/video"
   },
-  "files": [
-    "src",
-    "dist"
-  ],
+  "author": "Toss <platform@toss.im>",
+  "homepage": "https://github.com/toss/granite/tree/main/packages/video#readme",
+  "license": "MIT",
   "devDependencies": {
-    "@granite-js/native": "workspace:*",
     "@types/react": "catalog:react-native",
+    "del-cli": "^6.0.0",
+    "eslint": "^9.7.0",
     "react": "catalog:react-native",
     "react-native": "catalog:react-native",
-    "react-native-builder-bob": "^0.40.15",
     "typescript": "5.8.3"
   },
   "peerDependencies": {
-    "@granite-js/native": "workspace:*",
-    "@types/react": "*",
     "react": "*",
     "react-native": "*"
   },
-  "sideEffects": false,
-  "react-native-builder-bob": {
-    "source": "src",
-    "output": "dist",
-    "targets": [
-      [
-        "module",
-        {
-          "esm": true
-        }
-      ]
-    ]
-  }
+  "codegenConfig": {
+    "name": "GraniteVideoViewSpec",
+    "type": "all",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.anthropic.reactnativegranitevideo"
+    },
+    "ios": {
+      "componentProvider": {
+        "GraniteVideoView": "GraniteVideoView"
+      }
+    }
+  },
+  "sideEffects": false
 }
