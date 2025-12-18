@@ -9,6 +9,7 @@
   "exports": {
     ".": {
       "types": "./dist/typescript/index.d.ts",
+      "react-native": "./src/index.ts",
       "default": "./dist/module/index.js"
     },
     "./package.json": "./package.json"
@@ -57,21 +58,12 @@
     "eslint": "^9.7.0",
     "react": "catalog:react-native",
     "react-native": "catalog:react-native",
-    "react-native-builder-bob": "^0.40.15",
+    "react-native-builder-bob": "0.40.17",
     "typescript": "5.8.3"
   },
   "peerDependencies": {
-    "@granite-js/native": "*",
     "react": "*",
     "react-native": "*"
-  },
-  "peerDependenciesMeta": {
-    "@granite-js/native": {
-      "optional": true
-    }
-  },
-  "dependencies": {
-    "react-simplikit": "^0.0.40"
   },
   "codegenConfig": {
     "name": "GraniteImageSpec",
