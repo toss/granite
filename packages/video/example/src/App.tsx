@@ -1,13 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import {
-  View,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  Platform,
-} from 'react-native';
+import { View, ScrollView, Text, TouchableOpacity, StyleSheet, SafeAreaView, Platform } from 'react-native';
 import GraniteVideo from '../../src';
 import type {
   VideoRef,
@@ -61,23 +53,18 @@ export default function App() {
 
   const handleLoad = useCallback(
     (data: OnLoadData) => {
-      addLog(
-        `onLoad: ${data.naturalSize.width}x${data.naturalSize.height}, duration: ${data.duration.toFixed(1)}s`
-      );
+      addLog(`onLoad: ${data.naturalSize.width}x${data.naturalSize.height}, duration: ${data.duration.toFixed(1)}s`);
       setProgress({ currentTime: 0, duration: data.duration });
     },
     [addLog]
   );
 
-  const handleProgress = useCallback(
-    (data: OnProgressData) => {
-      setProgress({
-        currentTime: data.currentTime,
-        duration: data.seekableDuration,
-      });
-    },
-    []
-  );
+  const handleProgress = useCallback((data: OnProgressData) => {
+    setProgress({
+      currentTime: data.currentTime,
+      duration: data.seekableDuration,
+    });
+  }, []);
 
   const handleSeek = useCallback(
     (data: OnSeekData) => {
@@ -181,11 +168,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        testID="main-scroll"
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ScrollView testID="main-scroll" style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <Text testID="app-title" style={styles.title}>
           GraniteVideo Example
         </Text>
@@ -237,34 +220,18 @@ export default function App() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>1. Basic Controls</Text>
           <View style={styles.buttonRow}>
-            <TouchableOpacity
-              testID="play-pause-button"
-              style={styles.button}
-              onPress={togglePlayPause}
-            >
+            <TouchableOpacity testID="play-pause-button" style={styles.button} onPress={togglePlayPause}>
               <Text style={styles.buttonText}>{paused ? '▶ Play' : '⏸ Pause'}</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              testID="mute-button"
-              style={styles.button}
-              onPress={toggleMute}
-            >
+            <TouchableOpacity testID="mute-button" style={styles.button} onPress={toggleMute}>
               <Text style={styles.buttonText}>{muted ? '🔇 Unmute' : '🔊 Mute'}</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.buttonRow}>
-            <TouchableOpacity
-              testID="seek-back-button"
-              style={styles.button}
-              onPress={seekBackward}
-            >
+            <TouchableOpacity testID="seek-back-button" style={styles.button} onPress={seekBackward}>
               <Text style={styles.buttonText}>⏪ -10s</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              testID="seek-forward-button"
-              style={styles.button}
-              onPress={seekForward}
-            >
+            <TouchableOpacity testID="seek-forward-button" style={styles.button} onPress={seekForward}>
               <Text style={styles.buttonText}>⏩ +10s</Text>
             </TouchableOpacity>
           </View>
@@ -349,18 +316,10 @@ export default function App() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>6. Source Selection</Text>
           <View style={styles.buttonRow}>
-            <TouchableOpacity
-              testID="source-mp4"
-              style={styles.button}
-              onPress={() => changeSource(TEST_VIDEOS.mp4)}
-            >
+            <TouchableOpacity testID="source-mp4" style={styles.button} onPress={() => changeSource(TEST_VIDEOS.mp4)}>
               <Text style={styles.buttonText}>MP4</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              testID="source-hls"
-              style={styles.button}
-              onPress={() => changeSource(TEST_VIDEOS.hls)}
-            >
+            <TouchableOpacity testID="source-hls" style={styles.button} onPress={() => changeSource(TEST_VIDEOS.hls)}>
               <Text style={styles.buttonText}>HLS</Text>
             </TouchableOpacity>
           </View>
@@ -369,11 +328,7 @@ export default function App() {
         {/* Section 7: Error Handling */}
         <View testID="error-test" style={styles.section}>
           <Text style={styles.sectionTitle}>7. Error Handling</Text>
-          <TouchableOpacity
-            testID="trigger-error"
-            style={styles.button}
-            onPress={triggerError}
-          >
+          <TouchableOpacity testID="trigger-error" style={styles.button} onPress={triggerError}>
             <Text style={styles.buttonText}>Trigger Error</Text>
           </TouchableOpacity>
         </View>

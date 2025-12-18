@@ -2,13 +2,7 @@ import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNati
 import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
 import type { ViewProps, HostComponent } from 'react-native';
 
-import type {
-  Int32,
-  Float,
-  Double,
-  DirectEventHandler,
-  WithDefault,
-} from 'react-native/Libraries/Types/CodegenTypes';
+import type { Int32, Float, Double, DirectEventHandler, WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 
 // ============================================================
 // Native Props Interface

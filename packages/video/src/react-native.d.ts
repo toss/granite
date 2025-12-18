@@ -7,15 +7,11 @@ declare module 'react-native/Libraries/Types/CodegenTypes' {
   export type WithDefault<T, Default> = T | undefined;
 
   export type DirectEventHandler<T, PaperName extends string = ''> = (
-    event: T extends null
-      ? { nativeEvent: {} }
-      : { nativeEvent: T }
+    event: T extends null ? { nativeEvent: {} } : { nativeEvent: T }
   ) => void;
 
   export type BubblingEventHandler<T, PaperName extends string = ''> = (
-    event: T extends null
-      ? { nativeEvent: {} }
-      : { nativeEvent: T }
+    event: T extends null ? { nativeEvent: {} } : { nativeEvent: T }
   ) => void;
 }
 

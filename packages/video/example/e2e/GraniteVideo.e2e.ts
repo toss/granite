@@ -20,7 +20,7 @@ describe('GraniteVideo E2E Tests', () => {
     // The video player's periodic time observer keeps the main queue busy
     await device.disableSynchronization();
     // Add a small delay after launch to ensure app is ready
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     await waitFor(element(by.id('app-title')))
       .toBeVisible()
       .withTimeout(15000);
@@ -35,7 +35,7 @@ describe('GraniteVideo E2E Tests', () => {
         return;
       } catch {
         await element(by.id('main-scroll')).swipe('up', 'slow', 0.3);
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise((resolve) => setTimeout(resolve, 300));
       }
     }
     await expect(element(by.id(testID))).toBeVisible();
@@ -47,10 +47,10 @@ describe('GraniteVideo E2E Tests', () => {
       for (let i = 0; i < 5; i++) {
         await element(by.id('main-scroll')).swipe('down', 'fast', 0.8);
       }
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     } catch {
       // If swipe fails, just wait and try to verify the element we need
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
   };
 
@@ -83,11 +83,11 @@ describe('GraniteVideo E2E Tests', () => {
 
       // Click play - button text should change
       await element(by.id('play-pause-button')).tap();
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Click pause
       await element(by.id('play-pause-button')).tap();
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     });
 
     it('should toggle mute', async () => {
@@ -98,14 +98,14 @@ describe('GraniteVideo E2E Tests', () => {
     it('should seek forward', async () => {
       // First, start playback
       await element(by.id('play-pause-button')).tap();
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       await element(by.id('seek-forward-button')).tap();
     });
 
     it('should seek backward', async () => {
       await element(by.id('play-pause-button')).tap();
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       await element(by.id('seek-back-button')).tap();
     });
@@ -127,7 +127,7 @@ describe('GraniteVideo E2E Tests', () => {
     it('should change playback rate to 0.5x', async () => {
       await scrollToElement('rate-0.5');
       await element(by.id('rate-0.5')).tap();
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
       await scrollToElement('rate-label');
       await expect(element(by.id('rate-label'))).toHaveText('Current: 0.5x');
     });
@@ -135,7 +135,7 @@ describe('GraniteVideo E2E Tests', () => {
     it('should change playback rate to 2x', async () => {
       await scrollToElement('rate-2');
       await element(by.id('rate-2')).tap();
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
       await scrollToElement('rate-label');
       await expect(element(by.id('rate-label'))).toHaveText('Current: 2x');
     });
@@ -156,7 +156,7 @@ describe('GraniteVideo E2E Tests', () => {
     it('should change volume to 50%', async () => {
       await scrollToElement('volume-50');
       await element(by.id('volume-50')).tap();
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
       // Check that label contains "50" (percentage sign may have encoding issues)
       await scrollToElement('volume-label');
       await expect(element(by.id('volume-label'))).toBeVisible();
@@ -165,7 +165,7 @@ describe('GraniteVideo E2E Tests', () => {
     it('should mute volume (0%)', async () => {
       await scrollToElement('volume-0');
       await element(by.id('volume-0')).tap();
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
       await scrollToElement('volume-label');
       await expect(element(by.id('volume-label'))).toBeVisible();
     });
@@ -186,7 +186,7 @@ describe('GraniteVideo E2E Tests', () => {
     it('should change resize mode to cover', async () => {
       await scrollToElement('resize-cover');
       await element(by.id('resize-cover')).tap();
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
       await scrollToElement('resize-mode-label');
       await expect(element(by.id('resize-mode-label'))).toBeVisible();
     });
@@ -194,7 +194,7 @@ describe('GraniteVideo E2E Tests', () => {
     it('should change resize mode to stretch', async () => {
       await scrollToElement('resize-stretch');
       await element(by.id('resize-stretch')).tap();
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
       await scrollToElement('resize-mode-label');
       await expect(element(by.id('resize-mode-label'))).toBeVisible();
     });
@@ -238,7 +238,7 @@ describe('GraniteVideo E2E Tests', () => {
       await scrollToElement('source-hls');
       await element(by.id('source-hls')).tap();
       // Wait for source to load
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       // Verify video is still visible after source change
       await scrollToTop();
       await expect(element(by.id('main-video'))).toBeVisible();
@@ -247,7 +247,7 @@ describe('GraniteVideo E2E Tests', () => {
     it('should change source back to MP4', async () => {
       await scrollToElement('source-mp4');
       await element(by.id('source-mp4')).tap();
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       await scrollToTop();
       await expect(element(by.id('main-video'))).toBeVisible();
     });
@@ -267,7 +267,7 @@ describe('GraniteVideo E2E Tests', () => {
       await scrollToElement('trigger-error');
       await element(by.id('trigger-error')).tap();
       // Wait for error to be processed
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       // App should not crash and remain responsive
       await scrollToTop();
       await expect(element(by.id('app-title'))).toBeVisible();
@@ -287,7 +287,7 @@ describe('GraniteVideo E2E Tests', () => {
     it('should clear logs', async () => {
       // First create some logs
       await element(by.id('play-pause-button')).tap();
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       await scrollToElement('clear-logs');
       await element(by.id('clear-logs')).tap();
@@ -314,7 +314,7 @@ describe('GraniteVideo E2E Tests', () => {
       // Toggle play/pause multiple times
       for (let i = 0; i < 3; i++) {
         await element(by.id('play-pause-button')).tap();
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
       // Change resize modes
@@ -334,12 +334,12 @@ describe('GraniteVideo E2E Tests', () => {
 
     it('should handle rapid seek operations', async () => {
       await element(by.id('play-pause-button')).tap();
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Rapid seeking
       for (let i = 0; i < 5; i++) {
         await element(by.id('seek-forward-button')).tap();
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
       }
 
       await expect(element(by.id('main-video'))).toBeVisible();
@@ -350,10 +350,10 @@ describe('GraniteVideo E2E Tests', () => {
 
       // Switch sources multiple times
       await element(by.id('source-hls')).tap();
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       await element(by.id('source-mp4')).tap();
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Scroll back to verify video
       await scrollToTop();
