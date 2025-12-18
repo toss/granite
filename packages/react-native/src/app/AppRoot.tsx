@@ -1,5 +1,5 @@
+import { SafeAreaProvider } from '@granite-js/native/react-native-safe-area-context';
 import type { ComponentType, PropsWithChildren } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import type { InitialProps } from '../initial-props';
 import { Router, type InternalRouterProps } from '../router';
 import { BackEventProvider } from '../use-back-event';

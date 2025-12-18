@@ -1,5 +1,5 @@
+import { SvgXml } from '@granite-js/native/react-native-svg';
 import { Platform, TouchableOpacity, TouchableOpacityProps, View } from 'react-native';
-import { SvgXml } from 'react-native-svg';
 
 interface BackButtonProps extends TouchableOpacityProps {
   tintColor?: string;
