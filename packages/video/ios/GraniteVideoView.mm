@@ -60,7 +60,7 @@ using namespace facebook::react;
         // Create provider from registry
         _provider = [[GraniteVideoRegistry shared] createProvider];
 
-#if !defined(GRANITE_VIDEO_PROVIDER_NONE)
+#if defined(GRANITE_VIDEO_DEFAULT_PROVIDER)
         if (_provider == nil) {
             // Use default AVPlayer provider
             _provider = [[AVPlayerProvider alloc] init];
