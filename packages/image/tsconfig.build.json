@@ -1,4 +1,9 @@
 {
-  "extends": "./tsconfig",
-  "exclude": ["example", "lib"]
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "dist/typescript",
+    "emitDeclarationOnly": true
+  },
+  "include": ["src"]
 }

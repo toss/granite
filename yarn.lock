@@ -5526,15 +5526,11 @@ __metadata:
     eslint: "npm:^9.7.0"
     react: "catalog:react-native"
     react-native: "catalog:react-native"
-    react-simplikit: "npm:^0.0.40"
+    react-native-builder-bob: "npm:0.40.17"
     typescript: "npm:5.8.3"
   peerDependencies:
-    "@granite-js/native": "*"
     react: "*"
     react-native: "*"
-  peerDependenciesMeta:
-    "@granite-js/native":
-      optional: true
   languageName: unknown
   linkType: soft
 
@@ -22699,7 +22695,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-builder-bob@npm:^0.40.15":
+"react-native-builder-bob@npm:0.40.17, react-native-builder-bob@npm:^0.40.15":
   version: 0.40.17
   resolution: "react-native-builder-bob@npm:0.40.17"
   dependencies:
@@ -22943,15 +22939,6 @@ __metadata:
   peerDependencies:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
   checksum: 10c0/c194d741792e86043a4ae272f7353c1cb9412bc649945c4220c6a101a6ea5410cceb3d65d5a4d750f11a24f7426e8eec7977e8a4e3ad5d3ee235ca2b18166fa8
-  languageName: node
-  linkType: hard
-
-"react-simplikit@npm:^0.0.40":
-  version: 0.0.40
-  resolution: "react-simplikit@npm:0.0.40"
-  peerDependencies:
-    react: "*"
-  checksum: 10c0/9fca56dc995caacf42b00cbb1fa71a0d84d87e1b7e0d9093681181ca76c59339f9b520d5a1923e03501d44a4ba8a687918d76cf85c3cc53d29cdd583e82e4bf2
   languageName: node
   linkType: hard
 
