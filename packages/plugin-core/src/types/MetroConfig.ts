@@ -7,6 +7,7 @@ export interface AdditionalMetroConfig extends MetroConfig {
    * Partial support for some options only
    *
    * - `getPolyfills`
+   * - `getModulesRunBeforeMainModule`
    * - `processModuleFilter`
    */
   serializer?: MetroConfig['serializer'] & {
@@ -16,6 +17,7 @@ export interface AdditionalMetroConfig extends MetroConfig {
      * @returns true if the module should be included, false otherwise
      */
     processModuleFilter?: (module: Module) => boolean;
+    getModulesRunBeforeMainModule?: () => string[];
   };
   /**
    * Partial support for some options only

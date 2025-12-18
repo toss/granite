@@ -73,11 +73,6 @@ export async function runServer({
   const { middlewares = [], inspectorProxy, ...additionalMetroConfig } = resolvedConfig?.metro ?? {};
   const baseConfig = await getMetroConfig({ rootPath: config.cwd }, additionalMetroConfig);
 
-  console.log('[Granite] Final metroConfig paths:', {
-    transformerPath: baseConfig.transformerPath,
-    babelTransformerPath: baseConfig.transformer?.babelTransformerPath,
-    workerPath: baseConfig.transformer?.workerPath,
-  });
 
   const metroConfig = mergeConfig(baseConfig, {
     server: { port },

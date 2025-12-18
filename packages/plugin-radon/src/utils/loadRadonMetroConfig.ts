@@ -77,9 +77,6 @@ export const loadRadonMetroConfig = (): AdditionalMetroConfig => {
   const baseConfig: AdditionalMetroConfig = {
     projectRoot: appRoot,
     serializer: {
-      // Provide a default processModuleFilter that Radon can wrap
-      // Metro's default is (module) => true
-      // biome-ignore lint/suspicious/noExplicitAny: Metro module type is not well-defined
       processModuleFilter: () => true,
     },
     resolver: {
@@ -104,7 +101,9 @@ export const loadRadonMetroConfig = (): AdditionalMetroConfig => {
     resolver: {
       resolveRequest: adaptedConfig.resolver?.resolveRequest,
       blockList: adaptedConfig.resolver?.blockList,
-      extraNodeModules: adaptedConfig.resolver?.extraNodeModules,
+      extraNodeModules: {
+        ...adaptedConfig.resolver?.extraNodeModules,
+      },
       nodeModulesPaths: adaptedConfig.resolver?.nodeModulesPaths,
     },
     transformer: {

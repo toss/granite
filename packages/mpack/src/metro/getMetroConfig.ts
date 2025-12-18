@@ -42,6 +42,7 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
     additionalConfig?.resolver?.resolveRequest ??
     createResolver(rootPath, {
       conditionNames: additionalConfig?.resolver?.conditionNames,
+      extraNodeModules: additionalConfig?.resolver?.extraNodeModules,
     });
 
   return mergeConfig(defaultConfig, {
@@ -89,7 +90,10 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
       resolverMainFields: additionalConfig?.resolver?.resolverMainFields ?? RESOLVER_MAIN_FIELDS,
     },
     serializer: {
-      getModulesRunBeforeMainModule: () => [resolveFromRoot('react-native/Libraries/Core/InitializeCore', rootPath)],
+      getModulesRunBeforeMainModule: () => [
+        resolveFromRoot('react-native/Libraries/Core/InitializeCore', rootPath),
+        ...(additionalConfig?.serializer?.getModulesRunBeforeMainModule?.() ?? []),
+      ],
       getPolyfills: () => [
         ...require(path.join(reactNativePath, 'rn-get-polyfills'))(),
         ...(additionalConfig?.serializer?.getPolyfills?.() ?? []),

@@ -24,6 +24,8 @@ const resolvers = new Map();
 
 interface CreateResolverOptions {
   conditionNames?: string[];
+  extraNodeModules?: Record<string, string>;
+  monorepoRoot?: string;
 }
 
 export function createResolver(rootPath: string, options?: CreateResolverOptions) {
@@ -44,12 +46,17 @@ export function createResolver(rootPath: string, options?: CreateResolverOptions
       mainFields: context.mainFields,
       conditionNames: options?.conditionNames ?? [...RESOLVER_EXPORTS_MAP_CONDITIONS, 'require', 'node', 'default'],
       mainFiles: ['index'],
-      modules: ['node_modules', path.join(rootPath, 'src')],
+      modules: [
+        'node_modules',
+        path.join(rootPath, 'node_modules'),
+        path.join(rootPath, 'src'),
+      ],
+      alias: options?.extraNodeModules ?? {},
     });
 
     function resolve(context: MetroResolutionContext, request: string) {
       for (const nativeModule of NATIVE_MODULES) {
-        if (request === nativeModule) {
+        if (request === nativeModule || request.startsWith(nativeModule + '/')) {
           return {
             type: 'sourceFile',
             filePath: resolver({}, rootPath, request),
@@ -76,6 +83,20 @@ export function createResolver(rootPath: string, options?: CreateResolverOptions
         }
 
         request = `${request}/`;
+      }
+
+      // 상대 경로가 아닌 패키지 import는 rootPath에서 찾기
+      const isPackageImport = !request.startsWith('.') && !request.startsWith('/');
+      if (isPackageImport) {
+        try {
+          const resolveResult = resolver({}, rootPath, request);
+          return {
+            type: 'sourceFile',
+            filePath: resolveResult,
+          };
+        } catch {
+          // rootPath에서 못 찾으면 아래 originModulePath 기준으로 fallback
+        }
       }
 
       try {
