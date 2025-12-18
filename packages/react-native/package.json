@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/react-native",
-  "version": "0.1.34-next.2",
+  "version": "0.1.34-next.3",
   "description": "The Granite Framework",
   "bin": {
     "granite": "./bin/cli.js"
@@ -111,7 +111,7 @@
     "zod": "^4.1.12"
   },
   "peerDependencies": {
-    "@granite-js/native": "0.1.34-next.2",
+    "@granite-js/native": "0.1.34-next.3",
     "@types/react": "*",
     "brick-module": "*",
     "react": "*",
@@ -124,7 +124,7 @@
     "@granite-js/jest": "workspace:*",
     "@granite-js/lottie": "workspace:*",
     "@granite-js/mpack": "workspace:*",
-    "@granite-js/native": "0.1.34-next.2",
+    "@granite-js/native": "0.1.34-next.3",
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/style-utils": "workspace:*",
     "@granite-js/video": "workspace:*",
