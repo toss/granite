@@ -280,6 +280,9 @@ export interface GraniteVideoProps {
   // Style
   style?: StyleProp<ViewStyle>;
 
+  // Progress
+  progressUpdateInterval?: number;
+
   // Source
   source: VideoSource | number;
 

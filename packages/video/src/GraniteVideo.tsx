@@ -1,8 +1,15 @@
 import React, { forwardRef, useRef, useImperativeHandle, useCallback } from 'react';
-import { Platform, StyleSheet, View, Image, findNodeHandle, NativeModules } from 'react-native';
-import type { StyleProp, ViewStyle } from 'react-native';
-import NativeGraniteVideoView, { Commands } from './GraniteVideoNativeComponent';
-import type { NativeProps } from './GraniteVideoNativeComponent';
+import {
+  Platform,
+  StyleSheet,
+  View,
+  Image,
+  findNodeHandle,
+  NativeModules,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
+import NativeGraniteVideoView, { Commands, type NativeProps } from './GraniteVideoNativeComponent';
 import type {
   GraniteVideoProps,
   VideoRef,
@@ -47,7 +54,9 @@ function normalizeSource(source: VideoSource | number): NativeProps['source'] | 
 function normalizeSelectedTrack(
   track?: GraniteVideoProps['selectedAudioTrack']
 ): NativeProps['selectedAudioTrack'] | undefined {
-  if (!track) return undefined;
+  if (!track) {
+    return undefined;
+  }
   return {
     type: track.type,
     value: track.value?.toString(),
@@ -57,7 +66,9 @@ function normalizeSelectedTrack(
 function normalizeSelectedVideoTrack(
   track?: GraniteVideoProps['selectedVideoTrack']
 ): NativeProps['selectedVideoTrack'] | undefined {
-  if (!track) return undefined;
+  if (!track) {
+    return undefined;
+  }
   return {
     type: track.type,
     value: track.value,
@@ -65,7 +76,9 @@ function normalizeSelectedVideoTrack(
 }
 
 function normalizeDrm(drm?: GraniteVideoProps['drm']): NativeProps['drm'] | undefined {
-  if (!drm) return undefined;
+  if (!drm) {
+    return undefined;
+  }
   return {
     type: drm.type,
     licenseServer: drm.licenseServer,
@@ -76,7 +89,9 @@ function normalizeDrm(drm?: GraniteVideoProps['drm']): NativeProps['drm'] | unde
 }
 
 function normalizeBufferConfig(config?: GraniteVideoProps['bufferConfig']): NativeProps['bufferConfig'] | undefined {
-  if (!config) return undefined;
+  if (!config) {
+    return undefined;
+  }
   return {
     minBufferMs: config.minBufferMs,
     maxBufferMs: config.maxBufferMs,
@@ -88,7 +103,9 @@ function normalizeBufferConfig(config?: GraniteVideoProps['bufferConfig']): Nati
 }
 
 function getPosterUri(poster?: GraniteVideoProps['poster']): string | undefined {
-  if (!poster) return undefined;
+  if (!poster) {
+    return undefined;
+  }
   if (typeof poster === 'object' && 'uri' in poster && poster.uri) {
     return poster.uri;
   }
@@ -96,7 +113,7 @@ function getPosterUri(poster?: GraniteVideoProps['poster']): string | undefined 
   return resolved?.uri;
 }
 
-export const GraniteVideo = forwardRef<VideoRef, GraniteVideoProps>((props, ref) => {
+const GraniteVideoBase = forwardRef<VideoRef, GraniteVideoProps>((props, ref) => {
   const {
     // Test ID
     testID,
@@ -254,7 +271,7 @@ export const GraniteVideo = forwardRef<VideoRef, GraniteVideoProps>((props, ref)
       }
       return { uri: '' };
     },
-    restoreUserInterfaceForPictureInPictureStopCompleted: (_restored: boolean) => {
+    restoreUserInterfaceForPictureInPictureStopCompleted: () => {
       // iOS specific - handled internally
     },
   }));
@@ -483,7 +500,18 @@ export const GraniteVideo = forwardRef<VideoRef, GraniteVideoProps>((props, ref)
   );
 });
 
-GraniteVideo.displayName = 'GraniteVideo';
+GraniteVideoBase.displayName = 'GraniteVideo';
+
+// Type for GraniteVideo with static properties
+type GraniteVideoComponent = typeof GraniteVideoBase & {
+  isAvailable: boolean;
+};
+
+// Static property to indicate availability
+// For Fabric (New Architecture), the component is always available
+(GraniteVideoBase as GraniteVideoComponent).isAvailable = true;
+
+export const GraniteVideo = GraniteVideoBase as GraniteVideoComponent;
 
 const styles = StyleSheet.create({
   container: {

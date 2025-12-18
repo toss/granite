@@ -1,5 +1,6 @@
 export {
   GraniteVideo,
+  GraniteVideo as Video,
   GraniteVideo as default,
   clearCache,
   getWidevineLevel,

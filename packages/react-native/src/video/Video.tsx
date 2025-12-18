@@ -1,4 +1,4 @@
-import { Video as VideoBase, VideoRef } from '@granite-js/video';
+import { Video as VideoBase, type VideoRef } from '@granite-js/video';
 import { ComponentProps, forwardRef, useMemo, useState } from 'react';
 import { Animated, Platform } from 'react-native';
 import { useVisibility } from '../visibility';
@@ -61,7 +61,7 @@ type VideoProps = ComponentProps<typeof AnimatedRNVideo>;
  * }
  * ```
  */
-const VideoImpl = forwardRef<typeof VideoRef, VideoProps>((props, ref) => {
+const VideoImpl = forwardRef<VideoRef, VideoProps>((props, ref) => {
   const [isFocused, setIsFocused] = useState(props.muted || props.paused);
   const visible = useVisibility();
 

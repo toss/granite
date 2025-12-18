@@ -3,7 +3,8 @@ import type { WithDefault, Int32, DirectEventHandler } from 'react-native/Librar
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 
 // Event payload types
-export type OnLoadStartEvent = Readonly<object>;
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export type OnLoadStartEvent = Readonly<{}>;
 
 export type OnProgressEvent = Readonly<{
   loaded: Int32;
@@ -19,7 +20,8 @@ export type OnErrorEvent = Readonly<{
   error: string;
 }>;
 
-export type OnLoadEndEvent = Readonly<object>;
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export type OnLoadEndEvent = Readonly<{}>;
 
 export interface GraniteImageProps extends ViewProps {
   // Source

@@ -5526,6 +5526,7 @@ __metadata:
     eslint: "npm:^9.7.0"
     react: "catalog:react-native"
     react-native: "catalog:react-native"
+    react-native-builder-bob: "npm:^0.40.15"
     react-simplikit: "npm:^0.0.40"
     typescript: "npm:5.8.3"
   peerDependencies:
@@ -5993,6 +5994,7 @@ __metadata:
     eslint: "npm:^9.7.0"
     react: "catalog:react-native"
     react-native: "catalog:react-native"
+    react-native-builder-bob: "npm:0.40.17"
     typescript: "npm:5.8.3"
   peerDependencies:
     react: "*"
@@ -22697,7 +22699,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-builder-bob@npm:^0.40.15":
+"react-native-builder-bob@npm:0.40.17, react-native-builder-bob@npm:^0.40.15":
   version: 0.40.17
   resolution: "react-native-builder-bob@npm:0.40.17"
   dependencies:
