@@ -21,7 +21,7 @@ interface BackButtonProps extends TouchableOpacityProps {
  * ### Example of directly passing a handler to a back button and setting a function to close the view
  *
  * ```tsx
- * import { createNavigationContainerRef, useNavigation } from '@react-navigation/native';
+ * import { createNavigationContainerRef, useNavigation } from '@granite-js/native/@react-navigation/native';
  * import { BackButton, useRouterBackHandler } from '@granite-js/react-native';
  * import { useEffect } from 'react';
  *

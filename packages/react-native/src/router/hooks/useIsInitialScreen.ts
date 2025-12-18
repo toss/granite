@@ -1,4 +1,4 @@
-import { useNavigationState } from '@react-navigation/native';
+import { useNavigationState } from '@granite-js/native/@react-navigation/native';
 
 /**
  * Hook that determines if the current screen is the initial screen in the navigation stack.

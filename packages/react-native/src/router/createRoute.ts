@@ -1,5 +1,12 @@
-import { type ParamListBase, useNavigation as useNavigationNative, useRoute } from '@react-navigation/native';
-import { NativeStackNavigationOptions, NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {
+  type ParamListBase,
+  useNavigation as useNavigationNative,
+  useRoute,
+} from '@granite-js/native/@react-navigation/native';
+import {
+  NativeStackNavigationOptions,
+  NativeStackNavigationProp,
+} from '@granite-js/native/@react-navigation/native-stack';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { useMemo } from 'react';
 import { RESERVED_PATHS } from './constants';

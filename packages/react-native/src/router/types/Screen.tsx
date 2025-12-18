@@ -1,4 +1,4 @@
-import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+import type { NativeStackNavigationOptions } from '@granite-js/native/@react-navigation/native-stack';
 import type { ComponentType } from 'react';
 
 /**

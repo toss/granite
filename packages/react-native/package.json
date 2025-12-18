@@ -113,13 +113,11 @@
     "zod": "^4.1.12"
   },
   "peerDependencies": {
+    "@granite-js/native": "*",
     "@types/react": "*",
     "brick-module": "*",
     "react": "*",
-    "react-native": "*",
-    "react-native-safe-area-context": "*",
-    "react-native-screens": "*",
-    "react-native-svg": "*"
+    "react-native": "*"
   },
   "dependencies": {
     "@granite-js/blur-view": "workspace:*",
@@ -128,12 +126,10 @@
     "@granite-js/jest": "workspace:*",
     "@granite-js/lottie": "workspace:*",
     "@granite-js/mpack": "workspace:*",
+    "@granite-js/native": "*",
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/style-utils": "workspace:*",
     "@granite-js/video": "workspace:*",
-    "@react-navigation/elements": "catalog:react-native",
-    "@react-navigation/native": "catalog:react-native",
-    "@react-navigation/native-stack": "catalog:react-native",
     "@standard-schema/spec": "^1.0.0",
     "es-toolkit": "^1.39.8",
     "react-native-url-polyfill": "3.0.0"

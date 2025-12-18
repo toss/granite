@@ -1,12 +1,12 @@
-import { HeaderBackButtonProps } from '@react-navigation/elements';
+import { HeaderBackButtonProps } from '@granite-js/native/@react-navigation/elements';
 import {
   createNavigationContainerRef,
   NavigationContainer,
   NavigationContainerRefWithCurrent,
   ParamListBase,
   RouteProp,
-} from '@react-navigation/native';
-import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+} from '@granite-js/native/@react-navigation/native';
+import { NativeStackNavigationOptions } from '@granite-js/native/@react-navigation/native-stack';
 import {
   ComponentProps,
   ComponentType,

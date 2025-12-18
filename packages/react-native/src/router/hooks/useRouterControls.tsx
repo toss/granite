@@ -1,4 +1,4 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer } from '@granite-js/native/@react-navigation/native';
 import { useMemo, type ComponentProps, type ComponentType, type PropsWithChildren } from 'react';
 import { StackNavigator } from '../components/StackNavigator';
 import { RESERVED_KEYWORDS } from '../constants';

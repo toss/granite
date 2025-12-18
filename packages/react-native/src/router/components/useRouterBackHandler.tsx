@@ -1,4 +1,4 @@
-import { NavigationContainerRefWithCurrent } from '@react-navigation/native';
+import { NavigationContainerRefWithCurrent } from '@granite-js/native/@react-navigation/native';
 import { useCallback, useMemo } from 'react';
 import { useBackEventContext } from '../../use-back-event';
 
@@ -19,7 +19,7 @@ import { useBackEventContext } from '../../use-back-event';
  * ### Example of directly passing a handler to a back button and setting a function to close the view
  *
  * ```tsx
- * import { createNavigationContainerRef, useNavigation } from '@react-navigation/native';
+ * import { createNavigationContainerRef, useNavigation } from '@granite-js/native/@react-navigation/native';
  * import { BackButton, useRouterBackHandler } from '@granite-js/react-native';
  * import { useEffect } from 'react';
  *

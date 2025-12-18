@@ -1,4 +1,4 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@granite-js/native/@react-navigation/native-stack';
 
 function createStackNavigator() {
   const Stack = createNativeStackNavigator();
