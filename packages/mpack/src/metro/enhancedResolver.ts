@@ -46,7 +46,7 @@ export function createResolver(rootPath: string, options?: CreateResolverOptions
       mainFields: context.mainFields,
       conditionNames: options?.conditionNames ?? [...RESOLVER_EXPORTS_MAP_CONDITIONS, 'require', 'node', 'default'],
       mainFiles: ['index'],
-      modules: [ 'node_modules', path.join(rootPath, 'src')],
+      modules: ['node_modules', path.join(rootPath, 'src')],
       alias: options?.extraNodeModules ?? {},
     });
 

@@ -3,7 +3,6 @@ import { radonCorePlugin } from './radonCorePlugin.js';
 import { radonGraniteRouter } from './radonGraniteRouterPlugin.js';
 
 export const radon = (): GranitePlugin[] => {
-
   const plugins: GranitePlugin[] = [];
 
   plugins.push(radonCorePlugin());

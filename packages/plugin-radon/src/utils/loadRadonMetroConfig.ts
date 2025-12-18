@@ -34,10 +34,9 @@ export const loadRadonMetroConfig = (): AdditionalMetroConfig => {
     const localRequire = ((specifier: string) => {
       if (specifier.startsWith('.')) {
         const basePath = path.resolve(path.dirname(resolvedFilePath), specifier);
-        const withExtension =
-          fs.existsSync(basePath)
-            ? basePath
-            : ['.js', '.cjs', '.json'].map((ext) => `${basePath}${ext}`).find((candidate) => fs.existsSync(candidate));
+        const withExtension = fs.existsSync(basePath)
+          ? basePath
+          : ['.js', '.cjs', '.json'].map((ext) => `${basePath}${ext}`).find((candidate) => fs.existsSync(candidate));
 
         if (!withExtension) {
           return nodeRequire(specifier);
@@ -71,8 +70,7 @@ export const loadRadonMetroConfig = (): AdditionalMetroConfig => {
   // with its wrapper transformer.
   const appRoot = process.cwd();
   const originalBabelTransformerPath =
-    process.env.RADON_IDE_ORIG_BABEL_TRANSFORMER_PATH ??
-    requireResolve('metro-react-native-babel-transformer');
+    process.env.RADON_IDE_ORIG_BABEL_TRANSFORMER_PATH ?? requireResolve('metro-react-native-babel-transformer');
 
   const baseConfig: AdditionalMetroConfig = {
     projectRoot: appRoot,

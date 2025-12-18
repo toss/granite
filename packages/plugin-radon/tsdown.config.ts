@@ -10,7 +10,7 @@ export default defineConfig([
   {
     entry: 'src/routerBabel.js',
     outDir: 'dist',
-    format: ['esm','cjs'],
+    format: ['esm', 'cjs'],
     dts: false,
     minify: true,
   },

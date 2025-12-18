@@ -10,7 +10,6 @@ const DEFAULT_OPTIONS: Required<RadonGraniteRouterPluginOptions> = {
 export const radonGraniteRouter = (options: RadonGraniteRouterPluginOptions = DEFAULT_OPTIONS): GranitePluginCore => {
   const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
 
-
   return {
     name: 'radon-metro-reporter',
     config: {

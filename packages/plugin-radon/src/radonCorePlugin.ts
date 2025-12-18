@@ -7,7 +7,7 @@ import { loadRadonMetroConfig } from './utils/loadRadonMetroConfig';
 function ensureRadonIdeEnv() {
   const appRoot = getPackageRoot();
   const radonIdePath = detectRadonIdeExtensionPath();
-  
+
   if (!radonIdePath) {
     console.warn('[Radon] Extension not found, Radon IDE features will not be available');
     return;

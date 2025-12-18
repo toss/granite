@@ -60,8 +60,7 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
         },
       }),
       babelTransformerPath:
-        additionalConfig?.transformer?.babelTransformerPath ||
-        require.resolve('metro-react-native-babel-transformer'),
+        additionalConfig?.transformer?.babelTransformerPath || require.resolve('metro-react-native-babel-transformer'),
       asyncRequireModulePath: require.resolve('metro-runtime/src/modules/asyncRequire'),
       unstable_collectDependenciesPath: resolveVendors('metro/src/ModuleGraph/worker/collectDependencies'),
       unstable_allowRequireContext: true,
