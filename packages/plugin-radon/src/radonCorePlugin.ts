@@ -21,7 +21,7 @@ function ensureRadonIdeEnv() {
   process.env.NODE_PATH = path.join(appRoot, 'node_modules');
   process.env.RCT_METRO_PORT = '8081';
   process.env.RADON_IDE_LIB_PATH = radonIdeLibPath;
-  process.env.RADON_IDE_VERSION = '1.14.2';
+  process.env.RADON_IDE_VERSION = '1.14.0';
   process.env.RADON_IDE_ORIG_BABEL_TRANSFORMER_PATH = require.resolve('metro-react-native-babel-transformer');
 }
 
