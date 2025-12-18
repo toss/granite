@@ -16,7 +16,7 @@ use_default_provider = (provider_env != 'false')  # default: true
 
 # Exclude AVPlayerProvider when not using default provider
 exclude_patterns = []
-exclude_patterns << "ios/Providers/AVPlayerProvider.swift" unless use_default_provider
+exclude_patterns << "ios/Providers/AVPlayerProvider.swift" if use_default_provider
 
 Pod::Spec.new do |s|
   s.name         = "GraniteVideo"
