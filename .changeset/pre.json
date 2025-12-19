@@ -26,5 +26,12 @@
     "@granite-js/blur-view": "0.1.34-next.0",
     "@granite-js/video": "0.1.34-next.0"
   },
-  "changesets": ["crisp-poets-hope", "frank-bats-say", "shaky-clocks-care", "twelve-heads-burn", "wacky-news-invite"]
+  "changesets": [
+    "bright-falcons-dig",
+    "crisp-poets-hope",
+    "frank-bats-say",
+    "shaky-clocks-care",
+    "twelve-heads-burn",
+    "wacky-news-invite"
+  ]
 }
