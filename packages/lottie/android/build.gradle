@@ -25,8 +25,42 @@ def getExtOrIntegerDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["GraniteLottie_" + name]).toInteger()
 }
 
-// Read environment variable for default provider inclusion (default: true)
-def includeDefaultProvider = System.getenv('GRANITE_LOTTIE_DEFAULT_PROVIDER') != 'false'
+// ============================================================
+// GraniteLottie Default Provider Configuration
+// ============================================================
+// Priority: GRANITE_LOTTIE_DEFAULT_PROVIDER > GRANITE_DEFAULT_PROVIDER_ALL > true (default)
+//
+// Examples:
+//   Include default provider (default):
+//     ./gradlew assembleDebug
+//
+//   Exclude default provider for lottie only:
+//     GRANITE_LOTTIE_DEFAULT_PROVIDER=false ./gradlew assembleDebug
+//
+//   Exclude default providers for all Granite packages:
+//     GRANITE_DEFAULT_PROVIDER_ALL=false ./gradlew assembleDebug
+//
+//   Exclude all but override lottie to include:
+//     GRANITE_DEFAULT_PROVIDER_ALL=false GRANITE_LOTTIE_DEFAULT_PROVIDER=true ./gradlew assembleDebug
+// ============================================================
+def resolveDefaultProvider(String specificKey, String fallbackKey, boolean defaultValue) {
+    def specificValue = System.getenv(specificKey)
+    def fallbackValue = System.getenv(fallbackKey)
+
+    if (specificValue != null) {
+        return specificValue == 'true'
+    } else if (fallbackValue != null) {
+        return fallbackValue == 'true'
+    } else {
+        return defaultValue
+    }
+}
+
+def includeDefaultProvider = resolveDefaultProvider(
+    'GRANITE_LOTTIE_DEFAULT_PROVIDER',
+    'GRANITE_DEFAULT_PROVIDER_ALL',
+    true
+)
 
 android {
   namespace "com.anthropic.granitelottie"

@@ -2,8 +2,39 @@ require "json"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
-# Read environment variable for default provider inclusion (default: true)
-include_default_provider = ENV['GRANITE_LOTTIE_DEFAULT_PROVIDER'] != 'false'
+# ============================================================
+# GraniteLottie Default Provider Configuration
+# ============================================================
+# Priority: GRANITE_LOTTIE_DEFAULT_PROVIDER > GRANITE_DEFAULT_PROVIDER_ALL > true (default)
+#
+# Examples:
+#   Include default provider (default):
+#     pod install
+#
+#   Exclude default provider for lottie only:
+#     GRANITE_LOTTIE_DEFAULT_PROVIDER=false pod install
+#
+#   Exclude default providers for all Granite packages:
+#     GRANITE_DEFAULT_PROVIDER_ALL=false pod install
+#
+#   Exclude all but override lottie to include:
+#     GRANITE_DEFAULT_PROVIDER_ALL=false GRANITE_LOTTIE_DEFAULT_PROVIDER=true pod install
+# ============================================================
+def resolve_default_provider(specific_key, fallback_key, default_value)
+  if ENV.key?(specific_key)
+    ENV[specific_key] == 'true'
+  elsif ENV.key?(fallback_key)
+    ENV[fallback_key] == 'true'
+  else
+    default_value
+  end
+end
+
+include_default_provider = resolve_default_provider(
+  'GRANITE_LOTTIE_DEFAULT_PROVIDER',
+  'GRANITE_DEFAULT_PROVIDER_ALL',
+  true
+)
 
 Pod::Spec.new do |s|
   s.name         = "GraniteLottie"
