@@ -1,20 +1,21 @@
 {
   "name": "@granite-js/lottie",
-  "version": "0.1.0",
+  "version": "0.1.34-next.5s",
   "description": "Pluggable Lottie animation component for React Native",
-  "main": "./lib/module/index.js",
-  "types": "./lib/typescript/src/index.d.ts",
+  "main": "./dist/module/index.js",
+  "types": "./dist/typescript/src/index.d.ts",
+  "react-native": "./src/index.ts",
   "exports": {
     ".": {
       "source": "./src/index.tsx",
-      "types": "./lib/typescript/src/index.d.ts",
-      "default": "./lib/module/index.js"
+      "types": "./dist/typescript/src/index.d.ts",
+      "default": "./dist/module/index.js"
     },
     "./package.json": "./package.json"
   },
   "files": [
     "src",
-    "lib",
+    "dist",
     "android",
     "ios",
     "*.podspec",
@@ -32,10 +33,11 @@
   ],
   "scripts": {
     "prepack": "yarn build",
+    "example": "yarn workspace @granite-js/lottie-example",
+    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "build": "bob build",
-    "clean": "del-cli android/build ios/build lib"
+    "build": "bob build && tsc --project tsconfig.build.json"
   },
   "repository": {
     "type": "git",
@@ -60,18 +62,12 @@
   },
   "react-native-builder-bob": {
     "source": "src",
-    "output": "lib",
+    "output": "dist",
     "targets": [
       [
         "module",
         {
           "esm": true
-        }
-      ],
-      [
-        "typescript",
-        {
-          "project": "tsconfig.build.json"
         }
       ]
     ]

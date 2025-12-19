@@ -5556,16 +5556,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@granite-js/lottie@workspace:packages/lottie"
   dependencies:
-    "@granite-js/native": "workspace:*"
+    "@react-native/babel-preset": "catalog:react-native"
     "@types/react": "catalog:react-native"
+    del-cli: "npm:^6.0.0"
     eslint: "npm:^9.7.0"
     react: "catalog:react-native"
     react-native: "catalog:react-native"
-    tsup: "npm:^8.5.0"
+    react-native-builder-bob: "npm:^0.40.17"
     typescript: "npm:5.8.3"
   peerDependencies:
-    "@granite-js/native": "workspace:*"
-    "@types/react": "*"
     react: "*"
     react-native: "*"
   languageName: unknown
@@ -22688,7 +22687,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-builder-bob@npm:0.40.17, react-native-builder-bob@npm:^0.40.15":
+"react-native-builder-bob@npm:0.40.17, react-native-builder-bob@npm:^0.40.15, react-native-builder-bob@npm:^0.40.17":
   version: 0.40.17
   resolution: "react-native-builder-bob@npm:0.40.17"
   dependencies:

@@ -1,47 +1,31 @@
-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
-import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
-import type {
-  ViewProps,
-  HostComponent,
-  Double,
-  Float,
-  Int32,
-} from 'react-native';
-import type {
-  DirectEventHandler,
-  WithDefault,
+import type { ViewProps, HostComponent } from 'react-native';
+import {
+  type Int32,
+  type Float,
+  type Double,
+  type DirectEventHandler,
+  type WithDefault,
 } from 'react-native/Libraries/Types/CodegenTypes';
+import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
+import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 
 // Color filter type for native
-type ColorFilterNative = Readonly<{
+interface ColorFilterNative {
   keypath: string;
   color: string;
-}>;
+}
 
 // Text filter for iOS
-type TextFilterIOSNative = Readonly<{
+interface TextFilterIOSNative {
   keypath: string;
   text: string;
-}>;
+}
 
 // Text filter for Android
-type TextFilterAndroidNative = Readonly<{
+interface TextFilterAndroidNative {
   find: string;
   replace: string;
-}>;
-
-// Event payloads
-type AnimationFinishEventData = Readonly<{
-  isCancelled: boolean;
-}>;
-
-type AnimationFailureEventData = Readonly<{
-  error: string;
-}>;
-
-type AnimationLoadedEventData = Readonly<object>;
-
-type AnimationLoopEventData = Readonly<object>;
+}
 
 export interface NativeProps extends ViewProps {
   // Animation source
@@ -73,10 +57,14 @@ export interface NativeProps extends ViewProps {
   textFiltersAndroid?: ReadonlyArray<TextFilterAndroidNative>;
 
   // Events
-  onAnimationFinish?: DirectEventHandler<AnimationFinishEventData>;
-  onAnimationFailure?: DirectEventHandler<AnimationFailureEventData>;
-  onAnimationLoaded?: DirectEventHandler<AnimationLoadedEventData>;
-  onAnimationLoop?: DirectEventHandler<AnimationLoopEventData>;
+  onAnimationFinish?: DirectEventHandler<{
+    isCancelled: boolean;
+  }>;
+  onAnimationFailure?: DirectEventHandler<{
+    error: string;
+  }>;
+  onAnimationLoaded?: DirectEventHandler<null>;
+  onAnimationLoop?: DirectEventHandler<null>;
 }
 
 export interface NativeCommands {
