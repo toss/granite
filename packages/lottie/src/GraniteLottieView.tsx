@@ -1,15 +1,6 @@
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { forwardRef, useImperativeHandle, useRef, useCallback, useMemo } from 'react';
 import { Image, type NativeSyntheticEvent, Platform } from 'react-native';
-import NativeGraniteLottieView, {
-  Commands,
-  type NativeProps,
-} from './GraniteLottieViewNativeComponent';
+import NativeGraniteLottieView, { Commands, type NativeProps } from './GraniteLottieViewNativeComponent';
 import type {
   GraniteLottieViewProps,
   GraniteLottieViewRef,
@@ -69,10 +60,7 @@ function resolveSource(source: AnimationSource): {
 /**
  * GraniteLottieView - Pluggable Lottie animation component for React Native
  */
-const GraniteLottieView = forwardRef<
-  GraniteLottieViewRef,
-  GraniteLottieViewProps
->((props, ref) => {
+const GraniteLottieView = forwardRef<GraniteLottieViewRef, GraniteLottieViewProps>((props, ref) => {
   const {
     source,
     style,
@@ -98,8 +86,7 @@ const GraniteLottieView = forwardRef<
     ...restProps
   } = props;
 
-  const nativeRef =
-    useRef<React.ElementRef<typeof NativeGraniteLottieView>>(null);
+  const nativeRef = useRef<React.ElementRef<typeof NativeGraniteLottieView>>(null);
 
   // Imperative handle
   useImperativeHandle(ref, () => ({
@@ -175,8 +162,7 @@ const GraniteLottieView = forwardRef<
   // Platform-specific props
   if (Platform.OS === 'android') {
     nativeProps.textFiltersAndroid = textFiltersAndroid;
-    nativeProps.enableMergePathsAndroidForKitKatAndAbove =
-      enableMergePathsAndroidForKitKatAndAbove;
+    nativeProps.enableMergePathsAndroidForKitKatAndAbove = enableMergePathsAndroidForKitKatAndAbove;
     nativeProps.enableSafeModeAndroid = enableSafeModeAndroid;
     nativeProps.hardwareAccelerationAndroid = hardwareAccelerationAndroid;
   } else if (Platform.OS === 'ios') {

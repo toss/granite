@@ -54,11 +54,7 @@ export type RenderMode = 'AUTOMATIC' | 'HARDWARE' | 'SOFTWARE';
 /**
  * Animation source - can be a local asset, remote URL, or JSON object
  */
-export type AnimationSource =
-  | string
-  | AnimationObject
-  | { uri: string }
-  | number; // require() returns number
+export type AnimationSource = string | AnimationObject | { uri: string } | number; // require() returns number
 
 /**
  * Callback when animation finishes

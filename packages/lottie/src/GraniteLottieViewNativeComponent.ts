@@ -68,11 +68,7 @@ export interface NativeProps extends ViewProps {
 }
 
 export interface NativeCommands {
-  play: (
-    viewRef: React.ElementRef<HostComponent<NativeProps>>,
-    startFrame: Int32,
-    endFrame: Int32
-  ) => void;
+  play: (viewRef: React.ElementRef<HostComponent<NativeProps>>, startFrame: Int32, endFrame: Int32) => void;
   pause: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
   resume: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
   reset: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
@@ -82,6 +78,4 @@ export const Commands: NativeCommands = codegenNativeCommands<NativeCommands>({
   supportedCommands: ['play', 'pause', 'resume', 'reset'],
 });
 
-export default codegenNativeComponent<NativeProps>(
-  'GraniteLottieView'
-) as HostComponent<NativeProps>;
+export default codegenNativeComponent<NativeProps>('GraniteLottieView') as HostComponent<NativeProps>;
