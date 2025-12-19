@@ -11,6 +11,9 @@ package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 # ============================================================
 granite_default_provider = ENV.fetch('GRANITE_IMAGE_DEFAULT_PROVIDER', 'true') == 'true'
 
+exclude_patterns = []
+exclude_patterns << "ios/Providers/SDWebImageProvider.swift" if granite_default_provider
+
 Pod::Spec.new do |s|
   s.name         = "GraniteImage"
   s.version      = package["version"]
@@ -23,11 +26,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/toss/granite.git", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,m,mm,swift,cpp}"
-
-  # Exclude default provider if not needed
-  unless granite_default_provider
-    s.exclude_files = "ios/Providers/SDWebImageProvider.swift"
-  end
+  s.exclude_files = exclude_patterns if exclude_patterns.any?
 
   # Set preprocessor macros
   swift_flags = []

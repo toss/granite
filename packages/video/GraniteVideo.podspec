@@ -6,17 +6,17 @@ package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 # Provider Selection (Environment Variables)
 # ============================================================
 # Usage:
-#   Default (AVPlayer):  pod install
-#   No provider:         GRANITE_VIDEO_PROVIDER=none pod install
+#   Default (AVPlayer):  pod install                                    (default: true)
+#   No provider:         GRANITE_VIDEO_DEFAULT_PROVIDER=false pod install
 #                        (then register your own provider in AppDelegate)
 # ============================================================
 
-provider_env = ENV['GRANITE_VIDEO_PROVIDER']&.downcase
-provider_none = (provider_env == 'none')
+provider_env = ENV['GRANITE_VIDEO_DEFAULT_PROVIDER']&.downcase
+use_default_provider = (provider_env != 'false')  # default: true
 
-# Exclude AVPlayerProvider when using custom provider
+# Exclude AVPlayerProvider when not using default provider
 exclude_patterns = []
-exclude_patterns << "ios/Providers/AVPlayerProvider.swift" if provider_none
+exclude_patterns << "ios/Providers/AVPlayerProvider.swift" if use_default_provider
 
 Pod::Spec.new do |s|
   s.name         = "GraniteVideo"
@@ -34,7 +34,7 @@ Pod::Spec.new do |s|
 
   # Preprocessor definitions for conditional compilation
   preprocessor_defs = ['$(inherited)']
-  preprocessor_defs << 'GRANITE_VIDEO_PROVIDER_NONE=1' if provider_none
+  preprocessor_defs << 'GRANITE_VIDEO_DEFAULT_PROVIDER=1' if use_default_provider
 
   s.pod_target_xcconfig = {
     'CLANG_ENABLE_MODULES' => 'YES',
