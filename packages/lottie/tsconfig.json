@@ -1,4 +1,10 @@
 {
   "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "paths": {
+      "@granite-js/lottie": ["./src/index"]
+    }
+  },
   "include": ["src"]
 }

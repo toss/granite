@@ -1,44 +1,93 @@
 {
   "name": "@granite-js/lottie",
-  "version": "0.1.34-next.5",
-  "scripts": {
-    "prepack": "yarn build",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
-    "build": "tsup"
-  },
-  "main": "./src/index.ts",
-  "types": "./dist/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/toss/granite.git",
-    "directory": "packages/lottie"
-  },
+  "version": "0.1.0",
+  "description": "Pluggable Lottie animation component for React Native",
+  "main": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
+      "source": "./src/index.tsx",
+      "types": "./lib/typescript/src/index.d.ts",
+      "default": "./lib/module/index.js"
     },
     "./package.json": "./package.json"
   },
   "files": [
     "src",
-    "dist"
+    "lib",
+    "android",
+    "ios",
+    "*.podspec",
+    "react-native.config.js",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*"
   ],
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "bob build",
+    "clean": "del-cli android/build ios/build lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anthropics/granite.git",
+    "directory": "packages/lottie"
+  },
+  "author": "",
+  "license": "MIT",
   "devDependencies": {
-    "@granite-js/native": "workspace:*",
+    "@react-native/babel-preset": "catalog:react-native",
     "@types/react": "catalog:react-native",
+    "del-cli": "^6.0.0",
     "eslint": "^9.7.0",
     "react": "catalog:react-native",
     "react-native": "catalog:react-native",
-    "tsup": "^8.5.0",
+    "react-native-builder-bob": "^0.40.17",
     "typescript": "5.8.3"
   },
   "peerDependencies": {
-    "@granite-js/native": "workspace:*",
-    "@types/react": "*",
     "react": "*",
     "react-native": "*"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
+    ]
+  },
+  "codegenConfig": {
+    "name": "GraniteLottieViewSpec",
+    "type": "all",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.anthropic.granitelottie"
+    },
+    "ios": {
+      "componentProvider": {
+        "GraniteLottieView": "GraniteLottieView"
+      }
+    }
   },
   "sideEffects": false
 }
