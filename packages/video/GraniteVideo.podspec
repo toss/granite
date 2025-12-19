@@ -11,12 +11,11 @@ package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 #                        (then register your own provider in AppDelegate)
 # ============================================================
 
-provider_env = ENV['GRANITE_VIDEO_DEFAULT_PROVIDER']&.downcase
-use_default_provider = (provider_env != 'false')  # default: true
+use_default_provider = ENV.fetch('GRANITE_VIDEO_DEFAULT_PROVIDER', 'true') == 'true'
 
 # Exclude AVPlayerProvider when not using default provider
 exclude_patterns = []
-exclude_patterns << "ios/Providers/AVPlayerProvider.swift" if use_default_provider
+exclude_patterns << "ios/Providers/AVPlayerProvider.swift" unless use_default_provider
 
 Pod::Spec.new do |s|
   s.name         = "GraniteVideo"

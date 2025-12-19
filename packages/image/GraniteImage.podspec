@@ -9,10 +9,10 @@ package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 # To exclude the default provider and use your own implementation:
 #   GRANITE_IMAGE_DEFAULT_PROVIDER=false pod install
 # ============================================================
-granite_default_provider = ENV.fetch('GRANITE_IMAGE_DEFAULT_PROVIDER', 'true') == 'true'
+use_default_provider = ENV.fetch('GRANITE_IMAGE_DEFAULT_PROVIDER', 'true') == 'true'
 
 exclude_patterns = []
-exclude_patterns << "ios/Providers/SDWebImageProvider.swift" if granite_default_provider
+exclude_patterns << "ios/Providers/SDWebImageProvider.swift" unless use_default_provider
 
 Pod::Spec.new do |s|
   s.name         = "GraniteImage"
@@ -30,7 +30,7 @@ Pod::Spec.new do |s|
 
   # Set preprocessor macros
   swift_flags = []
-  swift_flags << 'GRANITE_IMAGE_DEFAULT_PROVIDER' if granite_default_provider
+  swift_flags << 'GRANITE_IMAGE_DEFAULT_PROVIDER' if use_default_provider
 
   s.pod_target_xcconfig = {
     'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => swift_flags.join(' '),
@@ -41,7 +41,7 @@ Pod::Spec.new do |s|
   install_modules_dependencies(s)
 
   # Include SDWebImage dependency only when using default provider
-  if granite_default_provider
+  if use_default_provider
     s.dependency "SDWebImage", "~> 5.18"
   end
 end
