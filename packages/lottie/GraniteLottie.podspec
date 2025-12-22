@@ -20,7 +20,7 @@ package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 #   Exclude all but override lottie to include:
 #     GRANITE_DEFAULT_PROVIDER_ALL=false GRANITE_LOTTIE_DEFAULT_PROVIDER=true pod install
 # ============================================================
-def resolve_default_provider(specific_key, fallback_key, default_value)
+resolve_default_provider = lambda do |specific_key, fallback_key, default_value|
   if ENV.key?(specific_key)
     ENV[specific_key] == 'true'
   elsif ENV.key?(fallback_key)
@@ -30,7 +30,7 @@ def resolve_default_provider(specific_key, fallback_key, default_value)
   end
 end
 
-include_default_provider = resolve_default_provider(
+use_default_provider = resolve_default_provider.call(
   'GRANITE_LOTTIE_DEFAULT_PROVIDER',
   'GRANITE_DEFAULT_PROVIDER_ALL',
   true
@@ -48,7 +48,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => package["repository"]["url"], :tag => "#{s.version}" }
 
   # Conditional source files based on environment variable
-  if include_default_provider
+  if use_default_provider
     s.source_files = "ios/**/*.{h,m,mm,swift,cpp}"
   else
     s.source_files = "ios/**/*.{h,m,mm,swift,cpp}"
@@ -61,12 +61,12 @@ Pod::Spec.new do |s|
     'CLANG_ENABLE_MODULES' => 'YES',
     'SWIFT_OBJC_INTERFACE_HEADER_NAME' => 'GraniteLottie-Swift.h',
     'DEFINES_MODULE' => 'YES',
-    'GCC_PREPROCESSOR_DEFINITIONS' => include_default_provider ? '$(inherited) GRANITE_LOTTIE_DEFAULT_PROVIDER=1' : '$(inherited) GRANITE_LOTTIE_DEFAULT_PROVIDER=0',
-    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => include_default_provider ? '$(inherited) GRANITE_LOTTIE_DEFAULT_PROVIDER' : '$(inherited)'
+    'GCC_PREPROCESSOR_DEFINITIONS' => use_default_provider ? '$(inherited) GRANITE_LOTTIE_DEFAULT_PROVIDER=1' : '$(inherited) GRANITE_LOTTIE_DEFAULT_PROVIDER=0',
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => use_default_provider ? '$(inherited) GRANITE_LOTTIE_DEFAULT_PROVIDER' : '$(inherited)'
   }
 
   # Conditional lottie-ios dependency
-  if include_default_provider
+  if use_default_provider
     s.dependency 'lottie-ios', '~> 4.5.0'
   end
 
