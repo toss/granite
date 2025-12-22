@@ -20,7 +20,7 @@ package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 #   Exclude all but override video to include:
 #     GRANITE_DEFAULT_PROVIDER_ALL=false GRANITE_VIDEO_DEFAULT_PROVIDER=true pod install
 # ============================================================
-def resolve_default_provider(specific_key, fallback_key, default_value)
+resolve_default_provider = lambda do |specific_key, fallback_key, default_value|
   if ENV.key?(specific_key)
     ENV[specific_key] == 'true'
   elsif ENV.key?(fallback_key)
@@ -30,7 +30,7 @@ def resolve_default_provider(specific_key, fallback_key, default_value)
   end
 end
 
-use_default_provider = resolve_default_provider(
+use_default_provider = resolve_default_provider.call(
   'GRANITE_VIDEO_DEFAULT_PROVIDER',
   'GRANITE_DEFAULT_PROVIDER_ALL',
   true
