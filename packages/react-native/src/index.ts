@@ -14,7 +14,7 @@ export {
 
 // Image with SVG support
 export * from './image';
-export { Lottie, type RemoteLottieProps, type AnimationObjectLottieProps } from './lottie';
+export * from './lottie';
 
 export * from './dev-entrypoint';
 export * from './native-modules/natives';
