@@ -58,9 +58,9 @@ function resolveSource(source: AnimationSource): {
 }
 
 /**
- * GraniteLottieView - Pluggable Lottie animation component for React Native
+ * LottieView - Pluggable Lottie animation component for React Native
  */
-const GraniteLottieView = forwardRef<GraniteLottieViewRef, GraniteLottieViewProps>((props, ref) => {
+export const LottieView = forwardRef<GraniteLottieViewRef, GraniteLottieViewProps>((props, ref) => {
   const {
     source,
     style,
@@ -172,6 +172,4 @@ const GraniteLottieView = forwardRef<GraniteLottieViewRef, GraniteLottieViewProp
   return <NativeGraniteLottieView ref={nativeRef} {...nativeProps} />;
 });
 
-GraniteLottieView.displayName = 'GraniteLottieView';
-
-export default GraniteLottieView;
+LottieView.displayName = 'LottieView';

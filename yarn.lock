@@ -5707,7 +5707,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@granite-js/native@npm:0.1.34-next.5, @granite-js/native@workspace:*, @granite-js/native@workspace:packages/native":
+"@granite-js/native@workspace:*, @granite-js/native@workspace:packages/native":
   version: 0.0.0-use.local
   resolution: "@granite-js/native@workspace:packages/native"
   dependencies:
@@ -5893,7 +5893,7 @@ __metadata:
     "@granite-js/jest": "workspace:*"
     "@granite-js/lottie": "workspace:*"
     "@granite-js/mpack": "workspace:*"
-    "@granite-js/native": "npm:0.1.34-next.5"
+    "@granite-js/native": "workspace:*"
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/style-utils": "workspace:*"
     "@granite-js/video": "workspace:*"
@@ -5919,7 +5919,7 @@ __metadata:
     vitest: "npm:^4.0.12"
     zod: "npm:^4.1.12"
   peerDependencies:
-    "@granite-js/native": 0.1.34-next.5
+    "@granite-js/native": "workspace:*"
     "@types/react": "*"
     brick-module: "*"
     react: "*"

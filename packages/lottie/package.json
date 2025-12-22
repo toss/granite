@@ -1,14 +1,15 @@
 {
   "name": "@granite-js/lottie",
-  "version": "0.1.34-next.5s",
+  "version": "0.1.34-next.5",
   "description": "Pluggable Lottie animation component for React Native",
+  "type": "module",
   "main": "./dist/module/index.js",
-  "types": "./dist/typescript/src/index.d.ts",
+  "types": "./dist/typescript/index.d.ts",
   "react-native": "./src/index.ts",
   "exports": {
     ".": {
-      "source": "./src/index.tsx",
-      "types": "./dist/typescript/src/index.d.ts",
+      "types": "./dist/typescript/index.d.ts",
+      "react-native": "./src/index.ts",
       "default": "./dist/module/index.js"
     },
     "./package.json": "./package.json"

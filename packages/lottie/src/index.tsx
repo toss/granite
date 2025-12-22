@@ -1,2 +1,2 @@
-export { default as GraniteLottieView } from './GraniteLottieView';
+export { LottieView } from './GraniteLottieView';
 export * from './types';
