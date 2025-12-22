@@ -1,6 +1,6 @@
 buildscript {
   ext.getExtOrDefault = {name ->
-    return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['GraniteVideo_' + name]
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['GraniteLottie_' + name]
   }
 
   repositories {
@@ -22,26 +22,26 @@ apply plugin: "kotlin-android"
 apply plugin: "com.facebook.react"
 
 def getExtOrIntegerDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["GraniteVideo_" + name]).toInteger()
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["GraniteLottie_" + name]).toInteger()
 }
 
 // ============================================================
-// GraniteVideo Default Provider Configuration
+// GraniteLottie Default Provider Configuration
 // ============================================================
-// Priority: GRANITE_VIDEO_DEFAULT_PROVIDER > GRANITE_DEFAULT_PROVIDER_ALL > true (default)
+// Priority: GRANITE_LOTTIE_DEFAULT_PROVIDER > GRANITE_DEFAULT_PROVIDER_ALL > true (default)
 //
 // Examples:
 //   Include default provider (default):
 //     ./gradlew assembleDebug
 //
-//   Exclude default provider for video only:
-//     GRANITE_VIDEO_DEFAULT_PROVIDER=false ./gradlew assembleDebug
+//   Exclude default provider for lottie only:
+//     GRANITE_LOTTIE_DEFAULT_PROVIDER=false ./gradlew assembleDebug
 //
 //   Exclude default providers for all Granite packages:
 //     GRANITE_DEFAULT_PROVIDER_ALL=false ./gradlew assembleDebug
 //
-//   Exclude all but override video to include:
-//     GRANITE_DEFAULT_PROVIDER_ALL=false GRANITE_VIDEO_DEFAULT_PROVIDER=true ./gradlew assembleDebug
+//   Exclude all but override lottie to include:
+//     GRANITE_DEFAULT_PROVIDER_ALL=false GRANITE_LOTTIE_DEFAULT_PROVIDER=true ./gradlew assembleDebug
 // ============================================================
 def resolveDefaultProvider(String specificKey, String fallbackKey, boolean defaultValue) {
     def specificValue = System.getenv(specificKey)
@@ -57,13 +57,13 @@ def resolveDefaultProvider(String specificKey, String fallbackKey, boolean defau
 }
 
 def includeDefaultProvider = resolveDefaultProvider(
-    'GRANITE_VIDEO_DEFAULT_PROVIDER',
+    'GRANITE_LOTTIE_DEFAULT_PROVIDER',
     'GRANITE_DEFAULT_PROVIDER_ALL',
     true
 )
 
 android {
-  namespace "com.anthropic.reactnativegranitevideo"
+  namespace "com.anthropic.granitelottie"
 
   compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
 
@@ -116,29 +116,12 @@ repositories {
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
 
-// Provider selection via gradle properties (only when default provider is enabled)
-def useExoPlayer = project.hasProperty('graniteVideoUseExoPlayer') ? project.graniteVideoUseExoPlayer.toBoolean() : true
-def useVLC = project.hasProperty('graniteVideoUseVLC') ? project.graniteVideoUseVLC.toBoolean() : false
-
 dependencies {
   implementation "com.facebook.react:react-android"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-  // Provider-specific dependencies (only included when default provider is enabled)
+  // Conditional lottie-android dependency
   if (includeDefaultProvider) {
-    // Default: ExoPlayer (Media3)
-    if (useExoPlayer) {
-      implementation "androidx.media3:media3-exoplayer:1.2.1"
-      implementation "androidx.media3:media3-exoplayer-dash:1.2.1"
-      implementation "androidx.media3:media3-exoplayer-hls:1.2.1"
-      implementation "androidx.media3:media3-exoplayer-smoothstreaming:1.2.1"
-      implementation "androidx.media3:media3-datasource:1.2.1"
-      implementation "androidx.media3:media3-ui:1.2.1"
-    }
-
-    // Optional: VLC
-    if (useVLC) {
-      implementation "org.videolan.android:libvlc-all:3.6.0"
-    }
+    implementation 'com.airbnb.android:lottie:6.6.0'
   }
 }

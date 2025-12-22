@@ -3,15 +3,38 @@ require "json"
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
 # ============================================================
-# Provider Selection (Environment Variables)
+# GraniteVideo Default Provider Configuration
 # ============================================================
-# Usage:
-#   Default (AVPlayer):  pod install                                    (default: true)
-#   No provider:         GRANITE_VIDEO_DEFAULT_PROVIDER=false pod install
-#                        (then register your own provider in AppDelegate)
+# Priority: GRANITE_VIDEO_DEFAULT_PROVIDER > GRANITE_DEFAULT_PROVIDER_ALL > true (default)
+#
+# Examples:
+#   Include default provider (default):
+#     pod install
+#
+#   Exclude default provider for video only:
+#     GRANITE_VIDEO_DEFAULT_PROVIDER=false pod install
+#
+#   Exclude default providers for all Granite packages:
+#     GRANITE_DEFAULT_PROVIDER_ALL=false pod install
+#
+#   Exclude all but override video to include:
+#     GRANITE_DEFAULT_PROVIDER_ALL=false GRANITE_VIDEO_DEFAULT_PROVIDER=true pod install
 # ============================================================
+def resolve_default_provider(specific_key, fallback_key, default_value)
+  if ENV.key?(specific_key)
+    ENV[specific_key] == 'true'
+  elsif ENV.key?(fallback_key)
+    ENV[fallback_key] == 'true'
+  else
+    default_value
+  end
+end
 
-use_default_provider = ENV.fetch('GRANITE_VIDEO_DEFAULT_PROVIDER', 'true') == 'true'
+use_default_provider = resolve_default_provider(
+  'GRANITE_VIDEO_DEFAULT_PROVIDER',
+  'GRANITE_DEFAULT_PROVIDER_ALL',
+  true
+)
 
 # Exclude AVPlayerProvider when not using default provider
 exclude_patterns = []
