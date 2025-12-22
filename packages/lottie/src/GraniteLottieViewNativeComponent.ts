@@ -1,4 +1,4 @@
-import type { ViewProps, HostComponent } from 'react-native';
+import { type ViewProps, type HostComponent, codegenNativeCommands, codegenNativeComponent } from 'react-native';
 import {
   type Int32,
   type Float,
@@ -6,8 +6,6 @@ import {
   type DirectEventHandler,
   type WithDefault,
 } from 'react-native/Libraries/Types/CodegenTypes';
-import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 
 // Color filter type for native
 interface ColorFilterNative {

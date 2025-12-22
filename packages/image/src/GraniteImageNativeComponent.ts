@@ -1,6 +1,5 @@
-import { type ViewProps, type ColorValue } from 'react-native';
+import { type ViewProps, type ColorValue, codegenNativeComponent } from 'react-native';
 import type { WithDefault, Int32, DirectEventHandler } from 'react-native/Libraries/Types/CodegenTypes';
-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 
 // Event payload types
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
