@@ -89,7 +89,6 @@
     "@babel/traverse": "7.28.5",
     "@babel/types": "7.28.5",
     "@fastify/static": "7.0.1",
-    "@granite-js/devtools-frontend": "workspace:*",
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/utils": "workspace:*",
     "@inquirer/prompts": "^7.2.3",
