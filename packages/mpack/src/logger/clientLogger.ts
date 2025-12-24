@@ -1,7 +1,17 @@
 import { logger } from './Logger';
-import type { ClientLogEvent } from '../server/types';
 
-export const clientLogger = (level: ClientLogEvent['level'], data: any[]) => {
+type ClientLogLevel =
+  | 'trace'
+  | 'debug'
+  | 'info'
+  | 'warn'
+  | 'error'
+  | 'log'
+  | 'group'
+  | 'groupCollapsed'
+  | 'groupEnd';
+
+export const clientLogger = (level: ClientLogLevel, data: any[]) => {
   switch (level) {
     case 'trace':
       logger.trace(...data);
