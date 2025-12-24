@@ -1,6 +1,6 @@
 import { createPluginHooksDriver, resolveConfig, type CompleteGraniteConfig } from '@granite-js/plugin-core';
 import { createDevMiddleware } from '@react-native/dev-middleware';
-import { createDevServerMiddleware, indexPageMiddleware } from '@react-native-community/cli-server-api';
+import { createDevServerMiddleware } from '@react-native-community/cli-server-api';
 import Debug from 'debug';
 import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../constants';
 import { getMetroConfig } from '../metro/getMetroConfig';
@@ -29,6 +29,8 @@ export async function runServer({
 }: RunServerConfig) {
   // Since eventsSocketEndpoint.reportEvent cannot be assigned first due to the control flow,
   // we reference it through an object
+  const devServerUrl = new URL(`http://${host}:${port}`).toString();
+
   const ref: Partial<{
     reportEvent: (event: any) => void;
     enableStdinWatchMode: () => void;
@@ -79,15 +81,10 @@ export async function runServer({
     watchFolders: metroConfig.watchFolders,
   });
 
-  const serverBaseUrl = new URL(`http://${host}:${port}`).toString();
-
   const { middleware: debuggerMiddleware, websocketEndpoints: debuggerWebSocketEndpoints } = createDevMiddleware({
     projectRoot: config.cwd,
-    serverBaseUrl,
+    serverBaseUrl: devServerUrl,
   });
-
-  middleware.use(debuggerMiddleware);
-  middleware.use(indexPageMiddleware);
 
   const customEnhanceMiddleware = metroConfig.server.enhanceMiddleware;
 
@@ -115,6 +112,7 @@ export async function runServer({
       communityWebsocketEndpoints,
       debuggerWebSocketEndpoints
     },
+    unstable_extraMiddleware: [middleware, debuggerMiddleware],
     inspectorProxyDelegate: inspectorProxy?.delegate,
   });
 

@@ -8,6 +8,7 @@ export default defineConfig({
     '!**/*.{spec,test,stories,d}.*',
     '!**/fixtures/**',
     '!**/__snapshots__/**',
+    '!**/experimental/**',
   ],
   format: ['cjs'],
   external: ['pnpapi'],

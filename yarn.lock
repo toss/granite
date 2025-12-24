@@ -5790,7 +5790,7 @@ __metadata:
     "@react-native-community/cli-tools": "npm:11.3.7"
     "@react-native/babel-plugin-codegen": "catalog:react-native"
     "@react-native/babel-preset": "catalog:react-native"
-    "@react-native/dev-middleware": "npm:0.81.2"
+    "@react-native/dev-middleware": "npm:0.81.3"
     "@shopify/semaphore": "npm:^3.1.0"
     "@swc/core": "catalog:swc"
     "@swc/helpers": "catalog:swc"
@@ -5874,7 +5874,6 @@ __metadata:
     oxc-transform: "npm:^0.82.1"
     path-browserify: "npm:1.0.1"
     prettier-2: "npm:prettier@^2"
-    react-native-devtools-standalone: "npm:^0.4.1"
     rimraf: "npm:^2.5.4"
     serialize-error: "npm:^2.1.0"
     serve-static: "npm:^1.15.0"
@@ -8285,36 +8284,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native/debugger-frontend@npm:0.81.2":
-  version: 0.81.2
-  resolution: "@react-native/debugger-frontend@npm:0.81.2"
-  checksum: 10c0/34aa673464b7975f94a289859742a3b399509d9f41b5b2bb1b02a9ba81623b1e2615838232a7fa64c0e7f0651288b02919c3b0472ab6835f625e6b494510170f
-  languageName: node
-  linkType: hard
-
 "@react-native/debugger-frontend@npm:0.81.3":
   version: 0.81.3
   resolution: "@react-native/debugger-frontend@npm:0.81.3"
   checksum: 10c0/41f3750ba338ddb01f97f111435b8a397b39b78b79966c093f53822c00ed435f18ef1237bd234532cc13439a0615b45dc387dfaa9d9c84de8e9960b488d3d984
-  languageName: node
-  linkType: hard
-
-"@react-native/dev-middleware@npm:0.81.2":
-  version: 0.81.2
-  resolution: "@react-native/dev-middleware@npm:0.81.2"
-  dependencies:
-    "@isaacs/ttlcache": "npm:^1.4.1"
-    "@react-native/debugger-frontend": "npm:0.81.2"
-    chrome-launcher: "npm:^0.15.2"
-    chromium-edge-launcher: "npm:^0.2.0"
-    connect: "npm:^3.6.5"
-    debug: "npm:^4.4.0"
-    invariant: "npm:^2.2.4"
-    nullthrows: "npm:^1.1.1"
-    open: "npm:^7.0.3"
-    serve-static: "npm:^1.16.2"
-    ws: "npm:^6.2.3"
-  checksum: 10c0/34f7fc05492c04a71776971e634748af76ff9e8306ac4906bb6062f0b365f1517e9a5a8f81d77e5c2d2e7b814f76b3b4368e2ec1e613acafdda98a72b94ee4a0
   languageName: node
   linkType: hard
 
@@ -22310,7 +22283,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -22513,30 +22486,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-devtools-inline@npm:^5.3.1":
-  version: 5.3.2
-  resolution: "react-devtools-inline@npm:5.3.2"
-  dependencies:
-    source-map-js: "npm:^0.6.2"
-    sourcemap-codec: "npm:^1.4.8"
-  checksum: 10c0/473a9cd4b8bef5dc8b753712966a7f5f039121b2f33349d756d6d09ad56d1f44b55a1c56d8629656e1e7328e9fc4b6e58656b58d82ca4e0377b2865080aeaadc
-  languageName: node
-  linkType: hard
-
-"react-dom@npm:^0.0.0-experimental-3da26163a3-20240704":
-  version: 0.0.0-fec00a869
-  resolution: "react-dom@npm:0.0.0-fec00a869"
-  dependencies:
-    loose-envify: "npm:^1.1.0"
-    object-assign: "npm:^4.1.1"
-    prop-types: "npm:^15.6.2"
-    scheduler: "npm:0.0.0-fec00a869"
-  peerDependencies:
-    react: 0.0.0-fec00a869
-  checksum: 10c0/fde460327be0cc23d1ffd9e9358e6ba8606d8851d01a2273a4ea66acb3aff51e4d3dab5c3807d604e646140cff935f6320692444f537b9b7c20918cc44bcb8c3
-  languageName: node
-  linkType: hard
-
 "react-freeze@npm:^1.0.0":
   version: 1.0.4
   resolution: "react-freeze@npm:1.0.4"
@@ -22571,19 +22520,6 @@ __metadata:
   version: 19.2.0
   resolution: "react-is@npm:19.2.0"
   checksum: 10c0/a63cb346aeced8ac0e671b0f9b33720d2906de02a066ca067075d871a5d4c64cdb328f495baf9b5842d5868c0d5edd1ce18465a7358b52f4b6aa983479c9bfa2
-  languageName: node
-  linkType: hard
-
-"react-native-devtools-standalone@npm:^0.4.1":
-  version: 0.4.1
-  resolution: "react-native-devtools-standalone@npm:0.4.1"
-  dependencies:
-    react: "npm:^0.0.0-experimental-3da26163a3-20240704"
-    react-devtools-inline: "npm:^5.3.1"
-    react-dom: "npm:^0.0.0-experimental-3da26163a3-20240704"
-    react-is: "npm:^18.2.0"
-    ws: "npm:^8.18.0"
-  checksum: 10c0/429bb7cf2ffa160bd1eaef62000e00d9b3fd2a73bc8de013714564632357490b2a46a131b4106a9ddc08b8f32ba964dae8cc4a2b9747982e93c288551b33c7d7
   languageName: node
   linkType: hard
 
@@ -22805,18 +22741,6 @@ __metadata:
   version: 19.1.0
   resolution: "react@npm:19.1.0"
   checksum: 10c0/530fb9a62237d54137a13d2cfb67a7db6a2156faed43eecc423f4713d9b20c6f2728b026b45e28fcd72e8eadb9e9ed4b089e99f5e295d2f0ad3134251bdd3698
-  languageName: node
-  linkType: hard
-
-"react@npm:^0.0.0-experimental-3da26163a3-20240704":
-  version: 0.0.0-fec00a869
-  resolution: "react@npm:0.0.0-fec00a869"
-  dependencies:
-    loose-envify: "npm:^1.1.0"
-    object-assign: "npm:^4.1.1"
-    prop-types: "npm:^15.6.2"
-    scheduler: "npm:0.0.0-fec00a869"
-  checksum: 10c0/b023d4dfa501d1d935404e93e72524202d53446dba666d6dff3cebdbaf3ac65d0e9a1b88811c14d298111206cb56efa4a07acae0d2d49556737a4ae6fdc0ddd0
   languageName: node
   linkType: hard
 
@@ -23622,16 +23546,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"scheduler@npm:0.0.0-fec00a869":
-  version: 0.0.0-fec00a869
-  resolution: "scheduler@npm:0.0.0-fec00a869"
-  dependencies:
-    loose-envify: "npm:^1.1.0"
-    object-assign: "npm:^4.1.1"
-  checksum: 10c0/835a4c43dba7f04c15c81a2e72eed1deab2217d286db88e72fd92f550c4dfb5f0c683a8d9f5178e8e8663f5ac2b90e49133c058e1f55946974d8e689a4fef696
-  languageName: node
-  linkType: hard
-
 "scheduler@npm:0.26.0":
   version: 0.26.0
   resolution: "scheduler@npm:0.26.0"
@@ -24062,13 +23976,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-js@npm:^0.6.2":
-  version: 0.6.2
-  resolution: "source-map-js@npm:0.6.2"
-  checksum: 10c0/75c147e3db6fe45d0ade3e04e837aec07c4d17165e7069fa5dcc9c5c47c66c53556783d631829ef78541a00ba59e6048683e770af9cc1dcb5dabdeb32f85eaf1
-  languageName: node
-  linkType: hard
-
 "source-map-js@npm:^1.2.1":
   version: 1.2.1
   resolution: "source-map-js@npm:1.2.1"
@@ -24133,13 +24040,6 @@ __metadata:
   dependencies:
     whatwg-url: "npm:^7.0.0"
   checksum: 10c0/fb4d9bde9a9fdb2c29b10e5eae6c71d10e09ef467e1afb75fdec2eb7e11fa5b343a2af553f74f18b695dbc0b81f9da2e9fa3d7a317d5985e9939499ec6087835
-  languageName: node
-  linkType: hard
-
-"sourcemap-codec@npm:^1.4.8":
-  version: 1.4.8
-  resolution: "sourcemap-codec@npm:1.4.8"
-  checksum: 10c0/f099279fdaae070ff156df7414bbe39aad69cdd615454947ed3e19136bfdfcb4544952685ee73f56e17038f4578091e12b17b283ed8ac013882916594d95b9e6
   languageName: node
   linkType: hard
 
