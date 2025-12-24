@@ -41,7 +41,8 @@ export async function runServer({
 }: RunServerConfig) {
   // Since eventsSocketEndpoint.reportEvent cannot be assigned first due to the control flow,
   // we reference it through an object
-  const devServerUrl = new URL(`http://${host}:${port}`).toString();
+  const devServerHostname = host === '0.0.0.0' ? 'localhost' : host;
+  const devServerUrl = new URL(`http://${devServerHostname}:${port}`).origin;
   let keyHandlersAttached = false;
 
   const ref: Partial<{
@@ -91,6 +92,7 @@ export async function runServer({
   const metroConfig = mergeConfig(baseConfig, {
     server: { port },
   });
+  metroConfig.server.runInspectorProxy = false;
 
   const {
     middleware,
@@ -145,6 +147,7 @@ export async function runServer({
     projectRoot: config.cwd,
     serverBaseUrl: devServerUrl,
   });
+  middleware.use(debuggerMiddleware);
 
   const customEnhanceMiddleware = metroConfig.server.enhanceMiddleware;
 
@@ -169,10 +172,9 @@ export async function runServer({
   const serverInstance = await Metro.runServer(metroConfig, {
     host,
     websocketEndpoints: {
-      communityWebsocketEndpoints,
-      debuggerWebSocketEndpoints,
+      ...communityWebsocketEndpoints,
+      ...debuggerWebSocketEndpoints,
     },
-    unstable_extraMiddleware: [middleware, debuggerMiddleware],
     inspectorProxyDelegate: inspectorProxy?.delegate,
   });
 
