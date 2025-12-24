@@ -1,8 +1,7 @@
 import { createPluginHooksDriver, resolveConfig, type CompleteGraniteConfig } from '@granite-js/plugin-core';
+import { createDevMiddleware } from '@react-native/dev-middleware';
 import { createDevServerMiddleware, indexPageMiddleware } from '@react-native-community/cli-server-api';
 import Debug from 'debug';
-import { setupDevToolsProxy } from 'react-native-devtools-standalone/backend';
-import { createDebuggerMiddleware } from './createDebuggerMiddleware';
 import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../constants';
 import { getMetroConfig } from '../metro/getMetroConfig';
 import { printLogo } from '../utils/printLogo';
@@ -15,7 +14,6 @@ interface RunServerConfig {
   config: CompleteGraniteConfig;
   host?: string;
   port?: number;
-  enableEmbeddedReactDevTools?: boolean;
   onServerReady?: () => Promise<void> | void;
 }
 
@@ -27,7 +25,6 @@ export async function runServer({
   config,
   host = DEV_SERVER_DEFAULT_HOST,
   port = DEV_SERVER_DEFAULT_PORT,
-  enableEmbeddedReactDevTools = true,
   onServerReady,
 }: RunServerConfig) {
   // Since eventsSocketEndpoint.reportEvent cannot be assigned first due to the control flow,
@@ -57,7 +54,6 @@ export async function runServer({
           break;
 
         case 'initialize_done':
-          enableStdinWatchMode();
           await driver.devServer.post({ host, port });
           printServerUrl({ host, port });
           await onServerReady?.();
@@ -77,15 +73,17 @@ export async function runServer({
     reporter,
   });
 
-  const { middleware, websocketEndpoints, messageSocketEndpoint, eventsSocketEndpoint } = createDevServerMiddleware({
+  const { middleware, websocketEndpoints: communityWebsocketEndpoints, eventsSocketEndpoint } = createDevServerMiddleware({
     host,
     port,
     watchFolders: metroConfig.watchFolders,
   });
 
-  const { middleware: debuggerMiddleware, enableStdinWatchMode } = createDebuggerMiddleware({
-    port,
-    broadcastMessage: messageSocketEndpoint.broadcast,
+  const serverBaseUrl = new URL(`http://${host}:${port}`).toString();
+
+  const { middleware: debuggerMiddleware, websocketEndpoints: debuggerWebSocketEndpoints } = createDevMiddleware({
+    projectRoot: config.cwd,
+    serverBaseUrl,
   });
 
   middleware.use(debuggerMiddleware);
@@ -107,29 +105,16 @@ export async function runServer({
     return middleware.use(metroMiddleware);
   };
 
-  if (enableEmbeddedReactDevTools) {
-    await setupDevToolsProxy({
-      client: {
-        delegate: {
-          onError: (error) => console.error('React DevTools client error', error),
-        },
-      },
-      devtools: {
-        delegate: {
-          onError: (error) => console.error('React DevTools frontend error', error),
-        },
-      },
-    });
-  }
-
   ref.reportEvent = eventsSocketEndpoint.reportEvent;
-  ref.enableStdinWatchMode = enableStdinWatchMode;
 
   await driver.devServer.pre({ host, port });
 
   const serverInstance = await Metro.runServer(metroConfig, {
     host,
-    websocketEndpoints,
+    websocketEndpoints:{
+      communityWebsocketEndpoints,
+      debuggerWebSocketEndpoints
+    },
     inspectorProxyDelegate: inspectorProxy?.delegate,
   });
 
