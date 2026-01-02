@@ -27,6 +27,7 @@
     "@granite-js/video": "0.1.34-next.0"
   },
   "changesets": [
+    "beige-lands-think",
     "bright-falcons-dig",
     "crisp-poets-hope",
     "dull-animals-shake",
