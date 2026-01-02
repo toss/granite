@@ -144,7 +144,6 @@ export async function runServer({
   metroConfig.reporter = reporter;
 
   const { middleware: debuggerMiddleware, websocketEndpoints: debuggerWebSocketEndpoints } = createDevMiddleware({
-    projectRoot: config.cwd,
     serverBaseUrl: devServerUrl,
   });
   middleware.use(debuggerMiddleware);

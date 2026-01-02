@@ -94,7 +94,7 @@
     "@react-native-community/cli-tools": "11.3.7",
     "@react-native/babel-plugin-codegen": "catalog:react-native",
     "@react-native/babel-preset": "catalog:react-native",
-    "@react-native/dev-middleware": "0.81.3",
+    "@react-native/dev-middleware": "0.83.1",
     "@shopify/semaphore": "^3.1.0",
     "@swc/core": "catalog:swc",
     "@swc/helpers": "catalog:swc",
