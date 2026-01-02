@@ -22776,13 +22776,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-pager-view@npm:6.9.1":
-  version: 6.9.1
-  resolution: "react-native-pager-view@npm:6.9.1"
+"react-native-pager-view@npm:8.0.0":
+  version: 8.0.0
+  resolution: "react-native-pager-view@npm:8.0.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10c0/c5229d230734ad9dad0b1e296168f0eebc5cff1b4b63201266ee7d5ecadc2e9c584b426b4ef146718c2e581dfcf63914174133b3ed1657294ccd437c22dbbc05
+  checksum: 10c0/2513ab5e55c7c8e290c514f1dd5388e198975853ffb8e8546bbacc605a853f76a9cb31048bfac22a95a1d0d6e61ae954d690b4522530e97c54e2eabd3447af9d
   languageName: node
   linkType: hard
 
