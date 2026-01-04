@@ -76,7 +76,7 @@ def getExtOrIntegerDefault(name) {
 }
 
 android {
-  namespace "com.graniteimage"
+  namespace "run.granite.image"
 
   compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
 

@@ -1,4 +1,4 @@
-package com.graniteimage
+package run.granite.image
 
 /**
  * Singleton registry for managing the current GraniteImageProvider.

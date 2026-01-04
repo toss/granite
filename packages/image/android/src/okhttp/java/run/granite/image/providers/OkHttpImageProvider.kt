@@ -1,4 +1,4 @@
-package com.graniteimage.providers
+package run.granite.image.providers
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -10,11 +10,11 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import com.graniteimage.GraniteImageProvider
-import com.graniteimage.GraniteImagePriority
-import com.graniteimage.GraniteImageCachePolicy
-import com.graniteimage.GraniteImageProgressCallback
-import com.graniteimage.GraniteImageCompletionCallback
+import run.granite.image.GraniteImageProvider
+import run.granite.image.GraniteImagePriority
+import run.granite.image.GraniteImageCachePolicy
+import run.granite.image.GraniteImageProgressCallback
+import run.granite.image.GraniteImageCompletionCallback
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.CacheControl

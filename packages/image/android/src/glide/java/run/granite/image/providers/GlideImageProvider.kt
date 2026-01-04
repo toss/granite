@@ -1,4 +1,4 @@
-package com.graniteimage.providers
+package run.granite.image.providers
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -8,11 +8,11 @@ import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import com.graniteimage.GraniteImageProvider
-import com.graniteimage.GraniteImagePriority
-import com.graniteimage.GraniteImageCachePolicy
-import com.graniteimage.GraniteImageProgressCallback
-import com.graniteimage.GraniteImageCompletionCallback
+import run.granite.image.GraniteImageProvider
+import run.granite.image.GraniteImagePriority
+import run.granite.image.GraniteImageCachePolicy
+import run.granite.image.GraniteImageProgressCallback
+import run.granite.image.GraniteImageCompletionCallback
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy

@@ -1,4 +1,4 @@
-package com.graniteimage
+package run.granite.image
 
 import android.util.Log
 import com.facebook.react.ReactPackage
@@ -23,9 +23,9 @@ class GraniteImagePackage : ReactPackage {
 
             // Try to auto-register a provider based on available implementations
             val providerClasses = listOf(
-                "com.graniteimage.providers.OkHttpImageProvider",
-                "com.graniteimage.providers.GlideImageProvider",
-                "com.graniteimage.providers.CoilImageProvider"
+                "run.granite.image.providers.OkHttpImageProvider",
+                "run.granite.image.providers.GlideImageProvider",
+                "run.granite.image.providers.CoilImageProvider"
             )
 
             for (className in providerClasses) {

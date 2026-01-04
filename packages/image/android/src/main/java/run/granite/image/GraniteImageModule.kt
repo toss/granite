@@ -1,4 +1,4 @@
-package com.graniteimage
+package run.granite.image
 
 import android.util.Log
 import com.facebook.react.bridge.Promise

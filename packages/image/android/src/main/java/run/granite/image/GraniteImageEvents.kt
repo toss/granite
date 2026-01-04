@@ -1,4 +1,4 @@
-package com.graniteimage
+package run.granite.image
 
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
