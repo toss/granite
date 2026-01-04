@@ -63,7 +63,7 @@ def includeDefaultProvider = resolveDefaultProvider(
 )
 
 android {
-  namespace "com.anthropic.granitelottie"
+  namespace "run.granite.lottie"
 
   compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
 
