@@ -1,4 +1,4 @@
-package com.anthropic.granitelottie
+package run.granite.lottie
 
 import android.content.Context
 import android.graphics.Color
@@ -32,7 +32,7 @@ class GraniteLottieView(context: Context) : FrameLayout(context), GraniteLottieL
             try {
                 // Use reflection to load BuiltInLottieProvider to avoid compile-time dependency
                 // when the class is excluded from the build
-                val providerClass = Class.forName("com.anthropic.granitelottie.providers.BuiltInLottieProvider")
+                val providerClass = Class.forName("run.granite.lottie.providers.BuiltInLottieProvider")
                 resolvedProvider = providerClass.getDeclaredConstructor().newInstance() as GraniteLottieProvider
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to instantiate BuiltInLottieProvider: ${e.message}")

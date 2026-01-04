@@ -1,4 +1,4 @@
-package com.anthropic.granitelottie.providers
+package run.granite.lottie.providers
 
 import android.animation.Animator
 import android.content.Context
@@ -13,7 +13,7 @@ import com.airbnb.lottie.RenderMode
 import com.airbnb.lottie.TextDelegate
 import com.airbnb.lottie.model.KeyPath
 import com.airbnb.lottie.value.LottieValueCallback
-import com.anthropic.granitelottie.*
+import run.granite.lottie.*
 import java.util.WeakHashMap
 
 /**

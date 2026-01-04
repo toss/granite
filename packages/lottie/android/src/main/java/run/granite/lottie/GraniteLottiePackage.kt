@@ -1,4 +1,4 @@
-package com.anthropic.granitelottie
+package run.granite.lottie
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

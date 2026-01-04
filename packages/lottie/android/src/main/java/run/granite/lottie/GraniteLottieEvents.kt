@@ -1,4 +1,4 @@
-package com.anthropic.granitelottie
+package run.granite.lottie
 
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap

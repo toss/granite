@@ -1,4 +1,4 @@
-package com.anthropic.granitelottie
+package run.granite.lottie
 
 import android.content.Context
 import android.view.View

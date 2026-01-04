@@ -1,4 +1,4 @@
-package com.anthropic.granitelottie
+package run.granite.lottie
 
 /**
  * Registry singleton for managing the Lottie provider.
