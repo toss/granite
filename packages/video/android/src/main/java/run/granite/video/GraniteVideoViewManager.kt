@@ -1,4 +1,4 @@
-package com.anthropic.reactnativegranitevideo
+package run.granite.video
 
 import android.graphics.Color
 import com.facebook.react.bridge.ReadableMap
@@ -12,7 +12,7 @@ import com.facebook.react.viewmanagers.GraniteVideoViewManagerDelegate
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.common.MapBuilder
 import com.facebook.react.uimanager.events.EventDispatcher
-import com.anthropic.reactnativegranitevideo.provider.*
+import run.granite.video.provider.*
 
 @ReactModule(name = GraniteVideoViewManager.NAME)
 class GraniteVideoViewManager : SimpleViewManager<GraniteVideoView>(),

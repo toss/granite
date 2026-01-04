@@ -63,7 +63,7 @@ def includeDefaultProvider = resolveDefaultProvider(
 )
 
 android {
-  namespace "com.anthropic.reactnativegranitevideo"
+  namespace "run.granite.video"
 
   compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
 

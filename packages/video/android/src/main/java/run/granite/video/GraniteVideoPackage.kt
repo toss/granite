@@ -1,4 +1,4 @@
-package com.anthropic.reactnativegranitevideo
+package run.granite.video
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

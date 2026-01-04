@@ -1,11 +1,11 @@
-package com.anthropic.reactnativegranitevideo
+package run.granite.video
 
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReadableMap
-import com.anthropic.reactnativegranitevideo.provider.GraniteVideoRegistry
+import run.granite.video.provider.GraniteVideoRegistry
 
 class GraniteVideoModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 

@@ -1,4 +1,4 @@
-package com.anthropic.reactnativegranitevideo.provider
+package run.granite.video.provider
 
 import android.content.Context
 import android.net.Uri

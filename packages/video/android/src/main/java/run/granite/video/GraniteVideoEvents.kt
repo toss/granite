@@ -1,10 +1,10 @@
-package com.anthropic.reactnativegranitevideo
+package run.granite.video
 
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
-import com.anthropic.reactnativegranitevideo.provider.GraniteVideoLoadData
-import com.anthropic.reactnativegranitevideo.provider.GraniteVideoProgressData
-import com.anthropic.reactnativegranitevideo.provider.GraniteVideoErrorData
+import run.granite.video.provider.GraniteVideoLoadData
+import run.granite.video.provider.GraniteVideoProgressData
+import run.granite.video.provider.GraniteVideoErrorData
 
 object GraniteVideoEvents {
 

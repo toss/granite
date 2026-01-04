@@ -1,8 +1,8 @@
-package com.anthropic.reactnativegranitevideo
+package run.granite.video
 
 import android.content.Context
 import android.widget.FrameLayout
-import com.anthropic.reactnativegranitevideo.provider.*
+import run.granite.video.provider.*
 
 class GraniteVideoView(context: Context) : FrameLayout(context), GraniteVideoDelegate {
 
