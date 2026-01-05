@@ -1,43 +1,43 @@
 import { env } from '@granite-js/plugin-env';
 import { hermes } from '@granite-js/plugin-hermes';
-import { microFrontend } from '@granite-js/plugin-micro-frontend';
 import { router } from '@granite-js/plugin-router';
 import { sentry } from '@granite-js/plugin-sentry';
 import { defineConfig } from '@granite-js/react-native/config';
 
 export default defineConfig({
   /**
-   * granite://showcase
+   * supertoss://m/showcase
    */
-  scheme: 'granite',
+  scheme: 'supertoss',
+  host: "m",
   appName: 'showcase',
   plugins: [
     router(),
     env({ MY_ENV: 'from granite.config.ts' }),
     hermes(),
     sentry({ useClient: false }),
-    microFrontend({
-      name: 'remoteApp',
-      exposes: {
-        './AppContainer': './src/_app.tsx',
-      },
-      shared: [
-        '@react-native-community/blur',
-        '@react-navigation/native',
-        '@react-navigation/native-stack',
-        '@shopify/flash-list',
-        'lottie-react-native',
-        'react-native-safe-area-context',
-        'react-native-screens',
-        'react-native-fast-image',
-        'react-native-svg',
-        'react-native-gesture-handler',
-        'react-native',
-        'react',
-        'react-native-video',
-        'react-native-webview',
-      ],
-    }),
+    // microFrontend({
+    //   name: 'remoteApp',
+    //   exposes: {
+    //     './AppContainer': './src/_app.tsx',
+    //   },
+    //   shared: [
+    //     '@react-native-community/blur',
+    //     '@react-navigation/native',
+    //     '@react-navigation/native-stack',
+    //     '@shopify/flash-list',
+    //     'lottie-react-native',
+    //     'react-native-safe-area-context',
+    //     'react-native-screens',
+    //     'react-native-fast-image',
+    //     'react-native-svg',
+    //     'react-native-gesture-handler',
+    //     'react-native',
+    //     'react',
+    //     'react-native-video',
+    //     'react-native-webview',
+    //   ],
+    // }),
     {
       name: 'test',
       build: {
