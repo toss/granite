@@ -1,8 +1,8 @@
 import { env } from '@granite-js/plugin-env';
 import { hermes } from '@granite-js/plugin-hermes';
+import { microFrontend } from '@granite-js/plugin-micro-frontend';
 import { router } from '@granite-js/plugin-router';
 import { sentry } from '@granite-js/plugin-sentry';
-import { microFrontend } from '@granite-js/plugin-micro-frontend';
 import { defineConfig } from '@granite-js/react-native/config';
 
 export default defineConfig({
