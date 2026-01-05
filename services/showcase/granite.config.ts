@@ -14,7 +14,7 @@ export default defineConfig({
   plugins: [
     router(),
     env({ MY_ENV: 'from granite.config.ts' }),
-    hermes(),
+    // hermes(),
     sentry({ useClient: false }),
     // microFrontend({
     //   name: 'remoteApp',
