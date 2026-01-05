@@ -10,7 +10,7 @@ export default function NotFoundPage() {
         justifyContent: 'center',
       }}
     >
-      <Text>404 Not Foun13d</Text>
+      <Text>404 Not Found </Text>
     </View>
   );
 }
