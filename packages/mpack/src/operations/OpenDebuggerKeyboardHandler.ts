@@ -30,10 +30,9 @@ export default class OpenDebuggerKeyboardHandler {
         throw new Error('Global fetch is not available');
       }
 
-      await fetchFn(
-        new URL(`/open-debugger?target=${encodeURIComponent(target.id)}`, this.#devServerUrl).href,
-        { method: 'POST' }
-      );
+      await fetchFn(new URL(`/open-debugger?target=${encodeURIComponent(target.id)}`, this.#devServerUrl).href, {
+        method: 'POST',
+      });
     } catch (error) {
       this.#log('error', 'Failed to open debugger for %s (%s): %s', target.title, target.description, 'Network error');
       if (error instanceof Error && error.cause != null) {
@@ -82,9 +81,7 @@ export default class OpenDebuggerKeyboardHandler {
         this.#setTerminalMenu(
           `Multiple debug targets available, please select:\n  ${targets
             .slice(0, 9)
-            .map(
-              ({ title }, index) => `${styleText(['white', 'inverse'], ` ${index + 1} `)} - "${title}"`
-            )
+            .map(({ title }, index) => `${styleText(['white', 'inverse'], ` ${index + 1} `)} - "${title}"`)
             .join('\n  ')}`
         );
       }

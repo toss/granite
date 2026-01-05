@@ -850,7 +850,13 @@ class Server {
       // Fallback: Check if relative path from project root is valid
       const relativeToRoot = path.relative(projectRoot, module.path);
       if (!relativeToRoot.startsWith('..') && !path.isAbsolute(relativeToRoot)) {
-        return '/[metro-project]/' + relativeToRoot.split(path.sep).map((segment) => encodeURIComponent(segment)).join('/');
+        return (
+          '/[metro-project]/' +
+          relativeToRoot
+            .split(path.sep)
+            .map((segment) => encodeURIComponent(segment))
+            .join('/')
+        );
       }
 
       const modulePathPosix = module.path

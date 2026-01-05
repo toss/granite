@@ -1,15 +1,6 @@
 import { logger } from './Logger';
 
-type ClientLogLevel =
-  | 'trace'
-  | 'debug'
-  | 'info'
-  | 'warn'
-  | 'error'
-  | 'log'
-  | 'group'
-  | 'groupCollapsed'
-  | 'groupEnd';
+type ClientLogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'log' | 'group' | 'groupCollapsed' | 'groupEnd';
 
 export const clientLogger = (level: ClientLogLevel, data: any[]) => {
   switch (level) {
