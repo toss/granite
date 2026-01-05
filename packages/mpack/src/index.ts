@@ -1,4 +1,5 @@
 export { Bundler } from './bundler';
+export { DevServer } from './server';
 export { BuildUtils, runServer, EXPERIMENTAL__server } from './operations';
 export { getMetroConfig, MetroBuildUtils } from './metro';
 export {
