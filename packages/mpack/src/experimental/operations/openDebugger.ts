@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
 import { getChromePath, launch } from 'chrome-launcher';
-import { DEBUGGER_FRONTEND_PATH, DEBUGGER_TEMP_DIR, REACT_NATIVE_INSPECTOR_PAGE } from './constants';
+import { DEBUGGER_FRONTEND_PATH, DEBUGGER_TEMP_DIR, REACT_NATIVE_INSPECTOR_PAGE } from '../../operations/constants';
 
 const DEBUGGER_HOST = 'localhost';
 

@@ -1,1 +1,1 @@
-export const DEV_SERVER_BUNDLE_NAME = 'index';
+export * from '../experimental/server/constants';

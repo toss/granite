@@ -1,3 +1,1 @@
-export function parseDomain(method: string) {
-  return method.split('.')[0];
-}
+export * from '../../experimental/server/debugger/parseDomain';

@@ -1,1 +1,1 @@
-export { symbolicatePlugin } from './symbolicatePlugin';
+export * from '../../../experimental/server/plugins/symbolicatePlugin/index';

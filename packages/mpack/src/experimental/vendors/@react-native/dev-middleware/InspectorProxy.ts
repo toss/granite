@@ -2,7 +2,7 @@ import url from 'url';
 import { FastifyReply, FastifyRequest, HookHandlerDoneFunction } from 'fastify';
 import * as ws from 'ws';
 import { Device } from './Device';
-import { logger } from '../../../logger';
+import { logger } from '../../../../logger';
 
 /**
  * @see origin {@link https://github.com/facebook/react-native/blob/v0.73.0/packages/dev-middleware/src/inspector-proxy/InspectorProxy.js#L28-L34}

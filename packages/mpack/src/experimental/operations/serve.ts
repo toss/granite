@@ -3,10 +3,10 @@ import * as ChromeLauncher from 'chrome-launcher';
 import Debug from 'debug';
 import prompts from 'prompts';
 import { StartMenuHandler } from './StartMenuHandler';
+import { openDebugger } from './openDebugger';
 import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../../constants';
-import { DevServer } from '../../server/DevServer';
 import { printLogo } from '../../utils/printLogo';
-import { openDebugger } from '../openDebugger';
+import { DevServer } from '../server/DevServer';
 
 const debug = Debug('cli:start');
 
