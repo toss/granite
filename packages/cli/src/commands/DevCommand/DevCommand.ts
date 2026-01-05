@@ -1,4 +1,4 @@
-import { runServer } from '@granite-js/mpack';
+import { runServer, EXPERIMENTAL__server } from '@granite-js/mpack';
 import { loadConfig } from '@granite-js/plugin-core';
 import { Command, Option } from 'clipanion';
 import Debug from 'debug';
@@ -48,7 +48,7 @@ export class DevCommand extends Command {
         /**
          * @TODO Invoke pre and post handlers of devServer plugin hooks in experimental mode
          */
-        // await EXPERIMENTAL__server({ config, ...serverOptions });
+        await EXPERIMENTAL__server({ config, ...serverOptions });
       } else {
         await runServer({
           config,

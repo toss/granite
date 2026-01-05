@@ -1,5 +1,5 @@
 export { Bundler } from './bundler';
-export { BuildUtils, runServer } from './operations';
+export { BuildUtils, runServer, EXPERIMENTAL__server } from './operations';
 export { getMetroConfig, MetroBuildUtils } from './metro';
 export {
   DEV_SERVER_DEFAULT_HOST,

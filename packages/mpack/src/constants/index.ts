@@ -28,6 +28,8 @@ export const SERVICE_BUNDLE_NAME = getBundleName('service');
 
 export const BUNDLE_NAME = getBundleName('index');
 
+export const DEBUGGER_FRONTEND_PATH = '/debugger-frontend';
+
 export const RESOLVER_MAIN_FIELDS = ['react-native', 'browser', 'main'];
 export const RESOLVER_EXPORTS_MAP_CONDITIONS = ['react-native'];
 

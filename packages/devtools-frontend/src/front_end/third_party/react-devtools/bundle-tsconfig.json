@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../front_end/third_party/react-devtools"},"files":["../../../../../../front_end/third_party/react-devtools/react-devtools.ts"],"references":[{"path":"./css_files-tsconfig.json"},{"path":"./react-devtools-tsconfig.json"}]}

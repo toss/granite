@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../front_end/panels/rn_welcome"},"files":["../../../../../../front_end/panels/rn_welcome/rn_welcome-legacy-meta.ts"],"references":[{"path":"./bundle-tsconfig.json"}]}
