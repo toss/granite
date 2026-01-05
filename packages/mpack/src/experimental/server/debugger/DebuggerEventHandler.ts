@@ -1,14 +1,18 @@
 import type { InspectorProxyConfig } from '@granite-js/plugin-core';
 import Debug from 'debug';
 import * as ws from 'ws';
-import { parseDomain } from './parseDomain';
 import {
   CustomEvent,
   DebuggerRequest,
   GetResponseBodyRequest,
   NetworkResponseData,
   LegacyNetworkResponseData,
-} from '../../vendors/@react-native/dev-middleware';
+} from './types';
+
+export function parseDomain(method: string) {
+  return method.split('.')[0];
+}
+
 
 const debug = Debug('dev-server:debugger');
 

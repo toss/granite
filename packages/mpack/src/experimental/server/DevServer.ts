@@ -1,12 +1,15 @@
 import assert from 'assert';
+import middie from '@fastify/middie';
 import type { BundleData } from '@granite-js/plugin-core';
+import { createDevMiddleware } from '@react-native/dev-middleware';
+import { createDevServerMiddleware } from '@react-native-community/cli-server-api';
 import Fastify, {
   type DoneFuncWithErrOrRes,
   type FastifyInstance,
   type FastifyRequest,
   type FastifyReply,
 } from 'fastify';
-import { setupDevToolsProxy } from 'react-native-devtools-standalone/backend';
+import type { WebSocketServer } from 'ws';
 import { DebuggerEventHandler } from './debugger/DebuggerEventHandler';
 import { createBundlerForDevServer } from './helpers/createBundlerForDevServer';
 import { mergeBundles } from './helpers/mergeBundles';
@@ -19,8 +22,24 @@ import { logger, clientLogger } from '../../logger';
 import { statusPlugin } from '../../plugins/statusPlugin';
 import { isDebugMode } from '../../utils/isDebugMode';
 import { createProgressBar } from '../../utils/progressBar';
-import { InspectorProxy } from '../vendors/@react-native/dev-middleware';
-import { createWebSocketEndpoints } from '../vendors/@react-native-community/cli-server-api';
+
+type DevServerMiddleware = {
+  middleware: {
+    use: (middleware: (req: any, res: any, next: (error?: Error) => void) => void) => void;
+    (req: any, res: any, next: (error?: Error) => void): void;
+  };
+  websocketEndpoints: Record<string, WebSocketServer>;
+  messageSocketEndpoint: {
+    broadcast: (method: string, params?: Record<string, unknown> | null) => void;
+  };
+  eventsSocketEndpoint: {
+    reportEvent: (event: any) => void;
+  };
+};
+
+type FastifyWithUse = FastifyInstance & {
+  use: (middleware: (req: any, res: any, next: (error?: Error) => void) => void) => void;
+};
 
 export class DevServer {
   public host: string;
@@ -28,7 +47,7 @@ export class DevServer {
 
   private app: FastifyInstance;
   private context: DevServerContext | null = null;
-  private inspectorProxy?: InspectorProxy;
+  private inspectorProxy?: unknown;
   private wssDelegate?: WebSocketServerDelegate;
 
   constructor(private devServerOptions: DevServerOptions) {
@@ -76,8 +95,8 @@ export class DevServer {
     return `http://${this.host}:${this.port}`;
   }
 
-  broadcastCommand(command: BroadcastCommand): void {
-    this.wssDelegate?.broadcastCommand?.(command);
+  broadcastCommand(command: BroadcastCommand, params?: Record<string, unknown>): void {
+    this.wssDelegate?.broadcastCommand?.(command, params);
   }
 
   private getContext() {
@@ -86,25 +105,44 @@ export class DevServer {
   }
 
   private async setup(app: FastifyInstance) {
-    const baseRoot = this.devServerOptions.rootDir;
-    const serverBaseUrl = this.getBaseUrl();
+    const devServerHostname = this.host === '0.0.0.0' ? 'localhost' : this.host;
+    const serverBaseUrl = new URL(`http://${devServerHostname}:${this.port}`).origin;
+    await app.register(middie);
+
+    const {
+      middleware: devServerMiddleware,
+      websocketEndpoints: serverWebsocketEndpoints,
+      eventsSocketEndpoint,
+      messageSocketEndpoint,
+    } = createDevServerMiddleware({
+      host: this.host,
+      port: this.port,
+      watchFolders: [this.devServerOptions.rootDir],
+    }) as DevServerMiddleware;
+
+    const devMiddleware = createDevMiddleware({ serverBaseUrl }) as {
+      middleware: (req: any, res: any, next: (error?: Error) => void) => void;
+      websocketEndpoints: Record<string, WebSocketServer>;
+      inspectorProxy?: unknown;
+    };
+    const devtoolsWebsocketEndpoints = devMiddleware.websocketEndpoints ?? {};
+    this.inspectorProxy = devMiddleware.inspectorProxy;
+    devServerMiddleware.use(devMiddleware.middleware);
+    (app as FastifyWithUse).use(devServerMiddleware);
 
     const debuggerEventHandler = new DebuggerEventHandler(this.devServerOptions.inspectorProxy?.delegate);
-    const inspectorProxy = new InspectorProxy({ root: baseRoot, serverBaseUrl });
-    const inspectorProxyWss = inspectorProxy.createWebSocketServers({
-      onDeviceWebSocketConnected: (socket) => {
+    const deviceSocket = devtoolsWebsocketEndpoints['/inspector/device'];
+    if (deviceSocket) {
+      deviceSocket.on('connection', (socket) => {
         debuggerEventHandler.setDeviceWebSocketHandler(socket);
-      },
-      onDebuggerWebSocketConnected: (socket) => {
+      });
+    }
+    const debuggerSocket = devtoolsWebsocketEndpoints['/inspector/debug'];
+    if (debuggerSocket) {
+      debuggerSocket.on('connection', (socket) => {
         debuggerEventHandler.setDebuggerWebSocketHandler(socket);
-      },
-    });
-
-    const { debuggerProxySocket, eventsSocket, messageSocket } = createWebSocketEndpoints({
-      broadcast: (command, params) => {
-        this.wssDelegate?.broadcastCommand(command, params);
-      },
-    });
+      });
+    }
 
     const liveReloadMiddleware = createLiveReloadMiddleware({
       onClientLog: (event) => {
@@ -117,8 +155,8 @@ export class DevServer {
     });
 
     const wssDelegate = new WebSocketServerDelegate({
-      eventReporter: (event) => eventsSocket.reportEvent(event),
-      messageBroadcaster: (command, params) => messageSocket.broadcast(command, params),
+      eventReporter: (event) => eventsSocketEndpoint.reportEvent(event),
+      messageBroadcaster: (command, params) => messageSocketEndpoint.broadcast(command, params),
       hmr: {
         updateStart: () => liveReloadMiddleware.updateStart(),
         updateDone: () => liveReloadMiddleware.updateDone(),
@@ -128,40 +166,33 @@ export class DevServer {
 
     app
       .register(serverPlugins.statusPlugin, { rootDir: this.devServerOptions.rootDir })
-      .register(serverPlugins.debuggerPlugin, { onReload: () => this.wssDelegate?.broadcastCommand('reload') })
       .register(serverPlugins.serveBundlePlugin, { getBundle: this.getBundle.bind(this) })
       .register(serverPlugins.symbolicatePlugin, { getBundle: this.getBundle.bind(this) })
       .register(serverPlugins.indexPagePlugin)
-      .addHook('onRequest', inspectorProxy.handleRequest)
       .addHook('onSend', this.setCommonHeaders);
 
     for (const plugin of this.devServerOptions.middlewares ?? []) {
       app.register(plugin);
     }
 
-    new WebSocketServerRouter()
-      .register('/hot', liveReloadMiddleware.server)
-      .register('/debugger-proxy', debuggerProxySocket.server)
-      .register('/message', messageSocket.server)
-      .register('/events', eventsSocket.server)
-      .register('/inspector/device', inspectorProxyWss.deviceSocketServer)
-      .register('/inspector/debug', inspectorProxyWss.debuggerSocketServer)
-      .setup(app);
+    const webSocketRouter = new WebSocketServerRouter().register('/hot', liveReloadMiddleware.server);
+    const registeredPaths = new Set<string>(['/hot']);
 
-    await setupDevToolsProxy({
-      client: {
-        delegate: {
-          onError: (error: Error) => logger.error('React DevTools client error', error),
-        },
-      },
-      devtools: {
-        delegate: {
-          onError: (error: Error) => logger.error('React DevTools frontend error', error),
-        },
-      },
-    });
+    const registerEndpoints = (endpoints: Record<string, WebSocketServer>) => {
+      for (const [path, endpoint] of Object.entries(endpoints)) {
+        if (registeredPaths.has(path)) {
+          continue;
+        }
+        webSocketRouter.register(path, endpoint);
+        registeredPaths.add(path);
+      }
+    };
 
-    this.inspectorProxy = inspectorProxy;
+    registerEndpoints(serverWebsocketEndpoints ?? {});
+    registerEndpoints(devtoolsWebsocketEndpoints ?? {});
+
+    webSocketRouter.setup(app);
+
     this.wssDelegate = wssDelegate;
   }
 

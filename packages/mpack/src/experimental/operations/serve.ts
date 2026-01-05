@@ -1,14 +1,11 @@
 import { CompleteGraniteConfig, createPluginHooksDriver, resolveConfig } from '@granite-js/plugin-core';
-import * as ChromeLauncher from 'chrome-launcher';
-import Debug from 'debug';
-import prompts from 'prompts';
-import { StartMenuHandler } from './StartMenuHandler';
-import { openDebugger } from './openDebugger';
 import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../../constants';
+import attachKeyHandlers from '../../operations/attachKeyHandlers';
+import { keyReporter } from '../../operations/keyReporter';
 import { printLogo } from '../../utils/printLogo';
+import { printServerUrl } from '../../utils/printServerUrl';
 import { DevServer } from '../server/DevServer';
-
-const debug = Debug('cli:start');
+import type { BroadcastCommand } from '../server/types';
 
 interface RunServerArgs {
   config: CompleteGraniteConfig;
@@ -17,7 +14,7 @@ interface RunServerArgs {
   onServerReady?: () => Promise<void> | void;
 }
 
-const chromeInstanceMap: Map<string, ChromeLauncher.LaunchedChrome> = new Map();
+let keyHandlersAttached = false;
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export async function EXPERIMENTAL__server({
@@ -45,80 +42,25 @@ export async function EXPERIMENTAL__server({
   await server.listen();
 
   await driver.devServer.post({ host, port });
+  printServerUrl({ host, port });
   await onServerReady?.();
+  if (!keyHandlersAttached) {
+    keyHandlersAttached = true;
+    const devServerHostname = host === '0.0.0.0' ? 'localhost' : host;
+    const devServerUrl = new URL(`http://${devServerHostname}:${port}`).origin;
 
-  const menuHandler = new StartMenuHandler([
-    {
-      key: 'r',
-      description: 'Refresh',
-      action: () => {
-        console.log('Refreshing...');
-        server.broadcastCommand('reload');
+    attachKeyHandlers({
+      devServerUrl,
+      messageSocket: {
+        broadcast: (command, params) => server.broadcastCommand(command as BroadcastCommand, params ?? undefined),
       },
-    },
-    {
-      key: 'd',
-      description: 'Open Developer Menu',
-      action: () => {
-        console.log('Opening developer menu...');
-        server.broadcastCommand('devMenu');
-      },
-    },
-    {
-      key: 'j',
-      description: 'Open Debugger',
-      action: async () => {
-        const devices = server.getInspectorProxy()?.getDevices();
-        const connectedDevices = Array.from(devices?.entries() ?? []);
-        let targetDevice: { id: string; name: string };
-
-        for (const [id, device] of connectedDevices) {
-          debug(`[${id}] ${device.getName()}`);
-        }
-
-        if (connectedDevices.length === 0) {
-          console.log('No compatible apps connected');
-          return;
-        } else if (connectedDevices.length === 1) {
-          const [id, device] = connectedDevices[0]!;
-          const name = device.getName();
-          targetDevice = { id, name };
-        } else {
-          const response = await prompts({
-            type: 'select',
-            name: 'device',
-            message: 'Select a device to connect',
-            choices: connectedDevices.map(([id, device]) => ({
-              value: { id, name: device.getName() },
-              title: device.getName(),
-            })),
-          });
-
-          targetDevice = response.device;
-        }
-
-        console.log(`Opening debugger for '${targetDevice.name}'...`);
-
-        chromeInstanceMap.get(targetDevice.id)?.kill();
-
-        openDebugger(server.port, targetDevice.id)
-          .then((chrome) => {
-            chromeInstanceMap.set(targetDevice.id, chrome);
-          })
-          .catch((error) => {
-            if (error.message.includes('ECONNREFUSED')) {
-              return;
-            }
-            console.error(error);
-          });
-      },
-    },
-  ]).attach();
+      reporter: keyReporter,
+    });
+  }
 
   return {
     cleanup: async () => {
       await server.close();
-      menuHandler.close();
     },
   };
 }
