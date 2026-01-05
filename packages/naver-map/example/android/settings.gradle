@@ -1,0 +1,22 @@
+pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+rootProject.name = 'run.granite.navermap.example'
+include ':app'
+includeBuild('../node_modules/@react-native/gradle-plugin')
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            // Naver Maps repository
+            url "https://repository.map.naver.com/archive/maven"
+        }
+        maven {
+            // Detox repository
+            url "$rootDir/../node_modules/detox/Detox-android"
+        }
+    }
+}

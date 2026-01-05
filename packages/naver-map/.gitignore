@@ -1,0 +1,36 @@
+# OSX
+.DS_Store
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build
+lib/
+
+# IDE
+.idea/
+.vscode/
+
+# Example app
+example/ios/Pods/
+example/ios/build/
+example/android/build/
+example/android/app/build/
+example/android/.gradle/
+example/vendor/
+
+# CocoaPods
+ios/Pods/
+
+# Gradle
+android/.gradle/
+android/build/
+
+# Ruby
+*.lock
+vendor/
+
+# Misc
+*.log
