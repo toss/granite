@@ -1,7 +1,6 @@
 export { Bundler } from './bundler';
-export { DevServer } from './server';
 export { BuildUtils, runServer } from './operations';
-export { EXPERIMENTAL__server } from './experimental/operations/serve';
+export { EXPERIMENTAL__server, DevServer } from './experimental';
 export { getMetroConfig, MetroBuildUtils } from './metro';
 export {
   DEV_SERVER_DEFAULT_HOST,
