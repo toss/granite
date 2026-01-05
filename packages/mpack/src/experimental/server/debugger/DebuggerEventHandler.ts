@@ -13,7 +13,6 @@ export function parseDomain(method: string) {
   return method.split('.')[0];
 }
 
-
 const debug = Debug('dev-server:debugger');
 
 type NetworkResponseDataPayload = Pick<NetworkResponseData['params'], 'base64Encoded' | 'data'>;

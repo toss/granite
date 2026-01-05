@@ -49,6 +49,7 @@ export class DevServer {
   private context: DevServerContext | null = null;
   private inspectorProxy?: unknown;
   private wssDelegate?: WebSocketServerDelegate;
+  private setupTask: Promise<void>;
 
   constructor(private devServerOptions: DevServerOptions) {
     logger.trace('DevServer.constructor');
@@ -67,17 +68,19 @@ export class DevServer {
     });
 
     this.app = app;
-    this.setup(app);
+    this.setupTask = this.setup(app);
   }
 
   async initialize() {
     logger.trace('DevServer.initialize');
+    await this.setupTask;
     const { rootDir, buildConfig } = this.devServerOptions;
     this.context = await this.createDevServerContext(rootDir, buildConfig);
   }
 
-  listen() {
+  async listen() {
     logger.trace('DevServer.listen');
+    await this.setupTask;
     return this.app.listen({ host: this.host, port: this.port }).then(() => {
       logger.info(`개발 서버 실행 중 - ${this.getBaseUrl()}`);
     });

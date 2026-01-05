@@ -43,7 +43,6 @@ export async function EXPERIMENTAL__server({
 
   await driver.devServer.post({ host, port });
   printServerUrl({ host, port });
-  await onServerReady?.();
   if (!keyHandlersAttached) {
     keyHandlersAttached = true;
     const devServerHostname = host === '0.0.0.0' ? 'localhost' : host;
@@ -56,6 +55,7 @@ export async function EXPERIMENTAL__server({
       },
       reporter: keyReporter,
     });
+    await onServerReady?.();
   }
 
   return {
