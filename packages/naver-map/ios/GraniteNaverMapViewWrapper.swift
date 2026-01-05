@@ -1,5 +1,5 @@
 //
-//  RNNaverMapView.swift
+//  GraniteNaverMapView.swift
 //  react-native-toss-naver-map
 //
 
@@ -7,7 +7,7 @@ import NMapsMap
 import React
 import UIKit
 
-class RNNaverMapView: NMFNaverMapView {
+class GraniteNaverMapView: NMFNaverMapView {
     weak var bridge: RCTBridge?
 
     @objc var onInitialized: RCTDirectEventBlock?
@@ -116,7 +116,7 @@ class RNNaverMapView: NMFNaverMapView {
 }
 
 // MARK: - NMFMapViewTouchDelegate
-extension RNNaverMapView: NMFMapViewTouchDelegate {
+extension GraniteNaverMapView: NMFMapViewTouchDelegate {
     func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
         onMapClick?([
             "x": point.x,
@@ -128,7 +128,7 @@ extension RNNaverMapView: NMFMapViewTouchDelegate {
 }
 
 // MARK: - NMFMapViewCameraDelegate
-extension RNNaverMapView: NMFMapViewCameraDelegate {
+extension GraniteNaverMapView: NMFMapViewCameraDelegate {
     func mapView(_ mapView: NMFMapView, cameraWillChangeByReason reason: Int, animated: Bool) {
         onTouch?(["animated": animated, "reason": reason])
     }
@@ -153,7 +153,7 @@ extension RNNaverMapView: NMFMapViewCameraDelegate {
 }
 
 // MARK: - NMFMapViewOptionDelegate
-extension RNNaverMapView: NMFMapViewOptionDelegate {
+extension GraniteNaverMapView: NMFMapViewOptionDelegate {
     func mapViewOptionChanged(_ mapView: NMFMapView) {
         // Handle option changes if needed
     }

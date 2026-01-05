@@ -35,10 +35,10 @@ import org.json.JSONArray
 import java.net.URL
 import kotlin.concurrent.thread
 
-class RNNaverMapView(context: Context) : FrameLayout(context), LifecycleEventListener {
+class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEventListener {
 
     companion object {
-        private const val TAG = "RNNaverMapView"
+        private const val TAG = "GraniteNaverMapView"
         private var instanceCounter = 0
     }
 
@@ -65,10 +65,10 @@ class RNNaverMapView(context: Context) : FrameLayout(context), LifecycleEventLis
     private val handler = Handler(Looper.getMainLooper())
 
     init {
-        Log.d(TAG, "RNNaverMapView init - creating FrameLayout with MapView")
+        Log.d(TAG, "GraniteNaverMapView init - creating FrameLayout with MapView")
         mapView = MapView(context, NaverMapOptions())
         addView(mapView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
-        Log.d(TAG, "RNNaverMapView init - MapView added")
+        Log.d(TAG, "GraniteNaverMapView init - MapView added")
     }
 
     // Fabric requires explicit layout of children

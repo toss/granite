@@ -9,7 +9,7 @@ import {
 import { MapContext } from './internals/context';
 import type { MarkerEventListeners } from './overlays/Marker';
 import type { Coord } from './types/Coord';
-import RNNaverMapViewNativeComponent from './specs/RNNaverMapViewNativeComponent';
+import GraniteNaverMapViewNativeComponent from './specs/GraniteNaverMapViewNativeComponent';
 
 export interface CameraChangeEvent extends Coord {
   zoom: number;
@@ -117,7 +117,7 @@ export function NaverMapView({
   mapPadding,
   ...props
 }: MapViewProps) {
-  const mapRef = useRef<React.ElementRef<typeof RNNaverMapViewNativeComponent>>(null);
+  const mapRef = useRef<React.ElementRef<typeof GraniteNaverMapViewNativeComponent>>(null);
   const [isReady, setIsReady] = useState(false);
   const markersRef = useRef<Map<string, MarkerEventListeners>>(new Map());
 
@@ -194,7 +194,7 @@ export function NaverMapView({
   return (
     <AvoidViewFlatteningOnAndroid style={style}>
       <MapContext.Provider value={mapContext}>
-        <RNNaverMapViewNativeComponent
+        <GraniteNaverMapViewNativeComponent
           ref={mapRef}
           style={Platform.OS === 'ios' ? style : { flex: 1 }}
           {...props}

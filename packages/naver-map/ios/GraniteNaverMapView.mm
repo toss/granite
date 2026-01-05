@@ -29,11 +29,11 @@ using namespace facebook::react;
 
 // Define GraniteNaverMapView inheriting from RCTViewComponentView here in .mm file
 // The header declares it as UIView to avoid exposing C++ headers to Swift module
-@interface GraniteNaverMapView : RCTViewComponentView <RCTGraniteNaverMapViewViewProtocol, RNNaverMapViewDelegate>
+@interface GraniteNaverMapView : RCTViewComponentView <RCTGraniteNaverMapViewViewProtocol, GraniteNaverMapViewDelegate>
 @end
 
 @implementation GraniteNaverMapView {
-    RNNaverMapViewImpl *_mapView;
+    GraniteNaverMapViewImpl *_mapView;
     NSMutableDictionary<NSString *, id> *_markers;
 }
 
@@ -48,7 +48,7 @@ using namespace facebook::react;
         static const auto defaultProps = std::make_shared<const GraniteNaverMapViewProps>();
         _props = defaultProps;
 
-        _mapView = [[RNNaverMapViewImpl alloc] initWithFrame:self.bounds];
+        _mapView = [[GraniteNaverMapViewImpl alloc] initWithFrame:self.bounds];
         _mapView.eventDelegate = self;
         _markers = [NSMutableDictionary new];
 
@@ -328,7 +328,7 @@ using namespace facebook::react;
     RCTGraniteNaverMapViewHandleCommand(self, commandName, args);
 }
 
-#pragma mark - RNNaverMapViewDelegate
+#pragma mark - GraniteNaverMapViewDelegate
 
 - (void)mapViewDidInitialize
 {

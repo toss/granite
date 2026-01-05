@@ -1,5 +1,5 @@
 //
-//  RNNaverMapViewManager.swift
+//  GraniteNaverMapViewManager.swift
 //  react-native-toss-naver-map
 //
 
@@ -7,13 +7,13 @@ import NMapsMap
 import React
 import UIKit
 
-@objc(RNNaverMapViewManager)
-class RNNaverMapViewManager: RCTViewManager {
+@objc(GraniteNaverMapViewManager)
+class GraniteNaverMapViewManager: RCTViewManager {
 
     var markers: [String: NMFMarker] = [:]
 
     override func view() -> UIView! {
-        let mapView = RNNaverMapView(frame: CGRect(x: 0, y: 0, width: 200, height: 300))
+        let mapView = GraniteNaverMapView(frame: CGRect(x: 0, y: 0, width: 200, height: 300))
         mapView.bridge = bridge
         return mapView
     }
@@ -25,11 +25,11 @@ class RNNaverMapViewManager: RCTViewManager {
     @objc static func performActionWithView(
         reactTag: NSNumber,
         bridge: RCTBridge,
-        action: @escaping (RNNaverMapView) -> Void
+        action: @escaping (GraniteNaverMapView) -> Void
     ) {
         bridge.uiManager.addUIBlock { (_, viewRegistry) in
-            guard let view = viewRegistry?[reactTag] as? RNNaverMapView else {
-//                RCTLogError("Invalid view returned from registry, expecting RNNaverMapView, tag: \(reactTag)")
+            guard let view = viewRegistry?[reactTag] as? GraniteNaverMapView else {
+//                RCTLogError("Invalid view returned from registry, expecting GraniteNaverMapView, tag: \(reactTag)")
                 return
             }
             action(view)
@@ -133,7 +133,7 @@ class RNNaverMapViewManager: RCTViewManager {
     }
 
     @objc func moveCamera(_ update: NMFCameraUpdate, view: UIView) {
-        guard let mapView = view as? RNNaverMapView else {
+        guard let mapView = view as? GraniteNaverMapView else {
             return
         }
         Task { @MainActor [weak mapView] in

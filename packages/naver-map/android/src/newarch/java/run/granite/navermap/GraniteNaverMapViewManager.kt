@@ -8,25 +8,25 @@ import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.uimanager.annotations.ReactProp
-import com.facebook.react.viewmanagers.RNNaverMapViewManagerDelegate
-import com.facebook.react.viewmanagers.RNNaverMapViewManagerInterface
+import com.facebook.react.viewmanagers.GraniteNaverMapViewManagerDelegate
+import com.facebook.react.viewmanagers.GraniteNaverMapViewManagerInterface
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.geometry.LatLngBounds
 import com.naver.maps.map.CameraPosition
 
-@ReactModule(name = RNNaverMapViewManager.NAME)
-class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
-    RNNaverMapViewManagerInterface<RNNaverMapView> {
+@ReactModule(name = GraniteNaverMapViewManager.NAME)
+class GraniteNaverMapViewManager : SimpleViewManager<GraniteNaverMapView>(),
+    GraniteNaverMapViewManagerInterface<GraniteNaverMapView> {
 
-    private val delegate = RNNaverMapViewManagerDelegate(this)
+    private val delegate = GraniteNaverMapViewManagerDelegate(this)
 
-    override fun getDelegate(): ViewManagerDelegate<RNNaverMapView> = delegate
+    override fun getDelegate(): ViewManagerDelegate<GraniteNaverMapView> = delegate
 
     override fun getName(): String = NAME
 
-    override fun createViewInstance(reactContext: ThemedReactContext): RNNaverMapView {
-        Log.d(NAME, "Creating RNNaverMapView instance")
-        return RNNaverMapView(reactContext)
+    override fun createViewInstance(reactContext: ThemedReactContext): GraniteNaverMapView {
+        Log.d(NAME, "Creating GraniteNaverMapView instance")
+        return GraniteNaverMapView(reactContext)
     }
 
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {
@@ -41,7 +41,7 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
 
     // Props
     @ReactProp(name = "center")
-    override fun setCenter(view: RNNaverMapView, center: ReadableMap?) {
+    override fun setCenter(view: GraniteNaverMapView, center: ReadableMap?) {
         center?.let {
             val lat = it.getDouble("latitude")
             val lng = it.getDouble("longitude")
@@ -53,82 +53,82 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
     }
 
     @ReactProp(name = "showsMyLocationButton")
-    override fun setShowsMyLocationButton(view: RNNaverMapView, show: Boolean) {
+    override fun setShowsMyLocationButton(view: GraniteNaverMapView, show: Boolean) {
         view.setShowsMyLocationButton(show)
     }
 
     @ReactProp(name = "compass")
-    override fun setCompass(view: RNNaverMapView, show: Boolean) {
+    override fun setCompass(view: GraniteNaverMapView, show: Boolean) {
         view.setCompass(show)
     }
 
     @ReactProp(name = "scaleBar")
-    override fun setScaleBar(view: RNNaverMapView, show: Boolean) {
+    override fun setScaleBar(view: GraniteNaverMapView, show: Boolean) {
         view.setScaleBar(show)
     }
 
     @ReactProp(name = "zoomControl")
-    override fun setZoomControl(view: RNNaverMapView, show: Boolean) {
+    override fun setZoomControl(view: GraniteNaverMapView, show: Boolean) {
         view.setZoomControl(show)
     }
 
     @ReactProp(name = "mapType")
-    override fun setMapType(view: RNNaverMapView, mapType: Int) {
+    override fun setMapType(view: GraniteNaverMapView, mapType: Int) {
         view.setMapType(mapType)
     }
 
     @ReactProp(name = "buildingHeight", defaultFloat = 1f)
-    override fun setBuildingHeight(view: RNNaverMapView, height: Float) {
+    override fun setBuildingHeight(view: GraniteNaverMapView, height: Float) {
         view.setBuildingHeight(height)
     }
 
     @ReactProp(name = "nightMode")
-    override fun setNightMode(view: RNNaverMapView, enabled: Boolean) {
+    override fun setNightMode(view: GraniteNaverMapView, enabled: Boolean) {
         view.setNightMode(enabled)
     }
 
     @ReactProp(name = "minZoomLevel", defaultDouble = 0.0)
-    override fun setMinZoomLevel(view: RNNaverMapView, level: Double) {
+    override fun setMinZoomLevel(view: GraniteNaverMapView, level: Double) {
         view.setMinZoomLevel(level)
     }
 
     @ReactProp(name = "maxZoomLevel", defaultDouble = 21.0)
-    override fun setMaxZoomLevel(view: RNNaverMapView, level: Double) {
+    override fun setMaxZoomLevel(view: GraniteNaverMapView, level: Double) {
         view.setMaxZoomLevel(level)
     }
 
     @ReactProp(name = "scrollGesturesEnabled", defaultBoolean = true)
-    override fun setScrollGesturesEnabled(view: RNNaverMapView, enabled: Boolean) {
+    override fun setScrollGesturesEnabled(view: GraniteNaverMapView, enabled: Boolean) {
         view.setScrollGesturesEnabled(enabled)
     }
 
     @ReactProp(name = "zoomGesturesEnabled", defaultBoolean = true)
-    override fun setZoomGesturesEnabled(view: RNNaverMapView, enabled: Boolean) {
+    override fun setZoomGesturesEnabled(view: GraniteNaverMapView, enabled: Boolean) {
         view.setZoomGesturesEnabled(enabled)
     }
 
     @ReactProp(name = "tiltGesturesEnabled", defaultBoolean = true)
-    override fun setTiltGesturesEnabled(view: RNNaverMapView, enabled: Boolean) {
+    override fun setTiltGesturesEnabled(view: GraniteNaverMapView, enabled: Boolean) {
         view.setTiltGesturesEnabled(enabled)
     }
 
     @ReactProp(name = "rotateGesturesEnabled", defaultBoolean = true)
-    override fun setRotateGesturesEnabled(view: RNNaverMapView, enabled: Boolean) {
+    override fun setRotateGesturesEnabled(view: GraniteNaverMapView, enabled: Boolean) {
         view.setRotateGesturesEnabled(enabled)
     }
 
     @ReactProp(name = "stopGesturesEnabled", defaultBoolean = true)
-    override fun setStopGesturesEnabled(view: RNNaverMapView, enabled: Boolean) {
+    override fun setStopGesturesEnabled(view: GraniteNaverMapView, enabled: Boolean) {
         view.setStopGesturesEnabled(enabled)
     }
 
     @ReactProp(name = "locationTrackingMode")
-    override fun setLocationTrackingMode(view: RNNaverMapView, mode: Int) {
+    override fun setLocationTrackingMode(view: GraniteNaverMapView, mode: Int) {
         view.setLocationTrackingMode(mode)
     }
 
     @ReactProp(name = "mapPadding")
-    override fun setMapPadding(view: RNNaverMapView, padding: ReadableMap?) {
+    override fun setMapPadding(view: GraniteNaverMapView, padding: ReadableMap?) {
         padding?.let {
             val top = if (it.hasKey("top")) it.getInt("top") else 0
             val left = if (it.hasKey("left")) it.getInt("left") else 0
@@ -139,12 +139,12 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
     }
 
     // Commands
-    override fun animateToCoordinate(view: RNNaverMapView, latitude: Double, longitude: Double) {
+    override fun animateToCoordinate(view: GraniteNaverMapView, latitude: Double, longitude: Double) {
         view.animateToCoordinate(LatLng(latitude, longitude))
     }
 
     override fun animateToTwoCoordinates(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         lat1: Double,
         lng1: Double,
         lat2: Double,
@@ -154,7 +154,7 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
     }
 
     override fun animateToRegion(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         latitude: Double,
         longitude: Double,
         latitudeDelta: Double,
@@ -167,12 +167,12 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
         view.animateToRegion(bounds)
     }
 
-    override fun setLayerGroupEnabled(view: RNNaverMapView, group: String, enabled: Boolean) {
+    override fun setLayerGroupEnabled(view: GraniteNaverMapView, group: String, enabled: Boolean) {
         view.setLayerGroupEnabled(group, enabled)
     }
 
     override fun addMarker(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         latitude: Double,
         longitude: Double,
@@ -190,7 +190,7 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
     }
 
     override fun updateMarker(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         latitude: Double,
         longitude: Double,
@@ -206,13 +206,13 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
         view.updateMarkerNew(identifier, latitude, longitude, width, height, zIndex, rotation, flat, alpha, pinColor, image)
     }
 
-    override fun removeMarker(view: RNNaverMapView, identifier: String) {
+    override fun removeMarker(view: GraniteNaverMapView, identifier: String) {
         view.removeMarker(identifier)
     }
 
     // Polyline Commands
     override fun addPolyline(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         coordsJson: String,
         strokeWidth: Float,
@@ -226,7 +226,7 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
     }
 
     override fun updatePolyline(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         coordsJson: String,
         strokeWidth: Float,
@@ -239,13 +239,13 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
         view.updatePolyline(identifier, coordsJson, strokeWidth, strokeColor, zIndex, lineCap, lineJoin, patternJson)
     }
 
-    override fun removePolyline(view: RNNaverMapView, identifier: String) {
+    override fun removePolyline(view: GraniteNaverMapView, identifier: String) {
         view.removePolyline(identifier)
     }
 
     // Polygon Commands
     override fun addPolygon(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         coordsJson: String,
         holesJson: String,
@@ -258,7 +258,7 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
     }
 
     override fun updatePolygon(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         coordsJson: String,
         holesJson: String,
@@ -270,13 +270,13 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
         view.updatePolygon(identifier, coordsJson, holesJson, fillColor, strokeColor, strokeWidth, zIndex)
     }
 
-    override fun removePolygon(view: RNNaverMapView, identifier: String) {
+    override fun removePolygon(view: GraniteNaverMapView, identifier: String) {
         view.removePolygon(identifier)
     }
 
     // Circle Commands
     override fun addCircle(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         latitude: Double,
         longitude: Double,
@@ -290,7 +290,7 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
     }
 
     override fun updateCircle(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         latitude: Double,
         longitude: Double,
@@ -303,13 +303,13 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
         view.updateCircle(identifier, latitude, longitude, radius, fillColor, strokeColor, strokeWidth, zIndex)
     }
 
-    override fun removeCircle(view: RNNaverMapView, identifier: String) {
+    override fun removeCircle(view: GraniteNaverMapView, identifier: String) {
         view.removeCircle(identifier)
     }
 
     // Path Commands
     override fun addPath(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         coordsJson: String,
         width: Float,
@@ -327,7 +327,7 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
     }
 
     override fun updatePath(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         coordsJson: String,
         width: Float,
@@ -344,13 +344,13 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
         view.updatePath(identifier, coordsJson, width, outlineWidth, color, outlineColor, passedColor, passedOutlineColor, patternImage, patternInterval, progress, zIndex)
     }
 
-    override fun removePath(view: RNNaverMapView, identifier: String) {
+    override fun removePath(view: GraniteNaverMapView, identifier: String) {
         view.removePath(identifier)
     }
 
     // ArrowheadPath Commands
     override fun addArrowheadPath(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         coordsJson: String,
         width: Float,
@@ -364,7 +364,7 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
     }
 
     override fun updateArrowheadPath(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         coordsJson: String,
         width: Float,
@@ -377,13 +377,13 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
         view.updateArrowheadPath(identifier, coordsJson, width, outlineWidth, color, outlineColor, headSizeRatio, zIndex)
     }
 
-    override fun removeArrowheadPath(view: RNNaverMapView, identifier: String) {
+    override fun removeArrowheadPath(view: GraniteNaverMapView, identifier: String) {
         view.removeArrowheadPath(identifier)
     }
 
     // GroundOverlay Commands
     override fun addGroundOverlay(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         swLat: Double,
         swLng: Double,
@@ -397,7 +397,7 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
     }
 
     override fun updateGroundOverlay(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         swLat: Double,
         swLng: Double,
@@ -410,13 +410,13 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
         view.updateGroundOverlay(identifier, swLat, swLng, neLat, neLng, image, alpha, zIndex)
     }
 
-    override fun removeGroundOverlay(view: RNNaverMapView, identifier: String) {
+    override fun removeGroundOverlay(view: GraniteNaverMapView, identifier: String) {
         view.removeGroundOverlay(identifier)
     }
 
     // InfoWindow Commands
     override fun addInfoWindow(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         latitude: Double,
         longitude: Double,
@@ -430,7 +430,7 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
     }
 
     override fun updateInfoWindow(
-        view: RNNaverMapView,
+        view: GraniteNaverMapView,
         identifier: String,
         latitude: Double,
         longitude: Double,
@@ -443,11 +443,11 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>(),
         view.updateInfoWindow(identifier, latitude, longitude, text, alpha, zIndex, offsetX, offsetY)
     }
 
-    override fun removeInfoWindow(view: RNNaverMapView, identifier: String) {
+    override fun removeInfoWindow(view: GraniteNaverMapView, identifier: String) {
         view.removeInfoWindow(identifier)
     }
 
     companion object {
-        const val NAME = "RNNaverMapView"
+        const val NAME = "GraniteNaverMapView"
     }
 }

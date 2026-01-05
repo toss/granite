@@ -1,5 +1,5 @@
 //
-//  RNNaverMapViewImpl.swift
+//  GraniteNaverMapViewImpl.swift
 //  react-native-toss-naver-map
 //
 //  Fabric-compatible implementation of NaverMapView
@@ -8,7 +8,7 @@
 import NMapsMap
 import UIKit
 
-@objc public protocol RNNaverMapViewDelegate: AnyObject {
+@objc public protocol GraniteNaverMapViewDelegate: AnyObject {
     @objc func mapViewDidInitialize()
     @objc func mapViewDidChangeCamera(latitude: Double, longitude: Double, zoom: Double)
     @objc func mapViewDidTouch(reason: Int, animated: Bool)
@@ -16,8 +16,8 @@ import UIKit
     @objc func mapViewDidClickMarker(id: String)
 }
 
-@objc public class RNNaverMapViewImpl: NMFNaverMapView {
-    @objc public weak var eventDelegate: RNNaverMapViewDelegate?
+@objc public class GraniteNaverMapViewImpl: NMFNaverMapView {
+    @objc public weak var eventDelegate: GraniteNaverMapViewDelegate?
 
     private var markers: [String: NMFMarker] = [:]
     private var polylines: [String: NMFPolylineOverlay] = [:]
@@ -629,7 +629,7 @@ import UIKit
 
 // MARK: - NMFMapViewTouchDelegate
 
-extension RNNaverMapViewImpl: NMFMapViewTouchDelegate {
+extension GraniteNaverMapViewImpl: NMFMapViewTouchDelegate {
     public func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
         eventDelegate?.mapViewDidClick(x: point.x, y: point.y, latitude: latlng.lat, longitude: latlng.lng)
     }
@@ -637,7 +637,7 @@ extension RNNaverMapViewImpl: NMFMapViewTouchDelegate {
 
 // MARK: - NMFMapViewCameraDelegate
 
-extension RNNaverMapViewImpl: NMFMapViewCameraDelegate {
+extension GraniteNaverMapViewImpl: NMFMapViewCameraDelegate {
     public func mapView(_ mapView: NMFMapView, cameraWillChangeByReason reason: Int, animated: Bool) {
         eventDelegate?.mapViewDidTouch(reason: reason, animated: animated)
     }
@@ -653,7 +653,7 @@ extension RNNaverMapViewImpl: NMFMapViewCameraDelegate {
 
 // MARK: - NMFMapViewOptionDelegate
 
-extension RNNaverMapViewImpl: NMFMapViewOptionDelegate {
+extension GraniteNaverMapViewImpl: NMFMapViewOptionDelegate {
     public func mapViewOptionChanged(_ mapView: NMFMapView) {
         // Handle option changes if needed
     }

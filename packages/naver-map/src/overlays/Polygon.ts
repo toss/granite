@@ -3,7 +3,7 @@ import { useMapOverlay } from '../internals/useMapOverlay';
 import { usePreservedReference } from '../internals/usePreservedReference';
 import { processColorInput } from '../internals/colorUtils';
 import type { Coord } from '../types/Coord';
-import { Commands } from '../specs/RNNaverMapViewNativeComponent';
+import { Commands } from '../specs/GraniteNaverMapViewNativeComponent';
 
 export interface PolygonProps {
   coordinates: Coord[];

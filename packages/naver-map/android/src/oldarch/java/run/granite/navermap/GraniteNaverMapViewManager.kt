@@ -14,12 +14,12 @@ import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.NaverMap
 
-class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>() {
+class GraniteNaverMapViewManager : SimpleViewManager<GraniteNaverMapView>() {
 
-    override fun getName(): String = "RNNaverMapView"
+    override fun getName(): String = "GraniteNaverMapView"
 
-    override fun createViewInstance(reactContext: ThemedReactContext): RNNaverMapView {
-        return RNNaverMapView(reactContext)
+    override fun createViewInstance(reactContext: ThemedReactContext): GraniteNaverMapView {
+        return GraniteNaverMapView(reactContext)
     }
 
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {
@@ -65,7 +65,7 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>() {
             .build()
     }
 
-    override fun receiveCommand(view: RNNaverMapView, commandId: Int, args: ReadableArray?) {
+    override fun receiveCommand(view: GraniteNaverMapView, commandId: Int, args: ReadableArray?) {
         when (commandId) {
             COMMAND_ANIMATE_TO_COORDINATE -> {
                 val coord = args?.getMap(0)
@@ -125,7 +125,7 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>() {
     }
 
     @ReactProp(name = "center")
-    fun setCenter(view: RNNaverMapView, center: ReadableMap?) {
+    fun setCenter(view: GraniteNaverMapView, center: ReadableMap?) {
         center?.let {
             val lat = it.getDouble("latitude")
             val lng = it.getDouble("longitude")
@@ -138,82 +138,82 @@ class RNNaverMapViewManager : SimpleViewManager<RNNaverMapView>() {
     }
 
     @ReactProp(name = "showsMyLocationButton")
-    fun setShowsMyLocationButton(view: RNNaverMapView, show: Boolean) {
+    fun setShowsMyLocationButton(view: GraniteNaverMapView, show: Boolean) {
         view.setShowsMyLocationButton(show)
     }
 
     @ReactProp(name = "compass")
-    fun setCompass(view: RNNaverMapView, show: Boolean) {
+    fun setCompass(view: GraniteNaverMapView, show: Boolean) {
         view.setCompass(show)
     }
 
     @ReactProp(name = "scaleBar")
-    fun setScaleBar(view: RNNaverMapView, show: Boolean) {
+    fun setScaleBar(view: GraniteNaverMapView, show: Boolean) {
         view.setScaleBar(show)
     }
 
     @ReactProp(name = "zoomControl")
-    fun setZoomControl(view: RNNaverMapView, show: Boolean) {
+    fun setZoomControl(view: GraniteNaverMapView, show: Boolean) {
         view.setZoomControl(show)
     }
 
     @ReactProp(name = "mapType")
-    fun setMapType(view: RNNaverMapView, mapType: Int) {
+    fun setMapType(view: GraniteNaverMapView, mapType: Int) {
         view.setMapType(mapType)
     }
 
     @ReactProp(name = "buildingHeight", defaultFloat = 1f)
-    fun setBuildingHeight(view: RNNaverMapView, height: Float) {
+    fun setBuildingHeight(view: GraniteNaverMapView, height: Float) {
         view.setBuildingHeight(height)
     }
 
     @ReactProp(name = "nightMode")
-    fun setNightMode(view: RNNaverMapView, enabled: Boolean) {
+    fun setNightMode(view: GraniteNaverMapView, enabled: Boolean) {
         view.setNightMode(enabled)
     }
 
     @ReactProp(name = "minZoomLevel", defaultDouble = 0.0)
-    fun setMinZoomLevel(view: RNNaverMapView, level: Double) {
+    fun setMinZoomLevel(view: GraniteNaverMapView, level: Double) {
         view.setMinZoomLevel(level)
     }
 
     @ReactProp(name = "maxZoomLevel", defaultDouble = 21.0)
-    fun setMaxZoomLevel(view: RNNaverMapView, level: Double) {
+    fun setMaxZoomLevel(view: GraniteNaverMapView, level: Double) {
         view.setMaxZoomLevel(level)
     }
 
     @ReactProp(name = "scrollGesturesEnabled", defaultBoolean = true)
-    fun setScrollGesturesEnabled(view: RNNaverMapView, enabled: Boolean) {
+    fun setScrollGesturesEnabled(view: GraniteNaverMapView, enabled: Boolean) {
         view.setScrollGesturesEnabled(enabled)
     }
 
     @ReactProp(name = "zoomGesturesEnabled", defaultBoolean = true)
-    fun setZoomGesturesEnabled(view: RNNaverMapView, enabled: Boolean) {
+    fun setZoomGesturesEnabled(view: GraniteNaverMapView, enabled: Boolean) {
         view.setZoomGesturesEnabled(enabled)
     }
 
     @ReactProp(name = "tiltGesturesEnabled", defaultBoolean = true)
-    fun setTiltGesturesEnabled(view: RNNaverMapView, enabled: Boolean) {
+    fun setTiltGesturesEnabled(view: GraniteNaverMapView, enabled: Boolean) {
         view.setTiltGesturesEnabled(enabled)
     }
 
     @ReactProp(name = "rotateGesturesEnabled", defaultBoolean = true)
-    fun setRotateGesturesEnabled(view: RNNaverMapView, enabled: Boolean) {
+    fun setRotateGesturesEnabled(view: GraniteNaverMapView, enabled: Boolean) {
         view.setRotateGesturesEnabled(enabled)
     }
 
     @ReactProp(name = "stopGesturesEnabled", defaultBoolean = true)
-    fun setStopGesturesEnabled(view: RNNaverMapView, enabled: Boolean) {
+    fun setStopGesturesEnabled(view: GraniteNaverMapView, enabled: Boolean) {
         view.setStopGesturesEnabled(enabled)
     }
 
     @ReactProp(name = "locationTrackingMode")
-    fun setLocationTrackingMode(view: RNNaverMapView, mode: Int) {
+    fun setLocationTrackingMode(view: GraniteNaverMapView, mode: Int) {
         view.setLocationTrackingMode(mode)
     }
 
     @ReactProp(name = "mapPadding")
-    fun setMapPadding(view: RNNaverMapView, padding: ReadableMap?) {
+    fun setMapPadding(view: GraniteNaverMapView, padding: ReadableMap?) {
         padding?.let {
             val top = if (it.hasKey("top")) it.getInt("top") else 0
             val left = if (it.hasKey("left")) it.getInt("left") else 0

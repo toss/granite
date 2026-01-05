@@ -1,5 +1,5 @@
 //
-//  RNNaverMapViewManager.m
+//  GraniteNaverMapViewManager.m
 //  react-native-toss-naver-map
 //
 
@@ -7,9 +7,9 @@
 #import <React/RCTViewManager.h>
 #import "RCTConvert+NMFMapView.h"
 
-@interface RCT_EXTERN_MODULE(RNNaverMapViewManager, RCTViewManager)
+@interface RCT_EXTERN_MODULE(GraniteNaverMapViewManager, RCTViewManager)
 
-RCT_CUSTOM_VIEW_PROPERTY(center, NMFCameraUpdateWith*, RNNaverMapViewManager)
+RCT_CUSTOM_VIEW_PROPERTY(center, NMFCameraUpdateWith*, GraniteNaverMapViewManager)
 {
     if (json == nil) return;
     [self performSelector: NSSelectorFromString(@"moveCamera:view:")

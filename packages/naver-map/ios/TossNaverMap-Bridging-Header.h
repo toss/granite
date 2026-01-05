@@ -14,5 +14,5 @@
 
 #ifdef RCT_NEW_ARCH_ENABLED
 #import <React/RCTViewComponentView.h>
-#import "RNNaverMapViewComponentView.h"
+#import "GraniteNaverMapViewComponentView.h"
 #endif

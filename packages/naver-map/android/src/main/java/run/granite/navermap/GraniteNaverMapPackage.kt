@@ -11,6 +11,6 @@ class GraniteNaverMapPackage : ReactPackage {
     }
 
     override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
-        return listOf(RNNaverMapViewManager())
+        return listOf(GraniteNaverMapViewManager())
     }
 }
