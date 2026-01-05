@@ -124,6 +124,7 @@
     "events": "3.3.0",
     "fastify": "4.14.0",
     "fastify-plugin": "4.5.1",
+    "flow-remove-types": "^2.279.0",
     "frogress-bar": "^0.1.0",
     "fs-extra": "^1.0.0",
     "graceful-fs": "^4.2.4",

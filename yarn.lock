@@ -5818,6 +5818,7 @@ __metadata:
     fast-glob: "npm:^3.3.2"
     fastify: "npm:4.14.0"
     fastify-plugin: "npm:4.5.1"
+    flow-remove-types: "npm:^2.279.0"
     frogress-bar: "npm:^0.1.0"
     fs-extra: "npm:^1.0.0"
     graceful-fs: "npm:^4.2.4"
@@ -16065,6 +16066,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"flow-remove-types@npm:^2.279.0":
+  version: 2.295.0
+  resolution: "flow-remove-types@npm:2.295.0"
+  dependencies:
+    hermes-parser: "npm:0.32.0"
+    pirates: "npm:^3.0.2"
+    vlq: "npm:^0.2.1"
+  bin:
+    flow-node: flow-node
+    flow-remove-types: flow-remove-types
+  checksum: 10c0/a57d31ee2959442a5b552992a9cfa1c2494fee016bc94e419b802a46769f40cd9d3bad4284b4cc50a47c639c9deb48cd424ca5539d174962e97164bbfc7820f9
+  languageName: node
+  linkType: hard
+
 "focus-trap@npm:^7.6.4":
   version: 7.6.6
   resolution: "focus-trap@npm:7.6.6"
@@ -20734,6 +20749,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-modules-regexp@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "node-modules-regexp@npm:1.0.0"
+  checksum: 10c0/d4a9b6425a18e9fadd38f21a7f7820b3bfda4663c7d3b9f80043e3f5f7e27a0a1e04f524077b00a15ae77148cd81319da5772900229d89541062f7e876b36763
+  languageName: node
+  linkType: hard
+
 "node-releases@npm:^2.0.19":
   version: 2.0.19
   resolution: "node-releases@npm:2.0.19"
@@ -21940,6 +21962,15 @@ __metadata:
   bin:
     pino: bin.js
   checksum: 10c0/9cf8b3e8741ecc42b56d07fbb3d09f48c96c07a9a6d7196b69a60b56109899f8a7dfa14d85787d165a1038b74c7ca18e76cecce7c26ec14e0f05c73008df7891
+  languageName: node
+  linkType: hard
+
+"pirates@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "pirates@npm:3.0.2"
+  dependencies:
+    node-modules-regexp: "npm:^1.0.0"
+  checksum: 10c0/f71519f64abff750ad00398e7a0f724e7d3af0ce14c0cf149a47dd9e1fae5e9aea24cb3a63b4ce8dce8b051f7d44531af6743078e33f72cb8602c5a7365185d1
   languageName: node
   linkType: hard
 
