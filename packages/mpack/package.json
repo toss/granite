@@ -109,7 +109,7 @@
     "browserify-zlib": "0.2.0",
     "buffer": "6.0.3",
     "chalk": "^4",
-    "chrome-launcher": "^1.2.1",
+    "chrome-launcher": "^0.15.0",
     "ci-info": "^2.0.0",
     "connect": "^3.7.0",
     "cosmiconfig": "^7.0.0",
