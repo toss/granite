@@ -6,6 +6,7 @@ import { StartMenuHandler } from './StartMenuHandler';
 import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../../constants';
 import { DevServer } from '../../server/DevServer';
 import { printLogo } from '../../utils/printLogo';
+import { openDebugger } from '../openDebugger';
 
 const debug = Debug('cli:start');
 
@@ -100,16 +101,16 @@ export async function EXPERIMENTAL__server({
 
         chromeInstanceMap.get(targetDevice.id)?.kill();
 
-        // openDebugger(server.port, targetDevice.id)
-        //   .then((chrome) => {
-        //     chromeInstanceMap.set(targetDevice.id, chrome);
-        //   })
-        //   .catch((error) => {
-        //     if (error.message.includes('ECONNREFUSED')) {
-        //       return;
-        //     }
-        //     console.error(error);
-        //   });
+        openDebugger(server.port, targetDevice.id)
+          .then((chrome) => {
+            chromeInstanceMap.set(targetDevice.id, chrome);
+          })
+          .catch((error) => {
+            if (error.message.includes('ECONNREFUSED')) {
+              return;
+            }
+            console.error(error);
+          });
       },
     },
   ]).attach();
