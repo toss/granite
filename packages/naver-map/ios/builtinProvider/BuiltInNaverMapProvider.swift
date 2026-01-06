@@ -8,6 +8,14 @@
 import UIKit
 import NMapsMap
 
+/// Factory for creating BuiltInNaverMapProvider instances.
+/// Each call to createProvider() returns a new instance.
+@objc public class BuiltInNaverMapProviderFactory: NSObject, GraniteNaverMapProviderFactory {
+    @objc public func createProvider() -> GraniteNaverMapProvidable {
+        return BuiltInNaverMapProvider()
+    }
+}
+
 @objc public class BuiltInNaverMapProvider: NSObject, GraniteNaverMapProvidable {
     private var mapView: NMFNaverMapView?
     private weak var delegate: GraniteNaverMapProviderDelegate?

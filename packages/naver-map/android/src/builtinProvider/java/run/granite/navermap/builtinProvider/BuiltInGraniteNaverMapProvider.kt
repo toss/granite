@@ -2,6 +2,7 @@ package run.granite.navermap.builtinProvider
 
 import android.content.Context
 import run.granite.navermap.GraniteNaverMapProvider
+import run.granite.navermap.GraniteNaverMapProviderFactory
 import run.granite.navermap.GraniteNaverMapProviderDelegate
 import run.granite.navermap.GraniteNaverMapCameraPosition
 import run.granite.navermap.GraniteNaverMapCoordinate
@@ -33,6 +34,16 @@ import com.naver.maps.map.overlay.CircleOverlay
 import com.naver.maps.map.overlay.PathOverlay
 import java.net.URL
 import kotlin.concurrent.thread
+
+/**
+ * Factory for creating BuiltInGraniteNaverMapProvider instances.
+ * Each call to createProvider() returns a new instance.
+ */
+class BuiltInGraniteNaverMapProviderFactory : GraniteNaverMapProviderFactory {
+    override fun createProvider(context: Context): GraniteNaverMapProvider {
+        return BuiltInGraniteNaverMapProvider(context)
+    }
+}
 
 /**
  * Built-in provider using NMapsMap SDK

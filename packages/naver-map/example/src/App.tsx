@@ -27,10 +27,12 @@ const SEOUL = { latitude: 37.5665, longitude: 126.978 };
 const GANGNAM = { latitude: 37.4979, longitude: 127.0276 };
 const HONGDAE = { latitude: 37.5563, longitude: 126.9236 };
 const ITAEWON = { latitude: 37.5345, longitude: 126.9946 };
+const BUSAN = { latitude: 35.1796, longitude: 129.0756 };
 
 export default function App() {
   const [logs, setLogs] = useState<string[]>([]);
   const [center, setCenter] = useState({ ...SEOUL, zoom: 11 });
+  const [center2, setCenter2] = useState({ ...BUSAN, zoom: 11 });
   const [showMarkers, setShowMarkers] = useState(true);
   const [showPolyline, setShowPolyline] = useState(false);
   const [showPolygon, setShowPolygon] = useState(false);
@@ -365,6 +367,66 @@ export default function App() {
           </NaverMapView>
         </View>
 
+        {/* Second Map View - to test multiple map instances */}
+        <Text style={styles.mapTitle}>Map 2: Busan (Independent Instance)</Text>
+        <View style={styles.mapContainer2}>
+          <NaverMapView
+            style={styles.map}
+            center={center2}
+            mapType={0}
+            showsMyLocationButton={false}
+            compass={true}
+            scaleBar={false}
+            zoomControl={false}
+            onCameraChange={(ev) => {
+              addLog(`Map2 Camera: ${ev.latitude.toFixed(4)}, ${ev.longitude.toFixed(4)}`);
+            }}
+            onMapClick={(ev) => {
+              addLog(`Map2 Click: ${ev.latitude.toFixed(4)}, ${ev.longitude.toFixed(4)}`);
+            }}
+          >
+            <Marker
+              coordinate={BUSAN}
+              pinColor={0xFF5500}
+              onPress={() => handleMarkerPress('Busan (Map 2)')}
+            />
+          </NaverMapView>
+        </View>
+
+        {/* Quick switch between maps */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>0. Dual Map Test</Text>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                setCenter({ ...SEOUL, zoom: 14 });
+                addLog('Map1 → Seoul');
+              }}
+            >
+              <Text style={styles.buttonText}>Map1: Seoul</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                setCenter2({ ...BUSAN, zoom: 14 });
+                addLog('Map2 → Busan');
+              }}
+            >
+              <Text style={styles.buttonText}>Map2: Busan</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                setCenter2({ ...GANGNAM, zoom: 14 });
+                addLog('Map2 → Gangnam');
+              }}
+            >
+              <Text style={styles.buttonText}>Map2: Gangnam</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Section 1: Location Shortcuts */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>1. Quick Navigation</Text>
@@ -526,6 +588,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
     marginBottom: 16,
+  },
+  mapContainer2: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  mapTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#03DAC5',
+    marginBottom: 8,
   },
   map: {
     width: '100%',

@@ -34,11 +34,12 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
     }
 
     private fun setupProvider() {
-        val mapProvider = GraniteNaverMapRegistry.getProvider(context)
+        // Create a new provider instance for this view
+        val mapProvider = GraniteNaverMapRegistry.createProvider(context)
 
         if (mapProvider == null) {
-            // No provider available - show placeholder
-            Log.w(TAG, "No NaverMap provider registered")
+            // No provider factory available - show placeholder
+            Log.w(TAG, "No NaverMap provider factory registered")
             val label = TextView(context).apply {
                 text = "NaverMap provider not registered"
                 textAlignment = TEXT_ALIGNMENT_CENTER
@@ -53,7 +54,7 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         val mapView = mapProvider.createMapView(context)
         mapContentView = mapView
         addView(mapView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
-        Log.d(TAG, "GraniteNaverMapView - MapView added via provider")
+        Log.d(TAG, "GraniteNaverMapView[$instanceId] - MapView added via provider")
     }
 
     // Fabric requires explicit layout of children

@@ -32,8 +32,9 @@ import UIKit
     }
 
     private func setupProvider() {
-        guard let provider = GraniteNaverMapRegistry.shared.getProvider() else {
-            // No provider available - show placeholder or error
+        // Create a new provider instance for this view
+        guard let provider = GraniteNaverMapRegistry.shared.createProvider() else {
+            // No provider factory available - show placeholder or error
             let label = UILabel(frame: bounds)
             label.text = "NaverMap provider not registered"
             label.textAlignment = .center

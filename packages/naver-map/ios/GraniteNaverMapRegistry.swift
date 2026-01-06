@@ -1,8 +1,8 @@
 //
-//  GraniteGraniteNaverMapRegistry.swift
+//  GraniteNaverMapRegistry.swift
 //  granite-naver-map
 //
-//  Registry singleton for NaverMap providers
+//  Registry singleton for NaverMap provider factories
 //
 
 import Foundation
@@ -10,37 +10,38 @@ import Foundation
 @objc public class GraniteNaverMapRegistry: NSObject {
     @objc public static let shared = GraniteNaverMapRegistry()
 
-    @objc public private(set) var provider: GraniteNaverMapProvidable?
+    @objc public private(set) var factory: GraniteNaverMapProviderFactory?
 
     private override init() {
         super.init()
     }
 
-    /// Register a custom provider. Call this at app startup before using NaverMap.
-    @objc public func register(provider: GraniteNaverMapProvidable) {
-        self.provider = provider
+    /// Register a custom provider factory. Call this at app startup before using NaverMap.
+    @objc public func register(factory: GraniteNaverMapProviderFactory) {
+        self.factory = factory
     }
 
-    /// Get the current provider, falling back to built-in provider if none registered
-    @objc public func getProvider() -> GraniteNaverMapProvidable? {
-        if let provider = provider {
-            return provider
+    /// Create a new provider instance for a NaverMap view.
+    /// Each view should call this to get its own provider instance.
+    @objc public func createProvider() -> GraniteNaverMapProvidable? {
+        // Use registered factory if available
+        if let factory = factory {
+            return factory.createProvider()
         }
 
         #if GRANITE_NAVER_MAP_DEFAULT_PROVIDER
-        // Auto-register built-in provider on first use
-        let builtIn = BuiltInNaverMapProvider()
-        self.provider = builtIn
-        return builtIn
+        // Use built-in factory
+        let builtInFactory = BuiltInNaverMapProviderFactory()
+        return builtInFactory.createProvider()
         #else
-        // No default provider available - user must register a custom provider
+        // No default provider available - user must register a custom factory
         return nil
         #endif
     }
 
-    /// Check if a custom provider has been registered
-    @objc public var hasCustomProvider: Bool {
-        return provider != nil
+    /// Check if a custom factory has been registered
+    @objc public var hasCustomFactory: Bool {
+        return factory != nil
     }
 
     /// Check if a default provider is available
@@ -52,8 +53,8 @@ import Foundation
         #endif
     }
 
-    /// Reset the provider (useful for testing)
+    /// Reset the factory (useful for testing)
     @objc public func reset() {
-        provider = nil
+        factory = nil
     }
 }

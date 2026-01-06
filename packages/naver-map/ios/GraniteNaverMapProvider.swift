@@ -242,6 +242,16 @@ import UIKit
     @objc func mapViewDidClickMarker(id: String)
 }
 
+// MARK: - Provider Factory Protocol
+
+/// Factory protocol for creating NaverMap providers.
+/// Each call to createProvider() should return a new instance.
+@objc public protocol GraniteNaverMapProviderFactory: NSObjectProtocol {
+    /// Create a new provider instance.
+    /// This should be called for each NaverMap view.
+    @objc func createProvider() -> GraniteNaverMapProvidable
+}
+
 // MARK: - Provider Protocol
 
 @objc public protocol GraniteNaverMapProvidable: NSObjectProtocol {

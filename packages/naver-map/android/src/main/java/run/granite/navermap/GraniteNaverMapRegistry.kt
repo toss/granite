@@ -3,73 +3,69 @@ package run.granite.navermap
 import android.content.Context
 
 /**
- * Registry singleton for NaverMap providers
+ * Registry singleton for NaverMap provider factories
  *
- * Brownfield apps can register their own provider implementation at app startup.
- * If no provider is registered and the default provider is included, the built-in
- * NMapsMap provider will be used.
+ * Brownfield apps can register their own provider factory at app startup.
+ * If no factory is registered and the default provider is included, the built-in
+ * NMapsMap provider factory will be used.
  *
  * Usage:
  * ```kotlin
  * // In your Application.onCreate() or before using NaverMap:
- * GraniteNaverMapRegistry.register(MyCustomGraniteNaverMapProvider())
+ * GraniteNaverMapRegistry.register(MyCustomNaverMapProviderFactory())
  * ```
  */
 object GraniteNaverMapRegistry {
-    private var _provider: GraniteNaverMapProvider? = null
+    private var _factory: GraniteNaverMapProviderFactory? = null
 
     /**
-     * The currently registered provider
+     * The currently registered factory
      */
-    val provider: GraniteNaverMapProvider?
-        get() = _provider
+    val factory: GraniteNaverMapProviderFactory?
+        get() = _factory
 
     /**
-     * Register a custom provider. Call this at app startup before using NaverMap.
+     * Register a custom provider factory. Call this at app startup before using NaverMap.
      */
-    fun register(provider: GraniteNaverMapProvider) {
-        _provider = provider
+    fun register(factory: GraniteNaverMapProviderFactory) {
+        _factory = factory
     }
 
     /**
-     * Get the current provider, creating the built-in provider if none registered
-     * and the default provider is available.
+     * Create a new provider instance for a NaverMap view.
+     * Each view should call this to get its own provider instance.
      *
-     * @return The provider, or null if no provider is registered and default provider is not included
+     * @return A new provider instance, or null if no factory is registered and default provider is not included
      */
-    fun getProvider(context: Context): GraniteNaverMapProvider? {
-        if (_provider != null) {
-            return _provider
-        }
+    fun createProvider(context: Context): GraniteNaverMapProvider? {
+        // Use registered factory if available
+        _factory?.let { return it.createProvider(context) }
 
         // Only try to create built-in provider if it's included in the build
         if (BuildConfig.INCLUDE_DEFAULT_PROVIDER) {
-            return createBuiltInProvider(context)?.also {
-                _provider = it
-            }
+            return createBuiltInProviderFactory()?.createProvider(context)
         }
 
         return null
     }
 
     /**
-     * Create built-in provider using reflection to avoid compile-time dependency
+     * Create built-in provider factory using reflection to avoid compile-time dependency
      */
-    private fun createBuiltInProvider(context: Context): GraniteNaverMapProvider? {
+    private fun createBuiltInProviderFactory(): GraniteNaverMapProviderFactory? {
         return try {
-            val clazz = Class.forName("run.granite.navermap.builtinProvider.BuiltInGraniteNaverMapProvider")
-            val constructor = clazz.getConstructor(Context::class.java)
-            constructor.newInstance(context) as GraniteNaverMapProvider
+            val clazz = Class.forName("run.granite.navermap.builtinProvider.BuiltInGraniteNaverMapProviderFactory")
+            clazz.getDeclaredConstructor().newInstance() as GraniteNaverMapProviderFactory
         } catch (e: Exception) {
             null
         }
     }
 
     /**
-     * Check if a custom provider has been registered
+     * Check if a custom factory has been registered
      */
-    val hasCustomProvider: Boolean
-        get() = _provider != null
+    val hasCustomFactory: Boolean
+        get() = _factory != null
 
     /**
      * Check if the default provider is available in this build
@@ -78,9 +74,9 @@ object GraniteNaverMapRegistry {
         get() = BuildConfig.INCLUDE_DEFAULT_PROVIDER
 
     /**
-     * Reset the provider (useful for testing)
+     * Reset the factory (useful for testing)
      */
     fun reset() {
-        _provider = null
+        _factory = null
     }
 }

@@ -129,9 +129,24 @@ interface GraniteNaverMapProviderDelegate {
 }
 
 /**
+ * Factory interface for creating NaverMap providers.
+ * Each call to createProvider() should return a new instance.
+ *
+ * Brownfield apps can implement this interface to provide their own map implementation.
+ */
+interface GraniteNaverMapProviderFactory {
+    /**
+     * Create a new provider instance.
+     * This should be called for each NaverMap view.
+     */
+    fun createProvider(context: Context): GraniteNaverMapProvider
+}
+
+/**
  * Pluggable Provider interface for NaverMap
  *
  * Brownfield apps can implement this interface to use their own map implementation.
+ * Note: Each view should have its own Provider instance (created via Factory).
  */
 interface GraniteNaverMapProvider {
     /**
