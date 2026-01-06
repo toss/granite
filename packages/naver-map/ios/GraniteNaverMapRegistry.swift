@@ -7,6 +7,23 @@
 
 import Foundation
 
+/// Type alias for provider creation closure
+public typealias GraniteNaverMapProviderCreator = () -> GraniteNaverMapProvidable
+
+/// Internal wrapper to adapt closure to factory protocol (for Obj-C compatibility)
+private class ClosureProviderFactory: NSObject, GraniteNaverMapProviderFactory {
+    private let creator: GraniteNaverMapProviderCreator
+
+    init(creator: @escaping GraniteNaverMapProviderCreator) {
+        self.creator = creator
+        super.init()
+    }
+
+    func createProvider() -> GraniteNaverMapProvidable {
+        return creator()
+    }
+}
+
 @objc public class GraniteNaverMapRegistry: NSObject {
     @objc public static let shared = GraniteNaverMapRegistry()
 
@@ -16,7 +33,21 @@ import Foundation
         super.init()
     }
 
+    /// Register a provider using a closure. Call this at app startup before using NaverMap.
+    /// This is the preferred Swift API.
+    ///
+    /// Usage:
+    /// ```swift
+    /// GraniteNaverMapRegistry.shared.register {
+    ///     return MyNaverMapProvider()
+    /// }
+    /// ```
+    public func register(creator: @escaping GraniteNaverMapProviderCreator) {
+        self.factory = ClosureProviderFactory(creator: creator)
+    }
+
     /// Register a custom provider factory. Call this at app startup before using NaverMap.
+    /// This API is provided for Obj-C compatibility.
     @objc public func register(factory: GraniteNaverMapProviderFactory) {
         self.factory = factory
     }

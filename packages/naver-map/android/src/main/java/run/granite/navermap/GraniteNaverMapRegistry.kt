@@ -3,6 +3,22 @@ package run.granite.navermap
 import android.content.Context
 
 /**
+ * Type alias for provider creation lambda
+ */
+typealias GraniteNaverMapProviderCreator = (Context) -> GraniteNaverMapProvider
+
+/**
+ * Internal wrapper to adapt lambda to factory interface
+ */
+private class LambdaProviderFactory(
+    private val creator: GraniteNaverMapProviderCreator
+) : GraniteNaverMapProviderFactory {
+    override fun createProvider(context: Context): GraniteNaverMapProvider {
+        return creator(context)
+    }
+}
+
+/**
  * Registry singleton for NaverMap provider factories
  *
  * Brownfield apps can register their own provider factory at app startup.
@@ -12,7 +28,9 @@ import android.content.Context
  * Usage:
  * ```kotlin
  * // In your Application.onCreate() or before using NaverMap:
- * GraniteNaverMapRegistry.register(MyCustomNaverMapProviderFactory())
+ * GraniteNaverMapRegistry.register { context ->
+ *     MyNaverMapProvider(context)
+ * }
  * ```
  */
 object GraniteNaverMapRegistry {
@@ -25,7 +43,23 @@ object GraniteNaverMapRegistry {
         get() = _factory
 
     /**
+     * Register a provider using a lambda. Call this at app startup before using NaverMap.
+     * This is the preferred Kotlin API.
+     *
+     * Usage:
+     * ```kotlin
+     * GraniteNaverMapRegistry.register { context ->
+     *     MyNaverMapProvider(context)
+     * }
+     * ```
+     */
+    fun register(creator: GraniteNaverMapProviderCreator) {
+        _factory = LambdaProviderFactory(creator)
+    }
+
+    /**
      * Register a custom provider factory. Call this at app startup before using NaverMap.
+     * This API is provided for Java compatibility.
      */
     fun register(factory: GraniteNaverMapProviderFactory) {
         _factory = factory
