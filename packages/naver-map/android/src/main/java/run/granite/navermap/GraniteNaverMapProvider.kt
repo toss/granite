@@ -6,7 +6,7 @@ import android.view.View
 /**
  * Data class for map coordinates
  */
-data class NaverMapCoordinate(
+data class GraniteNaverMapCoordinate(
     val latitude: Double,
     val longitude: Double
 )
@@ -14,8 +14,8 @@ data class NaverMapCoordinate(
 /**
  * Data class for camera position
  */
-data class NaverMapCameraPosition(
-    val target: NaverMapCoordinate,
+data class GraniteNaverMapCameraPosition(
+    val target: GraniteNaverMapCoordinate,
     val zoom: Double,
     val tilt: Double = 0.0,
     val bearing: Double = 0.0
@@ -24,31 +24,31 @@ data class NaverMapCameraPosition(
 /**
  * Data class for bounds
  */
-data class NaverMapBounds(
-    val southWest: NaverMapCoordinate,
-    val northEast: NaverMapCoordinate
+data class GraniteNaverMapBounds(
+    val southWest: GraniteNaverMapCoordinate,
+    val northEast: GraniteNaverMapCoordinate
 )
 
 /**
  * Map type enum
  */
-enum class NaverMapType {
+enum class GraniteNaverMapType {
     BASIC, NAVI, SATELLITE, HYBRID, TERRAIN, NONE
 }
 
 /**
  * Location tracking mode enum
  */
-enum class NaverMapLocationTrackingMode {
+enum class GraniteNaverMapLocationTrackingMode {
     NONE, NO_FOLLOW, FOLLOW, FACE
 }
 
 /**
  * Marker data
  */
-data class NaverMapMarkerData(
+data class GraniteNaverMapMarkerData(
     val identifier: String,
-    val coordinate: NaverMapCoordinate,
+    val coordinate: GraniteNaverMapCoordinate,
     val width: Int,
     val height: Int,
     val zIndex: Int,
@@ -62,9 +62,9 @@ data class NaverMapMarkerData(
 /**
  * Polyline data
  */
-data class NaverMapPolylineData(
+data class GraniteNaverMapPolylineData(
     val identifier: String,
-    val coordinates: List<NaverMapCoordinate>,
+    val coordinates: List<GraniteNaverMapCoordinate>,
     val strokeWidth: Float,
     val strokeColor: Int,
     val zIndex: Int,
@@ -76,10 +76,10 @@ data class NaverMapPolylineData(
 /**
  * Polygon data
  */
-data class NaverMapPolygonData(
+data class GraniteNaverMapPolygonData(
     val identifier: String,
-    val coordinates: List<NaverMapCoordinate>,
-    val holes: List<List<NaverMapCoordinate>>,
+    val coordinates: List<GraniteNaverMapCoordinate>,
+    val holes: List<List<GraniteNaverMapCoordinate>>,
     val fillColor: Int,
     val strokeColor: Int,
     val strokeWidth: Float,
@@ -89,9 +89,9 @@ data class NaverMapPolygonData(
 /**
  * Circle data
  */
-data class NaverMapCircleData(
+data class GraniteNaverMapCircleData(
     val identifier: String,
-    val center: NaverMapCoordinate,
+    val center: GraniteNaverMapCoordinate,
     val radius: Double,
     val fillColor: Int,
     val strokeColor: Int,
@@ -102,9 +102,9 @@ data class NaverMapCircleData(
 /**
  * Path data
  */
-data class NaverMapPathData(
+data class GraniteNaverMapPathData(
     val identifier: String,
-    val coordinates: List<NaverMapCoordinate>,
+    val coordinates: List<GraniteNaverMapCoordinate>,
     val width: Float,
     val outlineWidth: Float,
     val color: Int,
@@ -120,9 +120,9 @@ data class NaverMapPathData(
 /**
  * Provider delegate interface for map events
  */
-interface NaverMapProviderDelegate {
+interface GraniteNaverMapProviderDelegate {
     fun onMapInitialized()
-    fun onCameraChange(position: NaverMapCameraPosition, contentRegion: List<NaverMapCoordinate>, coveringRegion: List<NaverMapCoordinate>)
+    fun onCameraChange(position: GraniteNaverMapCameraPosition, contentRegion: List<GraniteNaverMapCoordinate>, coveringRegion: List<GraniteNaverMapCoordinate>)
     fun onTouch(reason: Int, animated: Boolean)
     fun onClick(x: Double, y: Double, latitude: Double, longitude: Double)
     fun onMarkerClick(id: String)
@@ -133,7 +133,7 @@ interface NaverMapProviderDelegate {
  *
  * Brownfield apps can implement this interface to use their own map implementation.
  */
-interface NaverMapProvider {
+interface GraniteNaverMapProvider {
     /**
      * Create the map container view
      */
@@ -142,7 +142,7 @@ interface NaverMapProvider {
     /**
      * Set the delegate for map events
      */
-    fun setDelegate(delegate: NaverMapProviderDelegate?)
+    fun setDelegate(delegate: GraniteNaverMapProviderDelegate?)
 
     /**
      * Called when the view is attached to window
@@ -171,13 +171,13 @@ interface NaverMapProvider {
 
     // MARK: - Camera
 
-    fun moveCamera(position: NaverMapCameraPosition, animated: Boolean)
-    fun animateToCoordinate(coordinate: NaverMapCoordinate)
-    fun animateToBounds(bounds: NaverMapBounds, padding: Int)
+    fun moveCamera(position: GraniteNaverMapCameraPosition, animated: Boolean)
+    fun animateToCoordinate(coordinate: GraniteNaverMapCoordinate)
+    fun animateToBounds(bounds: GraniteNaverMapBounds, padding: Int)
 
     // MARK: - Map Properties
 
-    fun setMapType(type: NaverMapType)
+    fun setMapType(type: GraniteNaverMapType)
     fun setMapPadding(top: Int, left: Int, bottom: Int, right: Int)
     fun setCompassEnabled(enabled: Boolean)
     fun setScaleBarEnabled(enabled: Boolean)
@@ -192,36 +192,36 @@ interface NaverMapProvider {
     fun setTiltGesturesEnabled(enabled: Boolean)
     fun setRotateGesturesEnabled(enabled: Boolean)
     fun setStopGesturesEnabled(enabled: Boolean)
-    fun setLocationTrackingMode(mode: NaverMapLocationTrackingMode)
+    fun setLocationTrackingMode(mode: GraniteNaverMapLocationTrackingMode)
     fun setLayerGroupEnabled(group: String, enabled: Boolean)
 
     // MARK: - Markers
 
-    fun addMarker(data: NaverMapMarkerData)
-    fun updateMarker(data: NaverMapMarkerData)
+    fun addMarker(data: GraniteNaverMapMarkerData)
+    fun updateMarker(data: GraniteNaverMapMarkerData)
     fun removeMarker(identifier: String)
 
     // MARK: - Polylines
 
-    fun addPolyline(data: NaverMapPolylineData)
-    fun updatePolyline(data: NaverMapPolylineData)
+    fun addPolyline(data: GraniteNaverMapPolylineData)
+    fun updatePolyline(data: GraniteNaverMapPolylineData)
     fun removePolyline(identifier: String)
 
     // MARK: - Polygons
 
-    fun addPolygon(data: NaverMapPolygonData)
-    fun updatePolygon(data: NaverMapPolygonData)
+    fun addPolygon(data: GraniteNaverMapPolygonData)
+    fun updatePolygon(data: GraniteNaverMapPolygonData)
     fun removePolygon(identifier: String)
 
     // MARK: - Circles
 
-    fun addCircle(data: NaverMapCircleData)
-    fun updateCircle(data: NaverMapCircleData)
+    fun addCircle(data: GraniteNaverMapCircleData)
+    fun updateCircle(data: GraniteNaverMapCircleData)
     fun removeCircle(identifier: String)
 
     // MARK: - Paths
 
-    fun addPath(data: NaverMapPathData)
-    fun updatePath(data: NaverMapPathData)
+    fun addPath(data: GraniteNaverMapPathData)
+    fun updatePath(data: GraniteNaverMapPathData)
     fun removePath(identifier: String)
 }

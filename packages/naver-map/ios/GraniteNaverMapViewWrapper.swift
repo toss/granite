@@ -1,13 +1,14 @@
 //
-//  GraniteNaverMapView.swift
-//  react-native-toss-naver-map
+//  GraniteNaverMapViewWrapper.swift
+//  granite-naver-map
+//
+//  Provider-based wrapper for Old Architecture (no direct NMapsMap dependency)
 //
 
-import NMapsMap
 import React
 import UIKit
 
-class GraniteNaverMapView: NMFNaverMapView {
+class GraniteNaverMapView: UIView {
     weak var bridge: RCTBridge?
 
     @objc var onInitialized: RCTDirectEventBlock?
@@ -16,145 +17,198 @@ class GraniteNaverMapView: NMFNaverMapView {
     @objc var onMapClick: RCTDirectEventBlock?
     @objc var onMarkerClick: RCTDirectEventBlock?
 
+    private var provider: GraniteNaverMapProvidable?
+    private var mapContentView: UIView?
+
     override init(frame: CGRect) {
         super.init(frame: frame)
-        mapView.touchDelegate = self
-        mapView.addCameraDelegate(delegate: self)
-        mapView.addOptionDelegate(delegate: self)
+        setupProvider()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    @objc func setMapType(_ type: Int) {
-        guard let mapType = NMFMapType(rawValue: type) else {
+    private func setupProvider() {
+        guard let provider = GraniteNaverMapRegistry.shared.getProvider() else {
+            // No provider available - show placeholder or error
+            let label = UILabel(frame: bounds)
+            label.text = "NaverMap provider not registered"
+            label.textAlignment = .center
+            label.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            addSubview(label)
             return
         }
-        mapView.mapType = mapType
+
+        self.provider = provider
+        provider.setDelegate(self)
+
+        let mapView = provider.createMapView(frame: bounds)
+        mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(mapView)
+        self.mapContentView = mapView
     }
 
-    @objc var mapPadding: UIEdgeInsets {
-        get { mapView.contentInset }
-        set { mapView.contentInset = newValue }
+    // MARK: - Property Setters
+
+    @objc func setMapType(_ type: Int) {
+        guard let mapType = GraniteNaverMapType(rawValue: type) else { return }
+        provider?.setMapType(mapType)
     }
 
-    @objc var compass: Bool {
-        get { showCompass }
-        set { showCompass = newValue }
+    @objc var mapPadding: UIEdgeInsets = .zero {
+        didSet {
+            provider?.setMapPadding(mapPadding)
+        }
     }
 
-    @objc var scaleBar: Bool {
-        get { showScaleBar }
-        set { showScaleBar = newValue }
+    @objc var compass: Bool = true {
+        didSet {
+            provider?.setCompassEnabled(compass)
+        }
     }
 
-    @objc var zoomControl: Bool {
-        get { showZoomControls }
-        set { showZoomControls = newValue }
+    @objc var scaleBar: Bool = true {
+        didSet {
+            provider?.setScaleBarEnabled(scaleBar)
+        }
     }
 
-    @objc var buildingHeight: Float {
-        get { mapView.buildingHeight }
-        set { mapView.buildingHeight = newValue }
+    @objc var zoomControl: Bool = true {
+        didSet {
+            provider?.setZoomControlEnabled(zoomControl)
+        }
     }
 
-    @objc var nightMode: Bool {
-        get { mapView.isNightModeEnabled }
-        set { mapView.isNightModeEnabled = newValue }
+    @objc var buildingHeight: Float = 1.0 {
+        didSet {
+            provider?.setBuildingHeight(buildingHeight)
+        }
     }
 
-    @objc var minZoomLevel: Double {
-        get { mapView.minZoomLevel }
-        set { mapView.minZoomLevel = newValue }
+    @objc var nightMode: Bool = false {
+        didSet {
+            provider?.setNightModeEnabled(nightMode)
+        }
     }
 
-    @objc var maxZoomLevel: Double {
-        get { mapView.maxZoomLevel }
-        set { mapView.maxZoomLevel = newValue }
+    @objc var minZoomLevel: Double = 0 {
+        didSet {
+            provider?.setMinZoomLevel(minZoomLevel)
+        }
     }
 
-    @objc var scrollGesturesEnabled: Bool {
-        get { mapView.isScrollGestureEnabled }
-        set { mapView.isScrollGestureEnabled = newValue }
+    @objc var maxZoomLevel: Double = 21 {
+        didSet {
+            provider?.setMaxZoomLevel(maxZoomLevel)
+        }
     }
 
-    @objc var tiltGesturesEnabled: Bool {
-        get { mapView.isTiltGestureEnabled }
-        set { mapView.isTiltGestureEnabled = newValue }
+    @objc var scrollGesturesEnabled: Bool = true {
+        didSet {
+            provider?.setScrollGesturesEnabled(scrollGesturesEnabled)
+        }
     }
 
-    @objc var rotateGesturesEnabled: Bool {
-        get { mapView.isRotateGestureEnabled }
-        set { mapView.isRotateGestureEnabled = newValue }
+    @objc var tiltGesturesEnabled: Bool = true {
+        didSet {
+            provider?.setTiltGesturesEnabled(tiltGesturesEnabled)
+        }
     }
 
-    @objc var stopGesturesEnabled: Bool {
-        get { mapView.isStopGestureEnabled }
-        set { mapView.isStopGestureEnabled = newValue }
+    @objc var rotateGesturesEnabled: Bool = true {
+        didSet {
+            provider?.setRotateGesturesEnabled(rotateGesturesEnabled)
+        }
     }
 
-    @objc var tilt: Bool {
-        get { mapView.allowsTilting }
-        set { mapView.allowsTilting = newValue }
+    @objc var stopGesturesEnabled: Bool = true {
+        didSet {
+            provider?.setStopGesturesEnabled(stopGesturesEnabled)
+        }
     }
 
-    @objc var locationTrackingMode: UInt {
-        get { mapView.positionMode.rawValue }
-        set { mapView.positionMode = NMFMyPositionMode(rawValue: newValue) ?? .disabled }
+    @objc var tilt: Bool = true {
+        didSet {
+            provider?.setTiltGesturesEnabled(tilt)
+        }
     }
 
-    @objc var showsMyLocationButton: Bool {
-        get { showLocationButton }
-        set { showLocationButton = newValue }
+    @objc var locationTrackingMode: UInt = 0 {
+        didSet {
+            guard let mode = GraniteNaverMapLocationTrackingMode(rawValue: Int(locationTrackingMode)) else { return }
+            provider?.setLocationTrackingMode(mode)
+        }
     }
 
-    @objc var zoomGesturesEnabled: Bool {
-        get { mapView.isZoomGestureEnabled }
-        set { mapView.isZoomGestureEnabled = newValue }
+    @objc var showsMyLocationButton: Bool = false {
+        didSet {
+            provider?.setLocationButtonEnabled(showsMyLocationButton)
+        }
+    }
+
+    @objc var zoomGesturesEnabled: Bool = true {
+        didSet {
+            provider?.setZoomGesturesEnabled(zoomGesturesEnabled)
+        }
+    }
+
+    // MARK: - Commands
+
+    func animateToCoordinate(_ coord: GraniteNaverMapCoordinate) {
+        provider?.animateToCoordinate(coord)
+    }
+
+    func animateToBounds(_ bounds: GraniteNaverMapBounds, padding: CGFloat) {
+        provider?.animateToBounds(bounds, padding: padding)
+    }
+
+    func setLayerGroupEnabled(group: String, enabled: Bool) {
+        provider?.setLayerGroupEnabled(group: group, enabled: enabled)
+    }
+
+    func addMarker(_ data: ProviderMarkerData) {
+        provider?.addMarker(data)
+    }
+
+    func updateMarker(_ data: ProviderMarkerData) {
+        provider?.updateMarker(data)
+    }
+
+    func removeMarker(identifier: String) {
+        provider?.removeMarker(identifier: identifier)
     }
 }
 
-// MARK: - NMFMapViewTouchDelegate
-extension GraniteNaverMapView: NMFMapViewTouchDelegate {
-    func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
-        onMapClick?([
-            "x": point.x,
-            "y": point.y,
-            "latitude": latlng.lat,
-            "longitude": latlng.lng
+// MARK: - GraniteNaverMapProviderDelegate
+
+extension GraniteNaverMapView: GraniteNaverMapProviderDelegate {
+    func mapViewDidInitialize() {
+        onInitialized?([:])
+    }
+
+    func mapViewDidChangeCamera(position: GraniteNaverMapCameraPosition) {
+        onCameraChange?([
+            "latitude": position.target.latitude,
+            "longitude": position.target.longitude,
+            "zoom": position.zoom
         ])
     }
-}
 
-// MARK: - NMFMapViewCameraDelegate
-extension GraniteNaverMapView: NMFMapViewCameraDelegate {
-    func mapView(_ mapView: NMFMapView, cameraWillChangeByReason reason: Int, animated: Bool) {
+    func mapViewDidTouch(reason: Int, animated: Bool) {
         onTouch?(["animated": animated, "reason": reason])
     }
 
-    func mapViewCameraIdle(_ mapView: NMFMapView) {
-        let contentRegion = mapView.contentRegion.exteriorRing.points
-            .compactMap { $0 as? NMGLatLng }
-            .map { ["latitude": $0.lat, "longitude": $0.lng] }
-
-        let coveringRegion = mapView.coveringRegion.exteriorRing.points
-            .compactMap { $0 as? NMGLatLng }
-            .map { ["latitude": $0.lat, "longitude": $0.lng] }
-
-        onCameraChange?([
-            "latitude": mapView.cameraPosition.target.lat,
-            "longitude": mapView.cameraPosition.target.lng,
-            "zoom": mapView.cameraPosition.zoom,
-            "contentRegion": contentRegion,
-            "coveringRegion": coveringRegion
+    func mapViewDidClick(x: Double, y: Double, latitude: Double, longitude: Double) {
+        onMapClick?([
+            "x": x,
+            "y": y,
+            "latitude": latitude,
+            "longitude": longitude
         ])
     }
-}
 
-// MARK: - NMFMapViewOptionDelegate
-extension GraniteNaverMapView: NMFMapViewOptionDelegate {
-    func mapViewOptionChanged(_ mapView: NMFMapView) {
-        // Handle option changes if needed
+    func mapViewDidClickMarker(id: String) {
+        onMarkerClick?(["id": id])
     }
 }

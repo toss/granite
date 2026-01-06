@@ -1,6 +1,18 @@
-package run.granite.navermap
+package run.granite.navermap.providers
 
 import android.content.Context
+import run.granite.navermap.GraniteNaverMapProvider
+import run.granite.navermap.GraniteNaverMapProviderDelegate
+import run.granite.navermap.GraniteNaverMapCameraPosition
+import run.granite.navermap.GraniteNaverMapCoordinate
+import run.granite.navermap.GraniteNaverMapBounds
+import run.granite.navermap.GraniteNaverMapType
+import run.granite.navermap.GraniteNaverMapLocationTrackingMode
+import run.granite.navermap.GraniteNaverMapMarkerData
+import run.granite.navermap.GraniteNaverMapPolylineData
+import run.granite.navermap.GraniteNaverMapPolygonData
+import run.granite.navermap.GraniteNaverMapCircleData
+import run.granite.navermap.GraniteNaverMapPathData
 import android.graphics.BitmapFactory
 import android.view.View
 import android.widget.FrameLayout
@@ -25,11 +37,11 @@ import kotlin.concurrent.thread
 /**
  * Built-in provider using NMapsMap SDK
  */
-class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
+class BuiltInGraniteNaverMapProvider(private val context: Context) : GraniteNaverMapProvider {
     private var containerView: FrameLayout? = null
     private var mapView: MapView? = null
     private var naverMap: NaverMap? = null
-    private var delegate: NaverMapProviderDelegate? = null
+    private var delegate: GraniteNaverMapProviderDelegate? = null
     private var mapReady = false
     private var mapInitialized = false
 
@@ -58,7 +70,7 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
         return container
     }
 
-    override fun setDelegate(delegate: NaverMapProviderDelegate?) {
+    override fun setDelegate(delegate: GraniteNaverMapProviderDelegate?) {
         this.delegate = delegate
     }
 
@@ -110,25 +122,25 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
             val contentBounds = map.contentBounds
             val coveringBounds = map.coveringBounds
 
-            val cameraPos = NaverMapCameraPosition(
-                target = NaverMapCoordinate(position.target.latitude, position.target.longitude),
+            val cameraPos = GraniteNaverMapCameraPosition(
+                target = GraniteNaverMapCoordinate(position.target.latitude, position.target.longitude),
                 zoom = position.zoom,
                 tilt = position.tilt,
                 bearing = position.bearing
             )
 
             val contentRegion = listOf(
-                NaverMapCoordinate(contentBounds.southLatitude, contentBounds.westLongitude),
-                NaverMapCoordinate(contentBounds.southLatitude, contentBounds.eastLongitude),
-                NaverMapCoordinate(contentBounds.northLatitude, contentBounds.eastLongitude),
-                NaverMapCoordinate(contentBounds.northLatitude, contentBounds.westLongitude)
+                GraniteNaverMapCoordinate(contentBounds.southLatitude, contentBounds.westLongitude),
+                GraniteNaverMapCoordinate(contentBounds.southLatitude, contentBounds.eastLongitude),
+                GraniteNaverMapCoordinate(contentBounds.northLatitude, contentBounds.eastLongitude),
+                GraniteNaverMapCoordinate(contentBounds.northLatitude, contentBounds.westLongitude)
             )
 
             val coveringRegion = listOf(
-                NaverMapCoordinate(coveringBounds.southLatitude, coveringBounds.westLongitude),
-                NaverMapCoordinate(coveringBounds.southLatitude, coveringBounds.eastLongitude),
-                NaverMapCoordinate(coveringBounds.northLatitude, coveringBounds.eastLongitude),
-                NaverMapCoordinate(coveringBounds.northLatitude, coveringBounds.westLongitude)
+                GraniteNaverMapCoordinate(coveringBounds.southLatitude, coveringBounds.westLongitude),
+                GraniteNaverMapCoordinate(coveringBounds.southLatitude, coveringBounds.eastLongitude),
+                GraniteNaverMapCoordinate(coveringBounds.northLatitude, coveringBounds.eastLongitude),
+                GraniteNaverMapCoordinate(coveringBounds.northLatitude, coveringBounds.westLongitude)
             )
 
             delegate?.onCameraChange(cameraPos, contentRegion, coveringRegion)
@@ -145,7 +157,7 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
 
     // MARK: - Camera
 
-    override fun moveCamera(position: NaverMapCameraPosition, animated: Boolean) {
+    override fun moveCamera(position: GraniteNaverMapCameraPosition, animated: Boolean) {
         val cameraPosition = CameraPosition(
             LatLng(position.target.latitude, position.target.longitude),
             position.zoom,
@@ -159,14 +171,14 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
         naverMap?.moveCamera(update)
     }
 
-    override fun animateToCoordinate(coordinate: NaverMapCoordinate) {
+    override fun animateToCoordinate(coordinate: GraniteNaverMapCoordinate) {
         naverMap?.moveCamera(
             CameraUpdate.scrollTo(LatLng(coordinate.latitude, coordinate.longitude))
                 .animate(CameraAnimation.Easing)
         )
     }
 
-    override fun animateToBounds(bounds: NaverMapBounds, padding: Int) {
+    override fun animateToBounds(bounds: GraniteNaverMapBounds, padding: Int) {
         val latLngBounds = LatLngBounds(
             LatLng(bounds.southWest.latitude, bounds.southWest.longitude),
             LatLng(bounds.northEast.latitude, bounds.northEast.longitude)
@@ -179,14 +191,14 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
 
     // MARK: - Map Properties
 
-    override fun setMapType(type: NaverMapType) {
+    override fun setMapType(type: GraniteNaverMapType) {
         naverMap?.mapType = when (type) {
-            NaverMapType.BASIC -> NaverMap.MapType.Basic
-            NaverMapType.NAVI -> NaverMap.MapType.Navi
-            NaverMapType.SATELLITE -> NaverMap.MapType.Satellite
-            NaverMapType.HYBRID -> NaverMap.MapType.Hybrid
-            NaverMapType.TERRAIN -> NaverMap.MapType.Terrain
-            NaverMapType.NONE -> NaverMap.MapType.None
+            GraniteNaverMapType.BASIC -> NaverMap.MapType.Basic
+            GraniteNaverMapType.NAVI -> NaverMap.MapType.Navi
+            GraniteNaverMapType.SATELLITE -> NaverMap.MapType.Satellite
+            GraniteNaverMapType.HYBRID -> NaverMap.MapType.Hybrid
+            GraniteNaverMapType.TERRAIN -> NaverMap.MapType.Terrain
+            GraniteNaverMapType.NONE -> NaverMap.MapType.None
         }
     }
 
@@ -246,12 +258,12 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
         naverMap?.uiSettings?.isStopGesturesEnabled = enabled
     }
 
-    override fun setLocationTrackingMode(mode: NaverMapLocationTrackingMode) {
+    override fun setLocationTrackingMode(mode: GraniteNaverMapLocationTrackingMode) {
         naverMap?.locationTrackingMode = when (mode) {
-            NaverMapLocationTrackingMode.NONE -> LocationTrackingMode.None
-            NaverMapLocationTrackingMode.NO_FOLLOW -> LocationTrackingMode.NoFollow
-            NaverMapLocationTrackingMode.FOLLOW -> LocationTrackingMode.Follow
-            NaverMapLocationTrackingMode.FACE -> LocationTrackingMode.Face
+            GraniteNaverMapLocationTrackingMode.NONE -> LocationTrackingMode.None
+            GraniteNaverMapLocationTrackingMode.NO_FOLLOW -> LocationTrackingMode.NoFollow
+            GraniteNaverMapLocationTrackingMode.FOLLOW -> LocationTrackingMode.Follow
+            GraniteNaverMapLocationTrackingMode.FACE -> LocationTrackingMode.Face
         }
     }
 
@@ -270,7 +282,7 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
 
     // MARK: - Markers
 
-    override fun addMarker(data: NaverMapMarkerData) {
+    override fun addMarker(data: GraniteNaverMapMarkerData) {
         val map = naverMap ?: return
 
         val marker = Marker().apply {
@@ -301,7 +313,7 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
         markers[data.identifier] = marker
     }
 
-    override fun updateMarker(data: NaverMapMarkerData) {
+    override fun updateMarker(data: GraniteNaverMapMarkerData) {
         markers[data.identifier]?.apply {
             position = LatLng(data.coordinate.latitude, data.coordinate.longitude)
             if (data.width > 0) width = dpToPx(data.width)
@@ -356,7 +368,7 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
         }
     }
 
-    override fun addPolyline(data: NaverMapPolylineData) {
+    override fun addPolyline(data: GraniteNaverMapPolylineData) {
         val map = naverMap ?: return
         val coords = data.coordinates.map { LatLng(it.latitude, it.longitude) }
         if (coords.size < 2) return
@@ -377,7 +389,7 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
         polylines[data.identifier] = polyline
     }
 
-    override fun updatePolyline(data: NaverMapPolylineData) {
+    override fun updatePolyline(data: GraniteNaverMapPolylineData) {
         val polyline = polylines[data.identifier] ?: return
         val coords = data.coordinates.map { LatLng(it.latitude, it.longitude) }
         if (coords.size >= 2) {
@@ -400,7 +412,7 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
 
     // MARK: - Polygons
 
-    override fun addPolygon(data: NaverMapPolygonData) {
+    override fun addPolygon(data: GraniteNaverMapPolygonData) {
         val map = naverMap ?: return
         val coords = data.coordinates.map { LatLng(it.latitude, it.longitude) }
         if (coords.size < 3) return
@@ -422,7 +434,7 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
         polygons[data.identifier] = polygon
     }
 
-    override fun updatePolygon(data: NaverMapPolygonData) {
+    override fun updatePolygon(data: GraniteNaverMapPolygonData) {
         val polygon = polygons[data.identifier] ?: return
         val coords = data.coordinates.map { LatLng(it.latitude, it.longitude) }
         if (coords.size >= 3) {
@@ -446,7 +458,7 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
 
     // MARK: - Circles
 
-    override fun addCircle(data: NaverMapCircleData) {
+    override fun addCircle(data: GraniteNaverMapCircleData) {
         val map = naverMap ?: return
 
         val circle = CircleOverlay().apply {
@@ -462,7 +474,7 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
         circles[data.identifier] = circle
     }
 
-    override fun updateCircle(data: NaverMapCircleData) {
+    override fun updateCircle(data: GraniteNaverMapCircleData) {
         val circle = circles[data.identifier] ?: return
         circle.center = LatLng(data.center.latitude, data.center.longitude)
         circle.radius = data.radius
@@ -479,7 +491,7 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
 
     // MARK: - Paths
 
-    override fun addPath(data: NaverMapPathData) {
+    override fun addPath(data: GraniteNaverMapPathData) {
         val map = naverMap ?: return
         val coords = data.coordinates.map { LatLng(it.latitude, it.longitude) }
         if (coords.size < 2) return
@@ -503,7 +515,7 @@ class BuiltInNaverMapProvider(private val context: Context) : NaverMapProvider {
         paths[data.identifier] = path
     }
 
-    override fun updatePath(data: NaverMapPathData) {
+    override fun updatePath(data: GraniteNaverMapPathData) {
         val path = paths[data.identifier] ?: return
         val coords = data.coordinates.map { LatLng(it.latitude, it.longitude) }
         if (coords.size >= 2) {

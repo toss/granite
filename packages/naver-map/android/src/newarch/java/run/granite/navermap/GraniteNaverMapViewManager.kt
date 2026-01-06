@@ -10,9 +10,6 @@ import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.viewmanagers.GraniteNaverMapViewManagerDelegate
 import com.facebook.react.viewmanagers.GraniteNaverMapViewManagerInterface
-import com.naver.maps.geometry.LatLng
-import com.naver.maps.geometry.LatLngBounds
-import com.naver.maps.map.CameraPosition
 
 @ReactModule(name = GraniteNaverMapViewManager.NAME)
 class GraniteNaverMapViewManager : SimpleViewManager<GraniteNaverMapView>(),
@@ -48,7 +45,7 @@ class GraniteNaverMapViewManager : SimpleViewManager<GraniteNaverMapView>(),
             val zoom = if (it.hasKey("zoom")) it.getDouble("zoom") else 10.0
             val tilt = if (it.hasKey("tilt")) it.getDouble("tilt") else 0.0
             val bearing = if (it.hasKey("bearing")) it.getDouble("bearing") else 0.0
-            view.setCenter(CameraPosition(LatLng(lat, lng), zoom, tilt, bearing))
+            view.setCenter(lat, lng, zoom, tilt, bearing)
         }
     }
 
@@ -140,7 +137,7 @@ class GraniteNaverMapViewManager : SimpleViewManager<GraniteNaverMapView>(),
 
     // Commands
     override fun animateToCoordinate(view: GraniteNaverMapView, latitude: Double, longitude: Double) {
-        view.animateToCoordinate(LatLng(latitude, longitude))
+        view.animateToCoordinate(latitude, longitude)
     }
 
     override fun animateToTwoCoordinates(
@@ -150,7 +147,7 @@ class GraniteNaverMapViewManager : SimpleViewManager<GraniteNaverMapView>(),
         lat2: Double,
         lng2: Double
     ) {
-        view.animateToTwoCoordinates(LatLng(lat1, lng1), LatLng(lat2, lng2))
+        view.animateToTwoCoordinates(lat1, lng1, lat2, lng2)
     }
 
     override fun animateToRegion(
@@ -160,11 +157,7 @@ class GraniteNaverMapViewManager : SimpleViewManager<GraniteNaverMapView>(),
         latitudeDelta: Double,
         longitudeDelta: Double
     ) {
-        val bounds = LatLngBounds(
-            LatLng(latitude - latitudeDelta / 2, longitude - longitudeDelta / 2),
-            LatLng(latitude + latitudeDelta / 2, longitude + longitudeDelta / 2)
-        )
-        view.animateToRegion(bounds)
+        view.animateToRegion(latitude, longitude, latitudeDelta, longitudeDelta)
     }
 
     override fun setLayerGroupEnabled(view: GraniteNaverMapView, group: String, enabled: Boolean) {

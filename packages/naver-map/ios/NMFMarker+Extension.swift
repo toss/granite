@@ -25,7 +25,7 @@ extension NMFMarker {
         }.resume()
     }
 
-    func applyMarkerData(_ markerData: NaverMapMarkerData) {
+    func applyMarkerData(_ markerData: GraniteNaverMapMarkerData) {
         if let coordinate = markerData.coordinate {
             self.position = coordinate
         }

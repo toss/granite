@@ -1,41 +1,20 @@
 package run.granite.navermap
 
 import android.content.Context
-import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.os.Handler
-import android.os.Looper
+import android.util.Log
 import android.widget.FrameLayout
+import android.widget.TextView
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.LifecycleEventListener
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.events.RCTEventEmitter
-import com.naver.maps.geometry.LatLng
-import com.naver.maps.geometry.LatLngBounds
-import com.naver.maps.map.CameraAnimation
-import com.naver.maps.map.CameraPosition
-import com.naver.maps.map.CameraUpdate
-import com.naver.maps.map.LocationTrackingMode
-import com.naver.maps.map.MapView
-import com.naver.maps.map.NaverMap
-import com.naver.maps.map.NaverMapOptions
-import com.naver.maps.map.overlay.Marker
-import com.naver.maps.map.overlay.OverlayImage
-import com.naver.maps.map.overlay.PolylineOverlay
-import com.naver.maps.map.overlay.PolygonOverlay
-import com.naver.maps.map.overlay.CircleOverlay
-import com.naver.maps.map.overlay.PathOverlay
-import com.naver.maps.map.overlay.ArrowheadPathOverlay
-import com.naver.maps.map.overlay.GroundOverlay
-import com.naver.maps.map.overlay.InfoWindow
-import android.util.Log
-import org.json.JSONArray
-import java.net.URL
-import kotlin.concurrent.thread
 
-class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEventListener {
+/**
+ * Provider-based NaverMapView implementation (no direct NMapsMap dependency)
+ */
+class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEventListener, GraniteNaverMapProviderDelegate {
 
     companion object {
         private const val TAG = "GraniteNaverMapView"
@@ -43,32 +22,38 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
     }
 
     private val instanceId = ++instanceCounter
-    private val density = context.resources.displayMetrics.density
-
-    // Convert dp to px for consistent sizing across platforms
-    private fun dpToPx(dp: Int): Int = (dp * density).toInt()
-    private fun dpToPx(dp: Float): Int = (dp * density).toInt()
-
-    private val mapView: MapView
-    private var naverMap: NaverMap? = null
-    private var mapReady: Boolean = false
-    private val markers: MutableMap<String, Marker> = mutableMapOf()
-    private val polylines: MutableMap<String, PolylineOverlay> = mutableMapOf()
-    private val polygons: MutableMap<String, PolygonOverlay> = mutableMapOf()
-    private val circles: MutableMap<String, CircleOverlay> = mutableMapOf()
-    private val paths: MutableMap<String, PathOverlay> = mutableMapOf()
-    private val arrowheadPaths: MutableMap<String, ArrowheadPathOverlay> = mutableMapOf()
-    private val groundOverlays: MutableMap<String, GroundOverlay> = mutableMapOf()
-    private val infoWindows: MutableMap<String, InfoWindow> = mutableMapOf()
     private val reactContext: ReactContext = context as ReactContext
 
-    private val handler = Handler(Looper.getMainLooper())
+    private var provider: GraniteNaverMapProvider? = null
+    private var mapContentView: android.view.View? = null
+    private var mapInitialized = false
 
     init {
-        Log.d(TAG, "GraniteNaverMapView init - creating FrameLayout with MapView")
-        mapView = MapView(context, NaverMapOptions())
+        Log.d(TAG, "GraniteNaverMapView init")
+        setupProvider()
+    }
+
+    private fun setupProvider() {
+        val mapProvider = GraniteNaverMapRegistry.getProvider(context)
+
+        if (mapProvider == null) {
+            // No provider available - show placeholder
+            Log.w(TAG, "No NaverMap provider registered")
+            val label = TextView(context).apply {
+                text = "NaverMap provider not registered"
+                textAlignment = TEXT_ALIGNMENT_CENTER
+            }
+            addView(label, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+            return
+        }
+
+        provider = mapProvider
+        mapProvider.setDelegate(this)
+
+        val mapView = mapProvider.createMapView(context)
+        mapContentView = mapView
         addView(mapView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
-        Log.d(TAG, "GraniteNaverMapView init - MapView added")
+        Log.d(TAG, "GraniteNaverMapView - MapView added via provider")
     }
 
     // Fabric requires explicit layout of children
@@ -85,126 +70,98 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         layout(left, top, right, bottom)
     }
 
-    private var mapInitialized = false
-
     override fun onAttachedToWindow() {
         Log.d(TAG, "onAttachedToWindow")
         super.onAttachedToWindow()
         reactContext.addLifecycleEventListener(this)
-        Log.d(TAG, "onAttachedToWindow - completed")
+        provider?.onAttachedToWindow()
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         Log.d(TAG, "onSizeChanged: ${w}x${h} (was ${oldw}x${oldh})")
-
-        if (!mapInitialized && w > 0 && h > 0) {
-            Log.d(TAG, "onSizeChanged - valid size, initializing map")
-            initializeMap()
-        }
-    }
-
-    private fun initializeMap() {
-        if (mapInitialized) return
-        mapInitialized = true
-
-        Log.d(TAG, "initializeMap - calling lifecycle methods")
-        mapView.onCreate(null)
-        mapView.onStart()
-        mapView.onResume()
-
-        mapView.getMapAsync { map ->
-            Log.d(TAG, "[$instanceId] getMapAsync callback - map ready! naverMap hashCode=${map.hashCode()}")
-            naverMap = map
-            mapReady = true
-            setupMapListeners(map)
-            sendEvent("onInitialized", Arguments.createMap())
-            Log.d(TAG, "getMapAsync callback - setup complete")
-        }
-        Log.d(TAG, "initializeMap - getMapAsync requested")
+        provider?.onSizeChanged(w, h)
     }
 
     override fun onDetachedFromWindow() {
         Log.d(TAG, "onDetachedFromWindow")
         reactContext.removeLifecycleEventListener(this)
-        mapView.onPause()
-        mapView.onStop()
-        mapView.onDestroy()
+        provider?.onDetachedFromWindow()
         super.onDetachedFromWindow()
     }
 
     override fun onHostResume() {
         Log.d(TAG, "onHostResume")
-        if (mapReady) {
-            mapView.onResume()
-        }
+        provider?.onHostResume()
     }
 
     override fun onHostPause() {
         Log.d(TAG, "onHostPause")
-        if (mapReady) {
-            mapView.onPause()
-        }
+        provider?.onHostPause()
     }
 
     override fun onHostDestroy() {
         Log.d(TAG, "onHostDestroy")
     }
 
-    private fun setupMapListeners(map: NaverMap) {
-        map.addOnCameraIdleListener {
-            val position = map.cameraPosition
-            val contentBounds = map.contentBounds
-            val coveringBounds = map.coveringBounds
+    // MARK: - GraniteNaverMapProviderDelegate
 
-            val event = Arguments.createMap().apply {
-                putDouble("latitude", position.target.latitude)
-                putDouble("longitude", position.target.longitude)
-                putDouble("zoom", position.zoom)
-
-                val contentRegion = Arguments.createArray().apply {
-                    pushMap(coordToMap(LatLng(contentBounds.southLatitude, contentBounds.westLongitude)))
-                    pushMap(coordToMap(LatLng(contentBounds.southLatitude, contentBounds.eastLongitude)))
-                    pushMap(coordToMap(LatLng(contentBounds.northLatitude, contentBounds.eastLongitude)))
-                    pushMap(coordToMap(LatLng(contentBounds.northLatitude, contentBounds.westLongitude)))
-                }
-                putArray("contentRegion", contentRegion)
-
-                val coveringRegion = Arguments.createArray().apply {
-                    pushMap(coordToMap(LatLng(coveringBounds.southLatitude, coveringBounds.westLongitude)))
-                    pushMap(coordToMap(LatLng(coveringBounds.southLatitude, coveringBounds.eastLongitude)))
-                    pushMap(coordToMap(LatLng(coveringBounds.northLatitude, coveringBounds.eastLongitude)))
-                    pushMap(coordToMap(LatLng(coveringBounds.northLatitude, coveringBounds.westLongitude)))
-                }
-                putArray("coveringRegion", coveringRegion)
-            }
-            sendEvent("onCameraChange", event)
-        }
-
-        map.addOnCameraChangeListener { reason, animated ->
-            val event = Arguments.createMap().apply {
-                putInt("reason", reason)
-                putBoolean("animated", animated)
-            }
-            sendEvent("onTouch", event)
-        }
-
-        map.setOnMapClickListener { point, latLng ->
-            val event = Arguments.createMap().apply {
-                putDouble("x", point.x.toDouble())
-                putDouble("y", point.y.toDouble())
-                putDouble("latitude", latLng.latitude)
-                putDouble("longitude", latLng.longitude)
-            }
-            sendEvent("onMapClick", event)
-        }
+    override fun onMapInitialized() {
+        sendEvent("onInitialized", Arguments.createMap())
     }
 
-    private fun coordToMap(latLng: LatLng): WritableMap {
-        return Arguments.createMap().apply {
-            putDouble("latitude", latLng.latitude)
-            putDouble("longitude", latLng.longitude)
+    override fun onCameraChange(position: GraniteNaverMapCameraPosition, contentRegion: List<GraniteNaverMapCoordinate>, coveringRegion: List<GraniteNaverMapCoordinate>) {
+        val event = Arguments.createMap().apply {
+            putDouble("latitude", position.target.latitude)
+            putDouble("longitude", position.target.longitude)
+            putDouble("zoom", position.zoom)
+
+            val contentArray = Arguments.createArray().apply {
+                contentRegion.forEach { coord ->
+                    pushMap(Arguments.createMap().apply {
+                        putDouble("latitude", coord.latitude)
+                        putDouble("longitude", coord.longitude)
+                    })
+                }
+            }
+            putArray("contentRegion", contentArray)
+
+            val coveringArray = Arguments.createArray().apply {
+                coveringRegion.forEach { coord ->
+                    pushMap(Arguments.createMap().apply {
+                        putDouble("latitude", coord.latitude)
+                        putDouble("longitude", coord.longitude)
+                    })
+                }
+            }
+            putArray("coveringRegion", coveringArray)
         }
+        sendEvent("onCameraChange", event)
+    }
+
+    override fun onTouch(reason: Int, animated: Boolean) {
+        val event = Arguments.createMap().apply {
+            putInt("reason", reason)
+            putBoolean("animated", animated)
+        }
+        sendEvent("onTouch", event)
+    }
+
+    override fun onClick(x: Double, y: Double, latitude: Double, longitude: Double) {
+        val event = Arguments.createMap().apply {
+            putDouble("x", x)
+            putDouble("y", y)
+            putDouble("latitude", latitude)
+            putDouble("longitude", longitude)
+        }
+        sendEvent("onMapClick", event)
+    }
+
+    override fun onMarkerClick(id: String) {
+        val event = Arguments.createMap().apply {
+            putString("id", id)
+        }
+        sendEvent("onMarkerClick", event)
     }
 
     private fun sendEvent(eventName: String, params: WritableMap) {
@@ -212,131 +169,147 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
             .receiveEvent(id, eventName, params)
     }
 
-    fun setCenter(position: CameraPosition) {
-        naverMap?.moveCamera(CameraUpdate.toCameraPosition(position).animate(CameraAnimation.Easing))
+    // MARK: - Camera Methods
+
+    fun setCenter(latitude: Double, longitude: Double, zoom: Double, tilt: Double, bearing: Double) {
+        val position = GraniteNaverMapCameraPosition(
+            target = GraniteNaverMapCoordinate(latitude, longitude),
+            zoom = zoom,
+            tilt = tilt,
+            bearing = bearing
+        )
+        provider?.moveCamera(position, true)
     }
 
-    fun animateToCoordinate(latLng: LatLng) {
-        naverMap?.moveCamera(CameraUpdate.scrollTo(latLng).animate(CameraAnimation.Easing))
+    fun animateToCoordinate(latitude: Double, longitude: Double) {
+        provider?.animateToCoordinate(GraniteNaverMapCoordinate(latitude, longitude))
     }
 
-    fun animateToTwoCoordinates(latLng1: LatLng, latLng2: LatLng) {
-        val bounds = LatLngBounds.Builder()
-            .include(latLng1)
-            .include(latLng2)
-            .build()
-        naverMap?.moveCamera(CameraUpdate.fitBounds(bounds, 24).animate(CameraAnimation.Easing))
+    fun animateToTwoCoordinates(lat1: Double, lng1: Double, lat2: Double, lng2: Double) {
+        val bounds = GraniteNaverMapBounds(
+            southWest = GraniteNaverMapCoordinate(minOf(lat1, lat2), minOf(lng1, lng2)),
+            northEast = GraniteNaverMapCoordinate(maxOf(lat1, lat2), maxOf(lng1, lng2))
+        )
+        provider?.animateToBounds(bounds, 24)
     }
 
-    fun animateToRegion(bounds: LatLngBounds) {
-        naverMap?.moveCamera(CameraUpdate.fitBounds(bounds).animate(CameraAnimation.Easing))
+    fun animateToRegion(latitude: Double, longitude: Double, latitudeDelta: Double, longitudeDelta: Double) {
+        val bounds = GraniteNaverMapBounds(
+            southWest = GraniteNaverMapCoordinate(latitude - latitudeDelta / 2, longitude - longitudeDelta / 2),
+            northEast = GraniteNaverMapCoordinate(latitude + latitudeDelta / 2, longitude + longitudeDelta / 2)
+        )
+        provider?.animateToBounds(bounds, 0)
     }
+
+    // MARK: - Map Properties
 
     fun setLayerGroupEnabled(group: String, enabled: Boolean) {
-        val layerGroup = when (group) {
-            "building" -> NaverMap.LAYER_GROUP_BUILDING
-            "ctt" -> NaverMap.LAYER_GROUP_TRAFFIC
-            "transit" -> NaverMap.LAYER_GROUP_TRANSIT
-            "bike" -> NaverMap.LAYER_GROUP_BICYCLE
-            "mountain" -> NaverMap.LAYER_GROUP_MOUNTAIN
-            "landparcel" -> NaverMap.LAYER_GROUP_CADASTRAL
-            else -> return
-        }
-        naverMap?.setLayerGroupEnabled(layerGroup, enabled)
+        provider?.setLayerGroupEnabled(group, enabled)
     }
 
     fun setShowsMyLocationButton(show: Boolean) {
-        naverMap?.uiSettings?.isLocationButtonEnabled = show
+        provider?.setLocationButtonEnabled(show)
     }
 
     fun setCompass(show: Boolean) {
-        naverMap?.uiSettings?.isCompassEnabled = show
+        provider?.setCompassEnabled(show)
     }
 
     fun setScaleBar(show: Boolean) {
-        naverMap?.uiSettings?.isScaleBarEnabled = show
+        provider?.setScaleBarEnabled(show)
     }
 
     fun setZoomControl(show: Boolean) {
-        naverMap?.uiSettings?.isZoomControlEnabled = show
+        provider?.setZoomControlEnabled(show)
     }
 
     fun setMapType(type: Int) {
-        naverMap?.mapType = NaverMap.MapType.values().getOrElse(type) { NaverMap.MapType.Basic }
+        val mapType = GraniteNaverMapType.values().getOrElse(type) { GraniteNaverMapType.BASIC }
+        provider?.setMapType(mapType)
     }
 
     fun setBuildingHeight(height: Float) {
-        naverMap?.buildingHeight = height
+        provider?.setBuildingHeight(height)
     }
 
     fun setNightMode(enabled: Boolean) {
-        naverMap?.isNightModeEnabled = enabled
+        provider?.setNightModeEnabled(enabled)
     }
 
     fun setMinZoomLevel(level: Double) {
-        naverMap?.minZoom = level
+        provider?.setMinZoomLevel(level)
     }
 
     fun setMaxZoomLevel(level: Double) {
-        naverMap?.maxZoom = level
+        provider?.setMaxZoomLevel(level)
     }
 
     fun setScrollGesturesEnabled(enabled: Boolean) {
-        naverMap?.uiSettings?.isScrollGesturesEnabled = enabled
+        provider?.setScrollGesturesEnabled(enabled)
     }
 
     fun setZoomGesturesEnabled(enabled: Boolean) {
-        naverMap?.uiSettings?.isZoomGesturesEnabled = enabled
+        provider?.setZoomGesturesEnabled(enabled)
     }
 
     fun setTiltGesturesEnabled(enabled: Boolean) {
-        naverMap?.uiSettings?.isTiltGesturesEnabled = enabled
+        provider?.setTiltGesturesEnabled(enabled)
     }
 
     fun setRotateGesturesEnabled(enabled: Boolean) {
-        naverMap?.uiSettings?.isRotateGesturesEnabled = enabled
+        provider?.setRotateGesturesEnabled(enabled)
     }
 
     fun setStopGesturesEnabled(enabled: Boolean) {
-        naverMap?.uiSettings?.isStopGesturesEnabled = enabled
+        provider?.setStopGesturesEnabled(enabled)
     }
 
     fun setLocationTrackingMode(mode: Int) {
-        naverMap?.locationTrackingMode = LocationTrackingMode.values().getOrElse(mode) { LocationTrackingMode.None }
+        val trackingMode = GraniteNaverMapLocationTrackingMode.values().getOrElse(mode) { GraniteNaverMapLocationTrackingMode.NONE }
+        provider?.setLocationTrackingMode(trackingMode)
     }
 
     fun setMapPadding(top: Int, left: Int, bottom: Int, right: Int) {
-        naverMap?.setContentPadding(left, top, right, bottom)
+        provider?.setMapPadding(top, left, bottom, right)
     }
 
+    // MARK: - Marker Methods (Old Architecture - ReadableMap)
+
     fun addMarker(identifier: String, markerData: ReadableMap) {
-        val map = naverMap ?: return
-
-        val marker = Marker().apply {
-            applyMarkerData(markerData)
-            setOnClickListener {
-                val event = Arguments.createMap().apply {
-                    putString("id", identifier)
-                }
-                sendEvent("onMarkerClick", event)
-                true
-            }
-            this.map = map
-        }
-
-        markers[identifier] = marker
+        val data = parseMarkerData(identifier, markerData)
+        provider?.addMarker(data)
     }
 
     fun updateMarker(identifier: String, markerData: ReadableMap) {
-        markers[identifier]?.applyMarkerData(markerData)
+        val data = parseMarkerData(identifier, markerData)
+        provider?.updateMarker(data)
     }
 
     fun removeMarker(identifier: String) {
-        markers[identifier]?.map = null
-        markers.remove(identifier)
+        provider?.removeMarker(identifier)
     }
 
-    // New Architecture methods for direct parameter passing
+    private fun parseMarkerData(identifier: String, data: ReadableMap): GraniteNaverMapMarkerData {
+        val coord = data.getMap("coordinate")
+        return GraniteNaverMapMarkerData(
+            identifier = identifier,
+            coordinate = GraniteNaverMapCoordinate(
+                latitude = coord?.getDouble("latitude") ?: 0.0,
+                longitude = coord?.getDouble("longitude") ?: 0.0
+            ),
+            width = if (data.hasKey("width")) data.getInt("width") else 0,
+            height = if (data.hasKey("height")) data.getInt("height") else 0,
+            zIndex = if (data.hasKey("zIndex")) data.getInt("zIndex") else 0,
+            rotation = if (data.hasKey("rotation")) data.getDouble("rotation").toFloat() else 0f,
+            flat = if (data.hasKey("flat")) data.getBoolean("flat") else false,
+            alpha = if (data.hasKey("alpha")) data.getDouble("alpha").toFloat() else 1f,
+            pinColor = if (data.hasKey("pinColor")) data.getInt("pinColor") else 0,
+            image = if (data.hasKey("image")) data.getString("image") ?: "" else ""
+        )
+    }
+
+    // MARK: - Marker Methods (New Architecture - direct params)
+
     fun addMarkerNew(
         identifier: String,
         latitude: Double,
@@ -350,48 +323,20 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         pinColor: Int,
         image: String
     ) {
-        Log.d(TAG, "[$instanceId] addMarkerNew: id=$identifier, naverMap=${if (naverMap != null) "exists (hashCode=${naverMap?.hashCode()})" else "NULL"}")
-        val map = naverMap ?: run {
-            Log.w(TAG, "addMarkerNew: naverMap is null, cannot add marker $identifier")
-            return
-        }
-
-        Log.d(TAG, "addMarkerNew: params - width=$width, height=$height, pinColor=$pinColor (hex: ${Integer.toHexString(pinColor)}), alpha=$alpha, rotation=$rotation, flat=$flat, image=$image")
-
-        // Create marker and add to map
-        val marker = Marker()
-        marker.position = LatLng(latitude, longitude)
-        marker.map = map
-
-        // Set other properties
-        // Note: Don't set width/height for default icon - causes issues
-        // Width/height should only be set when using custom image icons
-        if (zIndex != 0) marker.zIndex = zIndex
-        if (rotation != 0f) marker.angle = rotation
-        marker.isFlat = flat
-        marker.alpha = alpha
-
-        // Only apply iconTintColor if it's a valid ARGB color (has alpha)
-        if (pinColor != 0 && (pinColor ushr 24) != 0) {
-            marker.iconTintColor = pinColor
-        }
-
-        if (image.isNotEmpty()) {
-            loadMarkerImage(marker, image)
-            // Only set size for custom images (convert dp to px)
-            if (width > 0) marker.width = dpToPx(width)
-            if (height > 0) marker.height = dpToPx(height)
-        }
-
-        marker.setOnClickListener {
-            val event = Arguments.createMap().apply {
-                putString("id", identifier)
-            }
-            sendEvent("onMarkerClick", event)
-            true
-        }
-
-        markers[identifier] = marker
+        Log.d(TAG, "[$instanceId] addMarkerNew: id=$identifier")
+        val data = GraniteNaverMapMarkerData(
+            identifier = identifier,
+            coordinate = GraniteNaverMapCoordinate(latitude, longitude),
+            width = width,
+            height = height,
+            zIndex = zIndex,
+            rotation = rotation,
+            flat = flat,
+            alpha = alpha,
+            pinColor = pinColor,
+            image = image
+        )
+        provider?.addMarker(data)
     }
 
     fun updateMarkerNew(
@@ -407,157 +352,23 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         pinColor: Int,
         image: String
     ) {
-        markers[identifier]?.apply {
-            position = LatLng(latitude, longitude)
-            if (width > 0) this.width = dpToPx(width)
-            if (height > 0) this.height = dpToPx(height)
-            this.zIndex = zIndex
-            angle = rotation
-            isFlat = flat
-            this.alpha = alpha
-            if (pinColor != 0) iconTintColor = pinColor
-            if (image.isNotEmpty()) loadMarkerImage(this, image)
-        }
+        val data = GraniteNaverMapMarkerData(
+            identifier = identifier,
+            coordinate = GraniteNaverMapCoordinate(latitude, longitude),
+            width = width,
+            height = height,
+            zIndex = zIndex,
+            rotation = rotation,
+            flat = flat,
+            alpha = alpha,
+            pinColor = pinColor,
+            image = image
+        )
+        provider?.updateMarker(data)
     }
 
-    private fun Marker.applyMarkerData(data: ReadableMap) {
-        if (data.hasKey("coordinate")) {
-            val coord = data.getMap("coordinate")
-            coord?.let {
-                position = LatLng(it.getDouble("latitude"), it.getDouble("longitude"))
-            }
-        }
+    // MARK: - Polyline Methods
 
-        if (data.hasKey("width")) {
-            width = data.getInt("width")
-        }
-
-        if (data.hasKey("height")) {
-            height = data.getInt("height")
-        }
-
-        if (data.hasKey("zIndex")) {
-            zIndex = data.getInt("zIndex")
-        }
-
-        if (data.hasKey("rotation")) {
-            angle = data.getDouble("rotation").toFloat()
-        }
-
-        if (data.hasKey("flat")) {
-            isFlat = data.getBoolean("flat")
-        }
-
-        if (data.hasKey("alpha")) {
-            alpha = data.getDouble("alpha").toFloat()
-        }
-
-        if (data.hasKey("pinColor")) {
-            iconTintColor = data.getInt("pinColor")
-        }
-
-        if (data.hasKey("image")) {
-            val imageUrl = data.getString("image")
-            imageUrl?.let { loadMarkerImage(this, it) }
-        }
-    }
-
-    private fun loadMarkerImage(marker: Marker, url: String) {
-        Log.d(TAG, "loadMarkerImage: starting to load image from $url")
-        thread {
-            try {
-                val connection = URL(url).openConnection()
-                connection.connect()
-                val inputStream = connection.getInputStream()
-                val bitmap = BitmapFactory.decodeStream(inputStream)
-                inputStream.close()
-                Log.d(TAG, "loadMarkerImage: bitmap loaded successfully, size=${bitmap?.width}x${bitmap?.height}")
-
-                post {
-                    marker.icon = OverlayImage.fromBitmap(bitmap)
-                    Log.d(TAG, "loadMarkerImage: icon set on marker")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "loadMarkerImage: failed to load image", e)
-                e.printStackTrace()
-            }
-        }
-    }
-
-    // Helper functions
-    private fun parseCoordinates(json: String): List<LatLng> {
-        val result = mutableListOf<LatLng>()
-        try {
-            val array = JSONArray(json)
-            for (i in 0 until array.length()) {
-                val obj = array.getJSONObject(i)
-                val lat = obj.getDouble("latitude")
-                val lng = obj.getDouble("longitude")
-                result.add(LatLng(lat, lng))
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return result
-    }
-
-    private fun parseHoles(json: String): List<List<LatLng>> {
-        val result = mutableListOf<List<LatLng>>()
-        try {
-            val array = JSONArray(json)
-            for (i in 0 until array.length()) {
-                val holeArray = array.getJSONArray(i)
-                val hole = mutableListOf<LatLng>()
-                for (j in 0 until holeArray.length()) {
-                    val obj = holeArray.getJSONObject(j)
-                    val lat = obj.getDouble("latitude")
-                    val lng = obj.getDouble("longitude")
-                    hole.add(LatLng(lat, lng))
-                }
-                result.add(hole)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return result
-    }
-
-    private fun parsePattern(json: String): List<Int> {
-        val result = mutableListOf<Int>()
-        try {
-            val array = JSONArray(json)
-            for (i in 0 until array.length()) {
-                result.add(array.getInt(i))
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return result
-    }
-
-    private fun colorFromInt(value: Int): Int {
-        // Value comes as signed Int32 from JS, convert to Android Color (ARGB)
-        // This handles negative values that represent colors with alpha > 0x7F
-        return value
-    }
-
-    private fun lineCapType(type: Int): PolylineOverlay.LineCap {
-        return when (type) {
-            1 -> PolylineOverlay.LineCap.Round
-            2 -> PolylineOverlay.LineCap.Square
-            else -> PolylineOverlay.LineCap.Butt
-        }
-    }
-
-    private fun lineJoinType(type: Int): PolylineOverlay.LineJoin {
-        return when (type) {
-            1 -> PolylineOverlay.LineJoin.Round
-            2 -> PolylineOverlay.LineJoin.Bevel
-            else -> PolylineOverlay.LineJoin.Miter
-        }
-    }
-
-    // Polyline Commands
     fun addPolyline(
         identifier: String,
         coordsJson: String,
@@ -568,29 +379,21 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         lineJoin: Int,
         patternJson: String
     ) {
-        Log.d(TAG, "addPolyline: id=$identifier, strokeWidth=$strokeWidth, strokeColor=$strokeColor (hex: ${Integer.toHexString(strokeColor)})")
-        val map = naverMap ?: run {
-            Log.w(TAG, "addPolyline: naverMap is null")
-            return
-        }
-        val coords = parseCoordinates(coordsJson)
+        Log.d(TAG, "addPolyline: id=$identifier")
+        val coords = parseCoordinatesJson(coordsJson)
         if (coords.size < 2) return
 
-        val polyline = PolylineOverlay().apply {
-            this.coords = coords
-            this.width = dpToPx(strokeWidth)
-            this.color = colorFromInt(strokeColor)
-            this.zIndex = zIndex
-            this.capType = lineCapType(lineCap)
-            this.joinType = lineJoinType(lineJoin)
-            val pattern = parsePattern(patternJson)
-            if (pattern.isNotEmpty()) {
-                this.setPattern(*pattern.toIntArray())
-            }
-            this.map = map
-        }
-
-        polylines[identifier] = polyline
+        val data = GraniteNaverMapPolylineData(
+            identifier = identifier,
+            coordinates = coords,
+            strokeWidth = strokeWidth,
+            strokeColor = strokeColor,
+            zIndex = zIndex,
+            lineCap = lineCap,
+            lineJoin = lineJoin,
+            pattern = parsePatternJson(patternJson)
+        )
+        provider?.addPolyline(data)
     }
 
     fun updatePolyline(
@@ -603,28 +406,28 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         lineJoin: Int,
         patternJson: String
     ) {
-        val polyline = polylines[identifier] ?: return
-        val coords = parseCoordinates(coordsJson)
-        if (coords.size >= 2) {
-            polyline.coords = coords
-        }
-        polyline.width = dpToPx(strokeWidth)
-        polyline.color = colorFromInt(strokeColor)
-        polyline.zIndex = zIndex
-        polyline.capType = lineCapType(lineCap)
-        polyline.joinType = lineJoinType(lineJoin)
-        val pattern = parsePattern(patternJson)
-        if (pattern.isNotEmpty()) {
-            polyline.setPattern(*pattern.toIntArray())
-        }
+        val coords = parseCoordinatesJson(coordsJson)
+        if (coords.size < 2) return
+
+        val data = GraniteNaverMapPolylineData(
+            identifier = identifier,
+            coordinates = coords,
+            strokeWidth = strokeWidth,
+            strokeColor = strokeColor,
+            zIndex = zIndex,
+            lineCap = lineCap,
+            lineJoin = lineJoin,
+            pattern = parsePatternJson(patternJson)
+        )
+        provider?.updatePolyline(data)
     }
 
     fun removePolyline(identifier: String) {
-        polylines[identifier]?.map = null
-        polylines.remove(identifier)
+        provider?.removePolyline(identifier)
     }
 
-    // Polygon Commands
+    // MARK: - Polygon Methods
+
     fun addPolygon(
         identifier: String,
         coordsJson: String,
@@ -634,28 +437,20 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         strokeWidth: Float,
         zIndex: Int
     ) {
-        Log.d(TAG, "addPolygon: id=$identifier, fillColor=$fillColor (hex: ${Integer.toHexString(fillColor)}), strokeColor=$strokeColor")
-        val map = naverMap ?: run {
-            Log.w(TAG, "addPolygon: naverMap is null")
-            return
-        }
-        val coords = parseCoordinates(coordsJson)
+        Log.d(TAG, "addPolygon: id=$identifier")
+        val coords = parseCoordinatesJson(coordsJson)
         if (coords.size < 3) return
 
-        val polygon = PolygonOverlay().apply {
-            this.coords = coords
-            val holes = parseHoles(holesJson)
-            if (holes.isNotEmpty()) {
-                this.holes = holes
-            }
-            this.color = colorFromInt(fillColor)
-            this.outlineColor = colorFromInt(strokeColor)
-            this.outlineWidth = dpToPx(strokeWidth)
-            this.zIndex = zIndex
-            this.map = map
-        }
-
-        polygons[identifier] = polygon
+        val data = GraniteNaverMapPolygonData(
+            identifier = identifier,
+            coordinates = coords,
+            holes = parseHolesJson(holesJson),
+            fillColor = fillColor,
+            strokeColor = strokeColor,
+            strokeWidth = strokeWidth,
+            zIndex = zIndex
+        )
+        provider?.addPolygon(data)
     }
 
     fun updatePolygon(
@@ -667,27 +462,27 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         strokeWidth: Float,
         zIndex: Int
     ) {
-        val polygon = polygons[identifier] ?: return
-        val coords = parseCoordinates(coordsJson)
-        if (coords.size >= 3) {
-            polygon.coords = coords
-        }
-        val holes = parseHoles(holesJson)
-        if (holes.isNotEmpty()) {
-            polygon.holes = holes
-        }
-        polygon.color = colorFromInt(fillColor)
-        polygon.outlineColor = colorFromInt(strokeColor)
-        polygon.outlineWidth = dpToPx(strokeWidth)
-        polygon.zIndex = zIndex
+        val coords = parseCoordinatesJson(coordsJson)
+        if (coords.size < 3) return
+
+        val data = GraniteNaverMapPolygonData(
+            identifier = identifier,
+            coordinates = coords,
+            holes = parseHolesJson(holesJson),
+            fillColor = fillColor,
+            strokeColor = strokeColor,
+            strokeWidth = strokeWidth,
+            zIndex = zIndex
+        )
+        provider?.updatePolygon(data)
     }
 
     fun removePolygon(identifier: String) {
-        polygons[identifier]?.map = null
-        polygons.remove(identifier)
+        provider?.removePolygon(identifier)
     }
 
-    // Circle Commands
+    // MARK: - Circle Methods
+
     fun addCircle(
         identifier: String,
         latitude: Double,
@@ -698,23 +493,17 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         strokeWidth: Float,
         zIndex: Int
     ) {
-        Log.d(TAG, "addCircle: id=$identifier, lat=$latitude, lng=$longitude, radius=$radius, fillColor=$fillColor (hex: ${Integer.toHexString(fillColor)})")
-        val map = naverMap ?: run {
-            Log.w(TAG, "addCircle: naverMap is null")
-            return
-        }
-
-        val circle = CircleOverlay().apply {
-            this.center = LatLng(latitude, longitude)
-            this.radius = radius
-            this.color = colorFromInt(fillColor)
-            this.outlineColor = colorFromInt(strokeColor)
-            this.outlineWidth = dpToPx(strokeWidth)
-            this.zIndex = zIndex
-            this.map = map
-        }
-
-        circles[identifier] = circle
+        Log.d(TAG, "addCircle: id=$identifier")
+        val data = GraniteNaverMapCircleData(
+            identifier = identifier,
+            center = GraniteNaverMapCoordinate(latitude, longitude),
+            radius = radius,
+            fillColor = fillColor,
+            strokeColor = strokeColor,
+            strokeWidth = strokeWidth,
+            zIndex = zIndex
+        )
+        provider?.addCircle(data)
     }
 
     fun updateCircle(
@@ -727,21 +516,24 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         strokeWidth: Float,
         zIndex: Int
     ) {
-        val circle = circles[identifier] ?: return
-        circle.center = LatLng(latitude, longitude)
-        circle.radius = radius
-        circle.color = colorFromInt(fillColor)
-        circle.outlineColor = colorFromInt(strokeColor)
-        circle.outlineWidth = dpToPx(strokeWidth)
-        circle.zIndex = zIndex
+        val data = GraniteNaverMapCircleData(
+            identifier = identifier,
+            center = GraniteNaverMapCoordinate(latitude, longitude),
+            radius = radius,
+            fillColor = fillColor,
+            strokeColor = strokeColor,
+            strokeWidth = strokeWidth,
+            zIndex = zIndex
+        )
+        provider?.updateCircle(data)
     }
 
     fun removeCircle(identifier: String) {
-        circles[identifier]?.map = null
-        circles.remove(identifier)
+        provider?.removeCircle(identifier)
     }
 
-    // Path Commands
+    // MARK: - Path Methods
+
     fun addPath(
         identifier: String,
         coordsJson: String,
@@ -756,31 +548,25 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         progress: Float,
         zIndex: Int
     ) {
-        Log.d(TAG, "addPath: id=$identifier, width=$width, color=$color (hex: ${Integer.toHexString(color)})")
-        val map = naverMap ?: run {
-            Log.w(TAG, "addPath: naverMap is null")
-            return
-        }
-        val coords = parseCoordinates(coordsJson)
+        Log.d(TAG, "addPath: id=$identifier")
+        val coords = parseCoordinatesJson(coordsJson)
         if (coords.size < 2) return
 
-        val path = PathOverlay().apply {
-            this.coords = coords
-            this.width = dpToPx(width)
-            this.outlineWidth = dpToPx(outlineWidth)
-            this.color = colorFromInt(color)
-            this.outlineColor = colorFromInt(outlineColor)
-            this.passedColor = colorFromInt(passedColor)
-            this.passedOutlineColor = colorFromInt(passedOutlineColor)
-            this.progress = progress.toDouble()
-            this.zIndex = zIndex
-            if (patternInterval > 0) {
-                this.patternInterval = patternInterval
-            }
-            this.map = map
-        }
-
-        paths[identifier] = path
+        val data = GraniteNaverMapPathData(
+            identifier = identifier,
+            coordinates = coords,
+            width = width,
+            outlineWidth = outlineWidth,
+            color = color,
+            outlineColor = outlineColor,
+            passedColor = passedColor,
+            passedOutlineColor = passedOutlineColor,
+            patternImage = patternImage,
+            patternInterval = patternInterval,
+            progress = progress,
+            zIndex = zIndex
+        )
+        provider?.addPath(data)
     }
 
     fun updatePath(
@@ -797,27 +583,32 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         progress: Float,
         zIndex: Int
     ) {
-        val path = paths[identifier] ?: return
-        val coords = parseCoordinates(coordsJson)
-        if (coords.size >= 2) {
-            path.coords = coords
-        }
-        path.width = dpToPx(width)
-        path.outlineWidth = dpToPx(outlineWidth)
-        path.color = colorFromInt(color)
-        path.outlineColor = colorFromInt(outlineColor)
-        path.passedColor = colorFromInt(passedColor)
-        path.passedOutlineColor = colorFromInt(passedOutlineColor)
-        path.progress = progress.toDouble()
-        path.zIndex = zIndex
+        val coords = parseCoordinatesJson(coordsJson)
+        if (coords.size < 2) return
+
+        val data = GraniteNaverMapPathData(
+            identifier = identifier,
+            coordinates = coords,
+            width = width,
+            outlineWidth = outlineWidth,
+            color = color,
+            outlineColor = outlineColor,
+            passedColor = passedColor,
+            passedOutlineColor = passedOutlineColor,
+            patternImage = patternImage,
+            patternInterval = patternInterval,
+            progress = progress,
+            zIndex = zIndex
+        )
+        provider?.updatePath(data)
     }
 
     fun removePath(identifier: String) {
-        paths[identifier]?.map = null
-        paths.remove(identifier)
+        provider?.removePath(identifier)
     }
 
-    // ArrowheadPath Commands
+    // MARK: - ArrowheadPath Methods (delegated to Path)
+
     fun addArrowheadPath(
         identifier: String,
         coordsJson: String,
@@ -828,22 +619,8 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         headSizeRatio: Float,
         zIndex: Int
     ) {
-        val map = naverMap ?: return
-        val coords = parseCoordinates(coordsJson)
-        if (coords.size < 2) return
-
-        val arrowheadPath = ArrowheadPathOverlay().apply {
-            this.coords = coords
-            this.width = dpToPx(width)
-            this.outlineWidth = dpToPx(outlineWidth)
-            this.color = colorFromInt(color)
-            this.outlineColor = colorFromInt(outlineColor)
-            this.headSizeRatio = headSizeRatio
-            this.zIndex = zIndex
-            this.map = map
-        }
-
-        arrowheadPaths[identifier] = arrowheadPath
+        // ArrowheadPath uses Path API with default passed colors
+        addPath(identifier, coordsJson, width, outlineWidth, color, outlineColor, color, outlineColor, "", 0, 0f, zIndex)
     }
 
     fun updateArrowheadPath(
@@ -856,25 +633,15 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         headSizeRatio: Float,
         zIndex: Int
     ) {
-        val arrowheadPath = arrowheadPaths[identifier] ?: return
-        val coords = parseCoordinates(coordsJson)
-        if (coords.size >= 2) {
-            arrowheadPath.coords = coords
-        }
-        arrowheadPath.width = dpToPx(width)
-        arrowheadPath.outlineWidth = dpToPx(outlineWidth)
-        arrowheadPath.color = colorFromInt(color)
-        arrowheadPath.outlineColor = colorFromInt(outlineColor)
-        arrowheadPath.headSizeRatio = headSizeRatio
-        arrowheadPath.zIndex = zIndex
+        updatePath(identifier, coordsJson, width, outlineWidth, color, outlineColor, color, outlineColor, "", 0, 0f, zIndex)
     }
 
     fun removeArrowheadPath(identifier: String) {
-        arrowheadPaths[identifier]?.map = null
-        arrowheadPaths.remove(identifier)
+        removePath(identifier)
     }
 
-    // GroundOverlay Commands
+    // MARK: - GroundOverlay Methods (TODO: Add to provider protocol)
+
     fun addGroundOverlay(
         identifier: String,
         swLat: Double,
@@ -885,35 +652,7 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         alpha: Float,
         zIndex: Int
     ) {
-        val map = naverMap ?: return
-
-        val bounds = LatLngBounds(LatLng(swLat, swLng), LatLng(neLat, neLng))
-
-        val overlay = GroundOverlay().apply {
-            this.bounds = bounds
-            this.alpha = alpha
-            this.zIndex = zIndex
-            this.map = map
-        }
-
-        groundOverlays[identifier] = overlay
-
-        // Load image asynchronously
-        thread {
-            try {
-                val connection = URL(image).openConnection()
-                connection.connect()
-                val inputStream = connection.getInputStream()
-                val bitmap = BitmapFactory.decodeStream(inputStream)
-                inputStream.close()
-
-                post {
-                    overlay.image = OverlayImage.fromBitmap(bitmap)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+        // TODO: Add ground overlay support to provider protocol
     }
 
     fun updateGroundOverlay(
@@ -926,35 +665,15 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         alpha: Float,
         zIndex: Int
     ) {
-        val overlay = groundOverlays[identifier] ?: return
-        overlay.bounds = LatLngBounds(LatLng(swLat, swLng), LatLng(neLat, neLng))
-        overlay.alpha = alpha
-        overlay.zIndex = zIndex
-
-        // Reload image if needed
-        thread {
-            try {
-                val connection = URL(image).openConnection()
-                connection.connect()
-                val inputStream = connection.getInputStream()
-                val bitmap = BitmapFactory.decodeStream(inputStream)
-                inputStream.close()
-
-                post {
-                    overlay.image = OverlayImage.fromBitmap(bitmap)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+        // TODO: Add ground overlay support to provider protocol
     }
 
     fun removeGroundOverlay(identifier: String) {
-        groundOverlays[identifier]?.map = null
-        groundOverlays.remove(identifier)
+        // TODO: Add ground overlay support to provider protocol
     }
 
-    // InfoWindow Commands
+    // MARK: - InfoWindow Methods (TODO: Add to provider protocol)
+
     fun addInfoWindow(
         identifier: String,
         latitude: Double,
@@ -965,23 +684,7 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         offsetX: Int,
         offsetY: Int
     ) {
-        val map = naverMap ?: return
-
-        val infoWindow = InfoWindow().apply {
-            adapter = object : InfoWindow.DefaultTextAdapter(context) {
-                override fun getText(infoWindow: InfoWindow): CharSequence {
-                    return text
-                }
-            }
-            position = LatLng(latitude, longitude)
-            this.alpha = alpha
-            this.offsetX = offsetX
-            this.offsetY = offsetY
-            this.zIndex = zIndex
-            this.open(map)
-        }
-
-        infoWindows[identifier] = infoWindow
+        // TODO: Add info window support to provider protocol
     }
 
     fun updateInfoWindow(
@@ -994,21 +697,64 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
         offsetX: Int,
         offsetY: Int
     ) {
-        val infoWindow = infoWindows[identifier] ?: return
-        infoWindow.adapter = object : InfoWindow.DefaultTextAdapter(context) {
-            override fun getText(infoWindow: InfoWindow): CharSequence {
-                return text
-            }
-        }
-        infoWindow.position = LatLng(latitude, longitude)
-        infoWindow.alpha = alpha
-        infoWindow.offsetX = offsetX
-        infoWindow.offsetY = offsetY
-        infoWindow.zIndex = zIndex
+        // TODO: Add info window support to provider protocol
     }
 
     fun removeInfoWindow(identifier: String) {
-        infoWindows[identifier]?.close()
-        infoWindows.remove(identifier)
+        // TODO: Add info window support to provider protocol
+    }
+
+    // MARK: - JSON Parsing Helpers
+
+    private fun parseCoordinatesJson(json: String): List<GraniteNaverMapCoordinate> {
+        val result = mutableListOf<GraniteNaverMapCoordinate>()
+        try {
+            val array = org.json.JSONArray(json)
+            for (i in 0 until array.length()) {
+                val obj = array.getJSONObject(i)
+                result.add(GraniteNaverMapCoordinate(
+                    latitude = obj.getDouble("latitude"),
+                    longitude = obj.getDouble("longitude")
+                ))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return result
+    }
+
+    private fun parseHolesJson(json: String): List<List<GraniteNaverMapCoordinate>> {
+        val result = mutableListOf<List<GraniteNaverMapCoordinate>>()
+        try {
+            val array = org.json.JSONArray(json)
+            for (i in 0 until array.length()) {
+                val holeArray = array.getJSONArray(i)
+                val hole = mutableListOf<GraniteNaverMapCoordinate>()
+                for (j in 0 until holeArray.length()) {
+                    val obj = holeArray.getJSONObject(j)
+                    hole.add(GraniteNaverMapCoordinate(
+                        latitude = obj.getDouble("latitude"),
+                        longitude = obj.getDouble("longitude")
+                    ))
+                }
+                result.add(hole)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return result
+    }
+
+    private fun parsePatternJson(json: String): List<Int> {
+        val result = mutableListOf<Int>()
+        try {
+            val array = org.json.JSONArray(json)
+            for (i in 0 until array.length()) {
+                result.add(array.getInt(i))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return result
     }
 }

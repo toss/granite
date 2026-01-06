@@ -1,13 +1,13 @@
 //
-//  NaverMapMarkerData.swift
-//  react-native-toss-naver-map
+//  GraniteNaverMapMarkerData.swift
+//  granite-naver-map
 //
 
 import Foundation
 import NMapsMap
 import React
 
-struct NaverMapMarkerData {
+struct GraniteNaverMapMarkerData {
     let coordinate: NMGLatLng?
     let width: CGFloat?
     let height: CGFloat?

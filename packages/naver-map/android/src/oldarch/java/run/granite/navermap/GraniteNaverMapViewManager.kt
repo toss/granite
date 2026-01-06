@@ -7,13 +7,10 @@ import com.facebook.react.common.MapBuilder
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
-import com.naver.maps.geometry.LatLng
-import com.naver.maps.geometry.LatLngBounds
-import com.naver.maps.map.CameraAnimation
-import com.naver.maps.map.CameraPosition
-import com.naver.maps.map.CameraUpdate
-import com.naver.maps.map.NaverMap
 
+/**
+ * Old Architecture ViewManager (no direct NMapsMap dependency)
+ */
 class GraniteNaverMapViewManager : SimpleViewManager<GraniteNaverMapView>() {
 
     override fun getName(): String = "GraniteNaverMapView"
@@ -72,16 +69,17 @@ class GraniteNaverMapViewManager : SimpleViewManager<GraniteNaverMapView>() {
                 coord?.let {
                     val lat = it.getDouble("latitude")
                     val lng = it.getDouble("longitude")
-                    view.animateToCoordinate(LatLng(lat, lng))
+                    view.animateToCoordinate(lat, lng)
                 }
             }
             COMMAND_ANIMATE_TO_TWO_COORDINATES -> {
                 val coord1 = args?.getMap(0)
                 val coord2 = args?.getMap(1)
                 if (coord1 != null && coord2 != null) {
-                    val latLng1 = LatLng(coord1.getDouble("latitude"), coord1.getDouble("longitude"))
-                    val latLng2 = LatLng(coord2.getDouble("latitude"), coord2.getDouble("longitude"))
-                    view.animateToTwoCoordinates(latLng1, latLng2)
+                    view.animateToTwoCoordinates(
+                        coord1.getDouble("latitude"), coord1.getDouble("longitude"),
+                        coord2.getDouble("latitude"), coord2.getDouble("longitude")
+                    )
                 }
             }
             COMMAND_ANIMATE_TO_REGION -> {
@@ -91,11 +89,7 @@ class GraniteNaverMapViewManager : SimpleViewManager<GraniteNaverMapView>() {
                     val lng = it.getDouble("longitude")
                     val latDelta = it.getDouble("latitudeDelta")
                     val lngDelta = it.getDouble("longitudeDelta")
-                    val bounds = LatLngBounds(
-                        LatLng(lat - latDelta / 2, lng - lngDelta / 2),
-                        LatLng(lat + latDelta / 2, lng + lngDelta / 2)
-                    )
-                    view.animateToRegion(bounds)
+                    view.animateToRegion(lat, lng, latDelta, lngDelta)
                 }
             }
             COMMAND_SET_LAYER_GROUP_ENABLED -> {
@@ -132,8 +126,7 @@ class GraniteNaverMapViewManager : SimpleViewManager<GraniteNaverMapView>() {
             val zoom = if (it.hasKey("zoom")) it.getDouble("zoom") else 10.0
             val tilt = if (it.hasKey("tilt")) it.getDouble("tilt") else 0.0
             val bearing = if (it.hasKey("bearing")) it.getDouble("bearing") else 0.0
-
-            view.setCenter(CameraPosition(LatLng(lat, lng), zoom, tilt, bearing))
+            view.setCenter(lat, lng, zoom, tilt, bearing)
         }
     }
 

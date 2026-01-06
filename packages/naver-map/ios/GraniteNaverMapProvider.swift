@@ -1,5 +1,5 @@
 //
-//  NaverMapProvider.swift
+//  GraniteNaverMapProvider.swift
 //  granite-naver-map
 //
 //  Pluggable Provider protocol for NaverMap
@@ -9,7 +9,7 @@ import UIKit
 
 // MARK: - Provider Enums
 
-@objc public enum NaverMapType: Int {
+@objc public enum GraniteNaverMapType: Int {
     case basic = 0
     case navi = 1
     case satellite = 2
@@ -18,7 +18,7 @@ import UIKit
     case none = 5
 }
 
-@objc public enum NaverMapLocationTrackingMode: Int {
+@objc public enum GraniteNaverMapLocationTrackingMode: Int {
     case none = 0
     case noFollow = 1
     case follow = 2
@@ -27,7 +27,7 @@ import UIKit
 
 // MARK: - Data Types
 
-@objc public class NaverMapCoordinate: NSObject {
+@objc public class GraniteNaverMapCoordinate: NSObject {
     @objc public let latitude: Double
     @objc public let longitude: Double
 
@@ -37,13 +37,13 @@ import UIKit
     }
 }
 
-@objc public class NaverMapCameraPosition: NSObject {
-    @objc public let target: NaverMapCoordinate
+@objc public class GraniteNaverMapCameraPosition: NSObject {
+    @objc public let target: GraniteNaverMapCoordinate
     @objc public let zoom: Double
     @objc public let tilt: Double
     @objc public let bearing: Double
 
-    @objc public init(target: NaverMapCoordinate, zoom: Double, tilt: Double = 0, bearing: Double = 0) {
+    @objc public init(target: GraniteNaverMapCoordinate, zoom: Double, tilt: Double = 0, bearing: Double = 0) {
         self.target = target
         self.zoom = zoom
         self.tilt = tilt
@@ -51,11 +51,11 @@ import UIKit
     }
 }
 
-@objc public class NaverMapBounds: NSObject {
-    @objc public let southWest: NaverMapCoordinate
-    @objc public let northEast: NaverMapCoordinate
+@objc public class GraniteNaverMapBounds: NSObject {
+    @objc public let southWest: GraniteNaverMapCoordinate
+    @objc public let northEast: GraniteNaverMapCoordinate
 
-    @objc public init(southWest: NaverMapCoordinate, northEast: NaverMapCoordinate) {
+    @objc public init(southWest: GraniteNaverMapCoordinate, northEast: GraniteNaverMapCoordinate) {
         self.southWest = southWest
         self.northEast = northEast
     }
@@ -65,7 +65,7 @@ import UIKit
 
 @objc public class ProviderMarkerData: NSObject {
     @objc public let identifier: String
-    @objc public let coordinate: NaverMapCoordinate
+    @objc public let coordinate: GraniteNaverMapCoordinate
     @objc public let width: Int
     @objc public let height: Int
     @objc public let zIndex: Int
@@ -77,7 +77,7 @@ import UIKit
 
     @objc public init(
         identifier: String,
-        coordinate: NaverMapCoordinate,
+        coordinate: GraniteNaverMapCoordinate,
         width: Int,
         height: Int,
         zIndex: Int,
@@ -104,7 +104,7 @@ import UIKit
 
 @objc public class ProviderPolylineData: NSObject {
     @objc public let identifier: String
-    @objc public let coordinates: [NaverMapCoordinate]
+    @objc public let coordinates: [GraniteNaverMapCoordinate]
     @objc public let strokeWidth: Float
     @objc public let strokeColor: Int
     @objc public let zIndex: Int
@@ -114,7 +114,7 @@ import UIKit
 
     @objc public init(
         identifier: String,
-        coordinates: [NaverMapCoordinate],
+        coordinates: [GraniteNaverMapCoordinate],
         strokeWidth: Float,
         strokeColor: Int,
         zIndex: Int,
@@ -135,8 +135,8 @@ import UIKit
 
 @objc public class ProviderPolygonData: NSObject {
     @objc public let identifier: String
-    @objc public let coordinates: [NaverMapCoordinate]
-    @objc public let holes: [[NaverMapCoordinate]]
+    @objc public let coordinates: [GraniteNaverMapCoordinate]
+    @objc public let holes: [[GraniteNaverMapCoordinate]]
     @objc public let fillColor: Int
     @objc public let strokeColor: Int
     @objc public let strokeWidth: Float
@@ -144,8 +144,8 @@ import UIKit
 
     @objc public init(
         identifier: String,
-        coordinates: [NaverMapCoordinate],
-        holes: [[NaverMapCoordinate]],
+        coordinates: [GraniteNaverMapCoordinate],
+        holes: [[GraniteNaverMapCoordinate]],
         fillColor: Int,
         strokeColor: Int,
         strokeWidth: Float,
@@ -163,7 +163,7 @@ import UIKit
 
 @objc public class ProviderCircleData: NSObject {
     @objc public let identifier: String
-    @objc public let center: NaverMapCoordinate
+    @objc public let center: GraniteNaverMapCoordinate
     @objc public let radius: Double
     @objc public let fillColor: Int
     @objc public let strokeColor: Int
@@ -172,7 +172,7 @@ import UIKit
 
     @objc public init(
         identifier: String,
-        center: NaverMapCoordinate,
+        center: GraniteNaverMapCoordinate,
         radius: Double,
         fillColor: Int,
         strokeColor: Int,
@@ -191,7 +191,7 @@ import UIKit
 
 @objc public class ProviderPathData: NSObject {
     @objc public let identifier: String
-    @objc public let coordinates: [NaverMapCoordinate]
+    @objc public let coordinates: [GraniteNaverMapCoordinate]
     @objc public let width: Float
     @objc public let outlineWidth: Float
     @objc public let color: Int
@@ -205,7 +205,7 @@ import UIKit
 
     @objc public init(
         identifier: String,
-        coordinates: [NaverMapCoordinate],
+        coordinates: [GraniteNaverMapCoordinate],
         width: Float,
         outlineWidth: Float,
         color: Int,
@@ -234,9 +234,9 @@ import UIKit
 
 // MARK: - Provider Delegate
 
-@objc public protocol NaverMapProviderDelegate: NSObjectProtocol {
+@objc public protocol GraniteNaverMapProviderDelegate: NSObjectProtocol {
     @objc func mapViewDidInitialize()
-    @objc func mapViewDidChangeCamera(position: NaverMapCameraPosition)
+    @objc func mapViewDidChangeCamera(position: GraniteNaverMapCameraPosition)
     @objc func mapViewDidTouch(reason: Int, animated: Bool)
     @objc func mapViewDidClick(x: Double, y: Double, latitude: Double, longitude: Double)
     @objc func mapViewDidClickMarker(id: String)
@@ -244,20 +244,20 @@ import UIKit
 
 // MARK: - Provider Protocol
 
-@objc public protocol NaverMapProvidable: NSObjectProtocol {
+@objc public protocol GraniteNaverMapProvidable: NSObjectProtocol {
     /// Create the map view
     @objc func createMapView(frame: CGRect) -> UIView
 
     /// Set the delegate for map events
-    @objc func setDelegate(_ delegate: NaverMapProviderDelegate?)
+    @objc func setDelegate(_ delegate: GraniteNaverMapProviderDelegate?)
 
     // MARK: - Camera
-    @objc func moveCamera(to position: NaverMapCameraPosition, animated: Bool)
-    @objc func animateToCoordinate(_ coordinate: NaverMapCoordinate)
-    @objc func animateToBounds(_ bounds: NaverMapBounds, padding: CGFloat)
+    @objc func moveCamera(to position: GraniteNaverMapCameraPosition, animated: Bool)
+    @objc func animateToCoordinate(_ coordinate: GraniteNaverMapCoordinate)
+    @objc func animateToBounds(_ bounds: GraniteNaverMapBounds, padding: CGFloat)
 
     // MARK: - Map Properties
-    @objc func setMapType(_ type: NaverMapType)
+    @objc func setMapType(_ type: GraniteNaverMapType)
     @objc func setMapPadding(_ padding: UIEdgeInsets)
     @objc func setCompassEnabled(_ enabled: Bool)
     @objc func setScaleBarEnabled(_ enabled: Bool)
@@ -272,7 +272,7 @@ import UIKit
     @objc func setTiltGesturesEnabled(_ enabled: Bool)
     @objc func setRotateGesturesEnabled(_ enabled: Bool)
     @objc func setStopGesturesEnabled(_ enabled: Bool)
-    @objc func setLocationTrackingMode(_ mode: NaverMapLocationTrackingMode)
+    @objc func setLocationTrackingMode(_ mode: GraniteNaverMapLocationTrackingMode)
     @objc func setLayerGroupEnabled(group: String, enabled: Bool)
 
     // MARK: - Markers

@@ -1,21 +1,14 @@
 //
 //  GraniteNaverMapViewManager.m
-//  react-native-toss-naver-map
+//  granite-naver-map
+//
+//  Old Architecture bridge (no direct NMapsMap dependency)
 //
 
 #import <React/RCTBridge.h>
 #import <React/RCTViewManager.h>
-#import "RCTConvert+NMFMapView.h"
 
 @interface RCT_EXTERN_MODULE(GraniteNaverMapViewManager, RCTViewManager)
-
-RCT_CUSTOM_VIEW_PROPERTY(center, NMFCameraUpdateWith*, GraniteNaverMapViewManager)
-{
-    if (json == nil) return;
-    [self performSelector: NSSelectorFromString(@"moveCamera:view:")
-               withObject:[RCTConvert NMFCameraUpdateWith: json]
-               withObject: view];
-}
 
 RCT_EXPORT_VIEW_PROPERTY(showsMyLocationButton, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(mapPadding, UIEdgeInsets)
@@ -45,14 +38,20 @@ RCT_EXTERN_METHOD(setLayerGroupEnabled:(nonnull NSNumber *)reactTag
                   withEnabled:(BOOL)enabled)
 
 RCT_EXTERN_METHOD(animateToCoordinate:(nonnull NSNumber *)reactTag
-                  withCoord:(NMGLatLng *)coord)
+                  withLatitude:(double)latitude
+                  withLongitude:(double)longitude)
 
 RCT_EXTERN_METHOD(animateToTwoCoordinates:(nonnull NSNumber *)reactTag
-                  withCoord1:(NMGLatLng *)coord1
-                  withCoord2:(NMGLatLng *)coord2)
+                  withLat1:(double)lat1
+                  withLng1:(double)lng1
+                  withLat2:(double)lat2
+                  withLng2:(double)lng2)
 
 RCT_EXTERN_METHOD(animateToRegion:(nonnull NSNumber *)reactTag
-                  withBounds:(NMGLatLngBounds *)bounds)
+                  withLatitude:(double)latitude
+                  withLongitude:(double)longitude
+                  withLatitudeDelta:(double)latitudeDelta
+                  withLongitudeDelta:(double)longitudeDelta)
 
 RCT_EXTERN_METHOD(addMarker:(nonnull NSNumber *)reactTag
                   identifier:(NSString *)identifier

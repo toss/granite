@@ -4,7 +4,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <NMapsMap/NMapsMap.h>
 
 #import <React/RCTViewComponentView.h>
 #import <React/RCTConversions.h>

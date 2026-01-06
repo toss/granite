@@ -101,10 +101,17 @@ android {
         "generated/jni"
       ]
 
-      // Conditionally exclude the providers directory
-      if (!includeDefaultProvider) {
-        java.exclude '**/providers/**'
-        java.exclude '**/BuiltInNaverMapProvider.kt'
+      // Conditionally include the providers directory containing BuiltInGraniteNaverMapProvider
+      if (includeDefaultProvider) {
+        java.srcDirs += "src/providers/java"
+      }
+
+      // Include the appropriate ViewManager based on architecture
+      def isNewArchitectureEnabled = rootProject.findProperty("newArchEnabled")?.toBoolean() ?: false
+      if (isNewArchitectureEnabled) {
+        java.srcDirs += "src/newarch/java"
+      } else {
+        java.srcDirs += "src/oldarch/java"
       }
     }
   }

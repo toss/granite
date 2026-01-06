@@ -36,9 +36,15 @@ use_default_provider = resolve_default_provider.call(
   true
 )
 
-# Exclude BuiltInNaverMapProvider when not using default provider
+# Exclude NMapsMap-dependent files when not using default provider
 exclude_patterns = []
-exclude_patterns << "ios/BuiltInNaverMapProvider.swift" unless use_default_provider
+unless use_default_provider
+  exclude_patterns << "ios/BuiltInNaverMapProvider.swift"
+  exclude_patterns << "ios/GraniteNaverMapMarkerData.swift"
+  exclude_patterns << "ios/NMFMarker+Extension.swift"
+  exclude_patterns << "ios/RCTConvert+NMFMapView.h"
+  exclude_patterns << "ios/RCTConvert+NMFMapView.m"
+end
 
 Pod::Spec.new do |s|
   s.name         = "GraniteNaverMap"
@@ -58,11 +64,16 @@ Pod::Spec.new do |s|
   preprocessor_defs = ['$(inherited)']
   preprocessor_defs << 'GRANITE_NAVER_MAP_DEFAULT_PROVIDER=1' if use_default_provider
 
+  # Swift Active Compilation Conditions
+  swift_flags = ['$(inherited)']
+  swift_flags << 'GRANITE_NAVER_MAP_DEFAULT_PROVIDER' if use_default_provider
+
   s.pod_target_xcconfig = {
     'CLANG_ENABLE_MODULES' => 'YES',
     'DEFINES_MODULE' => 'YES',
     'SWIFT_OBJC_INTERFACE_HEADER_NAME' => 'GraniteNaverMap-Swift.h',
-    'GCC_PREPROCESSOR_DEFINITIONS' => preprocessor_defs.join(' ')
+    'GCC_PREPROCESSOR_DEFINITIONS' => preprocessor_defs.join(' '),
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => swift_flags.join(' ')
   }
 
   # React Native modules dependencies (Fabric/TurboModule)

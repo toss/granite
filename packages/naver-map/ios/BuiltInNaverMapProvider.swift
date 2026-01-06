@@ -8,9 +8,9 @@
 import UIKit
 import NMapsMap
 
-@objc public class BuiltInNaverMapProvider: NSObject, NaverMapProvidable {
+@objc public class BuiltInNaverMapProvider: NSObject, GraniteNaverMapProvidable {
     private var mapView: NMFNaverMapView?
-    private weak var delegate: NaverMapProviderDelegate?
+    private weak var delegate: GraniteNaverMapProviderDelegate?
     private var isInitialized = false
 
     private var markers: [String: NMFMarker] = [:]
@@ -19,7 +19,7 @@ import NMapsMap
     private var circles: [String: NMFCircleOverlay] = [:]
     private var paths: [String: NMFPath] = [:]
 
-    // MARK: - NaverMapProvidable
+    // MARK: - GraniteNaverMapProvidable
 
     @objc public func createMapView(frame: CGRect) -> UIView {
         let view = NMFNaverMapView(frame: frame)
@@ -28,7 +28,7 @@ import NMapsMap
         return view
     }
 
-    @objc public func setDelegate(_ delegate: NaverMapProviderDelegate?) {
+    @objc public func setDelegate(_ delegate: GraniteNaverMapProviderDelegate?) {
         self.delegate = delegate
     }
 
@@ -39,7 +39,7 @@ import NMapsMap
 
     // MARK: - Camera
 
-    @objc public func moveCamera(to position: NaverMapCameraPosition, animated: Bool) {
+    @objc public func moveCamera(to position: GraniteNaverMapCameraPosition, animated: Bool) {
         guard let mapView = mapView else { return }
         let cameraPosition = NMFCameraPosition(
             NMGLatLng(lat: position.target.latitude, lng: position.target.longitude),
@@ -54,14 +54,14 @@ import NMapsMap
         mapView.mapView.moveCamera(update)
     }
 
-    @objc public func animateToCoordinate(_ coordinate: NaverMapCoordinate) {
+    @objc public func animateToCoordinate(_ coordinate: GraniteNaverMapCoordinate) {
         guard let mapView = mapView else { return }
         let cameraUpdate = NMFCameraUpdate(scrollTo: NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude))
         cameraUpdate.animation = .easeIn
         mapView.mapView.moveCamera(cameraUpdate)
     }
 
-    @objc public func animateToBounds(_ bounds: NaverMapBounds, padding: CGFloat) {
+    @objc public func animateToBounds(_ bounds: GraniteNaverMapBounds, padding: CGFloat) {
         guard let mapView = mapView else { return }
         let nmgBounds = NMGLatLngBounds(
             southWest: NMGLatLng(lat: bounds.southWest.latitude, lng: bounds.southWest.longitude),
@@ -74,7 +74,7 @@ import NMapsMap
 
     // MARK: - Map Properties
 
-    @objc public func setMapType(_ type: NaverMapType) {
+    @objc public func setMapType(_ type: GraniteNaverMapType) {
         guard let mapView = mapView, let nmfType = NMFMapType(rawValue: type.rawValue) else { return }
         mapView.mapView.mapType = nmfType
     }
@@ -135,7 +135,7 @@ import NMapsMap
         mapView?.mapView.isStopGestureEnabled = enabled
     }
 
-    @objc public func setLocationTrackingMode(_ mode: NaverMapLocationTrackingMode) {
+    @objc public func setLocationTrackingMode(_ mode: GraniteNaverMapLocationTrackingMode) {
         guard let mapView = mapView else { return }
         mapView.mapView.positionMode = NMFMyPositionMode(rawValue: UInt(mode.rawValue)) ?? .disabled
     }
@@ -470,8 +470,8 @@ extension BuiltInNaverMapProvider: NMFMapViewCameraDelegate {
 
     public func mapViewCameraIdle(_ mapView: NMFMapView) {
         let position = mapView.cameraPosition
-        let cameraPosition = NaverMapCameraPosition(
-            target: NaverMapCoordinate(latitude: position.target.lat, longitude: position.target.lng),
+        let cameraPosition = GraniteNaverMapCameraPosition(
+            target: GraniteNaverMapCoordinate(latitude: position.target.lat, longitude: position.target.lng),
             zoom: position.zoom,
             tilt: position.tilt,
             bearing: position.heading
