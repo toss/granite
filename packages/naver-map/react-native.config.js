@@ -1,16 +1,13 @@
-/**
- * @type {import('@react-native-community/cli-types').Config}
- */
 module.exports = {
   dependency: {
     platforms: {
-      ios: {
-        componentDescriptors: ['GraniteNaverMapViewComponentDescriptor'],
-        cmakeListsPath: undefined,
-      },
       android: {
-        componentDescriptors: ['GraniteNaverMapViewComponentDescriptor'],
-        cmakeListsPath: undefined,
+        sourceDir: './android',
+        packageImportPath: 'import run.granite.navermap.GraniteNaverMapPackage;',
+        packageInstance: 'new GraniteNaverMapPackage()',
+      },
+      ios: {
+        sourceDir: './ios',
       },
     },
   },

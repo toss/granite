@@ -1,8 +1,11 @@
 pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
 plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+// Autolinking disabled - using manual module include
+// extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
 rootProject.name = 'run.granite.navermap.example'
 include ':app'
+include ':granite-naver-map'
+project(':granite-naver-map').projectDir = new File(rootProject.projectDir, '../../android')
 includeBuild('../node_modules/@react-native/gradle-plugin')
 
 dependencyResolutionManagement {

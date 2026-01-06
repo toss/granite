@@ -51,7 +51,8 @@ react {
     // hermesFlags = ["-O", "-output-source-map"]
 
     /* Autolinking */
-    autolinkLibrariesWithApp()
+    // Disabled - using manual module include
+    // autolinkLibrariesWithApp()
 }
 
 /**
@@ -120,6 +121,9 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // Granite NaverMap (manual include since autolinking is disabled)
+    implementation project(':granite-naver-map')
 
     // Detox
     androidTestImplementation('com.wix:detox:+')
