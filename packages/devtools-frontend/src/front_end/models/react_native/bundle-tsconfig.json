@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../front_end/models/react_native"},"files":["../../../../../../front_end/models/react_native/react_native.ts"],"references":[{"path":"./react-native-tsconfig.json"}]}
