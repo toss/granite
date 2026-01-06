@@ -57,7 +57,7 @@ object GraniteNaverMapRegistry {
      */
     private fun createBuiltInProvider(context: Context): GraniteNaverMapProvider? {
         return try {
-            val clazz = Class.forName("run.granite.navermap.providers.BuiltInGraniteNaverMapProvider")
+            val clazz = Class.forName("run.granite.navermap.builtinProvider.BuiltInGraniteNaverMapProvider")
             val constructor = clazz.getConstructor(Context::class.java)
             constructor.newInstance(context) as GraniteNaverMapProvider
         } catch (e: Exception) {

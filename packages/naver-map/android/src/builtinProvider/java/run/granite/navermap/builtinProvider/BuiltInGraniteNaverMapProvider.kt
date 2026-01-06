@@ -1,4 +1,4 @@
-package run.granite.navermap.providers
+package run.granite.navermap.builtinProvider
 
 import android.content.Context
 import run.granite.navermap.GraniteNaverMapProvider

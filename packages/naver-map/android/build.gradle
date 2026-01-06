@@ -101,9 +101,9 @@ android {
         "generated/jni"
       ]
 
-      // Conditionally include the providers directory containing BuiltInGraniteNaverMapProvider
+      // Conditionally include the builtinProvider directory containing BuiltInGraniteNaverMapProvider
       if (includeDefaultProvider) {
-        java.srcDirs += "src/providers/java"
+        java.srcDirs += "src/builtinProvider/java"
       }
 
       // Include the appropriate ViewManager based on architecture

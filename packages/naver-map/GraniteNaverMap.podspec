@@ -37,13 +37,10 @@ use_default_provider = resolve_default_provider.call(
 )
 
 # Exclude NMapsMap-dependent files when not using default provider
+# All NMapsMap-dependent files are in ios/builtinProvider/ directory
 exclude_patterns = []
 unless use_default_provider
-  exclude_patterns << "ios/BuiltInNaverMapProvider.swift"
-  exclude_patterns << "ios/GraniteNaverMapMarkerData.swift"
-  exclude_patterns << "ios/NMFMarker+Extension.swift"
-  exclude_patterns << "ios/RCTConvert+NMFMapView.h"
-  exclude_patterns << "ios/RCTConvert+NMFMapView.m"
+  exclude_patterns << "ios/builtinProvider/**/*"
 end
 
 Pod::Spec.new do |s|
