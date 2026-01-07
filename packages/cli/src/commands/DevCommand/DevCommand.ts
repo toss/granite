@@ -1,11 +1,7 @@
-import { runServer, EXPERIMENTAL__server } from '@granite-js/mpack';
-import { loadConfig } from '@granite-js/plugin-core';
 import { Command, Option } from 'clipanion';
-import Debug from 'debug';
+import * as Rollipop from 'rollipop';
 import { ExitCode } from '../../constants';
 import { errorHandler } from '../../utils/command';
-
-const debug = Debug('cli');
 
 export class DevCommand extends Command {
   static paths = [[`dev`]];
@@ -30,32 +26,12 @@ export class DevCommand extends Command {
 
   async execute() {
     try {
-      process.env.MPACK_DEV_SERVER = 'true';
+      const config = await Rollipop.loadConfig();
 
-      const config = await loadConfig({ configFile: this.configFile });
-      const serverOptions = {
-        host: this.host,
+      await Rollipop.runServer(config, {
         port: this.port ? parseInt(this.port, 10) : undefined,
-      };
-
-      debug('StartCommand', {
-        ...serverOptions,
-        disableEmbeddedReactDevTools: this.disableEmbeddedReactDevTools,
-        experimentalMode: this.experimentalMode,
+        host: this.host,
       });
-
-      if (this.experimentalMode) {
-        /**
-         * @TODO Invoke pre and post handlers of devServer plugin hooks in experimental mode
-         */
-        await EXPERIMENTAL__server({ config, ...serverOptions });
-      } else {
-        await runServer({
-          config,
-          enableEmbeddedReactDevTools: !this.disableEmbeddedReactDevTools,
-          ...serverOptions,
-        });
-      }
 
       return ExitCode.SUCCESS;
     } catch (error: unknown) {

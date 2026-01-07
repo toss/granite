@@ -104,7 +104,8 @@ export function getScreenPathMapConfig(routeScreens: RouteScreen[]) {
   const notFoundPage = routeScreens.find((screen) => screen.path === '/_404');
 
   if (notFoundPage == null) {
-    throw new Error('404 page not found. Please create a `_404.ts` or `_404.tsx` file in the `pages/*` folder.');
+    // FIXME
+    // throw new Error('404 page not found. Please create a `_404.ts` or `_404.tsx` file in the `pages/*` folder.');
   }
 
   // https://reactnavigation.org/docs/configuring-links/#handling-unmatched-routes-or-404

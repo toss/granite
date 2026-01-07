@@ -68,6 +68,7 @@
     "es-toolkit": "^1.39.8",
     "execa": "^5",
     "ora": "^5",
+    "rollipop": "0.1.0-alpha.6",
     "typanion": "^3.14.0",
     "zod": "3.24.4"
   }

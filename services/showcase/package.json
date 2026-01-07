@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.28.5",
+    "@babel/plugin-transform-unicode-regex": "^7.27.1",
     "@babel/runtime": "7.18.9",
     "@biomejs/biome": "^1.9.4",
     "@granite-js/forge-cli": "workspace:*",
@@ -26,6 +27,7 @@
     "@granite-js/plugin-micro-frontend": "workspace:*",
     "@granite-js/plugin-router": "workspace:*",
     "@granite-js/plugin-sentry": "workspace:*",
+    "@swc/core": "^1.15.8",
     "@testing-library/react-native": "^12.9.0",
     "@types/babel__core": "^7.20.5",
     "@types/jest": "^29.5.14",
@@ -33,7 +35,10 @@
     "@types/react": "18.3.3",
     "babel-preset-granite": "workspace:*",
     "jest": "^29.7.0",
+    "mitt": "^3.0.1",
+    "oxc-resolver": "^11.16.2",
     "react-test-renderer": "18.2.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.2"
   }
 }

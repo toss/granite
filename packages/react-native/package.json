@@ -3,7 +3,7 @@
   "version": "0.1.33",
   "description": "The Granite Framework",
   "bin": {
-    "granite": "./bin/cli.js"
+    "granite": "./bin/cli.mjs"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

@@ -48,3 +48,5 @@ report-*.html
 # rust
 target
 *.wasm
+
+.rollipop/
