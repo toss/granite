@@ -29,13 +29,13 @@
     "test:no-parallel": "vitest --no-watch --coverage"
   },
   "devDependencies": {
-    "@types/kill-port": "^2.0.1",
+    "@types/kill-port": "2.0.1",
     "@types/node": "^22.10.2",
     "@types/yargs": "^17.0.33",
     "@vitest/coverage-v8": "^4.0.12",
     "es-toolkit": "^1.39.8",
     "execa": "^9.5.2",
-    "kill-port": "^2.0.1",
+    "kill-port": "2.0.1",
     "tsup": "^8.5.0",
     "typescript": "5.8.3",
     "vitest": "^4.0.12",

@@ -24,6 +24,8 @@ const resolvers = new Map();
 
 interface CreateResolverOptions {
   conditionNames?: string[];
+  extraNodeModules?: Record<string, string>;
+  monorepoRoot?: string;
 }
 
 export function createResolver(rootPath: string, options?: CreateResolverOptions) {
@@ -45,11 +47,12 @@ export function createResolver(rootPath: string, options?: CreateResolverOptions
       conditionNames: options?.conditionNames ?? [...RESOLVER_EXPORTS_MAP_CONDITIONS, 'require', 'node', 'default'],
       mainFiles: ['index'],
       modules: ['node_modules', path.join(rootPath, 'src')],
+      alias: options?.extraNodeModules ?? {},
     });
 
     function resolve(context: MetroResolutionContext, request: string) {
       for (const nativeModule of NATIVE_MODULES) {
-        if (request === nativeModule) {
+        if (request === nativeModule || request.startsWith(nativeModule + '/')) {
           return {
             type: 'sourceFile',
             filePath: resolver({}, rootPath, request),
@@ -76,6 +79,19 @@ export function createResolver(rootPath: string, options?: CreateResolverOptions
         }
 
         request = `${request}/`;
+      }
+
+      const isPackageImport = !(request.startsWith('.') || request.startsWith('/'));
+      if (isPackageImport) {
+        try {
+          const resolveResult = resolver({}, rootPath, request);
+          return {
+            type: 'sourceFile',
+            filePath: resolveResult,
+          };
+        } catch {
+          // noop: If package resolution fails from rootPath, fall through to try resolving from originModulePath below
+        }
       }
 
       try {
