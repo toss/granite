@@ -1,4 +1,4 @@
-import { GraniteModule } from './GraniteModule';
+import { GraniteModule } from './GraniteBrownfieldModule.brick';
 
 /**
  * @public
@@ -21,5 +21,5 @@ import { GraniteModule } from './GraniteModule';
  * ```
  */
 export async function closeView() {
-  return GraniteModule.closeView();
+  return GraniteModule?.closeView();
 }

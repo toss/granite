@@ -27,6 +27,7 @@ export async function mergeConfig(base: PluginConfig, ...configs: PluginConfig[]
       devServer: mergeDevServer(resolvedAcc?.devServer, resolvedCurr?.devServer),
       metro: mergeMetro(resolvedAcc?.metro, resolvedCurr?.metro),
       extra: mergeExtra(resolvedAcc?.extra, resolvedCurr?.extra),
+      reactNativePath: resolvedCurr.reactNativePath ?? resolvedAcc.reactNativePath,
     };
   }, resolveDynamicConfig(base));
 }

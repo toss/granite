@@ -1,0 +1,144 @@
+buildscript {
+  ext.getExtOrDefault = {name ->
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['GraniteVideo_' + name]
+  }
+
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:8.7.2"
+    // noinspection DifferentKotlinGradleVersion
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}"
+  }
+}
+
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+apply plugin: "com.facebook.react"
+
+def getExtOrIntegerDefault(name) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["GraniteVideo_" + name]).toInteger()
+}
+
+// ============================================================
+// GraniteVideo Default Provider Configuration
+// ============================================================
+// Priority: GRANITE_VIDEO_DEFAULT_PROVIDER > GRANITE_DEFAULT_PROVIDER_ALL > true (default)
+//
+// Examples:
+//   Include default provider (default):
+//     ./gradlew assembleDebug
+//
+//   Exclude default provider for video only:
+//     GRANITE_VIDEO_DEFAULT_PROVIDER=false ./gradlew assembleDebug
+//
+//   Exclude default providers for all Granite packages:
+//     GRANITE_DEFAULT_PROVIDER_ALL=false ./gradlew assembleDebug
+//
+//   Exclude all but override video to include:
+//     GRANITE_DEFAULT_PROVIDER_ALL=false GRANITE_VIDEO_DEFAULT_PROVIDER=true ./gradlew assembleDebug
+// ============================================================
+def resolveDefaultProvider(String specificKey, String fallbackKey, boolean defaultValue) {
+    def specificValue = System.getenv(specificKey)
+    def fallbackValue = System.getenv(fallbackKey)
+
+    if (specificValue != null) {
+        return specificValue == 'true'
+    } else if (fallbackValue != null) {
+        return fallbackValue == 'true'
+    } else {
+        return defaultValue
+    }
+}
+
+def includeDefaultProvider = resolveDefaultProvider(
+    'GRANITE_VIDEO_DEFAULT_PROVIDER',
+    'GRANITE_DEFAULT_PROVIDER_ALL',
+    true
+)
+
+android {
+  namespace "run.granite.video"
+
+  compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
+
+  defaultConfig {
+    minSdkVersion getExtOrIntegerDefault("minSdkVersion")
+    targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
+
+    // Pass build config flag for conditional compilation
+    buildConfigField "boolean", "INCLUDE_DEFAULT_PROVIDER", "${includeDefaultProvider}"
+  }
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+    }
+  }
+
+  lintOptions {
+    disable "GradleCompatible"
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  sourceSets {
+    main {
+      java.srcDirs += [
+        "generated/java",
+        "generated/jni"
+      ]
+
+      // Conditionally exclude the providers directory
+      if (!includeDefaultProvider) {
+        java.exclude '**/providers/**'
+      }
+    }
+  }
+}
+
+repositories {
+  mavenCentral()
+  google()
+}
+
+def kotlin_version = getExtOrDefault("kotlinVersion")
+
+// Provider selection via gradle properties (only when default provider is enabled)
+def useExoPlayer = project.hasProperty('graniteVideoUseExoPlayer') ? project.graniteVideoUseExoPlayer.toBoolean() : true
+def useVLC = project.hasProperty('graniteVideoUseVLC') ? project.graniteVideoUseVLC.toBoolean() : false
+
+dependencies {
+  implementation "com.facebook.react:react-android"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+  // Provider-specific dependencies (only included when default provider is enabled)
+  if (includeDefaultProvider) {
+    // Default: ExoPlayer (Media3)
+    if (useExoPlayer) {
+      implementation "androidx.media3:media3-exoplayer:1.2.1"
+      implementation "androidx.media3:media3-exoplayer-dash:1.2.1"
+      implementation "androidx.media3:media3-exoplayer-hls:1.2.1"
+      implementation "androidx.media3:media3-exoplayer-smoothstreaming:1.2.1"
+      implementation "androidx.media3:media3-datasource:1.2.1"
+      implementation "androidx.media3:media3-ui:1.2.1"
+    }
+
+    // Optional: VLC
+    if (useVLC) {
+      implementation "org.videolan.android:libvlc-all:3.6.0"
+    }
+  }
+}

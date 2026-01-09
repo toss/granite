@@ -1,38 +1,168 @@
 # @granite-js/deployment-manager
 
-## 0.1.33
-
-## 0.1.32
+## 0.1.34-next.9
 
 ### Patch Changes
 
-- 7572713: bump version up babel
+- fix
 
-## 0.1.31
-
-## 0.1.30
-
-## 0.1.29
-
-## 0.1.28
+## 0.1.34-next.8
 
 ### Patch Changes
 
-- 1d958cc: ci: provenance
+- fix
 
-## 0.1.27
+## 0.1.34-next.7
 
 ### Patch Changes
 
-- e32b020: ci: oidc
+- fix
 
-## 0.1.26
+## 0.1.34-next.6
 
-## 0.1.25
+### Patch Changes
 
-## 0.1.24
+- fix
 
-## 0.1.23
+## 0.1.34-next.5
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.4
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.3
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.2
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.1
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.0
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.19
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.18
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.17
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.16
+
+### Patch Changes
+
+- update
+
+## 0.1.23-next.15
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.14
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.13
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.12
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.11
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.10
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.9
+
+### Patch Changes
+
+- tollback
+
+## 0.1.23-next.8
+
+### Patch Changes
+
+- router
+
+## 0.1.23-next.7
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.6
+
+### Patch Changes
+
+- test
+
+## 0.1.23-next.5
+
+### Patch Changes
+
+- temp
+
+## 0.1.23-next.4
+
+### Patch Changes
+
+- test
+
+## 0.1.23-next.3
+
+### Patch Changes
+
+- test
+
+## 0.1.23-next.0
 
 ## 0.1.22
 

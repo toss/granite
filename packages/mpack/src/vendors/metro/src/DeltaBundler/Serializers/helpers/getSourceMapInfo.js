@@ -15,7 +15,8 @@ const { getJsOutput } = require('./js');
 function getSourceMapInfo(module, options) {
   return {
     ...getJsOutput(module).data,
-    path: module.path,
+    // MARK: - 0.81
+    path: options.getSourceUrl(module) ?? module.path,
     source: options.excludeSource ? '' : getModuleSource(module),
   };
 }

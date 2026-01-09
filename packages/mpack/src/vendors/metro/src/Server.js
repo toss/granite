@@ -75,6 +75,22 @@ class Server {
     this._reporter = config.reporter;
     this._logger = Logger;
     this._platforms = new Set(this._config.resolver.platforms);
+    this._allowedSuffixesForSourceRequests = [
+      ...new Set(
+        [
+          ...this._config.resolver.sourceExts,
+          ...this._config.watcher.additionalExts,
+          ...this._config.resolver.assetExts,
+        ].map((ext) => '.' + ext)
+      ),
+    ];
+    this._sourceRequestRoutingMap = [
+      ['/[metro-project]/', path.resolve(this._config.projectRoot)],
+      ...this._config.watchFolders.map((watchFolder, index) => [
+        `/[metro-watchFolders]/${index}/`,
+        path.resolve(watchFolder),
+      ]),
+    ];
     this._isEnded = false;
 
     // TODO(T34760917): These two properties should eventually be instantiated
@@ -105,8 +121,11 @@ class Server {
   }
 
   async build(options) {
-    const { entryFile, graphOptions, onProgress, resolverOptions, serializerOptions, transformOptions } =
-      splitBundleOptions(options);
+    const splitOptions = splitBundleOptions(options);
+    if (options.sourcePaths) {
+      splitOptions.serializerOptions.sourcePaths = options.sourcePaths;
+    }
+    const { entryFile, graphOptions, onProgress, resolverOptions, serializerOptions, transformOptions } = splitOptions;
 
     const { prepend, graph } = await this._bundler.buildGraph(entryFile, transformOptions, resolverOptions, {
       onProgress,
@@ -135,6 +154,7 @@ class Server {
       sourceUrl: serializerOptions.sourceUrl,
       inlineSourceMap: serializerOptions.inlineSourceMap,
       serverRoot: this._config.server.unstable_serverRoot ?? this._config.projectRoot,
+      getSourceUrl: (module) => this._getModuleSourceUrl(module, serializerOptions.sourcePaths),
     };
     let bundleCode = null;
     let bundleMap = null;
@@ -153,6 +173,7 @@ class Server {
       bundleMap = sourceMapString([...prepend, ...this._getSortedModules(graph)], {
         excludeSource: serializerOptions.excludeSource,
         processModuleFilter: this._config.serializer.processModuleFilter,
+        getSourceUrl: (module) => this._getModuleSourceUrl(module, serializerOptions.sourcePaths),
       });
     }
     return {
@@ -162,8 +183,11 @@ class Server {
   }
 
   async getRamBundleInfo(options) {
-    const { entryFile, graphOptions, onProgress, resolverOptions, serializerOptions, transformOptions } =
-      splitBundleOptions(options);
+    const splitOptions = splitBundleOptions(options);
+    if (options.sourcePaths) {
+      splitOptions.serializerOptions.sourcePaths = options.sourcePaths;
+    }
+    const { entryFile, graphOptions, onProgress, resolverOptions, serializerOptions, transformOptions } = splitOptions;
 
     const { prepend, graph } = await this._bundler.buildGraph(entryFile, transformOptions, resolverOptions, {
       onProgress,
@@ -195,6 +219,7 @@ class Server {
       sourceUrl: serializerOptions.sourceUrl,
       inlineSourceMap: serializerOptions.inlineSourceMap,
       serverRoot: this._config.server.unstable_serverRoot ?? this._config.projectRoot,
+      getSourceUrl: (module) => this._getModuleSourceUrl(module, serializerOptions.sourcePaths),
     });
   }
 
@@ -316,7 +341,17 @@ class Server {
   };
 
   _parseOptions(url) {
-    return parseOptionsFromUrl(url, new Set(this._config.resolver.platforms), getBytecodeVersion());
+    const options = parseOptionsFromUrl(url, new Set(this._config.resolver.platforms), getBytecodeVersion());
+    const urlObj = require('url').parse(url, true);
+    if (urlObj.query && urlObj.query.sourcePaths) {
+      options.sourcePaths = urlObj.query.sourcePaths;
+    } else if (
+      options.platform === 'android' ||
+      (urlObj.query && (urlObj.query.platform === 'android' || urlObj.query.p === 'android'))
+    ) {
+      options.sourcePaths = 'url-server';
+    }
+    return options;
   }
 
   async _processRequest(req, res, next) {
@@ -357,14 +392,66 @@ class Server {
     } else if (pathname === '/symbolicate') {
       await this._symbolicate(req, res);
     } else {
-      next();
+      const filePathname = pathname
+        .split('/')
+        .map((segment) => decodeURIComponent(segment))
+        .join('/');
+
+      let handled = false;
+      for (const [pathnamePrefix, normalizedRootDir] of this._sourceRequestRoutingMap) {
+        if (filePathname.startsWith(pathnamePrefix)) {
+          const relativeFilePathname = filePathname.substr(pathnamePrefix.length);
+          await this._processSourceRequest(relativeFilePathname, normalizedRootDir, res);
+          handled = true;
+          break;
+        }
+      }
+      if (!handled) {
+        next();
+      }
     }
+  }
+
+  async _processSourceRequest(relativeFilePathname, rootDir, res) {
+    if (!this._allowedSuffixesForSourceRequests.some((suffix) => relativeFilePathname.endsWith(suffix))) {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
+    const filePath = path.join(rootDir, relativeFilePathname);
+    try {
+      const stats = fs.statSync(filePath);
+      if (!stats.isFile()) {
+        throw new Error('Not a file');
+      }
+    } catch (e) {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
+
+    const mimeType = mime.lookup(path.basename(relativeFilePathname));
+    res.setHeader('Content-Type', mimeType);
+    const stream = fs.createReadStream(filePath);
+    stream.pipe(res);
+    stream.on('error', (error) => {
+      if (error.code === 'ENOENT') {
+        res.writeHead(404);
+        res.end();
+      } else {
+        res.writeHead(500);
+        res.end();
+      }
+    });
   }
 
   _createRequestProcessor({ createStartEntry, createEndEntry, build, delete: deleteFn, finish }) {
     return async function requestProcessor(req, res, bundleOptions) {
-      const { entryFile, graphOptions, resolverOptions, serializerOptions, transformOptions } =
-        splitBundleOptions(bundleOptions);
+      const splitOptions = splitBundleOptions(bundleOptions);
+      if (bundleOptions.sourcePaths) {
+        splitOptions.serializerOptions.sourcePaths = bundleOptions.sourcePaths;
+      }
+      const { entryFile, graphOptions, resolverOptions, serializerOptions, transformOptions } = splitOptions;
 
       /**
        * `entryFile` is relative to projectRoot, we need to use resolution function
@@ -593,6 +680,7 @@ class Server {
         sourceUrl: serializerOptions.sourceUrl,
         inlineSourceMap: serializerOptions.inlineSourceMap,
         serverRoot: this._config.server.unstable_serverRoot ?? this._config.projectRoot,
+        getSourceUrl: (module) => this._getModuleSourceUrl(module, serializerOptions.sourcePaths),
       });
 
       const bundleCode = typeof bundle === 'string' ? bundle : bundle.code;
@@ -688,6 +776,7 @@ class Server {
           sourceUrl: serializerOptions.sourceUrl,
           inlineSourceMap: serializerOptions.inlineSourceMap,
           serverRoot: this._config.server.unstable_serverRoot ?? this._config.projectRoot,
+          getSourceUrl: (module) => this._getModuleSourceUrl(module, serializerOptions.sourcePaths),
         })
       );
 
@@ -733,6 +822,52 @@ class Server {
     return modules.sort((a, b) => this._createModuleId(a.path) - this._createModuleId(b.path));
   }
 
+  _getModuleSourceUrl(module, mode) {
+    if (mode === 'url-server') {
+      for (const [pathnamePrefix, normalizedRootDir] of this._sourceRequestRoutingMap) {
+        if (module.path.startsWith(normalizedRootDir + path.sep)) {
+          const relativePath = module.path.slice(normalizedRootDir.length + 1);
+          const relativePathPosix = relativePath
+            .split(path.sep)
+            .map((segment) => encodeURIComponent(segment))
+            .join('/');
+          return pathnamePrefix + relativePathPosix;
+        }
+      }
+
+      // If the module is inside the project root but somehow not matched by routing map (e.g. symlinks resolved differently),
+      // try to make it relative to project root.
+      const projectRoot = this._config.projectRoot;
+      if (module.path.startsWith(projectRoot + path.sep)) {
+        const relativePath = module.path.slice(projectRoot.length + 1);
+        const relativePathPosix = relativePath
+          .split(path.sep)
+          .map((segment) => encodeURIComponent(segment))
+          .join('/');
+        return '/[metro-project]/' + relativePathPosix;
+      }
+
+      // Fallback: Check if relative path from project root is valid
+      const relativeToRoot = path.relative(projectRoot, module.path);
+      if (!relativeToRoot.startsWith('..') && !path.isAbsolute(relativeToRoot)) {
+        return (
+          '/[metro-project]/' +
+          relativeToRoot
+            .split(path.sep)
+            .map((segment) => encodeURIComponent(segment))
+            .join('/')
+        );
+      }
+
+      const modulePathPosix = module.path
+        .split(path.sep)
+        .map((segment) => encodeURIComponent(segment))
+        .join('/');
+      return modulePathPosix.startsWith('/') ? modulePathPosix : '/' + modulePathPosix;
+    }
+    return module.path;
+  }
+
   _processSourceMapRequest = this._createRequestProcessor({
     createStartEntry(context) {
       return {
@@ -775,6 +910,7 @@ class Server {
       return sourceMapString([...prepend, ...this._getSortedModules(graph)], {
         excludeSource: serializerOptions.excludeSource,
         processModuleFilter: this._config.serializer.processModuleFilter,
+        getSourceUrl: (module) => this._getModuleSourceUrl(module, serializerOptions.sourcePaths),
       });
     },
     finish({ mres, result }) {

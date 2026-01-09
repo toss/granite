@@ -1,6 +1,0 @@
-{
-  "compilerOptions": {
-    "composite": true
-  },
-  "files": ["package/index.js"]
-}

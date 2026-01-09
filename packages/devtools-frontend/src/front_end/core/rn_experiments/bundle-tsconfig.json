@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../front_end/core/rn_experiments"},"files":["../../../../../../front_end/core/rn_experiments/rn_experiments.ts"],"references":[{"path":"./rn_experiments-tsconfig.json"}]}

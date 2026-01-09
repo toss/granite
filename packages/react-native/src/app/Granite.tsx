@@ -1,4 +1,4 @@
-import { ComponentType, PropsWithChildren } from 'react';
+import { ComponentType, type JSX, PropsWithChildren } from 'react';
 import { AppRegistry } from 'react-native';
 import { ENTRY_BUNDLE_NAME } from '../constants';
 import type { InitialProps } from '../initial-props';
@@ -95,7 +95,7 @@ const createApp = () => {
     registerHostApp(
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
       { appName }: Pick<GraniteProps, 'appName'>
-    ): (initialProps: InitialProps) => JSX.Element {
+    ): (initialProps: InitialProps) => React.JSX.Element {
       if (appName !== ENTRY_BUNDLE_NAME) {
         throw new Error(`Host appName must be 'shared'`);
       }
