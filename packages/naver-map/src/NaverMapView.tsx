@@ -1,15 +1,9 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  Platform,
-  View,
-  type NativeSyntheticEvent,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
+import { Platform, View, type NativeSyntheticEvent, type StyleProp, type ViewStyle } from 'react-native';
 import { MapContext } from './internals/context';
 import type { MarkerEventListeners } from './overlays/Marker';
-import type { Coord } from './types/Coord';
 import GraniteNaverMapViewNativeComponent from './specs/GraniteNaverMapViewNativeComponent';
+import type { Coord } from './types/Coord';
 
 export interface CameraChangeEvent extends Coord {
   zoom: number;
@@ -121,13 +115,10 @@ export function NaverMapView({
   const [isReady, setIsReady] = useState(false);
   const markersRef = useRef<Map<string, MarkerEventListeners>>(new Map());
 
-  const onMarkerClick = useCallback(
-    (event: NativeMarkerClickEvent) => {
-      const marker = markersRef.current.get(event.nativeEvent.id);
-      marker?.onPress?.();
-    },
-    []
-  );
+  const onMarkerClick = useCallback((event: NativeMarkerClickEvent) => {
+    const marker = markersRef.current.get(event.nativeEvent.id);
+    marker?.onPress?.();
+  }, []);
 
   const handleCameraChange = useCallback(
     (event: NativeCameraChangeEvent) => {
@@ -161,16 +152,15 @@ export function NaverMapView({
   }, []);
 
   const mapContext = useMemo(
-    () =>
-      isReady && mapRef.current
-        ? { mapView: mapRef.current, markers: markersRef.current }
-        : null,
+    () => (isReady && mapRef.current ? { mapView: mapRef.current, markers: markersRef.current } : null),
     [isReady]
   );
 
   // Convert center prop to native format
   const nativeCenter = useMemo(() => {
-    if (!center) return undefined;
+    if (!center) {
+      return undefined;
+    }
     return {
       latitude: center.latitude,
       longitude: center.longitude,
@@ -182,7 +172,9 @@ export function NaverMapView({
 
   // Convert mapPadding prop to native format
   const nativeMapPadding = useMemo(() => {
-    if (!mapPadding) return undefined;
+    if (!mapPadding) {
+      return undefined;
+    }
     return {
       top: mapPadding.top,
       left: mapPadding.left,

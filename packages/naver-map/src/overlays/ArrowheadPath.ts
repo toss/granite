@@ -1,9 +1,9 @@
 import { type View } from 'react-native';
+import { processColorInput } from '../internals/colorUtils';
 import { useMapOverlay } from '../internals/useMapOverlay';
 import { usePreservedReference } from '../internals/usePreservedReference';
-import { processColorInput } from '../internals/colorUtils';
-import type { Coord } from '../types/Coord';
 import { Commands } from '../specs/GraniteNaverMapViewNativeComponent';
+import type { Coord } from '../types/Coord';
 
 export interface ArrowheadPathProps {
   coordinates: Coord[];
@@ -16,8 +16,8 @@ export interface ArrowheadPathProps {
 }
 
 const add = (v: View, id: string, args: ArrowheadPathProps) => {
-  const color = processColorInput(args.color, 0xFF000000);
-  const outlineColor = processColorInput(args.outlineColor, 0xFFFFFFFF);
+  const color = processColorInput(args.color, 0xff000000);
+  const outlineColor = processColorInput(args.outlineColor, 0xffffffff);
   const coordsJson = JSON.stringify(args.coordinates);
 
   Commands.addArrowheadPath(
@@ -34,8 +34,8 @@ const add = (v: View, id: string, args: ArrowheadPathProps) => {
 };
 
 const update = (v: View, id: string, args: ArrowheadPathProps) => {
-  const color = processColorInput(args.color, 0xFF000000);
-  const outlineColor = processColorInput(args.outlineColor, 0xFFFFFFFF);
+  const color = processColorInput(args.color, 0xff000000);
+  const outlineColor = processColorInput(args.outlineColor, 0xffffffff);
   const coordsJson = JSON.stringify(args.coordinates);
 
   Commands.updateArrowheadPath(
@@ -60,7 +60,7 @@ const methods = { add, update, remove };
 export function ArrowheadPath(props: ArrowheadPathProps) {
   const preserved = usePreservedReference(props);
 
-  useMapOverlay<{}, ArrowheadPathProps>({
+  useMapOverlay<object, ArrowheadPathProps>({
     registrySelector: (c) => c.markers,
     methods,
     props: preserved,

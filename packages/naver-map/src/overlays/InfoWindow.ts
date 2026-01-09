@@ -1,8 +1,8 @@
 import { type View } from 'react-native';
 import { useMapOverlay } from '../internals/useMapOverlay';
 import { usePreservedReference } from '../internals/usePreservedReference';
-import type { Coord } from '../types/Coord';
 import { Commands } from '../specs/GraniteNaverMapViewNativeComponent';
+import type { Coord } from '../types/Coord';
 
 export interface InfoWindowProps {
   coordinate: Coord;

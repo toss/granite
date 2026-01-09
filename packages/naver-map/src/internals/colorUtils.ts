@@ -20,13 +20,12 @@ export const rgbaToArgb = (rgba: number): number => {
 };
 
 // Convert unsigned color to signed Int32 (for Codegen compatibility)
-export const toSignedInt32 = (n: number): number =>
-  n > 0x7fffffff ? n - 0x100000000 : n;
+export const toSignedInt32 = (n: number): number => (n > 0x7fffffff ? n - 0x100000000 : n);
 
 // Process color from normalizeColor output (RRGGBBAA -> AARRGGBB -> signed Int32)
 export const processColor = (
   color: number | null | undefined,
-  defaultColor: number = 0xff000000ff // Default: opaque black in RRGGBBAA
+  defaultColor = 0xff000000ff // Default: opaque black in RRGGBBAA
 ): number => {
   const rgba = typeof color === 'number' ? color : defaultColor;
   const argb = rgbaToArgb(rgba);
@@ -36,7 +35,7 @@ export const processColor = (
 // Process color that's already in AARRGGBB format (just convert to signed Int32)
 export const processArgbColor = (
   color: number | null | undefined,
-  defaultColor: number = 0xff000000 // Default: opaque black in AARRGGBB
+  defaultColor = 0xff000000 // Default: opaque black in AARRGGBB
 ): number => {
   const argb = typeof color === 'number' ? color : defaultColor;
   return toSignedInt32(argb);
@@ -49,7 +48,7 @@ export const processArgbColor = (
  */
 export const processColorInput = (
   color: number | string | null | undefined,
-  defaultColorArgb: number = 0xff000000 // Default in AARRGGBB format
+  defaultColorArgb = 0xff000000 // Default in AARRGGBB format
 ): number => {
   if (color == null) {
     return toSignedInt32(defaultColorArgb);

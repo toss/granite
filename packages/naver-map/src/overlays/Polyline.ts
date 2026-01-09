@@ -1,9 +1,9 @@
 import { type View } from 'react-native';
+import { processColorInput } from '../internals/colorUtils';
 import { useMapOverlay } from '../internals/useMapOverlay';
 import { usePreservedReference } from '../internals/usePreservedReference';
-import { processColorInput } from '../internals/colorUtils';
-import type { Coord } from '../types/Coord';
 import { Commands } from '../specs/GraniteNaverMapViewNativeComponent';
+import type { Coord } from '../types/Coord';
 
 export interface PolylineProps {
   coordinates: Coord[];
@@ -17,22 +17,28 @@ export interface PolylineProps {
 
 const lineCapToInt = (cap?: string): number => {
   switch (cap) {
-    case 'round': return 1;
-    case 'square': return 2;
-    default: return 0; // butt
+    case 'round':
+      return 1;
+    case 'square':
+      return 2;
+    default:
+      return 0; // butt
   }
 };
 
 const lineJoinToInt = (join?: string): number => {
   switch (join) {
-    case 'miter': return 1;
-    case 'round': return 2;
-    default: return 0; // bevel
+    case 'miter':
+      return 1;
+    case 'round':
+      return 2;
+    default:
+      return 0; // bevel
   }
 };
 
 const add = (v: View, id: string, args: PolylineProps) => {
-  const strokeColor = processColorInput(args.strokeColor, 0xFF000000);
+  const strokeColor = processColorInput(args.strokeColor, 0xff000000);
   const coordsJson = JSON.stringify(args.coordinates);
   const patternJson = JSON.stringify(args.pattern ?? []);
 
@@ -50,7 +56,7 @@ const add = (v: View, id: string, args: PolylineProps) => {
 };
 
 const update = (v: View, id: string, args: PolylineProps) => {
-  const strokeColor = processColorInput(args.strokeColor, 0xFF000000);
+  const strokeColor = processColorInput(args.strokeColor, 0xff000000);
   const coordsJson = JSON.stringify(args.coordinates);
   const patternJson = JSON.stringify(args.pattern ?? []);
 
@@ -76,7 +82,7 @@ const methods = { add, update, remove };
 export function Polyline(props: PolylineProps) {
   const preserved = usePreservedReference(props);
 
-  useMapOverlay<{}, PolylineProps>({
+  useMapOverlay<object, PolylineProps>({
     registrySelector: (c) => c.markers, // reuse markers registry for now
     methods,
     props: preserved,

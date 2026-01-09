@@ -1,9 +1,9 @@
 import { type View } from 'react-native';
+import { processColorInput } from '../internals/colorUtils';
 import { useMapOverlay } from '../internals/useMapOverlay';
 import { usePreservedReference } from '../internals/usePreservedReference';
-import { processColorInput } from '../internals/colorUtils';
-import type { Coord } from '../types/Coord';
 import { Commands } from '../specs/GraniteNaverMapViewNativeComponent';
+import type { Coord } from '../types/Coord';
 
 export interface PathProps {
   coordinates: Coord[];
@@ -20,10 +20,10 @@ export interface PathProps {
 }
 
 const add = (v: View, id: string, args: PathProps) => {
-  const color = processColorInput(args.color, 0xFF000000);
-  const outlineColor = processColorInput(args.outlineColor, 0xFFFFFFFF);
-  const passedColor = processColorInput(args.passedColor, 0xFF808080);
-  const passedOutlineColor = processColorInput(args.passedOutlineColor, 0xFFFFFFFF);
+  const color = processColorInput(args.color, 0xff000000);
+  const outlineColor = processColorInput(args.outlineColor, 0xffffffff);
+  const passedColor = processColorInput(args.passedColor, 0xff808080);
+  const passedOutlineColor = processColorInput(args.passedOutlineColor, 0xffffffff);
   const coordsJson = JSON.stringify(args.coordinates);
 
   Commands.addPath(
@@ -44,10 +44,10 @@ const add = (v: View, id: string, args: PathProps) => {
 };
 
 const update = (v: View, id: string, args: PathProps) => {
-  const color = processColorInput(args.color, 0xFF000000);
-  const outlineColor = processColorInput(args.outlineColor, 0xFFFFFFFF);
-  const passedColor = processColorInput(args.passedColor, 0xFF808080);
-  const passedOutlineColor = processColorInput(args.passedOutlineColor, 0xFFFFFFFF);
+  const color = processColorInput(args.color, 0xff000000);
+  const outlineColor = processColorInput(args.outlineColor, 0xffffffff);
+  const passedColor = processColorInput(args.passedColor, 0xff808080);
+  const passedOutlineColor = processColorInput(args.passedOutlineColor, 0xffffffff);
   const coordsJson = JSON.stringify(args.coordinates);
 
   Commands.updatePath(
@@ -76,7 +76,7 @@ const methods = { add, update, remove };
 export function Path(props: PathProps) {
   const preserved = usePreservedReference(props);
 
-  useMapOverlay<{}, PathProps>({
+  useMapOverlay<object, PathProps>({
     registrySelector: (c) => c.markers,
     methods,
     props: preserved,

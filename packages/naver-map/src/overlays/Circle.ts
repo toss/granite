@@ -1,9 +1,9 @@
 import { type View } from 'react-native';
+import { processColorInput } from '../internals/colorUtils';
 import { useMapOverlay } from '../internals/useMapOverlay';
 import { usePreservedReference } from '../internals/usePreservedReference';
-import { processColorInput } from '../internals/colorUtils';
-import type { Coord } from '../types/Coord';
 import { Commands } from '../specs/GraniteNaverMapViewNativeComponent';
+import type { Coord } from '../types/Coord';
 
 export interface CircleProps {
   center: Coord;
@@ -16,7 +16,7 @@ export interface CircleProps {
 
 const add = (v: View, id: string, args: CircleProps) => {
   const fillColor = processColorInput(args.fillColor, 0x80000000);
-  const strokeColor = processColorInput(args.strokeColor, 0xFF000000);
+  const strokeColor = processColorInput(args.strokeColor, 0xff000000);
 
   Commands.addCircle(
     v as any,
@@ -33,7 +33,7 @@ const add = (v: View, id: string, args: CircleProps) => {
 
 const update = (v: View, id: string, args: CircleProps) => {
   const fillColor = processColorInput(args.fillColor, 0x80000000);
-  const strokeColor = processColorInput(args.strokeColor, 0xFF000000);
+  const strokeColor = processColorInput(args.strokeColor, 0xff000000);
 
   Commands.updateCircle(
     v as any,
@@ -57,7 +57,7 @@ const methods = { add, update, remove };
 export function Circle(props: CircleProps) {
   const preserved = usePreservedReference(props);
 
-  useMapOverlay<{}, CircleProps>({
+  useMapOverlay<object, CircleProps>({
     registrySelector: (c) => c.markers,
     methods,
     props: preserved,

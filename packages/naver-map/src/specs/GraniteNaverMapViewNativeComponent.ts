@@ -1,13 +1,7 @@
 import type { HostComponent, ViewProps } from 'react-native';
-import type {
-  DirectEventHandler,
-  Double,
-  Float,
-  Int32,
-  WithDefault,
-} from 'react-native/Libraries/Types/CodegenTypes';
-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
+import type { DirectEventHandler, Double, Float, Int32, WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
+import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 
 // Event types - simplified for Codegen compatibility
 type CameraChangeEvent = Readonly<{
@@ -76,6 +70,7 @@ export interface NativeProps extends ViewProps {
   stopGesturesEnabled?: WithDefault<boolean, true>;
 
   // Events
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   onInitialized?: DirectEventHandler<Readonly<{}>>;
   onCameraChange?: DirectEventHandler<CameraChangeEvent>;
   onTouch?: DirectEventHandler<TouchEvent>;
@@ -86,11 +81,7 @@ export interface NativeProps extends ViewProps {
 type ComponentType = HostComponent<NativeProps>;
 
 interface NativeCommands {
-  animateToCoordinate: (
-    viewRef: React.ElementRef<ComponentType>,
-    latitude: Double,
-    longitude: Double
-  ) => void;
+  animateToCoordinate: (viewRef: React.ElementRef<ComponentType>, latitude: Double, longitude: Double) => void;
   animateToTwoCoordinates: (
     viewRef: React.ElementRef<ComponentType>,
     lat1: Double,
@@ -105,11 +96,7 @@ interface NativeCommands {
     latitudeDelta: Double,
     longitudeDelta: Double
   ) => void;
-  setLayerGroupEnabled: (
-    viewRef: React.ElementRef<ComponentType>,
-    group: string,
-    enabled: boolean
-  ) => void;
+  setLayerGroupEnabled: (viewRef: React.ElementRef<ComponentType>, group: string, enabled: boolean) => void;
   // Marker
   addMarker: (
     viewRef: React.ElementRef<ComponentType>,
@@ -139,10 +126,7 @@ interface NativeCommands {
     pinColor: Int32,
     image: string
   ) => void;
-  removeMarker: (
-    viewRef: React.ElementRef<ComponentType>,
-    identifier: string
-  ) => void;
+  removeMarker: (viewRef: React.ElementRef<ComponentType>, identifier: string) => void;
   // Polyline
   addPolyline: (
     viewRef: React.ElementRef<ComponentType>,
@@ -166,10 +150,7 @@ interface NativeCommands {
     lineJoin: Int32,
     patternJson: string
   ) => void;
-  removePolyline: (
-    viewRef: React.ElementRef<ComponentType>,
-    identifier: string
-  ) => void;
+  removePolyline: (viewRef: React.ElementRef<ComponentType>, identifier: string) => void;
   // Polygon
   addPolygon: (
     viewRef: React.ElementRef<ComponentType>,
@@ -191,10 +172,7 @@ interface NativeCommands {
     strokeWidth: Float,
     zIndex: Int32
   ) => void;
-  removePolygon: (
-    viewRef: React.ElementRef<ComponentType>,
-    identifier: string
-  ) => void;
+  removePolygon: (viewRef: React.ElementRef<ComponentType>, identifier: string) => void;
   // Circle
   addCircle: (
     viewRef: React.ElementRef<ComponentType>,
@@ -218,10 +196,7 @@ interface NativeCommands {
     strokeWidth: Float,
     zIndex: Int32
   ) => void;
-  removeCircle: (
-    viewRef: React.ElementRef<ComponentType>,
-    identifier: string
-  ) => void;
+  removeCircle: (viewRef: React.ElementRef<ComponentType>, identifier: string) => void;
   // Path
   addPath: (
     viewRef: React.ElementRef<ComponentType>,
@@ -253,10 +228,7 @@ interface NativeCommands {
     progress: Float,
     zIndex: Int32
   ) => void;
-  removePath: (
-    viewRef: React.ElementRef<ComponentType>,
-    identifier: string
-  ) => void;
+  removePath: (viewRef: React.ElementRef<ComponentType>, identifier: string) => void;
   // ArrowheadPath
   addArrowheadPath: (
     viewRef: React.ElementRef<ComponentType>,
@@ -280,10 +252,7 @@ interface NativeCommands {
     headSizeRatio: Float,
     zIndex: Int32
   ) => void;
-  removeArrowheadPath: (
-    viewRef: React.ElementRef<ComponentType>,
-    identifier: string
-  ) => void;
+  removeArrowheadPath: (viewRef: React.ElementRef<ComponentType>, identifier: string) => void;
   // GroundOverlay
   addGroundOverlay: (
     viewRef: React.ElementRef<ComponentType>,
@@ -307,10 +276,7 @@ interface NativeCommands {
     alpha: Float,
     zIndex: Int32
   ) => void;
-  removeGroundOverlay: (
-    viewRef: React.ElementRef<ComponentType>,
-    identifier: string
-  ) => void;
+  removeGroundOverlay: (viewRef: React.ElementRef<ComponentType>, identifier: string) => void;
   // InfoWindow
   addInfoWindow: (
     viewRef: React.ElementRef<ComponentType>,
@@ -334,10 +300,7 @@ interface NativeCommands {
     offsetX: Int32,
     offsetY: Int32
   ) => void;
-  removeInfoWindow: (
-    viewRef: React.ElementRef<ComponentType>,
-    identifier: string
-  ) => void;
+  removeInfoWindow: (viewRef: React.ElementRef<ComponentType>, identifier: string) => void;
 }
 
 export const Commands: NativeCommands = codegenNativeCommands<NativeCommands>({
@@ -381,6 +344,4 @@ export const Commands: NativeCommands = codegenNativeCommands<NativeCommands>({
   ],
 });
 
-export default codegenNativeComponent<NativeProps>(
-  'GraniteNaverMapView'
-) as ComponentType;
+export default codegenNativeComponent<NativeProps>('GraniteNaverMapView') as ComponentType;

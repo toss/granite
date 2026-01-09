@@ -1,8 +1,8 @@
 import { type View } from 'react-native';
 import { useMapOverlay } from '../internals/useMapOverlay';
 import { usePreservedReference } from '../internals/usePreservedReference';
-import type { Coord } from '../types/Coord';
 import { Commands } from '../specs/GraniteNaverMapViewNativeComponent';
+import type { Coord } from '../types/Coord';
 
 export interface GroundOverlayProps {
   bounds: {
@@ -51,7 +51,7 @@ const methods = { add, update, remove };
 export function GroundOverlay(props: GroundOverlayProps) {
   const preserved = usePreservedReference(props);
 
-  useMapOverlay<{}, GroundOverlayProps>({
+  useMapOverlay<object, GroundOverlayProps>({
     registrySelector: (c) => c.markers,
     methods,
     props: preserved,
