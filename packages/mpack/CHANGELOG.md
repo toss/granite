@@ -1,5 +1,16 @@
 # @granite-js/mpack
 
+## 0.1.34
+
+### Patch Changes
+
+- b546c17: move `asyncIterator` polyfill to runtime
+- 9c39997: bump version up `@swc/core`
+- Updated dependencies [9c39997]
+  - @granite-js/plugin-core@0.1.34
+  - @granite-js/devtools-frontend@0.1.34
+  - @granite-js/utils@0.1.34
+
 ## 0.1.33
 
 ### Patch Changes

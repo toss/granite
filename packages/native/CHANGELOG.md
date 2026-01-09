@@ -1,5 +1,11 @@
 # @granite-js/native
 
+## 0.1.34
+
+### Patch Changes
+
+- 9c39997: bump version up `@swc/core`
+
 ## 0.1.33
 
 ### Patch Changes

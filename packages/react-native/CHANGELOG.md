@@ -1,5 +1,21 @@
 # @granite-js/react-native
 
+## 0.1.34
+
+### Patch Changes
+
+- b546c17: move `asyncIterator` polyfill to runtime
+- Updated dependencies [b546c17]
+- Updated dependencies [9c39997]
+  - @granite-js/mpack@0.1.34
+  - @granite-js/plugin-core@0.1.34
+  - @granite-js/native@0.1.34
+  - @granite-js/cli@0.1.34
+  - @granite-js/image@0.1.34
+  - @granite-js/jest@0.1.34
+  - @granite-js/lottie@0.1.34
+  - @granite-js/style-utils@0.1.34
+
 ## 0.1.33
 
 ### Patch Changes
