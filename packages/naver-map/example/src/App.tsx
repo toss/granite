@@ -1,13 +1,5 @@
 import { useState, useCallback } from 'react';
-import {
-  View,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  Platform,
-} from 'react-native';
+import { View, ScrollView, Text, TouchableOpacity, StyleSheet, SafeAreaView, Platform } from 'react-native';
 import {
   NaverMapView,
   Marker,
@@ -67,10 +59,13 @@ export default function App() {
     [addLog]
   );
 
-  const moveToLocation = useCallback((location: typeof SEOUL, name: string) => {
-    setCenter({ ...location, zoom: 14 });
-    addLog(`Move to: ${name}`);
-  }, [addLog]);
+  const moveToLocation = useCallback(
+    (location: typeof SEOUL, name: string) => {
+      setCenter({ ...location, zoom: 14 });
+      addLog(`Move to: ${name}`);
+    },
+    [addLog]
+  );
 
   const cycleMapType = useCallback(() => {
     const types = [0, 1, 2, 3, 4]; // Basic, Navi, Satellite, Hybrid, Terrain
@@ -106,181 +101,181 @@ export default function App() {
             onMapClick={handleMapClick}
           >
             <Marker
-          coordinate={{
-            latitude: 37.5676108,
-            longitude: 126.9773882,
-          }}
-          image="https://cdn-icons-png.flaticon.com/512/220/220218.png"
-          width={50}
-          height={50}
-          onPress={() => {
-            console.log('Seoul City Hall marker pressed');
-          }}
-        />
-        {/* 경복궁 */}
-        <Marker
-          coordinate={{
-            latitude: 37.5796,
-            longitude: 126.977,
-          }}
-          pinColor="#FF0000"
-          width={36}
-          height={36}
-          onPress={() => {
-            console.log('Gyeongbokgung marker pressed');
-          }}
-        />
-        {/* 남산타워 */}
-        <Marker
-          coordinate={{
-            latitude: 37.5512,
-            longitude: 126.9882,
-          }}
-          pinColor="#00FF00"
-          width={36}
-          height={36}
-          onPress={() => {
-            console.log('Namsan Tower marker pressed');
-          }}
-        />
-        {/* 명동 */}
-        <Marker
-          coordinate={{
-            latitude: 37.5636,
-            longitude: 126.9869,
-          }}
-          pinColor="#0000FF"
-          width={32}
-          height={32}
-          onPress={() => {
-            console.log('Myeongdong marker pressed');
-          }}
-        />
-        {/* 동대문 DDP */}
-        <Marker
-          coordinate={{
-            latitude: 37.5673,
-            longitude: 127.0095,
-          }}
-          pinColor="#FF6600"
-          width={32}
-          height={32}
-          onPress={() => {
-            console.log('DDP marker pressed');
-          }}
-        />
-        {/* 이태원 */}
-        <Marker
-          coordinate={{
-            latitude: 37.5345,
-            longitude: 126.9946,
-          }}
-          pinColor="#9900FF"
-          width={32}
-          height={32}
-          alpha={0.8}
-          onPress={() => {
-            console.log('Itaewon marker pressed');
-          }}
-        />
-        {/* 홍대입구 */}
-        <Marker
-          coordinate={{
-            latitude: 37.5563,
-            longitude: 126.9237,
-          }}
-          pinColor="#FF00FF"
-          width={32}
-          height={32}
-          rotation={45}
-          onPress={() => {
-            console.log('Hongdae marker pressed');
-          }}
-        />
+              coordinate={{
+                latitude: 37.5676108,
+                longitude: 126.9773882,
+              }}
+              image="https://cdn-icons-png.flaticon.com/512/220/220218.png"
+              width={50}
+              height={50}
+              onPress={() => {
+                console.log('Seoul City Hall marker pressed');
+              }}
+            />
+            {/* 경복궁 */}
+            <Marker
+              coordinate={{
+                latitude: 37.5796,
+                longitude: 126.977,
+              }}
+              pinColor="#FF0000"
+              width={36}
+              height={36}
+              onPress={() => {
+                console.log('Gyeongbokgung marker pressed');
+              }}
+            />
+            {/* 남산타워 */}
+            <Marker
+              coordinate={{
+                latitude: 37.5512,
+                longitude: 126.9882,
+              }}
+              pinColor="#00FF00"
+              width={36}
+              height={36}
+              onPress={() => {
+                console.log('Namsan Tower marker pressed');
+              }}
+            />
+            {/* 명동 */}
+            <Marker
+              coordinate={{
+                latitude: 37.5636,
+                longitude: 126.9869,
+              }}
+              pinColor="#0000FF"
+              width={32}
+              height={32}
+              onPress={() => {
+                console.log('Myeongdong marker pressed');
+              }}
+            />
+            {/* 동대문 DDP */}
+            <Marker
+              coordinate={{
+                latitude: 37.5673,
+                longitude: 127.0095,
+              }}
+              pinColor="#FF6600"
+              width={32}
+              height={32}
+              onPress={() => {
+                console.log('DDP marker pressed');
+              }}
+            />
+            {/* 이태원 */}
+            <Marker
+              coordinate={{
+                latitude: 37.5345,
+                longitude: 126.9946,
+              }}
+              pinColor="#9900FF"
+              width={32}
+              height={32}
+              alpha={0.8}
+              onPress={() => {
+                console.log('Itaewon marker pressed');
+              }}
+            />
+            {/* 홍대입구 */}
+            <Marker
+              coordinate={{
+                latitude: 37.5563,
+                longitude: 126.9237,
+              }}
+              pinColor="#FF00FF"
+              width={32}
+              height={32}
+              rotation={45}
+              onPress={() => {
+                console.log('Hongdae marker pressed');
+              }}
+            />
 
-        {/* ===== Overlay Examples ===== */}
+            {/* ===== Overlay Examples ===== */}
 
-        {/* Polyline: 서울시청 → 경복궁 → 명동 연결 */}
-        <Polyline
-          coordinates={[
-            {latitude: 37.5666103, longitude: 126.9783882}, // 서울시청
-            {latitude: 37.5796, longitude: 126.977}, // 경복궁
-            {latitude: 37.5636, longitude: 126.9869}, // 명동
-          ]}
-          strokeColor="#FF0000"
-          strokeWidth={4}
-          lineCap="round"
-          lineJoin="round"
-        />
+            {/* Polyline: 서울시청 → 경복궁 → 명동 연결 */}
+            <Polyline
+              coordinates={[
+                { latitude: 37.5666103, longitude: 126.9783882 }, // 서울시청
+                { latitude: 37.5796, longitude: 126.977 }, // 경복궁
+                { latitude: 37.5636, longitude: 126.9869 }, // 명동
+              ]}
+              strokeColor="#FF0000"
+              strokeWidth={4}
+              lineCap="round"
+              lineJoin="round"
+            />
 
-        {/* Polygon: 숭례문 주변 삼각형 영역 */}
-        <Polygon
-          coordinates={[
-            {latitude: 37.5615, longitude: 126.9730},
-            {latitude: 37.5615, longitude: 126.9780},
-            {latitude: 37.5580, longitude: 126.9755},
-          ]}
-          fillColor={0x800000FF}
-          strokeColor={0xFFFF0000}
-          strokeWidth={3}
-        />
+            {/* Polygon: 숭례문 주변 삼각형 영역 */}
+            <Polygon
+              coordinates={[
+                { latitude: 37.5615, longitude: 126.973 },
+                { latitude: 37.5615, longitude: 126.978 },
+                { latitude: 37.558, longitude: 126.9755 },
+              ]}
+              fillColor={0x800000ff}
+              strokeColor={0xffff0000}
+              strokeWidth={3}
+            />
 
-        {/* Circle: 남산타워 주변 원형 영역 (반경 300m) */}
-        <Circle
-          center={{
-            latitude: 37.5512,
-            longitude: 126.9882,
-          }}
-          radius={300}
-          fillColor={0x3300FF00}
-          strokeColor={0xFF00FF00}
-          strokeWidth={2}
-        />
+            {/* Circle: 남산타워 주변 원형 영역 (반경 300m) */}
+            <Circle
+              center={{
+                latitude: 37.5512,
+                longitude: 126.9882,
+              }}
+              radius={300}
+              fillColor={0x3300ff00}
+              strokeColor={0xff00ff00}
+              strokeWidth={2}
+            />
 
-        {/* Path: 이태원 → DDP 경로 (진행률 표시) */}
-        <Path
-          coordinates={[
-            {latitude: 37.5345, longitude: 126.9946}, // 이태원
-            {latitude: 37.5450, longitude: 127.0000},
-            {latitude: 37.5550, longitude: 127.0050},
-            {latitude: 37.5673, longitude: 127.0095}, // DDP
-          ]}
-          width={8}
-          outlineWidth={2}
-          color="#3366FF"
-          outlineColor="#FFFFFF"
-          passedColor="#AAAAAA"
-          passedOutlineColor="#FFFFFF"
-          progress={0.5}
-        />
+            {/* Path: 이태원 → DDP 경로 (진행률 표시) */}
+            <Path
+              coordinates={[
+                { latitude: 37.5345, longitude: 126.9946 }, // 이태원
+                { latitude: 37.545, longitude: 127.0 },
+                { latitude: 37.555, longitude: 127.005 },
+                { latitude: 37.5673, longitude: 127.0095 }, // DDP
+              ]}
+              width={8}
+              outlineWidth={2}
+              color="#3366FF"
+              outlineColor="#FFFFFF"
+              passedColor="#AAAAAA"
+              passedOutlineColor="#FFFFFF"
+              progress={0.5}
+            />
 
-        {/* ArrowheadPath: 홍대 → 시청 방향 화살표 경로 */}
-        <ArrowheadPath
-          coordinates={[
-            {latitude: 37.5563, longitude: 126.9237}, // 홍대
-            {latitude: 37.5580, longitude: 126.9400},
-            {latitude: 37.5620, longitude: 126.9550},
-            {latitude: 37.5666103, longitude: 126.9783882}, // 시청
-          ]}
-          width={6}
-          outlineWidth={1}
-          color="#FF6600"
-          outlineColor="#FFFFFF"
-          headSizeRatio={4}
-        />
+            {/* ArrowheadPath: 홍대 → 시청 방향 화살표 경로 */}
+            <ArrowheadPath
+              coordinates={[
+                { latitude: 37.5563, longitude: 126.9237 }, // 홍대
+                { latitude: 37.558, longitude: 126.94 },
+                { latitude: 37.562, longitude: 126.955 },
+                { latitude: 37.5666103, longitude: 126.9783882 }, // 시청
+              ]}
+              width={6}
+              outlineWidth={1}
+              color="#FF6600"
+              outlineColor="#FFFFFF"
+              headSizeRatio={4}
+            />
 
-        {/* GroundOverlay: 경복궁 영역에 이미지 오버레이 */}
-        <GroundOverlay
-          bounds={{
-            southWest: {latitude: 37.5770, longitude: 126.9740},
-            northEast: {latitude: 37.5820, longitude: 126.9800},
-          }}
-          image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7VhNhtgLdxlTNHynZjJJML0nWAz9P90UQpg&s"
-          alpha={0.8}
-        />
+            {/* GroundOverlay: 경복궁 영역에 이미지 오버레이 */}
+            <GroundOverlay
+              bounds={{
+                southWest: { latitude: 37.577, longitude: 126.974 },
+                northEast: { latitude: 37.582, longitude: 126.98 },
+              }}
+              image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7VhNhtgLdxlTNHynZjJJML0nWAz9P90UQpg&s"
+              alpha={0.8}
+            />
 
-        {/* InfoWindow: 서울시청 위에 정보창 */}
-        {/* <InfoWindow
+            {/* InfoWindow: 서울시청 위에 정보창 */}
+            {/* <InfoWindow
           coordinate={{
             latitude: 37.5666103,
             longitude: 126.9783882,
@@ -289,37 +284,21 @@ export default function App() {
           offsetY={-40}
         /> */}
 
-        {/* InfoWindow: 경복궁 위에 정보창 */}
-        <InfoWindow
-          coordinate={{
-            latitude: 37.5796,
-            longitude: 126.977,
-          }}
-          text="경복궁"
-          offsetY={-40}
-        />
+            {/* InfoWindow: 경복궁 위에 정보창 */}
+            <InfoWindow
+              coordinate={{
+                latitude: 37.5796,
+                longitude: 126.977,
+              }}
+              text="경복궁"
+              offsetY={-40}
+            />
             {showMarkers && (
               <>
-                <Marker
-                  coordinate={SEOUL}
-                  pinColor={0xFF0000}
-                  onPress={() => handleMarkerPress('Seoul City Hall')}
-                />
-                <Marker
-                  coordinate={GANGNAM}
-                  pinColor={0x00FF00}
-                  onPress={() => handleMarkerPress('Gangnam Station')}
-                />
-                <Marker
-                  coordinate={HONGDAE}
-                  pinColor={0x0000FF}
-                  onPress={() => handleMarkerPress('Hongdae')}
-                />
-                <Marker
-                  coordinate={ITAEWON}
-                  pinColor={0xFFFF00}
-                  onPress={() => handleMarkerPress('Itaewon')}
-                />
+                <Marker coordinate={SEOUL} pinColor={0xff0000} onPress={() => handleMarkerPress('Seoul City Hall')} />
+                <Marker coordinate={GANGNAM} pinColor={0x00ff00} onPress={() => handleMarkerPress('Gangnam Station')} />
+                <Marker coordinate={HONGDAE} pinColor={0x0000ff} onPress={() => handleMarkerPress('Hongdae')} />
+                <Marker coordinate={ITAEWON} pinColor={0xffff00} onPress={() => handleMarkerPress('Itaewon')} />
               </>
             )}
 
@@ -327,7 +306,7 @@ export default function App() {
               <Polyline
                 coordinates={[SEOUL, GANGNAM, ITAEWON, HONGDAE, SEOUL]}
                 strokeWidth={5}
-                strokeColor={0xFF6B6B}
+                strokeColor={0xff6b6b}
               />
             )}
 
@@ -339,29 +318,23 @@ export default function App() {
                   { latitude: 37.53, longitude: 126.97 },
                   { latitude: 37.55, longitude: 126.94 },
                 ]}
-                fillColor={0x4CAF5080}
-                strokeColor={0x4CAF50}
+                fillColor={0x4caf5080}
+                strokeColor={0x4caf50}
                 strokeWidth={2}
               />
             )}
 
             {showCircle && (
-              <Circle
-                center={SEOUL}
-                radius={2000}
-                fillColor={0x2196F340}
-                strokeColor={0x2196F3}
-                strokeWidth={2}
-              />
+              <Circle center={SEOUL} radius={2000} fillColor={0x2196f340} strokeColor={0x2196f3} strokeWidth={2} />
             )}
 
             {showPath && (
               <Path
                 coordinates={[SEOUL, GANGNAM]}
                 width={10}
-                color={0xE91E63}
+                color={0xe91e63}
                 outlineWidth={2}
-                outlineColor={0xFFFFFF}
+                outlineColor={0xffffff}
               />
             )}
           </NaverMapView>
@@ -385,11 +358,7 @@ export default function App() {
               addLog(`Map2 Click: ${ev.latitude.toFixed(4)}, ${ev.longitude.toFixed(4)}`);
             }}
           >
-            <Marker
-              coordinate={BUSAN}
-              pinColor={0xFF5500}
-              onPress={() => handleMarkerPress('Busan (Map 2)')}
-            />
+            <Marker coordinate={BUSAN} pinColor={0xff5500} onPress={() => handleMarkerPress('Busan (Map 2)')} />
           </NaverMapView>
         </View>
 
@@ -431,11 +400,7 @@ export default function App() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>1. Quick Navigation</Text>
           <View style={styles.buttonRow}>
-            <TouchableOpacity
-              testID="goto-seoul"
-              style={styles.button}
-              onPress={() => moveToLocation(SEOUL, 'Seoul')}
-            >
+            <TouchableOpacity testID="goto-seoul" style={styles.button} onPress={() => moveToLocation(SEOUL, 'Seoul')}>
               <Text style={styles.buttonText}>Seoul</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -459,11 +424,7 @@ export default function App() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>2. Map Settings</Text>
           <View style={styles.buttonRow}>
-            <TouchableOpacity
-              testID="toggle-maptype"
-              style={styles.button}
-              onPress={cycleMapType}
-            >
+            <TouchableOpacity testID="toggle-maptype" style={styles.button} onPress={cycleMapType}>
               <Text style={styles.buttonText}>Map Type</Text>
             </TouchableOpacity>
             <TouchableOpacity
