@@ -22,7 +22,19 @@
     "@granite-js/plugin-sentry": "0.1.33",
     "@granite-js/react-native": "0.1.33",
     "@granite-js/style-utils": "0.1.33",
-    "@granite-js/utils": "0.1.33"
+    "@granite-js/utils": "0.1.33",
+    "@granite-js/blur-view": "0.1.34-next.0",
+    "@granite-js/video": "0.1.34-next.0"
   },
-  "changesets": ["crisp-poets-hope"]
+  "changesets": [
+    "beige-lands-think",
+    "bright-falcons-dig",
+    "crisp-poets-hope",
+    "dull-animals-shake",
+    "floppy-wings-go",
+    "frank-bats-say",
+    "shaky-clocks-care",
+    "twelve-heads-burn",
+    "wacky-news-invite"
+  ]
 }
