@@ -22,7 +22,7 @@ export type OnErrorEvent = Readonly<{
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type OnLoadEndEvent = Readonly<{}>;
 
-export interface GraniteImageProps extends ViewProps {
+interface GraniteImageProps extends ViewProps {
   // Source
   uri?: string;
   headers?: string; // JSON string of headers object

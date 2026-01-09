@@ -1,5 +1,12 @@
 import React, { useCallback } from 'react';
-import { type StyleProp, type ViewStyle, type ColorValue, type ImageRequireSource, NativeModules } from 'react-native';
+import {
+  type StyleProp,
+  type ViewStyle,
+  type ColorValue,
+  type ImageRequireSource,
+  NativeModules,
+  ViewProps,
+} from 'react-native';
 import GraniteImageNativeComponent, {
   type OnLoadStartEvent,
   type OnProgressEvent,
@@ -32,7 +39,7 @@ export interface OnProgressEventData {
   total: number;
 }
 
-export interface GraniteImageProps {
+export interface GraniteImageProps extends ViewProps {
   // Source - can be string URI or source object
   source: GraniteImageSource | string;
 
@@ -57,9 +64,6 @@ export interface GraniteImageProps {
   onLoad?: (event: OnLoadEventData) => void;
   onError?: (error: { nativeEvent: { error: string } }) => void;
   onLoadEnd?: (event: OnLoadEndEvent) => void;
-
-  // Accessibility
-  testID?: string;
 }
 
 // Map resizeMode to contentMode for native
