@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "granite dev",
-    "build": "granite build",
+    "build": "granite build --no-cache",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write"
   },

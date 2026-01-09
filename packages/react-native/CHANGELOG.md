@@ -1,5 +1,141 @@
 # @granite-js/react-native
 
+## 0.1.34-next.8
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.34-next.8
+  - @granite-js/style-utils@0.1.34-next.8
+  - @granite-js/blur-view@0.1.34-next.8
+  - @granite-js/lottie@0.1.34-next.8
+  - @granite-js/native@0.1.34-next.8
+  - @granite-js/image@0.1.34-next.8
+  - @granite-js/mpack@0.1.34-next.8
+  - @granite-js/video@0.1.34-next.8
+  - @granite-js/jest@0.1.34-next.8
+  - @granite-js/cli@0.1.34-next.8
+
+## 0.1.34-next.7
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.34-next.7
+  - @granite-js/style-utils@0.1.34-next.7
+  - @granite-js/blur-view@0.1.34-next.7
+  - @granite-js/lottie@0.1.34-next.7
+  - @granite-js/native@0.1.34-next.7
+  - @granite-js/image@0.1.34-next.7
+  - @granite-js/mpack@0.1.34-next.7
+  - @granite-js/video@0.1.34-next.7
+  - @granite-js/jest@0.1.34-next.7
+  - @granite-js/cli@0.1.34-next.7
+
+## 0.1.34-next.6
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.34-next.6
+  - @granite-js/style-utils@0.1.34-next.6
+  - @granite-js/blur-view@0.1.34-next.6
+  - @granite-js/lottie@0.1.34-next.6
+  - @granite-js/native@0.1.34-next.6
+  - @granite-js/image@0.1.34-next.6
+  - @granite-js/mpack@0.1.34-next.6
+  - @granite-js/video@0.1.34-next.6
+  - @granite-js/jest@0.1.34-next.6
+  - @granite-js/cli@0.1.34-next.6
+
+## 0.1.34-next.5
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.34-next.5
+  - @granite-js/style-utils@0.1.34-next.5
+  - @granite-js/blur-view@0.1.34-next.5
+  - @granite-js/lottie@0.1.34-next.5
+  - @granite-js/native@0.1.34-next.5
+  - @granite-js/image@0.1.34-next.5
+  - @granite-js/mpack@0.1.34-next.5
+  - @granite-js/video@0.1.34-next.5
+  - @granite-js/jest@0.1.34-next.5
+  - @granite-js/cli@0.1.34-next.5
+
+## 0.1.34-next.4
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.34-next.4
+  - @granite-js/style-utils@0.1.34-next.4
+  - @granite-js/blur-view@0.1.34-next.4
+  - @granite-js/lottie@0.1.34-next.4
+  - @granite-js/native@0.1.34-next.4
+  - @granite-js/image@0.1.34-next.4
+  - @granite-js/mpack@0.1.34-next.4
+  - @granite-js/video@0.1.34-next.4
+  - @granite-js/jest@0.1.34-next.4
+  - @granite-js/cli@0.1.34-next.4
+
+## 0.1.34-next.3
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.34-next.3
+  - @granite-js/style-utils@0.1.34-next.3
+  - @granite-js/blur-view@0.1.34-next.3
+  - @granite-js/lottie@0.1.34-next.3
+  - @granite-js/native@0.1.34-next.3
+  - @granite-js/image@0.1.34-next.3
+  - @granite-js/mpack@0.1.34-next.3
+  - @granite-js/video@0.1.34-next.3
+  - @granite-js/jest@0.1.34-next.3
+  - @granite-js/cli@0.1.34-next.3
+
+## 0.1.34-next.2
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.34-next.2
+  - @granite-js/style-utils@0.1.34-next.2
+  - @granite-js/blur-view@0.1.34-next.2
+  - @granite-js/lottie@0.1.34-next.2
+  - @granite-js/native@0.1.34-next.2
+  - @granite-js/image@0.1.34-next.2
+  - @granite-js/mpack@0.1.34-next.2
+  - @granite-js/video@0.1.34-next.2
+  - @granite-js/jest@0.1.34-next.2
+  - @granite-js/cli@0.1.34-next.2
+
+## 0.1.34-next.1
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.34-next.1
+  - @granite-js/style-utils@0.1.34-next.1
+  - @granite-js/blur-view@0.1.34-next.1
+  - @granite-js/lottie@0.1.34-next.1
+  - @granite-js/native@0.1.34-next.1
+  - @granite-js/image@0.1.34-next.1
+  - @granite-js/mpack@0.1.34-next.1
+  - @granite-js/video@0.1.34-next.1
+  - @granite-js/jest@0.1.34-next.1
+  - @granite-js/cli@0.1.34-next.1
+
 ## 0.1.34-next.0
 
 ### Patch Changes
