@@ -9,13 +9,27 @@ import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.viewmanagers.GraniteVideoViewManagerInterface
 import com.facebook.react.viewmanagers.GraniteVideoViewManagerDelegate
-import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.common.MapBuilder
-import com.facebook.react.uimanager.events.EventDispatcher
+import run.granite.video.event.DefaultVideoEventDispatcherFactory
+import run.granite.video.event.VideoEventDispatcherFactory
+import run.granite.video.event.VideoEventListenerAdapter
 import run.granite.video.provider.*
 
+/**
+ * React Native ViewManager for GraniteVideoView.
+ *
+ * This manager supports:
+ * - Provider selection via `providerId` prop
+ * - All standard video props (source, paused, volume, etc.)
+ * - Commands for playback control
+ *
+ * The ViewManager uses dependency injection for the event dispatcher factory,
+ * making it testable without React Native context.
+ */
 @ReactModule(name = GraniteVideoViewManager.NAME)
-class GraniteVideoViewManager : SimpleViewManager<GraniteVideoView>(),
+class GraniteVideoViewManager(
+    private val eventDispatcherFactory: VideoEventDispatcherFactory = DefaultVideoEventDispatcherFactory()
+) : SimpleViewManager<GraniteVideoView>(),
     GraniteVideoViewManagerInterface<GraniteVideoView> {
 
     private val mDelegate: ViewManagerDelegate<GraniteVideoView> = GraniteVideoViewManagerDelegate(this)
@@ -27,140 +41,12 @@ class GraniteVideoViewManager : SimpleViewManager<GraniteVideoView>(),
     override fun createViewInstance(context: ThemedReactContext): GraniteVideoView {
         val view = GraniteVideoView(context)
 
-        // Set up event listener
-        view.eventListener = object : GraniteVideoEventListener {
-            override fun onLoadStart(isNetwork: Boolean, type: String, uri: String) {
-                val event = GraniteVideoEvents.createLoadStartEvent(view.id, isNetwork, type, uri)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoLoadStart", event)
-            }
-
-            override fun onLoad(data: GraniteVideoLoadData) {
-                val event = GraniteVideoEvents.createLoadEvent(view.id, data)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoLoad", event)
-            }
-
-            override fun onError(error: GraniteVideoErrorData) {
-                val event = GraniteVideoEvents.createErrorEvent(view.id, error)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoError", event)
-            }
-
-            override fun onProgress(data: GraniteVideoProgressData) {
-                val event = GraniteVideoEvents.createProgressEvent(view.id, data)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoProgress", event)
-            }
-
-            override fun onSeek(currentTime: Double, seekTime: Double) {
-                val event = GraniteVideoEvents.createSeekEvent(view.id, currentTime, seekTime)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoSeek", event)
-            }
-
-            override fun onEnd() {
-                val event = GraniteVideoEvents.createEmptyEvent(view.id)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoEnd", event)
-            }
-
-            override fun onBuffer(isBuffering: Boolean) {
-                val event = GraniteVideoEvents.createBufferEvent(view.id, isBuffering)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoBuffer", event)
-            }
-
-            override fun onBandwidthUpdate(bitrate: Double, width: Int, height: Int) {
-                val event = GraniteVideoEvents.createBandwidthEvent(view.id, bitrate, width, height)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoBandwidthUpdate", event)
-            }
-
-            override fun onPlaybackStateChanged(isPlaying: Boolean, isSeeking: Boolean, isLooping: Boolean) {
-                val event = GraniteVideoEvents.createPlaybackStateEvent(view.id, isPlaying, isSeeking, isLooping)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoPlaybackStateChanged", event)
-            }
-
-            override fun onPlaybackRateChange(rate: Float) {
-                val event = GraniteVideoEvents.createPlaybackRateEvent(view.id, rate)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoPlaybackRateChange", event)
-            }
-
-            override fun onVolumeChange(volume: Float) {
-                val event = GraniteVideoEvents.createVolumeEvent(view.id, volume)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoVolumeChange", event)
-            }
-
-            override fun onIdle() {
-                val event = GraniteVideoEvents.createEmptyEvent(view.id)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoIdle", event)
-            }
-
-            override fun onReadyForDisplay() {
-                val event = GraniteVideoEvents.createEmptyEvent(view.id)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoReadyForDisplay", event)
-            }
-
-            override fun onAudioFocusChanged(hasAudioFocus: Boolean) {
-                val event = GraniteVideoEvents.createAudioFocusEvent(view.id, hasAudioFocus)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoAudioFocusChanged", event)
-            }
-
-            override fun onAudioBecomingNoisy() {
-                val event = GraniteVideoEvents.createEmptyEvent(view.id)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoAudioBecomingNoisy", event)
-            }
-
-            override fun onFullscreenPlayerWillPresent() {
-                val event = GraniteVideoEvents.createEmptyEvent(view.id)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoFullscreenPlayerWillPresent", event)
-            }
-
-            override fun onFullscreenPlayerDidPresent() {
-                val event = GraniteVideoEvents.createEmptyEvent(view.id)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoFullscreenPlayerDidPresent", event)
-            }
-
-            override fun onFullscreenPlayerWillDismiss() {
-                val event = GraniteVideoEvents.createEmptyEvent(view.id)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoFullscreenPlayerWillDismiss", event)
-            }
-
-            override fun onFullscreenPlayerDidDismiss() {
-                val event = GraniteVideoEvents.createEmptyEvent(view.id)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoFullscreenPlayerDidDismiss", event)
-            }
-
-            override fun onPictureInPictureStatusChanged(isActive: Boolean) {
-                val event = GraniteVideoEvents.createPipStatusEvent(view.id, isActive)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoPictureInPictureStatusChanged", event)
-            }
-
-            override fun onControlsVisibilityChanged(isVisible: Boolean) {
-                val event = GraniteVideoEvents.createControlsVisibilityEvent(view.id, isVisible)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoControlsVisibilityChange", event)
-            }
-
-            override fun onAspectRatioChanged(width: Double, height: Double) {
-                val event = GraniteVideoEvents.createAspectRatioEvent(view.id, width, height)
-                context.getJSModule(com.facebook.react.uimanager.events.RCTEventEmitter::class.java)
-                    .receiveEvent(view.id, "topVideoAspectRatio", event)
-            }
-        }
+        // Set up event dispatcher and listener
+        val dispatcher = eventDispatcherFactory.create(context)
+        view.eventListener = VideoEventListenerAdapter(
+            dispatcher = dispatcher,
+            viewIdProvider = { view.id }
+        )
 
         return view
     }
