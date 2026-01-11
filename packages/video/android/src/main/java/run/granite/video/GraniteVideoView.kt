@@ -4,7 +4,19 @@ import android.content.Context
 import android.widget.FrameLayout
 import run.granite.video.provider.*
 
-class GraniteVideoView(context: Context) : FrameLayout(context), GraniteVideoDelegate {
+/**
+ * Video view that wraps a GraniteVideoProvider.
+ *
+ * This view can be configured with:
+ * - A specific provider ID (to use a registered provider from the registry)
+ * - A custom provider instance (for testing or custom implementations)
+ * - Default behavior (uses registry default or ExoPlayerProvider)
+ */
+class GraniteVideoView @JvmOverloads constructor(
+    context: Context,
+    private val providerId: String? = null,
+    private val providerFactory: (() -> GraniteVideoProvider)? = null
+) : FrameLayout(context), GraniteVideoDelegate {
 
     private var provider: GraniteVideoProvider? = null
     private var playerView: android.view.View? = null
@@ -20,12 +32,52 @@ class GraniteVideoView(context: Context) : FrameLayout(context), GraniteVideoDel
     // Event listener
     var eventListener: GraniteVideoEventListener? = null
 
+    // Expose provider for testing
+    val currentProvider: GraniteVideoProvider?
+        get() = provider
+
     init {
-        // Create provider from registry or use default
-        provider = GraniteVideoRegistry.createProvider() ?: ExoPlayerProvider()
+        setupProvider(context)
+    }
+
+    private fun setupProvider(context: Context) {
+        // Create provider using:
+        // 1. Custom factory (for testing)
+        // 2. Specific provider ID from registry
+        // 3. Default from registry
+        // 4. Fallback to ExoPlayerProvider
+        provider = providerFactory?.invoke()
+            ?: providerId?.let { GraniteVideoRegistry.createProvider(it) }
+            ?: GraniteVideoRegistry.createProvider()
+            ?: ExoPlayerProvider()
+
         provider?.delegate = this
 
         // Create player view
+        playerView = provider?.createPlayerView(context)
+        playerView?.let {
+            it.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            addView(it)
+        }
+    }
+
+    /**
+     * Change the provider at runtime.
+     * This will release the current provider and setup a new one.
+     */
+    fun setProviderId(id: String) {
+        // Release current provider
+        releaseProvider()
+
+        // Remove current player view
+        playerView?.let { removeView(it) }
+        playerView = null
+
+        // Create new provider
+        provider = GraniteVideoRegistry.createProvider(id)
+        provider?.delegate = this
+
+        // Create new player view
         playerView = provider?.createPlayerView(context)
         playerView?.let {
             it.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
@@ -305,9 +357,13 @@ class GraniteVideoView(context: Context) : FrameLayout(context), GraniteVideoDel
     }
 
     // Cleanup
-    fun release() {
+    private fun releaseProvider() {
         (provider as? ExoPlayerProvider)?.release()
         provider = null
+    }
+
+    fun release() {
+        releaseProvider()
     }
 
     override fun onDetachedFromWindow() {
