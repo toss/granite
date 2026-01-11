@@ -7,6 +7,7 @@ import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import run.granite.video.helpers.FakeGraniteVideoProvider
 
 class GraniteVideoRegistryTest : BehaviorSpec({
