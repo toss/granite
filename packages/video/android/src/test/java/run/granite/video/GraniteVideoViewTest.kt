@@ -35,7 +35,7 @@ class GraniteVideoViewTest : BehaviorSpec({
     }
 
     Given("GraniteVideoView initialization") {
-        When("created with provider factory") {
+        When("created with provider factory (for testing)") {
             val view = GraniteVideoView(
                 context = mockContext,
                 providerFactory = { mockProvider }
@@ -54,20 +54,7 @@ class GraniteVideoViewTest : BehaviorSpec({
             }
         }
 
-        When("created with provider ID") {
-            GraniteVideoRegistry.registerFactory("custom") { mockProvider }
-
-            val view = GraniteVideoView(
-                context = mockContext,
-                providerId = "custom"
-            )
-
-            Then("should use provider from registry") {
-                view.currentProvider shouldBe mockProvider
-            }
-        }
-
-        When("created with no arguments and registry has provider") {
+        When("created with default provider from registry") {
             GraniteVideoRegistry.registerFactory("default") { mockProvider }
             GraniteVideoRegistry.setDefaultProvider("default")
 
@@ -75,6 +62,16 @@ class GraniteVideoViewTest : BehaviorSpec({
 
             Then("should use default provider from registry") {
                 view.currentProvider shouldBe mockProvider
+            }
+        }
+
+        When("created with no registry and no factory") {
+            // Registry is empty, no factory provided
+            // Should fallback to ExoPlayerProvider
+            val view = GraniteVideoView(context = mockContext)
+
+            Then("should have a provider (fallback)") {
+                view.currentProvider shouldNotBe null
             }
         }
     }
@@ -383,7 +380,7 @@ class GraniteVideoViewTest : BehaviorSpec({
         }
     }
 
-    Given("setProviderId at runtime") {
+    Given("provider selection via registry default") {
         val mockProvider2 = mockk<GraniteVideoProvider>(relaxed = true)
         val mockPlayerView2 = mockk<View>(relaxed = true)
         every { mockProvider2.createPlayerView(any()) } returns mockPlayerView2
@@ -392,24 +389,25 @@ class GraniteVideoViewTest : BehaviorSpec({
         GraniteVideoRegistry.registerFactory("provider1") { mockProvider }
         GraniteVideoRegistry.registerFactory("provider2") { mockProvider2 }
 
-        val view = GraniteVideoView(
-            context = mockContext,
-            providerId = "provider1"
-        )
+        When("default provider is set before view creation") {
+            GraniteVideoRegistry.setDefaultProvider("provider2")
+            val view = GraniteVideoView(context = mockContext)
 
-        When("changing provider at runtime") {
-            view.setProviderId("provider2")
-
-            Then("should switch to new provider") {
+            Then("should use the default provider") {
                 view.currentProvider shouldBe mockProvider2
             }
+        }
 
-            Then("should set delegate on new provider") {
-                verify { mockProvider2.delegate = view }
-            }
+        When("default provider is changed between view creations") {
+            GraniteVideoRegistry.setDefaultProvider("provider1")
+            val view1 = GraniteVideoView(context = mockContext)
 
-            Then("should create new player view") {
-                verify { mockProvider2.createPlayerView(mockContext) }
+            GraniteVideoRegistry.setDefaultProvider("provider2")
+            val view2 = GraniteVideoView(context = mockContext)
+
+            Then("each view should use the provider that was default at creation time") {
+                view1.currentProvider shouldBe mockProvider
+                view2.currentProvider shouldBe mockProvider2
             }
         }
     }

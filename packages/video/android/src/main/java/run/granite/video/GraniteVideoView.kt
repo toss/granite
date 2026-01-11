@@ -7,14 +7,16 @@ import run.granite.video.provider.*
 /**
  * Video view that wraps a GraniteVideoProvider.
  *
- * This view can be configured with:
- * - A specific provider ID (to use a registered provider from the registry)
- * - A custom provider instance (for testing or custom implementations)
- * - Default behavior (uses registry default or ExoPlayerProvider)
+ * Provider selection:
+ * - Default: Uses the provider set via GraniteVideoRegistry.setDefaultProvider()
+ * - Fallback: Uses ExoPlayerProvider if no default is set
+ * - Testing: Can inject a custom providerFactory for unit tests
+ *
+ * To change the default provider at runtime, use GraniteVideoModule.setDefaultProvider()
+ * from JavaScript before creating new video views.
  */
 class GraniteVideoView @JvmOverloads constructor(
     context: Context,
-    private val providerId: String? = null,
     private val providerFactory: (() -> GraniteVideoProvider)? = null
 ) : FrameLayout(context), GraniteVideoDelegate {
 
@@ -43,41 +45,15 @@ class GraniteVideoView @JvmOverloads constructor(
     private fun setupProvider(context: Context) {
         // Create provider using:
         // 1. Custom factory (for testing)
-        // 2. Specific provider ID from registry
-        // 3. Default from registry
-        // 4. Fallback to ExoPlayerProvider
+        // 2. Default from registry (set via GraniteVideoRegistry.setDefaultProvider)
+        // 3. Fallback to ExoPlayerProvider
         provider = providerFactory?.invoke()
-            ?: providerId?.let { GraniteVideoRegistry.createProvider(it) }
             ?: GraniteVideoRegistry.createProvider()
             ?: ExoPlayerProvider()
 
         provider?.delegate = this
 
         // Create player view
-        playerView = provider?.createPlayerView(context)
-        playerView?.let {
-            it.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-            addView(it)
-        }
-    }
-
-    /**
-     * Change the provider at runtime.
-     * This will release the current provider and setup a new one.
-     */
-    fun setProviderId(id: String) {
-        // Release current provider
-        releaseProvider()
-
-        // Remove current player view
-        playerView?.let { removeView(it) }
-        playerView = null
-
-        // Create new provider
-        provider = GraniteVideoRegistry.createProvider(id)
-        provider?.delegate = this
-
-        // Create new player view
         playerView = provider?.createPlayerView(context)
         playerView?.let {
             it.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
