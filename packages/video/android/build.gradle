@@ -117,7 +117,11 @@ repositories {
 def kotlin_version = getExtOrDefault("kotlinVersion")
 
 // Provider selection via gradle properties (only when default provider is enabled)
+// Media3 ExoPlayer (default, recommended)
 def useExoPlayer = project.hasProperty('graniteVideoUseExoPlayer') ? project.graniteVideoUseExoPlayer.toBoolean() : true
+// Legacy ExoPlayer2 (for compatibility with older projects)
+def useExoPlayer2 = project.hasProperty('graniteVideoUseExoPlayer2') ? project.graniteVideoUseExoPlayer2.toBoolean() : false
+// VLC (optional)
 def useVLC = project.hasProperty('graniteVideoUseVLC') ? project.graniteVideoUseVLC.toBoolean() : false
 
 dependencies {
@@ -126,7 +130,7 @@ dependencies {
 
   // Provider-specific dependencies (only included when default provider is enabled)
   if (includeDefaultProvider) {
-    // Default: ExoPlayer (Media3)
+    // Default: ExoPlayer (Media3) - recommended
     if (useExoPlayer) {
       implementation "androidx.media3:media3-exoplayer:1.2.1"
       implementation "androidx.media3:media3-exoplayer-dash:1.2.1"
@@ -134,6 +138,15 @@ dependencies {
       implementation "androidx.media3:media3-exoplayer-smoothstreaming:1.2.1"
       implementation "androidx.media3:media3-datasource:1.2.1"
       implementation "androidx.media3:media3-ui:1.2.1"
+    }
+
+    // Legacy: ExoPlayer2 - for compatibility with older projects
+    if (useExoPlayer2) {
+      implementation "com.google.android.exoplayer:exoplayer-core:2.19.1"
+      implementation "com.google.android.exoplayer:exoplayer-dash:2.19.1"
+      implementation "com.google.android.exoplayer:exoplayer-hls:2.19.1"
+      implementation "com.google.android.exoplayer:exoplayer-smoothstreaming:2.19.1"
+      implementation "com.google.android.exoplayer:exoplayer-ui:2.19.1"
     }
 
     // Optional: VLC
