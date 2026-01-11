@@ -82,7 +82,7 @@
     "type": "all",
     "jsSrcsDir": "src",
     "android": {
-      "javaPackageName": "com.anthropic.reactnativegranitevideo"
+      "javaPackageName": "run.granite.video"
     },
     "ios": {
       "componentProvider": {
