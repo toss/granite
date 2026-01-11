@@ -204,6 +204,9 @@ interface GraniteVideoProvider {
     fun isCodecSupported(mimeType: String, width: Int, height: Int): Boolean = false
     fun isHEVCSupported(): Boolean = false
     fun getWidevineLevel(): Int = 0
+
+    // Lifecycle - Release resources
+    fun release() {}
 }
 
 // ============================================================
