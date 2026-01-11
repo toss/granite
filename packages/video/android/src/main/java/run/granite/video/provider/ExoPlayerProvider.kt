@@ -361,7 +361,7 @@ class ExoPlayerProvider(
     }
 
     // Cleanup
-    fun release() {
+    override fun release() {
         progressScheduler.cancel()
         eventListener?.let { player?.removeListener(it) }
         player?.release()

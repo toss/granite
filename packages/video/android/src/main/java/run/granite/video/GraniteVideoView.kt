@@ -334,7 +334,7 @@ class GraniteVideoView @JvmOverloads constructor(
 
     // Cleanup
     private fun releaseProvider() {
-        (provider as? ExoPlayerProvider)?.release()
+        provider?.release()
         provider = null
     }
 

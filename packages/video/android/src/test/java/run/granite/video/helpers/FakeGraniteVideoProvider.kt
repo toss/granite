@@ -139,6 +139,10 @@ class FakeGraniteVideoProvider(
         delegate?.onBuffer(isBuffering)
     }
 
+    override fun release() {
+        reset()
+    }
+
     fun reset() {
         playCount = 0
         pauseCount = 0

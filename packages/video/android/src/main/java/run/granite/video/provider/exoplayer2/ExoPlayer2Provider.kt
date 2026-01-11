@@ -423,7 +423,7 @@ class ExoPlayer2Provider : GraniteVideoProvider {
     }
 
     // Cleanup
-    fun release() {
+    override fun release() {
         stopProgressUpdates()
         player?.removeListener(playerListener)
         player?.release()
