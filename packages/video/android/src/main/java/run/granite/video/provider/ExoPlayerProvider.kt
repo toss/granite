@@ -16,9 +16,11 @@ import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.DefaultLoadControl
 import run.granite.video.provider.factory.DefaultExoPlayerFactory
 import run.granite.video.provider.factory.DefaultMediaSourceFactory
+import run.granite.video.provider.factory.DefaultTrackSelectorFactory
 import run.granite.video.provider.factory.DefaultVideoSurfaceFactory
 import run.granite.video.provider.factory.ExoPlayerFactory
 import run.granite.video.provider.factory.MediaSourceFactory
+import run.granite.video.provider.factory.TrackSelectorFactory
 import run.granite.video.provider.factory.VideoSurfaceFactory
 import run.granite.video.provider.listener.ExoPlayerEventListener
 import run.granite.video.provider.listener.PlaybackStateProvider
@@ -37,7 +39,8 @@ class ExoPlayerProvider(
     private val exoPlayerFactory: ExoPlayerFactory = DefaultExoPlayerFactory(),
     private val videoSurfaceFactory: VideoSurfaceFactory = DefaultVideoSurfaceFactory(),
     private val mediaSourceFactory: MediaSourceFactory = DefaultMediaSourceFactory(),
-    private val progressScheduler: ProgressScheduler = HandlerProgressScheduler()
+    private val progressScheduler: ProgressScheduler = HandlerProgressScheduler(),
+    private val trackSelectorFactory: TrackSelectorFactory = DefaultTrackSelectorFactory()
 ) : GraniteVideoProvider, PlaybackStateProvider {
 
     // Provider Identification
@@ -92,7 +95,7 @@ class ExoPlayerProvider(
         }
 
         // Initialize player
-        trackSelector = DefaultTrackSelector(context)
+        trackSelector = trackSelectorFactory.create(context)
         player = exoPlayerFactory.create(context, trackSelector!!)
 
         // Create and attach event listener
