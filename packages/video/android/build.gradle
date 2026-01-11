@@ -141,4 +141,16 @@ dependencies {
       implementation "org.videolan.android:libvlc-all:3.6.0"
     }
   }
+
+  // Test dependencies
+  testImplementation "io.kotest:kotest-runner-junit5:5.8.0"
+  testImplementation "io.kotest:kotest-assertions-core:5.8.0"
+  testImplementation "io.kotest:kotest-property:5.8.0"
+  testImplementation "io.mockk:mockk:1.13.9"
+  testImplementation "org.robolectric:robolectric:4.11.1"
+  testImplementation "junit:junit:4.13.2"
+}
+
+tasks.withType(Test).configureEach {
+  useJUnitPlatform()
 }
