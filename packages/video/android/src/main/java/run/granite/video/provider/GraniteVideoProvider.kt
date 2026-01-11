@@ -120,6 +120,10 @@ interface GraniteVideoDelegate {
 // ============================================================
 
 interface GraniteVideoProvider {
+    // Required - Provider Identification
+    val providerId: String
+    val providerName: String
+
     // Required - View Creation
     fun createPlayerView(context: Context): View
 
@@ -203,27 +207,136 @@ interface GraniteVideoProvider {
 }
 
 // ============================================================
+// Provider Info
+// ============================================================
+
+data class ProviderInfo(
+    val id: String,
+    val name: String
+)
+
+// ============================================================
 // Registry Singleton
 // ============================================================
 
 object GraniteVideoRegistry {
-    private var provider: GraniteVideoProvider? = null
-    private var providerFactory: (() -> GraniteVideoProvider)? = null
+    // Multi-provider storage: id -> factory
+    private val providers = mutableMapOf<String, () -> GraniteVideoProvider>()
+    private var defaultProviderId: String? = null
 
+    // Legacy support
+    private var legacyFactory: (() -> GraniteVideoProvider)? = null
+    private var legacyProvider: GraniteVideoProvider? = null
+
+    // ============================================================
+    // New API - Multi-Provider Support
+    // ============================================================
+
+    /**
+     * Register a provider factory with a specific ID.
+     * If the ID already exists, it will be overwritten.
+     */
+    fun registerFactory(id: String, factory: () -> GraniteVideoProvider) {
+        providers[id] = factory
+    }
+
+    /**
+     * Create a provider instance by ID.
+     * Returns null if the ID is not registered.
+     */
+    fun createProvider(id: String): GraniteVideoProvider? {
+        return providers[id]?.invoke()
+    }
+
+    /**
+     * Set the default provider ID.
+     * When createProvider() is called without an ID, this provider will be created.
+     */
+    fun setDefaultProvider(id: String) {
+        defaultProviderId = id
+    }
+
+    /**
+     * Get list of all registered provider IDs.
+     */
+    fun getAvailableProviders(): List<String> {
+        return providers.keys.toList()
+    }
+
+    /**
+     * Get provider info by ID.
+     * Creates a temporary instance to read providerId and providerName.
+     */
+    fun getProviderInfo(id: String): ProviderInfo? {
+        val factory = providers[id] ?: return null
+        val provider = factory()
+        return ProviderInfo(id = provider.providerId, name = provider.providerName)
+    }
+
+    /**
+     * Clear all registered providers and reset state.
+     * Primarily used for testing.
+     */
+    @androidx.annotation.VisibleForTesting
+    fun clear() {
+        providers.clear()
+        defaultProviderId = null
+        legacyFactory = null
+        legacyProvider = null
+    }
+
+    // ============================================================
+    // Legacy API - Backward Compatibility
+    // ============================================================
+
+    /**
+     * Register a provider instance (legacy).
+     */
     fun register(provider: GraniteVideoProvider) {
-        this.provider = provider
+        legacyProvider = provider
+        // Also register in new system if it has an ID
+        registerFactory(provider.providerId) { provider }
     }
 
+    /**
+     * Register a provider factory without ID (legacy).
+     * The factory will be used as fallback when no ID is specified.
+     */
     fun registerFactory(factory: () -> GraniteVideoProvider) {
-        this.providerFactory = factory
+        legacyFactory = factory
+        // Create one instance to get the ID and register
+        val instance = factory()
+        registerFactory(instance.providerId, factory)
     }
 
+    /**
+     * Create a provider instance (legacy/default).
+     * Priority:
+     * 1. Default provider ID if set
+     * 2. Legacy factory
+     * 3. Legacy provider instance
+     * 4. First available provider
+     */
     fun createProvider(): GraniteVideoProvider? {
-        providerFactory?.let { return it() }
-        return provider
+        // 1. Try default provider
+        defaultProviderId?.let { id ->
+            return providers[id]?.invoke()
+        }
+
+        // 2. Try legacy factory (also registered in providers map)
+        legacyFactory?.let { return it() }
+
+        // 3. Try legacy provider
+        legacyProvider?.let { return it }
+
+        // 4. Return first available
+        return providers.values.firstOrNull()?.invoke()
     }
 
+    /**
+     * Check if any provider is registered.
+     */
     fun hasProvider(): Boolean {
-        return provider != null || providerFactory != null
+        return providers.isNotEmpty() || legacyFactory != null || legacyProvider != null
     }
 }
