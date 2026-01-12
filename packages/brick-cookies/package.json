@@ -58,12 +58,13 @@
       "moduleName": "CookiesModule"
     }
   },
+  "dependencies": {
+    "brick-module": "catalog:brick-module"
+  },
   "peerDependencies": {
-    "brick-module": "*",
     "react-native": "*"
   },
   "devDependencies": {
-    "brick-module": "catalog:brick-module",
     "react-native": "catalog:react-native",
     "tsdown": "^0.14.2",
     "typescript": "^5.9.2"
