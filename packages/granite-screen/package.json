@@ -1,0 +1,40 @@
+{
+  "name": "@granite-js/screen",
+  "type": "module",
+  "version": "0.0.40",
+  "description": "Brownfield Screen for React Native",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "ios",
+    "android",
+    "react-native.config.js",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*",
+    "GraniteScreen.podspec",
+    "package.json"
+  ],
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "registry": "https://nexus-shared.toss.bz/repository/npm-shared/"
+  }
+}
