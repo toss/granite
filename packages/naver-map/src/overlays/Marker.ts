@@ -1,9 +1,9 @@
 import { type View } from 'react-native';
+import { processColorInput } from '../internals/colorUtils';
 import { useMapOverlay } from '../internals/useMapOverlay';
 import { usePreservedReference } from '../internals/usePreservedReference';
-import { processColorInput } from '../internals/colorUtils';
-import type { Coord } from '../types/Coord';
 import { Commands } from '../specs/GraniteNaverMapViewNativeComponent';
+import type { Coord } from '../types/Coord';
 
 export interface MarkerProps extends MarkerEventListeners {
   coordinate: Coord;
