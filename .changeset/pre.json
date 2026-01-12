@@ -29,6 +29,7 @@
     "@granite-js/screen": "0.0.40"
   },
   "changesets": [
+    "brave-badgers-learn",
     "few-jars-serve",
     "great-stamps-hug",
     "odd-dryers-jog",
