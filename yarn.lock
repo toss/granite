@@ -12851,7 +12851,6 @@ __metadata:
     tsdown: "npm:^0.14.2"
     typescript: "npm:^5.9.2"
   peerDependencies:
-    brick-module: "*"
     react-native: "*"
   languageName: unknown
   linkType: soft
