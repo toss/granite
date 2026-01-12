@@ -1,5 +1,13 @@
 # @granite-js/plugin-router
 
+## 0.1.34
+
+### Patch Changes
+
+- 9c39997: bump version up `@swc/core`
+- Updated dependencies [9c39997]
+  - @granite-js/plugin-core@0.1.34
+
 ## 0.1.33
 
 ### Patch Changes
