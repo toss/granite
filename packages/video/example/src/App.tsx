@@ -1,16 +1,15 @@
 import { useState, useCallback, useRef } from 'react';
 import { View, ScrollView, Text, TouchableOpacity, StyleSheet, SafeAreaView, Platform } from 'react-native';
-import GraniteVideo from '../../src';
-import type {
-  VideoRef,
-  OnLoadStartData,
-  OnLoadData,
-  OnProgressData,
-  OnSeekData,
-  OnBufferData,
-  OnVideoErrorData,
-  OnPlaybackStateChangedData,
-  ResizeMode,
+import GraniteVideo, {
+  type VideoRef,
+  type OnLoadStartData,
+  type OnLoadData,
+  type OnProgressData,
+  type OnSeekData,
+  type OnBufferData,
+  type OnVideoErrorData,
+  type OnPlaybackStateChangedData,
+  type ResizeMode,
 } from '../../src';
 
 // Test video sources
@@ -34,7 +33,7 @@ export default function App() {
   const [repeat, setRepeat] = useState(false);
   const [resizeMode, setResizeMode] = useState<ResizeMode>('contain');
   const [currentSource, setCurrentSource] = useState(TEST_VIDEOS.mp4);
-  const [_showError, setShowError] = useState(false);
+  const [, setShowError] = useState(false);
   const [progress, setProgress] = useState({ currentTime: 0, duration: 0 });
 
   // Logger
@@ -364,7 +363,9 @@ export default function App() {
 
 // Helper function
 function formatTime(seconds: number): string {
-  if (!isFinite(seconds) || seconds < 0) return '0:00';
+  if (!isFinite(seconds) || seconds < 0) {
+    return '0:00';
+  }
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, '0')}`;
