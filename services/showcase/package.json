@@ -11,6 +11,7 @@
   "dependencies": {
     "@granite-js/native": "workspace:*",
     "@granite-js/react-native": "workspace:*",
+    "brick-module": "catalog:brick-module",
     "react": "catalog:react-native",
     "react-native": "catalog:react-native",
     "valibot": "^1.1.0",
