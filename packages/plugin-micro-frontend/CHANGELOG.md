@@ -1,5 +1,14 @@
 # @granite-js/plugin-micro-frontend
 
+## 0.1.34-next.11
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.34-next.11
+  - @granite-js/utils@0.1.34-next.11
+
 ## 0.1.34-next.10
 
 ### Patch Changes
