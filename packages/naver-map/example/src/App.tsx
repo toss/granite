@@ -1,5 +1,3 @@
-import { useState, useCallback } from 'react';
-import { View, ScrollView, Text, TouchableOpacity, StyleSheet, SafeAreaView, Platform } from 'react-native';
 import {
   NaverMapView,
   Marker,
@@ -13,6 +11,8 @@ import {
   InfoWindow,
   ArrowheadPath,
 } from '@granite-js/naver-map';
+import { useState, useCallback } from 'react';
+import { View, ScrollView, Text, TouchableOpacity, StyleSheet, SafeAreaView, Platform } from 'react-native';
 
 // Seoul coordinates
 const SEOUL = { latitude: 37.5665, longitude: 126.978 };
