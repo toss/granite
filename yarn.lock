@@ -12820,9 +12820,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"brick-codegen@npm:0.3.1":
-  version: 0.3.1
-  resolution: "brick-codegen@npm:0.3.1"
+"brick-codegen@npm:0.4.0":
+  version: 0.4.0
+  resolution: "brick-codegen@npm:0.4.0::__archiveUrl=http%3A%2F%2Fnexus.toss.bz%2Frepository%2Fnpm-group%2Fbrick-codegen%2F-%2Fbrick-codegen-0.4.0.tgz"
   dependencies:
     "@babel/parser": "npm:^7.27.5"
     "@babel/types": "npm:^7.27.6"
@@ -12838,7 +12838,7 @@ __metadata:
     typescript: "npm:^5.9.2"
   bin:
     brick-codegen: dist/cli.js
-  checksum: 10c0/c64da5e9b7663a5ab2f903ac74182dfe0f1942de1627f2c7b7658a532bdf7872f3638fbd4f350ea8b9d2fe87b364ac95404457578f13aba1e1d53b83586d1302
+  checksum: 10c0/12b4adde0416332cf59b8943415c964c75ec307167af14a2d8188edc773f65b0e282fce301c2d430b059088990274a14d297166e6924ca75aa9a03b75b9322c1
   languageName: node
   linkType: hard
 
@@ -12855,17 +12855,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"brick-module@npm:0.3.1":
-  version: 0.3.1
-  resolution: "brick-module@npm:0.3.1"
+"brick-module@npm:0.4.0":
+  version: 0.4.0
+  resolution: "brick-module@npm:0.4.0::__archiveUrl=http%3A%2F%2Fnexus.toss.bz%2Frepository%2Fnpm-group%2Fbrick-module%2F-%2Fbrick-module-0.4.0.tgz"
   dependencies:
-    brick-codegen: "npm:0.3.1"
+    brick-codegen: "npm:0.4.0"
   peerDependencies:
     react: ">=18.2.0"
     react-native: ">=0.70.0"
   bin:
     brick-codegen: bin/brick-codegen.js
-  checksum: 10c0/8f8a051492b84840d449e320657deee4f300ccb74a0811d61da1b5aaec156666d4e64df1f615fa3aec46d4ad8d9dcc1d449ab1c342a148176b1ad2ec411758b1
+  checksum: 10c0/90be2338bd2a5bdad2704b63d83ffa502bcbcfa97c31bfab53bdfec975665612c8f7a8608da323b55d1017a756cdce6bd66b8df0cb3af9393738365d1ba3c306
   languageName: node
   linkType: hard
 
