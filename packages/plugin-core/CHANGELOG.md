@@ -1,5 +1,12 @@
 # @granite-js/plugin-core
 
+## 0.1.34
+
+### Patch Changes
+
+- 9c39997: bump version up `@swc/core`
+  - @granite-js/utils@0.1.34
+
 ## 0.1.33
 
 ### Patch Changes

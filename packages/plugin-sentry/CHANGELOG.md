@@ -1,5 +1,13 @@
 # @granite-js/plugin-sentry
 
+## 0.1.34
+
+### Patch Changes
+
+- Updated dependencies [9c39997]
+  - @granite-js/plugin-core@0.1.34
+  - @granite-js/utils@0.1.34
+
 ## 0.1.33
 
 ### Patch Changes
