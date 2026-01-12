@@ -61,3 +61,12 @@ target
 **/example/ios/*.xcworkspace/xcuserdata/
 **/example/vendor/bundle/
 .metro-health-check*
+
+.classpath
+.cxx
+.gradle
+.idea
+.project
+.settings
+local.properties
+android.iml
