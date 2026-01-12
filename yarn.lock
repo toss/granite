@@ -6142,7 +6142,6 @@ __metadata:
   peerDependencies:
     "@granite-js/native": "workspace:*"
     "@types/react": "*"
-    brick-module: "*"
     react: "*"
     react-native: "*"
   bin:
