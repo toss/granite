@@ -27,6 +27,7 @@
     "@granite-js/video": "0.1.34-next.8"
   },
   "changesets": [
+    "few-jars-serve",
     "great-stamps-hug",
     "ripe-moons-double"
   ]
