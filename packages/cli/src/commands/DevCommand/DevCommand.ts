@@ -52,7 +52,6 @@ export class DevCommand extends Command {
       } else {
         await runServer({
           config,
-          enableEmbeddedReactDevTools: !this.disableEmbeddedReactDevTools,
           ...serverOptions,
         });
       }
