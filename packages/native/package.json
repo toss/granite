@@ -45,6 +45,18 @@
       "types": "./dist/react-native-webview.d.ts",
       "default": "./src/react-native-webview.ts"
     },
+    "./lottie-react-native": {
+      "types": "./dist/lottie-react-native.d.ts",
+      "default": "./src/lottie-react-native.ts"
+    },
+    "./react-native-fast-image": {
+      "types": "./dist/react-native-fast-image.d.ts",
+      "default": "./src/react-native-fast-image.ts"
+    },
+    "./react-native-video": {
+      "types": "./dist/react-native-video.d.ts",
+      "default": "./src/react-native-video.ts"
+    },
     "./react-native-safe-area-context": {
       "types": "./dist/react-native-safe-area-context/index.d.ts",
       "default": "./src/react-native-safe-area-context/index.ts"
@@ -87,6 +99,9 @@
     "dist"
   ],
   "dependencies": {
+    "@granite-js/image": "workspace:*",
+    "@granite-js/lottie": "workspace:*",
+    "@granite-js/video": "workspace:*",
     "@react-native-async-storage/async-storage": "catalog:react-native",
     "@react-native-community/blur": "catalog:react-native",
     "@react-navigation/elements": "catalog:react-native",
