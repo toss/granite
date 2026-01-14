@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-micro-frontend",
   "type": "module",
-  "version": "0.1.34-next.22",
+  "version": "0.1.34-next.23",
   "description": "Plugin for micro frontend",
   "scripts": {
     "prepack": "yarn build",
