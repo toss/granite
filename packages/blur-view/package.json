@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/blur-view",
-  "version": "0.1.34-next.18",
+  "version": "0.1.34-next.19",
   "type": "module",
   "main": "./dist/module/index.js",
   "types": "./dist/typescript/index.d.ts",
