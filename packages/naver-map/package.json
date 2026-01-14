@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/naver-map",
-  "version": "0.1.34-next.17",
+  "version": "0.1.34-next.18",
   "description": "Pluggable Naver Map component for React Native with provider selection",
   "type": "module",
   "main": "./dist/module/index.js",
