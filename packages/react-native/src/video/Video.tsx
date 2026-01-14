@@ -14,13 +14,8 @@ type VideoProps = ComponentProps<typeof AnimatedRNVideo>;
  * @description
  * The Video component implements audio focus control logic to prevent the sandbox app from stopping music playing in other apps. It automatically plays or pauses based on the app's state. For example, when the app transitions to the background, the video automatically pauses.
  *
- * ::: warning
- * The Video component uses [react-native-video version (6.0.0-alpha.6)](https://github.com/TheWidlarzGroup/react-native-video/tree/v6.0.0-alpha.6). Therefore, some types or features may not be compatible with the latest version.
- * :::
- *
  * @property {boolean} [isAvailable] Value to check if the `Video` component can be used. You can check this value to determine if the user can render the video or if video functionality is unavailable due to environmental constraints (e.g., network connection issues, unsupported devices). If this value is `false`, you should handle it by not rendering the video or providing alternative content.
  *
- * @param {VideoProperties} [props] Properties provided by [`react-native-video`](https://github.com/TheWidlarzGroup/react-native-video/tree/v6.0.0-alpha.6).
  * @param {string} [props.source.uri] Source of the video to play. Can be set to a file path or URL.
  * @param {boolean} [props.muted=false] Controls the mute state of the video. If `true`, the video's audio is muted; if `false`, the audio plays. Default is `false`.
  * @param {boolean} [props.paused=false] Property to control video playback. If `true`, the video is paused; if `false`, the video plays. Default is `false`, and it autoplays.
@@ -28,11 +23,6 @@ type VideoProps = ComponentProps<typeof AnimatedRNVideo>;
  * @param {Ref<VideoRef>} ref Reference object to access the video instance. Through this ref, you can access various methods of the video instance.
  *
  * @returns {JSX.Element} Returns a JSX element that renders the video. Uses `Animated` to provide smooth animation effects during video playback.
- *
- * @see [react-native-video] https://github.com/react-native-video/react-native-video
- * For detailed properties of the video component, please refer to the official documentation.
- * @see [react-native-video-6.0.0] https://github.com/TheWidlarzGroup/react-native-video/releases/tag/v6.0.0
- * This is the source code of the version currently installed in the sandbox app.
  *
  * @example
  *

@@ -45,14 +45,6 @@
       "types": "./dist/react-native-webview.d.ts",
       "default": "./src/react-native-webview.ts"
     },
-    "./lottie-react-native": {
-      "types": "./dist/lottie-react-native.d.ts",
-      "default": "./src/lottie-react-native.ts"
-    },
-    "./react-native-fast-image": {
-      "types": "./dist/react-native-fast-image.d.ts",
-      "default": "./src/react-native-fast-image.ts"
-    },
     "./react-native-safe-area-context": {
       "types": "./dist/react-native-safe-area-context/index.d.ts",
       "default": "./src/react-native-safe-area-context/index.ts"
@@ -81,10 +73,6 @@
       "types": "./dist/react-native-gesture-handler/jestSetup.d.ts",
       "default": "./src/react-native-gesture-handler/jestSetup.js"
     },
-    "./react-native-video": {
-      "types": "./dist/react-native-video.d.ts",
-      "default": "./src/react-native-video.ts"
-    },
     "./fingerprint": {
       "types": "./fingerprint/index.d.ts",
       "import": "./fingerprint/index.mjs",
@@ -105,15 +93,11 @@
     "@react-navigation/native": "catalog:react-native",
     "@react-navigation/native-stack": "catalog:react-native",
     "@shopify/flash-list": "catalog:react-native",
-    "@types/react-native-video": "^5.0.20",
-    "lottie-react-native": "catalog:react-native",
-    "react-native-fast-image": "catalog:react-native",
     "react-native-gesture-handler": "catalog:react-native",
     "react-native-pager-view": "catalog:react-native",
     "react-native-safe-area-context": "catalog:react-native",
     "react-native-screens": "catalog:react-native",
     "react-native-svg": "catalog:react-native",
-    "react-native-video": "catalog:react-native",
     "react-native-webview": "catalog:react-native"
   },
   "devDependencies": {
