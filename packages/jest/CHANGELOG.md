@@ -1,5 +1,13 @@
 # @granite-js/jest
 
+## 0.1.34-next.24
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/native@0.1.34-next.24
+
 ## 0.1.34-next.23
 
 ### Patch Changes
