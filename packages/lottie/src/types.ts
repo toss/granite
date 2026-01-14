@@ -71,9 +71,9 @@ export interface AnimationFailureEvent {
 }
 
 /**
- * Props for GraniteLottieView component
+ * Props for LottieView component
  */
-export interface GraniteLottieViewProps {
+export interface LottieViewProps {
   /**
    * Animation source - required
    * Can be a local asset path, remote URL, JSON object, or require() result
@@ -200,9 +200,9 @@ export interface GraniteLottieViewProps {
 }
 
 /**
- * Imperative handle for GraniteLottieView
+ * Imperative handle for LottieView
  */
-export interface GraniteLottieViewRef {
+export interface LottieViewRef {
   /**
    * Play the animation
    * @param startFrame Optional start frame
