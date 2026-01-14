@@ -19,16 +19,13 @@
     "@shopify/flash-list": "catalog:react-native",
     "@toss/error-boundary": "^1.5.2",
     "brick-module": "catalog:brick-module",
-    "lottie-react-native": "catalog:react-native",
     "react": "catalog:react-native",
     "react-native": "catalog:react-native",
-    "react-native-fast-image": "catalog:react-native",
     "react-native-gesture-handler": "catalog:react-native",
     "react-native-pager-view": "catalog:react-native",
     "react-native-safe-area-context": "catalog:react-native",
     "react-native-screens": "catalog:react-native",
     "react-native-svg": "catalog:react-native",
-    "react-native-video": "catalog:react-native",
     "react-native-webview": "catalog:react-native"
   },
   "devDependencies": {
@@ -40,7 +37,6 @@
     "@react-native/babel-preset": "catalog:react-native",
     "@types/node": "^22.10.2",
     "@types/react": "catalog:react-native",
-    "@types/react-native-video": "^5.0.20",
     "typescript": "5.8.3"
   }
 }
