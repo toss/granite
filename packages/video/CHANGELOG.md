@@ -1,5 +1,11 @@
 # @granite-js/video
 
+## 0.1.34-next.18
+
+### Patch Changes
+
+- fix
+
 ## 0.1.34-next.17
 
 ### Patch Changes
