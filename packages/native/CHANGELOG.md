@@ -1,5 +1,11 @@
 # @granite-js/native
 
+## 0.1.34-next.20
+
+### Patch Changes
+
+- fix
+
 ## 0.1.34-next.19
 
 ### Patch Changes
