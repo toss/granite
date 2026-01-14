@@ -23209,13 +23209,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-pager-view@npm:8.0.0":
-  version: 8.0.0
-  resolution: "react-native-pager-view@npm:8.0.0"
+"react-native-pager-view@npm:7.0.2":
+  version: 7.0.2
+  resolution: "react-native-pager-view@npm:7.0.2::__archiveUrl=http%3A%2F%2Fregistry.npmjs.org%2Frepository%2Fnpm-group%2Freact-native-pager-view%2F-%2Freact-native-pager-view-7.0.2.tgz"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10c0/2513ab5e55c7c8e290c514f1dd5388e198975853ffb8e8546bbacc605a853f76a9cb31048bfac22a95a1d0d6e61ae954d690b4522530e97c54e2eabd3447af9d
+  checksum: 10c0/f90e2e765b6cde96c3c625df51eeab92e873dc96200aeff347b0c67decc5161ba580135c857b5961c1c37dcd4afd67e3edfcd625b64bf1aa94dfe91bfdc18f14
   languageName: node
   linkType: hard
 
