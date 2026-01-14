@@ -1,4 +1,4 @@
-import { LottieView, type AnimationObject } from '@granite-js/lottie';
+import LottieView, { type AnimationObject } from '@granite-js/lottie';
 import type { ComponentProps } from 'react';
 import { View } from 'react-native';
 import { ensureSafeLottie, hasFonts } from './ensureSafeLottie';
