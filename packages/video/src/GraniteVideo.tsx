@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import NativeGraniteVideoView, { Commands, type NativeProps } from './GraniteVideoNativeComponent';
 import type {
-  GraniteVideoProps,
   VideoRef,
   VideoSource,
   OnLoadStartData,
@@ -29,6 +28,7 @@ import type {
   OnExternalPlaybackChangeData,
   OnAudioFocusChangedData,
   OnVideoAspectRatioData,
+  VideoProps,
 } from './types';
 
 const { GraniteVideoModule } = NativeModules;
@@ -52,7 +52,7 @@ function normalizeSource(source: VideoSource | number): NativeProps['source'] | 
 }
 
 function normalizeSelectedTrack(
-  track?: GraniteVideoProps['selectedAudioTrack']
+  track?: VideoProps['selectedAudioTrack']
 ): NativeProps['selectedAudioTrack'] | undefined {
   if (!track) {
     return undefined;
@@ -64,7 +64,7 @@ function normalizeSelectedTrack(
 }
 
 function normalizeSelectedVideoTrack(
-  track?: GraniteVideoProps['selectedVideoTrack']
+  track?: VideoProps['selectedVideoTrack']
 ): NativeProps['selectedVideoTrack'] | undefined {
   if (!track) {
     return undefined;
@@ -75,7 +75,7 @@ function normalizeSelectedVideoTrack(
   };
 }
 
-function normalizeDrm(drm?: GraniteVideoProps['drm']): NativeProps['drm'] | undefined {
+function normalizeDrm(drm?: VideoProps['drm']): NativeProps['drm'] | undefined {
   if (!drm) {
     return undefined;
   }
@@ -88,7 +88,7 @@ function normalizeDrm(drm?: GraniteVideoProps['drm']): NativeProps['drm'] | unde
   };
 }
 
-function normalizeBufferConfig(config?: GraniteVideoProps['bufferConfig']): NativeProps['bufferConfig'] | undefined {
+function normalizeBufferConfig(config?: VideoProps['bufferConfig']): NativeProps['bufferConfig'] | undefined {
   if (!config) {
     return undefined;
   }
@@ -102,7 +102,7 @@ function normalizeBufferConfig(config?: GraniteVideoProps['bufferConfig']): Nati
   };
 }
 
-function getPosterUri(poster?: GraniteVideoProps['poster']): string | undefined {
+function getPosterUri(poster?: VideoProps['poster']): string | undefined {
   if (!poster) {
     return undefined;
   }
@@ -113,7 +113,7 @@ function getPosterUri(poster?: GraniteVideoProps['poster']): string | undefined 
   return resolved?.uri;
 }
 
-const GraniteVideoBase = forwardRef<VideoRef, GraniteVideoProps>((props, ref) => {
+const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
   const {
     // Test ID
     testID,
@@ -500,18 +500,18 @@ const GraniteVideoBase = forwardRef<VideoRef, GraniteVideoProps>((props, ref) =>
   );
 });
 
-GraniteVideoBase.displayName = 'GraniteVideo';
+VideoBase.displayName = 'Video';
 
 // Type for GraniteVideo with static properties
-type GraniteVideoComponent = typeof GraniteVideoBase & {
+type VideoComponent = typeof VideoBase & {
   isAvailable: boolean;
 };
 
 // Static property to indicate availability
 // For Fabric (New Architecture), the component is always available
-(GraniteVideoBase as GraniteVideoComponent).isAvailable = true;
+(VideoBase as VideoComponent).isAvailable = true;
 
-export const GraniteVideo = GraniteVideoBase as GraniteVideoComponent;
+export const Video = VideoBase as VideoComponent;
 
 const styles = StyleSheet.create({
   container: {
@@ -549,5 +549,3 @@ export async function isHEVCSupported(): Promise<boolean> {
   }
   return false;
 }
-
-export default GraniteVideo;

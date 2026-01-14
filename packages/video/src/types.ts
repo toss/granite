@@ -273,7 +273,7 @@ export interface VideoRef {
 // Component Props
 // ============================================================
 
-export interface GraniteVideoProps {
+export interface VideoProps {
   // Test ID
   testID?: string;
 
@@ -412,7 +412,7 @@ export interface GraniteVideoProps {
 // Static Methods
 // ============================================================
 
-export interface GraniteVideoStatic {
+export interface VideoStatic {
   clearCache: () => Promise<void>;
   getWidevineLevel: () => Promise<number>;
   isCodecSupported: (mimeType: string, width: number, height: number) => Promise<boolean>;

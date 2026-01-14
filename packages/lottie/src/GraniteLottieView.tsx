@@ -2,8 +2,8 @@ import React, { forwardRef, useImperativeHandle, useRef, useCallback, useMemo } 
 import { Image, type NativeSyntheticEvent, Platform } from 'react-native';
 import NativeGraniteLottieView, { Commands, type NativeProps } from './GraniteLottieViewNativeComponent';
 import type {
-  GraniteLottieViewProps,
-  GraniteLottieViewRef,
+  LottieViewProps,
+  LottieViewRef,
   AnimationSource,
   AnimationObject,
   AnimationFinishEvent,
@@ -60,7 +60,7 @@ function resolveSource(source: AnimationSource): {
 /**
  * LottieView - Pluggable Lottie animation component for React Native
  */
-export const LottieView = forwardRef<GraniteLottieViewRef, GraniteLottieViewProps>((props, ref) => {
+export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref) => {
   const {
     source,
     style,
