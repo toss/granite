@@ -1,4 +1,4 @@
-import { Video as VideoBase, type VideoRef } from '@granite-js/video';
+import VideoBase, { type VideoRef } from '@granite-js/video';
 import { ComponentProps, forwardRef, useMemo, useState } from 'react';
 import { Animated, Platform } from 'react-native';
 import { useVisibility } from '../visibility';
