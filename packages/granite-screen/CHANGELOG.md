@@ -1,5 +1,11 @@
 # @granite-js/screen
 
+## 0.1.34-next.27
+
+### Patch Changes
+
+- fix
+
 ## 0.1.34-next.26
 
 ### Patch Changes
