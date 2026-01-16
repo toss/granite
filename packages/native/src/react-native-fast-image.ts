@@ -1,3 +1,3 @@
-import { GraniteImage } from '@granite-js/image';
+import { FastImage } from '@granite-js/image';
 export * from '@granite-js/image';
-export default GraniteImage;
+export default FastImage;

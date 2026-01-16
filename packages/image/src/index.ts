@@ -1,15 +1,15 @@
 export { Image, type ImageProps } from './Image';
 
 export {
-  GraniteImage,
-  type GraniteImageProps,
-  type GraniteImageSource,
-  type GraniteImageStatic,
-  type ResizeMode,
-  type CachePolicy,
+  FastImage,
+  type FastImageProps,
+  type FastImageSource,
+  type FastImageStatic,
   type Priority,
   type OnLoadEventData,
   type OnProgressEventData,
-} from './GraniteImage';
+  type ResizeMode,
+  type CachePolicy,
+} from './FastImage';
 
-export { default as GraniteImageDefault } from './GraniteImage';
+export { default as FastImageDefault } from './FastImage';

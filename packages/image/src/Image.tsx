@@ -1,4 +1,4 @@
-import { GraniteImage, type GraniteImageProps, type GraniteImageSource } from './GraniteImage';
+import { type FastImageSource, FastImage, FastImageProps } from './FastImage';
 
 type Source = {
   uri?: string;
@@ -7,7 +7,7 @@ type Source = {
   cache?: 'immutable' | 'web' | 'cacheOnly';
 };
 
-export interface ImageProps extends Omit<GraniteImageProps, 'source' | 'onError'> {
+export interface ImageProps extends Omit<FastImageProps, 'source' | 'onError'> {
   source?: Source;
   onError?: () => void;
 }
@@ -55,8 +55,7 @@ export interface ImageProps extends Omit<GraniteImageProps, 'source' | 'onError'
  * ```
  */
 function Image(props: ImageProps) {
-  // Convert source to GraniteImageSource format
-  const graniteSource: GraniteImageSource | string | undefined = props.source
+  const source: FastImageSource | string | undefined = props.source
     ? props.source.uri
       ? {
           uri: props.source.uri,
@@ -67,13 +66,11 @@ function Image(props: ImageProps) {
       : undefined
     : undefined;
 
-  if (!graniteSource) {
+  if (!source) {
     return null;
   }
 
-  return (
-    <GraniteImage {...props} source={graniteSource} onError={props.onError ? () => props.onError?.() : undefined} />
-  );
+  return <FastImage {...props} source={source} onError={props.onError ? () => props.onError?.() : undefined} />;
 }
 
 export { Image };

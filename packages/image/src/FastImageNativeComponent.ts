@@ -22,7 +22,7 @@ export type OnErrorEvent = Readonly<{
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type OnLoadEndEvent = Readonly<{}>;
 
-interface GraniteImageProps extends ViewProps {
+interface FastImageProps extends ViewProps {
   // Source
   uri?: string;
   headers?: string; // JSON string of headers object
@@ -47,4 +47,4 @@ interface GraniteImageProps extends ViewProps {
   onGraniteLoadEnd?: DirectEventHandler<OnLoadEndEvent>;
 }
 
-export default codegenNativeComponent<GraniteImageProps>('GraniteImage');
+export default codegenNativeComponent<FastImageProps>('GraniteImage');
