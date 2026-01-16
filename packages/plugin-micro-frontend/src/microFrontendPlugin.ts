@@ -9,13 +9,14 @@ import type { MicroFrontendPluginOptions } from './types';
 import { intoShared } from './utils/intoShared';
 
 export const microFrontendPlugin = async (options: MicroFrontendPluginOptions): Promise<GranitePluginCore> => {
-  const sharedEntries = Object.entries(intoShared(options.shared) ?? {});
+  const sharedConfig = intoShared(options.shared);
+  const sharedEntries = Object.entries(sharedConfig ?? {});
   const nonEagerEntries = sharedEntries
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .filter(([_, config]) => config.eager !== true);
 
   const rootDir = process.cwd();
-  const preludeConfig = getPreludeConfig(options);
+  const preludeConfig = getPreludeConfig({ ...options, shared: sharedConfig });
   const localDir = prepareLocalDirectory(rootDir);
   const preludePath = path.join(localDir, 'micro-frontend-runtime.js');
   fs.writeFileSync(preludePath, preludeConfig.preludeScript);
