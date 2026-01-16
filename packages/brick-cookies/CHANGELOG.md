@@ -1,5 +1,11 @@
 # brick-cookies
 
+## 0.1.34-next.26
+
+### Patch Changes
+
+- fix
+
 ## 0.1.34-next.25
 
 ### Patch Changes

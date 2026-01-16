@@ -24,7 +24,7 @@ import { CanGoBackGuard } from './components/CanGoBackGuard';
 import { StackNavigator } from './components/StackNavigator';
 import { useInternalRouterBackHandler } from './components/useRouterBackHandler';
 import { useRouterControls, type RouterControlsConfig } from './hooks/useRouterControls';
-import { RequireContext } from './types';
+import type { ErrorComponent, RequireContext } from './types';
 import { BASE_STACK_NAVIGATOR_STYLE } from './types/screen-option';
 
 /**
@@ -91,6 +91,12 @@ interface StackNavigatorProps {
    * Container component that wraps each Screen component.
    */
   screenContainer?: ComponentType<PropsWithChildren<any>>;
+  /**
+   * @name defaultErrorComponent
+   * @description
+   * Error boundary component used when a route does not provide its own error component.
+   */
+  defaultErrorComponent?: ErrorComponent;
 }
 
 type NavigationContainerProps = Pick<
@@ -114,6 +120,7 @@ type NavigationContainerProps = Pick<
  * @param {boolean} [canGoBack=true] Whether navigation back is possible. Default is true, and when set to true, you can use the back gesture or back button from @react-navigation/native.
  * @param {() => void} [onBack] Callback function called when the user presses the back button or uses the back gesture. For example, you can set it to log when the user presses the back button.
  * @param {ComponentType<{ children: ReactNode }>} [container=Fragment] Container component that wraps the Navigator from @react-navigation/native.
+ * @param {ComponentType<{ error: unknown; reset: () => void }>} [defaultErrorComponent] Default error component for screens without a route-specific error component.
  * @param {NavigationContainerProps} [navigationContainerProps] - You can set props to be passed to NavigationContainer from @react-navigation/native.
  *
  * @returns {ReactElement} - Returns the router component.
@@ -138,6 +145,7 @@ export function Router({
   navigationContainerRef,
   defaultScreenOption,
   screenContainer,
+  defaultErrorComponent,
   // Public props (StackNavigator)
   setIosSwipeGestureEnabled,
   getInitialUrl,
@@ -149,6 +157,7 @@ export function Router({
     screenContainer,
     initialScheme,
     getInitialUrl,
+    defaultErrorComponent,
   });
 
   const ref = useMemo(() => navigationContainerRef ?? createNavigationContainerRef<never>(), [navigationContainerRef]);

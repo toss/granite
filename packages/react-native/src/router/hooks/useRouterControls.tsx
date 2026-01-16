@@ -1,8 +1,9 @@
 import { NavigationContainer } from '@granite-js/native/@react-navigation/native';
 import { useMemo, type ComponentProps, type ComponentType, type PropsWithChildren } from 'react';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import { StackNavigator } from '../components/StackNavigator';
 import { RESERVED_KEYWORDS } from '../constants';
-import { RequireContext } from '../types/RequireContext';
+import type { ErrorComponent, RequireContext } from '../types';
 import { getRouteScreens, getScreenPathMapConfig } from '../utils';
 import { createParentRouteScreenMap } from '../utils/createParentRouteScreenMap';
 import { mergeParentLayoutScreen } from '../utils/mergeParentLayoutScreen';
@@ -16,6 +17,7 @@ export interface RouterControlsConfig {
   context: RequireContext;
   getInitialUrl?: (initialScheme: string) => string | undefined | Promise<string | undefined>;
   screenContainer?: ComponentType<PropsWithChildren<any>>;
+  defaultErrorComponent?: ErrorComponent;
 }
 
 export function useRouterControls({
@@ -24,6 +26,7 @@ export function useRouterControls({
   screenContainer: ScreenContainer,
   getInitialUrl = defaultGetInitialUrl,
   initialScheme,
+  defaultErrorComponent,
 }: RouterControlsConfig) {
   const routeScreens = useMemo(() => getRouteScreens(context), [context]);
 
@@ -37,16 +40,27 @@ export function useRouterControls({
 
   const Screens = useMemo(() => {
     return registerScreens.map((routeScreen) => {
+      const RouteErrorComponent = routeScreen.errorComponent;
       const Layout = mergeParentLayoutScreen(layoutScreenMap, routeScreen.path);
 
       const Component = function Component() {
-        const element = (
-          <Layout>
+        const routeElement =
+          RouteErrorComponent == null ? (
             <routeScreen.component />
-          </Layout>
-        );
+          ) : (
+            <ErrorBoundary fallback={RouteErrorComponent}>
+              <routeScreen.component />
+            </ErrorBoundary>
+          );
 
-        return ScreenContainer == null ? element : <ScreenContainer>{element}</ScreenContainer>;
+        const element = <Layout>{routeElement}</Layout>;
+        const wrappedElement = ScreenContainer == null ? element : <ScreenContainer>{element}</ScreenContainer>;
+
+        if (defaultErrorComponent == null) {
+          return wrappedElement;
+        }
+
+        return <ErrorBoundary fallback={defaultErrorComponent}>{wrappedElement}</ErrorBoundary>;
       };
 
       const routePath = routeScreen.path;
@@ -54,7 +68,7 @@ export function useRouterControls({
 
       return <StackNavigator.Screen key={routePath} name={routePath} component={Component} options={options} />;
     });
-  }, [registerScreens, layoutScreenMap, ScreenContainer]);
+  }, [registerScreens, layoutScreenMap, ScreenContainer, defaultErrorComponent]);
 
   const linkingOptions: NavigationContainerProps['linking'] = useMemo(() => {
     return {
