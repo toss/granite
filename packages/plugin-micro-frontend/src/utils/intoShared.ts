@@ -27,7 +27,6 @@ export function intoShared(shared: MicroFrontendPluginOptions['shared']): Shared
     return normalized;
   }
 
-  // NativeComponent codegen imports internal RN subpaths; share them with the same config.
   for (const subpath of REACT_NATIVE_INTERNAL_SHARED) {
     if (normalized[subpath] == null) {
       normalized[subpath] = { ...reactNativeConfig };
