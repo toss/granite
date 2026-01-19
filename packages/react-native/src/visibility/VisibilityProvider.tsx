@@ -33,8 +33,8 @@ export function VisibilityProvider({ isVisible, children }: Props): ReactElement
   const [visible, setVisible] = useState(isVisible);
 
   useEffect(() => {
-    const subscription = GraniteModule.onVisibilityChanged((nextVisible) => {
-      setVisible(nextVisible);
+    const subscription = GraniteModule.onVisibilityChanged(({ visible }) => {
+      setVisible(visible);
     });
 
     return () => {
