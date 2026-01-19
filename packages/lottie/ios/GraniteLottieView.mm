@@ -144,8 +144,12 @@ using namespace facebook::react;
     }
 
     if (oldViewProps.autoPlay != newViewProps.autoPlay) {
+        BOOL wasAutoPlay = _shouldAutoPlay;
         _shouldAutoPlay = newViewProps.autoPlay;
         _config.autoPlay = newViewProps.autoPlay;
+        if (_isLoaded && _shouldAutoPlay && !wasAutoPlay) {
+            [_provider playWithView:_containerView startFrame:-1 endFrame:-1];
+        }
     }
 
     if (oldViewProps.progress != newViewProps.progress) {
