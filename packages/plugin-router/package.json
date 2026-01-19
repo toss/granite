@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-router",
   "type": "module",
-  "version": "0.1.34-next.35",
+  "version": "0.1.34-next.36",
   "description": "A Route Generator for Granite project",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
