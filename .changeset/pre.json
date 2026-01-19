@@ -29,6 +29,7 @@
     "@granite-js/screen": "0.0.40"
   },
   "changesets": [
+    "afraid-doodles-juggle",
     "brave-badgers-learn",
     "clean-parks-divide",
     "curvy-oranges-lead",
