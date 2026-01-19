@@ -1,4 +1,4 @@
-import { FastImage, type FastImageProps, type FastImageSource } from '@granite-js/image';
+import FastImage, { type FastImageProps, type FastImageSource } from '@granite-js/image';
 import { StyleSheet } from 'react-native';
 import { SvgImage } from './SvgImage';
 

@@ -1,3 +1,5 @@
+import FastImage from './FastImage';
+
 export { Image, type ImageProps } from './Image';
 
 export {
@@ -12,4 +14,4 @@ export {
   type CachePolicy,
 } from './FastImage';
 
-export { default as FastImageDefault } from './FastImage';
+export default FastImage;
