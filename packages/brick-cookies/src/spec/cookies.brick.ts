@@ -7,11 +7,7 @@
  * Uses CookieManager on Android
  */
 
-import {
-  type AnyObject,
-  BrickModule,
-  type BrickModuleSpec,
-} from "brick-module";
+import { type AnyObject, BrickModule, type BrickModuleSpec } from 'brick-module';
 
 /**
  * Cookie object representing a single HTTP cookie
@@ -46,7 +42,7 @@ export type Cookies = AnyObject;
  * Manages HTTP cookies for both iOS and Android platforms
  */
 export interface CookiesModuleSpec extends BrickModuleSpec {
-  readonly moduleName: "Cookies";
+  readonly moduleName: 'Cookies';
 
   /**
    * Set a cookie for a given URL
@@ -119,5 +115,4 @@ export interface CookiesModuleSpec extends BrickModuleSpec {
   removeSessionCookies(): Promise<boolean>;
 }
 
-export const CookiesNativeModule =
-  BrickModule.get<CookiesModuleSpec>("Cookies");
+export const CookiesNativeModule = BrickModule.get<CookiesModuleSpec>('BrickCookies');
