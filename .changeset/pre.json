@@ -29,23 +29,31 @@
     "@granite-js/screen": "0.0.40"
   },
   "changesets": [
+    "afraid-doodles-juggle",
     "brave-badgers-learn",
+    "bright-buckets-win",
+    "clean-parks-divide",
     "curvy-oranges-lead",
     "cute-symbols-accept",
     "dry-jeans-mate",
     "few-jars-serve",
     "fluffy-cities-fall",
+    "great-mangos-deny",
     "great-stamps-hug",
+    "khaki-lions-wear",
     "odd-dryers-jog",
     "ripe-moons-double",
     "shy-ducks-camp",
     "six-bobcats-buy",
     "six-impalas-flash",
     "swift-hotels-pick",
+    "tasty-candles-warn",
     "tidy-shirts-count",
+    "tired-bears-fetch",
     "tough-ducks-rule",
     "tricky-rabbits-listen",
     "two-eyes-argue",
-    "upset-pugs-agree"
+    "upset-pugs-agree",
+    "whole-donuts-tie"
   ]
 }
