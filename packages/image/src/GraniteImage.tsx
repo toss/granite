@@ -17,7 +17,7 @@ import GraniteImageNativeComponent, {
 
 const { GraniteImageModule } = NativeModules;
 
-// Source types matching FastImage
+// Source types matching GraniteImage
 export interface GraniteImageSource {
   uri: string;
   headers?: Record<string, string>;
@@ -71,7 +71,7 @@ const resizeModeToContentMode = (resizeMode?: ResizeMode): 'cover' | 'contain' |
   return resizeMode || 'cover';
 };
 
-// Map FastImage cache to native cachePolicy
+// Map GraniteImage cache to native cachePolicy
 const mapCachePolicy = (cache?: 'immutable' | 'web' | 'cacheOnly'): CachePolicy => {
   switch (cache) {
     case 'cacheOnly':

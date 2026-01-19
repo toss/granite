@@ -1,5 +1,5 @@
-import LottieViewDefault from '@granite-js/lottie';
+import LottieView from '@granite-js/lottie';
 
 export * from '@granite-js/lottie';
-export const LottieView = LottieViewDefault;
-export default LottieViewDefault;
+export { LottieView };
+export default LottieView;
