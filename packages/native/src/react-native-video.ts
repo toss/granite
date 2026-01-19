@@ -1,5 +1,2 @@
-import VideoDefault from '@granite-js/video';
-
 export * from '@granite-js/video';
-export const Video = VideoDefault;
-export default VideoDefault;
+export { default } from '@granite-js/video';

@@ -1,4 +1,4 @@
-import { GraniteImage, type GraniteImageProps, type GraniteImageSource } from '@granite-js/image';
+import GraniteImage, { GraniteImageProps, type GraniteImageSource } from '@granite-js/image';
 import { StyleSheet } from 'react-native';
 import { SvgImage } from './SvgImage';
 
@@ -89,8 +89,7 @@ function Image(props: ImageProps) {
     );
   }
 
-  // Convert source to GraniteImageSource format
-  const graniteSource: GraniteImageSource | string | undefined = props.source
+  const source: GraniteImageSource | string | undefined = props.source
     ? props.source.uri
       ? {
           uri: props.source.uri,
@@ -101,13 +100,11 @@ function Image(props: ImageProps) {
       : undefined
     : undefined;
 
-  if (!graniteSource) {
+  if (!source) {
     return null;
   }
 
-  return (
-    <GraniteImage {...props} source={graniteSource} onError={props.onError ? () => props.onError?.() : undefined} />
-  );
+  return <GraniteImage {...props} source={source} onError={props.onError ? () => props.onError?.() : undefined} />;
 }
 
 export { Image };
