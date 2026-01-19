@@ -1,17 +1,15 @@
-import FastImage from './FastImage';
-
-export { Image, type ImageProps } from './Image';
+import GraniteImage from './GraniteImage';
 
 export {
-  FastImage,
-  type FastImageProps,
-  type FastImageSource,
-  type FastImageStatic,
+  GraniteImage,
+  type GraniteImageProps,
+  type GraniteImageSource,
+  type GraniteImageStatic,
   type Priority,
   type OnLoadEventData,
   type OnProgressEventData,
   type ResizeMode,
   type CachePolicy,
-} from './FastImage';
+} from './GraniteImage';
 
-export default FastImage;
+export default GraniteImage;

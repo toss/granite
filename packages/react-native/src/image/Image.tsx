@@ -1,4 +1,4 @@
-import FastImage, { type FastImageProps, type FastImageSource } from '@granite-js/image';
+import GraniteImage, { GraniteImageProps, type GraniteImageSource } from '@granite-js/image';
 import { StyleSheet } from 'react-native';
 import { SvgImage } from './SvgImage';
 
@@ -9,7 +9,7 @@ type Source = {
   cache?: 'immutable' | 'web' | 'cacheOnly';
 };
 
-export interface ImageProps extends Omit<FastImageProps, 'source' | 'onError'> {
+export interface ImageProps extends Omit<GraniteImageProps, 'source' | 'onError'> {
   source?: Source;
   onError?: () => void;
 }
@@ -89,7 +89,7 @@ function Image(props: ImageProps) {
     );
   }
 
-  const source: FastImageSource | string | undefined = props.source
+  const source: GraniteImageSource | string | undefined = props.source
     ? props.source.uri
       ? {
           uri: props.source.uri,
@@ -104,7 +104,7 @@ function Image(props: ImageProps) {
     return null;
   }
 
-  return <FastImage {...props} source={source} onError={props.onError ? () => props.onError?.() : undefined} />;
+  return <GraniteImage {...props} source={source} onError={props.onError ? () => props.onError?.() : undefined} />;
 }
 
 export { Image };

@@ -7,18 +7,18 @@ import {
   NativeModules,
   ViewProps,
 } from 'react-native';
-import FastImageNativeComponent, {
+import GraniteImageNativeComponent, {
   type OnLoadStartEvent,
   type OnProgressEvent,
   type OnLoadEvent,
   type OnErrorEvent,
   type OnLoadEndEvent,
-} from './FastImageNativeComponent';
+} from './GraniteImageNativeComponent';
 
-const { FastImageModule } = NativeModules;
+const { GraniteImageModule } = NativeModules;
 
-// Source types matching FastImage
-export interface FastImageSource {
+// Source types matching GraniteImage
+export interface GraniteImageSource {
   uri: string;
   headers?: Record<string, string>;
   priority?: 'low' | 'normal' | 'high';
@@ -39,9 +39,9 @@ export interface OnProgressEventData {
   total: number;
 }
 
-export interface FastImageProps extends ViewProps {
+export interface GraniteImageProps extends ViewProps {
   // Source - can be string URI or source object
-  source: FastImageSource | string;
+  source: GraniteImageSource | string;
 
   // Display
   resizeMode?: ResizeMode;
@@ -71,7 +71,7 @@ const resizeModeToContentMode = (resizeMode?: ResizeMode): 'cover' | 'contain' |
   return resizeMode || 'cover';
 };
 
-// Map FastImage cache to native cachePolicy
+// Map GraniteImage cache to native cachePolicy
 const mapCachePolicy = (cache?: 'immutable' | 'web' | 'cacheOnly'): CachePolicy => {
   switch (cache) {
     case 'cacheOnly':
@@ -85,42 +85,42 @@ const mapCachePolicy = (cache?: 'immutable' | 'web' | 'cacheOnly'): CachePolicy 
 };
 
 // Type declarations for static methods
-export interface FastImageStatic {
+export interface GraniteImageStatic {
   clearMemoryCache: () => Promise<void>;
   clearDiskCache: () => Promise<void>;
-  preload: (sources: FastImageSource[]) => Promise<void>;
+  preload: (sources: GraniteImageSource[]) => Promise<void>;
 }
 
-type FastImageComponent = React.FC<FastImageProps> & FastImageStatic;
+type GraniteImageComponent = React.FC<GraniteImageProps> & GraniteImageStatic;
 
 // Static methods for cache management
 const clearMemoryCache = (): Promise<void> => {
-  if (FastImageModule?.clearMemoryCache) {
-    return FastImageModule.clearMemoryCache();
+  if (GraniteImageModule?.clearMemoryCache) {
+    return GraniteImageModule.clearMemoryCache();
   }
-  console.warn('FastImage.clearMemoryCache: Native module not available');
+  console.warn('GraniteImage.clearMemoryCache: Native module not available');
   return Promise.resolve();
 };
 
 const clearDiskCache = (): Promise<void> => {
-  if (FastImageModule?.clearDiskCache) {
-    return FastImageModule.clearDiskCache();
+  if (GraniteImageModule?.clearDiskCache) {
+    return GraniteImageModule.clearDiskCache();
   }
-  console.warn('FastImage.clearDiskCache: Native module not available');
+  console.warn('GraniteImage.clearDiskCache: Native module not available');
   return Promise.resolve();
 };
 
-const preload = (sources: FastImageSource[]): Promise<void> => {
-  if (FastImageModule?.preload) {
+const preload = (sources: GraniteImageSource[]): Promise<void> => {
+  if (GraniteImageModule?.preload) {
     const sourcesJson = JSON.stringify(sources);
-    return FastImageModule.preload(sourcesJson);
+    return GraniteImageModule.preload(sourcesJson);
   } else {
-    console.warn('FastImage.preload: Native module not available');
+    console.warn('GraniteImage.preload: Native module not available');
     return Promise.resolve();
   }
 };
 
-const FastImageBase: React.FC<FastImageProps> = ({
+const GraniteImageBase: React.FC<GraniteImageProps> = ({
   source,
   resizeMode = 'cover',
   tintColor,
@@ -201,7 +201,7 @@ const FastImageBase: React.FC<FastImageProps> = ({
   );
 
   return (
-    <FastImageNativeComponent
+    <GraniteImageNativeComponent
       uri={uri}
       headers={headers}
       contentMode={resizeModeToContentMode(resizeMode)}
@@ -221,10 +221,10 @@ const FastImageBase: React.FC<FastImageProps> = ({
   );
 };
 
-export const FastImage: FastImageComponent = Object.assign(FastImageBase, {
+export const GraniteImage: GraniteImageComponent = Object.assign(GraniteImageBase, {
   clearMemoryCache,
   clearDiskCache,
   preload,
 });
 
-export default FastImage;
+export default GraniteImage;

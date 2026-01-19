@@ -3,8 +3,8 @@ import './types/global';
 export { Granite, useInitialSearchParams, useInitialProps } from './app';
 export * from '@granite-js/style-utils';
 export {
-  type FastImageSource,
-  type FastImageStatic,
+  type GraniteImageSource,
+  type GraniteImageStatic,
   type ResizeMode,
   type CachePolicy,
   type Priority,
