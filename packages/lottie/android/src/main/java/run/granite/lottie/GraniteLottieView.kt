@@ -124,10 +124,9 @@ class GraniteLottieView(context: Context) : FrameLayout(context), GraniteLottieL
     }
 
     fun setAutoPlay(autoPlay: Boolean) {
-        val wasAutoPlay = shouldAutoPlay
         shouldAutoPlay = autoPlay
         config.autoPlay = autoPlay
-        if (autoPlay && !wasAutoPlay && isLoaded) {
+        if (autoPlay && isLoaded) {
             containerView?.let { provider?.play(it, -1, -1) }
         }
     }
