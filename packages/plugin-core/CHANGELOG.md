@@ -1,5 +1,13 @@
 # @granite-js/plugin-core
 
+## 0.1.34-next.34
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/utils@0.1.34-next.34
+
 ## 0.1.34-next.33
 
 ### Patch Changes
