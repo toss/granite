@@ -1,2 +1,2 @@
-export * from './dist/react-native-fast-image';
-export { default } from './dist/react-native-fast-image';
+export * from '@granite-js/image';
+export { default } from '@granite-js/image';

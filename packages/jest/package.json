@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/jest",
-  "version": "0.1.34",
+  "version": "0.1.34-next.36",
   "description": "Jest presets for Granite",
   "scripts": {
     "prepack": "yarn build",
@@ -37,7 +37,7 @@
     "typescript": "5.8.3"
   },
   "peerDependencies": {
-    "@granite-js/native": "*",
+    "@granite-js/native": "workspace:*",
     "react": "*",
     "react-native": "*"
   },

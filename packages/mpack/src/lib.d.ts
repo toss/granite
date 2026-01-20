@@ -59,3 +59,93 @@ declare module 'metro-react-native-babel-transformer' {
 
   export default babelTransformer;
 }
+
+declare module 'flow-remove-types' {
+  declare const removeTypes: (
+    code: string,
+    options: {
+      all?: boolean;
+      ignoreUninitializedFields?: boolean;
+      pretty?: boolean;
+      removeEmptyImports?: boolean;
+    }
+  ) => {
+    toString(): string;
+    generateMap(): {
+      version: number;
+      sources: string[];
+      names: string[];
+      mappings: string;
+    };
+  };
+  export = removeTypes;
+}
+
+declare module 'hermes-parser' {
+  export type ParserOptions = {
+    allowReturnOutsideFunction?: boolean;
+    babel?: boolean;
+    flow?: 'all' | 'detect';
+    enableExperimentalComponentSyntax?: boolean;
+    enableExperimentalFlowMatchSyntax?: boolean;
+    reactRuntimeTarget?: '18' | '19';
+    sourceFilename?: string;
+    sourceType?: 'module' | 'script' | 'unambiguous';
+    tokens?: boolean;
+  };
+
+  export const ParserOptionsKeys: ReadonlySet<keyof ParserOptions>;
+
+  export type HermesPosition = {
+    /** >= 1 */
+    line: number;
+    /** >= 0 */
+    column: number;
+  };
+
+  export type HermesSourceLocation = {
+    start?: HermesPosition;
+    end?: HermesPosition;
+    rangeStart?: number;
+    rangeEnd?: number;
+  };
+
+  export type HermesNode = {
+    type: string;
+    [key: string]: any;
+  };
+
+  export type HermesToken = {
+    type:
+      | 'Boolean'
+      | 'Identifier'
+      | 'Keyword'
+      | 'Null'
+      | 'Numeric'
+      | 'BigInt'
+      | 'Punctuator'
+      | 'String'
+      | 'RegularExpression'
+      | 'Template'
+      | 'JSXText';
+    loc: HermesSourceLocation;
+    value?: string | null;
+  };
+
+  export type HermesComment = {
+    type: 'CommentLine' | 'CommentBlock' | 'InterpreterDirective';
+    loc: HermesSourceLocation;
+    value?: string | null;
+  };
+
+  export type HermesProgram = {
+    type: 'Program';
+    loc: HermesSourceLocation;
+    body: Array<HermesNode | null>;
+    comments: Array<HermesComment>;
+    tokens?: Array<HermesToken>;
+    interpreter?: HermesComment | null;
+  };
+
+  export function parse(code: string, options?: ParserOptions): HermesProgram;
+}

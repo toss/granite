@@ -1,2 +1,2 @@
-export { default } from './dist/react-native-video';
-export * from './dist/react-native-video';
+export * from '@granite-js/video';
+export { default } from '@granite-js/video';

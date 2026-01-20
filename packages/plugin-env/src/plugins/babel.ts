@@ -1,9 +1,10 @@
-import { PluginObj, types } from '@babel/core';
+import { PluginObj } from '@babel/core';
+import type * as BabelTypes from '@babel/types';
 
 const GLOBAL_NAMESPACE = '__granite';
 
-export default function replaceImportMetaEnv({ types: t }: { types: typeof types }): PluginObj {
-  function isImportMetaEnv(node: types.Node): node is types.MemberExpression {
+export default function replaceImportMetaEnv({ types: t }: { types: typeof BabelTypes }): PluginObj {
+  function isImportMetaEnv(node: BabelTypes.Node): node is BabelTypes.MemberExpression {
     if (!t.isMemberExpression(node)) {
       return false;
     }
@@ -23,7 +24,7 @@ export default function replaceImportMetaEnv({ types: t }: { types: typeof types
         const node = path.node;
 
         if (isImportMetaEnv(node)) {
-          let replacement: types.MemberExpression | types.OptionalMemberExpression = t.memberExpression(
+          let replacement: BabelTypes.MemberExpression | BabelTypes.OptionalMemberExpression = t.memberExpression(
             t.memberExpression(
               t.memberExpression(t.identifier('global'), t.identifier(GLOBAL_NAMESPACE)),
               t.identifier('meta')
@@ -35,7 +36,7 @@ export default function replaceImportMetaEnv({ types: t }: { types: typeof types
           if (node.optional) {
             replacement = t.optionalMemberExpression(
               replacement.object,
-              replacement.property as types.Identifier,
+              replacement.property as BabelTypes.Identifier,
               replacement.computed,
               true
             );

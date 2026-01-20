@@ -1,10 +1,290 @@
 # @granite-js/native
 
-## 0.1.34
+## 0.1.34-next.36
 
 ### Patch Changes
 
-- 9c39997: bump version up `@swc/core`
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.36
+  - @granite-js/image@0.1.34-next.36
+  - @granite-js/video@0.1.34-next.36
+
+## 0.1.34-next.35
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.35
+  - @granite-js/image@0.1.34-next.35
+  - @granite-js/video@0.1.34-next.35
+
+## 0.1.34-next.34
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.34
+  - @granite-js/image@0.1.34-next.34
+  - @granite-js/video@0.1.34-next.34
+
+## 0.1.34-next.33
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.33
+  - @granite-js/image@0.1.34-next.33
+  - @granite-js/video@0.1.34-next.33
+
+## 0.1.34-next.32
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.32
+  - @granite-js/image@0.1.34-next.32
+  - @granite-js/video@0.1.34-next.32
+
+## 0.1.34-next.31
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.31
+  - @granite-js/image@0.1.34-next.31
+  - @granite-js/video@0.1.34-next.31
+
+## 0.1.34-next.30
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.30
+  - @granite-js/image@0.1.34-next.30
+  - @granite-js/video@0.1.34-next.30
+
+## 0.1.34-next.29
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.29
+  - @granite-js/image@0.1.34-next.29
+  - @granite-js/video@0.1.34-next.29
+
+## 0.1.34-next.28
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.28
+  - @granite-js/image@0.1.34-next.28
+  - @granite-js/video@0.1.34-next.28
+
+## 0.1.34-next.27
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.27
+  - @granite-js/image@0.1.34-next.27
+  - @granite-js/video@0.1.34-next.27
+
+## 0.1.34-next.26
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.26
+  - @granite-js/image@0.1.34-next.26
+  - @granite-js/video@0.1.34-next.26
+
+## 0.1.34-next.25
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.25
+  - @granite-js/image@0.1.34-next.25
+  - @granite-js/video@0.1.34-next.25
+
+## 0.1.34-next.24
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.24
+  - @granite-js/image@0.1.34-next.24
+  - @granite-js/video@0.1.34-next.24
+
+## 0.1.34-next.23
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.23
+  - @granite-js/image@0.1.34-next.23
+  - @granite-js/video@0.1.34-next.23
+
+## 0.1.34-next.22
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.22
+  - @granite-js/image@0.1.34-next.22
+  - @granite-js/video@0.1.34-next.22
+
+## 0.1.34-next.21
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.21
+  - @granite-js/image@0.1.34-next.21
+  - @granite-js/video@0.1.34-next.21
+
+## 0.1.34-next.20
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.19
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.18
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.17
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.16
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.15
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.14
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.13
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.12
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.11
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.10
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.9
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.8
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.7
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.6
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.5
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.4
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.3
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.2
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.1
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.0
+
+### Patch Changes
+
+- fix
 
 ## 0.1.33
 
@@ -49,9 +329,107 @@
 
 ## 0.1.25
 
-## 0.1.24
+### Patch Changes
 
-## 0.1.23
+- fix
+
+## 0.1.23-next.18
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.17
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.16
+
+### Patch Changes
+
+- update
+
+## 0.1.23-next.15
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.14
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.13
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.12
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.11
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.10
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.9
+
+### Patch Changes
+
+- tollback
+
+## 0.1.23-next.8
+
+### Patch Changes
+
+- router
+
+## 0.1.23-next.7
+
+### Patch Changes
+
+- fix
+
+## 0.1.23-next.6
+
+### Patch Changes
+
+- test
+
+## 0.1.23-next.5
+
+### Patch Changes
+
+- temp
+
+## 0.1.23-next.4
+
+### Patch Changes
+
+- test
+
+## 0.1.23-next.3
+
+### Patch Changes
+
+- test
+
+## 0.1.23-next.0
 
 ## 0.1.22
 

@@ -1,14 +1,15 @@
 import assert from 'assert';
 import * as fs from 'fs/promises';
 import { Plugin } from 'esbuild';
+import { PluginOptions } from '../types';
 import * as preludeScript from './helpers/preludeScript';
 import { createCacheSteps } from './steps/createCacheSteps';
+import { createFlowStripStep } from './steps/createFlowStripStep';
 import { createFullyTransformStep } from './steps/createFullyTransformStep';
-import { createStripFlowStep } from './steps/createStripFlowStep';
+import { createTransformCodegenStep } from './steps/createTransformCodegenStep';
 import { createTransformToHermesSyntaxStep } from './steps/createTransformToHermesSyntaxStep';
 import { Performance } from '../../../performance';
 import { AsyncTransformPipeline } from '../../../transformer';
-import { PluginOptions } from '../types';
 
 interface TransformPluginOptions {
   transformSync?: (id: string, code: string) => string;
@@ -43,11 +44,16 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
 
           return { code };
         })
-        .addStep(createFullyTransformStep({ dev, additionalBabelOptions: babel }), {
-          conditions: babel?.conditions,
-          skipOtherSteps: true,
+        .addStep({
+          if: ({ path, code }) => babel?.conditions?.some((cond) => cond(code, path)) ?? false,
+          then: createFullyTransformStep({ dev, additionalBabelOptions: babel }),
+          stopAfter: true,
         })
-        .addStep(createStripFlowStep({ dev }))
+        .addStep({
+          if: ({ path }) => /(?:^|[\\/])(?:Native\w+|(\w+)NativeComponent)\.[jt]sx?$/.test(path),
+          then: createTransformCodegenStep(),
+          else: createFlowStripStep(),
+        })
         .addStep(createTransformToHermesSyntaxStep({ dev, additionalSwcOptions: swc }))
         .afterStep(cacheSteps.afterTransform);
 

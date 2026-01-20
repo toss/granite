@@ -1,0 +1,58 @@
+{
+  "name": "@granite-js/blur-view",
+  "version": "0.1.34-next.36",
+  "type": "module",
+  "main": "./dist/module/index.js",
+  "types": "./dist/typescript/index.d.ts",
+  "react-native": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/typescript/index.d.ts",
+      "react-native": "./src/index.ts",
+      "default": "./dist/module/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "bob build && tsc --project tsconfig.build.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/blur-view"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "devDependencies": {
+    "@granite-js/native": "workspace:*",
+    "@types/react": "catalog:react-native",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
+    "react-native-builder-bob": "^0.40.15",
+    "typescript": "5.8.3"
+  },
+  "peerDependencies": {
+    "@granite-js/native": "workspace:*",
+    "@types/react": "*",
+    "react": "*",
+    "react-native": "*"
+  },
+  "sideEffects": false,
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "dist",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ]
+    ]
+  }
+}

@@ -1,5 +1,2 @@
-import Video from 'react-native-video';
-
-export * from 'react-native-video';
-export { Video };
-export default Video;
+export * from '@granite-js/video';
+export { default } from '@granite-js/video';

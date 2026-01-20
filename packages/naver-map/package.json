@@ -1,0 +1,103 @@
+{
+  "name": "@granite-js/naver-map",
+  "version": "0.1.34-next.36",
+  "description": "Pluggable Naver Map component for React Native with provider selection",
+  "type": "module",
+  "main": "./dist/module/index.js",
+  "types": "./dist/typescript/index.d.ts",
+  "react-native": "./src/index.tsx",
+  "exports": {
+    ".": {
+      "types": "./dist/typescript/index.d.ts",
+      "react-native": "./src/index.tsx",
+      "default": "./dist/module/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "dist",
+    "android",
+    "ios",
+    "*.podspec",
+    "react-native.config.js",
+    "!example/**",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*"
+  ],
+  "scripts": {
+    "prepack": "yarn build",
+    "example": "yarn workspace @granite-js/naver-map-example",
+    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "bob build && tsc --project tsconfig.build.json"
+  },
+  "keywords": [
+    "react-native",
+    "ios",
+    "android",
+    "naver",
+    "map",
+    "navermap",
+    "korea",
+    "pluggable",
+    "provider",
+    "brownfield"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/naver-map"
+  },
+  "author": "Toss <platform@toss.im>",
+  "homepage": "https://github.com/toss/granite/tree/main/packages/naver-map#readme",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "catalog:react-native",
+    "del-cli": "^6.0.0",
+    "eslint": "^9.7.0",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
+    "react-native-builder-bob": "0.40.17",
+    "typescript": "5.8.3"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "codegenConfig": {
+    "name": "GraniteNaverMapViewSpec",
+    "type": "components",
+    "jsSrcsDir": "src/specs",
+    "android": {
+      "javaPackageName": "run.granite.navermap"
+    },
+    "ios": {
+      "componentProvider": {
+        "GraniteNaverMapView": "GraniteNaverMapView"
+      }
+    }
+  },
+  "sideEffects": false,
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "dist",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ]
+    ]
+  }
+}

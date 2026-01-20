@@ -10,6 +10,7 @@ import {
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { useMemo } from 'react';
 import { RESERVED_PATHS } from './constants';
+import type { ErrorComponent } from './types';
 import { defaultParserParams } from './utils/defaultParserParams';
 import { type InferOutput, type InferInput } from './utils/standardSchema';
 import { validateRouteParams } from './utils/validateRouteParams';
@@ -18,6 +19,7 @@ export interface RouteOptions<T extends Readonly<object | undefined>> {
   parserParams?: (params: Record<string, unknown>) => Record<string, unknown>;
   validateParams?: ((params: Readonly<object | undefined>) => T) | StandardSchemaV1<any, T>;
   component: React.FC<any>;
+  errorComponent?: ErrorComponent;
   screenOptions?: NativeStackNavigationOptions | ((context: { params: T }) => NativeStackNavigationOptions);
 }
 
@@ -49,8 +51,9 @@ export type RouteHooksOptions<TScreen extends keyof RegisterScreen> =
 export const routeMap = new Map<
   keyof RegisterScreenInput,
   {
-    options: Omit<RouteOptions<any>, 'component' | 'screenOptions'>;
+    options: Omit<RouteOptions<any>, 'component' | 'screenOptions' | 'errorComponent'>;
     component: React.FC<any>;
+    errorComponent?: ErrorComponent;
     screenOptions?: NativeStackNavigationOptions | ((context: { params: any }) => NativeStackNavigationOptions);
   }
 >();
@@ -193,10 +196,11 @@ export function createRoute<T extends Readonly<object | undefined>>(
 
 // Implementation
 export function createRoute(path: keyof RegisterScreenInput, options: RouteOptions<any>) {
-  const { component, screenOptions, ...restOptions } = options;
+  const { component, screenOptions, errorComponent, ...restOptions } = options;
   routeMap.set(path, {
     options: restOptions,
     component,
+    errorComponent,
     screenOptions: screenOptions,
   });
 

@@ -2,8 +2,19 @@ import './types/global';
 
 export { Granite, useInitialSearchParams, useInitialProps } from './app';
 export * from '@granite-js/style-utils';
-export * from '@granite-js/image';
-export * from '@granite-js/lottie';
+export {
+  type GraniteImageSource,
+  type GraniteImageStatic,
+  type ResizeMode,
+  type CachePolicy,
+  type Priority,
+  type OnLoadEventData,
+  type OnProgressEventData,
+} from '@granite-js/image';
+
+// Image with SVG support
+export * from './image';
+export * from './lottie';
 
 export * from './dev-entrypoint';
 export * from './native-modules/natives';
@@ -18,7 +29,7 @@ export * from './router/hooks/useIsInitialScreen';
 export * from './event';
 export * from './video';
 export * from './status-bar';
-export * from './blur';
+export * from '@granite-js/blur-view';
 
 export { BackButton, useRouterBackHandler } from './router';
 

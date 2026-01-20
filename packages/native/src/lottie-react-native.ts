@@ -1,5 +1,5 @@
-import LottieView from 'lottie-react-native';
+import LottieView from '@granite-js/lottie';
 
-export * from 'lottie-react-native';
+export * from '@granite-js/lottie';
 export { LottieView };
 export default LottieView;

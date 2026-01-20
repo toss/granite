@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/react-native",
-  "version": "0.1.34",
+  "version": "0.1.34-next.36",
   "description": "The Granite Framework",
   "bin": {
     "granite": "./bin/cli.js"
@@ -97,27 +97,27 @@
     "@types/babel__core": "^7",
     "@types/babel__preset-env": "^7",
     "@types/node": "^22.10.2",
-    "@types/react": "18.3.3",
-    "@types/react-dom": "^18",
+    "@types/react": "catalog:react-native",
+    "@types/react-dom": "catalog:react-native",
     "@vitest/coverage-v8": "^4.0.12",
-    "esbuild": "0.25.8",
+    "esbuild": "0.25.9",
     "eslint": "^9.7.0",
     "jsdom": "^25.0.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-native": "0.72.6",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
     "tsup": "^8.5.0",
     "typescript": "5.8.3",
     "vitest": "^4.0.12",
     "zod": "^4.1.12"
   },
   "peerDependencies": {
-    "@granite-js/native": "*",
+    "@granite-js/native": "workspace:*",
     "@types/react": "*",
     "react": "*",
     "react-native": "*"
   },
   "dependencies": {
+    "@granite-js/blur-view": "workspace:*",
     "@granite-js/cli": "workspace:*",
     "@granite-js/image": "workspace:*",
     "@granite-js/jest": "workspace:*",
@@ -125,7 +125,9 @@
     "@granite-js/mpack": "workspace:*",
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/style-utils": "workspace:*",
+    "@granite-js/video": "workspace:*",
     "@standard-schema/spec": "^1.0.0",
+    "brick-module": "catalog:brick-module",
     "es-toolkit": "^1.39.8",
     "react-native-url-polyfill": "3.0.0"
   },
