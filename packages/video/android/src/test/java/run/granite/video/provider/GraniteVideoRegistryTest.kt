@@ -191,4 +191,42 @@ class GraniteVideoRegistryTest : FunSpec({
 
         GraniteVideoRegistry.hasProvider() shouldBe true
     }
+
+    // ============================================================
+    // Custom Provider Override Tests
+    // ============================================================
+
+    test("custom provider should be used when registered before default") {
+        GraniteVideoRegistry.registerFactory("custom") { FakeGraniteVideoProvider("custom", "Custom") }
+        GraniteVideoRegistry.setDefaultProvider("custom")
+
+        // Even after registering media3
+        GraniteVideoRegistry.registerFactory("media3") { FakeGraniteVideoProvider("media3", "Media3") }
+
+        val provider = GraniteVideoRegistry.createProvider()
+        provider.shouldNotBeNull()
+        provider.providerId shouldBe "custom"
+    }
+
+    test("custom provider should override default when set after registration") {
+        GraniteVideoRegistry.registerFactory("media3") { FakeGraniteVideoProvider("media3", "Media3") }
+        GraniteVideoRegistry.setDefaultProvider("media3")
+
+        GraniteVideoRegistry.registerFactory("custom") { FakeGraniteVideoProvider("custom", "Custom") }
+        GraniteVideoRegistry.setDefaultProvider("custom")
+
+        val provider = GraniteVideoRegistry.createProvider()
+        provider.shouldNotBeNull()
+        provider.providerId shouldBe "custom"
+    }
+
+    test("createProvider with specific id should work even when different default is set") {
+        GraniteVideoRegistry.registerFactory("media3") { FakeGraniteVideoProvider("media3", "Media3") }
+        GraniteVideoRegistry.registerFactory("custom") { FakeGraniteVideoProvider("custom", "Custom") }
+        GraniteVideoRegistry.setDefaultProvider("custom")
+
+        val provider = GraniteVideoRegistry.createProvider("media3")
+        provider.shouldNotBeNull()
+        provider.providerId shouldBe "media3"
+    }
 })
