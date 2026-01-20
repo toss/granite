@@ -35,6 +35,16 @@ class CoilImageProvider : GraniteImageProvider {
         loadImage(url, into, scaleType, null, GraniteImagePriority.NORMAL, GraniteImageCachePolicy.DISK, null, null, null)
     }
 
+    private fun isValidImageUrl(url: String): Boolean {
+        return try {
+            val uri = android.net.Uri.parse(url)
+            val scheme = uri.scheme?.lowercase()
+            scheme == "http" || scheme == "https"
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     override fun loadImage(
         url: String,
         into: View?,
@@ -60,6 +70,12 @@ class CoilImageProvider : GraniteImageProvider {
 
         if (imageView == null) {
             completionCallback?.invoke(null, Exception("No view provided"), 0, 0)
+            return
+        }
+
+        if (!isValidImageUrl(url)) {
+            Log.e(TAG, "Invalid URL: $url")
+            completionCallback?.invoke(null, Exception("Invalid URL: $url"), 0, 0)
             return
         }
 
