@@ -1,4 +1,4 @@
-package run.granite.video.provider.listener
+package run.granite.video.provider.media3.listener
 
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player

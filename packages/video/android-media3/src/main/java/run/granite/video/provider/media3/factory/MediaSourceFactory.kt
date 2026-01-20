@@ -1,4 +1,4 @@
-package run.granite.video.provider.factory
+package run.granite.video.provider.media3.factory
 
 import android.net.Uri
 import androidx.media3.common.MediaItem
