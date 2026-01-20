@@ -224,4 +224,5 @@ export interface MetroConfig {
   readonly reporter?: {
     update: (event: ReportableEvent) => void;
   };
+  readonly cacheVersion?: string;
 }

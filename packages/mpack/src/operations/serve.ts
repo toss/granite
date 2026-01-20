@@ -72,6 +72,7 @@ export async function runServer({
   const resolvedConfig = await resolveConfig(config);
   const { middlewares = [], inspectorProxy, ...additionalMetroConfig } = resolvedConfig?.metro ?? {};
   const baseConfig = await getMetroConfig({ rootPath: config.cwd }, additionalMetroConfig);
+
   const metroConfig = mergeConfig(baseConfig, {
     server: { port },
     reporter,
