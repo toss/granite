@@ -137,7 +137,7 @@ const GraniteImageBase: React.FC<GraniteImageProps> = ({
   testID,
 }) => {
   // Parse source
-  const uri = typeof source === 'string' ? source : source.uri;
+  const uri = typeof source === 'string' ? source : ((source && typeof source === 'object' ? source.uri : '') ?? '');
   const headers = typeof source === 'object' && source.headers ? JSON.stringify(source.headers) : undefined;
   const sourcePriority = typeof source === 'object' ? source.priority : undefined;
   const sourceCache = typeof source === 'object' ? source.cache : undefined;

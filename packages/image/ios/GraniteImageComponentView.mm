@@ -196,8 +196,15 @@ __attribute__((used)) static void _forceIncludeGraniteImageComponentView(void) {
     _currentDefaultSource = newDefaultSource;
     _currentFallbackSource = newFallbackSource;
 
-    if (shouldReload && _currentUri.length > 0) {
-        [self loadImageWithProvider];
+    if (shouldReload) {
+        if (_currentUri.length > 0) {
+            [self loadImageWithProvider];
+        } else {
+            // URI가 비어있거나 nil인 경우 에러 발생
+            [self showErrorViewWithMessage:@"No URI provided"];
+            [self emitOnError:@"No URI provided"];
+            [self emitOnLoadEnd];
+        }
     }
 
     [super updateProps:props oldProps:oldProps];
