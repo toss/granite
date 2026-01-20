@@ -1,4 +1,4 @@
-package run.granite.video.provider.factory
+package run.granite.video.provider.media3.factory
 
 import android.content.Context
 import android.view.SurfaceView

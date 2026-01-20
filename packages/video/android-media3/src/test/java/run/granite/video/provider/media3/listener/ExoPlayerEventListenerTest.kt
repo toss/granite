@@ -1,4 +1,4 @@
-package run.granite.video.provider.listener
+package run.granite.video.provider.media3.listener
 
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize

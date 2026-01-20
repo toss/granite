@@ -1,4 +1,4 @@
-package run.granite.video.provider.scheduler
+package run.granite.video.provider.media3.scheduler
 
 import android.os.Handler
 import android.os.Looper

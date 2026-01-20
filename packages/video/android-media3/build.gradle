@@ -1,0 +1,87 @@
+buildscript {
+  ext.getExtOrDefault = {name ->
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['GraniteVideoMedia3_' + name]
+  }
+
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:8.7.2"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}"
+  }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+def getExtOrIntegerDefault(name) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["GraniteVideoMedia3_" + name]).toInteger()
+}
+
+// Check gradle.properties for useMedia3 flag (default: true)
+def useMedia3 = project.findProperty('graniteVideo.useMedia3')?.toString() ?: 'true'
+
+android {
+  namespace "run.granite.video.media3"
+
+  compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
+
+  defaultConfig {
+    minSdkVersion getExtOrIntegerDefault("minSdkVersion")
+    targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
+
+    // Pass flag to BuildConfig for conditional registration
+    buildConfigField "boolean", "USE_MEDIA3", useMedia3
+  }
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+    }
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+
+repositories {
+  mavenCentral()
+  google()
+}
+
+def kotlin_version = getExtOrDefault("kotlinVersion")
+
+dependencies {
+  // Core module dependency
+  implementation project(':granite-video')
+  
+  implementation "com.facebook.react:react-android"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+  // Media3 ExoPlayer dependencies
+  implementation "androidx.media3:media3-exoplayer:1.2.1"
+  implementation "androidx.media3:media3-exoplayer-dash:1.2.1"
+  implementation "androidx.media3:media3-exoplayer-hls:1.2.1"
+  implementation "androidx.media3:media3-exoplayer-smoothstreaming:1.2.1"
+  implementation "androidx.media3:media3-datasource:1.2.1"
+  implementation "androidx.media3:media3-ui:1.2.1"
+
+  // Test dependencies
+  testImplementation "io.kotest:kotest-runner-junit5:5.9.1"
+  testImplementation "io.kotest:kotest-assertions-core:5.9.1"
+  testImplementation "io.mockk:mockk:1.13.9"
+  testImplementation "junit:junit:4.13.2"
+}
+
+tasks.withType(Test).configureEach {
+  useJUnitPlatform()
+}

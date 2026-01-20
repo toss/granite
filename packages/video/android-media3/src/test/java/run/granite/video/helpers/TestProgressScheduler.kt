@@ -1,6 +1,6 @@
 package run.granite.video.helpers
 
-import run.granite.video.provider.scheduler.ProgressScheduler
+import run.granite.video.provider.media3.scheduler.ProgressScheduler
 
 class TestProgressScheduler : ProgressScheduler {
     private var action: (() -> Unit)? = null

@@ -1,4 +1,4 @@
-package run.granite.video.provider
+package run.granite.video.provider.media3
 
 import android.content.Context
 import android.net.Uri
@@ -14,18 +14,26 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.DefaultLoadControl
-import run.granite.video.provider.factory.DefaultExoPlayerFactory
-import run.granite.video.provider.factory.DefaultMediaSourceFactory
-import run.granite.video.provider.factory.DefaultTrackSelectorFactory
-import run.granite.video.provider.factory.DefaultVideoSurfaceFactory
-import run.granite.video.provider.factory.ExoPlayerFactory
-import run.granite.video.provider.factory.MediaSourceFactory
-import run.granite.video.provider.factory.TrackSelectorFactory
-import run.granite.video.provider.factory.VideoSurfaceFactory
-import run.granite.video.provider.listener.ExoPlayerEventListener
-import run.granite.video.provider.listener.PlaybackStateProvider
-import run.granite.video.provider.scheduler.HandlerProgressScheduler
-import run.granite.video.provider.scheduler.ProgressScheduler
+import run.granite.video.provider.GraniteVideoAudioOutput
+import run.granite.video.provider.GraniteVideoBufferConfig
+import run.granite.video.provider.GraniteVideoDelegate
+import run.granite.video.provider.GraniteVideoProvider
+import run.granite.video.provider.GraniteVideoResizeMode
+import run.granite.video.provider.GraniteVideoSelectedTrack
+import run.granite.video.provider.GraniteVideoSource
+import run.granite.video.provider.GraniteVideoProgressData
+import run.granite.video.provider.media3.factory.DefaultExoPlayerFactory
+import run.granite.video.provider.media3.factory.DefaultMediaSourceFactory
+import run.granite.video.provider.media3.factory.DefaultTrackSelectorFactory
+import run.granite.video.provider.media3.factory.DefaultVideoSurfaceFactory
+import run.granite.video.provider.media3.factory.ExoPlayerFactory
+import run.granite.video.provider.media3.factory.MediaSourceFactory
+import run.granite.video.provider.media3.factory.TrackSelectorFactory
+import run.granite.video.provider.media3.factory.VideoSurfaceFactory
+import run.granite.video.provider.media3.listener.ExoPlayerEventListener
+import run.granite.video.provider.media3.listener.PlaybackStateProvider
+import run.granite.video.provider.media3.scheduler.HandlerProgressScheduler
+import run.granite.video.provider.media3.scheduler.ProgressScheduler
 
 /**
  * Built-in ExoPlayer Provider (Default, using AndroidX Media3)
