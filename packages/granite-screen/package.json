@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/screen",
   "type": "module",
-  "version": "0.1.34-next.36",
+  "version": "0.1.34-next.37",
   "description": "Brownfield Screen for React Native",
   "main": "dist/index.js",
   "module": "dist/index.js",

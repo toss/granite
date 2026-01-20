@@ -1,5 +1,11 @@
 # @granite-js/image
 
+## 0.1.34-next.37
+
+### Patch Changes
+
+- chore: react-navigation version up
+
 ## 0.1.34-next.36
 
 ### Patch Changes

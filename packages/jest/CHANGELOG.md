@@ -1,5 +1,13 @@
 # @granite-js/jest
 
+## 0.1.34-next.37
+
+### Patch Changes
+
+- chore: react-navigation version up
+- Updated dependencies
+  - @granite-js/native@0.1.34-next.37
+
 ## 0.1.34-next.36
 
 ### Patch Changes
