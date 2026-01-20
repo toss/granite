@@ -9,8 +9,9 @@ import run.granite.video.provider.*
  *
  * Provider selection:
  * - Default: Uses the provider set via GraniteVideoRegistry.setDefaultProvider()
- * - Fallback: Uses ExoPlayerProvider if no default is set
- * - Testing: Can inject a custom providerFactory for unit tests
+ * - Custom: Can inject a custom providerFactory for unit tests
+ *
+ * If no provider is registered, an IllegalStateException will be thrown.
  *
  * To change the default provider at runtime, use GraniteVideoModule.setDefaultProvider()
  * from JavaScript before creating new video views.
@@ -46,10 +47,13 @@ class GraniteVideoView @JvmOverloads constructor(
         // Create provider using:
         // 1. Custom factory (for testing)
         // 2. Default from registry (set via GraniteVideoRegistry.setDefaultProvider)
-        // 3. Fallback to ExoPlayerProvider
         provider = providerFactory?.invoke()
             ?: GraniteVideoRegistry.createProvider()
-            ?: ExoPlayerProvider()
+            ?: throw IllegalStateException(
+                "No video provider registered. Either register a provider via " +
+                "GraniteVideoRegistry.registerFactory() or enable the default provider " +
+                "by setting GRANITE_VIDEO_DEFAULT_PROVIDER=true."
+            )
 
         provider?.delegate = this
 
