@@ -72,7 +72,9 @@ import SDWebImage
             imageView?.contentMode = contentMode
         }
 
-        guard let imageURL = URL(string: url) else {
+        guard let imageURL = URL(string: url),
+              let scheme = imageURL.scheme?.lowercased(),
+              scheme == "http" || scheme == "https" else {
             NSLog("[SDWebImageProvider] Invalid URL: \(url)")
             completionBlock?(nil, NSError(domain: "SDWebImageProvider", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]), .zero)
             return
