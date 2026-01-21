@@ -16,7 +16,7 @@
   },
   "files": [
     "dist",
-    "src/spec",
+    "src/",
     "ios/",
     "android/",
     "package.json",
