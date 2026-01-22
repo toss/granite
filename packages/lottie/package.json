@@ -78,7 +78,7 @@
     "type": "all",
     "jsSrcsDir": "src",
     "android": {
-      "javaPackageName": "com.anthropic.granitelottie"
+      "javaPackageName": "run.granite.lottie"
     },
     "ios": {
       "componentProvider": {

@@ -3,7 +3,7 @@ module.exports = {
     platforms: {
       android: {
         sourceDir: 'android',
-        packageImportPath: 'import com.anthropic.granitelottie.GraniteLottieViewPackage;',
+        packageImportPath: 'import run.granite.lottie.GraniteLottieViewPackage;',
         packageInstance: 'new GraniteLottieViewPackage()',
       },
       ios: {},

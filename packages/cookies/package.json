@@ -50,7 +50,7 @@
       "className": "CookiesModule"
     },
     "android": {
-      "package": "com.granitecookies",
+      "package": "run.granite.cookies",
       "projectName": "cookies",
       "moduleName": "CookiesModule"
     }
