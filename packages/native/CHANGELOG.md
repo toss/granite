@@ -1,5 +1,15 @@
 # @granite-js/native
 
+## 0.1.34-next.42
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.42
+  - @granite-js/image@0.1.34-next.42
+  - @granite-js/video@0.1.34-next.42
+
 ## 0.1.34-next.41
 
 ### Patch Changes

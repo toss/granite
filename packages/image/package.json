@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/image",
-  "version": "0.1.34-next.41",
+  "version": "0.1.34-next.42",
   "description": "A pluggable React Native image component that lets you use your existing native image loading infrastructure",
   "type": "module",
   "main": "./dist/module/index.js",
