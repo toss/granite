@@ -1,4 +1,4 @@
-# brick-cookies
+# @granite-js/cookies
 
 ## 0.1.34-next.39
 

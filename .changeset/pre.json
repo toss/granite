@@ -25,7 +25,7 @@
     "@granite-js/style-utils": "0.1.34-next.8",
     "@granite-js/utils": "0.1.34-next.8",
     "@granite-js/video": "0.1.34-next.8",
-    "brick-cookies": "0.1.6",
+    "@granite-js/cookies": "0.1.34-next.39",
     "@granite-js/screen": "0.0.40"
   },
   "changesets": [

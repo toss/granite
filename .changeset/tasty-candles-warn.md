@@ -4,7 +4,7 @@
 'create-granite-app': patch
 '@granite-js/deployment-manager': patch
 '@granite-js/screen': patch
-'brick-cookies': patch
+'@granite-js/cookies': patch
 '@granite-js/plugin-hermes': patch
 '@granite-js/plugin-router': patch
 '@granite-js/plugin-sentry': patch

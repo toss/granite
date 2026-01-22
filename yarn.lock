@@ -5735,6 +5735,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@granite-js/cookies@workspace:packages/cookies":
+  version: 0.0.0-use.local
+  resolution: "@granite-js/cookies@workspace:packages/cookies"
+  dependencies:
+    brick-module: "catalog:brick-module"
+    react-native: "catalog:react-native"
+    tsdown: "npm:^0.14.2"
+    typescript: "npm:^5.9.2"
+  peerDependencies:
+    react-native: "*"
+  languageName: unknown
+  linkType: soft
+
 "@granite-js/deployment-manager@workspace:*, @granite-js/deployment-manager@workspace:infra/deployment-manager":
   version: 0.0.0-use.local
   resolution: "@granite-js/deployment-manager@workspace:infra/deployment-manager"
@@ -12791,19 +12804,6 @@ __metadata:
   checksum: 10c0/e1c2730a46a4ed6bd46d2eb9234a602d75593e8e4ace9617da8c62b53b1b4bb352867bff5c03277ca9ad1290cefe08c27f945c3d49195cd5dcab5e1a2ff9b9ae
   languageName: node
   linkType: hard
-
-"brick-cookies@workspace:packages/brick-cookies":
-  version: 0.0.0-use.local
-  resolution: "brick-cookies@workspace:packages/brick-cookies"
-  dependencies:
-    brick-module: "catalog:brick-module"
-    react-native: "catalog:react-native"
-    tsdown: "npm:^0.14.2"
-    typescript: "npm:^5.9.2"
-  peerDependencies:
-    react-native: "*"
-  languageName: unknown
-  linkType: soft
 
 "brick-module@npm:0.4.1":
   version: 0.4.1
