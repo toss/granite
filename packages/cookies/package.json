@@ -20,7 +20,7 @@
     "ios/",
     "android/",
     "package.json",
-    "BrickCookies.podspec"
+    "GraniteCookies.podspec"
   ],
   "scripts": {
     "build": "brick-codegen && tsdown"
@@ -46,11 +46,11 @@
   "brickModule": {
     "specSrc": "./src/spec",
     "ios": {
-      "moduleName": "BrickCookies",
+      "moduleName": "GraniteCookies",
       "className": "CookiesModule"
     },
     "android": {
-      "package": "com.brickcookies",
+      "package": "com.granitecookies",
       "projectName": "cookies",
       "moduleName": "CookiesModule"
     }

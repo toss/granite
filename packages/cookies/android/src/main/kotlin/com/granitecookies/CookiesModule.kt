@@ -4,7 +4,7 @@
  *
  * Uses Android's CookieManager for cookie management
  */
-package com.brickcookies
+package com.granitecookies
 
 import android.os.Build
 import android.webkit.CookieManager
