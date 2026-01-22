@@ -115,4 +115,4 @@ export interface CookiesModuleSpec extends BrickModuleSpec {
   removeSessionCookies(): Promise<boolean>;
 }
 
-export const CookiesNativeModule = BrickModule.get<CookiesModuleSpec>('BrickCookies');
+export const CookiesNativeModule = BrickModule.get<CookiesModuleSpec>('Cookies');

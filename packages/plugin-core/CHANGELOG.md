@@ -1,5 +1,29 @@
 # @granite-js/plugin-core
 
+## 0.1.34-next.39
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/utils@0.1.34-next.39
+
+## 0.1.34-next.38
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/utils@0.1.34-next.38
+
+## 0.1.34-next.37
+
+### Patch Changes
+
+- chore: react-navigation version up
+- Updated dependencies
+  - @granite-js/utils@0.1.34-next.37
+
 ## 0.1.34-next.36
 
 ### Patch Changes

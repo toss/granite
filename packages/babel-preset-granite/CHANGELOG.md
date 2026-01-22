@@ -1,5 +1,23 @@
 # babel-preset-granite
 
+## 0.1.34-next.39
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.38
+
+### Patch Changes
+
+- fix
+
+## 0.1.34-next.37
+
+### Patch Changes
+
+- chore: react-navigation version up
+
 ## 0.1.34-next.36
 
 ### Patch Changes

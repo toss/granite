@@ -1,5 +1,35 @@
 # @granite-js/native
 
+## 0.1.34-next.39
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.39
+  - @granite-js/image@0.1.34-next.39
+  - @granite-js/video@0.1.34-next.39
+
+## 0.1.34-next.38
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.38
+  - @granite-js/image@0.1.34-next.38
+  - @granite-js/video@0.1.34-next.38
+
+## 0.1.34-next.37
+
+### Patch Changes
+
+- chore: react-navigation version up
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.37
+  - @granite-js/image@0.1.34-next.37
+  - @granite-js/video@0.1.34-next.37
+
 ## 0.1.34-next.36
 
 ### Patch Changes
