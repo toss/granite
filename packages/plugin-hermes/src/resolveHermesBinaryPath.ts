@@ -75,7 +75,7 @@ export function resolveHermesBinaryPath() {
   // 1) RN 0.83+: prefer hermes-compiler package
   const hermesCompilerPath = getHermesCompilerPackagePath(reactNativePath);
   if (hermesCompilerPath) {
-    const engine = path.join(hermesCompilerPath,"hermesc", getHermesOSBin(), getHermesOSExe());
+    const engine = path.join(hermesCompilerPath, 'hermesc', getHermesOSBin(), getHermesOSExe());
     if (fileExists(engine)) {
       return engine;
     }
