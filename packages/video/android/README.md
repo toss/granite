@@ -53,11 +53,13 @@ Media3 ExoPlayer is the default video provider and is enabled by default.
 To disable Media3 and use a custom provider, you can use either:
 
 **Option 1: gradle.properties**
+
 ```properties
 graniteVideo.useMedia3=false
 ```
 
 **Option 2: Environment variable** (takes priority)
+
 ```bash
 export GRANITE_VIDEO_USE_MEDIA3=false
 ```
