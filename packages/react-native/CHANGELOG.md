@@ -1,5 +1,21 @@
 # @granite-js/react-native
 
+## 1.0.0-next.85
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@1.0.0-next.85
+  - @granite-js/style-utils@1.0.0-next.85
+  - @granite-js/blur-view@1.0.0-next.85
+  - @granite-js/lottie@1.0.0-next.85
+  - @granite-js/native@1.0.0-next.85
+  - @granite-js/image@1.0.0-next.85
+  - @granite-js/mpack@1.0.0-next.85
+  - @granite-js/video@1.0.0-next.85
+  - @granite-js/jest@1.0.0-next.85
+  - @granite-js/cli@1.0.0-next.85
 
 ## 0.1.34-next.44
 
@@ -85,7 +101,6 @@
   - @granite-js/video@0.1.34-next.40
   - @granite-js/jest@0.1.34-next.40
   - @granite-js/cli@0.1.34-next.40
-
 
 ## 0.1.34-next.39
 

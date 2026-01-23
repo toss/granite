@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/react-native",
-  "version": "1.0.0-next.84",
+  "version": "1.0.0-next.85",
   "description": "The Granite Framework",
   "bin": {
     "granite": "./bin/cli.js"
