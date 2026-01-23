@@ -66,6 +66,16 @@ android {
     main {
       java {
         srcDirs += ["generated/java", "generated/jni"]
+        // Conditionally include Media3 sources
+        if (useMedia3) {
+          srcDirs += ["src/media3/java"]
+        }
+      }
+      // Use different manifest based on Media3 flag
+      // - media3 manifest includes ContentProvider for auto-initialization
+      // - main manifest is empty (for custom provider use case)
+      if (useMedia3) {
+        manifest.srcFile "src/media3/AndroidManifest.xml"
       }
     }
   }
