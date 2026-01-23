@@ -17,11 +17,13 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { Platform } from 'react-native';
 import { InitialProps } from '..';
 import { closeView } from '../native-modules';
 import { BackButton } from './components/BackButton';
 import { CanGoBackGuard } from './components/CanGoBackGuard';
 import { StackNavigator } from './components/StackNavigator';
+import { WebScreenContainer } from './components/WebScreenContainer';
 import { useInternalRouterBackHandler } from './components/useRouterBackHandler';
 import { useRouterControls, type RouterControlsConfig } from './hooks/useRouterControls';
 import type { ErrorComponent, RequireContext } from './types';
@@ -151,10 +153,16 @@ export function Router({
   getInitialUrl,
   ...navigationContainerProps
 }: InternalRouterProps & RouterProps): ReactElement {
+  const resolvedScreenContainer =
+    screenContainer ??
+    (Platform.OS === 'web'
+      ? (WebScreenContainer as RouterControlsConfig['screenContainer'])
+      : undefined);
+
   const { Screens, linkingOptions } = useRouterControls({
     prefix,
     context,
-    screenContainer,
+    screenContainer: resolvedScreenContainer,
     initialScheme,
     getInitialUrl,
     defaultErrorComponent,
