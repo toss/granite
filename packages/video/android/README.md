@@ -42,13 +42,41 @@ override fun getPackages(): List<ReactPackage> {
 }
 ```
 
-### 3. Disable Media3 (Optional)
+---
 
-You can disable Media3 registration in `gradle.properties`:
+## Media3 Provider (Default)
 
+Media3 ExoPlayer is the default video provider and is enabled by default.
+
+### Disabling Media3
+
+To disable Media3 and use a custom provider, you can use either:
+
+**Option 1: gradle.properties**
 ```properties
-# gradle.properties
 graniteVideo.useMedia3=false
+```
+
+**Option 2: Environment variable** (takes priority)
+```bash
+export GRANITE_VIDEO_USE_MEDIA3=false
+```
+
+Priority: Environment variable > gradle.properties > default (true)
+
+### Custom Provider Registration
+
+When Media3 is disabled, register your custom provider in your Application class:
+
+```kotlin
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+
+        GraniteVideoRegistry.registerFactory("custom") { MyCustomProvider() }
+        GraniteVideoRegistry.setDefaultProvider("custom")
+    }
+}
 ```
 
 ---
