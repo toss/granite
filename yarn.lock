@@ -12776,9 +12776,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"brick-codegen@npm:0.4.1":
-  version: 0.4.1
-  resolution: "brick-codegen@npm:0.4.1"
+"brick-codegen@npm:0.5.0":
+  version: 0.5.0
+  resolution: "brick-codegen@npm:0.5.0"
   dependencies:
     "@babel/parser": "npm:^7.27.5"
     "@babel/types": "npm:^7.27.6"
@@ -12794,21 +12794,21 @@ __metadata:
     typescript: "npm:^5.9.2"
   bin:
     brick-codegen: dist/cli.js
-  checksum: 10c0/e1c2730a46a4ed6bd46d2eb9234a602d75593e8e4ace9617da8c62b53b1b4bb352867bff5c03277ca9ad1290cefe08c27f945c3d49195cd5dcab5e1a2ff9b9ae
+  checksum: 10c0/15099edbb8867329371601000b1060cf3e1f1730104e6ca99fd4473d9c44f83987fccdbbda4782d407fa15dc529175d23da8c67e94ee9786a14b532108104e6a
   languageName: node
   linkType: hard
 
-"brick-module@npm:0.4.1":
-  version: 0.4.1
-  resolution: "brick-module@npm:0.4.1"
+"brick-module@npm:0.5.0":
+  version: 0.5.0
+  resolution: "brick-module@npm:0.5.0"
   dependencies:
-    brick-codegen: "npm:0.4.1"
+    brick-codegen: "npm:0.5.0"
   peerDependencies:
     react: ">=18.2.0"
     react-native: ">=0.70.0"
   bin:
     brick-codegen: bin/brick-codegen.js
-  checksum: 10c0/90216ee569e33787e8c248049e754c2f01e156b712da05e2ab552a8b716cc00e246c6d4d4194f8b8b1cf9e1cbb31ed04513b1b8c5592899a8592f35e63d16bc6
+  checksum: 10c0/6c4e93a5f79b6befcd93821e6c9f28dd0a0b4af7833e1b1d35b10a64f5134f0a28fd08d9f951c23009a5d5fcc4748f50d4fdafd008fde4642872fbba5a9242b3
   languageName: node
   linkType: hard
 
