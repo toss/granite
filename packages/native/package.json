@@ -23,6 +23,7 @@
     },
     "./@react-native-community/blur": {
       "types": "./dist/@react-native-community/blur.d.ts",
+      "browser": "./src/@react-native-community/blur.web.tsx",
       "default": "./src/@react-native-community/blur.ts"
     },
     "./@react-navigation/native": {
@@ -43,6 +44,7 @@
     },
     "./react-native-webview": {
       "types": "./dist/react-native-webview.d.ts",
+      "browser": "./src/react-native-webview.web.tsx",
       "default": "./src/react-native-webview.ts"
     },
     "./lottie-react-native": {

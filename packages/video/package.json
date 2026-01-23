@@ -9,6 +9,7 @@
   "exports": {
     ".": {
       "types": "./dist/typescript/index.d.ts",
+      "browser": "./src/index.web.ts",
       "default": "./dist/module/index.js"
     },
     "./package.json": "./package.json"

@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "granite dev",
+    "dev:web": "vite",
     "build": "granite build",
     "test": "jest --passWithNoTests",
     "typecheck": "tsc --noEmit",
@@ -12,7 +13,9 @@
     "@granite-js/native": "workspace:*",
     "@granite-js/react-native": "workspace:*",
     "react": "catalog:react-native",
+    "react-dom": "19.1.0",
     "react-native": "catalog:react-native",
+    "react-native-web": "^0.20.0",
     "valibot": "^1.1.0",
     "zod": "^4.1.12"
   },
@@ -32,9 +35,12 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.2",
     "@types/react": "catalog:react-native",
+    "@vitejs/plugin-react": "^5.0.0",
     "babel-preset-granite": "workspace:*",
+    "flow-remove-types": "^2.298.0",
     "jest": "^29.7.0",
     "react-test-renderer": "18.2.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vite": "7.3.1"
   }
 }

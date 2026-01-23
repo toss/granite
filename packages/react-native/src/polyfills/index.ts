@@ -2,6 +2,20 @@ import { setupURLPolyfill } from 'react-native-url-polyfill';
 
 export function setupPolyfills() {
   setupAsyncIterator();
+  const runtime = globalThis as {
+    document?: unknown;
+    URL?: unknown;
+    URLSearchParams?: unknown;
+  };
+
+  if (runtime.document) {
+    return;
+  }
+
+  if (runtime.URL && runtime.URLSearchParams) {
+    return;
+  }
+
   setupURLPolyfill();
 }
 

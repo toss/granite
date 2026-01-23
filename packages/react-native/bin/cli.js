@@ -1,3 +1,8 @@
 #!/usr/bin/env node
 
-require('@granite-js/cli').initialize();
+import { initialize } from '@granite-js/cli';
+
+initialize().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

@@ -10,6 +10,7 @@
     ".": {
       "types": "./dist/typescript/index.d.ts",
       "react-native": "./src/index.ts",
+      "browser": "./src/index.web.ts",
       "default": "./dist/module/index.js"
     },
     "./package.json": "./package.json"
