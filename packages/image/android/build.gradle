@@ -27,17 +27,26 @@ apply plugin: "com.facebook.react"
 // ============================================================
 // GraniteImage Default Provider Configuration
 // ============================================================
-// Priority: GRANITE_IMAGE_DEFAULT_PROVIDER > GRANITE_DEFAULT_PROVIDER_ALL > true (default)
+// Priority: Environment Variable > gradle.properties > default (true)
+//
+// Environment Variables:
+//   GRANITE_IMAGE_DEFAULT_PROVIDER - Image specific override
+//   GRANITE_DEFAULT_PROVIDER_ALL - Global default for all Granite packages
+//
+// gradle.properties (alternative):
+//   GRANITE_IMAGE_DEFAULT_PROVIDER=false
+//   GRANITE_DEFAULT_PROVIDER_ALL=false
 //
 // Examples:
 //   Include default provider (default):
 //     ./gradlew assembleDebug
 //
-//   Exclude default provider for image only:
+//   Exclude default provider for image only (env var):
 //     GRANITE_IMAGE_DEFAULT_PROVIDER=false ./gradlew assembleDebug
 //
-//   Exclude default providers for all Granite packages:
-//     GRANITE_DEFAULT_PROVIDER_ALL=false ./gradlew assembleDebug
+//   Exclude default provider via gradle.properties:
+//     # In gradle.properties:
+//     GRANITE_IMAGE_DEFAULT_PROVIDER=false
 //
 //   Exclude all but override image to include:
 //     GRANITE_DEFAULT_PROVIDER_ALL=false GRANITE_IMAGE_DEFAULT_PROVIDER=true ./gradlew assembleDebug
@@ -50,16 +59,29 @@ apply plugin: "com.facebook.react"
 // Example: ./gradlew assembleDebug -PGRANITE_PROVIDER=glide
 // ============================================================
 def resolveDefaultProvider(String specificKey, String fallbackKey, boolean defaultValue) {
-    def specificValue = System.getenv(specificKey)
-    def fallbackValue = System.getenv(fallbackKey)
+    // Priority: Environment Variable > gradle.properties > default
 
-    if (specificValue != null) {
-        return specificValue == 'true'
-    } else if (fallbackValue != null) {
-        return fallbackValue == 'true'
-    } else {
-        return defaultValue
+    // Check specific key
+    def specificEnvValue = System.getenv(specificKey)
+    if (specificEnvValue != null) {
+        return specificEnvValue == 'true'
     }
+    def specificPropValue = project.findProperty(specificKey)
+    if (specificPropValue != null) {
+        return specificPropValue.toString() == 'true'
+    }
+
+    // Check fallback key
+    def fallbackEnvValue = System.getenv(fallbackKey)
+    if (fallbackEnvValue != null) {
+        return fallbackEnvValue == 'true'
+    }
+    def fallbackPropValue = project.findProperty(fallbackKey)
+    if (fallbackPropValue != null) {
+        return fallbackPropValue.toString() == 'true'
+    }
+
+    return defaultValue
 }
 
 def includeDefaultProvider = resolveDefaultProvider(

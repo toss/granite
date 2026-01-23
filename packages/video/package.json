@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/video",
-  "version": "0.1.34-next.39",
+  "version": "1.0.0-next.84",
   "description": "Pluggable video component for React Native with provider selection",
   "type": "module",
   "main": "./dist/module/index.js",
@@ -82,7 +82,7 @@
     "type": "all",
     "jsSrcsDir": "src",
     "android": {
-      "javaPackageName": "com.anthropic.reactnativegranitevideo"
+      "javaPackageName": "run.granite.video"
     },
     "ios": {
       "componentProvider": {

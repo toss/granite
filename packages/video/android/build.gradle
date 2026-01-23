@@ -25,42 +25,10 @@ def getExtOrIntegerDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["GraniteVideo_" + name]).toInteger()
 }
 
-// ============================================================
-// GraniteVideo Default Provider Configuration
-// ============================================================
-// Priority: GRANITE_VIDEO_DEFAULT_PROVIDER > GRANITE_DEFAULT_PROVIDER_ALL > true (default)
-//
-// Examples:
-//   Include default provider (default):
-//     ./gradlew assembleDebug
-//
-//   Exclude default provider for video only:
-//     GRANITE_VIDEO_DEFAULT_PROVIDER=false ./gradlew assembleDebug
-//
-//   Exclude default providers for all Granite packages:
-//     GRANITE_DEFAULT_PROVIDER_ALL=false ./gradlew assembleDebug
-//
-//   Exclude all but override video to include:
-//     GRANITE_DEFAULT_PROVIDER_ALL=false GRANITE_VIDEO_DEFAULT_PROVIDER=true ./gradlew assembleDebug
-// ============================================================
-def resolveDefaultProvider(String specificKey, String fallbackKey, boolean defaultValue) {
-    def specificValue = System.getenv(specificKey)
-    def fallbackValue = System.getenv(fallbackKey)
-
-    if (specificValue != null) {
-        return specificValue == 'true'
-    } else if (fallbackValue != null) {
-        return fallbackValue == 'true'
-    } else {
-        return defaultValue
-    }
-}
-
-def includeDefaultProvider = resolveDefaultProvider(
-    'GRANITE_VIDEO_DEFAULT_PROVIDER',
-    'GRANITE_DEFAULT_PROVIDER_ALL',
-    true
-)
+// Check useMedia3 flag from environment variable or gradle.properties (default: true)
+// Priority: Environment variable > gradle.properties > default (true)
+def useMedia3Flag = System.getenv('GRANITE_VIDEO_USE_MEDIA3') ?: project.findProperty('graniteVideo.useMedia3')?.toString()
+def useMedia3 = useMedia3Flag != 'false'
 
 android {
   namespace "run.granite.video"
@@ -71,8 +39,8 @@ android {
     minSdkVersion getExtOrIntegerDefault("minSdkVersion")
     targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
 
-    // Pass build config flag for conditional compilation
-    buildConfigField "boolean", "INCLUDE_DEFAULT_PROVIDER", "${includeDefaultProvider}"
+    // Pass flag to BuildConfig for conditional registration
+    buildConfigField "boolean", "USE_MEDIA3", useMedia3.toString()
   }
 
   buildFeatures {
@@ -96,14 +64,18 @@ android {
 
   sourceSets {
     main {
-      java.srcDirs += [
-        "generated/java",
-        "generated/jni"
-      ]
-
-      // Conditionally exclude the providers directory
-      if (!includeDefaultProvider) {
-        java.exclude '**/providers/**'
+      java {
+        srcDirs += ["generated/java", "generated/jni"]
+        // Conditionally include Media3 sources
+        if (useMedia3) {
+          srcDirs += ["src/media3/java"]
+        }
+      }
+      // Use different manifest based on Media3 flag
+      // - media3 manifest includes ContentProvider for auto-initialization
+      // - main manifest is empty (for custom provider use case)
+      if (useMedia3) {
+        manifest.srcFile "src/media3/AndroidManifest.xml"
       }
     }
   }
@@ -116,29 +88,30 @@ repositories {
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
 
-// Provider selection via gradle properties (only when default provider is enabled)
-def useExoPlayer = project.hasProperty('graniteVideoUseExoPlayer') ? project.graniteVideoUseExoPlayer.toBoolean() : true
-def useVLC = project.hasProperty('graniteVideoUseVLC') ? project.graniteVideoUseVLC.toBoolean() : false
-
 dependencies {
   implementation "com.facebook.react:react-android"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-  // Provider-specific dependencies (only included when default provider is enabled)
-  if (includeDefaultProvider) {
-    // Default: ExoPlayer (Media3)
-    if (useExoPlayer) {
-      implementation "androidx.media3:media3-exoplayer:1.2.1"
-      implementation "androidx.media3:media3-exoplayer-dash:1.2.1"
-      implementation "androidx.media3:media3-exoplayer-hls:1.2.1"
-      implementation "androidx.media3:media3-exoplayer-smoothstreaming:1.2.1"
-      implementation "androidx.media3:media3-datasource:1.2.1"
-      implementation "androidx.media3:media3-ui:1.2.1"
-    }
-
-    // Optional: VLC
-    if (useVLC) {
-      implementation "org.videolan.android:libvlc-all:3.6.0"
-    }
+  // Media3 ExoPlayer dependencies (conditional)
+  if (useMedia3) {
+    implementation "androidx.media3:media3-exoplayer:1.2.1"
+    implementation "androidx.media3:media3-exoplayer-dash:1.2.1"
+    implementation "androidx.media3:media3-exoplayer-hls:1.2.1"
+    implementation "androidx.media3:media3-exoplayer-smoothstreaming:1.2.1"
+    implementation "androidx.media3:media3-datasource:1.2.1"
+    implementation "androidx.media3:media3-ui:1.2.1"
   }
+
+  // Test dependencies
+  testImplementation "io.kotest:kotest-runner-junit5:5.9.1"
+  testImplementation "io.kotest:kotest-assertions-core:5.9.1"
+  testImplementation "io.kotest:kotest-property:5.9.1"
+  testImplementation "io.mockk:mockk:1.13.9"
+  testImplementation "org.robolectric:robolectric:4.11.1"
+  testImplementation "junit:junit:4.13.2"
 }
+
+tasks.withType(Test).configureEach {
+  useJUnitPlatform()
+}
+
