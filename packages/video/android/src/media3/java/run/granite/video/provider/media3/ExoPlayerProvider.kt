@@ -1,35 +1,59 @@
-package run.granite.video.provider
+package run.granite.video.provider.media3
 
 import android.content.Context
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import android.view.SurfaceView
 import android.view.TextureView
 import android.widget.FrameLayout
 import android.graphics.Color
-import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
-import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.MediaSource
-import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import androidx.media3.exoplayer.hls.HlsMediaSource
-import androidx.media3.exoplayer.dash.DashMediaSource
-import androidx.media3.exoplayer.smoothstreaming.SsMediaSource
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.DefaultLoadControl
+import run.granite.video.provider.GraniteVideoAudioOutput
+import run.granite.video.provider.GraniteVideoBufferConfig
+import run.granite.video.provider.GraniteVideoDelegate
+import run.granite.video.provider.GraniteVideoProvider
+import run.granite.video.provider.GraniteVideoResizeMode
+import run.granite.video.provider.GraniteVideoSelectedTrack
+import run.granite.video.provider.GraniteVideoSource
+import run.granite.video.provider.GraniteVideoProgressData
+import run.granite.video.provider.media3.factory.DefaultExoPlayerFactory
+import run.granite.video.provider.media3.factory.DefaultMediaSourceFactory
+import run.granite.video.provider.media3.factory.DefaultTrackSelectorFactory
+import run.granite.video.provider.media3.factory.DefaultVideoSurfaceFactory
+import run.granite.video.provider.media3.factory.ExoPlayerFactory
+import run.granite.video.provider.media3.factory.MediaSourceFactory
+import run.granite.video.provider.media3.factory.TrackSelectorFactory
+import run.granite.video.provider.media3.factory.VideoSurfaceFactory
+import run.granite.video.provider.media3.listener.ExoPlayerEventListener
+import run.granite.video.provider.media3.listener.PlaybackStateProvider
+import run.granite.video.provider.media3.scheduler.HandlerProgressScheduler
+import run.granite.video.provider.media3.scheduler.ProgressScheduler
 
 /**
  * Built-in ExoPlayer Provider (Default, using AndroidX Media3)
+ *
+ * This provider uses dependency injection for all external dependencies,
+ * making it fully testable. Default implementations are provided for
+ * production use.
  */
 @UnstableApi
-class ExoPlayerProvider : GraniteVideoProvider {
+class ExoPlayerProvider(
+    private val exoPlayerFactory: ExoPlayerFactory = DefaultExoPlayerFactory(),
+    private val videoSurfaceFactory: VideoSurfaceFactory = DefaultVideoSurfaceFactory(),
+    private val mediaSourceFactory: MediaSourceFactory = DefaultMediaSourceFactory(),
+    private val progressScheduler: ProgressScheduler = HandlerProgressScheduler(),
+    private val trackSelectorFactory: TrackSelectorFactory = DefaultTrackSelectorFactory()
+) : GraniteVideoProvider, PlaybackStateProvider {
+
+    // Provider Identification
+    override val providerId: String = "media3"
+    override val providerName: String = "Media3 ExoPlayer"
 
     // Properties
     override var delegate: GraniteVideoDelegate? = null
@@ -40,8 +64,10 @@ class ExoPlayerProvider : GraniteVideoProvider {
     private var textureView: TextureView? = null
     private var context: Context? = null
     private var trackSelector: DefaultTrackSelector? = null
+    private var eventListener: ExoPlayerEventListener? = null
 
     private var _isPlaying: Boolean = false
+    private var _isSeeking: Boolean = false
     private var _shouldRepeat: Boolean = false
     private var _resizeMode: GraniteVideoResizeMode = GraniteVideoResizeMode.CONTAIN
     private var _useTextureView: Boolean = false
@@ -52,8 +78,15 @@ class ExoPlayerProvider : GraniteVideoProvider {
     private var _rate: Float = 1.0f
     private var _shutterColor: Int = Color.BLACK
 
-    private val mainHandler = Handler(Looper.getMainLooper())
-    private var progressRunnable: Runnable? = null
+    // PlaybackStateProvider implementation
+    override val isPlaying: Boolean
+        get() = _isPlaying
+
+    override val isSeeking: Boolean
+        get() = _isSeeking
+
+    override val isLooping: Boolean
+        get() = _shouldRepeat
 
     override val currentTime: Double
         get() = (player?.currentPosition ?: 0L) / 1000.0
@@ -61,25 +94,26 @@ class ExoPlayerProvider : GraniteVideoProvider {
     override val duration: Double
         get() = (player?.duration ?: 0L) / 1000.0
 
-    override val isPlaying: Boolean
-        get() = _isPlaying
-
     // Required - View Creation
     override fun createPlayerView(context: Context): View {
         this.context = context
 
-        playerView = FrameLayout(context).apply {
+        playerView = videoSurfaceFactory.createContainer(context).apply {
             setBackgroundColor(_shutterColor)
         }
 
         // Initialize player
-        trackSelector = DefaultTrackSelector(context)
+        trackSelector = trackSelectorFactory.create(context)
+        player = exoPlayerFactory.create(context, trackSelector!!)
 
-        player = ExoPlayer.Builder(context)
-            .setTrackSelector(trackSelector!!)
-            .build()
-
-        player?.addListener(playerListener)
+        // Create and attach event listener
+        eventListener = ExoPlayerEventListener(
+            delegateProvider = { delegate },
+            stateProvider = this,
+            onPlayingChanged = { isPlaying -> _isPlaying = isPlaying },
+            onVideoSizeChanged = { _, _ -> /* Handled by listener */ }
+        )
+        player?.addListener(eventListener!!)
 
         // Create surface/texture view
         setupVideoSurface(context)
@@ -93,21 +127,11 @@ class ExoPlayerProvider : GraniteVideoProvider {
         textureView?.let { playerView?.removeView(it) }
 
         if (_useTextureView) {
-            textureView = TextureView(context).apply {
-                layoutParams = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-                )
-            }
+            textureView = videoSurfaceFactory.createTextureView(context)
             player?.setVideoTextureView(textureView)
             playerView?.addView(textureView)
         } else {
-            surfaceView = SurfaceView(context).apply {
-                layoutParams = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-                )
-            }
+            surfaceView = videoSurfaceFactory.createSurfaceView(context)
             player?.setVideoSurfaceView(surfaceView)
             playerView?.addView(surfaceView)
         }
@@ -133,26 +157,8 @@ class ExoPlayerProvider : GraniteVideoProvider {
 
         val dataSourceFactory = DefaultDataSource.Factory(ctx, httpDataSourceFactory)
 
-        // Create media source based on type
-        val mediaUri = Uri.parse(uri)
-        val mediaSource: MediaSource = when {
-            uri.contains(".m3u8") || source.type == "m3u8" -> {
-                HlsMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(mediaUri))
-            }
-            uri.contains(".mpd") || source.type == "mpd" -> {
-                DashMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(mediaUri))
-            }
-            uri.contains(".ism") || source.type == "ism" -> {
-                SsMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(mediaUri))
-            }
-            else -> {
-                ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(mediaUri))
-            }
-        }
+        // Create media source using factory
+        val mediaSource = mediaSourceFactory.create(source, dataSourceFactory)
 
         player?.setMediaSource(mediaSource)
         player?.prepare()
@@ -164,7 +170,7 @@ class ExoPlayerProvider : GraniteVideoProvider {
     }
 
     override fun unload() {
-        stopProgressUpdates()
+        progressScheduler.cancel()
         player?.stop()
         player?.clearMediaItems()
     }
@@ -180,17 +186,19 @@ class ExoPlayerProvider : GraniteVideoProvider {
     override fun pause() {
         player?.pause()
         _isPlaying = false
-        stopProgressUpdates()
+        progressScheduler.cancel()
         delegate?.onPlaybackStateChanged(isPlaying = false, isSeeking = false, isLooping = _shouldRepeat)
     }
 
     override fun seek(time: Double, tolerance: Double) {
+        _isSeeking = true
         delegate?.onPlaybackStateChanged(isPlaying = _isPlaying, isSeeking = true, isLooping = _shouldRepeat)
 
         val positionMs = (time * 1000).toLong()
         player?.seekTo(positionMs)
 
         delegate?.onSeek(currentTime = currentTime, seekTime = time)
+        _isSeeking = false
         delegate?.onPlaybackStateChanged(isPlaying = _isPlaying, isSeeking = false, isLooping = _shouldRepeat)
     }
 
@@ -351,94 +359,25 @@ class ExoPlayerProvider : GraniteVideoProvider {
     }
 
     private fun startProgressUpdates() {
-        stopProgressUpdates()
-
-        progressRunnable = object : Runnable {
-            override fun run() {
-                player?.let { p ->
-                    val progressData = GraniteVideoProgressData(
-                        currentTime = p.currentPosition / 1000.0,
-                        playableDuration = p.bufferedPosition / 1000.0,
-                        seekableDuration = p.duration / 1000.0
-                    )
-                    delegate?.onProgress(progressData)
-                }
-
-                mainHandler.postDelayed(this, 250)
+        progressScheduler.schedule(250) {
+            player?.let { p ->
+                val progressData = GraniteVideoProgressData(
+                    currentTime = p.currentPosition / 1000.0,
+                    playableDuration = p.bufferedPosition / 1000.0,
+                    seekableDuration = p.duration / 1000.0
+                )
+                delegate?.onProgress(progressData)
             }
-        }
-
-        mainHandler.post(progressRunnable!!)
-    }
-
-    private fun stopProgressUpdates() {
-        progressRunnable?.let { mainHandler.removeCallbacks(it) }
-        progressRunnable = null
-    }
-
-    // Player Listener
-    private val playerListener = object : Player.Listener {
-        override fun onPlaybackStateChanged(playbackState: Int) {
-            when (playbackState) {
-                Player.STATE_IDLE -> {
-                    delegate?.onIdle()
-                }
-                Player.STATE_BUFFERING -> {
-                    delegate?.onBuffer(true)
-                }
-                Player.STATE_READY -> {
-                    delegate?.onBuffer(false)
-
-                    val loadData = GraniteVideoLoadData(
-                        currentTime = currentTime,
-                        duration = duration,
-                        naturalWidth = player?.videoSize?.width?.toDouble() ?: 0.0,
-                        naturalHeight = player?.videoSize?.height?.toDouble() ?: 0.0,
-                        orientation = if ((player?.videoSize?.width ?: 0) > (player?.videoSize?.height ?: 0))
-                            "landscape" else "portrait"
-                    )
-                    delegate?.onLoad(loadData)
-                    delegate?.onReadyForDisplay()
-                }
-                Player.STATE_ENDED -> {
-                    delegate?.onEnd()
-                }
-            }
-        }
-
-        override fun onPlayerError(error: PlaybackException) {
-            val errorData = GraniteVideoErrorData(
-                code = error.errorCode,
-                domain = "ExoPlayer",
-                localizedDescription = error.message ?: "Unknown error",
-                errorString = error.errorCodeName
-            )
-            delegate?.onError(errorData)
-        }
-
-        override fun onVideoSizeChanged(videoSize: VideoSize) {
-            delegate?.onAspectRatioChanged(
-                width = videoSize.width.toDouble(),
-                height = videoSize.height.toDouble()
-            )
-        }
-
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            _isPlaying = isPlaying
-            delegate?.onPlaybackStateChanged(
-                isPlaying = isPlaying,
-                isSeeking = false,
-                isLooping = _shouldRepeat
-            )
         }
     }
 
     // Cleanup
-    fun release() {
-        stopProgressUpdates()
-        player?.removeListener(playerListener)
+    override fun release() {
+        progressScheduler.cancel()
+        eventListener?.let { player?.removeListener(it) }
         player?.release()
         player = null
+        eventListener = null
         surfaceView = null
         textureView = null
         playerView = null
