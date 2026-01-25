@@ -16,6 +16,7 @@ describe('intoShared', () => {
       })
     ).toEqual({
       react: { eager: true },
+      'react/jsx-runtime': { eager: true },
       'react-native': { eager: true },
       'react-native/Libraries/NativeComponent/NativeComponentRegistry': { eager: true },
       'react-native/Libraries/NativeComponent/NativeComponentRegistryUnstable': { eager: true },
@@ -25,6 +26,7 @@ describe('intoShared', () => {
 
     expect(intoShared(['react', 'react-native'])).toEqual({
       react: {},
+      'react/jsx-runtime': {},
       'react-native': {},
       'react-native/Libraries/NativeComponent/NativeComponentRegistry': {},
       'react-native/Libraries/NativeComponent/NativeComponentRegistryUnstable': {},
