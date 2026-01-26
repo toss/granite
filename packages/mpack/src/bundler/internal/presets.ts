@@ -6,14 +6,22 @@ import { getDefaultReactNativePath } from '../../utils/getDefaultReactNativePath
 export function getReactNativeSetupScripts({
   rootDir,
   reactNativePath = getDefaultReactNativePath(rootDir),
+  skipReactNativePolyfills = false,
+  skipReactNativeInitializeCore = false,
 }: {
   rootDir: string;
   reactNativePath?: string;
+  skipReactNativePolyfills?: boolean;
+  skipReactNativeInitializeCore?: boolean;
 }) {
-  return [
-    ...require(path.join(reactNativePath, 'rn-get-polyfills'))(),
-    path.join(reactNativePath, 'Libraries/Core/InitializeCore.js'),
-  ] as string[];
+  const polyfills = skipReactNativePolyfills
+    ? []
+    : (require(path.join(reactNativePath, 'rn-get-polyfills'))() as string[]);
+  const initializeCore = skipReactNativeInitializeCore
+    ? []
+    : [path.join(reactNativePath, 'Libraries/Core/InitializeCore.js')];
+
+  return [...polyfills, ...initializeCore] as string[];
 }
 
 export function globalVariables({ dev }: { dev: boolean }) {
@@ -46,6 +54,8 @@ export function combineWithBaseBuildConfig(
         prelude: getReactNativeSetupScripts({
           rootDir: context.rootDir,
           reactNativePath: config.buildConfig.reactNativePath,
+          skipReactNativePolyfills: config.buildConfig.extra?.skipReactNativePolyfills === true,
+          skipReactNativeInitializeCore: config.buildConfig.extra?.skipReactNativeInitializeCore === true,
         }),
         banner: {
           js: globalVariables({ dev: context.dev }),
