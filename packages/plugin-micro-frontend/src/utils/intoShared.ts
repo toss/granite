@@ -17,7 +17,7 @@ const SHARED_PRESETS: Record<string, string[]> = {
     'react-native/Libraries/Utilities/Platform',
     'react-native/Libraries/Utilities/defineLazyObjectProperty',
   ],
-  react: ['react/jsx-runtime'],
+  react: ['react/jsx-runtime', 'react/jsx-dev-runtime'],
 };
 
 export function intoShared(shared: MicroFrontendPluginOptions['shared']): SharedConfig | undefined {
