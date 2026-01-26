@@ -1,5 +1,11 @@
 # @granite-js/pulumi-aws
 
+## 1.0.0-next.87
+
+### Patch Changes
+
+- fix
+
 ## 1.0.0-next.86
 
 ### Patch Changes
