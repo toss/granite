@@ -1,35 +1,6 @@
-import * as path from 'path';
 import type { ResolverConfig } from '@granite-js/plugin-core';
-import { resolveReactNativeBasePath } from './utils/resolveReactNativeBasePath';
 
-const VIRTUAL_INITIALIZE_CORE_PROTOCOL = 'virtual-initialize-core';
 const VIRTUAL_SHARED_PROTOCOL = 'virtual-shared';
-
-export function virtualInitializeCoreConfig(reactNativeBasePath = resolveReactNativeBasePath()) {
-  const initializeCorePath = path.join(reactNativeBasePath, 'Libraries/Core/InitializeCore.js');
-
-  const alias: ResolverConfig['alias'] = [
-    {
-      // `InitializeCore.js` file is loaded by prelude script in mpack. so we need to prefix `prelude:` to resolve it.
-      from: `prelude:${initializeCorePath}`,
-      to: `${VIRTUAL_INITIALIZE_CORE_PROTOCOL}:noop`,
-      exact: false,
-    },
-  ];
-
-  const protocols: ResolverConfig['protocols'] = {
-    [VIRTUAL_INITIALIZE_CORE_PROTOCOL]: {
-      load: function virtualInitializeCoreProtocolLoader() {
-        return {
-          loader: 'js',
-          contents: `// noop`,
-        };
-      },
-    },
-  };
-
-  return { alias, protocols };
-}
 
 export function virtualSharedConfig<Entries extends [string, object]>(moduleEntries: Entries[]) {
   const alias: ResolverConfig['alias'] = moduleEntries.map(([libName]) => ({
