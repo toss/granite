@@ -2,17 +2,29 @@ import path from 'path';
 import { mergeBuildConfigs, type BuildConfig } from '@granite-js/plugin-core';
 import type { BundlerConfig } from '../../types';
 
-export function getReactNativeSetupScripts({ rootDir }: { rootDir: string }) {
+export function getReactNativeSetupScripts({
+  rootDir,
+  skipReactNativePolyfills = false,
+  skipReactNativeInitializeCore = false,
+}: {
+  rootDir: string;
+  skipReactNativePolyfills?: boolean;
+  skipReactNativeInitializeCore?: boolean;
+}) {
   const reactNativePath = path.dirname(
     require.resolve('react-native/package.json', {
       paths: [rootDir],
     })
   );
 
-  return [
-    ...require(path.join(reactNativePath, 'rn-get-polyfills'))(),
-    path.join(reactNativePath, 'Libraries/Core/InitializeCore.js'),
-  ] as string[];
+  const polyfills = skipReactNativePolyfills
+    ? []
+    : (require(path.join(reactNativePath, 'rn-get-polyfills'))() as string[]);
+  const initializeCore = skipReactNativeInitializeCore
+    ? []
+    : [path.join(reactNativePath, 'Libraries/Core/InitializeCore.js')];
+
+  return [...polyfills, ...initializeCore] as string[];
 }
 
 export function globalVariables({ dev }: { dev: boolean }) {
@@ -42,7 +54,11 @@ export function combineWithBaseBuildConfig(
       platform: config.buildConfig.platform,
       esbuild: {
         define: defineGlobalVariables({ dev: context.dev }),
-        prelude: getReactNativeSetupScripts({ rootDir: context.rootDir }),
+        prelude: getReactNativeSetupScripts({
+          rootDir: context.rootDir,
+          skipReactNativePolyfills: config.buildConfig.extra?.skipReactNativePolyfills === true,
+          skipReactNativeInitializeCore: config.buildConfig.extra?.skipReactNativeInitializeCore === true,
+        }),
         banner: {
           js: globalVariables({ dev: context.dev }),
         },
