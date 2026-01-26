@@ -4,7 +4,7 @@ import { GranitePluginCore } from '@granite-js/plugin-core';
 import { prepareLocalDirectory } from '@granite-js/utils';
 import { getPreludeConfig } from './prelude';
 import { fetchRemoteBundle } from './remote';
-import { virtualInitializeCoreConfig, virtualSharedConfig } from './resolver';
+import { virtualSharedConfig } from './resolver';
 import type { MicroFrontendPluginOptions } from './types';
 import { intoShared } from './utils/intoShared';
 
@@ -29,27 +29,20 @@ export const microFrontendPlugin = async (options: MicroFrontendPluginOptions): 
   }
 
   /**
-   * If importing `react-native` from the shared registry,
-   * `InitializeCore.js` must be excluded from the bundle to ensure the core is loaded only once per runtime.
+   * If importing `react-native` from the shared registry, skip its prelude scripts
+   * to ensure the core is loaded only once per runtime by the host.
    */
-  const shouldExcludeReactNativeInitializeCore = Boolean(
-    nonEagerEntries.find(([libName]) => libName === 'react-native')
-  );
+  const isReactNativeShared = Boolean(nonEagerEntries.find(([libName]) => libName === 'react-native'));
 
-  const virtualInitializeCore = shouldExcludeReactNativeInitializeCore
-    ? virtualInitializeCoreConfig(options.reactNativeBasePath)
-    : undefined;
   const virtualShared = virtualSharedConfig(nonEagerEntries);
 
   return {
     name: 'micro-frontend-plugin',
     config: {
+      extra: isReactNativeShared ? { skipReactNativePolyfills: true, skipReactNativeInitializeCore: true } : undefined,
       resolver: {
-        alias: [...(virtualInitializeCore?.alias ?? []), ...virtualShared.alias],
-        protocols: {
-          ...virtualInitializeCore?.protocols,
-          ...virtualShared.protocols,
-        },
+        alias: virtualShared.alias,
+        protocols: virtualShared.protocols,
       },
       esbuild: {
         prelude: [preludePath],
