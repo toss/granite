@@ -16,6 +16,7 @@ describe('intoShared', () => {
       })
     ).toEqual({
       react: { eager: true },
+      'react/jsx-runtime': { eager: true },
       'react-native': { eager: true },
       'react-native/Libraries/BatchedBridge/BatchedBridge': { eager: true },
       'react-native/Libraries/BatchedBridge/NativeModules': { eager: true },
@@ -35,6 +36,7 @@ describe('intoShared', () => {
 
     expect(intoShared(['react', 'react-native'])).toEqual({
       react: {},
+      'react/jsx-runtime': {},
       'react-native': {},
       'react-native/Libraries/BatchedBridge/BatchedBridge': {},
       'react-native/Libraries/BatchedBridge/NativeModules': {},
