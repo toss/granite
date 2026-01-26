@@ -1,11 +1,5 @@
 # @granite-js/lottie
 
-## 0.1.34-next.45
-
-### Patch Changes
-
-- fix
-
 ## 0.1.34-next.44
 
 ### Patch Changes
