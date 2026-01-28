@@ -22,6 +22,12 @@ export type OnErrorEvent = Readonly<{
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type OnLoadEndEvent = Readonly<{}>;
 
+export type OnGraniteLoadStartEvent = DirectEventHandler<OnLoadStartEvent>;
+export type OnGraniteProgressEvent = DirectEventHandler<OnProgressEvent>;
+export type OnGraniteLoadEvent = DirectEventHandler<OnLoadEvent>;
+export type OnGraniteErrorEvent = DirectEventHandler<OnErrorEvent>;
+export type OnGraniteLoadEndEvent = DirectEventHandler<OnLoadEndEvent>;
+
 interface GraniteImageProps extends ViewProps {
   // Source
   uri?: string;

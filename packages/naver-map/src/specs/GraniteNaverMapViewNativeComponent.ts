@@ -3,28 +3,33 @@ import type { DirectEventHandler, Double, Float, Int32, WithDefault } from 'reac
 import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 
-// Event types - simplified for Codegen compatibility
-type CameraChangeEvent = Readonly<{
+// ============================================================
+// Event Types
+// ============================================================
+
+export type OnCameraChangeEvent = Readonly<{
   latitude: Double;
   longitude: Double;
   zoom: Double;
 }>;
 
-type TouchEvent = Readonly<{
+export type OnTouchEvent = Readonly<{
   reason: Int32;
   animated: boolean;
 }>;
 
-type MapClickEvent = Readonly<{
+export type OnMapClickEvent = Readonly<{
   x: Double;
   y: Double;
   latitude: Double;
   longitude: Double;
 }>;
 
-type MarkerClickEvent = Readonly<{
+export type OnMarkerClickEvent = Readonly<{
   id: string;
 }>;
+
+export type OnInitializedEvent = Readonly<{}>;
 
 // Center prop type
 type CenterProp = Readonly<{
@@ -70,12 +75,11 @@ export interface NativeProps extends ViewProps {
   stopGesturesEnabled?: WithDefault<boolean, true>;
 
   // Events
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  onInitialized?: DirectEventHandler<Readonly<{}>>;
-  onCameraChange?: DirectEventHandler<CameraChangeEvent>;
-  onTouch?: DirectEventHandler<TouchEvent>;
-  onMapClick?: DirectEventHandler<MapClickEvent>;
-  onMarkerClick?: DirectEventHandler<MarkerClickEvent>;
+  onInitialized?: DirectEventHandler<OnInitializedEvent>;
+  onCameraChange?: DirectEventHandler<OnCameraChangeEvent>;
+  onTouch?: DirectEventHandler<OnTouchEvent>;
+  onMapClick?: DirectEventHandler<OnMapClickEvent>;
+  onMarkerClick?: DirectEventHandler<OnMarkerClickEvent>;
 }
 
 type ComponentType = HostComponent<NativeProps>;

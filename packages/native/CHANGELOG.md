@@ -1,21 +1,34 @@
 # @granite-js/native
 
+<<<<<<< HEAD
 ## 1.0.0-next.87
+=======
+## 0.1.34-next.46
+>>>>>>> feature/rn81
 
 ### Patch Changes
 
 - fix
 - Updated dependencies
+<<<<<<< HEAD
   - @granite-js/lottie@1.0.0-next.87
   - @granite-js/image@1.0.0-next.87
   - @granite-js/video@1.0.0-next.87
 
 ## 1.0.0-next.86
+=======
+  - @granite-js/lottie@0.1.34-next.46
+  - @granite-js/image@0.1.34-next.46
+  - @granite-js/video@0.1.34-next.46
+
+## 0.1.34-next.45
+>>>>>>> feature/rn81
 
 ### Patch Changes
 
 - fix
 - Updated dependencies
+<<<<<<< HEAD
   - @granite-js/lottie@1.0.0-next.86
   - @granite-js/image@1.0.0-next.86
   - @granite-js/video@1.0.0-next.86
@@ -29,6 +42,11 @@
   - @granite-js/lottie@1.0.0-next.85
   - @granite-js/image@1.0.0-next.85
   - @granite-js/video@1.0.0-next.85
+=======
+  - @granite-js/lottie@0.1.34-next.45
+  - @granite-js/image@0.1.34-next.45
+  - @granite-js/video@0.1.34-next.45
+>>>>>>> feature/rn81
 
 ## 0.1.34-next.44
 

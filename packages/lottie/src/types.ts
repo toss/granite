@@ -1,4 +1,5 @@
-import type { ViewStyle, StyleProp } from 'react-native';
+import type { ViewStyle, StyleProp, NativeSyntheticEvent } from 'react-native';
+import { OnAnimationFailureEvent, OnAnimationFinishEvent } from './GraniteLottieViewNativeComponent';
 
 /**
  * Represents a serialized animation generated from After Effects
@@ -176,12 +177,12 @@ export interface LottieViewProps {
   /**
    * Callback when animation finishes
    */
-  onAnimationFinish?: (event: AnimationFinishEvent) => void;
+  onAnimationFinish?: (event: NativeSyntheticEvent<OnAnimationFinishEvent>) => void;
 
   /**
    * Callback when animation fails to load
    */
-  onAnimationFailure?: (event: AnimationFailureEvent) => void;
+  onAnimationFailure?: (event: NativeSyntheticEvent<OnAnimationFailureEvent>) => void;
 
   /**
    * Callback when animation is loaded

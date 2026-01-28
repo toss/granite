@@ -1,21 +1,34 @@
 # @granite-js/cli
 
+<<<<<<< HEAD
 ## 1.0.0-next.87
+=======
+## 0.1.34-next.46
+>>>>>>> feature/rn81
 
 ### Patch Changes
 
 - fix
 - Updated dependencies
+<<<<<<< HEAD
   - @granite-js/plugin-core@1.0.0-next.87
   - @granite-js/mpack@1.0.0-next.87
   - @granite-js/utils@1.0.0-next.87
 
 ## 1.0.0-next.86
+=======
+  - @granite-js/plugin-core@0.1.34-next.46
+  - @granite-js/mpack@0.1.34-next.46
+  - @granite-js/utils@0.1.34-next.46
+
+## 0.1.34-next.45
+>>>>>>> feature/rn81
 
 ### Patch Changes
 
 - fix
 - Updated dependencies
+<<<<<<< HEAD
   - @granite-js/plugin-core@1.0.0-next.86
   - @granite-js/mpack@1.0.0-next.86
   - @granite-js/utils@1.0.0-next.86
@@ -29,6 +42,11 @@
   - @granite-js/plugin-core@1.0.0-next.85
   - @granite-js/mpack@1.0.0-next.85
   - @granite-js/utils@1.0.0-next.85
+=======
+  - @granite-js/plugin-core@0.1.34-next.45
+  - @granite-js/mpack@0.1.34-next.45
+  - @granite-js/utils@0.1.34-next.45
+>>>>>>> feature/rn81
 
 ## 0.1.34-next.44
 

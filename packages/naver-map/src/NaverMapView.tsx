@@ -2,24 +2,13 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Platform, View, type NativeSyntheticEvent, type StyleProp, type ViewStyle } from 'react-native';
 import { MapContext } from './internals/context';
 import type { MarkerEventListeners } from './overlays/Marker';
-import GraniteNaverMapViewNativeComponent from './specs/GraniteNaverMapViewNativeComponent';
-import type { Coord } from './types/Coord';
-
-export interface CameraChangeEvent extends Coord {
-  zoom: number;
-}
-
-export interface TouchEvent {
-  reason: number;
-  animated: boolean;
-}
-
-export interface MapClickEvent {
-  x: number;
-  y: number;
-  latitude: number;
-  longitude: number;
-}
+import GraniteNaverMapViewNativeComponent, {
+  OnCameraChangeEvent,
+  OnTouchEvent,
+  OnMapClickEvent,
+  OnMarkerClickEvent,
+} from './specs/GraniteNaverMapViewNativeComponent';
+import type { Coord } from './types';
 
 export interface MapViewProps {
   style?: StyleProp<ViewStyle>;
@@ -51,35 +40,12 @@ export interface MapViewProps {
   tiltGesturesEnabled?: boolean;
   rotateGesturesEnabled?: boolean;
   stopGesturesEnabled?: boolean;
-  onCameraChange?: (ev: CameraChangeEvent) => void;
-  onTouch?: (ev: TouchEvent) => void;
-  onMapClick?: (ev: MapClickEvent) => void;
+  onCameraChange?: (event: NativeSyntheticEvent<OnCameraChangeEvent>) => void;
+  onTouch?: (event: NativeSyntheticEvent<OnTouchEvent>) => void;
+  onMapClick?: (event: NativeSyntheticEvent<OnMapClickEvent>) => void;
+  onInitialized?: () => void;
   children?: React.ReactNode;
 }
-
-type NativeCameraChangeEvent = NativeSyntheticEvent<
-  Readonly<{
-    latitude: number;
-    longitude: number;
-    zoom: number;
-  }>
->;
-
-type NativeTouchEvent = NativeSyntheticEvent<{
-  reason: number;
-  animated: boolean;
-}>;
-
-type NativeMapClickEvent = NativeSyntheticEvent<{
-  x: number;
-  y: number;
-  latitude: number;
-  longitude: number;
-}>;
-
-type NativeMarkerClickEvent = NativeSyntheticEvent<{
-  id: string;
-}>;
 
 /**
  * Avoid View Flattening issue on Android
@@ -106,6 +72,7 @@ export function NaverMapView({
   onTouch,
   onMapClick,
   onCameraChange,
+  onInitialized,
   children,
   center,
   mapPadding,
@@ -115,33 +82,28 @@ export function NaverMapView({
   const [isReady, setIsReady] = useState(false);
   const markersRef = useRef<Map<string, MarkerEventListeners>>(new Map());
 
-  const onMarkerClick = useCallback((event: NativeMarkerClickEvent) => {
+  const onMarkerClick = useCallback((event: NativeSyntheticEvent<OnMarkerClickEvent>) => {
     const marker = markersRef.current.get(event.nativeEvent.id);
     marker?.onPress?.();
   }, []);
 
   const handleCameraChange = useCallback(
-    (event: NativeCameraChangeEvent) => {
-      const { latitude, longitude, zoom } = event.nativeEvent;
-      onCameraChange?.({
-        latitude,
-        longitude,
-        zoom,
-      });
+    (event: NativeSyntheticEvent<OnCameraChangeEvent>) => {
+      onCameraChange?.(event);
     },
     [onCameraChange]
   );
 
   const handleTouch = useCallback(
-    (event: NativeTouchEvent) => {
-      onTouch?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnTouchEvent>) => {
+      onTouch?.(event);
     },
     [onTouch]
   );
 
   const handleMapClick = useCallback(
-    (event: NativeMapClickEvent) => {
-      onMapClick?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnMapClickEvent>) => {
+      onMapClick?.(event);
     },
     [onMapClick]
   );
@@ -149,7 +111,8 @@ export function NaverMapView({
   const handleInitialized = useCallback(() => {
     console.log('[NaverMapView] handleInitialized called - setting isReady to true');
     setIsReady(true);
-  }, []);
+    onInitialized?.();
+  }, [onInitialized]);
 
   const mapContext = useMemo(
     () => (isReady && mapRef.current ? { mapView: mapRef.current, markers: markersRef.current } : null),

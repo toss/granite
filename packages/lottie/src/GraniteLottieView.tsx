@@ -1,14 +1,12 @@
 import React, { forwardRef, useImperativeHandle, useRef, useCallback, useMemo } from 'react';
 import { Image, type NativeSyntheticEvent, Platform } from 'react-native';
-import NativeGraniteLottieView, { Commands, type NativeProps } from './GraniteLottieViewNativeComponent';
-import type {
-  LottieViewProps,
-  LottieViewRef,
-  AnimationSource,
-  AnimationObject,
-  AnimationFinishEvent,
-  AnimationFailureEvent,
-} from './types';
+import NativeGraniteLottieView, {
+  Commands,
+  OnAnimationFailureEvent,
+  OnAnimationFinishEvent,
+  type NativeProps,
+} from './GraniteLottieViewNativeComponent';
+import type { LottieViewProps, LottieViewRef, AnimationSource, AnimationObject } from './types';
 
 // Helper to resolve animation source
 function resolveSource(source: AnimationSource): {
@@ -117,15 +115,15 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
 
   // Event handlers
   const handleAnimationFinish = useCallback(
-    (event: NativeSyntheticEvent<{ isCancelled: boolean }>) => {
-      onAnimationFinish?.(event.nativeEvent as AnimationFinishEvent);
+    (event: NativeSyntheticEvent<OnAnimationFinishEvent>) => {
+      onAnimationFinish?.(event);
     },
     [onAnimationFinish]
   );
 
   const handleAnimationFailure = useCallback(
-    (event: NativeSyntheticEvent<{ error: string }>) => {
-      onAnimationFailure?.(event.nativeEvent as AnimationFailureEvent);
+    (event: NativeSyntheticEvent<OnAnimationFailureEvent>) => {
+      onAnimationFailure?.(event);
     },
     [onAnimationFailure]
   );

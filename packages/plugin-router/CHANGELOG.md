@@ -1,19 +1,30 @@
 # @granite-js/plugin-router
 
+<<<<<<< HEAD
 ## 1.0.0-next.87
+=======
+## 0.1.34-next.46
+>>>>>>> feature/rn81
 
 ### Patch Changes
 
 - fix
 - Updated dependencies
+<<<<<<< HEAD
   - @granite-js/plugin-core@1.0.0-next.87
 
 ## 1.0.0-next.86
+=======
+  - @granite-js/plugin-core@0.1.34-next.46
+
+## 0.1.34-next.45
+>>>>>>> feature/rn81
 
 ### Patch Changes
 
 - fix
 - Updated dependencies
+<<<<<<< HEAD
   - @granite-js/plugin-core@1.0.0-next.86
 
 ## 1.0.0-next.85
@@ -23,6 +34,9 @@
 - fix
 - Updated dependencies
   - @granite-js/plugin-core@1.0.0-next.85
+=======
+  - @granite-js/plugin-core@0.1.34-next.45
+>>>>>>> feature/rn81
 
 ## 0.1.34-next.44
 

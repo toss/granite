@@ -1,4 +1,21 @@
-import type { StyleProp, ViewStyle, ImageSourcePropType } from 'react-native';
+import type { StyleProp, ViewStyle, ImageSourcePropType, NativeSyntheticEvent } from 'react-native';
+import type {
+  OnVideoLoadStartEvent,
+  OnVideoLoadEvent,
+  OnVideoErrorEvent,
+  OnVideoProgressEvent,
+  OnVideoSeekEvent,
+  OnVideoBufferEvent,
+  OnVideoBandwidthUpdateEvent,
+  OnVideoPlaybackStateChangedEvent,
+  OnVideoPlaybackRateChangeEvent,
+  OnVideoVolumeChangeEvent,
+  OnVideoAudioFocusChangedEvent,
+  OnVideoPictureInPictureStatusChangedEvent,
+  OnVideoControlsVisibilityChangeEvent,
+  OnVideoExternalPlaybackChangeEvent,
+  OnVideoAspectRatioEvent,
+} from './GraniteVideoNativeComponent';
 
 // ============================================================
 // Source Types
@@ -359,21 +376,69 @@ export interface VideoProps {
 
   // === Events ===
 
-  // Load Events
-  onLoadStart?: (data: OnLoadStartData) => void;
-  onLoad?: (data: OnLoadData) => void;
-  onError?: (data: OnVideoErrorData) => void;
+  /**
+   * Callback when video starts loading
+   */
+  onLoadStart?: (event: NativeSyntheticEvent<OnVideoLoadStartEvent>) => void;
 
-  // Playback Events
-  onProgress?: (data: OnProgressData) => void;
-  onSeek?: (data: OnSeekData) => void;
+  /**
+   * Callback when video is loaded
+   */
+  onLoad?: (event: NativeSyntheticEvent<OnVideoLoadEvent>) => void;
+
+  /**
+   * Callback when video fails to load
+   */
+  onError?: (event: NativeSyntheticEvent<OnVideoErrorEvent>) => void;
+
+  /**
+   * Callback during video playback progress
+   */
+  onProgress?: (event: NativeSyntheticEvent<OnVideoProgressEvent>) => void;
+
+  /**
+   * Callback when video seek completes
+   */
+  onSeek?: (event: NativeSyntheticEvent<OnVideoSeekEvent>) => void;
+
+  /**
+   * Callback when video ends
+   */
   onEnd?: () => void;
-  onBuffer?: (data: OnBufferData) => void;
-  onBandwidthUpdate?: (data: OnBandwidthUpdateData) => void;
-  onPlaybackStateChanged?: (data: OnPlaybackStateChangedData) => void;
-  onPlaybackRateChange?: (data: OnPlaybackRateChangeData) => void;
-  onVolumeChange?: (data: OnVolumeChangeData) => void;
+
+  /**
+   * Callback when video buffering state changes
+   */
+  onBuffer?: (event: NativeSyntheticEvent<OnVideoBufferEvent>) => void;
+
+  /**
+   * Callback when video bandwidth updates
+   */
+  onBandwidthUpdate?: (event: NativeSyntheticEvent<OnVideoBandwidthUpdateEvent>) => void;
+
+  /**
+   * Callback when playback state changes
+   */
+  onPlaybackStateChanged?: (event: NativeSyntheticEvent<OnVideoPlaybackStateChangedEvent>) => void;
+
+  /**
+   * Callback when playback rate changes
+   */
+  onPlaybackRateChange?: (event: NativeSyntheticEvent<OnVideoPlaybackRateChangeEvent>) => void;
+
+  /**
+   * Callback when volume changes
+   */
+  onVolumeChange?: (event: NativeSyntheticEvent<OnVideoVolumeChangeEvent>) => void;
+
+  /**
+   * Callback when video becomes idle
+   */
   onIdle?: () => void;
+
+  /**
+   * Callback when video is ready for display
+   */
   onReadyForDisplay?: () => void;
 
   // Track Events
@@ -382,27 +447,61 @@ export interface VideoProps {
   onTextTrackDataChanged?: (data: OnTextTrackDataChangedData) => void;
   onVideoTracks?: (data: OnVideoTracksData) => void;
   onTimedMetadata?: (data: OnTimedMetadataData) => void;
-  onAspectRatio?: (data: OnVideoAspectRatioData) => void;
 
-  // Focus Events (Android)
-  onAudioFocusChanged?: (data: OnAudioFocusChangedData) => void;
+  /**
+   * Callback when video aspect ratio changes
+   */
+  onAspectRatio?: (event: NativeSyntheticEvent<OnVideoAspectRatioEvent>) => void;
+
+  /**
+   * Callback when audio focus changes
+   */
+  onAudioFocusChanged?: (event: NativeSyntheticEvent<OnVideoAudioFocusChangedEvent>) => void;
+
+  /**
+   * Callback when audio becomes noisy
+   */
   onAudioBecomingNoisy?: () => void;
 
-  // Fullscreen Events
+  /**
+   * Callback before fullscreen player presents
+   */
   onFullscreenPlayerWillPresent?: () => void;
+
+  /**
+   * Callback after fullscreen player presents
+   */
   onFullscreenPlayerDidPresent?: () => void;
+
+  /**
+   * Callback before fullscreen player dismisses
+   */
   onFullscreenPlayerWillDismiss?: () => void;
+
+  /**
+   * Callback after fullscreen player dismisses
+   */
   onFullscreenPlayerDidDismiss?: () => void;
 
-  // PIP Events
-  onPictureInPictureStatusChanged?: (data: OnPictureInPictureStatusChangedData) => void;
+  /**
+   * Callback when picture-in-picture status changes
+   */
+  onPictureInPictureStatusChanged?: (event: NativeSyntheticEvent<OnVideoPictureInPictureStatusChangedEvent>) => void;
+
+  /**
+   * Callback to restore user interface for picture-in-picture stop
+   */
   onRestoreUserInterfaceForPictureInPictureStop?: () => void;
 
-  // Control Events
-  onControlsVisibilityChange?: (data: OnControlsVisibilityChangeData) => void;
+  /**
+   * Callback when controls visibility changes
+   */
+  onControlsVisibilityChange?: (event: NativeSyntheticEvent<OnVideoControlsVisibilityChangeEvent>) => void;
 
-  // External Playback Events (iOS)
-  onExternalPlaybackChange?: (data: OnExternalPlaybackChangeData) => void;
+  /**
+   * Callback when external playback changes
+   */
+  onExternalPlaybackChange?: (event: NativeSyntheticEvent<OnVideoExternalPlaybackChangeEvent>) => void;
 
   // Ad Events
   onReceiveAdEvent?: (data: OnReceiveAdEventData) => void;
