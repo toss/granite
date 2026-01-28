@@ -6,10 +6,16 @@ export {
   type GraniteImageSource,
   type GraniteImageStatic,
   type Priority,
-  type OnLoadEventData,
-  type OnProgressEventData,
   type ResizeMode,
   type CachePolicy,
 } from './GraniteImage';
+
+export {
+  type OnLoadEvent,
+  type OnProgressEvent,
+  type OnLoadEndEvent,
+  type OnErrorEvent,
+  type OnLoadStartEvent,
+} from './GraniteImageNativeComponent';
 
 export default GraniteImage;

@@ -1,6 +1,6 @@
-import LottieView, { type AnimationObject } from '@granite-js/lottie';
+import LottieView, { type AnimationObject, type OnAnimationFailureEvent } from '@granite-js/lottie';
 import type { ComponentProps } from 'react';
-import { View } from 'react-native';
+import { View, type NativeSyntheticEvent } from 'react-native';
 import { ensureSafeLottie, hasFonts } from './ensureSafeLottie';
 import { useFetchResource } from './useFetchResource';
 
@@ -33,7 +33,13 @@ export function Lottie({
   onAnimationFailure,
   ...props
 }: RemoteLottieProps) {
-  const jsonData = useFetchResource(src, onAnimationFailure);
+  const handleAnimationFailure = onAnimationFailure
+    ? (event: { error: string }) => {
+        onAnimationFailure({ nativeEvent: event } as NativeSyntheticEvent<OnAnimationFailureEvent>);
+      }
+    : undefined;
+
+  const jsonData = useFetchResource(src, handleAnimationFailure);
 
   if (jsonData == null) {
     return <View testID="lottie-placeholder" style={[{ opacity: 1, width, height }, style]} />;
