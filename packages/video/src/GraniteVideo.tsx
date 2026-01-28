@@ -8,7 +8,8 @@ import {
   NativeModules,
   type StyleProp,
   type ViewStyle,
-type  NativeSyntheticEvent } from 'react-native';
+  type NativeSyntheticEvent,
+} from 'react-native';
 import NativeGraniteVideoView, {
   Commands,
   type NativeProps,
@@ -28,11 +29,7 @@ import NativeGraniteVideoView, {
   OnVideoExternalPlaybackChangeEvent,
   OnVideoAspectRatioEvent,
 } from './GraniteVideoNativeComponent';
-import type {
-  VideoRef,
-  VideoSource,
-  VideoProps,
-} from './types';
+import type { VideoRef, VideoSource, VideoProps } from './types';
 
 const { GraniteVideoModule } = NativeModules;
 

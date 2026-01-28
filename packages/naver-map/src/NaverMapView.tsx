@@ -82,13 +82,10 @@ export function NaverMapView({
   const [isReady, setIsReady] = useState(false);
   const markersRef = useRef<Map<string, MarkerEventListeners>>(new Map());
 
-  const onMarkerClick = useCallback(
-    (event: NativeSyntheticEvent<OnMarkerClickEvent>) => {
-      const marker = markersRef.current.get(event.nativeEvent.id);
-      marker?.onPress?.();
-    },
-    []
-  );
+  const onMarkerClick = useCallback((event: NativeSyntheticEvent<OnMarkerClickEvent>) => {
+    const marker = markersRef.current.get(event.nativeEvent.id);
+    marker?.onPress?.();
+  }, []);
 
   const handleCameraChange = useCallback(
     (event: NativeSyntheticEvent<OnCameraChangeEvent>) => {

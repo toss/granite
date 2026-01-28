@@ -6,12 +6,7 @@ import NativeGraniteLottieView, {
   OnAnimationFinishEvent,
   type NativeProps,
 } from './GraniteLottieViewNativeComponent';
-import type {
-  LottieViewProps,
-  LottieViewRef,
-  AnimationSource,
-  AnimationObject,
-} from './types';
+import type { LottieViewProps, LottieViewRef, AnimationSource, AnimationObject } from './types';
 
 // Helper to resolve animation source
 function resolveSource(source: AnimationSource): {
