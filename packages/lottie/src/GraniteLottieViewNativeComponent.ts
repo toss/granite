@@ -25,6 +25,18 @@ interface TextFilterAndroidNative {
   replace: string;
 }
 
+export type OnAnimationFinishEvent = Readonly<{
+  isCancelled: boolean;
+}>;
+
+export type OnAnimationFailureEvent = Readonly<{
+  error: string;
+}>;
+
+export type OnAnimationLoadedEvent = Readonly<{}>;
+
+export type OnAnimationLoopEvent = Readonly<{}>;
+
 export interface NativeProps extends ViewProps {
   // Animation source
   sourceName?: string;
@@ -55,14 +67,10 @@ export interface NativeProps extends ViewProps {
   textFiltersAndroid?: ReadonlyArray<TextFilterAndroidNative>;
 
   // Events
-  onAnimationFinish?: DirectEventHandler<{
-    isCancelled: boolean;
-  }>;
-  onAnimationFailure?: DirectEventHandler<{
-    error: string;
-  }>;
-  onAnimationLoaded?: DirectEventHandler<null>;
-  onAnimationLoop?: DirectEventHandler<null>;
+  onAnimationFinish?: DirectEventHandler<OnAnimationFinishEvent>;
+  onAnimationFailure?: DirectEventHandler<OnAnimationFailureEvent>;
+  onAnimationLoaded?: DirectEventHandler<OnAnimationLoadedEvent>;
+  onAnimationLoop?: DirectEventHandler<OnAnimationLoopEvent>;
 }
 
 export interface NativeCommands {

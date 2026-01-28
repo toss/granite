@@ -1,5 +1,11 @@
-import GraniteImage, { GraniteImageProps, type GraniteImageSource } from '@granite-js/image';
-import { StyleSheet } from 'react-native';
+import GraniteImage, {
+  GraniteImageProps,
+  OnErrorEvent,
+  OnLoadEndEvent,
+  OnLoadStartEvent,
+  type GraniteImageSource,
+} from '@granite-js/image';
+import { NativeSyntheticEvent, StyleSheet } from 'react-native';
 import { SvgImage } from './SvgImage';
 
 type Source = {
@@ -11,7 +17,10 @@ type Source = {
 
 export interface ImageProps extends Omit<GraniteImageProps, 'source' | 'onError'> {
   source?: Source;
-  onError?: () => void;
+
+  onLoadStart?: (event: NativeSyntheticEvent<OnLoadStartEvent> | Readonly<{ type: 'svg' }>) => void;
+  onLoadEnd?: (event: NativeSyntheticEvent<OnLoadEndEvent> | Readonly<{ type: 'svg' }>) => void;
+  onError?: (event: NativeSyntheticEvent<OnErrorEvent> | Readonly<{ type: 'svg' }>) => void;
 }
 
 /**
@@ -82,9 +91,9 @@ function Image(props: ImageProps) {
         width={width}
         height={height}
         style={props.style}
-        onLoadStart={props.onLoadStart}
-        onLoadEnd={props.onLoadEnd}
-        onError={props.onError}
+        onLoadStart={props.onLoadStart ? (e) => props.onLoadStart?.({ type: 'svg', ...e }) : undefined}
+        onLoadEnd={props.onLoadEnd ? (e) => props.onLoadEnd?.({ type: 'svg', ...e }) : undefined}
+        onError={props.onError ? () => props.onError?.({ type: 'svg' }) : undefined}
       />
     );
   }
@@ -104,7 +113,13 @@ function Image(props: ImageProps) {
     return null;
   }
 
-  return <GraniteImage {...props} source={source} onError={props.onError ? () => props.onError?.() : undefined} />;
+  const handleError = props.onError
+    ? (event: NativeSyntheticEvent<OnErrorEvent>) => {
+        props.onError?.(event);
+      }
+    : undefined;
+
+  return <GraniteImage {...props} source={source} onError={handleError} />;
 }
 
 export { Image };

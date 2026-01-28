@@ -6,6 +6,7 @@ import {
   type ImageRequireSource,
   NativeModules,
   ViewProps,
+  NativeSyntheticEvent,
 } from 'react-native';
 import GraniteImageNativeComponent, {
   type OnLoadStartEvent,
@@ -29,16 +30,6 @@ export type ResizeMode = 'cover' | 'contain' | 'stretch' | 'center';
 export type CachePolicy = 'memory' | 'disk' | 'none';
 export type Priority = 'low' | 'normal' | 'high';
 
-export interface OnLoadEventData {
-  width: number;
-  height: number;
-}
-
-export interface OnProgressEventData {
-  loaded: number;
-  total: number;
-}
-
 export interface GraniteImageProps extends ViewProps {
   // Source - can be string URI or source object
   source: GraniteImageSource | string;
@@ -59,11 +50,11 @@ export interface GraniteImageProps extends ViewProps {
   cachePolicy?: CachePolicy;
 
   // Callbacks
-  onLoadStart?: (event: OnLoadStartEvent) => void;
-  onProgress?: (event: OnProgressEventData) => void;
-  onLoad?: (event: OnLoadEventData) => void;
-  onError?: (error: { nativeEvent: { error: string } }) => void;
-  onLoadEnd?: (event: OnLoadEndEvent) => void;
+  onLoadStart?: (event: NativeSyntheticEvent<OnLoadStartEvent>) => void;
+  onProgress?: (event: NativeSyntheticEvent<OnProgressEvent>) => void;
+  onLoad?: (event: NativeSyntheticEvent<OnLoadEvent>) => void;
+  onError?: (error: NativeSyntheticEvent<OnErrorEvent>) => void;
+  onLoadEnd?: (event: NativeSyntheticEvent<OnLoadEndEvent>) => void;
 }
 
 // Map resizeMode to contentMode for native
@@ -160,41 +151,35 @@ const GraniteImageBase: React.FC<GraniteImageProps> = ({
 
   // Event handlers
   const handleLoadStart = useCallback(
-    (event: { nativeEvent: OnLoadStartEvent }) => {
+    (event: NativeSyntheticEvent<OnLoadStartEvent>) => {
       onLoadStart?.(event);
     },
     [onLoadStart]
   );
 
   const handleProgress = useCallback(
-    (event: { nativeEvent: OnProgressEvent }) => {
-      onProgress?.({
-        loaded: event.nativeEvent.loaded,
-        total: event.nativeEvent.total,
-      });
+    (event: NativeSyntheticEvent<OnProgressEvent>) => {
+      onProgress?.(event);
     },
     [onProgress]
   );
 
   const handleLoad = useCallback(
-    (event: { nativeEvent: OnLoadEvent }) => {
-      onLoad?.({
-        width: event.nativeEvent.width,
-        height: event.nativeEvent.height,
-      });
+    (event: NativeSyntheticEvent<OnLoadEvent>) => {
+      onLoad?.(event);
     },
     [onLoad]
   );
 
   const handleError = useCallback(
-    (event: { nativeEvent: OnErrorEvent }) => {
-      onError?.({ nativeEvent: { error: event.nativeEvent.error } });
+    (event: NativeSyntheticEvent<OnErrorEvent>) => {
+      onError?.(event);
     },
     [onError]
   );
 
   const handleLoadEnd = useCallback(
-    (event: { nativeEvent: OnLoadEndEvent }) => {
+    (event: NativeSyntheticEvent<OnLoadEndEvent>) => {
       onLoadEnd?.(event);
     },
     [onLoadEnd]

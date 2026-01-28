@@ -8,8 +8,8 @@ export {
   type ResizeMode,
   type CachePolicy,
   type Priority,
-  type OnLoadEventData,
-  type OnProgressEventData,
+  type OnLoadEvent,
+  type OnProgressEvent,
 } from '@granite-js/image';
 
 // Image with SVG support
