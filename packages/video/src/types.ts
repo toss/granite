@@ -112,8 +112,6 @@ export interface OnLoadStartData {
   uri: string;
 }
 
-type NativeEvent<T extends object> = T & { nativeEvent: T };
-
 export interface OnLoadData {
   currentTime: number;
   duration: number;
@@ -362,32 +360,32 @@ export interface VideoProps {
   // === Events ===
 
   // Load Events
-  onLoadStart?: (data: NativeEvent<OnLoadStartData>) => void;
-  onLoad?: (data: NativeEvent<OnLoadData>) => void;
-  onError?: (data: NativeEvent<OnVideoErrorData>) => void;
+  onLoadStart?: (data: OnLoadStartData) => void;
+  onLoad?: (data: OnLoadData) => void;
+  onError?: (data: OnVideoErrorData) => void;
 
   // Playback Events
-  onProgress?: (data: NativeEvent<OnProgressData>) => void;
-  onSeek?: (data: NativeEvent<OnSeekData>) => void;
+  onProgress?: (data: OnProgressData) => void;
+  onSeek?: (data: OnSeekData) => void;
   onEnd?: () => void;
-  onBuffer?: (data: NativeEvent<OnBufferData>) => void;
-  onBandwidthUpdate?: (data: NativeEvent<OnBandwidthUpdateData>) => void;
-  onPlaybackStateChanged?: (data: NativeEvent<OnPlaybackStateChangedData>) => void;
-  onPlaybackRateChange?: (data: NativeEvent<OnPlaybackRateChangeData>) => void;
-  onVolumeChange?: (data: NativeEvent<OnVolumeChangeData>) => void;
+  onBuffer?: (data: OnBufferData) => void;
+  onBandwidthUpdate?: (data: OnBandwidthUpdateData) => void;
+  onPlaybackStateChanged?: (data: OnPlaybackStateChangedData) => void;
+  onPlaybackRateChange?: (data: OnPlaybackRateChangeData) => void;
+  onVolumeChange?: (data: OnVolumeChangeData) => void;
   onIdle?: () => void;
   onReadyForDisplay?: () => void;
 
   // Track Events
-  onAudioTracks?: (data: NativeEvent<OnAudioTracksData>) => void;
-  onTextTracks?: (data: NativeEvent<OnTextTracksData>) => void;
-  onTextTrackDataChanged?: (data: NativeEvent<OnTextTrackDataChangedData>) => void;
-  onVideoTracks?: (data: NativeEvent<OnVideoTracksData>) => void;
-  onTimedMetadata?: (data: NativeEvent<OnTimedMetadataData>) => void;
-  onAspectRatio?: (data: NativeEvent<OnVideoAspectRatioData>) => void;
+  onAudioTracks?: (data: OnAudioTracksData) => void;
+  onTextTracks?: (data: OnTextTracksData) => void;
+  onTextTrackDataChanged?: (data: OnTextTrackDataChangedData) => void;
+  onVideoTracks?: (data: OnVideoTracksData) => void;
+  onTimedMetadata?: (data: OnTimedMetadataData) => void;
+  onAspectRatio?: (data: OnVideoAspectRatioData) => void;
 
   // Focus Events (Android)
-  onAudioFocusChanged?: (data: NativeEvent<OnAudioFocusChangedData>) => void;
+  onAudioFocusChanged?: (data: OnAudioFocusChangedData) => void;
   onAudioBecomingNoisy?: () => void;
 
   // Fullscreen Events
@@ -397,17 +395,17 @@ export interface VideoProps {
   onFullscreenPlayerDidDismiss?: () => void;
 
   // PIP Events
-  onPictureInPictureStatusChanged?: (data: NativeEvent<OnPictureInPictureStatusChangedData>) => void;
+  onPictureInPictureStatusChanged?: (data: OnPictureInPictureStatusChangedData) => void;
   onRestoreUserInterfaceForPictureInPictureStop?: () => void;
 
   // Control Events
-  onControlsVisibilityChange?: (data: NativeEvent<OnControlsVisibilityChangeData>) => void;
+  onControlsVisibilityChange?: (data: OnControlsVisibilityChangeData) => void;
 
   // External Playback Events (iOS)
-  onExternalPlaybackChange?: (data: NativeEvent<OnExternalPlaybackChangeData>) => void;
+  onExternalPlaybackChange?: (data: OnExternalPlaybackChangeData) => void;
 
   // Ad Events
-  onReceiveAdEvent?: (data: NativeEvent<OnReceiveAdEventData>) => void;
+  onReceiveAdEvent?: (data: OnReceiveAdEventData) => void;
 }
 
 // ============================================================

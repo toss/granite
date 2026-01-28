@@ -33,13 +33,6 @@ import type {
 
 const { GraniteVideoModule } = NativeModules;
 
-type WithNativeEvent<T extends object> = T & { nativeEvent: T };
-
-const withNativeEvent = <T extends object>(nativeEvent: T): WithNativeEvent<T> => ({
-  ...nativeEvent,
-  nativeEvent,
-});
-
 // For Fabric (New Architecture), the component is always available through codegenNativeComponent
 // We don't need to check UIManager.getViewManagerConfig which is Old Architecture only
 
@@ -286,35 +279,35 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
   // === Event Handlers ===
   const handleLoadStart = useCallback(
     (event: { nativeEvent: OnLoadStartData }) => {
-      onLoadStart?.(withNativeEvent(event.nativeEvent));
+      onLoadStart?.(event.nativeEvent);
     },
     [onLoadStart]
   );
 
   const handleLoad = useCallback(
     (event: { nativeEvent: OnLoadData }) => {
-      onLoad?.(withNativeEvent(event.nativeEvent));
+      onLoad?.(event.nativeEvent);
     },
     [onLoad]
   );
 
   const handleError = useCallback(
     (event: { nativeEvent: OnVideoErrorData }) => {
-      onError?.(withNativeEvent(event.nativeEvent));
+      onError?.(event.nativeEvent);
     },
     [onError]
   );
 
   const handleProgress = useCallback(
     (event: { nativeEvent: OnProgressData }) => {
-      onProgress?.(withNativeEvent(event.nativeEvent));
+      onProgress?.(event.nativeEvent);
     },
     [onProgress]
   );
 
   const handleSeek = useCallback(
     (event: { nativeEvent: OnSeekData }) => {
-      onSeek?.(withNativeEvent(event.nativeEvent));
+      onSeek?.(event.nativeEvent);
     },
     [onSeek]
   );
@@ -325,35 +318,35 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
 
   const handleBuffer = useCallback(
     (event: { nativeEvent: OnBufferData }) => {
-      onBuffer?.(withNativeEvent(event.nativeEvent));
+      onBuffer?.(event.nativeEvent);
     },
     [onBuffer]
   );
 
   const handleBandwidthUpdate = useCallback(
     (event: { nativeEvent: OnBandwidthUpdateData }) => {
-      onBandwidthUpdate?.(withNativeEvent(event.nativeEvent));
+      onBandwidthUpdate?.(event.nativeEvent);
     },
     [onBandwidthUpdate]
   );
 
   const handlePlaybackStateChanged = useCallback(
     (event: { nativeEvent: OnPlaybackStateChangedData }) => {
-      onPlaybackStateChanged?.(withNativeEvent(event.nativeEvent));
+      onPlaybackStateChanged?.(event.nativeEvent);
     },
     [onPlaybackStateChanged]
   );
 
   const handlePlaybackRateChange = useCallback(
     (event: { nativeEvent: OnPlaybackRateChangeData }) => {
-      onPlaybackRateChange?.(withNativeEvent(event.nativeEvent));
+      onPlaybackRateChange?.(event.nativeEvent);
     },
     [onPlaybackRateChange]
   );
 
   const handleVolumeChange = useCallback(
     (event: { nativeEvent: OnVolumeChangeData }) => {
-      onVolumeChange?.(withNativeEvent(event.nativeEvent));
+      onVolumeChange?.(event.nativeEvent);
     },
     [onVolumeChange]
   );
@@ -368,7 +361,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
 
   const handleAudioFocusChanged = useCallback(
     (event: { nativeEvent: OnAudioFocusChangedData }) => {
-      onAudioFocusChanged?.(withNativeEvent(event.nativeEvent));
+      onAudioFocusChanged?.(event.nativeEvent);
     },
     [onAudioFocusChanged]
   );
@@ -395,7 +388,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
 
   const handlePictureInPictureStatusChanged = useCallback(
     (event: { nativeEvent: OnPictureInPictureStatusChangedData }) => {
-      onPictureInPictureStatusChanged?.(withNativeEvent(event.nativeEvent));
+      onPictureInPictureStatusChanged?.(event.nativeEvent);
     },
     [onPictureInPictureStatusChanged]
   );
@@ -406,21 +399,21 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
 
   const handleControlsVisibilityChange = useCallback(
     (event: { nativeEvent: OnControlsVisibilityChangeData }) => {
-      onControlsVisibilityChange?.(withNativeEvent(event.nativeEvent));
+      onControlsVisibilityChange?.(event.nativeEvent);
     },
     [onControlsVisibilityChange]
   );
 
   const handleExternalPlaybackChange = useCallback(
     (event: { nativeEvent: OnExternalPlaybackChangeData }) => {
-      onExternalPlaybackChange?.(withNativeEvent(event.nativeEvent));
+      onExternalPlaybackChange?.(event.nativeEvent);
     },
     [onExternalPlaybackChange]
   );
 
   const handleAspectRatio = useCallback(
     (event: { nativeEvent: OnVideoAspectRatioData }) => {
-      onAspectRatio?.(withNativeEvent(event.nativeEvent));
+      onAspectRatio?.(event.nativeEvent);
     },
     [onAspectRatio]
   );

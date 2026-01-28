@@ -5,13 +5,6 @@ import type { MarkerEventListeners } from './overlays/Marker';
 import GraniteNaverMapViewNativeComponent from './specs/GraniteNaverMapViewNativeComponent';
 import type { Coord } from './types/Coord';
 
-type WithNativeEvent<T extends object> = T & { nativeEvent: T };
-
-const withNativeEvent = <T extends object>(nativeEvent: T): WithNativeEvent<T> => ({
-  ...nativeEvent,
-  nativeEvent,
-});
-
 export interface CameraChangeEvent extends Coord {
   zoom: number;
 }
@@ -58,9 +51,9 @@ export interface MapViewProps {
   tiltGesturesEnabled?: boolean;
   rotateGesturesEnabled?: boolean;
   stopGesturesEnabled?: boolean;
-  onCameraChange?: (ev: WithNativeEvent<CameraChangeEvent>) => void;
-  onTouch?: (ev: WithNativeEvent<TouchEvent>) => void;
-  onMapClick?: (ev: WithNativeEvent<MapClickEvent>) => void;
+  onCameraChange?: (ev: CameraChangeEvent) => void;
+  onTouch?: (ev: TouchEvent) => void;
+  onMapClick?: (ev: MapClickEvent) => void;
   children?: React.ReactNode;
 }
 
@@ -129,21 +122,26 @@ export function NaverMapView({
 
   const handleCameraChange = useCallback(
     (event: NativeCameraChangeEvent) => {
-      onCameraChange?.(withNativeEvent(event.nativeEvent));
+      const { latitude, longitude, zoom } = event.nativeEvent;
+      onCameraChange?.({
+        latitude,
+        longitude,
+        zoom,
+      });
     },
     [onCameraChange]
   );
 
   const handleTouch = useCallback(
     (event: NativeTouchEvent) => {
-      onTouch?.(withNativeEvent(event.nativeEvent));
+      onTouch?.(event.nativeEvent);
     },
     [onTouch]
   );
 
   const handleMapClick = useCallback(
     (event: NativeMapClickEvent) => {
-      onMapClick?.(withNativeEvent(event.nativeEvent));
+      onMapClick?.(event.nativeEvent);
     },
     [onMapClick]
   );
