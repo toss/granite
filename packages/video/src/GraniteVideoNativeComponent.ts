@@ -46,6 +46,89 @@ interface NativeDrmConfig {
   base64Certificate?: boolean;
 }
 
+export type OnVideoLoadStartEvent = Readonly<{
+  isNetwork: boolean;
+  type: string;
+  uri: string;
+}>;
+
+export type OnVideoLoadEvent = Readonly<{
+  currentTime: Double;
+  duration: Double;
+  naturalSize: {
+    width: Double;
+    height: Double;
+    orientation: string;
+  };
+}>;
+
+export type OnVideoErrorEvent = Readonly<{
+  error: {
+    code: Int32;
+    domain: string;
+    localizedDescription: string;
+    localizedFailureReason: string;
+    localizedRecoverySuggestion: string;
+    errorString: string;
+  };
+}>;
+
+export type OnVideoProgressEvent = Readonly<{
+  currentTime: Double;
+  playableDuration: Double;
+  seekableDuration: Double;
+}>;
+
+export type OnVideoSeekEvent = Readonly<{
+  currentTime: Double;
+  seekTime: Double;
+}>;
+
+export type OnVideoBufferEvent = Readonly<{
+  isBuffering: boolean;
+}>;
+
+export type OnVideoBandwidthUpdateEvent = Readonly<{
+  bitrate: Double;
+  width: Int32;
+  height: Int32;
+}>;
+
+export type OnVideoPlaybackStateChangedEvent = Readonly<{
+  isPlaying: boolean;
+  isSeeking: boolean;
+  isLooping: boolean;
+}>;
+
+export type OnVideoPlaybackRateChangeEvent = Readonly<{
+  playbackRate: Float;
+}>;
+
+export type OnVideoVolumeChangeEvent = Readonly<{
+  volume: Float;
+}>;
+
+export type OnVideoAudioFocusChangedEvent = Readonly<{
+  hasAudioFocus: boolean;
+}>;
+
+export type OnVideoPictureInPictureStatusChangedEvent = Readonly<{
+  isActive: boolean;
+}>;
+
+export type OnVideoControlsVisibilityChangeEvent = Readonly<{
+  isVisible: boolean;
+}>;
+
+export type OnVideoExternalPlaybackChangeEvent = Readonly<{
+  isExternalPlaybackActive: boolean;
+}>;
+
+export type OnVideoAspectRatioEvent = Readonly<{
+  width: Double;
+  height: Double;
+}>;
+
 export interface NativeProps extends ViewProps {
   // Source
   source?: NativeVideoSource;
@@ -119,83 +202,30 @@ export interface NativeProps extends ViewProps {
   enableDebugThread?: boolean;
 
   // === Events ===
-  onVideoLoadStart?: DirectEventHandler<{
-    isNetwork: boolean;
-    type: string;
-    uri: string;
-  }>;
-  onVideoLoad?: DirectEventHandler<{
-    currentTime: Double;
-    duration: Double;
-    naturalSize: {
-      width: Double;
-      height: Double;
-      orientation: string;
-    };
-  }>;
-  onVideoError?: DirectEventHandler<{
-    error: {
-      code: Int32;
-      domain: string;
-      localizedDescription: string;
-      localizedFailureReason: string;
-      localizedRecoverySuggestion: string;
-      errorString: string;
-    };
-  }>;
-  onVideoProgress?: DirectEventHandler<{
-    currentTime: Double;
-    playableDuration: Double;
-    seekableDuration: Double;
-  }>;
-  onVideoSeek?: DirectEventHandler<{
-    currentTime: Double;
-    seekTime: Double;
-  }>;
+  onVideoLoadStart?: DirectEventHandler<OnVideoLoadStartEvent>;
+  onVideoLoad?: DirectEventHandler<OnVideoLoadEvent>;
+  onVideoError?: DirectEventHandler<OnVideoErrorEvent>;
+  onVideoProgress?: DirectEventHandler<OnVideoProgressEvent>;
+  onVideoSeek?: DirectEventHandler<OnVideoSeekEvent>;
   onVideoEnd?: DirectEventHandler<null>;
-  onVideoBuffer?: DirectEventHandler<{
-    isBuffering: boolean;
-  }>;
-  onVideoBandwidthUpdate?: DirectEventHandler<{
-    bitrate: Double;
-    width: Int32;
-    height: Int32;
-  }>;
-  onVideoPlaybackStateChanged?: DirectEventHandler<{
-    isPlaying: boolean;
-    isSeeking: boolean;
-    isLooping: boolean;
-  }>;
-  onVideoPlaybackRateChange?: DirectEventHandler<{
-    playbackRate: Float;
-  }>;
-  onVideoVolumeChange?: DirectEventHandler<{
-    volume: Float;
-  }>;
+  onVideoBuffer?: DirectEventHandler<OnVideoBufferEvent>;
+  onVideoBandwidthUpdate?: DirectEventHandler<OnVideoBandwidthUpdateEvent>;
+  onVideoPlaybackStateChanged?: DirectEventHandler<OnVideoPlaybackStateChangedEvent>;
+  onVideoPlaybackRateChange?: DirectEventHandler<OnVideoPlaybackRateChangeEvent>;
+  onVideoVolumeChange?: DirectEventHandler<OnVideoVolumeChangeEvent>;
   onVideoIdle?: DirectEventHandler<null>;
   onVideoReadyForDisplay?: DirectEventHandler<null>;
-  onVideoAudioFocusChanged?: DirectEventHandler<{
-    hasAudioFocus: boolean;
-  }>;
+  onVideoAudioFocusChanged?: DirectEventHandler<OnVideoAudioFocusChangedEvent>;
   onVideoAudioBecomingNoisy?: DirectEventHandler<null>;
   onVideoFullscreenPlayerWillPresent?: DirectEventHandler<null>;
   onVideoFullscreenPlayerDidPresent?: DirectEventHandler<null>;
   onVideoFullscreenPlayerWillDismiss?: DirectEventHandler<null>;
   onVideoFullscreenPlayerDidDismiss?: DirectEventHandler<null>;
-  onVideoPictureInPictureStatusChanged?: DirectEventHandler<{
-    isActive: boolean;
-  }>;
+  onVideoPictureInPictureStatusChanged?: DirectEventHandler<OnVideoPictureInPictureStatusChangedEvent>;
   onVideoRestoreUserInterfaceForPictureInPictureStop?: DirectEventHandler<null>;
-  onVideoControlsVisibilityChange?: DirectEventHandler<{
-    isVisible: boolean;
-  }>;
-  onVideoExternalPlaybackChange?: DirectEventHandler<{
-    isExternalPlaybackActive: boolean;
-  }>;
-  onVideoAspectRatio?: DirectEventHandler<{
-    width: Double;
-    height: Double;
-  }>;
+  onVideoControlsVisibilityChange?: DirectEventHandler<OnVideoControlsVisibilityChangeEvent>;
+  onVideoExternalPlaybackChange?: DirectEventHandler<OnVideoExternalPlaybackChangeEvent>;
+  onVideoAspectRatio?: DirectEventHandler<OnVideoAspectRatioEvent>;
 }
 
 // ============================================================

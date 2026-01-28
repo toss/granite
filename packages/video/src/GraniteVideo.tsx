@@ -8,26 +8,29 @@ import {
   NativeModules,
   type StyleProp,
   type ViewStyle,
-} from 'react-native';
-import NativeGraniteVideoView, { Commands, type NativeProps } from './GraniteVideoNativeComponent';
+type  NativeSyntheticEvent } from 'react-native';
+import NativeGraniteVideoView, {
+  Commands,
+  type NativeProps,
+  OnVideoLoadStartEvent,
+  OnVideoLoadEvent,
+  OnVideoErrorEvent,
+  OnVideoProgressEvent,
+  OnVideoSeekEvent,
+  OnVideoBufferEvent,
+  OnVideoBandwidthUpdateEvent,
+  OnVideoPlaybackStateChangedEvent,
+  OnVideoPlaybackRateChangeEvent,
+  OnVideoVolumeChangeEvent,
+  OnVideoAudioFocusChangedEvent,
+  OnVideoPictureInPictureStatusChangedEvent,
+  OnVideoControlsVisibilityChangeEvent,
+  OnVideoExternalPlaybackChangeEvent,
+  OnVideoAspectRatioEvent,
+} from './GraniteVideoNativeComponent';
 import type {
   VideoRef,
   VideoSource,
-  OnLoadStartData,
-  OnLoadData,
-  OnProgressData,
-  OnSeekData,
-  OnBufferData,
-  OnBandwidthUpdateData,
-  OnVideoErrorData,
-  OnPlaybackStateChangedData,
-  OnPlaybackRateChangeData,
-  OnVolumeChangeData,
-  OnPictureInPictureStatusChangedData,
-  OnControlsVisibilityChangeData,
-  OnExternalPlaybackChangeData,
-  OnAudioFocusChangedData,
-  OnVideoAspectRatioData,
   VideoProps,
 } from './types';
 
@@ -278,36 +281,36 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
 
   // === Event Handlers ===
   const handleLoadStart = useCallback(
-    (event: { nativeEvent: OnLoadStartData }) => {
-      onLoadStart?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoLoadStartEvent>) => {
+      onLoadStart?.(event);
     },
     [onLoadStart]
   );
 
   const handleLoad = useCallback(
-    (event: { nativeEvent: OnLoadData }) => {
-      onLoad?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoLoadEvent>) => {
+      onLoad?.(event);
     },
     [onLoad]
   );
 
   const handleError = useCallback(
-    (event: { nativeEvent: OnVideoErrorData }) => {
-      onError?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoErrorEvent>) => {
+      onError?.(event);
     },
     [onError]
   );
 
   const handleProgress = useCallback(
-    (event: { nativeEvent: OnProgressData }) => {
-      onProgress?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoProgressEvent>) => {
+      onProgress?.(event);
     },
     [onProgress]
   );
 
   const handleSeek = useCallback(
-    (event: { nativeEvent: OnSeekData }) => {
-      onSeek?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoSeekEvent>) => {
+      onSeek?.(event);
     },
     [onSeek]
   );
@@ -317,36 +320,36 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
   }, [onEnd]);
 
   const handleBuffer = useCallback(
-    (event: { nativeEvent: OnBufferData }) => {
-      onBuffer?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoBufferEvent>) => {
+      onBuffer?.(event);
     },
     [onBuffer]
   );
 
   const handleBandwidthUpdate = useCallback(
-    (event: { nativeEvent: OnBandwidthUpdateData }) => {
-      onBandwidthUpdate?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoBandwidthUpdateEvent>) => {
+      onBandwidthUpdate?.(event);
     },
     [onBandwidthUpdate]
   );
 
   const handlePlaybackStateChanged = useCallback(
-    (event: { nativeEvent: OnPlaybackStateChangedData }) => {
-      onPlaybackStateChanged?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoPlaybackStateChangedEvent>) => {
+      onPlaybackStateChanged?.(event);
     },
     [onPlaybackStateChanged]
   );
 
   const handlePlaybackRateChange = useCallback(
-    (event: { nativeEvent: OnPlaybackRateChangeData }) => {
-      onPlaybackRateChange?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoPlaybackRateChangeEvent>) => {
+      onPlaybackRateChange?.(event);
     },
     [onPlaybackRateChange]
   );
 
   const handleVolumeChange = useCallback(
-    (event: { nativeEvent: OnVolumeChangeData }) => {
-      onVolumeChange?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoVolumeChangeEvent>) => {
+      onVolumeChange?.(event);
     },
     [onVolumeChange]
   );
@@ -360,8 +363,8 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
   }, [onReadyForDisplay]);
 
   const handleAudioFocusChanged = useCallback(
-    (event: { nativeEvent: OnAudioFocusChangedData }) => {
-      onAudioFocusChanged?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoAudioFocusChangedEvent>) => {
+      onAudioFocusChanged?.(event);
     },
     [onAudioFocusChanged]
   );
@@ -387,8 +390,8 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
   }, [onFullscreenPlayerDidDismiss]);
 
   const handlePictureInPictureStatusChanged = useCallback(
-    (event: { nativeEvent: OnPictureInPictureStatusChangedData }) => {
-      onPictureInPictureStatusChanged?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoPictureInPictureStatusChangedEvent>) => {
+      onPictureInPictureStatusChanged?.(event);
     },
     [onPictureInPictureStatusChanged]
   );
@@ -398,22 +401,22 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
   }, [onRestoreUserInterfaceForPictureInPictureStop]);
 
   const handleControlsVisibilityChange = useCallback(
-    (event: { nativeEvent: OnControlsVisibilityChangeData }) => {
-      onControlsVisibilityChange?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoControlsVisibilityChangeEvent>) => {
+      onControlsVisibilityChange?.(event);
     },
     [onControlsVisibilityChange]
   );
 
   const handleExternalPlaybackChange = useCallback(
-    (event: { nativeEvent: OnExternalPlaybackChangeData }) => {
-      onExternalPlaybackChange?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoExternalPlaybackChangeEvent>) => {
+      onExternalPlaybackChange?.(event);
     },
     [onExternalPlaybackChange]
   );
 
   const handleAspectRatio = useCallback(
-    (event: { nativeEvent: OnVideoAspectRatioData }) => {
-      onAspectRatio?.(event.nativeEvent);
+    (event: NativeSyntheticEvent<OnVideoAspectRatioEvent>) => {
+      onAspectRatio?.(event);
     },
     [onAspectRatio]
   );
@@ -471,30 +474,30 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
         mixWithOthers={mixWithOthers}
         enableDebug={debug?.enable}
         enableDebugThread={debug?.thread}
-        onVideoLoadStart={handleLoadStart as any}
-        onVideoLoad={handleLoad as any}
-        onVideoError={handleError as any}
-        onVideoProgress={handleProgress as any}
-        onVideoSeek={handleSeek as any}
-        onVideoEnd={handleEnd as any}
-        onVideoBuffer={handleBuffer as any}
-        onVideoBandwidthUpdate={handleBandwidthUpdate as any}
-        onVideoPlaybackStateChanged={handlePlaybackStateChanged as any}
-        onVideoPlaybackRateChange={handlePlaybackRateChange as any}
-        onVideoVolumeChange={handleVolumeChange as any}
-        onVideoIdle={handleIdle as any}
-        onVideoReadyForDisplay={handleReadyForDisplay as any}
-        onVideoAudioFocusChanged={handleAudioFocusChanged as any}
-        onVideoAudioBecomingNoisy={handleAudioBecomingNoisy as any}
-        onVideoFullscreenPlayerWillPresent={handleFullscreenPlayerWillPresent as any}
-        onVideoFullscreenPlayerDidPresent={handleFullscreenPlayerDidPresent as any}
-        onVideoFullscreenPlayerWillDismiss={handleFullscreenPlayerWillDismiss as any}
-        onVideoFullscreenPlayerDidDismiss={handleFullscreenPlayerDidDismiss as any}
-        onVideoPictureInPictureStatusChanged={handlePictureInPictureStatusChanged as any}
-        onVideoRestoreUserInterfaceForPictureInPictureStop={handleRestoreUserInterfaceForPictureInPictureStop as any}
-        onVideoControlsVisibilityChange={handleControlsVisibilityChange as any}
-        onVideoExternalPlaybackChange={handleExternalPlaybackChange as any}
-        onVideoAspectRatio={handleAspectRatio as any}
+        onVideoLoadStart={handleLoadStart}
+        onVideoLoad={handleLoad}
+        onVideoError={handleError}
+        onVideoProgress={handleProgress}
+        onVideoSeek={handleSeek}
+        onVideoEnd={handleEnd}
+        onVideoBuffer={handleBuffer}
+        onVideoBandwidthUpdate={handleBandwidthUpdate}
+        onVideoPlaybackStateChanged={handlePlaybackStateChanged}
+        onVideoPlaybackRateChange={handlePlaybackRateChange}
+        onVideoVolumeChange={handleVolumeChange}
+        onVideoIdle={handleIdle}
+        onVideoReadyForDisplay={handleReadyForDisplay}
+        onVideoAudioFocusChanged={handleAudioFocusChanged}
+        onVideoAudioBecomingNoisy={handleAudioBecomingNoisy}
+        onVideoFullscreenPlayerWillPresent={handleFullscreenPlayerWillPresent}
+        onVideoFullscreenPlayerDidPresent={handleFullscreenPlayerDidPresent}
+        onVideoFullscreenPlayerWillDismiss={handleFullscreenPlayerWillDismiss}
+        onVideoFullscreenPlayerDidDismiss={handleFullscreenPlayerDidDismiss}
+        onVideoPictureInPictureStatusChanged={handlePictureInPictureStatusChanged}
+        onVideoRestoreUserInterfaceForPictureInPictureStop={handleRestoreUserInterfaceForPictureInPictureStop}
+        onVideoControlsVisibilityChange={handleControlsVisibilityChange}
+        onVideoExternalPlaybackChange={handleExternalPlaybackChange}
+        onVideoAspectRatio={handleAspectRatio}
       />
     </View>
   );
