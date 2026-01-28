@@ -1,16 +1,37 @@
 # @granite-js/react-native
 
-<<<<<<< HEAD
-## 1.0.0-next.87
-=======
-## 0.1.34-next.46
->>>>>>> feature/rn81
+## 1.0.0-next.88
 
 ### Patch Changes
 
 - fix
 - Updated dependencies
+  - @granite-js/plugin-core@1.0.0-next.88
+  - @granite-js/style-utils@1.0.0-next.88
+  - @granite-js/blur-view@1.0.0-next.88
+  - @granite-js/lottie@1.0.0-next.88
+  - @granite-js/native@1.0.0-next.88
+  - @granite-js/image@1.0.0-next.88
+  - @granite-js/mpack@1.0.0-next.88
+  - @granite-js/video@1.0.0-next.88
+  - @granite-js/jest@1.0.0-next.88
+  - @granite-js/cli@1.0.0-next.88
+
 <<<<<<< HEAD
+
+## 1.0.0-next.87
+
+=======
+
+## 0.1.34-next.46
+
+> > > > > > > feature/rn81
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  <<<<<<< HEAD
   - @granite-js/plugin-core@1.0.0-next.87
   - @granite-js/style-utils@1.0.0-next.87
   - @granite-js/blur-view@1.0.0-next.87
@@ -23,26 +44,29 @@
   - @granite-js/cli@1.0.0-next.87
 
 ## 1.0.0-next.86
+
 =======
-  - @granite-js/plugin-core@0.1.34-next.46
-  - @granite-js/style-utils@0.1.34-next.46
-  - @granite-js/blur-view@0.1.34-next.46
-  - @granite-js/lottie@0.1.34-next.46
-  - @granite-js/native@0.1.34-next.46
-  - @granite-js/image@0.1.34-next.46
-  - @granite-js/mpack@0.1.34-next.46
-  - @granite-js/video@0.1.34-next.46
-  - @granite-js/jest@0.1.34-next.46
-  - @granite-js/cli@0.1.34-next.46
+
+- @granite-js/plugin-core@0.1.34-next.46
+- @granite-js/style-utils@0.1.34-next.46
+- @granite-js/blur-view@0.1.34-next.46
+- @granite-js/lottie@0.1.34-next.46
+- @granite-js/native@0.1.34-next.46
+- @granite-js/image@0.1.34-next.46
+- @granite-js/mpack@0.1.34-next.46
+- @granite-js/video@0.1.34-next.46
+- @granite-js/jest@0.1.34-next.46
+- @granite-js/cli@0.1.34-next.46
 
 ## 0.1.34-next.45
->>>>>>> feature/rn81
+
+> > > > > > > feature/rn81
 
 ### Patch Changes
 
 - fix
 - Updated dependencies
-<<<<<<< HEAD
+  <<<<<<< HEAD
   - @granite-js/plugin-core@1.0.0-next.86
   - @granite-js/style-utils@1.0.0-next.86
   - @granite-js/blur-view@1.0.0-next.86
@@ -69,8 +93,7 @@
   - @granite-js/mpack@1.0.0-next.85
   - @granite-js/video@1.0.0-next.85
   - @granite-js/jest@1.0.0-next.85
-  - @granite-js/cli@1.0.0-next.85
-=======
+  - # @granite-js/cli@1.0.0-next.85
   - @granite-js/plugin-core@0.1.34-next.45
   - @granite-js/style-utils@0.1.34-next.45
   - @granite-js/blur-view@0.1.34-next.45
@@ -81,7 +104,7 @@
   - @granite-js/video@0.1.34-next.45
   - @granite-js/jest@0.1.34-next.45
   - @granite-js/cli@0.1.34-next.45
->>>>>>> feature/rn81
+    > > > > > > > feature/rn81
 
 ## 0.1.34-next.44
 
