@@ -17,6 +17,13 @@ import GraniteImageNativeComponent, {
 
 const { GraniteImageModule } = NativeModules;
 
+type WithNativeEvent<T extends object> = T & { nativeEvent: T };
+
+const withNativeEvent = <T extends object>(nativeEvent: T): WithNativeEvent<T> => ({
+  ...nativeEvent,
+  nativeEvent,
+});
+
 // Source types matching GraniteImage
 export interface GraniteImageSource {
   uri: string;
@@ -59,11 +66,11 @@ export interface GraniteImageProps extends ViewProps {
   cachePolicy?: CachePolicy;
 
   // Callbacks
-  onLoadStart?: (event: OnLoadStartEvent) => void;
-  onProgress?: (event: OnProgressEventData) => void;
-  onLoad?: (event: OnLoadEventData) => void;
-  onError?: (error: { nativeEvent: { error: string } }) => void;
-  onLoadEnd?: (event: OnLoadEndEvent) => void;
+  onLoadStart?: (event: WithNativeEvent<OnLoadStartEvent>) => void;
+  onProgress?: (event: WithNativeEvent<OnProgressEventData>) => void;
+  onLoad?: (event: WithNativeEvent<OnLoadEventData>) => void;
+  onError?: (error: WithNativeEvent<OnErrorEvent>) => void;
+  onLoadEnd?: (event: WithNativeEvent<OnLoadEndEvent>) => void;
 }
 
 // Map resizeMode to contentMode for native
@@ -161,41 +168,35 @@ const GraniteImageBase: React.FC<GraniteImageProps> = ({
   // Event handlers
   const handleLoadStart = useCallback(
     (event: { nativeEvent: OnLoadStartEvent }) => {
-      onLoadStart?.(event);
+      onLoadStart?.(withNativeEvent(event.nativeEvent));
     },
     [onLoadStart]
   );
 
   const handleProgress = useCallback(
     (event: { nativeEvent: OnProgressEvent }) => {
-      onProgress?.({
-        loaded: event.nativeEvent.loaded,
-        total: event.nativeEvent.total,
-      });
+      onProgress?.(withNativeEvent(event.nativeEvent));
     },
     [onProgress]
   );
 
   const handleLoad = useCallback(
     (event: { nativeEvent: OnLoadEvent }) => {
-      onLoad?.({
-        width: event.nativeEvent.width,
-        height: event.nativeEvent.height,
-      });
+      onLoad?.(withNativeEvent(event.nativeEvent));
     },
     [onLoad]
   );
 
   const handleError = useCallback(
     (event: { nativeEvent: OnErrorEvent }) => {
-      onError?.({ nativeEvent: { error: event.nativeEvent.error } });
+      onError?.(withNativeEvent(event.nativeEvent));
     },
     [onError]
   );
 
   const handleLoadEnd = useCallback(
     (event: { nativeEvent: OnLoadEndEvent }) => {
-      onLoadEnd?.(event);
+      onLoadEnd?.(withNativeEvent(event.nativeEvent));
     },
     [onLoadEnd]
   );

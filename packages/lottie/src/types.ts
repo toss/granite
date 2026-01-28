@@ -70,6 +70,8 @@ export interface AnimationFailureEvent {
   error: string;
 }
 
+type NativeEvent<T extends object> = T & { nativeEvent: T };
+
 /**
  * Props for LottieView component
  */
@@ -176,12 +178,12 @@ export interface LottieViewProps {
   /**
    * Callback when animation finishes
    */
-  onAnimationFinish?: (event: AnimationFinishEvent) => void;
+  onAnimationFinish?: (event: NativeEvent<AnimationFinishEvent>) => void;
 
   /**
    * Callback when animation fails to load
    */
-  onAnimationFailure?: (event: AnimationFailureEvent) => void;
+  onAnimationFailure?: (event: NativeEvent<AnimationFailureEvent>) => void;
 
   /**
    * Callback when animation is loaded

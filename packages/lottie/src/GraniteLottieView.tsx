@@ -6,9 +6,14 @@ import type {
   LottieViewRef,
   AnimationSource,
   AnimationObject,
-  AnimationFinishEvent,
-  AnimationFailureEvent,
 } from './types';
+
+type WithNativeEvent<T extends object> = T & { nativeEvent: T };
+
+const withNativeEvent = <T extends object>(nativeEvent: T): WithNativeEvent<T> => ({
+  ...nativeEvent,
+  nativeEvent,
+});
 
 // Helper to resolve animation source
 function resolveSource(source: AnimationSource): {
@@ -118,14 +123,14 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
   // Event handlers
   const handleAnimationFinish = useCallback(
     (event: NativeSyntheticEvent<{ isCancelled: boolean }>) => {
-      onAnimationFinish?.(event.nativeEvent as AnimationFinishEvent);
+      onAnimationFinish?.(withNativeEvent(event.nativeEvent));
     },
     [onAnimationFinish]
   );
 
   const handleAnimationFailure = useCallback(
     (event: NativeSyntheticEvent<{ error: string }>) => {
-      onAnimationFailure?.(event.nativeEvent as AnimationFailureEvent);
+      onAnimationFailure?.(withNativeEvent(event.nativeEvent));
     },
     [onAnimationFailure]
   );
