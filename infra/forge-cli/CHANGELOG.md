@@ -1,5 +1,14 @@
 # @granite-js/forge-cli
 
+## 0.1.34-next.49
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/deployment-manager@0.1.34-next.49
+  - @granite-js/plugin-core@0.1.34-next.49
+
 ## 0.1.34-next.48
 
 ### Patch Changes

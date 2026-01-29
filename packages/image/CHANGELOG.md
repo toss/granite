@@ -1,5 +1,11 @@
 # @granite-js/image
 
+## 0.1.34-next.49
+
+### Patch Changes
+
+- fix
+
 ## 0.1.34-next.48
 
 ### Patch Changes
