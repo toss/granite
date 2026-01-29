@@ -26,4 +26,5 @@ export interface AdditionalMetroConfig extends MetroConfig {
   babelConfig?: babel.TransformOptions;
   transformSync?: (id: string, code: string) => string;
   projectRoot?: MetroConfig['projectRoot'];
+  reactNativePath?: string;
 }

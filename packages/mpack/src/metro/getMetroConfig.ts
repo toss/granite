@@ -4,6 +4,7 @@ import { getPackageRoot } from '@granite-js/utils';
 import { createResolver } from './enhancedResolver';
 import { getMonorepoRoot } from './getMonorepoRoot';
 import { DEV_SERVER_DEFAULT_PORT, RESOLVER_MAIN_FIELDS, SOURCE_EXTENSIONS } from '../constants';
+import { getDefaultReactNativePath } from '../utils/getDefaultReactNativePath';
 import { getDefaultValues } from '../vendors/metro-config/src/defaults';
 import exclusionList from '../vendors/metro-config/src/defaults/exclusionList';
 import { mergeConfig } from '../vendors/metro-config/src/loadConfig';
@@ -34,7 +35,7 @@ const INTERNAL_CALLSITES_REGEX = new RegExp(
 
 export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalConfig?: AdditionalMetroConfig) {
   const defaultConfig = getDefaultValues(rootPath);
-  const reactNativePath = path.dirname(resolveFromRoot('react-native/package.json', rootPath));
+  const reactNativePath = additionalConfig?.reactNativePath ?? getDefaultReactNativePath(rootPath);
   const resolvedRootPath = await getMonorepoRoot(rootPath);
   const packageRootPath = await getPackageRoot();
 
@@ -87,7 +88,9 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
       resolverMainFields: additionalConfig?.resolver?.resolverMainFields ?? RESOLVER_MAIN_FIELDS,
     },
     serializer: {
-      getModulesRunBeforeMainModule: () => [resolveFromRoot('react-native/Libraries/Core/InitializeCore', rootPath)],
+      getModulesRunBeforeMainModule: () => [
+        require.resolve(path.resolve(reactNativePath, 'Libraries/Core/InitializeCore')),
+      ],
       getPolyfills: () => [
         ...require(path.join(reactNativePath, 'rn-get-polyfills'))(),
         ...(additionalConfig?.serializer?.getPolyfills?.() ?? []),
@@ -105,10 +108,6 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
     reporter: additionalConfig?.reporter,
     ...(process.env.METRO_RESET_CACHE !== 'false' ? { resetCache: true } : {}),
   });
-}
-
-function resolveFromRoot(source: string, rootPath: string) {
-  return require.resolve(source, { paths: [rootPath] });
 }
 
 function resolveVendors(source: string) {
