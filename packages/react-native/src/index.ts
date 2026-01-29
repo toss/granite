@@ -10,7 +10,7 @@ export {
   type Priority,
   type OnLoadEvent,
   type OnProgressEvent,
-} from '@granite-js/image';
+} from '@granite-js/native/react-native-fast-image';
 
 // Image with SVG support
 export * from './image';

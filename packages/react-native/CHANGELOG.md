@@ -1,11 +1,10 @@
 # @granite-js/react-native
 
-## 1.0.0-next.88
-
 ### Patch Changes
 
 - fix
 - Updated dependencies
+  <<<<<<< HEAD
   - @granite-js/plugin-core@1.0.0-next.88
   - @granite-js/style-utils@1.0.0-next.88
   - @granite-js/blur-view@1.0.0-next.88
@@ -21,7 +20,45 @@
 
 ## 1.0.0-next.87
 
-=======
+# =======
+
+- @granite-js/plugin-core@0.1.34-next.49
+- @granite-js/style-utils@0.1.34-next.49
+- @granite-js/blur-view@0.1.34-next.49
+- @granite-js/native@0.1.34-next.49
+- @granite-js/mpack@0.1.34-next.49
+- @granite-js/video@0.1.34-next.49
+- @granite-js/jest@0.1.34-next.49
+- @granite-js/cli@0.1.34-next.49
+
+## 0.1.34-next.48
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.34-next.48
+  - @granite-js/style-utils@0.1.34-next.48
+  - @granite-js/native@0.1.34-next.48
+  - @granite-js/mpack@0.1.34-next.48
+  - @granite-js/video@0.1.34-next.48
+  - @granite-js/jest@0.1.34-next.48
+  - @granite-js/cli@0.1.34-next.48
+
+## 0.1.34-next.47
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/plugin-core@0.1.34-next.47
+  - @granite-js/style-utils@0.1.34-next.47
+  - @granite-js/native@0.1.34-next.47
+  - @granite-js/mpack@0.1.34-next.47
+  - @granite-js/video@0.1.34-next.47
+  - @granite-js/jest@0.1.34-next.47
+  - @granite-js/cli@0.1.34-next.47
+    > > > > > > > feature/rn81
 
 ## 0.1.34-next.46
 

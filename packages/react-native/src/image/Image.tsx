@@ -4,7 +4,7 @@ import GraniteImage, {
   OnLoadEndEvent,
   OnLoadStartEvent,
   type GraniteImageSource,
-} from '@granite-js/image';
+} from '@granite-js/native/react-native-fast-image';
 import { NativeSyntheticEvent, StyleSheet } from 'react-native';
 import { SvgImage } from './SvgImage';
 

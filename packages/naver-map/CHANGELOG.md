@@ -1,7 +1,5 @@
 # @granite-js/naver-map
 
-## 1.0.0-next.88
-
 ### Patch Changes
 
 - fix
