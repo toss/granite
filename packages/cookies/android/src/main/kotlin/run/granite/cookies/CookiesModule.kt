@@ -14,7 +14,9 @@ import com.brickmodule.*
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.bridge.WritableNativeMap
+import java.net.HttpCookie
 import java.net.URI
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -27,9 +29,9 @@ class CookiesModule(reactContext: ReactContext) : BrickModuleSpec(reactContext),
         CookieManager.getInstance().apply { setAcceptCookie(true) }
     }
 
-    // MARK: - Set Cookie
-
     override suspend fun set(url: String, cookie: Cookie, useWebKit: Boolean): Boolean {
+        val uri = validateUrl(url)
+        validateCookieDomain(uri, cookie.domain)
         val cookieString = buildCookieString(cookie)
 
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -47,22 +49,16 @@ class CookiesModule(reactContext: ReactContext) : BrickModuleSpec(reactContext),
         }
     }
 
-    // MARK: - Get Cookies
-
     override suspend fun get(url: String, useWebKit: Boolean): WritableMap {
         val cookieString = cookieManager.getCookie(url) ?: return WritableNativeMap()
         return parseCookieString(cookieString, url)
     }
-
-    // MARK: - Get All Cookies
 
     override suspend fun getAll(useWebKit: Boolean): WritableMap {
         // Android's CookieManager doesn't provide a way to get all cookies
         // This is a platform limitation - return empty map
         return WritableNativeMap()
     }
-
-    // MARK: - Clear All Cookies
 
     override suspend fun clearAll(useWebKit: Boolean): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -77,8 +73,6 @@ class CookiesModule(reactContext: ReactContext) : BrickModuleSpec(reactContext),
             true
         }
     }
-
-    // MARK: - Clear By Name
 
     override suspend fun clearByName(url: String, name: String, useWebKit: Boolean): Boolean {
         // Android doesn't provide a direct way to delete individual cookies
@@ -98,8 +92,6 @@ class CookiesModule(reactContext: ReactContext) : BrickModuleSpec(reactContext),
         return set(url, expiredCookie, useWebKit)
     }
 
-    // MARK: - Set From Response
-
     override suspend fun setFromResponse(url: String, cookie: String): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             suspendCancellableCoroutine { continuation ->
@@ -115,8 +107,6 @@ class CookiesModule(reactContext: ReactContext) : BrickModuleSpec(reactContext),
             true
         }
     }
-
-    // MARK: - Get From Response
 
     override suspend fun getFromResponse(url: String): WritableMap {
         return get(url, false)
@@ -150,15 +140,21 @@ class CookiesModule(reactContext: ReactContext) : BrickModuleSpec(reactContext),
         }
     }
 
-    // MARK: - Helper Methods
-
     private fun buildCookieString(cookie: Cookie): String {
         val builder = StringBuilder()
         builder.append("${cookie.name}=${cookie.value}")
 
         cookie.path?.let { builder.append("; path=$it") }
-        cookie.domain?.let { builder.append("; domain=$it") }
-        cookie.expires?.let { builder.append("; expires=$it") }
+        cookie.domain?.let { domain ->
+            // Strip leading dot as Android handles subdomains by default
+            val cleanDomain = domain.trimStart('.')
+            builder.append("; domain=$cleanDomain")
+        }
+        cookie.expires?.let { expires ->
+            parseExpiresDate(expires)?.let { date ->
+                builder.append("; expires=${formatDateRfc1123(date)}")
+            }
+        }
         cookie.secure?.let { if (it) builder.append("; secure") }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -172,51 +168,52 @@ class CookiesModule(reactContext: ReactContext) : BrickModuleSpec(reactContext),
         val result = WritableNativeMap()
 
         // Cookie string format: "name1=value1; name2=value2"
-        val pairs = cookieString.split(";").map { it.trim() }
-
-        for (pair in pairs) {
-            if (pair.isEmpty()) continue
-
-            val equalIndex = pair.indexOf('=')
-            if (equalIndex <= 0) continue
-
-            val name = pair.substring(0, equalIndex).trim()
-            val value = pair.substring(equalIndex + 1).trim()
-
-            // Skip cookie attributes (they start with known prefixes)
-            if (name.lowercase() in
-                            listOf(
-                                    "path",
-                                    "domain",
-                                    "expires",
-                                    "max-age",
-                                    "secure",
-                                    "httponly",
-                                    "samesite"
-                            )
-            ) {
-                continue
+        cookieString.split(";").forEach { singleCookie ->
+            val cookies = HttpCookie.parse(singleCookie.trim())
+            for (cookie in cookies) {
+                if (!cookie.name.isNullOrEmpty() && !cookie.value.isNullOrEmpty()) {
+                    val cookieMap = createCookieData(cookie)
+                    result.putMap(cookie.name, cookieMap)
+                }
             }
-
-            val domain =
-                    try {
-                        URI(url).host
-                    } catch (e: Exception) {
-                        null
-                    }
-
-            val cookieMap =
-                    WritableNativeMap().apply {
-                        putString("name", name)
-                        putString("value", value)
-                        putString("path", "/")
-                        domain?.let { putString("domain", it) }
-                    }
-
-            result.putMap(name, cookieMap)
         }
 
         return result
+    }
+
+    private fun createCookieData(cookie: HttpCookie): WritableNativeMap {
+        val cookieMap = WritableNativeMap()
+        cookieMap.putString("name", cookie.name)
+        cookieMap.putString("value", cookie.value)
+        cookieMap.putString("domain", cookie.domain)
+        cookieMap.putString("path", cookie.path)
+        cookieMap.putBoolean("secure", cookie.secure)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            cookieMap.putBoolean("httpOnly", cookie.isHttpOnly)
+        } else {
+            cookieMap.putBoolean("httpOnly", false)
+        }
+
+        val expires = cookie.maxAge
+        if (expires > 0) {
+            val expiry = formatDateIso8601(Date(expires))
+            if (!expiry.isNullOrEmpty()) {
+                cookieMap.putString("expires", expiry)
+            }
+        }
+
+        return cookieMap
+    }
+
+    private fun formatDateIso8601(date: Date): String? {
+        return try {
+            val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ", Locale.US)
+            formatter.timeZone = TimeZone.getTimeZone("GMT")
+            formatter.format(date)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -224,5 +221,64 @@ class CookiesModule(reactContext: ReactContext) : BrickModuleSpec(reactContext),
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             CookieSyncManager.getInstance().sync()
         }
+    }
+
+    private fun validateUrl(url: String): URI {
+        return try {
+            val uri = URI(url)
+            if (uri.host.isNullOrEmpty()) {
+                throw IllegalArgumentException(String.format(INVALID_URL_ERROR, url))
+            }
+            uri
+        } catch (e: Exception) {
+            throw IllegalArgumentException(String.format(INVALID_URL_ERROR, url))
+        }
+    }
+
+    private fun validateCookieDomain(uri: URI, domain: String?) {
+        if (domain.isNullOrEmpty()) return
+
+        val host = uri.host ?: return
+        val cleanDomain = domain.trimStart('.')
+
+        if (!host.endsWith(cleanDomain) && host != cleanDomain) {
+            throw IllegalArgumentException(String.format(INVALID_DOMAINS, host, domain))
+        }
+    }
+
+    private fun parseExpiresDate(expires: String): Date? {
+        // Try ISO 8601 format
+        try {
+            val isoFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ", Locale.US)
+            isoFormatter.timeZone = TimeZone.getTimeZone("GMT")
+            return isoFormatter.parse(expires)
+        } catch (_: Exception) {}
+
+        // Try RFC 1123 format
+        try {
+            val rfc1123Formatter = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
+            rfc1123Formatter.timeZone = TimeZone.getTimeZone("GMT")
+            return rfc1123Formatter.parse(expires)
+        } catch (_: Exception) {}
+
+        // Try as timestamp
+        try {
+            val timestamp = expires.toDouble()
+            return Date((timestamp).toLong())
+        } catch (_: Exception) {}
+
+        return null
+    }
+
+    private fun formatDateRfc1123(date: Date): String {
+        val formatter = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
+        formatter.timeZone = TimeZone.getTimeZone("GMT")
+        return formatter.format(date)
+    }
+
+    companion object {
+        private const val INVALID_URL_ERROR = "Invalid URL: %s"
+        private const val INVALID_COOKIE_VALUES = "Failed to create cookie from provided data"
+        private const val INVALID_DOMAINS = "Cookie URL host %s and domain %s mismatched"
     }
 }
