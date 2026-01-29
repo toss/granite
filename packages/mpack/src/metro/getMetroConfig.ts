@@ -88,7 +88,9 @@ export async function getMetroConfig({ rootPath }: GetMetroConfig, additionalCon
       resolverMainFields: additionalConfig?.resolver?.resolverMainFields ?? RESOLVER_MAIN_FIELDS,
     },
     serializer: {
-      getModulesRunBeforeMainModule: () => [require.resolve(path.resolve(reactNativePath, 'Libraries/Core/InitializeCore'))],
+      getModulesRunBeforeMainModule: () => [
+        require.resolve(path.resolve(reactNativePath, 'Libraries/Core/InitializeCore')),
+      ],
       getPolyfills: () => [
         ...require(path.join(reactNativePath, 'rn-get-polyfills'))(),
         ...(additionalConfig?.serializer?.getPolyfills?.() ?? []),
