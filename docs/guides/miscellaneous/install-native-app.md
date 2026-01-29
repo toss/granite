@@ -17,7 +17,6 @@ Follow the guide below to install the app.
 
 1. Download the Granite iOS app bundle from GitHub Releases  
    **[Browse all releases](https://github.com/toss/granite/releases)**
-
    - To use a stable version, choose a release without the "Pre-release" badge or version names like `alpha`, `beta`, or `rc`.
    - To try the latest features, you can use a pre-release version.
    - In the Assets section, download the `granite_ios.zip` file.
@@ -38,7 +37,6 @@ Follow the guide below to install the app.
 
 1. Download the Granite Android APK from GitHub Releases  
    **[Browse all releases](https://github.com/toss/granite/releases)**
-
    - To use a stable version, choose a release without the "Pre-release" badge or version names like `alpha`, `beta`, or `rc`.
    - To try the latest features, you can use a pre-release version.
    - In the Assets section, download the `granite_android.zip` file.

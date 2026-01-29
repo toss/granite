@@ -17,7 +17,6 @@ A minimal Pulumi template for provisioning AWS infrastructure using TypeScript. 
     ```
 
     Follow the prompts to set your:
-
     - Project name
     - Project description
     - AWS region (defaults to `us-east-1`)

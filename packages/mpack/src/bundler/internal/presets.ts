@@ -1,18 +1,27 @@
 import path from 'path';
 import { mergeBuildConfigs, type BuildConfig } from '@granite-js/plugin-core';
 import type { BundlerConfig } from '../../types';
+import { getDefaultReactNativePath } from '../../utils/getDefaultReactNativePath';
 
-export function getReactNativeSetupScripts({ rootDir }: { rootDir: string }) {
-  const reactNativePath = path.dirname(
-    require.resolve('react-native/package.json', {
-      paths: [rootDir],
-    })
-  );
+export function getReactNativeSetupScripts({
+  rootDir,
+  reactNativePath = getDefaultReactNativePath(rootDir),
+  skipReactNativePolyfills = false,
+  skipReactNativeInitializeCore = false,
+}: {
+  rootDir: string;
+  reactNativePath?: string;
+  skipReactNativePolyfills?: boolean;
+  skipReactNativeInitializeCore?: boolean;
+}) {
+  const polyfills = skipReactNativePolyfills
+    ? []
+    : (require(path.join(reactNativePath, 'rn-get-polyfills'))() as string[]);
+  const initializeCore = skipReactNativeInitializeCore
+    ? []
+    : [path.join(reactNativePath, 'Libraries/Core/InitializeCore.js')];
 
-  return [
-    ...require(path.join(reactNativePath, 'rn-get-polyfills'))(),
-    path.join(reactNativePath, 'Libraries/Core/InitializeCore.js'),
-  ] as string[];
+  return [...polyfills, ...initializeCore] as string[];
 }
 
 export function globalVariables({ dev }: { dev: boolean }) {
@@ -42,7 +51,12 @@ export function combineWithBaseBuildConfig(
       platform: config.buildConfig.platform,
       esbuild: {
         define: defineGlobalVariables({ dev: context.dev }),
-        prelude: getReactNativeSetupScripts({ rootDir: context.rootDir }),
+        prelude: getReactNativeSetupScripts({
+          rootDir: context.rootDir,
+          reactNativePath: config.buildConfig.reactNativePath,
+          skipReactNativePolyfills: config.buildConfig.extra?.skipReactNativePolyfills === true,
+          skipReactNativeInitializeCore: config.buildConfig.extra?.skipReactNativeInitializeCore === true,
+        }),
         banner: {
           js: globalVariables({ dev: context.dev }),
         },

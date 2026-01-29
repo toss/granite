@@ -36,6 +36,7 @@ export function getRouteScreens(context: RequireContext): RouteScreen[] {
 
     // Retrieve route configuration from routeMap
     const routeMapEntry = routeMap.get(context(key)?.Route?._path);
+    const errorComponent = routeMapEntry?.errorComponent;
 
     // Get screenOptions from routeMap or component (routeMap takes priority)
     const rawScreenOptions = routeMapEntry?.screenOptions ?? component.screenOptions;
@@ -64,6 +65,7 @@ export function getRouteScreens(context: RequireContext): RouteScreen[] {
     return {
       path,
       component,
+      errorComponent,
       screenOptions,
     };
   });

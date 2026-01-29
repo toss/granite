@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+
+# IDE
+.idea/
+*.xcworkspace
+*.xcuserdata
+
+# OS files
+.DS_Store
+
+# Debug
+*.log

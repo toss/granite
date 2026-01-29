@@ -18,6 +18,8 @@ export function getId(bundleConfig: BundlerConfig) {
       bundleConfig.buildConfig.esbuild?.resolveExtensions,
       bundleConfig.buildConfig.esbuild?.mainFields,
       bundleConfig.buildConfig.esbuild?.conditions,
+      bundleConfig.buildConfig.extra?.skipReactNativePolyfills,
+      bundleConfig.buildConfig.extra?.skipReactNativeInitializeCore,
     ])
   ) as INTERNAL__Id;
 }

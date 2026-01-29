@@ -26,6 +26,8 @@ function getSourceMapInfosImpl(isBlocking, onDone, modules, options) {
     const mod = modulesToProcess.shift();
     const info = getSourceMapInfo(mod, {
       excludeSource: options.excludeSource,
+      // MARK: - 0.81
+      getSourceUrl: options.getSourceUrl,
     });
     sourceMapInfos.push(info);
     return false;

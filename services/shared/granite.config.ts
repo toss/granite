@@ -9,15 +9,12 @@ const SHARED_MODULES = [
   '@react-navigation/native',
   '@react-navigation/native-stack',
   '@shopify/flash-list',
-  'lottie-react-native',
   'react-native-safe-area-context',
   'react-native-screens',
-  'react-native-fast-image',
   'react-native-svg',
   'react-native-gesture-handler',
   'react-native',
   'react',
-  'react-native-video',
   'react-native-webview',
 ];
 

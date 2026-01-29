@@ -21,23 +21,29 @@ interface TransformStep<TransformResult> {
   name?: string;
 }
 
-interface TransformStepConfig {
-  /**
-   * step 을 실행하기 위한 조건 (기본값: 항상 실행)
-   */
-  conditions?: Array<(code: string, path: string) => boolean>;
-  /**
-   * 현재 step 이 실행된 경우 done 처리 여부 (기본값: false)
-   */
-  skipOtherSteps?: boolean;
+export type AsyncTransformStep = TransformStep<Promise<TransformStepResult>>;
+
+// New conditional step interface
+export interface ConditionalStep {
+  if: (args: { path: string; code: string }) => boolean;
+  then: AsyncTransformStep;
+  else?: AsyncTransformStep;
+  stopAfter?: boolean;
 }
 
-export type AsyncTransformStep = TransformStep<Promise<TransformStepResult>>;
+// Step input can be either a function or a conditional
+export type StepInput = AsyncTransformStep | ConditionalStep;
+
+interface StepEntry {
+  type: 'normal' | 'conditional';
+  step?: AsyncTransformStep;
+  condition?: ConditionalStep;
+}
 
 export abstract class TransformPipeline<Step extends TransformStep<unknown>> {
   protected _beforeStep?: Step;
   protected _afterStep?: Step;
-  protected steps: Array<[Step, TransformStepConfig | null]> = [];
+  protected steps: StepEntry[] = [];
 
   beforeStep(step: Step): this {
     this._beforeStep = step;
@@ -49,8 +55,12 @@ export abstract class TransformPipeline<Step extends TransformStep<unknown>> {
     return this;
   }
 
-  addStep(step: Step, config?: TransformStepConfig): this {
-    this.steps.push([step, config ?? null]);
+  addStep(step: StepInput): this {
+    if (typeof step === 'function') {
+      this.steps.push({ type: 'normal', step: step as AsyncTransformStep });
+    } else {
+      this.steps.push({ type: 'conditional', condition: step as ConditionalStep });
+    }
     return this;
   }
 

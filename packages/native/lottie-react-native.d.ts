@@ -1,2 +1,5 @@
-export { default } from './dist/lottie-react-native';
-export * from './dist/lottie-react-native';
+import LottieView from '@granite-js/lottie';
+
+export * from '@granite-js/lottie';
+export { LottieView };
+export default LottieView;
