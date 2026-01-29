@@ -31,6 +31,11 @@
   "resolutions": {
     "typescript": "5.8.3"
   },
+  "dependenciesMeta": {
+    "hermes-compiler": {
+      "unplugged": true
+    }
+  },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
     "@changesets/cli": "^2.29.3",

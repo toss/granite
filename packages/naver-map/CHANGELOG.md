@@ -1,30 +1,14 @@
 # @granite-js/naver-map
 
-## 0.1.34-next.49
+## 1.0.0-next.89
 
 ### Patch Changes
 
 - fix
 
-## 0.1.34-next.48
-
 ### Patch Changes
 
 - fix
-
-## 0.1.34-next.47
-
-### Patch Changes
-
-- fix
-
-## 0.1.34-next.46
-
-### Patch Changes
-
-- fix
-
-## 0.1.34-next.45
 
 ### Patch Changes
 
