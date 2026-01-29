@@ -12,7 +12,7 @@ export async function resolveConfig(config: CompleteGraniteConfig) {
   }
 
   const mergedConfig = (await mergeConfig(base, ...rest)) ?? EMPTY_CONFIG;
-  const resolvedConfig: ResolvedPluginConfig = { ...mergedConfig, metro: resolveMetroConfig(config, mergedConfig) };
+  const resolvedConfig: ResolvedPluginConfig = { ...mergedConfig, metro: resolveMetroConfig(mergedConfig) };
 
   return resolvedConfig;
 }
@@ -20,12 +20,12 @@ export async function resolveConfig(config: CompleteGraniteConfig) {
 /**
  * Injects the some config into the metro config to ensure compatibility with the plugin config.
  */
-function resolveMetroConfig(config: CompleteGraniteConfig, pluginConfig: StaticPluginConfig): ResolvedMetroConfig {
+function resolveMetroConfig(pluginConfig: StaticPluginConfig): ResolvedMetroConfig {
   const metroConfig = pluginConfig.metro ?? {};
 
   return {
     ...metroConfig,
-    reactNativePath: config.reactNativePath,
+    reactNativePath: pluginConfig.reactNativePath,
     babelConfig: pluginConfig.babel,
     transformSync: pluginConfig?.transformer?.transformSync,
   };
