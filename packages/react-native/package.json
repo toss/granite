@@ -117,6 +117,7 @@
     "react-native": "*"
   },
   "dependencies": {
+    "@granite-js/blur-view": "workspace:*",
     "@granite-js/cli": "workspace:*",
     "@granite-js/jest": "workspace:*",
     "@granite-js/mpack": "workspace:*",
