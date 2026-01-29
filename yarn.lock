@@ -5679,7 +5679,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@granite-js/blur-view@workspace:*, @granite-js/blur-view@workspace:packages/blur-view":
+"@granite-js/blur-view@workspace:packages/blur-view":
   version: 0.0.0-use.local
   resolution: "@granite-js/blur-view@workspace:packages/blur-view"
   dependencies:
@@ -6169,11 +6169,8 @@ __metadata:
     "@babel/core": "npm:7.28.5"
     "@babel/preset-env": "npm:7.28.5"
     "@babel/preset-typescript": "npm:7.28.5"
-    "@granite-js/blur-view": "workspace:*"
     "@granite-js/cli": "workspace:*"
-    "@granite-js/image": "workspace:*"
     "@granite-js/jest": "workspace:*"
-    "@granite-js/lottie": "workspace:*"
     "@granite-js/mpack": "workspace:*"
     "@granite-js/native": "workspace:*"
     "@granite-js/plugin-core": "workspace:*"

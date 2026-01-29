@@ -1,4 +1,4 @@
-import type { AnimationObject } from '@granite-js/lottie';
+import type { AnimationObject } from '@granite-js/native/lottie-react-native';
 import { useState, useEffect } from 'react';
 
 export function useFetchResource(

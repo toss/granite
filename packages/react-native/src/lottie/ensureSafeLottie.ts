@@ -1,4 +1,4 @@
-import type { AnimationObject } from '@granite-js/lottie';
+import type { AnimationObject } from '@granite-js/native/lottie-react-native';
 
 type AnimationObjectWithFonts = AnimationObject & {
   fonts?: { list?: unknown[] };

@@ -1,4 +1,4 @@
-import LottieView, { type AnimationObject, type OnAnimationFailureEvent } from '@granite-js/lottie';
+import LottieView, { type AnimationObject, type OnAnimationFailureEvent } from '@granite-js/native/lottie-react-native';
 import type { ComponentProps } from 'react';
 import { View, type NativeSyntheticEvent } from 'react-native';
 import { ensureSafeLottie, hasFonts } from './ensureSafeLottie';
