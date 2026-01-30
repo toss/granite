@@ -1,6 +1,50 @@
 # @granite-js/plugin-core
 
+<<<<<<< HEAD
 ## 1.0.0-next.89
+=======
+## 0.1.34-next.54
+
+### Patch Changes
+
+- fix
+- Updated dependencies
+  - @granite-js/utils@0.1.34-next.54
+
+## 0.1.34-next.53
+
+### Patch Changes
+
+- update
+- Updated dependencies
+  - @granite-js/utils@0.1.34-next.53
+
+## 0.1.34-next.52
+
+### Patch Changes
+
+- update
+- Updated dependencies
+  - @granite-js/utils@0.1.34-next.52
+
+## 0.1.34-next.51
+
+### Patch Changes
+
+- update
+- Updated dependencies
+  - @granite-js/utils@0.1.34-next.51
+
+## 0.1.34-next.50
+
+### Patch Changes
+
+- update version
+- Updated dependencies
+  - @granite-js/utils@0.1.34-next.50
+
+## 0.1.34-next.49
+>>>>>>> feature/rn81
 
 ### Patch Changes
 

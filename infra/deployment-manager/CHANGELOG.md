@@ -1,7 +1,5 @@
 # @granite-js/deployment-manager
 
-## 1.0.0-next.89
-
 ### Patch Changes
 
 - fix
