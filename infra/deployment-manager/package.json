@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/deployment-manager",
   "type": "module",
-  "version": "1.0.0-next.89",
+  "version": "1.0.0-next.90",
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "module": "./dist/index.js",
