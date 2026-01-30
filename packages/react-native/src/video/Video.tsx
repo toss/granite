@@ -71,7 +71,7 @@ const VideoImpl = forwardRef<VideoRef, VideoProps>((props, ref) => {
       disableFocus={Platform.OS === 'ios' ? false : disableFocus}
       playWhenInactive
       onAudioFocusChanged={(event) => {
-        setIsFocused(event.nativeEvent.hasAudioFocus);
+        setIsFocused(event.hasAudioFocus);
         props.onAudioFocusChanged?.(event);
       }}
       {...props}
