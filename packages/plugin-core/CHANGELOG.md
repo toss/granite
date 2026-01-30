@@ -1,8 +1,11 @@
 # @granite-js/plugin-core
 
 <<<<<<< HEAD
+
 ## 1.0.0-next.89
+
 =======
+
 ## 0.1.34-next.54
 
 ### Patch Changes
@@ -44,7 +47,8 @@
   - @granite-js/utils@0.1.34-next.50
 
 ## 0.1.34-next.49
->>>>>>> feature/rn81
+
+> > > > > > > feature/rn81
 
 ### Patch Changes
 
