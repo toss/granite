@@ -1,10 +1,7 @@
 import type { AnimationObject } from '@granite-js/native/lottie-react-native';
 import { useState, useEffect } from 'react';
 
-export function useFetchResource(
-  src: string,
-  onAnimationFailure?: (event: { error: string }) => void
-): AnimationObject | null {
+export function useFetchResource(src: string, onAnimationFailure?: (error: string) => void): AnimationObject | null {
   const [jsonData, setJsonData] = useState<AnimationObject | null>(null);
 
   useEffect(() => {
@@ -18,7 +15,11 @@ export function useFetchResource(
         }
       })
       .catch((error) => {
-        onAnimationFailure?.({ error: error.message });
+        if (error instanceof Error) {
+          onAnimationFailure?.(error.message);
+        } else {
+          onAnimationFailure?.('Unknown error');
+        }
       });
 
     return () => {

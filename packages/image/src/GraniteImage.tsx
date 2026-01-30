@@ -125,7 +125,7 @@ const GraniteImageBase: React.FC<GraniteImageProps> = ({
   onLoad,
   onError,
   onLoadEnd,
-  testID,
+  ...viewProps
 }) => {
   // Parse source
   const uri = typeof source === 'string' ? source : ((source && typeof source === 'object' ? source.uri : '') ?? '');
@@ -187,6 +187,7 @@ const GraniteImageBase: React.FC<GraniteImageProps> = ({
 
   return (
     <GraniteImageNativeComponent
+      {...viewProps}
       uri={uri}
       headers={headers}
       contentMode={resizeModeToContentMode(resizeMode)}
@@ -196,7 +197,6 @@ const GraniteImageBase: React.FC<GraniteImageProps> = ({
       priority={sourcePriority || priority}
       cachePolicy={sourceCache ? mapCachePolicy(sourceCache) : cachePolicy}
       style={style}
-      testID={testID}
       onGraniteLoadStart={onLoadStart ? handleLoadStart : undefined}
       onGraniteProgress={onProgress ? handleProgress : undefined}
       onGraniteLoad={onLoad ? handleLoad : undefined}

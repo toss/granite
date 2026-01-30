@@ -33,8 +33,10 @@ export type OnAnimationFailureEvent = Readonly<{
   error: string;
 }>;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type OnAnimationLoadedEvent = Readonly<{}>;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type OnAnimationLoopEvent = Readonly<{}>;
 
 export interface NativeProps extends ViewProps {

@@ -29,6 +29,7 @@ export type OnMarkerClickEvent = Readonly<{
   id: string;
 }>;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type OnInitializedEvent = Readonly<{}>;
 
 // Center prop type
