@@ -116,14 +116,14 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
   // Event handlers
   const handleAnimationFinish = useCallback(
     (event: NativeSyntheticEvent<OnAnimationFinishEvent>) => {
-      onAnimationFinish?.(event);
+      onAnimationFinish?.(event.nativeEvent.isCancelled);
     },
     [onAnimationFinish]
   );
 
   const handleAnimationFailure = useCallback(
     (event: NativeSyntheticEvent<OnAnimationFailureEvent>) => {
-      onAnimationFailure?.(event);
+      onAnimationFailure?.(event.nativeEvent.error);
     },
     [onAnimationFailure]
   );

@@ -1,8 +1,7 @@
-import type { StyleProp, ViewStyle, ImageSourcePropType, NativeSyntheticEvent } from 'react-native';
+import type { StyleProp, ViewStyle, ImageSourcePropType } from 'react-native';
 import type {
   OnVideoLoadStartEvent,
   OnVideoLoadEvent,
-  OnVideoErrorEvent,
   OnVideoProgressEvent,
   OnVideoSeekEvent,
   OnVideoBufferEvent,
@@ -15,6 +14,7 @@ import type {
   OnVideoControlsVisibilityChangeEvent,
   OnVideoExternalPlaybackChangeEvent,
   OnVideoAspectRatioEvent,
+  OnVideoErrorEvent,
 } from './GraniteVideoNativeComponent';
 
 // ============================================================
@@ -123,24 +123,14 @@ export type Poster = ImageSourcePropType | PosterSource;
 // Event Data Types
 // ============================================================
 
-export interface OnLoadStartData {
-  isNetwork: boolean;
-  type: string;
-  uri: string;
-}
-
-export interface OnLoadData {
-  currentTime: number;
-  duration: number;
-  naturalSize: {
-    width: number;
-    height: number;
+export type OnLoadData = OnVideoLoadEvent & {
+  naturalSize: OnVideoLoadEvent['naturalSize'] & {
     orientation: 'portrait' | 'landscape';
   };
   audioTracks: AudioTrack[];
   textTracks: TextTrackInfo[];
   videoTracks: VideoTrackInfo[];
-}
+};
 
 export interface AudioTrack {
   index: number;
@@ -169,67 +159,9 @@ export interface VideoTrackInfo {
   selected?: boolean;
 }
 
-export interface OnProgressData {
-  currentTime: number;
-  playableDuration: number;
-  seekableDuration: number;
-}
-
-export interface OnSeekData {
-  currentTime: number;
-  seekTime: number;
-}
-
-export interface OnBufferData {
-  isBuffering: boolean;
-}
-
-export interface OnBandwidthUpdateData {
-  bitrate: number;
-  width?: number;
-  height?: number;
-}
-
-export interface OnVideoErrorData {
-  error: {
-    code: number;
-    domain?: string;
-    localizedDescription?: string;
-    localizedFailureReason?: string;
-    localizedRecoverySuggestion?: string;
-    errorString?: string;
-  };
-}
-
-export interface OnAudioFocusChangedData {
-  hasAudioFocus: boolean;
-}
-
-export interface OnPlaybackStateChangedData {
-  isPlaying: boolean;
-  isSeeking: boolean;
-  isLooping: boolean;
-}
-
-export interface OnPlaybackRateChangeData {
-  playbackRate: number;
-}
-
-export interface OnVolumeChangeData {
-  volume: number;
-}
-
-export interface OnPictureInPictureStatusChangedData {
-  isActive: boolean;
-}
-
-export interface OnControlsVisibilityChangeData {
-  isVisible: boolean;
-}
-
-export interface OnExternalPlaybackChangeData {
-  isExternalPlaybackActive: boolean;
-}
+export type OnSeekData = OnVideoSeekEvent & {
+  target?: number;
+};
 
 export interface OnTimedMetadataData {
   metadata: Array<{
@@ -252,11 +184,6 @@ export interface OnTextTrackDataChangedData {
 
 export interface OnVideoTracksData {
   videoTracks: VideoTrackInfo[];
-}
-
-export interface OnVideoAspectRatioData {
-  width: number;
-  height: number;
 }
 
 export interface OnReceiveAdEventData {
@@ -379,27 +306,27 @@ export interface VideoProps {
   /**
    * Callback when video starts loading
    */
-  onLoadStart?: (event: NativeSyntheticEvent<OnVideoLoadStartEvent>) => void;
+  onLoadStart?: (data: OnVideoLoadStartEvent) => void;
 
   /**
    * Callback when video is loaded
    */
-  onLoad?: (event: NativeSyntheticEvent<OnVideoLoadEvent>) => void;
+  onLoad?: (data: OnLoadData) => void;
 
   /**
    * Callback when video fails to load
    */
-  onError?: (event: NativeSyntheticEvent<OnVideoErrorEvent>) => void;
+  onError?: (data: OnVideoErrorEvent) => void;
 
   /**
    * Callback during video playback progress
    */
-  onProgress?: (event: NativeSyntheticEvent<OnVideoProgressEvent>) => void;
+  onProgress?: (data: OnVideoProgressEvent) => void;
 
   /**
    * Callback when video seek completes
    */
-  onSeek?: (event: NativeSyntheticEvent<OnVideoSeekEvent>) => void;
+  onSeek?: (data: OnSeekData) => void;
 
   /**
    * Callback when video ends
@@ -409,27 +336,27 @@ export interface VideoProps {
   /**
    * Callback when video buffering state changes
    */
-  onBuffer?: (event: NativeSyntheticEvent<OnVideoBufferEvent>) => void;
+  onBuffer?: (data: OnVideoBufferEvent) => void;
 
   /**
    * Callback when video bandwidth updates
    */
-  onBandwidthUpdate?: (event: NativeSyntheticEvent<OnVideoBandwidthUpdateEvent>) => void;
+  onBandwidthUpdate?: (data: OnVideoBandwidthUpdateEvent) => void;
 
   /**
    * Callback when playback state changes
    */
-  onPlaybackStateChanged?: (event: NativeSyntheticEvent<OnVideoPlaybackStateChangedEvent>) => void;
+  onPlaybackStateChanged?: (data: OnVideoPlaybackStateChangedEvent) => void;
 
   /**
    * Callback when playback rate changes
    */
-  onPlaybackRateChange?: (event: NativeSyntheticEvent<OnVideoPlaybackRateChangeEvent>) => void;
+  onPlaybackRateChange?: (data: OnVideoPlaybackRateChangeEvent) => void;
 
   /**
    * Callback when volume changes
    */
-  onVolumeChange?: (event: NativeSyntheticEvent<OnVideoVolumeChangeEvent>) => void;
+  onVolumeChange?: (data: OnVideoVolumeChangeEvent) => void;
 
   /**
    * Callback when video becomes idle
@@ -440,6 +367,8 @@ export interface VideoProps {
    * Callback when video is ready for display
    */
   onReadyForDisplay?: () => void;
+  onPlaybackResume?: () => void;
+  onPlaybackStalled?: () => void;
 
   // Track Events
   onAudioTracks?: (data: OnAudioTracksData) => void;
@@ -451,12 +380,12 @@ export interface VideoProps {
   /**
    * Callback when video aspect ratio changes
    */
-  onAspectRatio?: (event: NativeSyntheticEvent<OnVideoAspectRatioEvent>) => void;
+  onAspectRatio?: (data: OnVideoAspectRatioEvent) => void;
 
   /**
    * Callback when audio focus changes
    */
-  onAudioFocusChanged?: (event: NativeSyntheticEvent<OnVideoAudioFocusChangedEvent>) => void;
+  onAudioFocusChanged?: (data: OnVideoAudioFocusChangedEvent) => void;
 
   /**
    * Callback when audio becomes noisy
@@ -486,7 +415,7 @@ export interface VideoProps {
   /**
    * Callback when picture-in-picture status changes
    */
-  onPictureInPictureStatusChanged?: (event: NativeSyntheticEvent<OnVideoPictureInPictureStatusChangedEvent>) => void;
+  onPictureInPictureStatusChanged?: (data: OnVideoPictureInPictureStatusChangedEvent) => void;
 
   /**
    * Callback to restore user interface for picture-in-picture stop
@@ -496,12 +425,12 @@ export interface VideoProps {
   /**
    * Callback when controls visibility changes
    */
-  onControlsVisibilityChange?: (event: NativeSyntheticEvent<OnVideoControlsVisibilityChangeEvent>) => void;
+  onControlsVisibilityChange?: (data: OnVideoControlsVisibilityChangeEvent) => void;
 
   /**
    * Callback when external playback changes
    */
-  onExternalPlaybackChange?: (event: NativeSyntheticEvent<OnVideoExternalPlaybackChangeEvent>) => void;
+  onExternalPlaybackChange?: (data: OnVideoExternalPlaybackChangeEvent) => void;
 
   // Ad Events
   onReceiveAdEvent?: (data: OnReceiveAdEventData) => void;
