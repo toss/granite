@@ -1,5 +1,13 @@
 # @granite-js/jest
 
+## 0.1.34-next.58
+
+### Patch Changes
+
+- change Cookie name
+- Updated dependencies
+  - @granite-js/native@0.1.34-next.58
+
 ## 0.1.34-next.57
 
 ### Patch Changes

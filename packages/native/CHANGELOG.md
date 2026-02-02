@@ -1,5 +1,15 @@
 # @granite-js/native
 
+## 0.1.34-next.58
+
+### Patch Changes
+
+- change Cookie name
+- Updated dependencies
+  - @granite-js/lottie@0.1.34-next.58
+  - @granite-js/image@0.1.34-next.58
+  - @granite-js/video@0.1.34-next.58
+
 ## 0.1.34-next.57
 
 ### Patch Changes

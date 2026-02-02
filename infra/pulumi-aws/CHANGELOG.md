@@ -1,5 +1,11 @@
 # @granite-js/pulumi-aws
 
+## 0.1.34-next.58
+
+### Patch Changes
+
+- change Cookie name
+
 ## 0.1.34-next.57
 
 ### Patch Changes

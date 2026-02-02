@@ -1,5 +1,14 @@
 # @granite-js/forge-cli
 
+## 0.1.34-next.58
+
+### Patch Changes
+
+- change Cookie name
+- Updated dependencies
+  - @granite-js/deployment-manager@0.1.34-next.58
+  - @granite-js/plugin-core@0.1.34-next.58
+
 ## 0.1.34-next.57
 
 ### Patch Changes

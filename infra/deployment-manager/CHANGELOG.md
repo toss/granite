@@ -1,5 +1,11 @@
 # @granite-js/deployment-manager
 
+## 0.1.34-next.58
+
+### Patch Changes
+
+- change Cookie name
+
 ## 0.1.34-next.57
 
 ### Patch Changes
