@@ -1,5 +1,11 @@
 # babel-preset-granite
 
+## 0.1.34-next.59
+
+### Patch Changes
+
+- bumpup
+
 ## 0.1.34-next.58
 
 ### Patch Changes
