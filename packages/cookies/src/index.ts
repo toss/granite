@@ -3,7 +3,7 @@ import { type Cookie, CookiesNativeModule } from './spec/cookies.brick';
 /**
  * Type-safe cookie dictionary
  */
-export type CookieDict = { [name: string]: Cookie };
+export type Cookies = { [name: string]: Cookie };
 
 /**
  * Cookie Manager API
@@ -25,16 +25,16 @@ export const CookieManager = {
    * @param url - The URL to get cookies for
    * @param useWebKit - Whether to use WebKit cookie store (iOS only, default: false)
    */
-  get(url: string, useWebKit = false): Promise<CookieDict> {
-    return CookiesNativeModule.get(url, useWebKit) as Promise<CookieDict>;
+  get(url: string, useWebKit = false): Promise<Cookies> {
+    return CookiesNativeModule.get(url, useWebKit) as Promise<Cookies>;
   },
 
   /**
    * Get all cookies (iOS only, Android returns empty object)
    * @param useWebKit - Whether to use WebKit cookie store (iOS only, default: false)
    */
-  getAll(useWebKit = false): Promise<CookieDict> {
-    return CookiesNativeModule.getAll(useWebKit) as Promise<CookieDict>;
+  getAll(useWebKit = false): Promise<Cookies> {
+    return CookiesNativeModule.getAll(useWebKit) as Promise<Cookies>;
   },
 
   /**
@@ -68,8 +68,8 @@ export const CookieManager = {
    * Get cookies that would be sent with a request to the URL
    * @param url - The URL to get cookies for
    */
-  getFromResponse(url: string): Promise<CookieDict> {
-    return CookiesNativeModule.getFromResponse(url) as Promise<CookieDict>;
+  getFromResponse(url: string): Promise<Cookies> {
+    return CookiesNativeModule.getFromResponse(url) as Promise<Cookies>;
   },
 
   /**
