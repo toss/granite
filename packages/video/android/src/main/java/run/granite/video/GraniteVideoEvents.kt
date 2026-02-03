@@ -127,4 +127,11 @@ object GraniteVideoEvents {
             putDouble("height", height)
         }
     }
+
+    fun createTransferEndEvent(viewId: Int, uri: String, bytesTransferred: Long): WritableMap {
+        return Arguments.createMap().apply {
+            putString("uri", uri)
+            putDouble("bytesTransferred", bytesTransferred.toDouble())
+        }
+    }
 }
