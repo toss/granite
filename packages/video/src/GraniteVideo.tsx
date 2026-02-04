@@ -106,6 +106,9 @@ function getPosterUri(poster?: VideoProps['poster']): string | undefined {
   if (!poster) {
     return undefined;
   }
+  if (typeof poster === 'string') {
+    return poster;
+  }
   if (typeof poster === 'object' && 'uri' in poster && poster.uri) {
     return poster.uri;
   }
