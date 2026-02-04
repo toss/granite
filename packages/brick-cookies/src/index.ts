@@ -1,4 +1,4 @@
-import { type Cookie, CookiesNativeModule } from "./spec/cookies.brick";
+import { type Cookie, CookiesNativeModule } from './spec/cookies.brick';
 
 /**
  * Type-safe cookie dictionary

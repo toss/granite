@@ -13,7 +13,9 @@ export function useFetchResource(
     fetch(src)
       .then((res) => res.json())
       .then((data) => {
-        if (!cancelled) {setJsonData(data);}
+        if (!cancelled) {
+          setJsonData(data);
+        }
       })
       .catch((error) => {
         onAnimationFailure?.({ error: error.message });
