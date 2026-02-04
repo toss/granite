@@ -5,12 +5,12 @@ export function useFetchResource(src: string, onAnimationFailure?: (error: strin
   const [jsonData, setJsonData] = useState<AnimationObject | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
+    let canceled = false;
 
     fetch(src)
       .then((res) => res.json())
       .then((data) => {
-        if (!cancelled) {
+        if (!canceled) {
           setJsonData(data);
         }
       })
@@ -23,7 +23,7 @@ export function useFetchResource(src: string, onAnimationFailure?: (error: strin
       });
 
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, [src, onAnimationFailure]);
 
