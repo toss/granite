@@ -129,6 +129,11 @@ export type OnVideoAspectRatioEvent = Readonly<{
   height: Double;
 }>;
 
+export type TransferEndEvent = Readonly<{
+  uri: string;
+  bytesTransferred: Double;
+}>
+
 export interface NativeProps extends ViewProps {
   // Source
   source?: NativeVideoSource;
@@ -226,6 +231,7 @@ export interface NativeProps extends ViewProps {
   onVideoControlsVisibilityChange?: DirectEventHandler<OnVideoControlsVisibilityChangeEvent>;
   onVideoExternalPlaybackChange?: DirectEventHandler<OnVideoExternalPlaybackChangeEvent>;
   onVideoAspectRatio?: DirectEventHandler<OnVideoAspectRatioEvent>;
+  onTransferEnd?: DirectEventHandler<TransferEndEvent>;
 }
 
 // ============================================================
