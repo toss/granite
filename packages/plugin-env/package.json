@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-env",
   "type": "module",
-  "version": "1.0.0-next.95",
+  "version": "1.0.0-next.96",
   "license": "Apache-2.0",
   "description": "An env plugin for Granite",
   "scripts": {
