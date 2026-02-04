@@ -2,6 +2,7 @@ package run.granite.video.event
 
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
+import com.facebook.react.uimanager.events.Event
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
@@ -15,6 +16,7 @@ class VideoEventListenerAdapterTest : FunSpec({
     lateinit var mockWritableMap: WritableMap
     lateinit var adapter: VideoEventListenerAdapter
     val viewId = 123
+    val surfaceId = 1
 
     beforeTest {
         mockDispatcher = mockk(relaxed = true)
@@ -23,6 +25,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         // Mock static Arguments.createMap() to return our mock
         mockkStatic(Arguments::class)
         every { Arguments.createMap() } returns mockWritableMap
+
+        // Mock getSurfaceId() to return test surfaceId
+        every { mockDispatcher.getSurfaceId() } returns surfaceId
 
         adapter = VideoEventListenerAdapter(
             dispatcher = mockDispatcher,
@@ -43,11 +48,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onLoadStart(true, "mp4", "https://example.com/video.mp4")
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoLoadStart",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoLoadStartEvent> {
+                it.getEventName() == "topVideoLoadStart" && it.viewTag == viewId
+            })
         }
     }
 
@@ -67,11 +70,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onLoad(data)
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoLoad",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoLoadEvent> {
+                it.getEventName() == "topVideoLoad" && it.viewTag == viewId
+            })
         }
     }
 
@@ -90,11 +91,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onError(error)
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoError",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoErrorEvent> {
+                it.getEventName() == "topVideoError" && it.viewTag == viewId
+            })
         }
     }
 
@@ -112,11 +111,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onProgress(data)
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoProgress",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoProgressEvent> {
+                it.getEventName() == "topVideoProgress" && it.viewTag == viewId
+            })
         }
     }
 
@@ -128,11 +125,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onSeek(5.0, 10.0)
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoSeek",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoSeekEvent> {
+                it.getEventName() == "topVideoSeek" && it.viewTag == viewId
+            })
         }
     }
 
@@ -144,11 +139,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onEnd()
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoEnd",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoEndEvent> {
+                it.getEventName() == "topVideoEnd" && it.viewTag == viewId
+            })
         }
     }
 
@@ -160,11 +153,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onBuffer(true)
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoBuffer",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoBufferEvent> {
+                it.getEventName() == "topVideoBuffer" && it.viewTag == viewId
+            })
         }
     }
 
@@ -176,11 +167,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onBandwidthUpdate(5000000.0, 1920, 1080)
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoBandwidthUpdate",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoBandwidthUpdateEvent> {
+                it.getEventName() == "topVideoBandwidthUpdate" && it.viewTag == viewId
+            })
         }
     }
 
@@ -192,11 +181,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onPlaybackStateChanged(true, false, false)
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoPlaybackStateChanged",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoPlaybackStateChangedEvent> {
+                it.getEventName() == "topVideoPlaybackStateChanged" && it.viewTag == viewId
+            })
         }
     }
 
@@ -208,11 +195,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onPlaybackRateChange(1.5f)
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoPlaybackRateChange",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoPlaybackRateChangeEvent> {
+                it.getEventName() == "topVideoPlaybackRateChange" && it.viewTag == viewId
+            })
         }
     }
 
@@ -224,11 +209,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onVolumeChange(0.5f)
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoVolumeChange",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoVolumeChangeEvent> {
+                it.getEventName() == "topVideoVolumeChange" && it.viewTag == viewId
+            })
         }
     }
 
@@ -240,11 +223,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onIdle()
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoIdle",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoIdleEvent> {
+                it.getEventName() == "topVideoIdle" && it.viewTag == viewId
+            })
         }
     }
 
@@ -256,11 +237,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onReadyForDisplay()
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoReadyForDisplay",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoReadyForDisplayEvent> {
+                it.getEventName() == "topVideoReadyForDisplay" && it.viewTag == viewId
+            })
         }
     }
 
@@ -272,11 +251,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onFullscreenPlayerWillPresent()
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoFullscreenPlayerWillPresent",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoFullscreenPlayerWillPresentEvent> {
+                it.getEventName() == "topVideoFullscreenPlayerWillPresent" && it.viewTag == viewId
+            })
         }
     }
 
@@ -284,11 +261,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onFullscreenPlayerDidPresent()
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoFullscreenPlayerDidPresent",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoFullscreenPlayerDidPresentEvent> {
+                it.getEventName() == "topVideoFullscreenPlayerDidPresent" && it.viewTag == viewId
+            })
         }
     }
 
@@ -300,11 +275,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onPictureInPictureStatusChanged(true)
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoPictureInPictureStatusChanged",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoPictureInPictureStatusChangedEvent> {
+                it.getEventName() == "topVideoPictureInPictureStatusChanged" && it.viewTag == viewId
+            })
         }
     }
 
@@ -316,11 +289,9 @@ class VideoEventListenerAdapterTest : FunSpec({
         adapter.onAspectRatioChanged(16.0, 9.0)
 
         verify {
-            mockDispatcher.dispatchEvent(
-                viewId,
-                "topVideoAspectRatio",
-                any()
-            )
+            mockDispatcher.dispatchEvent(match<GraniteVideoAspectRatioEvent> {
+                it.getEventName() == "topVideoAspectRatio" && it.viewTag == viewId
+            })
         }
     }
 
@@ -341,8 +312,8 @@ class VideoEventListenerAdapterTest : FunSpec({
         dynamicAdapter.onEnd()
 
         verifyOrder {
-            mockDispatcher.dispatchEvent(100, "topVideoEnd", any())
-            mockDispatcher.dispatchEvent(200, "topVideoEnd", any())
+            mockDispatcher.dispatchEvent(match<GraniteVideoEndEvent> { it.viewTag == 100 })
+            mockDispatcher.dispatchEvent(match<GraniteVideoEndEvent> { it.viewTag == 200 })
         }
     }
 })
