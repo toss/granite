@@ -394,6 +394,10 @@ private class AVPlayerContainerView: UIView {
         // Native controls handled by AVPlayerViewController if needed
     }
 
+    @objc public func onTransferEnd(uri: String, bytesTransferred: Int) {
+        delegate?.videoTransferEnd?(uri: uri, bytesTransferred: Double(bytesTransferred))
+    }
+
     // MARK: - Private Methods
 
     private func unloadPlayerItem() {

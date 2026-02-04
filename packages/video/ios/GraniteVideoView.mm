@@ -619,6 +619,18 @@ using namespace facebook::react;
     }
 }
 
+- (void)videoTransferEndWithUri:(NSString *)uri bytesTransferred:(double)bytesTransferred
+{
+    if (_eventEmitter) {
+        auto emitter = std::static_pointer_cast<GraniteVideoViewEventEmitter const>(_eventEmitter);
+        facebook::react::GraniteVideoViewEventEmitter::OnTransferEnd event = {
+            .uri = std::string([uri UTF8String] ?: ""),
+            .bytesTransferred = bytesTransferred
+        };
+        emitter->onTransferEnd(event);
+    }
+}
+
 #pragma mark - Command Handler
 
 - (void)handleCommand:(NSString const *)commandName args:(NSArray const *)args
