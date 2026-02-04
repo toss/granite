@@ -4,12 +4,10 @@ import android.content.Context
 import android.util.Log
 import android.widget.FrameLayout
 import android.widget.TextView
-import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.LifecycleEventListener
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.ReadableMap
-import com.facebook.react.bridge.WritableMap
-import com.facebook.react.uimanager.events.RCTEventEmitter
+import com.facebook.react.uimanager.UIManagerHelper
 
 /**
  * Provider-based NaverMapView implementation (no direct NMapsMap dependency)
@@ -27,6 +25,12 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
     private var provider: GraniteNaverMapProvider? = null
     private var mapContentView: android.view.View? = null
     private var mapInitialized = false
+
+    private fun getEventDispatcher(): com.facebook.react.uimanager.events.EventDispatcher? {
+        return UIManagerHelper.getEventDispatcherForReactTag(reactContext, id)
+    }
+
+    private fun getSurfaceId(): Int = UIManagerHelper.getSurfaceId(this)
 
     init {
         Log.d(TAG, "GraniteNaverMapView init")
@@ -108,66 +112,33 @@ class GraniteNaverMapView(context: Context) : FrameLayout(context), LifecycleEve
     // MARK: - GraniteNaverMapProviderDelegate
 
     override fun onMapInitialized() {
-        sendEvent("onInitialized", Arguments.createMap())
+        getEventDispatcher()?.dispatchEvent(GraniteNaverMapInitializedEvent(getSurfaceId(), id))
     }
 
     override fun onCameraChange(position: GraniteNaverMapCameraPosition, contentRegion: List<GraniteNaverMapCoordinate>, coveringRegion: List<GraniteNaverMapCoordinate>) {
-        val event = Arguments.createMap().apply {
-            putDouble("latitude", position.target.latitude)
-            putDouble("longitude", position.target.longitude)
-            putDouble("zoom", position.zoom)
-
-            val contentArray = Arguments.createArray().apply {
-                contentRegion.forEach { coord ->
-                    pushMap(Arguments.createMap().apply {
-                        putDouble("latitude", coord.latitude)
-                        putDouble("longitude", coord.longitude)
-                    })
-                }
-            }
-            putArray("contentRegion", contentArray)
-
-            val coveringArray = Arguments.createArray().apply {
-                coveringRegion.forEach { coord ->
-                    pushMap(Arguments.createMap().apply {
-                        putDouble("latitude", coord.latitude)
-                        putDouble("longitude", coord.longitude)
-                    })
-                }
-            }
-            putArray("coveringRegion", coveringArray)
-        }
-        sendEvent("onCameraChange", event)
+        getEventDispatcher()?.dispatchEvent(
+            GraniteNaverMapCameraChangeEvent(
+                getSurfaceId(),
+                id,
+                position.target.latitude,
+                position.target.longitude,
+                position.zoom,
+                contentRegion,
+                coveringRegion
+            )
+        )
     }
 
     override fun onTouch(reason: Int, animated: Boolean) {
-        val event = Arguments.createMap().apply {
-            putInt("reason", reason)
-            putBoolean("animated", animated)
-        }
-        sendEvent("onTouch", event)
+        getEventDispatcher()?.dispatchEvent(GraniteNaverMapTouchEvent(getSurfaceId(), id, reason, animated))
     }
 
     override fun onClick(x: Double, y: Double, latitude: Double, longitude: Double) {
-        val event = Arguments.createMap().apply {
-            putDouble("x", x)
-            putDouble("y", y)
-            putDouble("latitude", latitude)
-            putDouble("longitude", longitude)
-        }
-        sendEvent("onMapClick", event)
+        getEventDispatcher()?.dispatchEvent(GraniteNaverMapClickEvent(getSurfaceId(), id, x, y, latitude, longitude))
     }
 
     override fun onMarkerClick(id: String) {
-        val event = Arguments.createMap().apply {
-            putString("id", id)
-        }
-        sendEvent("onMarkerClick", event)
-    }
-
-    private fun sendEvent(eventName: String, params: WritableMap) {
-        reactContext.getJSModule(RCTEventEmitter::class.java)
-            .receiveEvent(id, eventName, params)
+        getEventDispatcher()?.dispatchEvent(GraniteNaverMapMarkerClickEvent(getSurfaceId(), this.id, id))
     }
 
     // MARK: - Camera Methods
