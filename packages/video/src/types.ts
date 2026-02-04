@@ -193,6 +193,11 @@ export interface OnReceiveAdEventData {
   };
 }
 
+export interface OnTransferEndData {
+  uri: string;
+  bytesTransferred: number;
+}
+
 // ============================================================
 // Ref Methods
 // ============================================================
@@ -432,8 +437,15 @@ export interface VideoProps {
    */
   onExternalPlaybackChange?: (data: OnVideoExternalPlaybackChangeEvent) => void;
 
-  // Ad Events
+  /**
+   * Callback when receive ad event occurs
+   */
   onReceiveAdEvent?: (data: OnReceiveAdEventData) => void;
+
+  /**
+   * Callback when transfer end event occurs
+   */
+  onTransferEnd?: (data: OnTransferEndData) => void;
 }
 
 // ============================================================
