@@ -150,6 +150,7 @@ import AVFoundation
     @objc optional func videoControlsVisibilityChanged(isVisible: Bool)
     @objc optional func videoExternalPlaybackChanged(isActive: Bool)
     @objc optional func videoAspectRatioChanged(width: Double, height: Double)
+    @objc optional func videoTransferEnd(uri: String, bytesTransferred: Double)
 }
 
 // ============================================================

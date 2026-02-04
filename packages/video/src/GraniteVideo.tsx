@@ -28,6 +28,7 @@ import NativeGraniteVideoView, {
   OnVideoControlsVisibilityChangeEvent,
   OnVideoExternalPlaybackChangeEvent,
   OnVideoAspectRatioEvent,
+  TransferEndEvent,
 } from './GraniteVideoNativeComponent';
 import type { VideoRef, VideoSource, VideoProps, OnLoadData } from './types';
 
@@ -105,6 +106,9 @@ function normalizeBufferConfig(config?: VideoProps['bufferConfig']): NativeProps
 function getPosterUri(poster?: VideoProps['poster']): string | undefined {
   if (!poster) {
     return undefined;
+  }
+  if (typeof poster === 'string') {
+    return poster;
   }
   if (typeof poster === 'object' && 'uri' in poster && poster.uri) {
     return poster.uri;
@@ -201,6 +205,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     onControlsVisibilityChange,
     onExternalPlaybackChange,
     onAspectRatio,
+    onTransferEnd,
   } = props;
 
   const nativeRef = useRef<React.ElementRef<typeof NativeGraniteVideoView>>(null);
@@ -429,6 +434,13 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     [onAspectRatio]
   );
 
+  const handleTransferEnd = useCallback(
+    (event: NativeSyntheticEvent<TransferEndEvent>) => {
+      onTransferEnd?.(event.nativeEvent);
+    },
+    [onTransferEnd]
+  );
+
   // === Render ===
   const containerStyle: StyleProp<ViewStyle> = [styles.container, style];
 
@@ -506,6 +518,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
         onVideoControlsVisibilityChange={handleControlsVisibilityChange}
         onVideoExternalPlaybackChange={handleExternalPlaybackChange}
         onVideoAspectRatio={handleAspectRatio}
+        onTransferEnd={handleTransferEnd}
       />
     </View>
   );

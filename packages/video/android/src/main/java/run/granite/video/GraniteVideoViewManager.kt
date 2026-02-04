@@ -13,7 +13,6 @@ import com.facebook.react.common.MapBuilder
 import run.granite.video.event.DefaultVideoEventDispatcherFactory
 import run.granite.video.event.VideoEventDispatcherFactory
 import run.granite.video.event.VideoEventListenerAdapter
-import run.granite.video.provider.*
 
 /**
  * React Native ViewManager for GraniteVideoView.
@@ -309,6 +308,7 @@ class GraniteVideoViewManager(
             .put("topVideoPictureInPictureStatusChanged", MapBuilder.of("registrationName", "onVideoPictureInPictureStatusChanged"))
             .put("topVideoControlsVisibilityChange", MapBuilder.of("registrationName", "onVideoControlsVisibilityChange"))
             .put("topVideoAspectRatio", MapBuilder.of("registrationName", "onVideoAspectRatio"))
+            .put("topVideoTransferEnd", MapBuilder.of("registrationName", "onVideoTransferEnd"))
             .build()
     }
 

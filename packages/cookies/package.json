@@ -23,6 +23,7 @@
     "GraniteCookies.podspec"
   ],
   "scripts": {
+    "prepack": "yarn build",
     "build": "brick-codegen && tsdown"
   },
   "keywords": [

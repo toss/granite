@@ -113,6 +113,7 @@ interface GraniteVideoDelegate {
     fun onPictureInPictureStatusChanged(isActive: Boolean) {}
     fun onControlsVisibilityChanged(isVisible: Boolean) {}
     fun onAspectRatioChanged(width: Double, height: Double) {}
+    fun onTransferEnd(uri: String, bytesTransferred: Long) {}
 }
 
 // ============================================================
