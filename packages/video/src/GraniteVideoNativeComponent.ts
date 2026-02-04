@@ -132,7 +132,7 @@ export type OnVideoAspectRatioEvent = Readonly<{
 export type TransferEndEvent = Readonly<{
   uri: string;
   bytesTransferred: Double;
-}>
+}>;
 
 export interface NativeProps extends ViewProps {
   // Source
