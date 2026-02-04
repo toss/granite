@@ -12,6 +12,13 @@ import com.facebook.react.uimanager.ViewManager
  * Video provider registration is handled automatically via ContentProvider
  * when USE_MEDIA3 is enabled (default).
  *
+ * ## Basic Usage
+ * ```kotlin
+ * // Default configuration (uses Media3)
+ * packages.add(GraniteVideoPackage())
+ * ```
+ *
+ * ## Custom Provider Configuration
  * To disable Media3 and use a custom provider:
  * ```
  * // In gradle.properties
@@ -19,7 +26,7 @@ import com.facebook.react.uimanager.ViewManager
  * ```
  *
  * Then register your custom provider:
- * ```
+ * ```kotlin
  * GraniteVideoRegistry.registerFactory("custom") { MyCustomProvider() }
  * GraniteVideoRegistry.setDefaultProvider("custom")
  * ```
@@ -34,4 +41,3 @@ class GraniteVideoPackage : ReactPackage {
         return listOf(GraniteVideoModule(reactContext))
     }
 }
-

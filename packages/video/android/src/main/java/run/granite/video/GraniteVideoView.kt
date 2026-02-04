@@ -336,6 +336,10 @@ class GraniteVideoView @JvmOverloads constructor(
         eventListener?.onAspectRatioChanged(width, height)
     }
 
+    override fun onTransferEnd(uri: String, bytesTransferred: Long) {
+        eventListener?.onTransferEnd(uri, bytesTransferred)
+    }
+
     // Cleanup
     private fun releaseProvider() {
         provider?.release()
@@ -376,4 +380,5 @@ interface GraniteVideoEventListener {
     fun onPictureInPictureStatusChanged(isActive: Boolean)
     fun onControlsVisibilityChanged(isVisible: Boolean)
     fun onAspectRatioChanged(width: Double, height: Double)
+    fun onTransferEnd(uri: String, bytesTransferred: Long) {}
 }

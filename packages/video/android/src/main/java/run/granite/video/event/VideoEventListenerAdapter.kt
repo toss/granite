@@ -127,4 +127,9 @@ class VideoEventListenerAdapter(
         val event = GraniteVideoEvents.createAspectRatioEvent(viewId, width, height)
         dispatcher.dispatchEvent(viewId, "topVideoAspectRatio", event)
     }
+
+    override fun onTransferEnd(uri: String, bytesTransferred: Long) {
+        val event = GraniteVideoEvents.createTransferEndEvent(viewId, uri, bytesTransferred)
+        dispatcher.dispatchEvent(viewId, "topVideoTransferEnd", event)
+    }
 }
