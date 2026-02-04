@@ -286,8 +286,12 @@ export interface VideoProps {
   // Source
   source: VideoSource | number;
 
-  // Poster
-  poster?: Poster;
+  /**
+   * **NOTE**
+   *
+   * Value: string with a URL for the poster is deprecated, use poster as an object instead.
+   */
+  poster?: Poster | string;
   posterResizeMode?: ResizeMode;
 
   // Playback Control
