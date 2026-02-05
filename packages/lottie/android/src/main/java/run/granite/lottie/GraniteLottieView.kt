@@ -24,7 +24,7 @@ class GraniteLottieView(context: Context) : FrameLayout(context), GraniteLottieL
     private var isLoaded = false
 
     init {
-        // ContentProvider가 INCLUDE_DEFAULT_PROVIDER=true일 때 자동으로 builtin provider 등록
+        // ContentProvider auto-registers builtin provider when INCLUDE_DEFAULT_PROVIDER=true
         val resolvedProvider = GraniteLottieRegistry.createProvider()
 
         if (resolvedProvider == null) {

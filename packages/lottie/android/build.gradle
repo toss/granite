@@ -127,12 +127,12 @@ android {
           "generated/java",
           "generated/jni"
         ]
-        // 조건부로 default provider 소스 포함
+        // Conditionally include default provider sources
         if (includeDefaultProvider) {
           srcDirs += ["src/default/java"]
         }
       }
-      // 조건부 manifest (ContentProvider 포함)
+      // Conditional manifest (includes ContentProvider)
       if (includeDefaultProvider) {
         manifest.srcFile "src/default/AndroidManifest.xml"
       }
