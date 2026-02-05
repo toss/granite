@@ -1,6 +1,6 @@
 {
   "name": "create-granite-app",
-  "version": "1.0.0-next.97",
+  "version": "1.0.0-dev.20260205165843",
   "type": "module",
   "bin": {
     "cba": "./bin.js",
@@ -45,5 +45,6 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.8.2"
-  }
+  },
+  "stableVersion": "1.0.0-next.97"
 }

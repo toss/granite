@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/video",
-  "version": "1.0.0-next.97",
+  "version": "1.0.0-dev.20260205165843",
   "description": "Pluggable video component for React Native with provider selection",
   "type": "module",
   "main": "./dist/module/index.js",
@@ -102,5 +102,6 @@
         }
       ]
     ]
-  }
+  },
+  "stableVersion": "1.0.0-next.97"
 }

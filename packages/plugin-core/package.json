@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-core",
   "type": "module",
-  "version": "1.0.0-next.97",
+  "version": "1.0.0-dev.20260205165843",
   "description": "The core plugin module for Granite",
   "scripts": {
     "prepack": "yarn build",
@@ -53,5 +53,6 @@
     "fastify": "4.14.0",
     "zod": "^4.0.10"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "stableVersion": "1.0.0-next.97"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/native",
-  "version": "1.0.0-next.97",
+  "version": "1.0.0-dev.20260205165843",
   "description": "A native module hub package for Granite",
   "repository": {
     "type": "git",
@@ -139,5 +139,6 @@
     "react": "*",
     "react-native": "*"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "stableVersion": "1.0.0-next.97"
 }

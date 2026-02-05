@@ -1,7 +1,7 @@
 {
   "name": "babel-preset-granite",
   "type": "module",
-  "version": "1.0.0-next.97",
+  "version": "1.0.0-dev.20260205165843",
   "license": "Apache-2.0",
   "description": "Babel preset for Granite",
   "scripts": {
@@ -41,5 +41,6 @@
     "tsdown": "^0.16.5",
     "typescript": "5.8.3",
     "vitest": "^4.0.12"
-  }
+  },
+  "stableVersion": "1.0.0-next.97"
 }
