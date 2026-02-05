@@ -26,7 +26,8 @@
     "build:shared": "tsdown --config shared/tsdown.config.ts",
     "attw:all": "yarn tools attw",
     "clear": "rimraf --glob \"**/*/dist\" .nx",
-    "tools": "./bin/tools"
+    "tools": "./bin/tools",
+    "publish:dev": "sh .scripts/publish-dev.sh"
   },
   "resolutions": {
     "typescript": "5.8.3"
