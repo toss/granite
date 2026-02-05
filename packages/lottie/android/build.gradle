@@ -60,7 +60,7 @@ def resolveDefaultProvider(String specificKey, String fallbackKey, boolean defau
     if (specificEnvValue != null) {
         return specificEnvValue == 'true'
     }
-    def specificPropValue = project.findProperty(specificKey)
+    def specificPropValue = project.findProperty(specificKey) ?: rootProject.findProperty(specificKey)
     if (specificPropValue != null) {
         return specificPropValue.toString() == 'true'
     }
@@ -70,7 +70,7 @@ def resolveDefaultProvider(String specificKey, String fallbackKey, boolean defau
     if (fallbackEnvValue != null) {
         return fallbackEnvValue == 'true'
     }
-    def fallbackPropValue = project.findProperty(fallbackKey)
+    def fallbackPropValue = project.findProperty(fallbackKey) ?: rootProject.findProperty(fallbackKey)
     if (fallbackPropValue != null) {
         return fallbackPropValue.toString() == 'true'
     }
@@ -116,16 +116,25 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
 
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+
   sourceSets {
     main {
-      java.srcDirs += [
-        "generated/java",
-        "generated/jni"
-      ]
-
-      // Conditionally exclude the providers directory
-      if (!includeDefaultProvider) {
-        java.exclude '**/providers/**'
+      java {
+        srcDirs += [
+          "generated/java",
+          "generated/jni"
+        ]
+        // 조건부로 default provider 소스 포함
+        if (includeDefaultProvider) {
+          srcDirs += ["src/default/java"]
+        }
+      }
+      // 조건부 manifest (ContentProvider 포함)
+      if (includeDefaultProvider) {
+        manifest.srcFile "src/default/AndroidManifest.xml"
       }
     }
   }

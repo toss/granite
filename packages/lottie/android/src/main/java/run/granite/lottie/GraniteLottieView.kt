@@ -24,20 +24,8 @@ class GraniteLottieView(context: Context) : FrameLayout(context), GraniteLottieL
     private var isLoaded = false
 
     init {
-        // Get provider from registry
-        var resolvedProvider: GraniteLottieProvider? = GraniteLottieRegistry.provider
-
-        // Conditional fallback based on build config
-        if (resolvedProvider == null && BuildConfig.INCLUDE_DEFAULT_PROVIDER) {
-            try {
-                // Use reflection to load BuiltInLottieProvider to avoid compile-time dependency
-                // when the class is excluded from the build
-                val providerClass = Class.forName("run.granite.lottie.providers.BuiltInLottieProvider")
-                resolvedProvider = providerClass.getDeclaredConstructor().newInstance() as GraniteLottieProvider
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to instantiate BuiltInLottieProvider: ${e.message}")
-            }
-        }
+        // ContentProvider가 INCLUDE_DEFAULT_PROVIDER=true일 때 자동으로 builtin provider 등록
+        val resolvedProvider = GraniteLottieRegistry.createProvider()
 
         if (resolvedProvider == null) {
             Log.w(TAG, "No provider registered. Register a provider using GraniteLottieRegistry.")
