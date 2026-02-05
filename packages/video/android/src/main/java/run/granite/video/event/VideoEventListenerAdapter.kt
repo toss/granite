@@ -150,7 +150,8 @@ class VideoEventListenerAdapter(
     }
 
     override fun onTransferEnd(uri: String, bytesTransferred: Long) {
-        val event = GraniteVideoEvents.createTransferEndEvent(viewId, uri, bytesTransferred)
-        dispatcher.dispatchEvent(viewId, "topVideoTransferEnd", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoOnTransferEndEvent(dispatcher.getSurfaceId(), viewId, uri, bytesTransferred)
+        )
     }
 }

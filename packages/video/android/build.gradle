@@ -26,8 +26,8 @@ def getExtOrIntegerDefault(name) {
 }
 
 // Check useMedia3 flag from environment variable or gradle.properties (default: true)
-// Priority: Environment variable > gradle.properties > default (true)
-def useMedia3Flag = System.getenv('GRANITE_VIDEO_USE_MEDIA3') ?: project.findProperty('graniteVideo.useMedia3')?.toString()
+// Priority: Environment variable > root gradle.properties > module gradle.properties > default (true)
+def useMedia3Flag = System.getenv('GRANITE_VIDEO_USE_MEDIA3') ?: rootProject.findProperty('graniteVideo.useMedia3')?.toString() ?: project.findProperty('graniteVideo.useMedia3')?.toString()
 def useMedia3 = useMedia3Flag != 'false'
 
 android {
