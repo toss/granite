@@ -1,4 +1,4 @@
-package run.granite.lottie.providers
+package run.granite.lottie.builtin
 
 import android.animation.Animator
 import android.content.Context
