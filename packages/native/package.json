@@ -14,7 +14,7 @@
     "lint": "eslint .",
     "build": "rm -rf dist && yarn generate-fingerprint && tsc -p tsconfig.build.json",
     "sync-packages": "tsx --import ./.scripts/sync-packages.mts",
-    "generate-fingerprint": "tsx --import ./.scripts/generate-fingerprint.mts"
+    "generate-fingerprint": "tsx -e \"import('./.scripts/generate-fingerprint.mts').catch(e=>{console.error(e);process.exit(1)})\""
   },
   "exports": {
     "./@react-native-async-storage/async-storage": {

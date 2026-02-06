@@ -23,7 +23,7 @@ try {
   await esbuild.build({
     bundle: true,
     treeShaking: false,
-    logLevel: 'warning',
+    logLevel: 'silent',
     format: 'esm',
     stdin: {
       contents: `${nativePackages.map((pkg) => `import '${pkg}';`).join('\n')}`,
