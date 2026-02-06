@@ -6,21 +6,16 @@
       "cache": false
     },
     "test": {
-      "dependsOn": ["^build", "^build:release"],
+      "dependsOn": ["^build"],
       "cache": false
     },
     "test:no-parallel": {
-      "dependsOn": ["^build", "^build:release"],
+      "dependsOn": ["^build"],
       "cache": false
     },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["{projectRoot}/dist"],
-      "cache": true
-    },
-    "build:release": {
-      "dependsOn": ["^build:release"],
-      "outputs": ["{projectRoot}/target/wasm32-wasi/release"],
       "cache": true
     }
   },

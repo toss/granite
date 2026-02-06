@@ -22,7 +22,7 @@
     "check-exports": "tsx --import ./.scripts/check-exports.mts",
     "generate-licenses": "node .scripts/licenses.mjs generate",
     "consistency-check-licenses": "node .scripts/licenses.mjs consistency-check",
-    "build:all": "nx run-many --targets=build,build:release",
+    "build:all": "nx run-many --targets=build",
     "build:shared": "tsdown --config shared/tsdown.config.ts",
     "attw:all": "yarn tools attw",
     "clear": "rimraf --glob \"**/*/dist\" .nx",
