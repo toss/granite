@@ -19,6 +19,11 @@ const YARN_CONFIGS: Record<string, string | string[]> = {
           '@typescript-eslint/types': '^8',
         },
       },
+      'react-native-svg@*': {
+        dependencies: {
+          buffer: '^6',
+        },
+      },
     }),
   ],
 };
@@ -80,6 +85,9 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
     packageJson.dependencies['@granite-js/react-native'] = path.join(graniteReactNativePath, 'package.tgz');
     packageJson.dependencies['@granite-js/native'] = path.join(graniteNativePath, 'package.tgz');
+    packageJson.dependencies['react'] = '19.2.3';
+    packageJson.dependencies['react-native'] = '0.84.0-rc.3';
+    packageJson.devDependencies['@types/react'] = '19.2.0';
     packageJson.devDependencies['babel-preset-granite'] = path.join(babelPresetGranitePath, 'package.tgz');
     packageJson.devDependencies['@granite-js/plugin-router'] = path.join(granitePluginRouterPath, 'package.tgz');
     packageJson.devDependencies['@granite-js/plugin-hermes'] = path.join(granitePluginHermesPath, 'package.tgz');
@@ -164,7 +172,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
 
     for (const platform of platforms) {
       const response = await fetch(
-        `http://localhost:${options.port}/index.bundle?platform=${platform}&dev=true&minify=true`
+        `http://localhost:${options.port}/index.bundle?platform=${platform}&dev=true&minify=false`
       );
       const text = await response.text();
       expect(text).toContain('__BUNDLE_START_TIME__');

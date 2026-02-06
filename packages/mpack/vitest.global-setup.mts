@@ -3,14 +3,17 @@ import execa from 'execa';
 
 const TARGET_PACKAGE_NAME = '@granite-js/mpack';
 
-const toolsPath = path.resolve(__dirname, '..', '..', 'bin', 'tools');
+const rootDir = path.resolve(__dirname, '..', '..');
+const toolsPath = path.resolve(rootDir, 'bin', 'tools');
 
 export default async () => {
   console.log('\n\n👉 Packing...');
 
-  await execa('pwd');
   await execa(toolsPath, ['linked-pack', TARGET_PACKAGE_NAME]);
-  await execa('git', ['checkout', '--', 'packages/*/package.json']);
+  await execa('git', ['checkout', '--', 'packages/*/package.json'], {
+    shell: true,
+    cwd: rootDir,
+  });
 
   console.log('✅ Global setup completed successfully');
 };
