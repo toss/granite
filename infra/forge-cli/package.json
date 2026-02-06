@@ -2,7 +2,7 @@
   "name": "@granite-js/forge-cli",
   "description": "A CLI tool for managing Granite applications",
   "type": "module",
-  "version": "1.0.0-dev.20260205165843",
+  "version": "0.1.34",
   "bin": {
     "granite-forge": "./bin/index.js"
   },
