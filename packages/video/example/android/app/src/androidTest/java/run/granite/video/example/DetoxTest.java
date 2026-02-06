@@ -1,4 +1,4 @@
-package anthropic.reactnativegranitevideo.example;
+package run.granite.video.example;
 
 import com.wix.detox.Detox;
 import com.wix.detox.config.DetoxConfig;
