@@ -16,8 +16,7 @@ export default async () => {
     await $`../../bin/tools linked-pack ${packageName}`;
   }
 
-  await $`git reset --hard`;
-  await $`git clean -fd`;
+  await $`git checkout -- packages/*/package.json`;
 
   console.log('✅ Global setup completed successfully');
 };
