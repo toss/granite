@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/style-utils",
-  "version": "0.1.34-next.62",
+  "version": "1.0.0-dev.20260205165843",
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
@@ -54,5 +54,6 @@
     "react": "*",
     "react-native": "*"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "stableVersion": "1.0.0-next.97"
 }

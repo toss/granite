@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/screen",
   "type": "module",
-  "version": "0.1.34-next.62",
+  "version": "1.0.0-dev.20260205165843",
   "description": "Brownfield Screen for React Native",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -33,5 +33,6 @@
     "GraniteScreen.podspec",
     "package.json"
   ],
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "stableVersion": "1.0.0-next.97"
 }

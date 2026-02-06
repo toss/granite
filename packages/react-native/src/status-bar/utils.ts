@@ -1,9 +1,9 @@
+import { ColorSchemeName } from 'react-native';
 import type { StatusBarStyle } from './types';
-import type { ColorPreference } from '../initial-props';
 
 export function toStatusBarContentStyle(
   statusBarStyle: StatusBarStyle = 'auto',
-  colorPreference: ColorPreference = 'light'
+  colorPreference: ColorSchemeName = 'light'
 ): 'light-content' | 'dark-content' {
   const resolvedStyle = (() => {
     switch (statusBarStyle) {

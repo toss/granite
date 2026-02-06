@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <provider
+            android:name="run.granite.lottie.builtin.BuiltInLottieContentProvider"
+            android:authorities="${applicationId}.granite-lottie-builtin-init"
+            android:exported="false" />
+    </application>
+</manifest>

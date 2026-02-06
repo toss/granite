@@ -1,12 +1,6 @@
-import { type as osType } from 'os';
+import fs from 'fs';
 import path from 'path';
 import { getPackageRoot } from '@granite-js/utils';
-
-const BINARY_PATH = {
-  Darwin: 'react-native/sdks/hermesc/osx-bin/hermesc',
-  Linux: 'react-native/sdks/hermesc/linux64-bin/hermesc',
-  Windows_NT: 'react-native/sdks/hermesc/win64-bin/hermesc.exe',
-} as const;
 
 /**
  * Returns the Hermes OS binary folder name for the current platform.
@@ -42,14 +36,75 @@ function getReactNativePackagePath(root: string): string {
   }
 }
 
+function getHermesCompilerPackagePath(reactNativePath: string): string | null {
+  try {
+    return path.dirname(
+      require.resolve('hermes-compiler/package.json', {
+        paths: [reactNativePath],
+      })
+    );
+  } catch {
+    return null;
+  }
+}
+
+function getPackagePathFromRoot(root: string, pkgName: string): string | null {
+  try {
+    return path.dirname(
+      require.resolve(`${pkgName}/package.json`, {
+        paths: [root],
+      })
+    );
+  } catch {
+    return null;
+  }
+}
+
+function fileExists(file: string): boolean {
+  try {
+    return fs.statSync(file).isFile();
+  } catch {
+    return false;
+  }
+}
+
 export function resolveHermesBinaryPath() {
   const root = getPackageRoot();
-  const os = osType() as 'Darwin' | 'Linux' | 'Windows_NT';
-  const binaryPath = BINARY_PATH[os];
+  const reactNativePath = getReactNativePackagePath(root);
 
-  if (binaryPath == null) {
-    throw new Error(`Unsupported OS: ${os}`);
+  // 1) RN 0.83+: prefer hermes-compiler package
+  const hermesCompilerPath = getHermesCompilerPackagePath(reactNativePath);
+  if (hermesCompilerPath) {
+    const engine = path.join(hermesCompilerPath, 'hermesc', getHermesOSBin(), getHermesOSExe());
+    if (fileExists(engine)) {
+      return engine;
+    }
   }
 
-  return path.join(getReactNativePackagePath(root), 'sdks', 'hermesc', getHermesOSBin(), getHermesOSExe());
+  // 2) RN 0.69+: bundled hermesc inside react-native
+  const bundledHermesEngine = path.join(reactNativePath, 'sdks', 'hermesc', getHermesOSBin(), getHermesOSExe());
+  if (fileExists(bundledHermesEngine)) {
+    return bundledHermesEngine;
+  }
+
+  // 3) hermes-engine package
+  const hermesEnginePkg = getPackagePathFromRoot(root, 'hermes-engine');
+  if (hermesEnginePkg) {
+    const engine = path.join(hermesEnginePkg, getHermesOSBin(), getHermesOSExe());
+    if (fileExists(engine)) {
+      return engine;
+    }
+  }
+
+  // 4) hermesvm package (final fallback)
+  const hermesVmPkg = getPackagePathFromRoot(root, 'hermesvm');
+  if (hermesVmPkg) {
+    const engine = path.join(hermesVmPkg, getHermesOSBin(), 'hermes');
+    if (fileExists(engine)) {
+      return engine;
+    }
+  }
+
+  // Fallback: return legacy bundled path to keep previous behavior
+  return path.join(reactNativePath, 'sdks', 'hermesc', getHermesOSBin(), getHermesOSExe());
 }

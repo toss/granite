@@ -1,7 +1,6 @@
 package run.granite.video.event
 
 import run.granite.video.GraniteVideoEventListener
-import run.granite.video.GraniteVideoEvents
 import run.granite.video.provider.GraniteVideoErrorData
 import run.granite.video.provider.GraniteVideoLoadData
 import run.granite.video.provider.GraniteVideoProgressData
@@ -19,117 +18,140 @@ class VideoEventListenerAdapter(
         get() = viewIdProvider()
 
     override fun onLoadStart(isNetwork: Boolean, type: String, uri: String) {
-        val event = GraniteVideoEvents.createLoadStartEvent(viewId, isNetwork, type, uri)
-        dispatcher.dispatchEvent(viewId, "topVideoLoadStart", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoLoadStartEvent(dispatcher.getSurfaceId(), viewId, isNetwork, type, uri)
+        )
     }
 
     override fun onLoad(data: GraniteVideoLoadData) {
-        val event = GraniteVideoEvents.createLoadEvent(viewId, data)
-        dispatcher.dispatchEvent(viewId, "topVideoLoad", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoLoadEvent(dispatcher.getSurfaceId(), viewId, data)
+        )
     }
 
     override fun onError(error: GraniteVideoErrorData) {
-        val event = GraniteVideoEvents.createErrorEvent(viewId, error)
-        dispatcher.dispatchEvent(viewId, "topVideoError", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoErrorEvent(dispatcher.getSurfaceId(), viewId, error)
+        )
     }
 
     override fun onProgress(data: GraniteVideoProgressData) {
-        val event = GraniteVideoEvents.createProgressEvent(viewId, data)
-        dispatcher.dispatchEvent(viewId, "topVideoProgress", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoProgressEvent(dispatcher.getSurfaceId(), viewId, data)
+        )
     }
 
     override fun onSeek(currentTime: Double, seekTime: Double) {
-        val event = GraniteVideoEvents.createSeekEvent(viewId, currentTime, seekTime)
-        dispatcher.dispatchEvent(viewId, "topVideoSeek", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoSeekEvent(dispatcher.getSurfaceId(), viewId, currentTime, seekTime)
+        )
     }
 
     override fun onEnd() {
-        val event = GraniteVideoEvents.createEmptyEvent(viewId)
-        dispatcher.dispatchEvent(viewId, "topVideoEnd", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoEndEvent(dispatcher.getSurfaceId(), viewId)
+        )
     }
 
     override fun onBuffer(isBuffering: Boolean) {
-        val event = GraniteVideoEvents.createBufferEvent(viewId, isBuffering)
-        dispatcher.dispatchEvent(viewId, "topVideoBuffer", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoBufferEvent(dispatcher.getSurfaceId(), viewId, isBuffering)
+        )
     }
 
     override fun onBandwidthUpdate(bitrate: Double, width: Int, height: Int) {
-        val event = GraniteVideoEvents.createBandwidthEvent(viewId, bitrate, width, height)
-        dispatcher.dispatchEvent(viewId, "topVideoBandwidthUpdate", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoBandwidthUpdateEvent(dispatcher.getSurfaceId(), viewId, bitrate, width, height)
+        )
     }
 
     override fun onPlaybackStateChanged(isPlaying: Boolean, isSeeking: Boolean, isLooping: Boolean) {
-        val event = GraniteVideoEvents.createPlaybackStateEvent(viewId, isPlaying, isSeeking, isLooping)
-        dispatcher.dispatchEvent(viewId, "topVideoPlaybackStateChanged", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoPlaybackStateChangedEvent(dispatcher.getSurfaceId(), viewId, isPlaying, isSeeking, isLooping)
+        )
     }
 
     override fun onPlaybackRateChange(rate: Float) {
-        val event = GraniteVideoEvents.createPlaybackRateEvent(viewId, rate)
-        dispatcher.dispatchEvent(viewId, "topVideoPlaybackRateChange", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoPlaybackRateChangeEvent(dispatcher.getSurfaceId(), viewId, rate)
+        )
     }
 
     override fun onVolumeChange(volume: Float) {
-        val event = GraniteVideoEvents.createVolumeEvent(viewId, volume)
-        dispatcher.dispatchEvent(viewId, "topVideoVolumeChange", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoVolumeChangeEvent(dispatcher.getSurfaceId(), viewId, volume)
+        )
     }
 
     override fun onIdle() {
-        val event = GraniteVideoEvents.createEmptyEvent(viewId)
-        dispatcher.dispatchEvent(viewId, "topVideoIdle", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoIdleEvent(dispatcher.getSurfaceId(), viewId)
+        )
     }
 
     override fun onReadyForDisplay() {
-        val event = GraniteVideoEvents.createEmptyEvent(viewId)
-        dispatcher.dispatchEvent(viewId, "topVideoReadyForDisplay", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoReadyForDisplayEvent(dispatcher.getSurfaceId(), viewId)
+        )
     }
 
     override fun onAudioFocusChanged(hasAudioFocus: Boolean) {
-        val event = GraniteVideoEvents.createAudioFocusEvent(viewId, hasAudioFocus)
-        dispatcher.dispatchEvent(viewId, "topVideoAudioFocusChanged", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoAudioFocusChangedEvent(dispatcher.getSurfaceId(), viewId, hasAudioFocus)
+        )
     }
 
     override fun onAudioBecomingNoisy() {
-        val event = GraniteVideoEvents.createEmptyEvent(viewId)
-        dispatcher.dispatchEvent(viewId, "topVideoAudioBecomingNoisy", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoAudioBecomingNoisyEvent(dispatcher.getSurfaceId(), viewId)
+        )
     }
 
     override fun onFullscreenPlayerWillPresent() {
-        val event = GraniteVideoEvents.createEmptyEvent(viewId)
-        dispatcher.dispatchEvent(viewId, "topVideoFullscreenPlayerWillPresent", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoFullscreenPlayerWillPresentEvent(dispatcher.getSurfaceId(), viewId)
+        )
     }
 
     override fun onFullscreenPlayerDidPresent() {
-        val event = GraniteVideoEvents.createEmptyEvent(viewId)
-        dispatcher.dispatchEvent(viewId, "topVideoFullscreenPlayerDidPresent", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoFullscreenPlayerDidPresentEvent(dispatcher.getSurfaceId(), viewId)
+        )
     }
 
     override fun onFullscreenPlayerWillDismiss() {
-        val event = GraniteVideoEvents.createEmptyEvent(viewId)
-        dispatcher.dispatchEvent(viewId, "topVideoFullscreenPlayerWillDismiss", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoFullscreenPlayerWillDismissEvent(dispatcher.getSurfaceId(), viewId)
+        )
     }
 
     override fun onFullscreenPlayerDidDismiss() {
-        val event = GraniteVideoEvents.createEmptyEvent(viewId)
-        dispatcher.dispatchEvent(viewId, "topVideoFullscreenPlayerDidDismiss", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoFullscreenPlayerDidDismissEvent(dispatcher.getSurfaceId(), viewId)
+        )
     }
 
     override fun onPictureInPictureStatusChanged(isActive: Boolean) {
-        val event = GraniteVideoEvents.createPipStatusEvent(viewId, isActive)
-        dispatcher.dispatchEvent(viewId, "topVideoPictureInPictureStatusChanged", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoPictureInPictureStatusChangedEvent(dispatcher.getSurfaceId(), viewId, isActive)
+        )
     }
 
     override fun onControlsVisibilityChanged(isVisible: Boolean) {
-        val event = GraniteVideoEvents.createControlsVisibilityEvent(viewId, isVisible)
-        dispatcher.dispatchEvent(viewId, "topVideoControlsVisibilityChange", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoControlsVisibilityChangeEvent(dispatcher.getSurfaceId(), viewId, isVisible)
+        )
     }
 
     override fun onAspectRatioChanged(width: Double, height: Double) {
-        val event = GraniteVideoEvents.createAspectRatioEvent(viewId, width, height)
-        dispatcher.dispatchEvent(viewId, "topVideoAspectRatio", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoAspectRatioEvent(dispatcher.getSurfaceId(), viewId, width, height)
+        )
     }
 
     override fun onTransferEnd(uri: String, bytesTransferred: Long) {
-        val event = GraniteVideoEvents.createTransferEndEvent(viewId, uri, bytesTransferred)
-        dispatcher.dispatchEvent(viewId, "topVideoTransferEnd", event)
+        dispatcher.dispatchEvent(
+            GraniteVideoOnTransferEndEvent(dispatcher.getSurfaceId(), viewId, uri, bytesTransferred)
+        )
     }
 }

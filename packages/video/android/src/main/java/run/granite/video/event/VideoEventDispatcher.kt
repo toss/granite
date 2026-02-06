@@ -1,34 +1,47 @@
 package run.granite.video.event
 
-import com.facebook.react.bridge.WritableMap
-import com.facebook.react.uimanager.ThemedReactContext
-import com.facebook.react.uimanager.events.RCTEventEmitter
+import android.view.View
+import com.facebook.react.bridge.ReactContext
+import com.facebook.react.uimanager.UIManagerHelper
+import com.facebook.react.uimanager.events.Event
+import com.facebook.react.uimanager.events.EventDispatcher
 
 /**
  * Interface for dispatching video events to React Native.
- * Abstracted to allow for testability.
+ * Uses modern Event-based dispatching compatible with RN 0.84+.
  */
 interface VideoEventDispatcher {
     /**
      * Dispatch an event to React Native.
-     * @param viewId The view ID to dispatch the event for.
-     * @param eventName The name of the event.
-     * @param event The event data.
+     * @param event The Event object to dispatch.
      */
-    fun dispatchEvent(viewId: Int, eventName: String, event: WritableMap?)
+    fun dispatchEvent(event: Event<*>)
+
+    /**
+     * Get the surface ID for creating events.
+     * @return The surface ID for this view.
+     */
+    fun getSurfaceId(): Int
 }
 
 /**
- * Default implementation using React Native's RCTEventEmitter.
+ * Modern implementation using UIManagerHelper EventDispatcher.
+ * Compatible with React Native 0.84+.
  */
-class RCTVideoEventDispatcher(
-    private val context: ThemedReactContext
+class ModernVideoEventDispatcher(
+    private val view: View
 ) : VideoEventDispatcher {
 
-    override fun dispatchEvent(viewId: Int, eventName: String, event: WritableMap?) {
-        context.getJSModule(RCTEventEmitter::class.java)
-            .receiveEvent(viewId, eventName, event)
+    private fun getEventDispatcher(): EventDispatcher? {
+        val reactContext = view.context as? ReactContext ?: return null
+        return UIManagerHelper.getEventDispatcherForReactTag(reactContext, view.id)
     }
+
+    override fun dispatchEvent(event: Event<*>) {
+        getEventDispatcher()?.dispatchEvent(event)
+    }
+
+    override fun getSurfaceId(): Int = UIManagerHelper.getSurfaceId(view)
 }
 
 /**
@@ -36,18 +49,18 @@ class RCTVideoEventDispatcher(
  */
 interface VideoEventDispatcherFactory {
     /**
-     * Create a VideoEventDispatcher for the given context.
-     * @param context The themed React context.
+     * Create a VideoEventDispatcher for the given view.
+     * @param view The view to dispatch events for.
      * @return A new VideoEventDispatcher instance.
      */
-    fun create(context: ThemedReactContext): VideoEventDispatcher
+    fun create(view: View): VideoEventDispatcher
 }
 
 /**
  * Default factory implementation.
  */
 class DefaultVideoEventDispatcherFactory : VideoEventDispatcherFactory {
-    override fun create(context: ThemedReactContext): VideoEventDispatcher {
-        return RCTVideoEventDispatcher(context)
+    override fun create(view: View): VideoEventDispatcher {
+        return ModernVideoEventDispatcher(view)
     }
 }

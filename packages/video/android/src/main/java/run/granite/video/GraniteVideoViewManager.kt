@@ -41,7 +41,7 @@ class GraniteVideoViewManager(
         val view = GraniteVideoView(context)
 
         // Set up event dispatcher and listener
-        val dispatcher = eventDispatcherFactory.create(context)
+        val dispatcher = eventDispatcherFactory.create(view)
         view.eventListener = VideoEventListenerAdapter(
             dispatcher = dispatcher,
             viewIdProvider = { view.id }
