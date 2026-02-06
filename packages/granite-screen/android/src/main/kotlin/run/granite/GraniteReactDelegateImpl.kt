@@ -43,6 +43,7 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
     private var currentBundleLoader: BundleLoader? = null
     private var contentView: View? = null
     private var componentFactory: ComponentFactory? = null
+    private var reactInstanceEventListener: ReactInstanceEventListener? = null
 
     // Track pending lifecycle state for when ReactHost is created asynchronously
     private var pendingLifecycleState: LifecycleState = LifecycleState.BEFORE_CREATE
@@ -131,13 +132,49 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
         pendingLifecycleState = LifecycleState.DESTROYED
         pendingActivityRef = null
 
-        // Cleanup only if ReactHost exists
-        reactSurface?.stop()
+        // Clean up ReactSurface
+        // stop() is async (TaskInterface<Void>), but clear() and detach() can be called concurrently:
+        // - clear() removes view children via UiThreadUtil.runOnUiThread (thread-safe)
+        // - detach() releases host reference via AtomicReference.set(null) (thread-safe)
+        reactSurface?.let { surface ->
+            surface.stop()
+            surface.clear()
+            surface.detach()
+        }
+        reactSurface = null
+
+        // Remove ReactInstanceEventListener
+        reactInstanceEventListener?.let { listener ->
+            reactHost?.removeReactInstanceEventListener(listener)
+        }
+        reactInstanceEventListener = null
+
+        // Clean up ReactHost
+        // invalidate() internally runs destroy() asynchronously on bgExecutor.
+        // ReactHostImpl instance is kept alive by its own internal threading,
+        // so nulling the delegate's reactHost field won't interrupt the async destroy.
         reactHost?.let { host ->
             host.onHostDestroy(activity)
             host.invalidate()
         }
             ?: println("🔧 GraniteReactDelegate: ReactHost not ready, skipping onHostDestroy")
+        reactHost = null
+
+        // Clean up internal references
+        contentView = null
+        currentBundleSource = null
+        currentBundleLoader = null
+        componentFactory = null
+
+        // Clean up Provider/Consumer lambdas (may capture Activity via closure)
+        reactPackagesProvider = null
+        bundleLoaderProvider = null
+        loadingViewProvider = null
+        errorViewProvider = null
+        reactContainerProvider = null
+        loadingViewConsumer = null
+        surfaceViewConsumer = null
+        errorViewConsumer = null
     }
 
     override fun setReactPackagesProvider(provider: () -> List<ReactPackage>) {
@@ -253,25 +290,24 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
                 println("🔧 GraniteReactDelegate: Starting ReactSurface")
 
                 // Add ReactInstanceEventListener
-                host.addReactInstanceEventListener(
-                    object : ReactInstanceEventListener {
-                        override fun onReactContextInitialized(context: ReactContext) {
-                            println("🔧Granite onReactContextInitialized called")
-                            println(
-                                "🔧Granite onReactContextInitialized on currentActivity = ${context.currentActivity}",
-                            )
-                            // Call the host's onReactContextInitialized method
-                            pendingActivity?.let { activity ->
-                                if (activity is GraniteReactHost) {
-                                    println(
-                                        "🔧Granite activity.onReactContextInitialized called",
-                                    )
-                                    activity.onReactContextInitialized(context)
-                                }
+                reactInstanceEventListener = object : ReactInstanceEventListener {
+                    override fun onReactContextInitialized(context: ReactContext) {
+                        println("🔧Granite onReactContextInitialized called")
+                        println(
+                            "🔧Granite onReactContextInitialized on currentActivity = ${context.currentActivity}",
+                        )
+                        // Call the host's onReactContextInitialized method
+                        pendingActivity?.let { activity ->
+                            if (activity is GraniteReactHost) {
+                                println(
+                                    "🔧Granite activity.onReactContextInitialized called",
+                                )
+                                activity.onReactContextInitialized(context)
                             }
                         }
-                    },
-                )
+                    }
+                }
+                host.addReactInstanceEventListener(reactInstanceEventListener!!)
 
                 // Start the surface
                 println("🔧 GraniteReactDelegate: ⚠️ About to call surface.start()")
@@ -364,21 +400,29 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
                 reactHost = createReactHostWithBundle(activity, bundleSource)
 
                 // Setup ReactHost on UI thread
-                activity.runOnUiThread { setupReactHost(activity, initialProps) }
+                activity.runOnUiThread {
+                    // Both onDestroy() and runOnUiThread callbacks execute on the main thread,
+                    // so pendingLifecycleState checks are serialized by the main looper (thread-safe)
+                    if (pendingLifecycleState != LifecycleState.DESTROYED) {
+                        setupReactHost(activity, initialProps)
+                    }
+                }
             } catch (e: Exception) {
                 // Show error view on UI thread
                 activity.runOnUiThread {
-                    errorViewConsumer?.invoke(e)
-                        ?: run {
-                            // Fallback: Use default behavior if consumer not set
-                            val errorView =
-                                errorViewProvider?.invoke(activity, e)
-                                    ?: DefaultErrorView(activity, e)
-                            contentView = errorView
-                            activity.setContentView(errorView)
-                        }
-                    println("❌ GraniteReactDelegate: Failed to load bundle: ${e.message}")
-                    e.printStackTrace()
+                    if (pendingLifecycleState != LifecycleState.DESTROYED) {
+                        errorViewConsumer?.invoke(e)
+                            ?: run {
+                                // Fallback: Use default behavior if consumer not set
+                                val errorView =
+                                    errorViewProvider?.invoke(activity, e)
+                                        ?: DefaultErrorView(activity, e)
+                                contentView = errorView
+                                activity.setContentView(errorView)
+                            }
+                        println("❌ GraniteReactDelegate: Failed to load bundle: ${e.message}")
+                        e.printStackTrace()
+                    }
                 }
             }
         }
@@ -469,7 +513,7 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
         val allowPackagerServerAccess = useDevSupport
         val reactHostImpl =
             ReactHostImpl(
-                activity,
+                activity.applicationContext,
                 reactHostDelegate,
                 newComponentFactory,
                 allowPackagerServerAccess,
