@@ -28,9 +28,7 @@
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "build": "bob build && tsc --project tsconfig.build.json",
-    "test": "jest",
-    "test:coverage": "jest --coverage"
+    "build": "bob build && tsc --project tsconfig.build.json"
   },
   "keywords": [
     "react-native",

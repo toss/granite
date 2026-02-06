@@ -9,5 +9,5 @@ module.exports = {
       },
     ],
   ],
-  plugins: ['@babel/plugin-transform-flow-strip-types', '@babel/plugin-transform-private-methods'],
+  plugins: ['babel-plugin-syntax-hermes-parser', '@babel/plugin-transform-flow-strip-types', '@babel/plugin-transform-private-methods'],
 };

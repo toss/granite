@@ -104,6 +104,7 @@
     "eslint": "^9.7.0",
     "jsdom": "^25.0.1",
     "react": "catalog:react-native",
+    "react-dom": "catalog:react-native",
     "react-native": "catalog:react-native",
     "tsup": "^8.5.0",
     "typescript": "5.8.3",
