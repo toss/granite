@@ -307,7 +307,9 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
                         }
                     }
                 }
-                host.addReactInstanceEventListener(reactInstanceEventListener!!)
+                reactInstanceEventListener?.let { listener ->
+                      host.addReactInstanceEventListener(listener)
+                }
 
                 // Start the surface
                 println("🔧 GraniteReactDelegate: ⚠️ About to call surface.start()")
