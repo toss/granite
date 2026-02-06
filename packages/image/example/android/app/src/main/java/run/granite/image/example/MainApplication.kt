@@ -1,4 +1,4 @@
-package graniteimage.example
+package run.granite.image.example
 
 import android.app.Application
 import com.facebook.react.PackageList

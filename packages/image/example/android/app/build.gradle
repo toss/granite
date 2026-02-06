@@ -80,9 +80,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "graniteimage.example"
+    namespace "run.granite.image.example"
     defaultConfig {
-        applicationId "graniteimage.example"
+        applicationId "run.granite.image.example"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
