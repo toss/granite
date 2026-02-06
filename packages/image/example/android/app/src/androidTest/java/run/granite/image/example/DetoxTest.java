@@ -1,4 +1,4 @@
-package graniteimage.example;
+package run.granite.image.example;
 
 import com.wix.detox.Detox;
 import com.wix.detox.config.DetoxConfig;
