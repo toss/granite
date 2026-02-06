@@ -1,4 +1,4 @@
-package graniteimage.example;
+package run.granite.video.example;
 
 import com.wix.detox.Detox;
 import com.wix.detox.config.DetoxConfig;
@@ -14,7 +14,6 @@ import androidx.test.rule.ActivityTestRule;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class DetoxTest {
-
     @Rule
     public ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule<>(MainActivity.class, false, false);
 
@@ -23,7 +22,7 @@ public class DetoxTest {
         DetoxConfig detoxConfig = new DetoxConfig();
         detoxConfig.idlePolicyConfig.masterTimeoutSec = 90;
         detoxConfig.idlePolicyConfig.idleResourceTimeoutSec = 60;
-        detoxConfig.rnContextLoadTimeoutSec = (BuildConfig.DEBUG ? 180 : 60);
+        detoxConfig.rnContextLoadTimeoutSec = 180;
 
         Detox.runTests(mActivityRule, detoxConfig);
     }

@@ -1,4 +1,4 @@
-package anthropic.reactnativegranitevideo.example
+package run.granite.video.example
 
 import android.app.Application
 import com.facebook.react.PackageList
