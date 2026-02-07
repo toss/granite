@@ -11,7 +11,7 @@
     "@granite-js/react-native": "workspace:*",
     "@granite-js/native": "workspace:*",
     "react": "19.2.3",
-    "react-native": "0.84.0-rc.3"
+    "react-native": "0.84.0-rc.5"
   },
   "devDependencies": {
     "@babel/core": "7.28.5",
