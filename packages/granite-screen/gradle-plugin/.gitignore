@@ -1,0 +1,20 @@
+# Gradle build output
+build/
+# Allow pre-compiled JAR for npm distribution
+!build/libs/
+
+# Kotlin
+.kotlin/
+
+# Gradle cache
+.gradle/
+
+# Explicitly allow Gradle wrapper JAR
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
