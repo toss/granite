@@ -10,8 +10,8 @@
   "dependencies": {
     "@granite-js/react-native": "workspace:*",
     "@granite-js/native": "workspace:*",
-    "react": "catalog:react-native",
-    "react-native": "catalog:react-native"
+    "react": "19.2.3",
+    "react-native": "0.84.0-rc.3"
   },
   "devDependencies": {
     "@babel/core": "7.28.5",
@@ -20,7 +20,7 @@
     "@types/babel__core": "^7.20.5",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.2",
-    "@types/react": "catalog:react-native",
+    "@types/react": "19.2.0",
     "@granite-js/plugin-router": "workspace:*",
     "@granite-js/plugin-hermes": "workspace:*",
     "babel-preset-granite": "workspace:*",
