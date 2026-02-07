@@ -31,7 +31,7 @@ class DefaultLoadingView(
         // Create and add loading text
         val loadingText =
             TextView(context).apply {
-                text = "Loading..."
+                text = DEFAULT_LOADING_TEXT
                 textSize = 16f
                 setTextColor(Color.GRAY)
             }
@@ -43,5 +43,9 @@ class DefaultLoadingView(
             }
 
         addView(loadingText, textParams)
+    }
+
+    companion object {
+        private const val DEFAULT_LOADING_TEXT = "Loading..."
     }
 }
