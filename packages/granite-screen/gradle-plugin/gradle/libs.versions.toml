@@ -3,6 +3,7 @@ agp = "8.13.2"
 gson = "2.13.2"
 junit = "5.8.2"
 assertj = "3.24.2"
+spotless = "8.1.0"
 
 [libraries]
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -11,3 +12,6 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jun
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+
+[plugins]
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
