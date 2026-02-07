@@ -1,0 +1,45 @@
+{
+  "project": {
+    "name": "test-project",
+    "version": "1.0.0",
+    "android": {
+      "sourceDir": "android",
+      "manifestPath": "android/AndroidManifest.xml",
+      "packageName": "com.example.testproject"
+    }
+  },
+  "dependencies": {
+    "react-native-webview": {
+      "name": "react-native-webview",
+      "root": "/path/to/node_modules/react-native-webview",
+      "platforms": {
+        "android": {
+          "sourceDir": "android",
+          "packageImportPath": "com.reactnativecommunity.webview.RNCWebViewPackage",
+          "packageInstance": "new RNCWebViewPackage()",
+          "libraryName": "RNCWebView",
+          "componentDescriptors": ["RNCWebViewComponentDescriptor"],
+          "cmakeListsPath": "android/CMakeLists.txt"
+        }
+      }
+    },
+    "react-native-camera": {
+      "name": "react-native-camera",
+      "root": "/path/to/node_modules/react-native-camera",
+      "platforms": {
+        "android": {
+          "sourceDir": "android",
+          "packageImportPath": "org.reactnative.camera.RNCameraPackage",
+          "packageInstance": "new RNCameraPackage()",
+          "libraryName": "RNCamera",
+          "componentDescriptors": null
+        }
+      }
+    },
+    "pure-js-module": {
+      "name": "pure-js-module",
+      "root": "/path/to/node_modules/pure-js-module",
+      "platforms": {}
+    }
+  }
+}
