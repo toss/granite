@@ -6,6 +6,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.process.ExecOperations
+import run.granite.gradle.utils.NodeExecutableFinder
 import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.inject.Inject
@@ -21,65 +22,65 @@ import javax.inject.Inject
  */
 @CacheableTask
 abstract class BundleTask @Inject constructor(
-    private val execOperations: ExecOperations
+  private val execOperations: ExecOperations,
 ) : DefaultTask() {
 
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val entryFile: RegularFileProperty
+  @get:InputFile
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  abstract val entryFile: RegularFileProperty
 
-    /**
-     * React Native directory.
-     * Marked as Internal to avoid task output overlaps with other modules.
-     */
-    @get:Internal
-    abstract val reactNativeDir: DirectoryProperty
+  /**
+   * React Native directory.
+   * Marked as Internal to avoid task output overlaps with other modules.
+   */
+  @get:Internal
+  abstract val reactNativeDir: DirectoryProperty
 
-    /**
-     * Node modules directory.
-     * Marked as Internal to avoid task output overlaps with other modules.
-     */
-    @get:Internal
-    abstract val nodeModulesDir: DirectoryProperty
+  /**
+   * Node modules directory.
+   * Marked as Internal to avoid task output overlaps with other modules.
+   */
+  @get:Internal
+  abstract val nodeModulesDir: DirectoryProperty
 
-    /**
-     * Project root directory.
-     * Marked as Internal to avoid task output overlaps with other modules.
-     */
-    @get:Internal
-    abstract val projectDir: DirectoryProperty
+  /**
+   * Project root directory.
+   * Marked as Internal to avoid task output overlaps with other modules.
+   */
+  @get:Internal
+  abstract val projectDir: DirectoryProperty
 
-    @get:OutputFile
-    abstract val bundleFile: RegularFileProperty
+  @get:OutputFile
+  abstract val bundleFile: RegularFileProperty
 
-    @get:OutputFile
-    abstract val sourceMapFile: RegularFileProperty
+  @get:OutputFile
+  abstract val sourceMapFile: RegularFileProperty
 
-    @get:Input
-    abstract val bundleAssetName: Property<String>
+  @get:Input
+  abstract val bundleAssetName: Property<String>
 
-    @get:Input
-    abstract val devMode: Property<Boolean>
+  @get:Input
+  abstract val devMode: Property<Boolean>
 
-    @get:Input
-    abstract val variantName: Property<String>
+  @get:Input
+  abstract val variantName: Property<String>
 
-    init {
-        group = "granite"
-        description = "Generates React Native JavaScript bundle"
-    }
+  init {
+    group = "granite"
+    description = "Generates React Native JavaScript bundle"
+  }
 
-    @TaskAction
-    fun execute() {
-        val variant = variantName.get()
-        logger.lifecycle("Bundling JavaScript for variant: $variant")
+  @TaskAction
+  fun execute() {
+    val variant = variantName.get()
+    logger.lifecycle("Bundling JavaScript for variant: $variant")
 
-        // Validate entry file exists at execution time
-        // This allows flexibility for projects with JS in separate repos during development
-        val entryFileResolved = entryFile.get().asFile
-        if (!entryFileResolved.exists()) {
-            error(
-                """
+    // Validate entry file exists at execution time
+    // This allows flexibility for projects with JS in separate repos during development
+    val entryFileResolved = entryFile.get().asFile
+    if (!entryFileResolved.exists()) {
+      error(
+        """
                 |JavaScript entry file not found: ${entryFileResolved.absolutePath}
                 |
                 |The entry file is required for bundle generation but was not found.
@@ -97,152 +98,178 @@ abstract class BundleTask @Inject constructor(
                 |  3. For development, use Metro dev server instead of bundling
                 |
                 |Variant: $variant
-                """.trimMargin()
-            )
-        }
-
-        val jsBundleFile = generateJavaScriptBundle()
-
-        // Always compile to Hermes bytecode (JSC not supported)
-        compileToHermes(jsBundleFile)
-
-        logger.lifecycle("Bundle generation complete for variant: $variant")
+        """.trimMargin(),
+      )
     }
 
-    private fun generateJavaScriptBundle(): File {
-        logger.lifecycle("Running Metro bundler...")
+    val jsBundleFile = generateJavaScriptBundle()
 
-        val cliPath = reactNativeDir.get().file("cli.js").asFile
-        val nodeExecutable = findNodeExecutable()
+    // Always compile to Hermes bytecode (JSC not supported)
+    compileToHermes(jsBundleFile)
 
-        if (!cliPath.exists()) {
-            error("React Native CLI not found: ${cliPath.absolutePath}")
-        }
+    logger.lifecycle("Bundle generation complete for variant: $variant")
+  }
 
-        val tempJsBundle = File(bundleFile.get().asFile.parentFile, "temp_${bundleAssetName.get()}")
-        tempJsBundle.parentFile.mkdirs()
+  private fun generateJavaScriptBundle(): File {
+    logger.lifecycle("Running Metro bundler...")
 
-        val command = buildList {
-            add(nodeExecutable.absolutePath)
-            add(cliPath.absolutePath)
-            add("bundle")
-            add("--platform")
-            add("android")
-            add("--entry-file")
-            add(entryFile.get().asFile.absolutePath)
-            add("--bundle-output")
-            add(tempJsBundle.absolutePath)
-            add("--sourcemap-output")
-            add(sourceMapFile.get().asFile.absolutePath)
-            add("--assets-dest")
-            add(bundleFile.get().asFile.parentFile.absolutePath)
+    val cliPath = reactNativeDir.get().file("cli.js").asFile
+    val nodeExecutable = NodeExecutableFinder.findNodeExecutable()
 
-            if (devMode.get()) {
-                add("--dev")
-                add("true")
-            } else {
-                add("--dev")
-                add("false")
-                add("--minify")
-                add("true")
-            }
-        }
-
-        val stdout = ByteArrayOutputStream()
-        val stderr = ByteArrayOutputStream()
-
-        val result = execOperations.exec {
-            workingDir = projectDir.get().asFile
-            commandLine = command
-            standardOutput = stdout
-            errorOutput = stderr
-            isIgnoreExitValue = true
-        }
-
-        if (result.exitValue != 0) {
-            error("Failed to bundle JavaScript. Exit code: ${result.exitValue}\n${stderr}")
-        }
-
-        logger.lifecycle("Metro bundling complete: ${tempJsBundle.absolutePath}")
-        return tempJsBundle
+    if (!cliPath.exists()) {
+      error("React Native CLI not found: ${cliPath.absolutePath}")
     }
 
-    private fun compileToHermes(jsBundleFile: File) {
-        logger.lifecycle("Compiling to Hermes bytecode...")
+    val tempJsBundle = File(bundleFile.get().asFile.parentFile, "temp_${bundleAssetName.get()}")
+    tempJsBundle.parentFile.mkdirs()
 
-        val hermesExecutable = findHermesCompiler()
+    val command = buildList {
+      add(nodeExecutable.absolutePath)
+      add(cliPath.absolutePath)
+      add("bundle")
+      add("--platform")
+      add("android")
+      add("--entry-file")
+      add(entryFile.get().asFile.absolutePath)
+      add("--bundle-output")
+      add(tempJsBundle.absolutePath)
+      add("--sourcemap-output")
+      add(sourceMapFile.get().asFile.absolutePath)
+      add("--assets-dest")
+      add(bundleFile.get().asFile.parentFile.absolutePath)
 
-        val command = listOf(
-            hermesExecutable.absolutePath,
-            "-emit-binary",
-            "-out",
-            bundleFile.get().asFile.absolutePath,
-            jsBundleFile.absolutePath
-        )
-
-        val stdout = ByteArrayOutputStream()
-        val stderr = ByteArrayOutputStream()
-
-        val result = execOperations.exec {
-            commandLine = command
-            standardOutput = stdout
-            errorOutput = stderr
-            isIgnoreExitValue = true
-        }
-
-        if (result.exitValue != 0) {
-            error("Failed to compile to Hermes bytecode. Exit code: ${result.exitValue}\n${stderr}")
-        }
-
-        jsBundleFile.delete()
-
-        logger.lifecycle("Hermes compilation complete: ${bundleFile.get().asFile.absolutePath}")
+      if (devMode.get()) {
+        add("--dev")
+        add("true")
+      } else {
+        add("--dev")
+        add("false")
+        add("--minify")
+        add("true")
+      }
     }
 
-    private fun findHermesCompiler(): File {
-        val reactNativeAndroid = File(reactNativeDir.get().asFile, "android")
-        val hermesEngine = File(reactNativeAndroid, "com/facebook/react/hermes-engine")
+    val stdout = ByteArrayOutputStream()
+    val stderr = ByteArrayOutputStream()
 
-        if (hermesEngine.exists()) {
-            val hermescExecutables = hermesEngine.walk()
-                .filter { it.name == "hermesc" || it.name == "hermesc.exe" }
-                .filter { it.canExecute() }
-                .toList()
-
-            if (hermescExecutables.isNotEmpty()) {
-                return hermescExecutables.first()
-            }
-        }
-
-        val nodeModulesHermes = nodeModulesDir.get().asFile.walk()
-            .filter { it.name == "hermesc" || it.name == "hermesc.exe" }
-            .filter { it.canExecute() }
-            .firstOrNull()
-
-        if (nodeModulesHermes != null) {
-            return nodeModulesHermes
-        }
-
-        error("Hermes compiler (hermesc) not found in ${hermesEngine.absolutePath}")
+    val result = execOperations.exec {
+      workingDir = projectDir.get().asFile
+      commandLine = command
+      standardOutput = stdout
+      errorOutput = stderr
+      isIgnoreExitValue = true
     }
 
-    private fun findNodeExecutable(): File {
-        val nodeName = if (System.getProperty("os.name").startsWith("Windows")) {
-            "node.exe"
-        } else {
-            "node"
-        }
-
-        val pathEnv = System.getenv("PATH") ?: ""
-        val pathDirs = pathEnv.split(File.pathSeparator)
-
-        for (dir in pathDirs) {
-            val nodeFile = File(dir, nodeName)
-            if (nodeFile.exists() && nodeFile.canExecute()) {
-                return nodeFile
-            }
-        }
-
-        return File(nodeName)
+    if (result.exitValue != 0) {
+      error("Failed to bundle JavaScript. Exit code: ${result.exitValue}\n$stderr")
     }
+
+    logger.lifecycle("Metro bundling complete: ${tempJsBundle.absolutePath}")
+    return tempJsBundle
+  }
+
+  private fun compileToHermes(jsBundleFile: File) {
+    logger.lifecycle("Compiling to Hermes bytecode...")
+
+    val hermesExecutable = findHermesCompiler()
+
+    val command = listOf(
+      hermesExecutable.absolutePath,
+      "-emit-binary",
+      "-out",
+      bundleFile.get().asFile.absolutePath,
+      jsBundleFile.absolutePath,
+    )
+
+    val stdout = ByteArrayOutputStream()
+    val stderr = ByteArrayOutputStream()
+
+    val result = execOperations.exec {
+      commandLine = command
+      standardOutput = stdout
+      errorOutput = stderr
+      isIgnoreExitValue = true
+    }
+
+    if (result.exitValue != 0) {
+      error("Failed to compile to Hermes bytecode. Exit code: ${result.exitValue}\n$stderr")
+    }
+
+    jsBundleFile.delete()
+
+    logger.lifecycle("Hermes compilation complete: ${bundleFile.get().asFile.absolutePath}")
+  }
+
+  private fun findHermesCompiler(): File {
+    // Determine OS-specific binary directory
+    val osBinDir = when {
+      System.getProperty("os.name").startsWith("Windows") -> "win64-bin"
+      System.getProperty("os.name").startsWith("Mac") -> "osx-bin"
+      else -> "linux64-bin"
+    }
+    val hermescName = if (osBinDir == "win64-bin") "hermesc.exe" else "hermesc"
+
+    val nodeModules = nodeModulesDir.get().asFile
+
+    // 1. Check known paths in hermes-engine package
+    val hermesEnginePaths = listOf(
+      File(nodeModules, "hermes-engine/$osBinDir/$hermescName"),
+      File(nodeModules, "hermes-engine/bin/$hermescName"),
+    )
+
+    for (path in hermesEnginePaths) {
+      if (path.exists() && path.canExecute()) {
+        return path
+      }
+    }
+
+    // 2. Check known paths in react-native SDKs
+    val reactNativeSdkPaths = listOf(
+      File(nodeModules, "react-native/sdks/hermesc/$osBinDir/$hermescName"),
+      File(nodeModules, "react-native/sdks/hermes/$osBinDir/$hermescName"),
+    )
+
+    for (path in reactNativeSdkPaths) {
+      if (path.exists() && path.canExecute()) {
+        return path
+      }
+    }
+
+    // 3. Check react-native/android Maven cache (original location)
+    val reactNativeAndroid = File(reactNativeDir.get().asFile, "android")
+    val hermesEngine = File(reactNativeAndroid, "com/facebook/react/hermes-engine")
+
+    if (hermesEngine.exists()) {
+      val hermescExecutables = hermesEngine.walk()
+        .filter { it.name == hermescName }
+        .filter { it.canExecute() }
+        .toList()
+
+      if (hermescExecutables.isNotEmpty()) {
+        return hermescExecutables.first()
+      }
+    }
+
+    // 4. Fallback: targeted search in specific subdirectories only
+    val targetedDirs = listOf(
+      File(nodeModules, "hermes-engine"),
+      File(nodeModules, "react-native/sdks"),
+    )
+
+    for (dir in targetedDirs) {
+      if (dir.exists()) {
+        val found = dir.walk()
+          .maxDepth(5) // Limit depth to prevent excessive traversal
+          .filter { it.name == hermescName }
+          .filter { it.canExecute() }
+          .firstOrNull()
+
+        if (found != null) {
+          return found
+        }
+      }
+    }
+
+    error("Hermes compiler (hermesc) not found. Searched paths: ${hermesEnginePaths + reactNativeSdkPaths}")
+  }
 }

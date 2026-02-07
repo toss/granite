@@ -16,18 +16,18 @@ import java.io.File
  * @return Configured Gradle project
  */
 internal fun createProject(projectDir: File? = null): Project {
-    val project = ProjectBuilder.builder()
-        .apply {
-            if (projectDir != null) {
-                withProjectDir(projectDir)
-            }
-        }
-        .build()
+  val project = ProjectBuilder.builder()
+    .apply {
+      if (projectDir != null) {
+        withProjectDir(projectDir)
+      }
+    }
+    .build()
 
-    // Apply Android Library plugin for testing
-    project.plugins.apply("com.android.library")
+  // Apply Android Library plugin for testing
+  project.plugins.apply("com.android.library")
 
-    return project
+  return project
 }
 
 /**
@@ -43,9 +43,9 @@ internal fun createProject(projectDir: File? = null): Project {
  * @return Configured task instance
  */
 internal inline fun <reified T : Task> createTestTask(
-    project: Project = createProject(),
-    taskName: String = T::class.java.simpleName,
-    noinline block: (T) -> Unit = {}
+  project: Project = createProject(),
+  taskName: String = T::class.java.simpleName,
+  noinline block: (T) -> Unit = {},
 ): T = project.tasks.register(taskName, T::class.java, block).get()
 
 /**
@@ -57,10 +57,10 @@ internal inline fun <reified T : Task> createTestTask(
  * @return Created file
  */
 internal fun createTestFile(parent: File, name: String, content: String): File {
-    val file = File(parent, name)
-    file.parentFile.mkdirs()
-    file.writeText(content)
-    return file
+  val file = File(parent, name)
+  file.parentFile.mkdirs()
+  file.writeText(content)
+  return file
 }
 
 /**
@@ -71,9 +71,9 @@ internal fun createTestFile(parent: File, name: String, content: String): File {
  * @return Created directory
  */
 internal fun createTestDirectory(parent: File, path: String): File {
-    val dir = File(parent, path)
-    dir.mkdirs()
-    return dir
+  val dir = File(parent, path)
+  dir.mkdirs()
+  return dir
 }
 
 /**
@@ -83,6 +83,6 @@ internal fun createTestDirectory(parent: File, path: String): File {
  * @return File content as string
  */
 internal fun readFileContent(file: File): String {
-    require(file.exists()) { "File does not exist: ${file.absolutePath}" }
-    return file.readText()
+  require(file.exists()) { "File does not exist: ${file.absolutePath}" }
+  return file.readText()
 }

@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test
  */
 class AutolinkingParserTest {
 
-    @Test
-    fun `parse valid JSON with complete configuration`() {
-        val json = """
+  @Test
+  fun `parse valid JSON with complete configuration`() {
+    val json = """
             {
               "project": {
                 "name": "test-project",
@@ -40,32 +40,32 @@ class AutolinkingParserTest {
                 }
               }
             }
-        """.trimIndent()
+    """.trimIndent()
 
-        val config = AutolinkingParser.parse(json)
+    val config = AutolinkingParser.parse(json)
 
-        // Verify project info
-        assertThat(config.project.name).isEqualTo("test-project")
-        assertThat(config.project.version).isEqualTo("1.0.0")
-        assertThat(config.project.android).isNotNull
-        assertThat(config.project.android?.packageName).isEqualTo("com.example.test")
+    // Verify project info
+    assertThat(config.project.name).isEqualTo("test-project")
+    assertThat(config.project.version).isEqualTo("1.0.0")
+    assertThat(config.project.android).isNotNull
+    assertThat(config.project.android?.packageName).isEqualTo("com.example.test")
 
-        // Verify dependencies
-        assertThat(config.dependencies).hasSize(1)
-        assertThat(config.dependencies).containsKey("react-native-webview")
+    // Verify dependencies
+    assertThat(config.dependencies).hasSize(1)
+    assertThat(config.dependencies).containsKey("react-native-webview")
 
-        // Verify Android dependency config
-        val androidModules = config.androidDependencies()
-        assertThat(androidModules).hasSize(1)
-        assertThat(androidModules[0].name).isEqualTo("react-native-webview")
-        assertThat(androidModules[0].packageImportPath).isEqualTo("com.example.Package")
-        assertThat(androidModules[0].libraryName).isEqualTo("RNCWebView")
-    }
+    // Verify Android dependency config
+    val androidModules = config.androidDependencies()
+    assertThat(androidModules).hasSize(1)
+    assertThat(androidModules[0].name).isEqualTo("react-native-webview")
+    assertThat(androidModules[0].packageImportPath).isEqualTo("com.example.Package")
+    assertThat(androidModules[0].libraryName).isEqualTo("RNCWebView")
+  }
 
-    @Test
-    fun `parse JSON with null fields treats them as absent`() {
-        // Null and missing fields treated identically
-        val json = """
+  @Test
+  fun `parse JSON with null fields treats them as absent`() {
+    // Null and missing fields treated identically
+    val json = """
             {
               "project": {
                 "name": "test-project",
@@ -92,39 +92,39 @@ class AutolinkingParserTest {
                 }
               }
             }
-        """.trimIndent()
+    """.trimIndent()
 
-        val config = AutolinkingParser.parse(json)
+    val config = AutolinkingParser.parse(json)
 
-        assertThat(config.project.version).isNull()
-        assertThat(config.project.android?.manifestPath).isNull()
+    assertThat(config.project.version).isNull()
+    assertThat(config.project.android?.manifestPath).isNull()
 
-        val modules = config.androidDependencies()
-        assertThat(modules[0].packageImportPath).isNull()
-        assertThat(modules[0].packageInstance).isNull()
-        assertThat(modules[0].componentDescriptors).isEmpty()
-    }
+    val modules = config.androidDependencies()
+    assertThat(modules[0].packageImportPath).isNull()
+    assertThat(modules[0].packageInstance).isNull()
+    assertThat(modules[0].componentDescriptors).isEmpty()
+  }
 
-    @Test
-    fun `parse JSON with missing dependencies field returns empty dependencies`() {
-        val json = """
+  @Test
+  fun `parse JSON with missing dependencies field returns empty dependencies`() {
+    val json = """
             {
               "project": {
                 "name": "test-project"
               },
               "dependencies": {}
             }
-        """.trimIndent()
+    """.trimIndent()
 
-        val config = AutolinkingParser.parse(json)
+    val config = AutolinkingParser.parse(json)
 
-        assertThat(config.dependencies).isEmpty()
-        assertThat(config.androidDependencies()).isEmpty()
-    }
+    assertThat(config.dependencies).isEmpty()
+    assertThat(config.androidDependencies()).isEmpty()
+  }
 
-    @Test
-    fun `parse JSON with JavaScript-only modules excludes them from androidDependencies`() {
-        val json = """
+  @Test
+  fun `parse JSON with JavaScript-only modules excludes them from androidDependencies`() {
+    val json = """
             {
               "project": {
                 "name": "test-project"
@@ -146,67 +146,67 @@ class AutolinkingParserTest {
                 }
               }
             }
-        """.trimIndent()
+    """.trimIndent()
 
-        val config = AutolinkingParser.parse(json)
+    val config = AutolinkingParser.parse(json)
 
-        assertThat(config.dependencies).hasSize(2)
-        assertThat(config.androidDependencies()).isEmpty() // No Android modules
+    assertThat(config.dependencies).hasSize(2)
+    assertThat(config.androidDependencies()).isEmpty() // No Android modules
+  }
+
+  @Test
+  fun `throws IllegalArgumentException when JSON is malformed`() {
+    // Fail-fast with descriptive error
+    val malformedJson = "{ invalid json "
+
+    assertThatThrownBy {
+      AutolinkingParser.parse(malformedJson)
     }
+      .isInstanceOf(IllegalArgumentException::class.java)
+      .hasMessageContaining("react-native config")
+      .hasMessageContaining("Failed to parse JSON")
+      .hasMessageContaining("syntax error")
+  }
 
-    @Test
-    fun `throws IllegalArgumentException when JSON is malformed`() {
-        // Fail-fast with descriptive error
-        val malformedJson = "{ invalid json "
-
-        assertThatThrownBy {
-            AutolinkingParser.parse(malformedJson)
-        }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("react-native config")
-            .hasMessageContaining("Failed to parse JSON")
-            .hasMessageContaining("syntax error")
-    }
-
-    @Test
-    fun `throws IllegalArgumentException when project field missing`() {
-        // Fail-fast with descriptive error
-        val json = """
+  @Test
+  fun `throws IllegalArgumentException when project field missing`() {
+    // Fail-fast with descriptive error
+    val json = """
             {
               "dependencies": {}
             }
-        """.trimIndent()
+    """.trimIndent()
 
-        assertThatThrownBy {
-            AutolinkingParser.parse(json)
-        }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("react-native config")
-            .hasMessageContaining("missing 'project' field")
-            .hasMessageContaining("Ensure react-native CLI is properly configured")
+    assertThatThrownBy {
+      AutolinkingParser.parse(json)
     }
+      .isInstanceOf(IllegalArgumentException::class.java)
+      .hasMessageContaining("react-native config")
+      .hasMessageContaining("missing 'project' field")
+      .hasMessageContaining("Ensure react-native CLI is properly configured")
+  }
 
-    @Test
-    fun `throws IllegalArgumentException when JSON has unexpected structure`() {
-        // Fail-fast with descriptive error
-        val json = """
+  @Test
+  fun `throws IllegalArgumentException when JSON has unexpected structure`() {
+    // Fail-fast with descriptive error
+    val json = """
             {
               "project": "invalid-should-be-object",
               "dependencies": {}
             }
-        """.trimIndent()
+    """.trimIndent()
 
-        assertThatThrownBy {
-            AutolinkingParser.parse(json)
-        }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("react-native config")
-            // ClassCastException wrapped in IllegalArgumentException
+    assertThatThrownBy {
+      AutolinkingParser.parse(json)
     }
+      .isInstanceOf(IllegalArgumentException::class.java)
+      .hasMessageContaining("react-native config")
+    // ClassCastException wrapped in IllegalArgumentException
+  }
 
-    @Test
-    fun `parse handles empty project android field`() {
-        val json = """
+  @Test
+  fun `parse handles empty project android field`() {
+    val json = """
             {
               "project": {
                 "name": "test-project",
@@ -214,16 +214,16 @@ class AutolinkingParserTest {
               },
               "dependencies": {}
             }
-        """.trimIndent()
+    """.trimIndent()
 
-        val config = AutolinkingParser.parse(json)
+    val config = AutolinkingParser.parse(json)
 
-        assertThat(config.project.android).isNull()
-    }
+    assertThat(config.project.android).isNull()
+  }
 
-    @Test
-    fun `parse handles all AndroidDependencyConfig fields`() {
-        val json = """
+  @Test
+  fun `parse handles all AndroidDependencyConfig fields`() {
+    val json = """
             {
               "project": {
                 "name": "test-project"
@@ -250,27 +250,27 @@ class AutolinkingParserTest {
                 }
               }
             }
-        """.trimIndent()
+    """.trimIndent()
 
-        val config = AutolinkingParser.parse(json)
-        val modules = config.androidDependencies()
+    val config = AutolinkingParser.parse(json)
+    val modules = config.androidDependencies()
 
-        assertThat(modules).hasSize(1)
-        val module = modules[0]
+    assertThat(modules).hasSize(1)
+    val module = modules[0]
 
-        assertThat(module.packageImportPath).isEqualTo("com.example.Package")
-        assertThat(module.packageInstance).isEqualTo("new Package()")
-        assertThat(module.libraryName).isEqualTo("ComplexModule")
-        assertThat(module.componentDescriptors).containsExactly("Comp1", "Comp2")
-        assertThat(module.cmakeListsPath).isEqualTo("android/CMakeLists.txt")
-        assertThat(module.cxxModuleCMakeListsPath).isEqualTo("android/cxx/CMakeLists.txt")
-        assertThat(module.cxxModuleHeaderName).isEqualTo("ComplexModule")
-        assertThat(module.isPureCxxDependency).isFalse
-    }
+    assertThat(module.packageImportPath).isEqualTo("com.example.Package")
+    assertThat(module.packageInstance).isEqualTo("new Package()")
+    assertThat(module.libraryName).isEqualTo("ComplexModule")
+    assertThat(module.componentDescriptors).containsExactly("Comp1", "Comp2")
+    assertThat(module.cmakeListsPath).isEqualTo("android/CMakeLists.txt")
+    assertThat(module.cxxModuleCMakeListsPath).isEqualTo("android/cxx/CMakeLists.txt")
+    assertThat(module.cxxModuleHeaderName).isEqualTo("ComplexModule")
+    assertThat(module.isPureCxxDependency).isFalse
+  }
 
-    @Test
-    fun `parse handles module with multiple dependencies`() {
-        val json = """
+  @Test
+  fun `parse handles module with multiple dependencies`() {
+    val json = """
             {
               "project": {
                 "name": "test-project"
@@ -308,28 +308,28 @@ class AutolinkingParserTest {
                 }
               }
             }
-        """.trimIndent()
+    """.trimIndent()
 
-        val config = AutolinkingParser.parse(json)
+    val config = AutolinkingParser.parse(json)
 
-        assertThat(config.dependencies).hasSize(3)
-        assertThat(config.androidDependencies()).hasSize(3)
-        assertThat(config.androidDependencies().map { it.name })
-            .containsExactlyInAnyOrder("module1", "module2", "module3")
-    }
+    assertThat(config.dependencies).hasSize(3)
+    assertThat(config.androidDependencies()).hasSize(3)
+    assertThat(config.androidDependencies().map { it.name })
+      .containsExactlyInAnyOrder("module1", "module2", "module3")
+  }
 
-    @Test
-    fun `parse loads fixture JSON file successfully`() {
-        val fixtureJson = javaClass.classLoader
-            .getResourceAsStream("fixtures/sample-rn-config.json")!!
-            .bufferedReader()
-            .use { it.readText() }
+  @Test
+  fun `parse loads fixture JSON file successfully`() {
+    val fixtureJson = javaClass.classLoader
+      .getResourceAsStream("fixtures/sample-rn-config.json")!!
+      .bufferedReader()
+      .use { it.readText() }
 
-        val config = AutolinkingParser.parse(fixtureJson)
+    val config = AutolinkingParser.parse(fixtureJson)
 
-        assertThat(config.project.name).isEqualTo("test-project")
-        assertThat(config.project.android?.packageName).isEqualTo("com.example.testproject")
-        assertThat(config.dependencies).hasSize(3)
-        assertThat(config.androidDependencies()).hasSize(2) // pure-js-module excluded
-    }
+    assertThat(config.project.name).isEqualTo("test-project")
+    assertThat(config.project.android?.packageName).isEqualTo("com.example.testproject")
+    assertThat(config.dependencies).hasSize(3)
+    assertThat(config.androidDependencies()).hasSize(2) // pure-js-module excluded
+  }
 }

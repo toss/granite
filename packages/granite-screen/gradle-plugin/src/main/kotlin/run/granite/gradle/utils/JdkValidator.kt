@@ -13,20 +13,20 @@ import org.gradle.api.Project
  */
 object JdkValidator {
 
-    private val MINIMUM_JDK_VERSION = JavaVersion.VERSION_17
+  private val MINIMUM_JDK_VERSION = JavaVersion.VERSION_17
 
-    /**
-     * Validates that the current JDK meets minimum version requirements.
-     *
-     * @param project The Gradle project
-     * @throws IllegalStateException if JDK version is below minimum
-     */
-    fun validate(project: Project) {
-        val currentJavaVersion = JavaVersion.current()
+  /**
+   * Validates that the current JDK meets minimum version requirements.
+   *
+   * @param project The Gradle project
+   * @throws IllegalStateException if JDK version is below minimum
+   */
+  fun validate(project: Project) {
+    val currentJavaVersion = JavaVersion.current()
 
-        if (currentJavaVersion < MINIMUM_JDK_VERSION) {
-            error(
-                """
+    if (currentJavaVersion < MINIMUM_JDK_VERSION) {
+      error(
+        """
                 |Granite plugin requires JDK 17 or higher.
                 |
                 |Current JDK version: $currentJavaVersion
@@ -47,33 +47,27 @@ object JdkValidator {
                 |       }
                 |
                 |Project: ${project.path}
-                """.trimMargin()
-            )
-        }
-
-        project.logger.lifecycle("Granite plugin: JDK validation passed (using JDK $currentJavaVersion)")
+        """.trimMargin(),
+      )
     }
 
-    /**
-     * Gets the current JDK version.
-     */
-    fun getCurrentVersion(): JavaVersion {
-        return JavaVersion.current()
-    }
+    project.logger.lifecycle("Granite plugin: JDK validation passed (using JDK $currentJavaVersion)")
+  }
 
-    /**
-     * Gets the minimum required JDK version.
-     */
-    fun getMinimumVersion(): JavaVersion {
-        return MINIMUM_JDK_VERSION
-    }
+  /**
+   * Gets the current JDK version.
+   */
+  fun getCurrentVersion(): JavaVersion = JavaVersion.current()
 
-    /**
-     * Checks if the current JDK meets minimum requirements without throwing an error.
-     *
-     * @return true if current JDK >= minimum version, false otherwise
-     */
-    fun isCompatible(): Boolean {
-        return JavaVersion.current() >= MINIMUM_JDK_VERSION
-    }
+  /**
+   * Gets the minimum required JDK version.
+   */
+  fun getMinimumVersion(): JavaVersion = MINIMUM_JDK_VERSION
+
+  /**
+   * Checks if the current JDK meets minimum requirements without throwing an error.
+   *
+   * @return true if current JDK >= minimum version, false otherwise
+   */
+  fun isCompatible(): Boolean = JavaVersion.current() >= MINIMUM_JDK_VERSION
 }

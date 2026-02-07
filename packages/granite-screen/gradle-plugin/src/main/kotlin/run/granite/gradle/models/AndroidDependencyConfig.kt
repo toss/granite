@@ -8,16 +8,16 @@ package run.granite.gradle.models
  * Missing fields are treated identically to null fields.
  */
 data class AndroidDependencyConfig(
-    val sourceDir: String?,
-    val packageImportPath: String?,
-    val packageInstance: String?,
-    val dependencyConfiguration: String?,
-    val buildTypes: List<String>?,
-    val libraryName: String?,
-    val componentDescriptors: List<String>?,
-    val cmakeListsPath: String?,
-    val cxxModuleCMakeListsPath: String?,
-    val cxxModuleCMakeListsModuleName: String?,
-    val cxxModuleHeaderName: String?,
-    val isPureCxxDependency: Boolean?
+  val sourceDir: String?,
+  val packageImportPath: String?,
+  val packageInstance: String?,
+  val dependencyConfiguration: String?,
+  val buildTypes: List<String>?,
+  val libraryName: String?,
+  val componentDescriptors: List<String>?,
+  val cmakeListsPath: String?,
+  val cxxModuleCMakeListsPath: String?,
+  val cxxModuleCMakeListsModuleName: String?,
+  val cxxModuleHeaderName: String?,
+  val isPureCxxDependency: Boolean?,
 )

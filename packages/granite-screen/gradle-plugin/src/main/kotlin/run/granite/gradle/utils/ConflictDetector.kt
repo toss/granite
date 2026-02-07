@@ -11,31 +11,31 @@ import org.gradle.api.Project
  */
 object ConflictDetector {
 
-    private const val REACT_NATIVE_PLUGIN_ID = "com.facebook.react"
-    private const val REACT_NATIVE_APP_PLUGIN_ID = "com.facebook.react.application"
-    private const val REACT_NATIVE_LIBRARY_PLUGIN_ID = "com.facebook.react.library"
+  private const val REACT_NATIVE_PLUGIN_ID = "com.facebook.react"
+  private const val REACT_NATIVE_APP_PLUGIN_ID = "com.facebook.react.application"
+  private const val REACT_NATIVE_LIBRARY_PLUGIN_ID = "com.facebook.react.library"
 
-    /**
-     * Validates that the React Native Gradle Plugin is not applied to the same project.
-     *
-     * @param project The Gradle project
-     * @throws IllegalStateException if conflicting plugin is detected
-     */
-    fun validateNoConflicts(project: Project) {
-        // Check if React Native plugin is applied
-        val hasReactPlugin = project.pluginManager.hasPlugin(REACT_NATIVE_PLUGIN_ID)
-        val hasReactAppPlugin = project.pluginManager.hasPlugin(REACT_NATIVE_APP_PLUGIN_ID)
-        val hasReactLibraryPlugin = project.pluginManager.hasPlugin(REACT_NATIVE_LIBRARY_PLUGIN_ID)
+  /**
+   * Validates that the React Native Gradle Plugin is not applied to the same project.
+   *
+   * @param project The Gradle project
+   * @throws IllegalStateException if conflicting plugin is detected
+   */
+  fun validateNoConflicts(project: Project) {
+    // Check if React Native plugin is applied
+    val hasReactPlugin = project.pluginManager.hasPlugin(REACT_NATIVE_PLUGIN_ID)
+    val hasReactAppPlugin = project.pluginManager.hasPlugin(REACT_NATIVE_APP_PLUGIN_ID)
+    val hasReactLibraryPlugin = project.pluginManager.hasPlugin(REACT_NATIVE_LIBRARY_PLUGIN_ID)
 
-        if (hasReactPlugin || hasReactAppPlugin || hasReactLibraryPlugin) {
-            val detectedPlugin = when {
-                hasReactPlugin -> REACT_NATIVE_PLUGIN_ID
-                hasReactAppPlugin -> REACT_NATIVE_APP_PLUGIN_ID
-                else -> REACT_NATIVE_LIBRARY_PLUGIN_ID
-            }
+    if (hasReactPlugin || hasReactAppPlugin || hasReactLibraryPlugin) {
+      val detectedPlugin = when {
+        hasReactPlugin -> REACT_NATIVE_PLUGIN_ID
+        hasReactAppPlugin -> REACT_NATIVE_APP_PLUGIN_ID
+        else -> REACT_NATIVE_LIBRARY_PLUGIN_ID
+      }
 
-            error(
-                """
+      error(
+        """
                 |Granite plugin cannot coexist with the React Native Gradle Plugin.
                 |
                 |Detected conflicting plugin: $detectedPlugin
@@ -65,31 +65,31 @@ object ConflictDetector {
                 |      implementation(project(":your-library-module"))
                 |      // No React Native plugin needed - library provides everything
                 |  }
-                """.trimMargin()
-            )
-        }
-
-        // Warn if multiple library modules might be using Granite plugin
-        // (This is detected by checking if dependencies include other Granite-enabled modules)
-        detectMultipleGraniteModules(project)
-
-        project.logger.lifecycle("Granite plugin: Conflict detection passed")
+        """.trimMargin(),
+      )
     }
 
-    /**
-     * Detects if multiple library modules in the dependency tree are using Granite plugin.
-     *
-     * This is a warning, not an error, because it may be intentional in some cases.
-     */
-    private fun detectMultipleGraniteModules(project: Project) {
-        // Check if any dependencies also apply the Granite plugin
-        val graniteModuleCount = project.rootProject.subprojects.count { subproject ->
-            subproject.pluginManager.hasPlugin("run.granite.library")
-        }
+    // Warn if multiple library modules might be using Granite plugin
+    // (This is detected by checking if dependencies include other Granite-enabled modules)
+    detectMultipleGraniteModules(project)
 
-        if (graniteModuleCount > 1) {
-            project.logger.warn(
-                """
+    project.logger.lifecycle("Granite plugin: Conflict detection passed")
+  }
+
+  /**
+   * Detects if multiple library modules in the dependency tree are using Granite plugin.
+   *
+   * This is a warning, not an error, because it may be intentional in some cases.
+   */
+  private fun detectMultipleGraniteModules(project: Project) {
+    // Check if any dependencies also apply the Granite plugin
+    val graniteModuleCount = project.rootProject.subprojects.count { subproject ->
+      subproject.pluginManager.hasPlugin("run.granite.library")
+    }
+
+    if (graniteModuleCount > 1) {
+      project.logger.warn(
+        """
                 |
                 |⚠️ WARNING: Multiple modules in this project are using the Granite plugin.
                 |
@@ -104,20 +104,18 @@ object ConflictDetector {
                 |
                 |If this is intentional, ensure the modules are not in the same dependency tree.
                 |
-                """.trimMargin()
-            )
-        }
+        """.trimMargin(),
+      )
     }
+  }
 
-    /**
-     * Checks if a project has the React Native plugin applied.
-     *
-     * @param project The Gradle project to check
-     * @return true if React Native plugin is applied, false otherwise
-     */
-    fun hasReactNativePlugin(project: Project): Boolean {
-        return project.pluginManager.hasPlugin(REACT_NATIVE_PLUGIN_ID) ||
-                project.pluginManager.hasPlugin(REACT_NATIVE_APP_PLUGIN_ID) ||
-                project.pluginManager.hasPlugin(REACT_NATIVE_LIBRARY_PLUGIN_ID)
-    }
+  /**
+   * Checks if a project has the React Native plugin applied.
+   *
+   * @param project The Gradle project to check
+   * @return true if React Native plugin is applied, false otherwise
+   */
+  fun hasReactNativePlugin(project: Project): Boolean = project.pluginManager.hasPlugin(REACT_NATIVE_PLUGIN_ID) ||
+    project.pluginManager.hasPlugin(REACT_NATIVE_APP_PLUGIN_ID) ||
+    project.pluginManager.hasPlugin(REACT_NATIVE_LIBRARY_PLUGIN_ID)
 }
