@@ -3,21 +3,21 @@ package run.granite.gradle.utils
 import java.io.File
 
 /**
- * Node.js 실행 파일을 찾는 유틸리티.
+ * Utility for locating the Node.js executable.
  *
- * PATH 환경 변수를 탐색하여 Node.js 실행 파일의 위치를 반환한다.
- * Windows 환경에서는 node.exe, 그 외에는 node를 찾는다.
+ * Searches the PATH environment variable to find the Node.js executable.
+ * Looks for node.exe on Windows and node on other platforms.
  */
 object NodeExecutableFinder {
 
   /**
-   * Node.js 실행 파일을 찾아서 반환한다.
+   * Finds and returns the Node.js executable.
    *
-   * 탐색 순서:
-   * 1. PATH 환경 변수에 등록된 디렉토리에서 node 실행 파일 탐색
-   * 2. PATH에서 찾지 못한 경우, 시스템이 직접 resolve할 수 있도록 node 이름만 반환 (fallback)
+   * Search order:
+   * 1. Scan directories listed in the PATH environment variable for the node executable
+   * 2. If not found in PATH, return just the node name so the system can resolve it (fallback)
    *
-   * @return Node.js 실행 파일의 [File] 객체
+   * @return a [File] pointing to the Node.js executable
    */
   fun findNodeExecutable(): File {
     val nodeName = if (System.getProperty("os.name").startsWith("Windows")) {
@@ -26,7 +26,7 @@ object NodeExecutableFinder {
       "node"
     }
 
-    // PATH 환경 변수에서 node 실행 파일 탐색
+    // Search for the node executable in PATH directories
     val pathEnv = System.getenv("PATH") ?: ""
     val pathDirs = pathEnv.split(File.pathSeparator)
 
@@ -37,7 +37,7 @@ object NodeExecutableFinder {
       }
     }
 
-    // Fallback: 시스템이 직접 resolve하도록 node 이름만 반환
+    // Fallback: return just the node name and let the system resolve it
     return File(nodeName)
   }
 }
