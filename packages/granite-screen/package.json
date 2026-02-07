@@ -19,6 +19,16 @@
     "src",
     "ios",
     "android",
+    "gradle-plugin/src",
+    "gradle-plugin/gradle",
+    "gradle-plugin/build/libs",
+    "gradle-plugin/build.gradle.kts",
+    "gradle-plugin/settings.gradle.kts",
+    "gradle-plugin/gradle.properties",
+    "gradle-plugin/gradlew",
+    "gradle-plugin/gradlew.bat",
+    "gradle-plugin/README.md",
+    "gradle-plugin/LICENSE",
     "react-native.config.js",
     "!ios/build",
     "!android/build",
@@ -33,6 +43,34 @@
     "GraniteScreen.podspec",
     "package.json"
   ],
+  "scripts": {
+    "build:gradle-plugin": "cd gradle-plugin && ./gradlew jar",
+    "test:gradle-plugin": "cd gradle-plugin && ./gradlew test",
+    "prepack": "cd gradle-plugin && ./gradlew jar"
+  },
+  "nx": {
+    "targets": {
+      "build:gradle-plugin": {
+        "cache": true,
+        "inputs": [
+          "{projectRoot}/gradle-plugin/src/**",
+          "{projectRoot}/gradle-plugin/build.gradle.kts",
+          "{projectRoot}/gradle-plugin/settings.gradle.kts",
+          "{projectRoot}/gradle-plugin/gradle.properties",
+          "{projectRoot}/gradle-plugin/gradle/libs.versions.toml"
+        ],
+        "outputs": ["{projectRoot}/gradle-plugin/build/libs"]
+      },
+      "test:gradle-plugin": {
+        "cache": true,
+        "inputs": [
+          "{projectRoot}/gradle-plugin/src/**",
+          "{projectRoot}/gradle-plugin/build.gradle.kts"
+        ],
+        "dependsOn": ["build:gradle-plugin"]
+      }
+    }
+  },
   "license": "Apache-2.0",
   "stableVersion": "1.0.0-next.97"
 }
