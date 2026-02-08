@@ -1,0 +1,50 @@
+{
+  "name": "@granite-js/plugin-rozenite",
+  "type": "module",
+  "version": "0.1.34",
+  "description": "Rozenite integration plugin for Granite",
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run --passWithNoTests",
+    "build": "tsdown"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/plugin-rozenite"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/connect": "^3.4.38",
+    "@vitest/coverage-v8": "^4.0.12",
+    "tsdown": "^0.16.5",
+    "typescript": "^5.8.3",
+    "vitest": "^4.0.12"
+  },
+  "dependencies": {
+    "@granite-js/plugin-core": "workspace:*",
+    "@granite-js/utils": "workspace:*",
+    "@rozenite/middleware": "1.2.0"
+  },
+  "sideEffects": false,
+  "stableVersion": "1.0.0-next.97"
+}
