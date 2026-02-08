@@ -1,6 +1,7 @@
 package run.granite
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
@@ -10,18 +11,12 @@ import androidx.lifecycle.lifecycleScope
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactInstanceEventListener
 import com.facebook.react.ReactPackage
-import com.facebook.react.bridge.JSBundleLoader
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.common.annotations.UnstableReactNativeAPI
-import com.facebook.react.defaults.DefaultComponentsRegistry
-import com.facebook.react.defaults.DefaultReactHostDelegate
-import com.facebook.react.defaults.DefaultTurboModuleManagerDelegate
 import com.facebook.react.fabric.ComponentFactory
 import com.facebook.react.interfaces.fabric.ReactSurface
 import com.facebook.react.modules.core.DefaultHardwareBackBtnHandler
-import com.facebook.react.runtime.ReactHostImpl
 import com.facebook.react.runtime.ReactSurfaceView
-import com.facebook.react.runtime.hermes.HermesInstance
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
@@ -77,13 +72,13 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
         // Get packages
         val packages = reactPackagesProvider?.invoke() ?: emptyList()
 
-        println("🔧 GraniteReactDelegate: Using ${packages.size} React packages")
+        Log.d(TAG, "Using ${packages.size} React packages")
         packages.forEach { pkg ->
-            println("🔧 GraniteReactDelegate: - ${pkg.javaClass.simpleName}")
+            Log.d(TAG, "- ${pkg.javaClass.simpleName}")
         }
 
         if (BuildConfig.DEBUG) {
-            println("🔧 GraniteReactDelegate: Running in debug mode")
+            Log.d(TAG, "Running in debug mode")
         }
 
         // Require BundleLoader
@@ -111,9 +106,14 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
         pendingActivityRef = WeakReference(activity)
 
         // Call onHostResume if ReactHost is ready, otherwise it will be called in setupReactHost
-        reactHost?.onHostResume(activity, activity as DefaultHardwareBackBtnHandler)
-            ?: println(
-                "🔧 GraniteReactDelegate: ReactHost not ready yet, will call onHostResume after creation",
+        val backBtnHandler = activity as? DefaultHardwareBackBtnHandler
+            ?: throw IllegalStateException(
+                "Activity ${activity.javaClass.simpleName} must implement DefaultHardwareBackBtnHandler",
+            )
+        reactHost?.onHostResume(activity, backBtnHandler)
+            ?: Log.w(
+                TAG,
+                "ReactHost not ready yet, will call onHostResume after creation",
             )
     }
 
@@ -124,7 +124,7 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
 
         // Call onHostPause only if ReactHost exists
         reactHost?.onHostPause(activity)
-            ?: println("🔧 GraniteReactDelegate: ReactHost not ready, skipping onHostPause")
+            ?: Log.w(TAG, "ReactHost not ready, skipping onHostPause")
     }
 
     override fun onDestroy(activity: AppCompatActivity) {
@@ -157,7 +157,7 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
             host.onHostDestroy(activity)
             host.invalidate()
         }
-            ?: println("🔧 GraniteReactDelegate: ReactHost not ready, skipping onHostDestroy")
+            ?: Log.w(TAG, "ReactHost not ready, skipping onHostDestroy")
         reactHost = null
 
         // Clean up internal references
@@ -217,24 +217,11 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
 
     override fun getContentView(): View? = contentView
 
-    private fun getMainComponentName(): String {
-        // Only use the BundleLoader-provided component name
-        currentBundleSource?.let { source ->
-            when (source) {
-                is BundleSource.DevServer ->
-                    source.componentName?.let {
-                        return it
-                    }
-                is BundleSource.Production ->
-                    source.componentName?.let {
-                        return it
-                    }
-            }
-        }
-        throw IllegalStateException(
-            "mainComponentName is missing. Use a BundleLoader that provides componentName.",
-        )
-    }
+    private fun getMainComponentName(): String =
+        currentBundleSource?.componentName
+            ?: throw IllegalStateException(
+                "mainComponentName is missing. Use a BundleLoader that provides componentName.",
+            )
 
     // Default (no-loader) ReactHost creation removed; BundleLoader is mandatory.
 
@@ -246,7 +233,7 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
             // Get component name using the method
             val componentName = getMainComponentName()
 
-            println("🔧 GraniteReactDelegate: Using component name: $componentName")
+            Log.d(TAG, "Using component name: $componentName")
 
             // Create surface
             val surface = host.createSurface(activity, componentName, initialProps)
@@ -287,50 +274,58 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
     override fun startReactSurface() {
         reactHost?.let { host ->
             reactSurface?.let { surface ->
-                println("🔧 GraniteReactDelegate: Starting ReactSurface")
+                Log.d(TAG, "Starting ReactSurface")
 
                 // Add ReactInstanceEventListener
-                reactInstanceEventListener = object : ReactInstanceEventListener {
+                val listener = object : ReactInstanceEventListener {
                     override fun onReactContextInitialized(context: ReactContext) {
-                        println("🔧Granite onReactContextInitialized called")
-                        println(
-                            "🔧Granite onReactContextInitialized on currentActivity = ${context.currentActivity}",
+                        Log.d(TAG, "Granite onReactContextInitialized called")
+                        Log.d(
+                            TAG,
+                            "Granite onReactContextInitialized on currentActivity = ${context.currentActivity}",
                         )
                         // Call the host's onReactContextInitialized method
                         pendingActivity?.let { activity ->
                             if (activity is GraniteReactHost) {
-                                println(
-                                    "🔧Granite activity.onReactContextInitialized called",
+                                Log.d(
+                                    TAG,
+                                    "Granite activity.onReactContextInitialized called",
                                 )
                                 activity.onReactContextInitialized(context)
                             }
                         }
                     }
                 }
-                reactInstanceEventListener?.let { listener ->
-                      host.addReactInstanceEventListener(listener)
-                }
+                reactInstanceEventListener = listener
+                host.addReactInstanceEventListener(listener)
 
                 // Start the surface
-                println("🔧 GraniteReactDelegate: ⚠️ About to call surface.start()")
-                println("🔧 GraniteReactDelegate: surface = $surface")
-                println(
-                    "🔧 GraniteReactDelegate: If AppRegistry.registerComponent was not called, this will fail!",
+                Log.d(TAG, "About to call surface.start()")
+                Log.d(TAG, "surface = $surface")
+                Log.d(
+                    TAG,
+                    "If AppRegistry.registerComponent was not called, this will fail!",
                 )
                 surface.start()
-                println("🔧 GraniteReactDelegate: surface.start() completed")
+                Log.d(TAG, "surface.start() completed")
 
                 // Apply pending lifecycle state
-                println(
-                    "🔧 GraniteReactDelegate: Applying pending lifecycle state: $pendingLifecycleState",
+                Log.d(
+                    TAG,
+                    "Applying pending lifecycle state: $pendingLifecycleState",
                 )
                 when (pendingLifecycleState) {
                     LifecycleState.RESUMED -> {
                         // Activity is resumed, call onHostResume
                         pendingActivity?.let { act ->
-                            host.onHostResume(act, act as DefaultHardwareBackBtnHandler)
-                            println(
-                                "🔧 GraniteReactDelegate: Called onHostResume with activity: $act",
+                            val handler = act as? DefaultHardwareBackBtnHandler
+                                ?: throw IllegalStateException(
+                                    "Activity ${act.javaClass.simpleName} must implement DefaultHardwareBackBtnHandler",
+                                )
+                            host.onHostResume(act, handler)
+                            Log.d(
+                                TAG,
+                                "Called onHostResume with activity: $act",
                             )
                         }
                     }
@@ -338,8 +333,9 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
                         // Activity is paused, call onHostPause
                         pendingActivity?.let { act ->
                             host.onHostPause(act)
-                            println(
-                                "🔧 GraniteReactDelegate: Called onHostPause with activity: $act",
+                            Log.d(
+                                TAG,
+                                "Called onHostPause with activity: $act",
                             )
                         }
                     }
@@ -348,16 +344,16 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
                         surface.stop()
                         pendingActivity?.let { act -> host.onHostDestroy(act) }
                         host.invalidate()
-                        println("🔧 GraniteReactDelegate: Activity destroyed, cleaned up ReactHost")
+                        Log.d(TAG, "Activity destroyed, cleaned up ReactHost")
                     }
                     else -> {
-                        println("🔧 GraniteReactDelegate: No lifecycle state to apply")
+                        Log.d(TAG, "No lifecycle state to apply")
                     }
                 }
             }
-                ?: println("🔧 GraniteReactDelegate: ReactSurface is null, cannot start")
+                ?: Log.w(TAG, "ReactSurface is null, cannot start")
         }
-            ?: println("🔧 GraniteReactDelegate: ReactHost is null, cannot start")
+            ?: Log.w(TAG, "ReactHost is null, cannot start")
     }
 
     private fun loadBundleWithLoader(
@@ -367,46 +363,54 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
     ) {
         activity.lifecycleScope.launch {
             try {
-                println("🔧 GraniteReactDelegate: loadBundleWithLoader started")
-                println(
-                    "🔧 GraniteReactDelegate: bundleLoader type = ${bundleLoader.javaClass.simpleName}",
+                Log.d(TAG, "loadBundleWithLoader started")
+                Log.d(
+                    TAG,
+                    "bundleLoader type = ${bundleLoader.javaClass.simpleName}",
                 )
 
-                // Load bundle
+                // Load bundle (suspend, may run on IO dispatcher)
                 val bundleSource = bundleLoader.loadBundle()
-                currentBundleSource = bundleSource
 
-                println("🔧 GraniteReactDelegate: bundleSource loaded = $bundleSource")
+                Log.d(TAG, "bundleSource loaded = $bundleSource")
                 when (bundleSource) {
                     is BundleSource.Production -> {
-                        println(
-                            "🔧 GraniteReactDelegate: bundleSource.location = ${bundleSource.location}",
+                        Log.d(
+                            TAG,
+                            "bundleSource.location = ${bundleSource.location}",
                         )
-                        println(
-                            "🔧 GraniteReactDelegate: bundleSource.componentName = ${bundleSource.componentName}",
+                        Log.d(
+                            TAG,
+                            "bundleSource.componentName = ${bundleSource.componentName}",
                         )
                         if (bundleSource.location is ProductionLocation.FileSystemBundle) {
-                            println(
-                                "🔧 GraniteReactDelegate: ⚠️ ACTUAL FILE PATH = ${(bundleSource.location as ProductionLocation.FileSystemBundle).filePath}",
+                            Log.d(
+                                TAG,
+                                "ACTUAL FILE PATH = ${(bundleSource.location as ProductionLocation.FileSystemBundle).filePath}",
                             )
                         }
                     }
                     is BundleSource.DevServer -> {
-                        println(
-                            "🔧 GraniteReactDelegate: DevServer mode - ${bundleSource.host}:${bundleSource.port}",
+                        Log.d(
+                            TAG,
+                            "DevServer mode - ${bundleSource.host}:${bundleSource.port}",
                         )
                     }
                 }
 
-                // Create ReactHost with the loaded bundle
-                reactHost = createReactHostWithBundle(activity, bundleSource)
+                // Create ReactHost with the loaded bundle (safe off main thread)
+                val factoryResult = createReactHostWithBundle(activity, bundleSource)
 
-                // Setup ReactHost on UI thread
+                // Assign shared state and setup on UI thread to serialize with onDestroy
                 activity.runOnUiThread {
-                    // Both onDestroy() and runOnUiThread callbacks execute on the main thread,
-                    // so pendingLifecycleState checks are serialized by the main looper (thread-safe)
                     if (pendingLifecycleState != LifecycleState.DESTROYED) {
+                        currentBundleSource = bundleSource
+                        reactHost = factoryResult.reactHost
+                        componentFactory = factoryResult.componentFactory
                         setupReactHost(activity, initialProps)
+                    } else {
+                        // Activity already destroyed; clean up the host we just created
+                        factoryResult.reactHost.invalidate()
                     }
                 }
             } catch (e: Exception) {
@@ -422,8 +426,7 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
                                 contentView = errorView
                                 activity.setContentView(errorView)
                             }
-                        println("❌ GraniteReactDelegate: Failed to load bundle: ${e.message}")
-                        e.printStackTrace()
+                        Log.e(TAG, "Failed to load bundle", e)
                     }
                 }
             }
@@ -433,99 +436,13 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
     private fun createReactHostWithBundle(
         activity: AppCompatActivity,
         bundleSource: BundleSource,
-    ): ReactHost {
+    ): ReactHostFactory.Result {
         val packages = reactPackagesProvider?.invoke() ?: emptyList()
+        return ReactHostFactory.create(activity.applicationContext, bundleSource, packages)
+    }
 
-        println(
-            "🔧 GraniteReactDelegate: Creating independent ReactHost instance with bundle source: $bundleSource",
-        )
-
-        // Determine bundle configuration based on source
-        val (jsBundleLoader, useDevSupport) =
-            when (bundleSource) {
-                is BundleSource.DevServer -> {
-                    // For dev mode, use asset bundle but enable dev support
-                    JSBundleLoader.createAssetLoader(
-                        activity,
-                        "assets://index.android.bundle",
-                        true,
-                    ) to true
-                }
-                is BundleSource.Production -> {
-                    when (bundleSource.location) {
-                        is ProductionLocation.FileSystemBundle -> {
-                            // Use file system bundle
-                            val filePath = bundleSource.location.filePath
-                            println(
-                                "🔧 GraniteReactDelegate: Creating JSBundleLoader.createFileLoader with path: $filePath",
-                            )
-                            println(
-                                "🔧 GraniteReactDelegate: ⚠️ THIS IS THE BUNDLE THAT WILL BE LOADED INTO HERMES",
-                            )
-                            JSBundleLoader.createFileLoader(filePath) to false
-                        }
-                        is ProductionLocation.EmbeddedBundle -> {
-                            // Use embedded asset bundle
-                            println(
-                                "🔧 GraniteReactDelegate: Creating JSBundleLoader for embedded asset bundle",
-                            )
-                            JSBundleLoader.createAssetLoader(
-                                activity,
-                                "assets://index.android.bundle",
-                                true,
-                            ) to false
-                        }
-                    }
-                }
-            }
-
-        println("🔧 GraniteReactDelegate: JSBundleLoader created, useDevSupport=$useDevSupport")
-
-        // 1. Create TurboModuleManagerDelegate Builder
-        val tmmDelegateBuilder = DefaultTurboModuleManagerDelegate.Builder()
-        // Add C++ packages if needed in the future
-        // tmmDelegateBuilder.addCxxReactPackage { MyCxxPackage() }
-
-        // 2. Create ReactHostDelegate
-        val reactHostDelegate =
-            DefaultReactHostDelegate(
-                jsMainModulePath = "index",
-                jsBundleLoader = jsBundleLoader,
-                reactPackages = packages,
-                jsRuntimeFactory = HermesInstance(),
-                bindingsInstaller = null,
-                turboModuleManagerDelegateBuilder = tmmDelegateBuilder,
-                exceptionHandler = { ex ->
-                    println("❌ GraniteReactDelegate: ReactHost exception: ${ex.message}")
-                    ex.printStackTrace()
-                },
-            )
-
-        // 3. Create ComponentFactory and register
-        val newComponentFactory = ComponentFactory()
-        DefaultComponentsRegistry.register(newComponentFactory)
-        componentFactory = newComponentFactory
-
-        println(
-            "🔧 GraniteReactDelegate: Created ComponentFactory and registered with DefaultComponentsRegistry",
-        )
-
-        // 4. Create ReactHostImpl directly (independent instance per delegate)
-        // Use applicationContext to prevent Activity memory leak
-        val allowPackagerServerAccess = useDevSupport
-        val reactHostImpl =
-            ReactHostImpl(
-                activity.applicationContext,
-                reactHostDelegate,
-                newComponentFactory,
-                allowPackagerServerAccess,
-                useDevSupport,
-            )
-
-        println(
-            "🔧 GraniteReactDelegate: Created independent ReactHostImpl (useDevSupport=$useDevSupport)",
-        )
-
-        return reactHostImpl
+    companion object {
+        // Note: BuildConfig.DEBUG reflects this library's build variant, not the consuming app's.
+        private const val TAG = "GraniteReactDelegate"
     }
 }
