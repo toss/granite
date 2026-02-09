@@ -1,5 +1,12 @@
 # @granite-js/plugin-router
 
+## 1.0.1
+
+### Patch Changes
+
+- ee26531: fix: align exports map
+  - @granite-js/plugin-core@1.0.1
+
 ## 1.0.0
 
 ### Major Changes
