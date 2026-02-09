@@ -34,7 +34,7 @@
     "dist"
   ],
   "devDependencies": {
-    "@types/node": "^22.10.2",
+    "@types/node": "catalog:tools",
     "@vitest/coverage-v8": "^4.0.12",
     "tsdown": "catalog:tools",
     "typescript": "catalog:tools",

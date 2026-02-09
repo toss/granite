@@ -3,8 +3,8 @@ NOTICE
 This project makes use of third-party libraries that are licensed under their respective open-source licenses. Below is a list of these libraries, their licenses, and their links for further reference.
 
 ================================================================================
-Project Name: @granite-js/plugin-sentry
-Copyright 2025 Viva Republica, Inc
+Project Name: @granite-js/plugin-rozenite
+Copyright 2026 Viva Republica, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,23 +21,23 @@ limitations under the License.
 ================================================================================
 Third-Party Libraries:
 
-1. **@sentry/cli**
-	
-   - License: BSD-3-Clause
-   - License Text: https://opensource.org/licenses/BSD-3-Clause
-   - Repository: git://github.com/getsentry/sentry-cli.git
-	
-2. **es-toolkit**
+1. **@rozenite/middleware**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/toss/es-toolkit.git
+   - Repository: https://github.com/callstackincubator/rozenite.git
 	
-3. **execa**
+2. **@types/connect**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/sindresorhus/execa.git
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
+	
+3. **@vitest/coverage-v8**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/vitest-dev/vitest.git
 	
 4. **tsdown**
 	

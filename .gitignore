@@ -71,3 +71,5 @@ target
 local.properties
 **/local.properties
 android.iml
+
+.xcode.env.local

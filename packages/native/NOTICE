@@ -4,7 +4,7 @@ This project makes use of third-party libraries that are licensed under their re
 
 ================================================================================
 Project Name: @granite-js/native
-Copyright 2025 Viva Republica, Inc
+Copyright 2026 Viva Republica, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -45,185 +45,173 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-5. **@react-native-async-storage/async-storage**
+5. **@granite-js/image**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/toss/granite.git
+	
+6. **@granite-js/lottie**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/anthropics/granite.git
+	
+7. **@granite-js/video**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/toss/granite.git
+	
+8. **@react-native-async-storage/async-storage**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-native-async-storage/async-storage.git
 	
-6. **@react-native-community/blur**
+9. **@react-native-community/blur**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-native-community/react-native-blur
 	
-7. **@react-navigation/elements**
+10. **@react-navigation/elements**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-navigation/react-navigation.git
 	
-8. **@react-navigation/native**
+11. **@react-navigation/native**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-navigation/react-navigation.git
 	
-9. **@react-navigation/native-stack**
+12. **@react-navigation/native-stack**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-navigation/react-navigation.git
 	
-10. **@shopify/flash-list**
+13. **@shopify/flash-list**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/Shopify/flash-list
 	
-11. **@types/babel__core**
+14. **@types/babel__core**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-12. **@types/babel__preset-env**
+15. **@types/babel__preset-env**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-13. **@types/jest**
+16. **@types/jest**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-14. **@types/node**
+17. **@types/node**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-15. **@types/react**
+18. **@types/react**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-16. **@types/react-native-video**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
-	
-17. **babel-jest**
+19. **babel-jest**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/jestjs/jest.git
 	
-18. **esbuild**
+20. **esbuild**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/evanw/esbuild.git
 	
-19. **eslint**
+21. **eslint**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/eslint/eslint.git
 	
-20. **jest**
+22. **jest**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/jestjs/jest.git
 	
-21. **react**
+23. **react**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/facebook/react.git
 	
-22. **react-native**
+24. **react-native**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/facebook/react-native.git
 	
-23. **react-native-gesture-handler**
+25. **react-native-gesture-handler**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/software-mansion/react-native-gesture-handler.git
 	
-24. **react-native-pager-view**
+26. **react-native-pager-view**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/callstack/react-native-pager-view
 	
-25. **react-native-safe-area-context**
+27. **react-native-safe-area-context**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/th3rdwave/react-native-safe-area-context.git
+   - Repository: https://github.com/AppAndFlow/react-native-safe-area-context.git
 	
-26. **react-native-screens**
+28. **react-native-screens**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/software-mansion/react-native-screens.git
 	
-27. **react-native-svg**
+29. **react-native-svg**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-native-community/react-native-svg
 	
-28. **react-native-video**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git@github.com:react-native-video/react-native-video.git
-	
-29. **react-native-webview**
+30. **react-native-webview**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-native-webview/react-native-webview.git
 	
-30. **tsx**
+31. **tsx**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/privatenumber/tsx.git
 	
-31. **lottie-ios**
-	
-   - License: Apache-2.0
-   - License Text: https://www.apache.org/licenses/LICENSE-2.0
-   - Repository: git+https://github.com/airbnb/lottie-ios.git
-	
-32. **lottie-react-native**
-	
-   - License: Apache-2.0
-   - License Text: https://www.apache.org/licenses/LICENSE-2.0
-   - Repository: https://github.com/react-native-community/lottie-react-native
-	
-33. **typescript**
+32. **typescript**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0
    - Repository: https://github.com/microsoft/TypeScript.git
-	
-34. **react-native-fast-image**
-	
-   - License: (MIT AND Apache-2.0)
-   - License Text: https://opensource.org/licenses/MIT, https://www.apache.org/licenses/LICENSE-2.0
-   - Repository: https://github.com/DylanVann/react-native-fast-image.git
 	
 
 ================================================================================

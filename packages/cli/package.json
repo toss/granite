@@ -44,7 +44,7 @@
     "@types/babel__preset-env": "^7",
     "@types/connect": "^3",
     "@types/debug": "^4",
-    "@types/node": "^22.10.2",
+    "@types/node": "catalog:tools",
     "@types/serve-static": "^1",
     "@vitest/coverage-v8": "^4.0.12",
     "esbuild": "0.25.8",

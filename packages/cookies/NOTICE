@@ -3,7 +3,7 @@ NOTICE
 This project makes use of third-party libraries that are licensed under their respective open-source licenses. Below is a list of these libraries, their licenses, and their links for further reference.
 
 ================================================================================
-Project Name: @granite-js/plugin-micro-frontend
+Project Name: @granite-js/cookies
 Copyright 2026 Viva Republica, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,41 +21,35 @@ limitations under the License.
 ================================================================================
 Third-Party Libraries:
 
-1. **@vitest/coverage-v8**
+1. **@granite-js/cookies**
 	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/vitest-dev/vitest.git
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: https://github.com/toss/brick.git
 	
-2. **es-toolkit**
+2. **brick-module**
 	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/toss/es-toolkit.git
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: https://github.com/toss/brick.git
 	
-3. **tsdown**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/rolldown/tsdown.git
-	
-4. **vitest**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/vitest-dev/vitest.git
-	
-5. **picocolors**
-	
-   - License: ISC
-   - License Text: https://opensource.org/licenses/ISC
-   - Repository: git+https://github.com/alexeyraspopov/picocolors.git
-	
-6. **typescript**
+3. **typescript**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0
    - Repository: https://github.com/microsoft/TypeScript.git
+	
+4. **react-native**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/facebook/react-native.git
+	
+5. **tsdown**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/rolldown/tsdown.git
 	
 
 ================================================================================

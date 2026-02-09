@@ -5508,7 +5508,7 @@ __metadata:
     "@testing-library/react-native": "npm:^12.9.0"
     "@types/babel__core": "npm:^7.20.5"
     "@types/jest": "npm:^29.5.14"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@types/react": "catalog:react-native"
     babel-preset-granite: "workspace:*"
     jest: "npm:^29.7.0"
@@ -5538,7 +5538,7 @@ __metadata:
     "@react-navigation/native-stack": "catalog:react-native"
     "@shopify/flash-list": "catalog:react-native"
     "@toss/error-boundary": "npm:^1.5.2"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@types/react": "catalog:react-native"
     brick-module: "catalog:brick-module"
     react: "catalog:react-native"
@@ -5572,7 +5572,7 @@ __metadata:
     "@testing-library/react-native": "npm:^12.9.0"
     "@types/babel__core": "npm:^7.20.5"
     "@types/jest": "npm:^29.5.14"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@types/react": "catalog:react-native"
     babel-preset-granite: "workspace:*"
     jest: "npm:^29.7.0"
@@ -5591,7 +5591,7 @@ __metadata:
   dependencies:
     "@commander-js/extra-typings": "npm:^13.1.0"
     "@nx/devkit": "npm:^21.0.3"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@types/yargs": "npm:^17.0.33"
     "@types/yauzl": "npm:^2.10.3"
     commander: "npm:^13.1.0"
@@ -5639,7 +5639,7 @@ __metadata:
     "@types/babel__preset-env": "npm:^7"
     "@types/connect": "npm:^3"
     "@types/debug": "npm:^4"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@types/serve-static": "npm:^1"
     "@vitest/coverage-v8": "npm:^4.0.12"
     chalk: "npm:^4"
@@ -5681,7 +5681,7 @@ __metadata:
   dependencies:
     "@aws-sdk/client-cloudfront": "npm:^3.812.0"
     "@aws-sdk/client-s3": "npm:^3.812.0"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@vitest/coverage-v8": "npm:^4.0.12"
     aws-lambda: "npm:^1.0.7"
     aws-sdk-client-mock: "npm:^4.1.0"
@@ -5703,7 +5703,7 @@ __metadata:
     "@commander-js/extra-typings": "npm:^14.0.0"
     "@granite-js/deployment-manager": "workspace:*"
     "@granite-js/plugin-core": "workspace:*"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@vitest/coverage-v8": "npm:^4.0.12"
     commander: "npm:^14.0.0"
     tsdown: "catalog:tools"
@@ -5739,7 +5739,7 @@ __metadata:
   dependencies:
     "@granite-js/native": "workspace:*"
     "@types/jest": "npm:^29.5.12"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     eslint: "npm:^9.7.0"
     jest: "npm:^29.7.0"
     tsup: "npm:^8.5.0"
@@ -5817,7 +5817,7 @@ __metadata:
     "@types/invariant": "npm:^2"
     "@types/lodash.throttle": "npm:^4"
     "@types/mime-types": "npm:^2"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@types/path-browserify": "npm:^1"
     "@types/pnpapi": "npm:^0"
     "@types/prompts": "npm:^2"
@@ -5920,7 +5920,7 @@ __metadata:
     "@types/babel__core": "npm:^7"
     "@types/babel__preset-env": "npm:^7"
     "@types/jest": "npm:^29.5.12"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@types/react": "catalog:react-native"
     babel-jest: "npm:^29.7.0"
     esbuild: "npm:0.25.8"
@@ -5968,7 +5968,7 @@ __metadata:
     "@swc/core": "catalog:swc"
     "@types/babel__core": "npm:^7"
     "@types/connect": "npm:^3"
-    "@types/node": "npm:^24.3.0"
+    "@types/node": "catalog:tools"
     "@types/ws": "npm:^8.18.0"
     "@vitest/coverage-v8": "npm:^4.0.12"
     cosmiconfig: "npm:^9.0.0"
@@ -5992,7 +5992,7 @@ __metadata:
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/utils": "workspace:*"
     "@types/babel__core": "npm:^7.20.5"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@vitest/coverage-v8": "npm:^4.0.12"
     tsdown: "catalog:tools"
     typescript: "catalog:tools"
@@ -6037,7 +6037,7 @@ __metadata:
   dependencies:
     "@granite-js/plugin-core": "workspace:*"
     "@swc/core": "catalog:swc"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@vitest/coverage-v8": "npm:^4.0.12"
     chokidar: "npm:4.0.1"
     es-toolkit: "npm:^1.39.8"
@@ -6088,7 +6088,7 @@ __metadata:
     "@pulumi/aws": "npm:^6.80.0"
     "@pulumi/pulumi": "npm:^3.170.0"
     "@types/aws-lambda": "npm:^8.10.149"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@vitest/coverage-v8": "npm:^4.0.12"
     aws-lambda: "npm:^1.0.7"
     aws-sdk-client-mock: "npm:^4.1.0"
@@ -6124,7 +6124,7 @@ __metadata:
     "@testing-library/react": "npm:^16.1.0"
     "@types/babel__core": "npm:^7"
     "@types/babel__preset-env": "npm:^7"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@types/react": "catalog:react-native"
     "@types/react-dom": "catalog:react-native"
     "@vitest/coverage-v8": "npm:^4.0.12"
@@ -6172,7 +6172,7 @@ __metadata:
     "@testing-library/jest-native": "npm:^5.4.3"
     "@testing-library/react-native": "npm:^12.5.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@types/react": "catalog:react-native"
     "@types/react-test-renderer": "npm:^18"
     babel-jest: "npm:^29.7.0"
@@ -6195,7 +6195,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@granite-js/utils@workspace:packages/utils"
   dependencies:
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@types/yauzl": "npm:^2.10.3"
     tsup: "npm:^8.5.0"
     typescript: "catalog:tools"
@@ -10551,6 +10551,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:24.10.12":
+  version: 24.10.12
+  resolution: "@types/node@npm:24.10.12"
+  dependencies:
+    undici-types: "npm:~7.16.0"
+  checksum: 10c0/fa39b88c8d82a2cec41544bee3426c4b78a13cc3c5ccf6fcb6c9528a68466ffcc73772833c612c7bb7e5fe1bc8e38002d1d543152e43b20b0600096cf6f210d1
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^12.7.1":
   version: 12.20.55
   resolution: "@types/node@npm:12.20.55"
@@ -10571,24 +10580,6 @@ __metadata:
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10c0/22ba2bc9f8863101a7e90a56aaeba1eb3ebdc51e847cef4a6d188967ab1acbce9b4f92251372fd0329ecb924bbf610509e122c3dfe346c04dbad04013d4ad7d0
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^22.10.2":
-  version: 22.19.1
-  resolution: "@types/node@npm:22.19.1"
-  dependencies:
-    undici-types: "npm:~6.21.0"
-  checksum: 10c0/6edd93aea86da740cb7872626839cd6f4a67a049d3a3a6639cb592c620ec591408a30989ab7410008d1a0b2d4985ce50f1e488e79c033e4476d3bec6833b0a2f
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^24.3.0":
-  version: 24.3.0
-  resolution: "@types/node@npm:24.3.0"
-  dependencies:
-    undici-types: "npm:~7.10.0"
-  checksum: 10c0/96bdeca01f690338957c2dcc92cb9f76c262c10398f8d91860865464412b0f9d309c24d9b03d0bdd26dd47fa7ee3f8227893d5c89bc2009d919a525a22512030
   languageName: node
   linkType: hard
 
@@ -12430,7 +12421,7 @@ __metadata:
     "@babel/plugin-transform-export-namespace-from": "npm:7.27.1"
     "@react-native/babel-preset": "catalog:react-native"
     "@types/babel__core": "npm:^7.20.5"
-    "@types/node": "npm:^24.3.0"
+    "@types/node": "catalog:tools"
     "@vitest/coverage-v8": "npm:^4.0.12"
     tsdown: "catalog:tools"
     typescript: "catalog:tools"
@@ -13679,7 +13670,7 @@ __metadata:
   dependencies:
     "@clack/prompts": "npm:^0.8.2"
     "@types/kill-port": "npm:2.0.1"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@types/yargs": "npm:^17.0.33"
     "@vitest/coverage-v8": "npm:^4.0.12"
     es-toolkit: "npm:^1.39.8"
@@ -16939,7 +16930,7 @@ __metadata:
   resolution: "granite-docs@workspace:docs"
   dependencies:
     "@algolia/client-search": "npm:^4.24.0"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     typescript: "catalog:tools"
     vitepress: "npm:^1.4.1"
     vue: "npm:^3.4.31"
@@ -16959,7 +16950,7 @@ __metadata:
     "@nx/js": "npm:^21.0.3"
     "@types/eslint__js": "npm:^8.42.3"
     "@types/jest": "npm:^29.5.12"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@types/react": "catalog:react-native"
     "@yarnpkg/types": "npm:^4.0.0"
     chalk: "npm:^5.3.0"
@@ -22852,7 +22843,7 @@ __metadata:
     "@pulumi/aws": "npm:^6.0.0"
     "@pulumi/awsx": "npm:^2.0.2"
     "@pulumi/pulumi": "npm:^3.113.0"
-    "@types/node": "npm:^22.10.2"
+    "@types/node": "catalog:tools"
     "@yarnpkg/pnpify": "npm:^4.1.4"
     typescript: "catalog:tools"
   languageName: unknown
@@ -26016,20 +26007,6 @@ __metadata:
   version: 5.26.5
   resolution: "undici-types@npm:5.26.5"
   checksum: 10c0/bb673d7876c2d411b6eb6c560e0c571eef4a01c1c19925175d16e3a30c4c428181fb8d7ae802a261f283e4166a0ac435e2f505743aa9e45d893f9a3df017b501
-  languageName: node
-  linkType: hard
-
-"undici-types@npm:~6.21.0":
-  version: 6.21.0
-  resolution: "undici-types@npm:6.21.0"
-  checksum: 10c0/c01ed51829b10aa72fc3ce64b747f8e74ae9b60eafa19a7b46ef624403508a54c526ffab06a14a26b3120d055e1104d7abe7c9017e83ced038ea5cf52f8d5e04
-  languageName: node
-  linkType: hard
-
-"undici-types@npm:~7.10.0":
-  version: 7.10.0
-  resolution: "undici-types@npm:7.10.0"
-  checksum: 10c0/8b00ce50e235fe3cc601307f148b5e8fb427092ee3b23e8118ec0a5d7f68eca8cee468c8fc9f15cbb2cf2a3797945ebceb1cbd9732306a1d00e0a9b6afa0f635
   languageName: node
   linkType: hard
 

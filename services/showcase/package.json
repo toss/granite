@@ -30,7 +30,7 @@
     "@testing-library/react-native": "^12.9.0",
     "@types/babel__core": "^7.20.5",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.10.2",
+    "@types/node": "catalog:tools",
     "@types/react": "catalog:react-native",
     "babel-preset-granite": "workspace:*",
     "jest": "^29.7.0",

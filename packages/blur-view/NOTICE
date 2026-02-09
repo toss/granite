@@ -3,7 +3,7 @@ NOTICE
 This project makes use of third-party libraries that are licensed under their respective open-source licenses. Below is a list of these libraries, their licenses, and their links for further reference.
 
 ================================================================================
-Project Name: @granite-js/plugin-micro-frontend
+Project Name: @granite-js/blur-view
 Copyright 2026 Viva Republica, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,37 +21,31 @@ limitations under the License.
 ================================================================================
 Third-Party Libraries:
 
-1. **@vitest/coverage-v8**
+1. **@types/react**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/vitest-dev/vitest.git
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-2. **es-toolkit**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/toss/es-toolkit.git
-	
-3. **tsdown**
+2. **react**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/rolldown/tsdown.git
+   - Repository: https://github.com/facebook/react.git
 	
-4. **vitest**
+3. **react-native**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/vitest-dev/vitest.git
+   - Repository: git+https://github.com/facebook/react-native.git
 	
-5. **picocolors**
+4. **react-native-builder-bob**
 	
-   - License: ISC
-   - License Text: https://opensource.org/licenses/ISC
-   - Repository: git+https://github.com/alexeyraspopov/picocolors.git
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/callstack/react-native-builder-bob.git
 	
-6. **typescript**
+5. **typescript**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0

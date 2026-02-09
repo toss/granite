@@ -59,7 +59,7 @@
     "@types/invariant": "^2",
     "@types/lodash.throttle": "^4",
     "@types/mime-types": "^2",
-    "@types/node": "^22.10.2",
+    "@types/node": "catalog:tools",
     "@types/path-browserify": "^1",
     "@types/pnpapi": "^0",
     "@types/prompts": "^2",

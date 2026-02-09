@@ -4,7 +4,7 @@ This project makes use of third-party libraries that are licensed under their re
 
 ================================================================================
 Project Name: @granite-js/plugin-core
-Copyright 2025 Viva Republica, Inc
+Copyright 2026 Viva Republica, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,53 +21,95 @@ limitations under the License.
 ================================================================================
 Third-Party Libraries:
 
-1. **@types/connect**
+1. **@swc/core**
+	
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: git+https://github.com/swc-project/swc.git
+	
+2. **typescript**
+	
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: https://github.com/microsoft/TypeScript.git
+	
+3. **@types/babel__core**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-2. **connect**
+4. **@types/connect**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/senchalabs/connect.git
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-3. **es-toolkit**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/toss/es-toolkit.git
-	
-4. **esbuild**
+5. **@types/node**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/evanw/esbuild.git
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-5. **tsdown**
+6. **@types/ws**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/rolldown/tsdown.git
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-6. **vitest**
+7. **@vitest/coverage-v8**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/vitest-dev/vitest.git
 	
-7. **zod**
+8. **cosmiconfig**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/cosmiconfig/cosmiconfig.git
+	
+9. **cosmiconfig-typescript-loader**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/Codex-/cosmiconfig-typescript-loader.git
+	
+10. **es-toolkit**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/toss/es-toolkit.git
+	
+11. **esbuild**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/evanw/esbuild.git
+	
+12. **fastify**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/fastify/fastify.git
+	
+13. **tsdown**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/rolldown/tsdown.git
+	
+14. **vitest**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/vitest-dev/vitest.git
+	
+15. **zod**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/colinhacks/zod.git
-	
-8. **typescript**
-	
-   - License: Apache-2.0
-   - License Text: https://www.apache.org/licenses/LICENSE-2.0
-   - Repository: https://github.com/microsoft/TypeScript.git
 	
 
 ================================================================================

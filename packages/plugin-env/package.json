@@ -38,7 +38,7 @@
     "@babel/core": "7.28.5",
     "@babel/types": "7.28.5",
     "@types/babel__core": "^7.20.5",
-    "@types/node": "^22.10.2",
+    "@types/node": "catalog:tools",
     "@vitest/coverage-v8": "^4.0.12",
     "tsdown": "catalog:tools",
     "typescript": "catalog:tools",

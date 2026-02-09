@@ -33,7 +33,7 @@
     "dist"
   ],
   "devDependencies": {
-    "@types/node": "^22.10.2",
+    "@types/node": "catalog:tools",
     "@types/yauzl": "^2.10.3",
     "tsup": "^8.5.0",
     "typescript": "catalog:tools"

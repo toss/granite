@@ -31,7 +31,7 @@
   "devDependencies": {
     "@granite-js/native": "workspace:*",
     "@types/jest": "^29.5.12",
-    "@types/node": "^22.10.2",
+    "@types/node": "catalog:tools",
     "eslint": "^9.7.0",
     "tsup": "^8.5.0",
     "typescript": "catalog:tools"
