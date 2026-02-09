@@ -7,5 +7,6 @@ export default defineConfig([
     outDir: 'dist',
     dts: true,
     shims: true,
+    fixedExtension: false,
   },
 ]);
