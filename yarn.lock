@@ -5575,6 +5575,7 @@ __metadata:
     "@types/node": "catalog:tools"
     "@types/react": "catalog:react-native"
     babel-preset-granite: "workspace:*"
+    brick-module: "catalog:brick-module"
     jest: "npm:^29.7.0"
     react: "catalog:react-native"
     react-native: "catalog:react-native"
