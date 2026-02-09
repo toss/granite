@@ -4,11 +4,11 @@ import { createDevServerMiddleware } from '@react-native-community/cli-server-ap
 import Debug from 'debug';
 import attachKeyHandlers from './attachKeyHandlers';
 import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../constants';
+import { keyReporter } from './keyReporter';
 import { getMetroConfig } from '../metro/getMetroConfig';
 import { printLogo } from '../utils/printLogo';
 import { printServerUrl } from '../utils/printServerUrl';
 import { getModule } from '../vendors';
-import { keyReporter } from './keyReporter';
 
 const debug = Debug('cli:start');
 
@@ -115,6 +115,8 @@ export async function runServer({
   const { middleware: debuggerMiddleware, websocketEndpoints: debuggerWebSocketEndpoints } = createDevMiddleware({
     serverBaseUrl: devServerUrl,
   });
+
+
   middleware.use(debuggerMiddleware);
 
   const customEnhanceMiddleware = metroConfig.server.enhanceMiddleware;
@@ -125,7 +127,7 @@ export async function runServer({
     if (customEnhanceMiddleware) {
       metroMiddleware = customEnhanceMiddleware(metroMiddleware, server);
     }
-
+    
     for (const item of middlewares) {
       middleware.use(item);
     }
