@@ -35,9 +35,25 @@
     "package.json"
   ],
   "scripts": {
-    "build:gradle-plugin": "cd gradle-plugin && ./gradlew jar",
+    "build": "cd gradle-plugin && ./gradlew jar",
     "test:gradle-plugin": "cd gradle-plugin && ./gradlew test",
     "prepack": "cd gradle-plugin && ./gradlew jar"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "inputs": [
+          "{projectRoot}/gradle-plugin/src/**",
+          "{projectRoot}/gradle-plugin/build.gradle.kts",
+          "{projectRoot}/gradle-plugin/settings.gradle.kts",
+          "{projectRoot}/gradle-plugin/gradle.properties",
+          "{projectRoot}/gradle-plugin/gradle/libs.versions.toml"
+        ],
+        "outputs": [
+          "{projectRoot}/gradle-plugin/build/libs"
+        ]
+      }
+    }
   },
   "license": "Apache-2.0",
   "stableVersion": "1..0-next.97"

@@ -18,19 +18,6 @@
       "outputs": ["{projectRoot}/dist"],
       "cache": true
     },
-    "build:gradle-plugin": {
-      "cache": true,
-      "inputs": [
-        "{projectRoot}/gradle-plugin/src/**",
-        "{projectRoot}/gradle-plugin/build.gradle.kts",
-        "{projectRoot}/gradle-plugin/settings.gradle.kts",
-        "{projectRoot}/gradle-plugin/gradle.properties",
-        "{projectRoot}/gradle-plugin/gradle/libs.versions.toml"
-      ],
-      "outputs": [
-        "{projectRoot}/gradle-plugin/build/libs"
-      ]
-    },
     "test:gradle-plugin": {
       "cache": true,
       "inputs": [
@@ -38,7 +25,7 @@
         "{projectRoot}/gradle-plugin/build.gradle.kts"
       ],
       "dependsOn": [
-        "build:gradle-plugin"
+        "build"
       ]
     }
   },
