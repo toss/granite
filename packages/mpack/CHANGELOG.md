@@ -1,5 +1,16 @@
 # @granite-js/mpack
 
+## 1.0.2
+
+### Patch Changes
+
+- d4beb3b: expose context to dynamic config plugin
+- b325495: fix(react-native-svg): buffer deps
+- Updated dependencies [d4beb3b]
+- Updated dependencies [b325495]
+  - @granite-js/plugin-core@1.0.2
+  - @granite-js/utils@1.0.2
+
 ## 1.0.1
 
 ### Patch Changes
