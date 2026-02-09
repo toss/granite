@@ -133,6 +133,7 @@
   },
   "sideEffects": [
     "dist/async-bridges.*",
-    "dist/constant-bridges.*"
+    "dist/constant-bridges.*",
+    "src/types/global.ts"
   ]
 }
