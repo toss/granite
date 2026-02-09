@@ -44,5 +44,11 @@ export default defineConfig({
         },
       },
     },
+    {
+      name: 'context-plugin',
+      config: (context) => {
+        console.debug('[DEBUG] Context:', context);
+      },
+    },
   ],
 });

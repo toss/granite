@@ -1,4 +1,9 @@
-import { createPluginHooksDriver, resolveConfig, type CompleteGraniteConfig } from '@granite-js/plugin-core';
+import {
+  createPluginHooksDriver,
+  resolveConfig,
+  type CompleteGraniteConfig,
+  type PluginConfigContext,
+} from '@granite-js/plugin-core';
 import { createDevMiddleware } from '@react-native/dev-middleware';
 import { createDevServerMiddleware } from '@react-native-community/cli-server-api';
 import Debug from 'debug';
@@ -55,7 +60,8 @@ export async function runServer({
   const terminal = new Terminal(process.stdout);
   const terminalReporter = new TerminalReporter(terminal);
 
-  const resolvedConfig = await resolveConfig(config);
+  const context: PluginConfigContext = { command: 'serve' };
+  const resolvedConfig = await resolveConfig(config, context);
   const { middlewares = [], inspectorProxy, ...additionalMetroConfig } = resolvedConfig?.metro ?? {};
   const baseConfig = await getMetroConfig({ rootPath: config.cwd }, additionalMetroConfig);
   const metroConfig = mergeConfig(baseConfig, {
@@ -116,7 +122,6 @@ export async function runServer({
     serverBaseUrl: devServerUrl,
   });
 
-
   middleware.use(debuggerMiddleware);
 
   const customEnhanceMiddleware = metroConfig.server.enhanceMiddleware;
@@ -127,7 +132,7 @@ export async function runServer({
     if (customEnhanceMiddleware) {
       metroMiddleware = customEnhanceMiddleware(metroMiddleware, server);
     }
-    
+
     for (const item of middlewares) {
       middleware.use(item);
     }

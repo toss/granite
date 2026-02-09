@@ -83,7 +83,13 @@ export type StaticPluginConfig = Omit<PluginBuildConfig, 'platform' | 'outfile'>
   metro?: PluginMetroConfig;
 };
 
-export type DynamicPluginConfig = (() => StaticPluginConfig) | (() => Promise<StaticPluginConfig>);
+export type DynamicPluginConfig =
+  | ((context: PluginConfigContext) => StaticPluginConfig | null | undefined)
+  | ((context: PluginConfigContext) => Promise<StaticPluginConfig | null | undefined>);
+
+export interface PluginConfigContext {
+  command: 'build' | 'serve';
+}
 
 // Omitted options are configured by `PluginBuildConfig['babel']`, `PluginBuildConfig['transformer']`
 export type PluginMetroConfig = Omit<ResolvedMetroConfig, 'babelConfig' | 'transformSync'>;

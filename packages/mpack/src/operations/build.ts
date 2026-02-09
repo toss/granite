@@ -3,6 +3,7 @@ import * as path from 'path';
 import {
   createPluginHooksDriver,
   resolveConfig,
+  type PluginConfigContext,
   type BuildConfig,
   type CompleteGraniteConfig,
 } from '@granite-js/plugin-core';
@@ -78,7 +79,8 @@ async function buildImpl(
   plugins: PluginFactory[],
   { platform, outfile, cache = true, dev = true, metafile = false }: CommonBuildOptions
 ) {
-  const { metro: _metroConfig, devServer: _devServerConfig, ...buildConfig } = await resolveConfig(config);
+  const context: PluginConfigContext = { command: 'build' };
+  const { metro: _metroConfig, devServer: _devServerConfig, ...buildConfig } = await resolveConfig(config, context);
   const outfileName = outfile == null ? getDefaultOutfileName(config.entryFile, platform) : outfile;
   const outfilePath = path.resolve(config.outdir, outfileName);
   const bundler = new Bundler({

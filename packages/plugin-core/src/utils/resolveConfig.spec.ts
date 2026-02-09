@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { resolveConfig } from './resolveConfig';
-import { GranitePluginCore } from '../types';
+import type { GranitePluginCore, PluginConfigContext } from '../types';
 import { resolvePlugins } from './resolvePlugins';
 
 describe('resolveConfig', () => {
+  const CONTEXT_SHIMS: PluginConfigContext = { command: 'build' };
   const CONFIG_SHIMS = {
     appName: 'test',
     cwd: '/',
@@ -49,8 +50,8 @@ describe('resolveConfig', () => {
   it('should return resolved config', async () => {
     const { configs } = await resolvePlugins([dummyPlugin()]);
 
-    const result1 = await resolveConfig({ ...CONFIG_SHIMS, pluginConfigs: configs });
-    const result2 = await resolveConfig({ ...CONFIG_SHIMS, pluginConfigs: configs });
+    const result1 = await resolveConfig({ ...CONFIG_SHIMS, pluginConfigs: configs }, CONTEXT_SHIMS);
+    const result2 = await resolveConfig({ ...CONFIG_SHIMS, pluginConfigs: configs }, CONTEXT_SHIMS);
 
     const value1 = result1.esbuild?.banner?.js;
     const value2 = result2.esbuild?.banner?.js;
@@ -63,7 +64,7 @@ describe('resolveConfig', () => {
   it('should resolve metro config', async () => {
     const { configs } = await resolvePlugins([dummyPlugin()]);
 
-    const result = await resolveConfig({ ...CONFIG_SHIMS, pluginConfigs: configs });
+    const result = await resolveConfig({ ...CONFIG_SHIMS, pluginConfigs: configs }, CONTEXT_SHIMS);
 
     // Granite config
     expect(result.transformer?.transformSync).toBeDefined();
