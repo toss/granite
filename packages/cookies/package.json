@@ -38,12 +38,13 @@
   "author": "Toss <opensource@toss.im>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/toss/brick.git"
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/cookies"
   },
   "bugs": {
-    "url": "https://github.com/toss/brick/issues"
+    "url": "https://github.com/toss/granite/issues"
   },
-  "homepage": "https://github.com/toss/brick#readme",
+  "homepage": "https://github.com/toss/granite#readme",
   "brickModule": {
     "specSrc": "./src/spec",
     "ios": {

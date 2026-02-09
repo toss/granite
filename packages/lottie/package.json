@@ -42,7 +42,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anthropics/granite.git",
+    "url": "git+https://github.com/toss/granite.git",
     "directory": "packages/lottie"
   },
   "author": "",
