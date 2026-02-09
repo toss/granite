@@ -84,8 +84,8 @@ export type StaticPluginConfig = Omit<PluginBuildConfig, 'platform' | 'outfile'>
 };
 
 export type DynamicPluginConfig =
-  | ((context: PluginConfigContext) => StaticPluginConfig | null | undefined)
-  | ((context: PluginConfigContext) => Promise<StaticPluginConfig | null | undefined>);
+  | ((context: PluginConfigContext) => StaticPluginConfig | null | undefined | void)
+  | ((context: PluginConfigContext) => Promise<StaticPluginConfig | null | undefined | void>);
 
 export interface PluginConfigContext {
   command: 'build' | 'serve';

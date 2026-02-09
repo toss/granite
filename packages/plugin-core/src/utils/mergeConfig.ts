@@ -21,7 +21,7 @@ export async function mergeConfig({ configs, context }: MergeConfigOptions) {
   }
 
   if (rest.length === 0) {
-    return undefined;
+    return resolveDynamicConfig(base, context);
   }
 
   return rest.reduce(
