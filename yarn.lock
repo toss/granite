@@ -3499,17 +3499,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@changesets/changelog-github@npm:^0.5.2":
-  version: 0.5.2
-  resolution: "@changesets/changelog-github@npm:0.5.2"
-  dependencies:
-    "@changesets/get-github-info": "npm:^0.7.0"
-    "@changesets/types": "npm:^6.1.0"
-    dotenv: "npm:^8.1.0"
-  checksum: 10c0/c2dbf767f7f18f44539d92f7fd0f42ef6fc33d8f3583a0cd2a558fe8242a4f2db178bf77497c73780652afbae55704b14c32dd33f4d61ebdf28113a0af08f19b
-  languageName: node
-  linkType: hard
-
 "@changesets/cli@npm:^2.29.3":
   version: 2.29.7
   resolution: "@changesets/cli@npm:2.29.7"
@@ -3581,16 +3570,6 @@ __metadata:
     picocolors: "npm:^1.1.0"
     semver: "npm:^7.5.3"
   checksum: 10c0/b9d9992440b7e09dcaf22f57d28f1d8e0e31996e1bc44dbbfa1801e44f93fa49ebba6f9356c60f6ff0bd85cd0f0d0b8602f7e0f2addc5be647b686e6f8985f70
-  languageName: node
-  linkType: hard
-
-"@changesets/get-github-info@npm:^0.7.0":
-  version: 0.7.0
-  resolution: "@changesets/get-github-info@npm:0.7.0"
-  dependencies:
-    dataloader: "npm:^1.4.0"
-    node-fetch: "npm:^2.5.0"
-  checksum: 10c0/3a4e497a0d05ea9cb1a17d2193f13d865d2dab8dc6e9162c63c2ffa2719338c27bfa897481feed9abf484075a27284e8c050210cff7b7dedde6a18303440e4d8
   languageName: node
   linkType: hard
 
@@ -13896,13 +13875,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dataloader@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "dataloader@npm:1.4.0"
-  checksum: 10c0/5fa4c843b9e60195092f1fc7e2acaff318ed46886dc670ddff683bc560f12d4079e6d1e77749501b7e111a8582d26a2aa2a2fbe6d7d5e1520cef64f4e1fd242d
-  languageName: node
-  linkType: hard
-
 "date-fns@npm:^2.25.0":
   version: 2.30.0
   resolution: "date-fns@npm:2.30.0"
@@ -14313,13 +14285,6 @@ __metadata:
   version: 16.6.1
   resolution: "dotenv@npm:16.6.1"
   checksum: 10c0/15ce56608326ea0d1d9414a5c8ee6dcf0fffc79d2c16422b4ac2268e7e2d76ff5a572d37ffe747c377de12005f14b3cc22361e79fc7f1061cce81f77d2c973dc
-  languageName: node
-  linkType: hard
-
-"dotenv@npm:^8.1.0":
-  version: 8.6.0
-  resolution: "dotenv@npm:8.6.0"
-  checksum: 10c0/6750431dea8efbd54b9f2d9681b04e1ccc7989486461dcf058bb708d9e3d63b04115fcdf8840e38ad1e24a4a2e1e7c1560626c5e3ac7bc09371b127c49e2d45f
   languageName: node
   linkType: hard
 
@@ -16976,7 +16941,6 @@ __metadata:
   resolution: "granite-monorepo@workspace:."
   dependencies:
     "@arethetypeswrong/cli": "npm:^0.18.2"
-    "@changesets/changelog-github": "npm:^0.5.2"
     "@changesets/cli": "npm:^2.29.3"
     "@clack/prompts": "npm:^0.9.0"
     "@eslint/compat": "npm:^1.1.1"
@@ -21186,7 +21150,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.2.0, node-fetch@npm:^2.5.0, node-fetch@npm:^2.6.0, node-fetch@npm:^2.6.7":
+"node-fetch@npm:^2.2.0, node-fetch@npm:^2.6.0, node-fetch@npm:^2.6.7":
   version: 2.7.0
   resolution: "node-fetch@npm:2.7.0"
   dependencies:
