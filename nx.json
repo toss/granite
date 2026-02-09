@@ -17,6 +17,16 @@
       "dependsOn": ["^build"],
       "outputs": ["{projectRoot}/dist"],
       "cache": true
+    },
+    "test:gradle-plugin": {
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/gradle-plugin/src/**",
+        "{projectRoot}/gradle-plugin/build.gradle.kts"
+      ],
+      "dependsOn": [
+        "build"
+      ]
     }
   },
   "defaultBase": "main",

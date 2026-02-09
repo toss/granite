@@ -19,6 +19,9 @@ void BundleEvaluator::evaluateJavascriptSync(
   std::string source{reinterpret_cast<const char *>(sourcePtr), sourceSize};
   std::string sourceUrl = url->toString();
 
-  auto rt = (jsi::Runtime *)jsRuntime;
+  if (jsRuntime == 0) {
+    return;
+  }
+  auto rt = reinterpret_cast<jsi::Runtime *>(jsRuntime);
   rt->evaluateJavaScript(std::make_unique<jsi::StringBuffer>(std::move(source)), std::move(sourceUrl));
 };

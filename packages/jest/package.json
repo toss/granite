@@ -34,13 +34,12 @@
     "@types/node": "^22.10.2",
     "eslint": "^9.7.0",
     "tsup": "^8.5.0",
-    "typescript": "5.8.3"
+    "typescript": "catalog:tools"
   },
   "peerDependencies": {
     "@granite-js/native": "workspace:*",
     "react": "*",
     "react-native": "*"
   },
-  "sideEffects": false,
-  "stableVersion": "1.0.0-next.97"
+  "sideEffects": false
 }

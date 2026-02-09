@@ -1,7 +1,7 @@
 {
   "name": "granite-monorepo",
   "private": true,
-  "packageManager": "yarn@4.10.3",
+  "packageManager": "yarn@4.12.0",
   "workspaces": [
     "packages/*",
     "services/*",
@@ -68,9 +68,9 @@
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
-    "tsdown": "^0.16.5",
+    "tsdown": "catalog:tools",
     "tsx": "^4.19.3",
-    "typescript": "5.8.3",
+    "typescript": "catalog:tools",
     "typescript-eslint": "^8.31.0",
     "yargs": "^17.7.2"
   }

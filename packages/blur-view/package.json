@@ -33,8 +33,8 @@
     "@types/react": "catalog:react-native",
     "react": "catalog:react-native",
     "react-native": "catalog:react-native",
-    "react-native-builder-bob": "^0.40.15",
-    "typescript": "5.8.3"
+    "react-native-builder-bob": "catalog:tools",
+    "typescript": "catalog:tools"
   },
   "peerDependencies": {
     "@granite-js/native": "workspace:*",
@@ -54,6 +54,5 @@
         }
       ]
     ]
-  },
-  "stableVersion": "1.0.0-next.97"
+  }
 }

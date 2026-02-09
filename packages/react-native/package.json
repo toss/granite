@@ -100,6 +100,7 @@
     "@types/react": "catalog:react-native",
     "@types/react-dom": "catalog:react-native",
     "@vitest/coverage-v8": "^4.0.12",
+    "brick-module": "catalog:brick-module",
     "esbuild": "0.25.9",
     "eslint": "^9.7.0",
     "jsdom": "^25.0.1",
@@ -107,13 +108,14 @@
     "react-dom": "catalog:react-native",
     "react-native": "catalog:react-native",
     "tsup": "^8.5.0",
-    "typescript": "5.8.3",
+    "typescript": "catalog:tools",
     "vitest": "^4.0.12",
     "zod": "^4.1.12"
   },
   "peerDependencies": {
     "@granite-js/native": "workspace:*",
     "@types/react": "*",
+    "brick-module": "*",
     "react": "*",
     "react-native": "*"
   },
@@ -126,13 +128,11 @@
     "@granite-js/style-utils": "workspace:*",
     "@granite-js/video": "workspace:*",
     "@standard-schema/spec": "^1.0.0",
-    "brick-module": "catalog:brick-module",
     "es-toolkit": "^1.39.8",
     "react-native-url-polyfill": "3.0.0"
   },
   "sideEffects": [
     "dist/async-bridges.*",
     "dist/constant-bridges.*"
-  ],
-  "stableVersion": "1.0.0-next.97"
+  ]
 }
