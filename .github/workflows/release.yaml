@@ -39,7 +39,7 @@ jobs:
             chore: version packages ${{ env.BASE_BRANCH }}
           commit: 'chore: version packages'
           version: yarn changeset version
-          publish: yarn workspaces foreach --all --no-private exec 'yarn npm publish --provenance --access public --tag next || true'
+          publish: bash ./.scripts/publish-packages.sh
         env:
           BASE_BRANCH: ${{ env.BASE_BRANCH }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
