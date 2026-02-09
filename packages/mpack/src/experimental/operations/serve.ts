@@ -1,4 +1,9 @@
-import { CompleteGraniteConfig, createPluginHooksDriver, resolveConfig } from '@granite-js/plugin-core';
+import {
+  resolveConfig,
+  createPluginHooksDriver,
+  type CompleteGraniteConfig,
+  type PluginConfigContext,
+} from '@granite-js/plugin-core';
 import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../../constants';
 import attachKeyHandlers from '../../operations/attachKeyHandlers';
 import { keyReporter } from '../../operations/keyReporter';
@@ -27,7 +32,8 @@ export async function EXPERIMENTAL__server({
   await driver.devServer.pre({ host, port });
 
   const rootDir = config.cwd;
-  const { metro: _, devServer, ...buildConfig } = (await resolveConfig(config)) ?? {};
+  const context: PluginConfigContext = { command: 'serve' };
+  const { metro: _, devServer, ...buildConfig } = (await resolveConfig(config, context)) ?? {};
   const server = new DevServer({
     buildConfig: { entry: config.entryFile, ...buildConfig },
     middlewares: devServer?.middlewares ?? [],

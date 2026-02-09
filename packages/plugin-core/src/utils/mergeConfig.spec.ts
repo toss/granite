@@ -99,7 +99,10 @@ describe('mergeConfig', () => {
       },
     };
 
-    const result = await mergeConfig(source, target);
+    const result = await mergeConfig({
+      configs: [source, target],
+      context: { command: 'build' },
+    });
 
     expect(result).toEqual({
       resolver: {
@@ -168,7 +171,10 @@ describe('mergeConfig', () => {
       esbuild: { minify: true },
     };
 
-    const result = await mergeConfig(source, target);
+    const result = await mergeConfig({
+      configs: [source, target],
+      context: { command: 'build' },
+    });
 
     expect(result).toEqual({
       babel: { presets: ['preset1'] },
@@ -191,7 +197,10 @@ describe('mergeConfig', () => {
       extra: { anotherOption: 'target' },
     };
 
-    const result = await mergeConfig(source, target);
+    const result = await mergeConfig({
+      configs: [source, target],
+      context: { command: 'build' },
+    });
 
     expect(result?.extra).toEqual({
       customOption: 'source',
@@ -248,7 +257,10 @@ describe('mergeConfig', () => {
       },
     };
 
-    const result = await mergeConfig(source, target);
+    const result = await mergeConfig({
+      configs: [source, target],
+      context: { command: 'build' },
+    });
 
     expect(result?.resolver?.alias).toHaveLength(2);
     expect(result?.babel?.presets).toEqual(['@babel/preset-react']);
@@ -378,7 +390,10 @@ describe('mergeConfig', () => {
       extra: { target3: '3' },
     };
 
-    const result = await mergeConfig(source, target1, target2, target3);
+    const result = await mergeConfig({
+      configs: [source, target1, target2, target3],
+      context: { command: 'build' },
+    });
 
     expect(result).toEqual({
       resolver: {
@@ -443,8 +458,15 @@ describe('mergeConfig', () => {
       babel: { presets: ['preset3'] },
     });
 
-    const result = await mergeConfig(source, target1, target2);
+    const target3: GranitePluginCore['config'] = async (context) => ({
+      babel: { presets: [context.command === 'build' ? 'build-preset' : 'serve-preset'] },
+    });
 
-    expect(result?.babel?.presets).toEqual(['preset1', 'preset2', 'preset3']);
+    const result = await mergeConfig({
+      configs: [source, target1, target2, target3],
+      context: { command: 'build' },
+    });
+
+    expect(result?.babel?.presets).toEqual(['preset1', 'preset2', 'preset3', 'build-preset']);
   });
 });
