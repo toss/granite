@@ -37,6 +37,6 @@
     "@react-native/babel-preset": "catalog:react-native",
     "@types/node": "^22.10.2",
     "@types/react": "catalog:react-native",
-    "typescript": "5.8.3"
+    "typescript": "catalog:tools"
   }
 }

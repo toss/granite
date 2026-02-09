@@ -42,9 +42,8 @@
     "aws-sdk-client-mock": "^4.1.0",
     "es-toolkit": "^1.39.8",
     "tsup": "^8.5.0",
-    "typescript": "^5.8.3",
+    "typescript": "catalog:tools",
     "valibot": "^1.1.0",
     "vitest": "^4.0.12"
-  },
-  "stableVersion": "1.0.0-next.97"
+  }
 }

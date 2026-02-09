@@ -36,8 +36,8 @@
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@vitest/coverage-v8": "^4.0.12",
-    "tsdown": "^0.16.5",
-    "typescript": "5.8.3",
+    "tsdown": "catalog:tools",
+    "typescript": "catalog:tools",
     "vitest": "^4.0.12"
   },
   "dependencies": {
@@ -46,6 +46,5 @@
     "chokidar": "4.0.1",
     "es-toolkit": "^1.39.8"
   },
-  "sideEffects": false,
-  "stableVersion": "1.0.0-next.97"
+  "sideEffects": false
 }

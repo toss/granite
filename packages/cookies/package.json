@@ -63,8 +63,7 @@
   "devDependencies": {
     "brick-module": "catalog:brick-module",
     "react-native": "catalog:react-native",
-    "tsdown": "^0.14.2",
-    "typescript": "^5.9.2"
-  },
-  "stableVersion": "1.0.0-next.97"
+    "tsdown": "catalog:tools",
+    "typescript": "catalog:tools"
+  }
 }
