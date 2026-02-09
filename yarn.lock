@@ -5667,11 +5667,13 @@ __metadata:
   resolution: "@granite-js/cookies@workspace:packages/cookies"
   dependencies:
     brick-module: "catalog:brick-module"
+    react: "catalog:react-native"
     react-native: "catalog:react-native"
     tsdown: "catalog:tools"
     typescript: "catalog:tools"
   peerDependencies:
     brick-module: "*"
+    react: "*"
     react-native: "*"
   languageName: unknown
   linkType: soft
