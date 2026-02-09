@@ -4,7 +4,7 @@ This project makes use of third-party libraries that are licensed under their re
 
 ================================================================================
 Project Name: babel-preset-granite
-Copyright 2025 Viva Republica, Inc
+Copyright 2026 Viva Republica, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,82 +27,59 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-2. **@babel/plugin-proposal-class-properties**
+2. **@babel/plugin-transform-export-namespace-from**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-3. **@babel/plugin-proposal-nullish-coalescing-operator**
+3. **@react-native/babel-preset**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/babel/babel.git
+   - Repository: git+ssh://git@github.com/facebook/react-native.git
 	
-4. **@babel/plugin-proposal-numeric-separator**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/babel/babel.git
-	
-5. **@babel/plugin-proposal-optional-chaining**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/babel/babel.git
-	
-6. **@babel/plugin-proposal-private-methods**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/babel/babel.git
-	
-7. **@babel/plugin-proposal-private-property-in-object**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/babel/babel.git
-	
-8. **@babel/plugin-transform-flow-strip-types**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/babel/babel.git
-	
-9. **@babel/preset-env**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/babel/babel.git
-	
-10. **@babel/preset-react**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/babel/babel.git
-	
-11. **@babel/preset-typescript**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/babel/babel.git
-	
-12. **@types/node**
+4. **@types/babel__core**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-13. **tsdown**
+5. **@types/node**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
+	
+6. **@vitest/coverage-v8**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/vitest-dev/vitest.git
+	
+7. **tsdown**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/rolldown/tsdown.git
 	
-14. **babel-preset-granite**
+8. **vitest**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/vitest-dev/vitest.git
+	
+9. **babel-preset-granite**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: git+https://github.com/toss/granite.git
+	
+10. **typescript**
+	
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: https://github.com/microsoft/TypeScript.git
 	
 
 ================================================================================

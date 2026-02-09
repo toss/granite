@@ -1,1 +1,0 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../front_end/panels/react_native_devtools_standalone"},"files":["../../../../../../front_end/panels/react_native_devtools_standalone/react_native_devtools_standalone-meta.ts"],"references":[{"path":"./bundle-tsconfig.json"}]}

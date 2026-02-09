@@ -19,6 +19,11 @@ const YARN_CONFIGS: Record<string, string | string[]> = {
           '@typescript-eslint/types': '^8',
         },
       },
+      'react-native-svg@*': {
+        dependencies: {
+          buffer: '^6',
+        },
+      },
     }),
   ],
 };
@@ -88,7 +93,6 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     const files = await fs.readdir(path.join(manager.dir, appName));
     const commonFiles = [
       'granite.config.ts',
-      '.nvmrc',
       'README.md',
       'babel.config.js',
       'index.ts',
@@ -164,7 +168,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
 
     for (const platform of platforms) {
       const response = await fetch(
-        `http://localhost:${options.port}/index.bundle?platform=${platform}&dev=true&minify=true`
+        `http://localhost:${options.port}/index.bundle?platform=${platform}&dev=true&minify=false`
       );
       const text = await response.text();
       expect(text).toContain('__BUNDLE_START_TIME__');

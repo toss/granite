@@ -30,6 +30,5 @@ async function fetchBundle(remote: RemoteConfig, platform: 'android' | 'ios') {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var remoteBundles: Record<'android' | 'ios', string> | null;
 }

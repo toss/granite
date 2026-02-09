@@ -4,7 +4,7 @@ This project makes use of third-party libraries that are licensed under their re
 
 ================================================================================
 Project Name: @granite-js/mpack
-Copyright 2025 Viva Republica, Inc
+Copyright 2026 Viva Republica, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -63,65 +63,65 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-8. **@babel/plugin-transform-flow-strip-types**
+8. **@babel/plugin-syntax-typescript**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-9. **@babel/preset-env**
+9. **@babel/plugin-transform-flow-strip-types**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-10. **@babel/preset-react**
+10. **@babel/preset-env**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-11. **@babel/preset-typescript**
+11. **@babel/preset-react**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-12. **@babel/runtime**
+12. **@babel/preset-typescript**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-13. **@babel/template**
+13. **@babel/runtime**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-14. **@babel/traverse**
+14. **@babel/template**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-15. **@babel/types**
+15. **@babel/traverse**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-16. **@fastify/static**
+16. **@babel/types**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/fastify/fastify-static.git
+   - Repository: https://github.com/babel/babel.git
 	
-17. **@inquirer/prompts**
+17. **@fastify/middie**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/SBoudrias/Inquirer.js.git
+   - Repository: git+https://github.com/fastify/middie.git
 	
 18. **@react-native-community/cli-plugin-metro**
 	
@@ -141,593 +141,593 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/react-native-community/cli.git
 	
-21. **@react-native/dev-middleware**
+21. **@react-native/babel-plugin-codegen**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/facebook/react-native.git
+   - Repository: git+https://github.com/facebook/react-native.git
 	
-22. **@shopify/semaphore**
+22. **@react-native/babel-preset**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+ssh://git@github.com/facebook/react-native.git
+	
+23. **@react-native/dev-middleware**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/facebook/react-native.git
+	
+24. **@shopify/semaphore**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/Shopify/quilt.git
 	
-23. **@types/accepts**
+25. **@types/accepts**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-24. **@types/async**
+26. **@types/async**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-25. **@types/babel__code-frame**
+27. **@types/babel__code-frame**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-26. **@types/babel__core**
+28. **@types/babel__core**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-27. **@types/babel__generator**
+29. **@types/babel__generator**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-28. **@types/babel__template**
+30. **@types/babel__template**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-29. **@types/babel__traverse**
+31. **@types/babel__traverse**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-30. **@types/connect**
+32. **@types/connect**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-31. **@types/debug**
+33. **@types/debug**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-32. **@types/denodeify**
+34. **@types/denodeify**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-33. **@types/eslint**
+35. **@types/eslint**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-34. **@types/events**
+36. **@types/events**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-35. **@types/graceful-fs**
+37. **@types/graceful-fs**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-36. **@types/invariant**
+38. **@types/invariant**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-37. **@types/lodash.throttle**
+39. **@types/lodash.throttle**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-38. **@types/mime-types**
+40. **@types/mime-types**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-39. **@types/node**
+41. **@types/node**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-40. **@types/path-browserify**
+42. **@types/path-browserify**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-41. **@types/pnpapi**
+43. **@types/pnpapi**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-42. **@types/prompts**
+44. **@types/prompts**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-43. **@types/serve-static**
+45. **@types/temp**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-44. **@types/temp**
+46. **@types/ws**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-45. **@types/ws**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
-	
-46. **@vitest/coverage-v8**
+47. **@vitest/coverage-v8**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/vitest-dev/vitest.git
 	
-47. **absolute-path**
+48. **absolute-path**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/filearts/node-absolute-path
 	
-48. **accepts**
+49. **accepts**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/jshttp/accepts.git
 	
-49. **assert**
+50. **assert**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/browserify/commonjs-assert.git
 	
-50. **async**
+51. **async**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/caolan/async.git
 	
-51. **babel-preset-fbjs**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/facebook/fbjs.git
-	
-52. **browserify-zlib**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/devongovett/browserify-zlib.git
-	
-53. **buffer**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git://github.com/feross/buffer.git
-	
-54. **chalk**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/chalk/chalk.git
-	
-55. **ci-info**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/watson/ci-info.git
-	
-56. **connect**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/senchalabs/connect.git
-	
-57. **cosmiconfig**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/davidtheclark/cosmiconfig.git
-	
-58. **debug**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git://github.com/debug-js/debug.git
-	
-59. **denodeify**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/matthew-andrews/denodeify.git
-	
-60. **enhanced-resolve**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git://github.com/webpack/enhanced-resolve.git
-	
-61. **error-stack-parser**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git://github.com/stacktracejs/error-stack-parser.git
-	
-62. **es-toolkit**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/toss/es-toolkit.git
-	
-63. **esbuild**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/evanw/esbuild.git
-	
-64. **eslint**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/eslint/eslint.git
-	
-65. **events**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git://github.com/Gozala/events.git
-	
-66. **execa**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/sindresorhus/execa.git
-	
-67. **fast-glob**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/mrmlnc/fast-glob.git
-	
-68. **fastify**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/fastify/fastify.git
-	
-69. **fastify-plugin**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/fastify/fastify-plugin.git
-	
-70. **flow-remove-types**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/facebook/flow.git
-	
-71. **frogress-bar**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/leegeunhyeok/frogress-bar#readme
-	
-72. **fs-extra**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/jprichardson/node-fs-extra
-	
-73. **hermes-parser**
+52. **babel-plugin-syntax-hermes-parser**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/hermes.git
 	
-74. **https-browserify**
+53. **babel-preset-fbjs**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/facebook/fbjs.git
+	
+54. **browserify-zlib**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/devongovett/browserify-zlib.git
+	
+55. **buffer**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git://github.com/feross/buffer.git
+	
+56. **chalk**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/chalk/chalk.git
+	
+57. **ci-info**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/watson/ci-info.git
+	
+58. **connect**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/senchalabs/connect.git
+	
+59. **cosmiconfig**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/davidtheclark/cosmiconfig.git
+	
+60. **debug**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git://github.com/debug-js/debug.git
+	
+61. **denodeify**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/matthew-andrews/denodeify.git
+	
+62. **enhanced-resolve**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git://github.com/webpack/enhanced-resolve.git
+	
+63. **error-stack-parser**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git://github.com/stacktracejs/error-stack-parser.git
+	
+64. **es-toolkit**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/toss/es-toolkit.git
+	
+65. **esbuild**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/evanw/esbuild.git
+	
+66. **eslint**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/eslint/eslint.git
+	
+67. **events**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git://github.com/Gozala/events.git
+	
+68. **execa**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/sindresorhus/execa.git
+	
+69. **fast-glob**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/mrmlnc/fast-glob.git
+	
+70. **fastify**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/fastify/fastify.git
+	
+71. **fastify-plugin**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/fastify/fastify-plugin.git
+	
+72. **flow-remove-types**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/facebook/flow.git
+	
+73. **frogress-bar**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/leegeunhyeok/frogress-bar#readme
+	
+74. **fs-extra**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/jprichardson/node-fs-extra
+	
+75. **hermes-parser**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git@github.com:facebook/hermes.git
+	
+76. **https-browserify**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git://github.com/substack/https-browserify.git
 	
-75. **image-size**
+77. **image-size**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/image-size/image-size.git
 	
-76. **invariant**
+78. **invariant**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/zertosh/invariant
 	
-77. **jest-validate**
+79. **jest-validate**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/facebook/jest.git
 	
-78. **jest-worker**
+80. **jest-worker**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/facebook/jest.git
 	
-79. **lodash.throttle**
+81. **lodash.throttle**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/lodash/lodash.git
 	
-80. **metro-babel-transformer**
+82. **metro-babel-transformer**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-81. **metro-cache**
+83. **metro-cache**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-82. **metro-cache-key**
+84. **metro-cache-key**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-83. **metro-file-map**
+85. **metro-file-map**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-84. **metro-hermes-compiler**
+86. **metro-hermes-compiler**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-85. **metro-inspector-proxy**
+87. **metro-inspector-proxy**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-86. **metro-minify-uglify**
+88. **metro-minify-uglify**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-87. **metro-react-native-babel-preset**
+89. **metro-react-native-babel-preset**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-88. **metro-react-native-babel-transformer**
+90. **metro-react-native-babel-transformer**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-89. **metro-resolver**
+91. **metro-resolver**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-90. **metro-runtime**
+92. **metro-runtime**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-91. **metro-source-map**
+93. **metro-source-map**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-92. **metro-symbolicate**
+94. **metro-symbolicate**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-93. **metro-transform-plugins**
+95. **metro-transform-plugins**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:facebook/metro.git
 	
-94. **mime-types**
+96. **mime-types**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/jshttp/mime-types.git
 	
-95. **node-fetch**
+97. **node-fetch**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/bitinn/node-fetch.git
 	
-96. **nullthrows**
+98. **nullthrows**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/zertosh/nullthrows
 	
-97. **path-browserify**
+99. **oxc-transform**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/oxc-project/oxc.git
+	
+100. **path-browserify**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git://github.com/browserify/path-browserify.git
 	
-98. **prettier-2**
+101. **prettier-2**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/prettier/prettier.git
 	
-99. **react-native-devtools-standalone**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git@github.com:leegeunhyeok/react-native-devtools-standalone.git
-	
-100. **serialize-error**
+102. **serialize-error**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/sindresorhus/serialize-error.git
 	
-101. **serve-static**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/expressjs/serve-static.git
-	
-102. **stream-browserify**
+103. **stream-browserify**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git://github.com/browserify/stream-browserify.git
 	
-103. **stream-http**
+104. **stream-http**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git://github.com/jhiesey/stream-http.git
 	
-104. **strip-ansi**
+105. **strip-ansi**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/chalk/strip-ansi.git
 	
-105. **sucrase**
+106. **sucrase**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/alangpierce/sucrase.git
 	
-106. **temp**
+107. **temp**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git://github.com/bruce/node-temp.git
 	
-107. **throat**
+108. **throat**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/ForbesLindesay/throat.git
 	
-108. **ts-prune**
+109. **ts-prune**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git@github.com:nadeesha/ts-prune.git
 	
-109. **tsup**
+110. **tsup**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/egoist/tsup.git
 	
-110. **url**
+111. **url**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/defunctzombie/node-url.git
 	
-111. **util**
+112. **util**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git://github.com/browserify/node-util
 	
-112. **vitest**
+113. **vitest**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/vitest-dev/vitest.git
 	
-113. **ws**
+114. **ws**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/websockets/ws.git
 	
-114. **yargs**
+115. **yargs**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/yargs/yargs.git
 	
-115. **zod**
+116. **zod**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/colinhacks/zod.git
 	
-116. **@swc/core**
+117. **@swc/core**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0
    - Repository: git+https://github.com/swc-project/swc.git
 	
-117. **@swc/helpers**
+118. **@swc/helpers**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0
    - Repository: git+https://github.com/swc-project/swc.git
-	
-118. **chrome-launcher**
-	
-   - License: Apache-2.0
-   - License Text: https://www.apache.org/licenses/LICENSE-2.0
-   - Repository: https://github.com/GoogleChrome/chrome-launcher/
 	
 119. **typescript**
 	

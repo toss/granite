@@ -25,6 +25,7 @@ function resolveMetroConfig(pluginConfig: StaticPluginConfig): ResolvedMetroConf
 
   return {
     ...metroConfig,
+    reactNativePath: pluginConfig.reactNativePath,
     babelConfig: pluginConfig.babel,
     transformSync: pluginConfig?.transformer?.transformSync,
   };

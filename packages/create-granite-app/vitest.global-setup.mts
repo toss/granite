@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { $ } from 'execa';
 
 const TARGET_PACKAGE_NAMES = [
@@ -9,6 +10,8 @@ const TARGET_PACKAGE_NAMES = [
   'babel-preset-granite',
 ];
 
+const rootDir = path.resolve(import.meta.dirname, '..', '..');
+
 export default async () => {
   console.log('\n\n👉 Packing...');
 
@@ -16,8 +19,7 @@ export default async () => {
     await $`../../bin/tools linked-pack ${packageName}`;
   }
 
-  await $`git reset --hard`;
-  await $`git clean -fd`;
+  await $({ cwd: rootDir, shell: true })`git checkout -- packages/*/package.json`;
 
   console.log('✅ Global setup completed successfully');
 };

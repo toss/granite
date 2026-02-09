@@ -16,6 +16,7 @@ esm
 .next
 node_modules
 .env
+.envrc
 .DS_Store
 
 .idea/
@@ -48,3 +49,27 @@ report-*.html
 # rust
 target
 *.wasm
+
+# React Native example builds
+**/android/build/
+**/example/android/app/.cxx
+**/example/android/build/
+**/example/android/app/build/
+**/example/android/.gradle/
+**/example/ios/build/
+**/example/ios/Pods/
+**/example/ios/*.xcworkspace/xcuserdata/
+**/example/vendor/bundle/
+.metro-health-check*
+
+.classpath
+.cxx
+.gradle
+.idea
+.project
+.settings
+local.properties
+**/local.properties
+android.iml
+
+.xcode.env.local

@@ -4,7 +4,7 @@ This project makes use of third-party libraries that are licensed under their re
 
 ================================================================================
 Project Name: @granite-js/react-native
-Copyright 2025 Viva Republica, Inc
+Copyright 2026 Viva Republica, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,115 +39,139 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/babel/babel.git
 	
-4. **@testing-library/dom**
+4. **@granite-js/video**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/toss/granite.git
+	
+5. **@standard-schema/spec**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/standard-schema/standard-schema
+	
+6. **@testing-library/dom**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/testing-library/dom-testing-library
 	
-5. **@testing-library/react**
+7. **@testing-library/react**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/testing-library/react-testing-library
 	
-6. **@types/babel__core**
+8. **@types/babel__core**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-7. **@types/babel__preset-env**
+9. **@types/babel__preset-env**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-8. **@types/node**
+10. **@types/node**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-9. **@types/react**
+11. **@types/react**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-10. **@types/react-dom**
+12. **@types/react-dom**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-11. **@vitest/coverage-v8**
+13. **@vitest/coverage-v8**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/vitest-dev/vitest.git
 	
-12. **es-toolkit**
+14. **es-toolkit**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/toss/es-toolkit.git
 	
-13. **esbuild**
+15. **esbuild**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/evanw/esbuild.git
 	
-14. **eslint**
+16. **eslint**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/eslint/eslint.git
 	
-15. **jsdom**
+17. **jsdom**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/jsdom/jsdom.git
 	
-16. **react**
+18. **react**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/facebook/react.git
 	
-17. **react-dom**
+19. **react-dom**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/facebook/react.git
 	
-18. **react-native**
+20. **react-native**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/facebook/react-native.git
 	
-19. **react-native-url-polyfill**
+21. **react-native-url-polyfill**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/charpeni/react-native-url-polyfill.git
 	
-20. **tsup**
+22. **tsup**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/egoist/tsup.git
 	
-21. **vitest**
+23. **vitest**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/vitest-dev/vitest.git
 	
-22. **typescript**
+24. **zod**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/colinhacks/zod.git
+	
+25. **brick-module**
+	
+   - License: Apache-2.0
+   - License Text: https://www.apache.org/licenses/LICENSE-2.0
+   - Repository: https://github.com/toss/brick.git
+	
+26. **typescript**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0

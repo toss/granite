@@ -1,0 +1,160 @@
+buildscript {
+  ext.getExtOrDefault = {name ->
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['GraniteNaverMap_' + name]
+  }
+
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:8.7.2"
+    // noinspection DifferentKotlinGradleVersion
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}"
+  }
+}
+
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+apply plugin: "com.facebook.react"
+
+def getExtOrIntegerDefault(name) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["GraniteNaverMap_" + name]).toInteger()
+}
+
+// ============================================================
+// GraniteNaverMap Default Provider Configuration
+// ============================================================
+// Priority: Environment Variable > gradle.properties > default (true)
+//
+// Environment Variables:
+//   GRANITE_NAVER_MAP_DEFAULT_PROVIDER - NaverMap specific override
+//   GRANITE_DEFAULT_PROVIDER_ALL - Global default for all Granite packages
+//
+// gradle.properties (alternative):
+//   GRANITE_NAVER_MAP_DEFAULT_PROVIDER=false
+//   GRANITE_DEFAULT_PROVIDER_ALL=false
+//
+// Examples:
+//   Include default provider (default):
+//     ./gradlew assembleDebug
+//
+//   Exclude default provider for naver-map only (env var):
+//     GRANITE_NAVER_MAP_DEFAULT_PROVIDER=false ./gradlew assembleDebug
+//
+//   Exclude default provider via gradle.properties:
+//     # In gradle.properties:
+//     GRANITE_NAVER_MAP_DEFAULT_PROVIDER=false
+//
+//   Exclude all but override naver-map to include:
+//     GRANITE_DEFAULT_PROVIDER_ALL=false GRANITE_NAVER_MAP_DEFAULT_PROVIDER=true ./gradlew assembleDebug
+// ============================================================
+def resolveDefaultProvider(String specificKey, String fallbackKey, boolean defaultValue) {
+    // Priority: Environment Variable > gradle.properties > default
+
+    // Check specific key
+    def specificEnvValue = System.getenv(specificKey)
+    if (specificEnvValue != null) {
+        return specificEnvValue == 'true'
+    }
+    def specificPropValue = project.findProperty(specificKey)
+    if (specificPropValue != null) {
+        return specificPropValue.toString() == 'true'
+    }
+
+    // Check fallback key
+    def fallbackEnvValue = System.getenv(fallbackKey)
+    if (fallbackEnvValue != null) {
+        return fallbackEnvValue == 'true'
+    }
+    def fallbackPropValue = project.findProperty(fallbackKey)
+    if (fallbackPropValue != null) {
+        return fallbackPropValue.toString() == 'true'
+    }
+
+    return defaultValue
+}
+
+def includeDefaultProvider = resolveDefaultProvider(
+    'GRANITE_NAVER_MAP_DEFAULT_PROVIDER',
+    'GRANITE_DEFAULT_PROVIDER_ALL',
+    true
+)
+
+android {
+  namespace "run.granite.navermap"
+
+  compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
+
+  defaultConfig {
+    minSdkVersion getExtOrIntegerDefault("minSdkVersion")
+    targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
+
+    // Pass build config flag for conditional compilation
+    buildConfigField "boolean", "INCLUDE_DEFAULT_PROVIDER", "${includeDefaultProvider}"
+  }
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+    }
+  }
+
+  lintOptions {
+    disable "GradleCompatible"
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  sourceSets {
+    main {
+      java.srcDirs += [
+        "generated/java",
+        "generated/jni"
+      ]
+
+      // Conditionally include the builtinProvider directory containing BuiltInGraniteNaverMapProvider
+      if (includeDefaultProvider) {
+        java.srcDirs += "src/builtinProvider/java"
+      }
+
+      // Include the appropriate ViewManager based on architecture
+      def isNewArchitectureEnabled = rootProject.findProperty("newArchEnabled")?.toBoolean() ?: false
+      if (isNewArchitectureEnabled) {
+        java.srcDirs += "src/newarch/java"
+      } else {
+        java.srcDirs += "src/oldarch/java"
+      }
+    }
+  }
+}
+
+repositories {
+  mavenCentral()
+  google()
+  maven {
+    url 'https://repository.map.naver.com/archive/maven'
+  }
+}
+
+def kotlin_version = getExtOrDefault("kotlinVersion")
+
+dependencies {
+  implementation "com.facebook.react:react-android"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+  // Naver Maps SDK (only included when default provider is enabled)
+  if (includeDefaultProvider) {
+    implementation "com.naver.maps:map-sdk:3.21.0"
+  }
+}

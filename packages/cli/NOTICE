@@ -4,7 +4,7 @@ This project makes use of third-party libraries that are licensed under their re
 
 ================================================================================
 Project Name: @granite-js/cli
-Copyright 2025 Viva Republica, Inc
+Copyright 2026 Viva Republica, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -87,109 +87,103 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-12. **chalk**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/chalk/chalk.git
-	
-13. **clipanion**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/arcanis/clipanion
-	
-14. **connect**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/senchalabs/connect.git
-	
-15. **cosmiconfig**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/cosmiconfig/cosmiconfig.git
-	
-16. **cosmiconfig-typescript-loader**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/Codex-/cosmiconfig-typescript-loader.git
-	
-17. **debug**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git://github.com/debug-js/debug.git
-	
-18. **enquirer**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/enquirer/enquirer.git
-	
-19. **es-toolkit**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/toss/es-toolkit.git
-	
-20. **esbuild**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/evanw/esbuild.git
-	
-21. **eslint**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/eslint/eslint.git
-	
-22. **execa**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/sindresorhus/execa.git
-	
-23. **ora**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/sindresorhus/ora.git
-	
-24. **ts-prune**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git@github.com:nadeesha/ts-prune.git
-	
-25. **tsup**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/egoist/tsup.git
-	
-26. **typanion**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/arcanis/typanion
-	
-27. **vitest**
+12. **@vitest/coverage-v8**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/vitest-dev/vitest.git
 	
-28. **zod**
+13. **chalk**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/chalk/chalk.git
+	
+14. **clipanion**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/arcanis/clipanion
+	
+15. **connect**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/senchalabs/connect.git
+	
+16. **debug**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git://github.com/debug-js/debug.git
+	
+17. **enquirer**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/enquirer/enquirer.git
+	
+18. **es-toolkit**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/toss/es-toolkit.git
+	
+19. **esbuild**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/evanw/esbuild.git
+	
+20. **eslint**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/eslint/eslint.git
+	
+21. **execa**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/sindresorhus/execa.git
+	
+22. **ora**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/sindresorhus/ora.git
+	
+23. **ts-prune**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git@github.com:nadeesha/ts-prune.git
+	
+24. **tsup**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/egoist/tsup.git
+	
+25. **typanion**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/arcanis/typanion
+	
+26. **vitest**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/vitest-dev/vitest.git
+	
+27. **zod**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/colinhacks/zod.git
 	
-29. **typescript**
+28. **typescript**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0

@@ -1,53 +1,92 @@
 {
   "name": "@granite-js/image",
   "version": "0.1.34",
+  "description": "A pluggable React Native image component that lets you use your existing native image loading infrastructure",
+  "type": "module",
+  "main": "./dist/module/index.js",
+  "types": "./dist/typescript/index.d.ts",
+  "react-native": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/typescript/index.d.ts",
+      "react-native": "./src/index.ts",
+      "default": "./dist/module/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "dist",
+    "android",
+    "ios",
+    "*.podspec",
+    "react-native.config.js"
+  ],
   "scripts": {
     "prepack": "yarn build",
+    "example": "yarn workspace @granite-js/image-example",
+    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "build": "tsdown"
+    "build": "bob build && tsc --project tsconfig.build.json"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "keywords": [
+    "react-native",
+    "image",
+    "fast-image",
+    "ios",
+    "android",
+    "brownfield",
+    "kingfisher",
+    "glide",
+    "coil",
+    "sdwebimage"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/toss/granite.git",
     "directory": "packages/image"
   },
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
-    "./package.json": "./package.json"
-  },
-  "files": [
-    "dist"
-  ],
+  "author": "Toss <platform@toss.im>",
+  "homepage": "https://github.com/toss/granite/tree/main/packages/image#readme",
+  "license": "MIT",
   "devDependencies": {
-    "@granite-js/native": "workspace:*",
-    "@types/react": "18.3.3",
+    "@types/react": "catalog:react-native",
+    "del-cli": "^6.0.0",
     "eslint": "^9.7.0",
-    "react": "18.2.0",
-    "react-native": "0.72.6",
-    "tsdown": "^0.16.5",
-    "typescript": "5.8.3"
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
+    "react-native-builder-bob": "catalog:tools",
+    "typescript": "catalog:tools"
   },
   "peerDependencies": {
-    "@granite-js/native": "*",
-    "@types/react": "*",
     "react": "*",
     "react-native": "*"
   },
-  "dependencies": {
-    "react-simplikit": "^0.0.40"
+  "codegenConfig": {
+    "name": "GraniteImageSpec",
+    "type": "components",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.facebook.react.viewmanagers"
+    },
+    "ios": {
+      "componentProvider": {
+        "GraniteImage": "GraniteImageComponentView"
+      }
+    }
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "dist",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ]
+    ]
+  }
 }

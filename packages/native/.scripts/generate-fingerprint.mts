@@ -19,57 +19,62 @@ export default '$FINGERPRINT';
 const resolvedPackages: Record<string, string> = {};
 const nativePackages = JSON.parse(await fs.readFile(path.join(ROOT, 'native-packages.json'), 'utf-8')) as string[];
 
-await esbuild.build({
-  bundle: true,
-  treeShaking: false,
-  logLevel: 'silent',
-  format: 'esm',
-  stdin: {
-    contents: `${nativePackages.map((pkg) => `import '${pkg}';`).join('\n')}`,
-  },
-  plugins: [
-    {
-      name: 'resolve-strict-package-version',
-      setup(build) {
-        const RESOLVING = Symbol();
-
-        build.onResolve({ filter: /.*/ }, async (args) => {
-          if (args.pluginData === RESOLVING) {
-            return;
-          }
-
-          const resolveOptions = {
-            importer: args.importer,
-            kind: args.kind,
-            resolveDir: ROOT,
-            pluginData: RESOLVING,
-          };
-
-          // 1. Try to resolve '{packageName}/package.json'
-          let result = await build.resolve(path.join(args.path, 'package.json'), resolveOptions);
-
-          // 2. If not found, try to resolve '{packageName}'
-          if (result.errors.length) {
-            result = await build.resolve(args.path, resolveOptions);
-          }
-
-          if (result.errors.length) {
-            return result;
-          }
-
-          const packageName = args.path;
-          const packagePath = extractPackagePath(result.path, packageName);
-
-          if (packagePath) {
-            resolvedPackages[packageName] = await getPackageVersion(packagePath);
-          }
-
-          return result;
-        });
-      },
+try {
+  await esbuild.build({
+    bundle: true,
+    treeShaking: false,
+    logLevel: 'silent',
+    format: 'esm',
+    stdin: {
+      contents: `${nativePackages.map((pkg) => `import '${pkg}';`).join('\n')}`,
     },
-  ],
-});
+    plugins: [
+      {
+        name: 'resolve-strict-package-version',
+        setup(build) {
+          const RESOLVING = Symbol();
+
+          build.onResolve({ filter: /.*/ }, async (args) => {
+            if (args.pluginData === RESOLVING) {
+              return;
+            }
+
+            const resolveOptions = {
+              importer: args.importer,
+              kind: args.kind,
+              resolveDir: ROOT,
+              pluginData: RESOLVING,
+            };
+
+            // 1. Try to resolve '{packageName}/package.json'
+            let result = await build.resolve(path.join(args.path, 'package.json'), resolveOptions);
+
+            // 2. If not found, try to resolve '{packageName}'
+            if (result.errors.length) {
+              result = await build.resolve(args.path, resolveOptions);
+            }
+
+            if (result.errors.length) {
+              return result;
+            }
+
+            const packageName = args.path;
+            const packagePath = extractPackagePath(result.path, packageName);
+
+            if (packagePath) {
+              resolvedPackages[packageName] = await getPackageVersion(packagePath);
+            }
+
+            return result;
+          });
+        },
+      },
+    ],
+  });
+} catch (error) {
+  console.error('Failed to resolve package versions:', error);
+  process.exit(1);
+}
 
 function extractPackagePath(path: string, packageName: string) {
   const normalizedPath = path.replace(/\\/g, '/');

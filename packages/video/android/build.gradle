@@ -1,0 +1,117 @@
+buildscript {
+  ext.getExtOrDefault = {name ->
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['GraniteVideo_' + name]
+  }
+
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:8.7.2"
+    // noinspection DifferentKotlinGradleVersion
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}"
+  }
+}
+
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+apply plugin: "com.facebook.react"
+
+def getExtOrIntegerDefault(name) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["GraniteVideo_" + name]).toInteger()
+}
+
+// Check useMedia3 flag from environment variable or gradle.properties (default: true)
+// Priority: Environment variable > root gradle.properties > module gradle.properties > default (true)
+def useMedia3Flag = System.getenv('GRANITE_VIDEO_USE_MEDIA3') ?: rootProject.findProperty('graniteVideo.useMedia3')?.toString() ?: project.findProperty('graniteVideo.useMedia3')?.toString()
+def useMedia3 = useMedia3Flag != 'false'
+
+android {
+  namespace "run.granite.video"
+
+  compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
+
+  defaultConfig {
+    minSdkVersion getExtOrIntegerDefault("minSdkVersion")
+    targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
+
+    // Pass flag to BuildConfig for conditional registration
+    buildConfigField "boolean", "USE_MEDIA3", useMedia3.toString()
+  }
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+    }
+  }
+
+  lintOptions {
+    disable "GradleCompatible"
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  sourceSets {
+    main {
+      java {
+        srcDirs += ["generated/java", "generated/jni"]
+        // Conditionally include Media3 sources
+        if (useMedia3) {
+          srcDirs += ["src/media3/java"]
+        }
+      }
+      // Use different manifest based on Media3 flag
+      // - media3 manifest includes ContentProvider for auto-initialization
+      // - main manifest is empty (for custom provider use case)
+      if (useMedia3) {
+        manifest.srcFile "src/media3/AndroidManifest.xml"
+      }
+    }
+  }
+}
+
+repositories {
+  mavenCentral()
+  google()
+}
+
+def kotlin_version = getExtOrDefault("kotlinVersion")
+
+dependencies {
+  implementation "com.facebook.react:react-android"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+  // Media3 ExoPlayer dependencies (conditional)
+  if (useMedia3) {
+    implementation "androidx.media3:media3-exoplayer:1.2.1"
+    implementation "androidx.media3:media3-exoplayer-dash:1.2.1"
+    implementation "androidx.media3:media3-exoplayer-hls:1.2.1"
+    implementation "androidx.media3:media3-exoplayer-smoothstreaming:1.2.1"
+    implementation "androidx.media3:media3-datasource:1.2.1"
+    implementation "androidx.media3:media3-ui:1.2.1"
+  }
+
+  // Test dependencies
+  testImplementation "io.kotest:kotest-runner-junit5:5.9.1"
+  testImplementation "io.kotest:kotest-assertions-core:5.9.1"
+  testImplementation "io.kotest:kotest-property:5.9.1"
+  testImplementation "io.mockk:mockk:1.13.9"
+  testImplementation "org.robolectric:robolectric:4.11.1"
+  testImplementation "junit:junit:4.13.2"
+}
+
+tasks.withType(Test).configureEach {
+  useJUnitPlatform()
+}
+

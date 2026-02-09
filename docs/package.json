@@ -3,8 +3,8 @@
   "private": true,
   "devDependencies": {
     "@algolia/client-search": "^4.24.0",
-    "@types/node": "^22.10.2",
-    "typescript": "5.8.3",
+    "@types/node": "catalog:tools",
+    "typescript": "catalog:tools",
     "vitepress": "^1.4.1",
     "vue": "^3.4.31"
   },

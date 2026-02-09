@@ -15,27 +15,48 @@ export class AsyncTransformPipeline extends TransformPipeline<AsyncTransformStep
 
     let result = await before(code, args, context);
 
-    for await (const [step, config] of this.steps) {
-      // 이전 step 결과가 done 인 경우 이후 step 들은 skip
+    // Process all steps with if-then-else logic
+    for await (const entry of this.steps) {
+      // Check if pipeline should stop
       if (result.done) {
         break;
       }
 
-      if (
-        config?.conditions == null ||
-        (Array.isArray(config?.conditions) && config.conditions.some((condition) => condition(result.code, args.path)))
-      ) {
+      if (entry.type === 'normal' && entry.step) {
+        // Normal function step
         let trace: Perf | undefined;
-        if (typeof step.name === 'string') {
-          trace = Performance.trace(`step-${step.name}`, { detail: { file: args.path } });
+        if (typeof entry.step.name === 'string') {
+          trace = Performance.trace(`step-${entry.step.name}`, { detail: { file: args.path } });
         }
-        // 조건이 아무것도 존재하지 않거나 (기본값: 항상 실행), 조건이 충족된 경우에만 다음 step 실행
-        result = await step(result.code, args, context);
+        result = await entry.step(result.code, args, context);
         trace?.stop();
+      } else if (entry.type === 'conditional' && entry.condition) {
+        // Conditional step with if-then-else logic
+        const condition = entry.condition;
 
-        if (config?.skipOtherSteps) {
-          break;
+        if (condition.if({ path: args.path, code: result.code })) {
+          // Execute 'then' branch
+          let trace: Perf | undefined;
+          if (typeof condition.then.name === 'string') {
+            trace = Performance.trace(`step-${condition.then.name}`, { detail: { file: args.path } });
+          }
+          result = await condition.then(result.code, args, context);
+          trace?.stop();
+
+          // Check stopAfter flag
+          if (condition.stopAfter) {
+            break;
+          }
+        } else if (condition.else) {
+          // Execute 'else' branch if present
+          let trace: Perf | undefined;
+          if (typeof condition.else.name === 'string') {
+            trace = Performance.trace(`step-${condition.else.name}`, { detail: { file: args.path } });
+          }
+          result = await condition.else(result.code, args, context);
+          trace?.stop();
         }
+        // If no else branch, continue to next step
       }
     }
 

@@ -4,7 +4,7 @@ This project makes use of third-party libraries that are licensed under their re
 
 ================================================================================
 Project Name: @granite-js/plugin-micro-frontend
-Copyright 2025 Viva Republica, Inc
+Copyright 2026 Viva Republica, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,25 +21,37 @@ limitations under the License.
 ================================================================================
 Third-Party Libraries:
 
-1. **es-toolkit**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/toss/es-toolkit.git
-	
-2. **tsdown**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/rolldown/tsdown.git
-	
-3. **vitest**
+1. **@vitest/coverage-v8**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/vitest-dev/vitest.git
 	
-4. **typescript**
+2. **es-toolkit**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: https://github.com/toss/es-toolkit.git
+	
+3. **tsdown**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/rolldown/tsdown.git
+	
+4. **vitest**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/vitest-dev/vitest.git
+	
+5. **picocolors**
+	
+   - License: ISC
+   - License Text: https://opensource.org/licenses/ISC
+   - Repository: git+https://github.com/alexeyraspopov/picocolors.git
+	
+6. **typescript**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0

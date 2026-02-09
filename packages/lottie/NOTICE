@@ -4,7 +4,7 @@ This project makes use of third-party libraries that are licensed under their re
 
 ================================================================================
 Project Name: @granite-js/lottie
-Copyright 2025 Viva Republica, Inc
+Copyright 2026 Viva Republica, Inc
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,37 +21,55 @@ limitations under the License.
 ================================================================================
 Third-Party Libraries:
 
-1. **@types/react**
+1. **@granite-js/lottie**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/anthropics/granite.git
+	
+2. **@react-native/babel-preset**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+ssh://git@github.com/facebook/react-native.git
+	
+3. **@types/react**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/DefinitelyTyped/DefinitelyTyped.git
 	
-2. **eslint**
+4. **del-cli**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/sindresorhus/del-cli.git
+	
+5. **eslint**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/eslint/eslint.git
 	
-3. **react**
+6. **react**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/facebook/react.git
 	
-4. **react-native**
+7. **react-native**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/facebook/react-native.git
 	
-5. **tsup**
+8. **react-native-builder-bob**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: https://github.com/egoist/tsup.git
+   - Repository: https://github.com/callstack/react-native-builder-bob.git
 	
-6. **typescript**
+9. **typescript**
 	
    - License: Apache-2.0
    - License Text: https://www.apache.org/licenses/LICENSE-2.0

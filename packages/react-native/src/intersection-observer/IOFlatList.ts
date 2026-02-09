@@ -1,4 +1,4 @@
-import { RefAttributes } from 'react';
+import React, { RefAttributes } from 'react';
 import { FlatList, FlatListProps } from 'react-native';
 import withIO, { IOComponentProps } from './withIO';
 
@@ -67,6 +67,6 @@ const IOFlatList = withIO(FlatList, [
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare function IOFlatListFunction<ItemT = any>(
   props: IOFlatListProps<ItemT> & RefAttributes<IOFlatListController>
-): JSX.Element;
+): React.JSX.Element;
 
 export default IOFlatList;

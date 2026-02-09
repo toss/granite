@@ -23,10 +23,10 @@
     "build": "tsdown"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
+    "@types/node": "catalog:tools",
     "@vitest/coverage-v8": "^4.0.12",
-    "tsdown": "^0.16.5",
-    "typescript": "^5.8.3",
+    "tsdown": "catalog:tools",
+    "typescript": "catalog:tools",
     "vitest": "^4.0.12"
   },
   "dependencies": {

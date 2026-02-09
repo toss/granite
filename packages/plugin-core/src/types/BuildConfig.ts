@@ -67,6 +67,10 @@ export interface BuildConfig {
    * ```
    */
   extra?: any;
+  /**
+   * Path to `react-native` package path
+   */
+  reactNativePath?: string;
 }
 
 export interface ResolverConfig {

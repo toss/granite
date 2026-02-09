@@ -10,7 +10,7 @@ export const Route = createRoute('/showcase/status-bar', {
 });
 
 function ShowcaseStatusBar() {
-  const [colorScheme, setColorScheme] = useState<ColorSchemeName>(Appearance.getColorScheme());
+  const [colorScheme, setColorScheme] = useState<ColorSchemeName>(Appearance.getColorScheme() ?? 'light');
   const [style, setStyle] = useState<StatusBarStyle>('auto');
   const [backgroundColor, setBackgroundColor] = useState<string | undefined>(undefined);
   const [translucent, setTranslucent] = useState(true);
