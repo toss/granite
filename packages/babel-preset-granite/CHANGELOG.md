@@ -1,5 +1,11 @@
 # babel-preset-granite
 
+## 1.0.2
+
+### Patch Changes
+
+- b325495: fix(react-native-svg): buffer deps
+
 ## 1.0.1
 
 ## 1.0.0
