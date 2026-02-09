@@ -26,4 +26,4 @@
 '@granite-js/cli': major
 ---
 
-git status
+feat: introduce support react native 0.84
