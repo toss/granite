@@ -93,7 +93,6 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     const files = await fs.readdir(path.join(manager.dir, appName));
     const commonFiles = [
       'granite.config.ts',
-      '.nvmrc',
       'README.md',
       'babel.config.js',
       'index.ts',
