@@ -1,5 +1,13 @@
 # @granite-js/plugin-router
 
+## 1.0.3
+
+### Patch Changes
+
+- 7694332: chore: RN 0.84-rc.5 -> RN 0.84 bump up
+- Updated dependencies [7694332]
+  - @granite-js/plugin-core@1.0.3
+
 ## 1.0.2
 
 ### Patch Changes

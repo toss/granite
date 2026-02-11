@@ -1,5 +1,11 @@
 # @granite-js/naver-map
 
+## 1.0.3
+
+### Patch Changes
+
+- 7694332: chore: RN 0.84-rc.5 -> RN 0.84 bump up
+
 ## 1.0.2
 
 ### Patch Changes
