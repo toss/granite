@@ -1,5 +1,21 @@
 # @granite-js/react-native
 
+## 1.0.3
+
+### Patch Changes
+
+- 7694332: chore: RN 0.84-rc.5 -> RN 0.84 bump up
+- Updated dependencies [23d1a4a]
+- Updated dependencies [7694332]
+  - @granite-js/jest@1.0.3
+  - @granite-js/blur-view@1.0.3
+  - @granite-js/cli@1.0.3
+  - @granite-js/mpack@1.0.3
+  - @granite-js/native@1.0.3
+  - @granite-js/plugin-core@1.0.3
+  - @granite-js/style-utils@1.0.3
+  - @granite-js/video@1.0.3
+
 ## 1.0.2
 
 ### Patch Changes

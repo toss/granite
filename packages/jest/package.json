@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/jest",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Jest presets for Granite",
   "scripts": {
     "prepack": "yarn build",
