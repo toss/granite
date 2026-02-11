@@ -34,6 +34,10 @@ function setupBridgeModule() {
     removeListeners: jest.fn(),
   };
   ReactNative.NativeModules.GraniteCoreModule = {};
+  ReactNative.NativeModules.BrickModule = {
+    getConstants: jest.fn(() => ({})),
+    getRegisteredModules: jest.fn(() => []),
+  };
 }
 
 function setupWebView() {
