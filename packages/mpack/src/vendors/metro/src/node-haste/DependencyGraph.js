@@ -191,15 +191,28 @@ class DependencyGraph extends EventEmitter {
     // MARK: - GRANITE
     const realpath = fs.realpathSync(containerName);
     const resolvedPath = (pnpapi ? pnpapi.resolveVirtual(realpath) : realpath) ?? realpath;
-    const sha1 = this._hasteFS.getSha1(resolvedPath);
+    let sha1 = this._hasteFS.getSha1(resolvedPath);
 
+    // Fallback for pnpm symlinks: try original filename
+    if (!sha1 && resolvedPath !== filename) {
+      sha1 = this._hasteFS.getSha1(filename);
+    }
+
+    // Fallback: compute SHA-1 directly from file content
     if (!sha1) {
-      throw new ReferenceError(
-        `SHA-1 for file ${filename} (${resolvedPath}) is not computed.
-         Potential causes:
-           1) You have symlinks in your project - watchman does not follow symlinks.
-           2) Check \`blockList\` in your metro.config.js and make sure it isn't excluding the file path.`
-      );
+      try {
+        const crypto = require('crypto');
+        const content = fs.readFileSync(resolvedPath);
+        sha1 = crypto.createHash('sha1').update(content).digest('hex');
+      } catch (error) {
+        throw new ReferenceError(
+          `SHA-1 for file ${filename} (${resolvedPath}) is not computed.
+           Potential causes:
+             1) You have symlinks in your project - watchman does not follow symlinks.
+             2) Check \`blockList\` in your metro.config.js and make sure it isn't excluding the file path.
+           Error: ${error.message}`
+        );
+      }
     }
 
     return sha1;
