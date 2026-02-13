@@ -1,5 +1,14 @@
 # @granite-js/native
 
+## 1.0.4
+
+### Patch Changes
+
+- cc75aa4: fix: default header title should be empty string
+  - @granite-js/image@1.0.4
+  - @granite-js/lottie@1.0.4
+  - @granite-js/video@1.0.4
+
 ## 1.0.3
 
 ### Patch Changes
