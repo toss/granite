@@ -22,5 +22,5 @@ else
   fi
 fi
 
-yarn workspaces foreach --all --no-private exec yarn version $version --deferred
-yarn version apply --all
+yarn workspaces foreach --all --no-private exec \
+  node -e "const p=require('./package.json');p.version='${version}';require('fs').writeFileSync('package.json',JSON.stringify(p,null,2)+'\n')"
