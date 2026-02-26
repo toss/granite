@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/lottie",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Pluggable Lottie animation component for React Native",
   "type": "module",
   "main": "./dist/module/index.js",

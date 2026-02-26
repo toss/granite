@@ -1,5 +1,18 @@
 # @granite-js/react-native
 
+## 1.0.5
+
+### Patch Changes
+
+- @granite-js/native@1.0.5
+- @granite-js/blur-view@1.0.5
+- @granite-js/jest@1.0.5
+- @granite-js/style-utils@1.0.5
+- @granite-js/cli@1.0.5
+- @granite-js/mpack@1.0.5
+- @granite-js/plugin-core@1.0.5
+- @granite-js/video@1.0.5
+
 ## 1.0.4
 
 ### Patch Changes

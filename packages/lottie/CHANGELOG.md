@@ -1,5 +1,11 @@
 # @granite-js/lottie
 
+## 1.0.5
+
+### Patch Changes
+
+- 0b77824: fix(android): add resource dispose logic for LottieProvider
+
 ## 1.0.4
 
 ## 1.0.3

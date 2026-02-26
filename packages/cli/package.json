@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/cli",
   "type": "module",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "The Granite CLI",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
