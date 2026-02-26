@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/mpack",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A bundler for Granite apps",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

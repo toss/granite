@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/cookies",
   "type": "module",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Cookie manager module for Brick framework",
   "main": "dist/index.js",
   "module": "dist/index.js",

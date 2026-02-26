@@ -1,5 +1,11 @@
 # @granite-js/video
 
+## 1.0.6
+
+### Patch Changes
+
+- 93e31cb: fix(android): fix wrong event name topVideoTransferEnd -> topTransferEnd
+
 ## 1.0.5
 
 ## 1.0.4
