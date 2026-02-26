@@ -202,6 +202,10 @@ class GraniteLottieView(context: Context) : FrameLayout(context), GraniteLottieL
         containerView?.let { provider?.reset(it) }
     }
 
+    fun dispose() {
+        containerView?.let { provider?.disposeView(it) }
+    }
+
     private fun loadAnimation() {
         isLoaded = false
         val p = provider ?: return

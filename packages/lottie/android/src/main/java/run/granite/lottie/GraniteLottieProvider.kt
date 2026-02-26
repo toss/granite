@@ -190,4 +190,5 @@ interface GraniteLottieProvider {
      * Cancel any ongoing load operation
      */
     fun cancelLoad(view: View)
+    fun disposeView(view: View)
 }

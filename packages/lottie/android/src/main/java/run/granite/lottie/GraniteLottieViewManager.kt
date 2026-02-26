@@ -165,6 +165,11 @@ class GraniteLottieViewManager : SimpleViewManager<GraniteLottieView>(),
         view.reset()
     }
 
+    override fun onDropViewInstance(view: GraniteLottieView) {
+        view.dispose()
+        super.onDropViewInstance(view)
+    }
+
     companion object {
         const val NAME = "GraniteLottieView"
     }

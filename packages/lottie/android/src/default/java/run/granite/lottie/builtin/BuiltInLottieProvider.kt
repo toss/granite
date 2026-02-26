@@ -208,6 +208,13 @@ class BuiltInLottieProvider : GraniteLottieProvider {
         animationViews[view]?.cancelAnimation()
     }
 
+    override fun disposeView(view: View) {
+        animationViews[view]?.cancelAnimation()
+        animationViews[view]?.removeAllAnimatorListeners()
+        animationViews.remove(view)
+        listeners.remove(view)
+    }
+
     // Private helpers
 
     private fun setupAnimatorListener(lottieView: LottieAnimationView, view: View) {
