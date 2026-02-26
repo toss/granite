@@ -11,7 +11,7 @@ interface Asset {
   type: string;
 }
 
-const IGNORE_PATH_PATTERN = [/react-native\/Libraries\/LogBox\/UI/, /@react-navigation\/elements/];
+const IGNORE_PATH_PATTERN = [/react-native\/Libraries\/LogBox/, /@react-navigation\/elements/];
 
 const assets = new Set();
 
@@ -28,7 +28,7 @@ function registerAsset(asset: Asset) {
 
 function warnUnableToUseLocalResources(asset: Asset) {
   /**
-   * Metro에서 기본값으로 `GET /assets/<파일>` 경로로 에셋을 서빙하기에, 앞에 붙은 Prefix를 제거하여 실제 경로만 추출함.
+   * Metro serves assets at `GET /assets/<file>` by default, so strip the leading prefix to extract the actual path.
    *
    * @see https://github.com/facebook/metro/blob/v0.72.3/packages/metro/src/Assets.js#L196-L198
    * @see https://github.com/facebook/metro/blob/v0.72.3/packages/metro-config/src/defaults/index.js#L122
@@ -40,7 +40,7 @@ function warnUnableToUseLocalResources(asset: Asset) {
   if (__DEV__ && !shouldIgnore) {
     console.warn(
       [
-        '(DEV) 로컬 리소스는 지원되지 않습니다. URI 방식의 원격 리소스를 사용해주세요.',
+        '(DEV) Local resources are not supported. Please use remote resources via URI.',
         `Resource: ${localPath}/${fileName}`,
       ].join('\n')
     );
