@@ -265,7 +265,7 @@ class GraniteVideoOnTransferEndEvent(
     private val uri: String, 
     private val bytesTransferred: Long
 ) : Event<GraniteVideoOnTransferEndEvent>(surfaceId, viewId) {
-    override fun getEventName(): String = "topVideoTransferEnd"
+    override fun getEventName(): String = "topTransferEnd"
     override fun getEventData(): WritableMap = Arguments.createMap().apply {
         putString("uri", uri)
         putLong("bytesTransferred", bytesTransferred)

@@ -308,7 +308,7 @@ class GraniteVideoViewManager(
             .put("topVideoPictureInPictureStatusChanged", MapBuilder.of("registrationName", "onVideoPictureInPictureStatusChanged"))
             .put("topVideoControlsVisibilityChange", MapBuilder.of("registrationName", "onVideoControlsVisibilityChange"))
             .put("topVideoAspectRatio", MapBuilder.of("registrationName", "onVideoAspectRatio"))
-            .put("topVideoTransferEnd", MapBuilder.of("registrationName", "onVideoTransferEnd"))
+            .put("topTransferEnd", MapBuilder.of("registrationName", "onTransferEnd"))
             .build()
     }
 
