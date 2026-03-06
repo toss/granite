@@ -2,6 +2,7 @@ package run.granite.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 import run.granite.gradle.config.DependencyCoordinates
 import run.granite.gradle.utils.ReactNativeVersionReader
 import java.io.File
@@ -19,6 +20,9 @@ import java.io.File
  *     // Optional: Override Maven group (for custom Maven repositories)
  *     // reactGroup.set("com.facebook.react")
  *     // hermesGroup.set("com.facebook.hermes")
+ *
+ *     // Optional: Apply dependency substitution to additional configuration suffixes
+ *     // additionalConfigurationSuffixes.add("DexGuardConsumerRuleBuildDependencies")
  * }
  * ```
  */
@@ -52,11 +56,18 @@ abstract class GraniteRootExtension(private val project: Project) {
    */
   abstract val nodeModulesDir: Property<File>
 
+  /**
+   * Additional configuration name suffixes for dependency substitution.
+   * Default: empty set (only CompileClasspath and RuntimeClasspath are matched)
+   */
+  abstract val additionalConfigurationSuffixes: SetProperty<String>
+
   init {
     // Set default conventions
     reactGroup.convention(DependencyCoordinates.DEFAULT_REACT_GROUP)
     hermesGroup.convention(DependencyCoordinates.DEFAULT_HERMES_GROUP)
     nodeModulesDir.convention(project.file("node_modules"))
+    additionalConfigurationSuffixes.convention(emptySet())
     // reactNativeVersion and hermesVersion are intentionally left without conventions
     // They will be auto-detected if not explicitly set
   }
