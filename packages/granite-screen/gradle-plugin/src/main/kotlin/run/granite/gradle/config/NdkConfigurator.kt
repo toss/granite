@@ -105,6 +105,7 @@ class NdkConfigurator(
         "-DPROJECT_BUILD_DIR=$projectBuildDir",
         "-DPROJECT_ROOT_DIR=$projectRootDir",
         "-DANDROID_STL=c++_shared",
+        "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
       )
 
       project.logger.debug("CMake configured with React Native arguments")
