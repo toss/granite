@@ -63,6 +63,36 @@ class GraniteRootProjectPluginTest {
   }
 
   @Test
+  fun `additionalConfigurationSuffixes defaults to empty set`() {
+    // Given
+    val project = ProjectBuilder.builder().build()
+    project.pluginManager.apply(GraniteRootProjectPlugin::class.java)
+
+    // When
+    val extension = project.extensions.getByType(GraniteRootExtension::class.java)
+
+    // Then
+    assertTrue(extension.additionalConfigurationSuffixes.get().isEmpty())
+  }
+
+  @Test
+  fun `additionalConfigurationSuffixes can be configured`() {
+    // Given
+    val project = ProjectBuilder.builder().build()
+    project.pluginManager.apply(GraniteRootProjectPlugin::class.java)
+    val extension = project.extensions.getByType(GraniteRootExtension::class.java)
+
+    // When
+    extension.additionalConfigurationSuffixes.add("DexGuardConsumerRuleBuildDependencies")
+
+    // Then
+    assertEquals(
+      setOf("DexGuardConsumerRuleBuildDependencies"),
+      extension.additionalConfigurationSuffixes.get()
+    )
+  }
+
+  @Test
   fun `plugin fails when applied to non-root project`() {
     // Given
     val rootProject = ProjectBuilder.builder()
