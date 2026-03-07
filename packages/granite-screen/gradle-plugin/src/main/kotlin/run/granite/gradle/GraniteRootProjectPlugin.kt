@@ -5,6 +5,7 @@ import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.artifacts.Configuration
 import run.granite.gradle.config.DependencyConfigurator
 
@@ -98,18 +99,26 @@ class GraniteRootProjectPlugin : Plugin<Project> {
     val coordinates = extension.getCoordinates()
     val substitutions = DependencyConfigurator.getDependencySubstitutions(coordinates)
     val hermesVersion = coordinates.getEffectiveHermesVersion()
+    val additionalSuffixes = extension.additionalConfigurationSuffixes.get()
 
     project.logger.lifecycle(
       "Granite: Configuring dependency substitution " +
         "(react: ${coordinates.reactVersion}, hermes: $hermesVersion)",
     )
 
+    if (additionalSuffixes.isNotEmpty()) {
+      project.logger.lifecycle(
+        "Granite: Additional configuration suffixes registered: $additionalSuffixes"
+      )
+    }
     project.allprojects {
       val targetProject = this
 
       targetProject.configurations.all configBlock@{
         // Filter: only Classpath configurations
-        if (!name.endsWith("CompileClasspath") && !name.endsWith("RuntimeClasspath")) {
+        val matchesDefault = name.endsWith("CompileClasspath") || name.endsWith("RuntimeClasspath")
+        val matchesAdditional = additionalSuffixes.any { suffix -> name.endsWith(suffix) }
+        if (!matchesDefault && !matchesAdditional) {
           return@configBlock
         }
         // Filter: skip AGP internal metadata configurations
