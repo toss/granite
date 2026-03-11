@@ -11,6 +11,7 @@ add_library(
         SHARED
         src/main/cpp/onLoad.cpp
         src/main/cpp/BundleEvaluator.cpp
+        src/main/cpp/FileReader.cpp
 )
 
 # Configure C++ 17
