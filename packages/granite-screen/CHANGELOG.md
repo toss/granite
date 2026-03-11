@@ -1,5 +1,13 @@
 # @granite-js/screen
 
+## 1.0.7
+
+### Patch Changes
+
+- 1cc53b9: fix(android): 16KB Page Size Support
+- 5445e88: feat(android): add file-path based bundle evaluation to reduce memory usage
+- 2b253fa: feat(android): Support additionalConfigurationSuffixes in GraniteRootExtension to extend React Native dependency substitution
+
 ## 1.0.6
 
 ## 1.0.5
