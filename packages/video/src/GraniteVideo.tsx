@@ -54,29 +54,6 @@ function normalizeCmcd(cmcd: VideoSource['cmcd']) {
   };
 }
 
-// Convert ad config to native format.
-function normalizeAd(ad: NonNullable<VideoSource['ad']>) {
-  if (ad.type === 'csai') {
-    return {
-      type: ad.type,
-      adTagUrl: ad.adTagUrl,
-      adLanguage: ad.adLanguage,
-    };
-  }
-  // ssai/dai
-  return {
-    type: ad.type,
-    streamType: ad.streamType,
-    contentSourceId: 'contentSourceId' in ad ? ad.contentSourceId : undefined,
-    videoId: 'videoId' in ad ? ad.videoId : undefined,
-    assetKey: 'assetKey' in ad ? ad.assetKey : undefined,
-    format: ad.format,
-    adLanguage: ad.adLanguage,
-    adTagParameters: ad.adTagParameters, // passes as Record through ReadableMap
-    fallbackUri: ad.fallbackUri,
-  };
-}
-
 function normalizeSource(source: VideoSource | number): NativeProps['source'] | undefined {
   if (typeof source === 'number') {
     // require() - not yet supported in native
@@ -86,7 +63,6 @@ function normalizeSource(source: VideoSource | number): NativeProps['source'] | 
   return {
     ...source,
     cmcd: normalizeCmcd(source.cmcd),
-    ad: source.ad ? normalizeAd(source.ad) : undefined,
   };
 }
 
