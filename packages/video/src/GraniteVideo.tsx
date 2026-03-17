@@ -84,61 +84,9 @@ function normalizeSource(source: VideoSource | number) {
   }
 
   return {
-    uri: source.uri,
-    type: source.type,
-    startPosition: source.startPosition,
-    cropStart: source.cropStart,
-    cropEnd: source.cropEnd,
-    headers: source.headers,
-    isNetwork: source.isNetwork,
-    isAsset: source.isAsset,
-    isLocalAssetFile: source.isLocalAssetFile,
-    shouldCache: source.shouldCache,
-    mainVer: source.mainVer,
-    patchVer: source.patchVer,
-    contentStartTime: source.contentStartTime,
-    metadata: source.metadata ? {
-      title: source.metadata.title,
-      subtitle: source.metadata.subtitle,
-      description: source.metadata.description,
-      artist: source.metadata.artist,
-      imageUri: source.metadata.imageUri,
-    } : undefined,
-    drm: source.drm ? {
-      type: source.drm.type,
-      licenseServer: source.drm.licenseServer,
-      headers: source.drm.headers,
-      contentId: source.drm.contentId,
-      certificateUrl: source.drm.certificateUrl,
-      base64Certificate: source.drm.base64Certificate,
-      multiDrm: source.drm.multiDrm,
-      localSourceEncryptionKeyScheme: source.drm.localSourceEncryptionKeyScheme,
-    } : undefined,
+    ...source,
     cmcd: normalizeCmcd(source.cmcd),
-    textTracksAllowChunklessPreparation: source.textTracksAllowChunklessPreparation,
-    textTracks: source.textTracks?.map(track => ({
-      title: track.title,
-      language: track.language,
-      type: track.type,
-      uri: track.uri,
-    })),
     ad: source.ad ? normalizeAd(source.ad) : undefined,
-    minLoadRetryCount: source.minLoadRetryCount,
-    bufferConfig: source.bufferConfig ? {
-      minBufferMs: source.bufferConfig.minBufferMs,
-      maxBufferMs: source.bufferConfig.maxBufferMs,
-      bufferForPlaybackMs: source.bufferConfig.bufferForPlaybackMs,
-      bufferForPlaybackAfterRebufferMs: source.bufferConfig.bufferForPlaybackAfterRebufferMs,
-      backBufferDurationMs: source.bufferConfig.backBufferDurationMs,
-      cacheSizeMB: source.bufferConfig.cacheSizeMB,
-      live: source.bufferConfig.live ? {
-        maxPlaybackSpeed: source.bufferConfig.live.maxPlaybackSpeed,
-        minPlaybackSpeed: source.bufferConfig.live.minPlaybackSpeed,
-        maxOffsetMs: source.bufferConfig.live.maxOffsetMs,
-        minOffsetMs: source.bufferConfig.live.minOffsetMs,
-        targetOffsetMs: source.bufferConfig.live.targetOffsetMs,
-      } : undefined,
-    } : undefined,
   };
 }
 
