@@ -33,6 +33,7 @@ export interface DrmConfig {
   certificateUrl?: string;
   base64Certificate?: boolean;
   multiDrm?: boolean;
+  localSourceEncryptionKeyScheme?: string; // iOS Only: offline DRM key scheme
 }
 
 export interface TextTrack {
@@ -58,6 +59,45 @@ export interface BufferConfig {
   };
 }
 
+// CMCD (Common Media Client Data) - Android Only
+export enum CmcdMode {
+  MODE_REQUEST_HEADER = 0,
+  MODE_QUERY_PARAMETER = 1,
+}
+
+export type CmcdData = Record<string, string>;
+
+export type CmcdConfiguration = Readonly<{
+  mode?: CmcdMode;
+  request?: CmcdData;
+  session?: CmcdData;
+  object?: CmcdData;
+  status?: CmcdData;
+}>;
+
+export type Cmcd = boolean | CmcdConfiguration;
+
+// Ad configuration
+export type AdConfigCSAI = Readonly<{
+  type: 'csai';
+  adTagUrl: string;
+  adLanguage?: string;
+}>;
+
+export type AdConfigDAI = Readonly<{
+  type: 'ssai';
+  streamType: 'vod' | 'live';
+  contentSourceId?: string;
+  videoId?: string;
+  assetKey?: string;
+  format?: 'hls' | 'dash';
+  adTagParameters?: Record<string, string>;
+  fallbackUri?: string;
+  adLanguage?: string;
+}>;
+
+export type AdConfig = AdConfigCSAI | AdConfigDAI;
+
 export interface VideoSource {
   uri?: string;
   type?: string;
@@ -70,6 +110,16 @@ export interface VideoSource {
   drm?: DrmConfig;
   textTracks?: TextTrack[];
   metadata?: VideoMetadata;
+  shouldCache?: boolean;
+  isNetwork?: boolean;
+  isAsset?: boolean;
+  isLocalAssetFile?: boolean;
+  contentStartTime?: number;
+  minLoadRetryCount?: number;
+  textTracksAllowChunklessPreparation?: boolean;
+  cmcd?: Cmcd;
+  ad?: AdConfig;
+  bufferConfig?: BufferConfig;
 }
 
 export interface VideoMetadata {
@@ -376,8 +426,6 @@ export interface VideoProps {
    * Callback when video is ready for display
    */
   onReadyForDisplay?: () => void;
-  onPlaybackResume?: () => void;
-  onPlaybackStalled?: () => void;
 
   // Track Events
   onAudioTracks?: (data: OnAudioTracksData) => void;

@@ -37,7 +37,47 @@ const { GraniteVideoModule } = NativeModules;
 // For Fabric (New Architecture), the component is always available through codegenNativeComponent
 // We don't need to check UIManager.getViewManagerConfig which is Old Architecture only
 
-function normalizeSource(source: VideoSource | number): NativeProps['source'] | undefined {
+// Convert CMCD config to native format.
+function normalizeCmcd(cmcd: VideoSource['cmcd']) {
+  if (cmcd === undefined || cmcd === null) return undefined;
+  if (typeof cmcd === 'boolean') {
+    if (!cmcd) return undefined;
+    // When true, use MODE_QUERY_PARAMETER as default
+    return { mode: 1 };
+  }
+  return {
+    mode: cmcd.mode ?? 1,
+    request: cmcd.request,   // passes as Record through ReadableMap
+    session: cmcd.session,
+    object: cmcd.object,
+    status: cmcd.status,
+  };
+}
+
+// Convert ad config to native format.
+function normalizeAd(ad: NonNullable<VideoSource['ad']>) {
+  if (ad.type === 'csai') {
+    return {
+      type: ad.type,
+      adTagUrl: ad.adTagUrl,
+      adLanguage: ad.adLanguage,
+    };
+  }
+  // ssai/dai
+  return {
+    type: ad.type,
+    streamType: ad.streamType,
+    contentSourceId: 'contentSourceId' in ad ? ad.contentSourceId : undefined,
+    videoId: 'videoId' in ad ? ad.videoId : undefined,
+    assetKey: 'assetKey' in ad ? ad.assetKey : undefined,
+    format: ad.format,
+    adLanguage: ad.adLanguage,
+    adTagParameters: ad.adTagParameters, // passes as Record through ReadableMap
+    fallbackUri: ad.fallbackUri,
+  };
+}
+
+function normalizeSource(source: VideoSource | number) {
   if (typeof source === 'number') {
     // require() - not yet supported in native
     return undefined;
@@ -49,6 +89,56 @@ function normalizeSource(source: VideoSource | number): NativeProps['source'] | 
     startPosition: source.startPosition,
     cropStart: source.cropStart,
     cropEnd: source.cropEnd,
+    headers: source.headers,
+    isNetwork: source.isNetwork,
+    isAsset: source.isAsset,
+    isLocalAssetFile: source.isLocalAssetFile,
+    shouldCache: source.shouldCache,
+    mainVer: source.mainVer,
+    patchVer: source.patchVer,
+    contentStartTime: source.contentStartTime,
+    metadata: source.metadata ? {
+      title: source.metadata.title,
+      subtitle: source.metadata.subtitle,
+      description: source.metadata.description,
+      artist: source.metadata.artist,
+      imageUri: source.metadata.imageUri,
+    } : undefined,
+    drm: source.drm ? {
+      type: source.drm.type,
+      licenseServer: source.drm.licenseServer,
+      headers: source.drm.headers,
+      contentId: source.drm.contentId,
+      certificateUrl: source.drm.certificateUrl,
+      base64Certificate: source.drm.base64Certificate,
+      multiDrm: source.drm.multiDrm,
+      localSourceEncryptionKeyScheme: source.drm.localSourceEncryptionKeyScheme,
+    } : undefined,
+    cmcd: normalizeCmcd(source.cmcd),
+    textTracksAllowChunklessPreparation: source.textTracksAllowChunklessPreparation,
+    textTracks: source.textTracks?.map(track => ({
+      title: track.title,
+      language: track.language,
+      type: track.type,
+      uri: track.uri,
+    })),
+    ad: source.ad ? normalizeAd(source.ad) : undefined,
+    minLoadRetryCount: source.minLoadRetryCount,
+    bufferConfig: source.bufferConfig ? {
+      minBufferMs: source.bufferConfig.minBufferMs,
+      maxBufferMs: source.bufferConfig.maxBufferMs,
+      bufferForPlaybackMs: source.bufferConfig.bufferForPlaybackMs,
+      bufferForPlaybackAfterRebufferMs: source.bufferConfig.bufferForPlaybackAfterRebufferMs,
+      backBufferDurationMs: source.bufferConfig.backBufferDurationMs,
+      cacheSizeMB: source.bufferConfig.cacheSizeMB,
+      live: source.bufferConfig.live ? {
+        maxPlaybackSpeed: source.bufferConfig.live.maxPlaybackSpeed,
+        minPlaybackSpeed: source.bufferConfig.live.minPlaybackSpeed,
+        maxOffsetMs: source.bufferConfig.live.maxOffsetMs,
+        minOffsetMs: source.bufferConfig.live.minOffsetMs,
+        targetOffsetMs: source.bufferConfig.live.targetOffsetMs,
+      } : undefined,
+    } : undefined,
   };
 }
 
@@ -89,6 +179,8 @@ function normalizeDrm(drm?: VideoProps['drm']): NativeProps['drm'] | undefined {
   };
 }
 
+// Note: `live` is only available via source-embedded bufferConfig (NativeSourceBufferConfig),
+// not via the top-level bufferConfig prop (NativeBufferConfig).
 function normalizeBufferConfig(config?: VideoProps['bufferConfig']): NativeProps['bufferConfig'] | undefined {
   if (!config) {
     return undefined;
@@ -449,7 +541,9 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
       <NativeGraniteVideoView
         ref={nativeRef}
         style={styles.video}
-        source={normalizeSource(source)}
+        // Cast needed: normalizeSource includes fields (drm.headers, cmcd.request/session/object/status,
+        // ad.adTagParameters) that bypass Codegen typing and pass through ReadableMap directly.
+        source={normalizeSource(source) as NativeProps['source']}
         poster={getPosterUri(poster)}
         posterResizeMode={posterResizeMode}
         paused={paused}
