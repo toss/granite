@@ -43,7 +43,9 @@ function normalizeCmcd(cmcd: VideoSource['cmcd']) {
     return undefined;
   }
   if (typeof cmcd === 'boolean') {
-    if (!cmcd) return undefined;
+    if (!cmcd) {
+      return undefined;
+    }
     // When true, use MODE_QUERY_PARAMETER as default
     return { mode: 1 };
   }
