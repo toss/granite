@@ -39,7 +39,9 @@ const { GraniteVideoModule } = NativeModules;
 
 // Convert CMCD config to native format.
 function normalizeCmcd(cmcd: VideoSource['cmcd']) {
-  if (cmcd === undefined || cmcd === null) return undefined;
+  if (cmcd === undefined || cmcd === null) {
+    return undefined;
+  }
   if (typeof cmcd === 'boolean') {
     if (!cmcd) return undefined;
     // When true, use MODE_QUERY_PARAMETER as default
