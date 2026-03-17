@@ -11,12 +11,93 @@ import {
 // Native Props Interface
 // ============================================================
 
+// Native video metadata
+interface NativeVideoMetadata {
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  artist?: string;
+  imageUri?: string;
+}
+
+// Native DRM config (source-embedded DRM)
+interface NativeSourceDrmConfig {
+  type?: string;
+  licenseServer?: string;
+  contentId?: string;
+  certificateUrl?: string;
+  base64Certificate?: boolean;
+  multiDrm?: boolean;
+  localSourceEncryptionKeyScheme?: string; // iOS-Only offline DRM key scheme
+}
+
+// Native CMCD config
+interface NativeCmcdConfiguration {
+  mode?: Int32;
+}
+
+// Native text track
+interface NativeTextTrack {
+  title: string;
+  language: string;
+  type: string;
+  uri: string;
+}
+
+// Native ad config
+interface NativeAdsConfig {
+  type?: string;
+  streamType?: string;
+  adTagUrl?: string;
+  adLanguage?: string;
+  contentSourceId?: string;
+  videoId?: string;
+  assetKey?: string;
+  format?: string;
+  fallbackUri?: string;
+}
+
+// Native live buffer config
+interface NativeBufferConfigLive {
+  maxPlaybackSpeed?: Float;
+  minPlaybackSpeed?: Float;
+  maxOffsetMs?: Int32;
+  minOffsetMs?: Int32;
+  targetOffsetMs?: Int32;
+}
+
+// Native source-embedded buffer config
+interface NativeSourceBufferConfig {
+  minBufferMs?: Int32;
+  maxBufferMs?: Int32;
+  bufferForPlaybackMs?: Int32;
+  bufferForPlaybackAfterRebufferMs?: Int32;
+  backBufferDurationMs?: Int32;
+  cacheSizeMB?: Int32;
+  live?: NativeBufferConfigLive;
+}
+
 interface NativeVideoSource {
   uri?: string;
   type?: string;
   startPosition?: Double;
   cropStart?: Double;
   cropEnd?: Double;
+  isNetwork?: boolean;
+  isAsset?: boolean;
+  isLocalAssetFile?: boolean;
+  shouldCache?: boolean;
+  mainVer?: Int32;
+  patchVer?: Int32;
+  contentStartTime?: Double;
+  metadata?: NativeVideoMetadata;
+  drm?: NativeSourceDrmConfig;
+  cmcd?: NativeCmcdConfiguration;
+  textTracksAllowChunklessPreparation?: boolean;
+  textTracks?: ReadonlyArray<Readonly<NativeTextTrack>>;
+  ad?: NativeAdsConfig;
+  minLoadRetryCount?: Int32;
+  bufferConfig?: NativeSourceBufferConfig;
 }
 
 interface NativeBufferConfig {

@@ -37,6 +37,27 @@ const { GraniteVideoModule } = NativeModules;
 // For Fabric (New Architecture), the component is always available through codegenNativeComponent
 // We don't need to check UIManager.getViewManagerConfig which is Old Architecture only
 
+// Convert CMCD config to native format.
+function normalizeCmcd(cmcd: VideoSource['cmcd']) {
+  if (cmcd === undefined || cmcd === null) {
+    return undefined;
+  }
+  if (typeof cmcd === 'boolean') {
+    if (!cmcd) {
+      return undefined;
+    }
+    // When true, use MODE_QUERY_PARAMETER as default
+    return { mode: 1 };
+  }
+  return {
+    mode: cmcd.mode ?? 1,
+    request: cmcd.request,   // passes as Record through ReadableMap
+    session: cmcd.session,
+    object: cmcd.object,
+    status: cmcd.status,
+  };
+}
+
 function normalizeSource(source: VideoSource | number): NativeProps['source'] | undefined {
   if (typeof source === 'number') {
     // require() - not yet supported in native
@@ -44,11 +65,8 @@ function normalizeSource(source: VideoSource | number): NativeProps['source'] | 
   }
 
   return {
-    uri: source.uri,
-    type: source.type,
-    startPosition: source.startPosition,
-    cropStart: source.cropStart,
-    cropEnd: source.cropEnd,
+    ...source,
+    cmcd: normalizeCmcd(source.cmcd),
   };
 }
 
@@ -89,6 +107,8 @@ function normalizeDrm(drm?: VideoProps['drm']): NativeProps['drm'] | undefined {
   };
 }
 
+// Note: `live` is only available via source-embedded bufferConfig (NativeSourceBufferConfig),
+// not via the top-level bufferConfig prop (NativeBufferConfig).
 function normalizeBufferConfig(config?: VideoProps['bufferConfig']): NativeProps['bufferConfig'] | undefined {
   if (!config) {
     return undefined;
@@ -449,6 +469,8 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
       <NativeGraniteVideoView
         ref={nativeRef}
         style={styles.video}
+        // Cast needed: normalizeSource includes fields (drm.headers, cmcd.request/session/object/status,
+        // ad.adTagParameters) that bypass Codegen typing and pass through ReadableMap directly.
         source={normalizeSource(source)}
         poster={getPosterUri(poster)}
         posterResizeMode={posterResizeMode}
