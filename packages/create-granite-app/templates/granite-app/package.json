@@ -17,15 +17,16 @@
   "devDependencies": {
     "@babel/core": "7.28.5",
     "@babel/runtime": "7.28.4",
-    "@testing-library/react-native": "^12.9.0",
+    "@testing-library/react-native": "13.3.3",
     "@types/babel__core": "^7.20.5",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.2",
     "@types/react": "19.2.0",
+    "@types/react-test-renderer":"19.1.0",
     "@granite-js/plugin-router": "workspace:*",
     "@granite-js/plugin-hermes": "workspace:*",
     "babel-preset-granite": "workspace:*",
-    "react-test-renderer": "18.2.0",
+    "react-test-renderer": "19.2.3",
     "jest": "^29.7.0",
     "typescript": "^5.8.3"
   },
