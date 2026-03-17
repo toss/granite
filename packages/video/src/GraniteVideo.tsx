@@ -77,7 +77,7 @@ function normalizeAd(ad: NonNullable<VideoSource['ad']>) {
   };
 }
 
-function normalizeSource(source: VideoSource | number) {
+function normalizeSource(source: VideoSource | number): NativeProps['source'] | undefined {
   if (typeof source === 'number') {
     // require() - not yet supported in native
     return undefined;
@@ -491,7 +491,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
         style={styles.video}
         // Cast needed: normalizeSource includes fields (drm.headers, cmcd.request/session/object/status,
         // ad.adTagParameters) that bypass Codegen typing and pass through ReadableMap directly.
-        source={normalizeSource(source) as NativeProps['source']}
+        source={normalizeSource(source)}
         poster={getPosterUri(poster)}
         posterResizeMode={posterResizeMode}
         paused={paused}
