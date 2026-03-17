@@ -37,7 +37,21 @@ data class GraniteVideoSource(
     val cropStart: Double = 0.0,
     val cropEnd: Double = 0.0,
     val headers: Map<String, String>? = null,
-    val drm: GraniteVideoDrmConfig? = null
+    val drm: GraniteVideoDrmConfig? = null,
+    val isNetwork: Boolean? = null,
+    val isAsset: Boolean = false,
+    val isLocalAssetFile: Boolean = false,
+    val shouldCache: Boolean = true,
+    val mainVer: Int = 0,
+    val patchVer: Int = 0,
+    val contentStartTime: Double = -1.0,
+    val minLoadRetryCount: Int = 3,
+    val textTracksAllowChunklessPreparation: Boolean = true,
+    val metadata: GraniteVideoMetadata? = null,
+    val cmcd: GraniteVideoCmcdConfig? = null,
+    val textTracks: List<GraniteVideoTextTrack>? = null,
+    val ad: GraniteVideoAdsConfig? = null,
+    val bufferConfig: GraniteVideoBufferConfig? = null
 )
 
 data class GraniteVideoDrmConfig(
@@ -53,12 +67,57 @@ data class GraniteVideoBufferConfig(
     val bufferForPlaybackMs: Int = 2500,
     val bufferForPlaybackAfterRebufferMs: Int = 5000,
     val backBufferDurationMs: Int = 0,
-    val cacheSizeMB: Int = 0
+    val cacheSizeMB: Int = 0,
+    val live: GraniteVideoBufferConfigLive? = null
+)
+
+data class GraniteVideoBufferConfigLive(
+    val maxPlaybackSpeed: Float = -1f,
+    val minPlaybackSpeed: Float = -1f,
+    val maxOffsetMs: Int = -1,
+    val minOffsetMs: Int = -1,
+    val targetOffsetMs: Int = -1
 )
 
 data class GraniteVideoSelectedTrack(
     val type: String = "system",
     val value: String? = null
+)
+
+data class GraniteVideoMetadata(
+    val title: String? = null,
+    val subtitle: String? = null,
+    val description: String? = null,
+    val artist: String? = null,
+    val imageUri: String? = null
+)
+
+data class GraniteVideoCmcdConfig(
+    val mode: Int = 1, // 0=HEADER, 1=QUERY_PARAM (default)
+    val request: Map<String, String>? = null,
+    val session: Map<String, String>? = null,
+    val obj: Map<String, String>? = null, // 'object' is a Kotlin reserved keyword
+    val status: Map<String, String>? = null
+)
+
+data class GraniteVideoTextTrack(
+    val title: String = "",
+    val language: String = "",
+    val type: String = "",
+    val uri: String = ""
+)
+
+data class GraniteVideoAdsConfig(
+    val type: String? = null, // "csai" | "ssai"
+    val streamType: String? = null, // "vod" | "live"
+    val adTagUrl: String? = null,
+    val adLanguage: String? = null,
+    val contentSourceId: String? = null,
+    val videoId: String? = null,
+    val assetKey: String? = null,
+    val format: String? = null, // "hls" | "dash"
+    val fallbackUri: String? = null,
+    val adTagParameters: Map<String, String>? = null
 )
 
 // ============================================================
@@ -205,6 +264,9 @@ interface GraniteVideoProvider {
     fun isCodecSupported(mimeType: String, width: Int, height: Int): Boolean = false
     fun isHEVCSupported(): Boolean = false
     fun getWidevineLevel(): Int = 0
+
+    // Optional - Content Start Time (SSAI)
+    fun setContentStartTime(time: Double) {}
 
     // Lifecycle - Release resources
     fun release() {}

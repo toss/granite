@@ -230,7 +230,9 @@ class GraniteVideoViewManager(
     override fun setFullscreenOrientation(view: GraniteVideoView?, value: String?) {}
 
     @ReactProp(name = "contentStartTime")
-    override fun setContentStartTime(view: GraniteVideoView?, value: Double) {}
+    override fun setContentStartTime(view: GraniteVideoView?, value: Double) {
+        view?.setContentStartTime(value)
+    }
 
     @ReactProp(name = "allowsExternalPlayback")
     override fun setAllowsExternalPlayback(view: GraniteVideoView?, value: Boolean) {}

@@ -66,8 +66,11 @@ class GraniteVideoView @JvmOverloads constructor(
     }
 
     // Source
+    @Suppress("UNCHECKED_CAST")
     fun setSource(source: Map<String, Any>?) {
         source ?: return
+
+        val headers = source["headers"] as? Map<String, String>
 
         val videoSource = GraniteVideoSource(
             uri = source["uri"] as? String,
@@ -75,7 +78,22 @@ class GraniteVideoView @JvmOverloads constructor(
             startPosition = (source["startPosition"] as? Number)?.toDouble() ?: 0.0,
             cropStart = (source["cropStart"] as? Number)?.toDouble() ?: 0.0,
             cropEnd = (source["cropEnd"] as? Number)?.toDouble() ?: 0.0,
-            headers = @Suppress("UNCHECKED_CAST") (source["headers"] as? Map<String, String>)
+            headers = headers,
+            drm = parseDrm(source["drm"] as? Map<String, Any>),
+            isNetwork = source["isNetwork"] as? Boolean,
+            isAsset = source["isAsset"] as? Boolean ?: false,
+            isLocalAssetFile = source["isLocalAssetFile"] as? Boolean ?: false,
+            shouldCache = source["shouldCache"] as? Boolean ?: true,
+            mainVer = (source["mainVer"] as? Number)?.toInt() ?: 0,
+            patchVer = (source["patchVer"] as? Number)?.toInt() ?: 0,
+            contentStartTime = (source["contentStartTime"] as? Number)?.toDouble() ?: -1.0,
+            minLoadRetryCount = (source["minLoadRetryCount"] as? Number)?.toInt() ?: 3,
+            textTracksAllowChunklessPreparation = source["textTracksAllowChunklessPreparation"] as? Boolean ?: true,
+            metadata = parseMetadata(source["metadata"] as? Map<String, Any>),
+            cmcd = parseCmcd(source["cmcd"] as? Map<String, Any>),
+            textTracks = parseTextTracks(source["textTracks"] as? List<Map<String, Any>>),
+            ad = parseAdsConfig(source["ad"] as? Map<String, Any>),
+            bufferConfig = parseBufferConfig(source["bufferConfig"] as? Map<String, Any>)
         )
 
         provider?.loadSource(videoSource)
@@ -83,6 +101,99 @@ class GraniteVideoView @JvmOverloads constructor(
         if (!paused) {
             provider?.play()
         }
+    }
+
+    // Source parsing helper methods
+
+    private fun parseDrm(map: Map<String, Any>?): GraniteVideoDrmConfig? {
+        map ?: return null
+        val typeStr = map["type"] as? String
+        val drmType = when (typeStr) {
+            "widevine" -> GraniteVideoDrmType.WIDEVINE
+            "playready" -> GraniteVideoDrmType.PLAYREADY
+            "clearkey" -> GraniteVideoDrmType.CLEARKEY
+            else -> GraniteVideoDrmType.NONE
+        }
+        val headers = map["headers"] as? Map<String, String>
+        return GraniteVideoDrmConfig(
+            type = drmType,
+            licenseServer = map["licenseServer"] as? String,
+            headers = headers,
+            contentId = map["contentId"] as? String
+        )
+    }
+
+    private fun parseMetadata(map: Map<String, Any>?): GraniteVideoMetadata? {
+        map ?: return null
+        return GraniteVideoMetadata(
+            title = map["title"] as? String,
+            subtitle = map["subtitle"] as? String,
+            description = map["description"] as? String,
+            artist = map["artist"] as? String,
+            imageUri = map["imageUri"] as? String
+        )
+    }
+
+    private fun parseCmcd(map: Map<String, Any>?): GraniteVideoCmcdConfig? {
+        map ?: return null
+        return GraniteVideoCmcdConfig(
+            mode = (map["mode"] as? Number)?.toInt() ?: 1,
+            request = map["request"] as? Map<String, String>,
+            session = map["session"] as? Map<String, String>,
+            obj = map["object"] as? Map<String, String>,
+            status = map["status"] as? Map<String, String>
+        )
+    }
+
+    private fun parseTextTracks(list: List<Map<String, Any>>?): List<GraniteVideoTextTrack>? {
+        list ?: return null
+        return list.map { item ->
+            GraniteVideoTextTrack(
+                title = item["title"] as? String ?: "",
+                language = item["language"] as? String ?: "",
+                type = item["type"] as? String ?: "",
+                uri = item["uri"] as? String ?: ""
+            )
+        }.ifEmpty { null }
+    }
+
+    private fun parseAdsConfig(map: Map<String, Any>?): GraniteVideoAdsConfig? {
+        map ?: return null
+        return GraniteVideoAdsConfig(
+            type = map["type"] as? String,
+            streamType = map["streamType"] as? String,
+            adTagUrl = map["adTagUrl"] as? String,
+            adLanguage = map["adLanguage"] as? String,
+            contentSourceId = map["contentSourceId"] as? String,
+            videoId = map["videoId"] as? String,
+            assetKey = map["assetKey"] as? String,
+            format = map["format"] as? String,
+            fallbackUri = map["fallbackUri"] as? String,
+            adTagParameters = map["adTagParameters"] as? Map<String, String>
+        )
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun parseBufferConfig(map: Map<String, Any>?): GraniteVideoBufferConfig? {
+        map ?: return null
+        val liveMap = map["live"] as? Map<String, Any>
+        return GraniteVideoBufferConfig(
+            minBufferMs = (map["minBufferMs"] as? Number)?.toInt() ?: 15000,
+            maxBufferMs = (map["maxBufferMs"] as? Number)?.toInt() ?: 50000,
+            bufferForPlaybackMs = (map["bufferForPlaybackMs"] as? Number)?.toInt() ?: 2500,
+            bufferForPlaybackAfterRebufferMs = (map["bufferForPlaybackAfterRebufferMs"] as? Number)?.toInt() ?: 5000,
+            backBufferDurationMs = (map["backBufferDurationMs"] as? Number)?.toInt() ?: 0,
+            cacheSizeMB = (map["cacheSizeMB"] as? Number)?.toInt() ?: 0,
+            live = liveMap?.let {
+                GraniteVideoBufferConfigLive(
+                    maxPlaybackSpeed = (it["maxPlaybackSpeed"] as? Number)?.toFloat() ?: -1f,
+                    minPlaybackSpeed = (it["minPlaybackSpeed"] as? Number)?.toFloat() ?: -1f,
+                    maxOffsetMs = (it["maxOffsetMs"] as? Number)?.toInt() ?: -1,
+                    minOffsetMs = (it["minOffsetMs"] as? Number)?.toInt() ?: -1,
+                    targetOffsetMs = (it["targetOffsetMs"] as? Number)?.toInt() ?: -1
+                )
+            }
+        )
     }
 
     // Playback Control
@@ -148,16 +259,27 @@ class GraniteVideoView @JvmOverloads constructor(
     }
 
     // Buffer
+    @Suppress("UNCHECKED_CAST")
     fun setBufferConfig(config: Map<String, Any>?) {
         config ?: return
 
+        val liveMap = config["live"] as? Map<String, Any>
         val bufferConfig = GraniteVideoBufferConfig(
             minBufferMs = (config["minBufferMs"] as? Number)?.toInt() ?: 15000,
             maxBufferMs = (config["maxBufferMs"] as? Number)?.toInt() ?: 50000,
             bufferForPlaybackMs = (config["bufferForPlaybackMs"] as? Number)?.toInt() ?: 2500,
             bufferForPlaybackAfterRebufferMs = (config["bufferForPlaybackAfterRebufferMs"] as? Number)?.toInt() ?: 5000,
             backBufferDurationMs = (config["backBufferDurationMs"] as? Number)?.toInt() ?: 0,
-            cacheSizeMB = (config["cacheSizeMB"] as? Number)?.toInt() ?: 0
+            cacheSizeMB = (config["cacheSizeMB"] as? Number)?.toInt() ?: 0,
+            live = liveMap?.let {
+                GraniteVideoBufferConfigLive(
+                    maxPlaybackSpeed = (it["maxPlaybackSpeed"] as? Number)?.toFloat() ?: -1f,
+                    minPlaybackSpeed = (it["minPlaybackSpeed"] as? Number)?.toFloat() ?: -1f,
+                    maxOffsetMs = (it["maxOffsetMs"] as? Number)?.toInt() ?: -1,
+                    minOffsetMs = (it["minOffsetMs"] as? Number)?.toInt() ?: -1,
+                    targetOffsetMs = (it["targetOffsetMs"] as? Number)?.toInt() ?: -1
+                )
+            }
         )
         provider?.setBufferConfig(bufferConfig)
     }
@@ -168,6 +290,11 @@ class GraniteVideoView @JvmOverloads constructor(
 
     fun setMinLoadRetryCount(count: Int) {
         provider?.setMinLoadRetryCount(count)
+    }
+
+    // Content Start Time
+    fun setContentStartTime(time: Double) {
+        provider?.setContentStartTime(time)
     }
 
     // Track Selection
