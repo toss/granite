@@ -1,5 +1,11 @@
 # create-granite-app
 
+## 1.0.8
+
+### Patch Changes
+
+- 097e062: feat(template): upgrade testing dependencies for RN 0.84
+
 ## 1.0.7
 
 ## 1.0.6

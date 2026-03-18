@@ -1,5 +1,12 @@
 # @granite-js/video
 
+## 1.0.8
+
+### Patch Changes
+
+- 503118a: feat(js): add react-native-video v6 compat
+- e059176: feat(android): add react-native-video v6 compat
+
 ## 1.0.7
 
 ## 1.0.6
