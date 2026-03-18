@@ -7,7 +7,7 @@ while IFS= read -r line; do
   name=$(echo "$line" | jq -r '.name')
 
   echo "Publishing $name..."
-  if ! (cd "$location" && yarn npm publish --provenance --access public); then
+  if ! (cd "$location" && yarn npm publish --provenance --access public --tag next); then
     echo "Failed to publish $name, continuing..."
     failed=1
   fi
