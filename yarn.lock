@@ -5916,7 +5916,6 @@ __metadata:
     "@granite-js/video": "workspace:*"
     "@react-native-async-storage/async-storage": "catalog:react-native"
     "@react-native-community/blur": "catalog:react-native"
-    "@react-navigation/core": "catalog:react-native"
     "@react-navigation/elements": "catalog:react-native"
     "@react-navigation/native": "catalog:react-native"
     "@react-navigation/native-stack": "catalog:react-native"
@@ -8409,7 +8408,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/core@npm:7.17.0, @react-navigation/core@npm:^7.17.0":
+"@react-navigation/core@npm:^7.17.0":
   version: 7.17.0
   resolution: "@react-navigation/core@npm:7.17.0"
   dependencies:
@@ -8427,27 +8426,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/elements@npm:2.9.12":
-  version: 2.9.12
-  resolution: "@react-navigation/elements@npm:2.9.12"
-  dependencies:
-    color: "npm:^4.2.3"
-    use-latest-callback: "npm:^0.2.4"
-    use-sync-external-store: "npm:^1.5.0"
-  peerDependencies:
-    "@react-native-masked-view/masked-view": ">= 0.2.0"
-    "@react-navigation/native": ^7.2.0
-    react: ">= 18.2.0"
-    react-native: "*"
-    react-native-safe-area-context: ">= 4.0.0"
-  peerDependenciesMeta:
-    "@react-native-masked-view/masked-view":
-      optional: true
-  checksum: 10c0/78dff00d79657dd47f7be254db2c4d3c37406f18e6ff6d650be31d5cbfe0c9e9bd28605e7880e174ae6d11ecbb41b87f7a4620b5cce899e135025a621e44a8f0
-  languageName: node
-  linkType: hard
-
-"@react-navigation/elements@npm:^2.9.5":
+"@react-navigation/elements@npm:2.9.5, @react-navigation/elements@npm:^2.9.5":
   version: 2.9.5
   resolution: "@react-navigation/elements@npm:2.9.5"
   dependencies:
