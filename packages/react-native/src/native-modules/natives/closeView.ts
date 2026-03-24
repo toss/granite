@@ -1,4 +1,4 @@
-import { GraniteModule } from './GraniteBrownfieldModule.brick';
+import { GraniteModule } from '../../spec/GraniteBrownfieldModule.brick';
 
 /**
  * @public
