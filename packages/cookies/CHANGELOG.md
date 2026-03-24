@@ -1,5 +1,11 @@
 # @granite-js/cookies
 
+## 1.0.9
+
+### Patch Changes
+
+- c65bf00: fix: upgrade granite cookies compile sdk to 34
+
 ## 1.0.8
 
 ## 1.0.7
