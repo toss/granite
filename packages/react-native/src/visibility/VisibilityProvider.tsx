@@ -1,7 +1,7 @@
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { AppStateProvider } from './useIsAppForeground';
 import { VisibilityChangedProvider } from './useVisibilityChanged';
-import { GraniteModule } from '../native-modules/natives/GraniteBrownfieldModule.brick';
+import { GraniteModule } from '../spec/GraniteBrownfieldModule.brick';
 
 interface Props {
   isVisible: boolean;

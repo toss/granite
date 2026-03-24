@@ -135,5 +135,8 @@
     "dist/async-bridges.*",
     "dist/constant-bridges.*",
     "src/types/global.ts"
-  ]
+  ],
+  "brickModule": {
+    "specSrc": "./src/spec"
+  }
 }
