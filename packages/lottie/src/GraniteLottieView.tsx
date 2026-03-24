@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useRef, useCallback, useMemo } from 'react';
-import { Image, type NativeSyntheticEvent, Platform } from 'react-native';
+import { Image, type NativeSyntheticEvent, Platform, View } from 'react-native';
 import NativeGraniteLottieView, {
   Commands,
   OnAnimationFailureEvent,
@@ -20,9 +20,9 @@ function resolveSource(source: AnimationSource): {
     const resolved = Image.resolveAssetSource(source);
     if (resolved?.uri) {
       if (resolved.uri.endsWith('.lottie')) {
-        return { sourceDotLottieURI: resolved.uri };
-      }
-      return { sourceURL: resolved.uri };
+      return { sourceDotLottieURI: resolved.uri };
+    }
+    return { sourceURL: resolved.uri };
     }
     return {};
   }
@@ -55,6 +55,19 @@ function resolveSource(source: AnimationSource): {
   return {};
 }
 
+function resolveEffectiveSpeed(
+  source: AnimationSource,
+  sourceJson: string | undefined,
+  speed: number,
+  duration?: number
+): number {
+  if (duration && sourceJson && (source as AnimationObject).fr) {
+    return (((source as AnimationObject).op / (source as AnimationObject).fr) * 1000) / duration;
+  }
+
+  return speed;
+}
+
 /**
  * LottieView - Pluggable Lottie animation component for React Native
  */
@@ -62,8 +75,10 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
   const {
     source,
     style,
+    containerStyle,
     progress,
     speed = 1,
+    duration,
     loop = true,
     autoPlay = false,
     resizeMode = 'contain',
@@ -112,6 +127,10 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
 
   // Resolve source
   const resolvedSource = useMemo(() => resolveSource(source), [source]);
+  const resolvedSpeed = useMemo(
+    () => resolveEffectiveSpeed(source, resolvedSource.sourceJson, speed, duration),
+    [duration, resolvedSource.sourceJson, source, speed]
+  );
 
   // Event handlers
   const handleAnimationFinish = useCallback(
@@ -143,7 +162,7 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
     testID,
     ...resolvedSource,
     progress,
-    speed,
+    speed: resolvedSpeed,
     loop,
     autoPlay,
     resizeMode,
@@ -167,7 +186,17 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
     nativeProps.textFiltersIOS = textFiltersIOS;
   }
 
-  return <NativeGraniteLottieView ref={nativeRef} {...nativeProps} />;
+  const animationView = <NativeGraniteLottieView ref={nativeRef} {...nativeProps} />;
+
+  if (containerStyle != null) {
+    return (
+      <View style={containerStyle} collapsable={false}>
+        {animationView}
+      </View>
+    );
+  }
+
+  return animationView;
 });
 
 LottieView.displayName = 'LottieView';

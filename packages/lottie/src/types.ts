@@ -86,6 +86,12 @@ export interface LottieViewProps extends ViewProps {
   style?: StyleProp<ViewStyle>;
 
   /**
+   * Style for an optional outer container that wraps the animation view.
+   * Use this when layout or border styles should apply to the wrapper instead of the inner animation view.
+   */
+  containerStyle?: StyleProp<ViewStyle>;
+
+  /**
    * Normalized progress value (0-1)
    */
   progress?: number;
