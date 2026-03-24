@@ -1,5 +1,19 @@
 # @granite-js/react-native
 
+## 1.0.10
+
+### Patch Changes
+
+- 6b9ba49: feat: granite brownfield module for brick autolinking
+  - @granite-js/blur-view@1.0.10
+  - @granite-js/cli@1.0.10
+  - @granite-js/jest@1.0.10
+  - @granite-js/mpack@1.0.10
+  - @granite-js/native@1.0.10
+  - @granite-js/plugin-core@1.0.10
+  - @granite-js/style-utils@1.0.10
+  - @granite-js/video@1.0.10
+
 ## 1.0.9
 
 ### Patch Changes
