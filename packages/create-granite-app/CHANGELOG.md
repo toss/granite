@@ -1,5 +1,11 @@
 # create-granite-app
 
+## 1.0.10
+
+### Patch Changes
+
+- 43876b9: fix: react navigation core for test
+
 ## 1.0.9
 
 ## 1.0.8
