@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useRef, useCallback, useMemo } from 'react';
-import { Image, type NativeSyntheticEvent, Platform, View } from 'react-native';
+import { Image, type NativeSyntheticEvent, Platform } from 'react-native';
 import NativeGraniteLottieView, {
   Commands,
   OnAnimationFailureEvent,
@@ -62,7 +62,7 @@ function resolveEffectiveSpeed(
   duration?: number
 ): number {
   if (duration && sourceJson && (source as AnimationObject).fr) {
-    return (((source as AnimationObject).op / (source as AnimationObject).fr) * 1000) / duration;
+    return Math.round((((source as AnimationObject).op / (source as AnimationObject).fr) * 1000) / duration);
   }
 
   return speed;
@@ -75,7 +75,6 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
   const {
     source,
     style,
-    containerStyle,
     progress,
     speed = 1,
     duration,
@@ -186,17 +185,8 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
     nativeProps.textFiltersIOS = textFiltersIOS;
   }
 
-  const animationView = <NativeGraniteLottieView ref={nativeRef} {...nativeProps} />;
+  return <NativeGraniteLottieView ref={nativeRef} {...nativeProps} />;
 
-  if (containerStyle != null) {
-    return (
-      <View style={containerStyle} collapsable={false}>
-        {animationView}
-      </View>
-    );
-  }
-
-  return animationView;
 });
 
 LottieView.displayName = 'LottieView';
