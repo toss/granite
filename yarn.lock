@@ -5916,6 +5916,7 @@ __metadata:
     "@granite-js/video": "workspace:*"
     "@react-native-async-storage/async-storage": "catalog:react-native"
     "@react-native-community/blur": "catalog:react-native"
+    "@react-navigation/core": "catalog:react-native"
     "@react-navigation/elements": "catalog:react-native"
     "@react-navigation/native": "catalog:react-native"
     "@react-navigation/native-stack": "catalog:react-native"
@@ -8408,7 +8409,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/core@npm:^7.14.0":
+"@react-navigation/core@npm:7.14.0, @react-navigation/core@npm:^7.14.0":
   version: 7.14.0
   resolution: "@react-navigation/core@npm:7.14.0"
   dependencies:
