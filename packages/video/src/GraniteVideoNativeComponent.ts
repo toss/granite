@@ -24,6 +24,7 @@ interface NativeVideoMetadata {
 interface NativeSourceDrmConfig {
   type?: string;
   licenseServer?: string;
+  headers?: Readonly<Record<string, string>>;
   contentId?: string;
   certificateUrl?: string;
   base64Certificate?: boolean;
@@ -34,6 +35,10 @@ interface NativeSourceDrmConfig {
 // Native CMCD config
 interface NativeCmcdConfiguration {
   mode?: Int32;
+  request?: Readonly<Record<string, string>>;
+  session?: Readonly<Record<string, string>>;
+  object?: Readonly<Record<string, string>>;
+  status?: Readonly<Record<string, string>>;
 }
 
 // Native text track
@@ -54,6 +59,7 @@ interface NativeAdsConfig {
   videoId?: string;
   assetKey?: string;
   format?: string;
+  adTagParameters?: Readonly<Record<string, string>>;
   fallbackUri?: string;
 }
 
@@ -80,6 +86,7 @@ interface NativeSourceBufferConfig {
 interface NativeVideoSource {
   uri?: string;
   type?: string;
+  headers?: Readonly<Record<string, string>>;
   startTime?: Double;
   endTime?: Double;
   isNetwork?: boolean;

@@ -508,8 +508,6 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
       <NativeGraniteVideoView
         ref={nativeRef}
         style={styles.video}
-        // Cast needed: normalizeSource includes fields (drm.headers, cmcd.request/session/object/status,
-        // ad.adTagParameters) that bypass Codegen typing and pass through ReadableMap directly.
         progressUpdateInterval={progressUpdateInterval}
         source={normalizeSource(source)}
         poster={getPosterUri(poster)}
