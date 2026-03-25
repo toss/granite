@@ -308,16 +308,13 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
   const handleLoad = useCallback(
     (event: NativeSyntheticEvent<OnVideoLoadEvent>) => {
       const nativeEvent = event.nativeEvent;
-      const loadData: OnLoadData = {
+      const loadData = {
         ...nativeEvent,
         naturalSize: {
           ...nativeEvent.naturalSize,
           orientation: nativeEvent.naturalSize.orientation as OnLoadData['naturalSize']['orientation'],
         },
-        audioTracks: [],
-        textTracks: [],
-        videoTracks: [],
-      };
+      } as OnLoadData;
       onLoad?.(loadData);
     },
     [onLoad]
