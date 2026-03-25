@@ -50,6 +50,17 @@ import type {
 
 const { GraniteVideoModule } = NativeModules;
 
+function normalizeDrm(drm: VideoProps['drm']): NativeProps['drm'] | undefined {
+  if (!drm) {
+    return undefined;
+  }
+
+  return {
+    ...drm,
+    headers: drm.headers === undefined ? undefined : JSON.stringify(drm.headers),
+  };
+}
+
 // For Fabric (New Architecture), the component is always available through codegenNativeComponent
 // We don't need to check UIManager.getViewManagerConfig which is Old Architecture only
 
@@ -67,10 +78,10 @@ function normalizeCmcd(cmcd: VideoSource['cmcd']) {
   }
   return {
     mode: cmcd.mode ?? 1,
-    request: cmcd.request,   // passes as Record through ReadableMap
-    session: cmcd.session,
-    object: cmcd.object,
-    status: cmcd.status,
+    request: cmcd.request === undefined ? undefined : JSON.stringify(cmcd.request),
+    session: cmcd.session === undefined ? undefined : JSON.stringify(cmcd.session),
+    object: cmcd.object === undefined ? undefined : JSON.stringify(cmcd.object),
+    status: cmcd.status === undefined ? undefined : JSON.stringify(cmcd.status),
   };
 }
 
@@ -82,7 +93,19 @@ function normalizeSource(source: VideoSource | number): NativeProps['source'] | 
 
   return {
     ...source,
+    headers: source.headers === undefined ? undefined : JSON.stringify(source.headers),
+    drm: normalizeDrm(source.drm),
     cmcd: normalizeCmcd(source.cmcd),
+    ad:
+      source.ad === undefined
+        ? undefined
+        : {
+            ...source.ad,
+            adTagParameters:
+              source.ad.type === 'ssai' && source.ad.adTagParameters !== undefined
+                ? JSON.stringify(source.ad.adTagParameters)
+                : undefined,
+          },
   };
 }
 
@@ -529,7 +552,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
         selectedTextTrack={normalizeSelectedTrack(selectedTextTrack)}
         selectedVideoTrack={normalizeSelectedVideoTrack(selectedVideoTrack)}
         textTracks={textTracks}
-        drm={drm}
+        drm={normalizeDrm(drm)}
         localSourceEncryptionKeyScheme={localSourceEncryptionKeyScheme}
         adTagUrl={adTagUrl}
         adLanguage={adLanguage}

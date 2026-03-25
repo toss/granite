@@ -24,7 +24,7 @@ interface NativeVideoMetadata {
 interface NativeSourceDrmConfig {
   type?: string;
   licenseServer?: string;
-  headers?: Readonly<Record<string, string>>;
+  headers?: string; // serialized object
   contentId?: string;
   certificateUrl?: string;
   base64Certificate?: boolean;
@@ -35,10 +35,10 @@ interface NativeSourceDrmConfig {
 // Native CMCD config
 interface NativeCmcdConfiguration {
   mode?: Int32;
-  request?: Readonly<Record<string, string>>;
-  session?: Readonly<Record<string, string>>;
-  object?: Readonly<Record<string, string>>;
-  status?: Readonly<Record<string, string>>;
+  request?: string; // serialized object
+  session?: string; // serialized object
+  object?: string; // serialized object
+  status?: string; // serialized object
 }
 
 // Native text track
@@ -59,7 +59,7 @@ interface NativeAdsConfig {
   videoId?: string;
   assetKey?: string;
   format?: string;
-  adTagParameters?: Readonly<Record<string, string>>;
+  adTagParameters?: string; // serialized object
   fallbackUri?: string;
 }
 
@@ -86,7 +86,7 @@ interface NativeSourceBufferConfig {
 interface NativeVideoSource {
   uri?: string;
   type?: string;
-  headers?: Readonly<Record<string, string>>;
+  headers?: string; // serialized object
   startTime?: Double;
   endTime?: Double;
   isNetwork?: boolean;
@@ -129,44 +129,12 @@ interface NativeSelectedVideoTrack {
 interface NativeDrmConfig {
   type?: string;
   licenseServer?: string;
-  headers?: Readonly<Record<string, string>>;
+  headers?: string; // serialized object
   contentId?: string;
   certificateUrl?: string;
   base64Certificate?: boolean;
   multiDrm?: boolean;
   localSourceEncryptionKeyScheme?: string;
-}
-
-interface NativeAudioTrack {
-  index: Int32;
-  title?: string;
-  language?: string;
-  bitrate?: Double;
-  type?: string;
-  selected?: boolean;
-}
-
-interface NativeTextTrackInfo {
-  index: Int32;
-  title?: string;
-  language?: string;
-  type?: string;
-  selected?: boolean;
-}
-
-interface NativeVideoTrackInfo {
-  index: Int32;
-  trackId?: string;
-  codecs?: string;
-  width?: Int32;
-  height?: Int32;
-  bitrate?: Double;
-  selected?: boolean;
-}
-
-interface NativeTimedMetadata {
-  value: string;
-  identifier: string;
 }
 
 export type OnVideoLoadStartEvent = Readonly<{
@@ -236,11 +204,24 @@ export type OnVideoAudioFocusChangedEvent = Readonly<{
 }>;
 
 export type OnVideoAudioTracksEvent = Readonly<{
-  audioTracks: ReadonlyArray<Readonly<NativeAudioTrack>>;
+  audioTracks: {
+    index: Int32;
+    title?: string;
+    language?: string;
+    bitrate?: Double;
+    type?: string;
+    selected?: boolean;
+  }[];
 }>;
 
 export type OnVideoTextTracksEvent = Readonly<{
-  textTracks: ReadonlyArray<Readonly<NativeTextTrackInfo>>;
+  textTracks: {
+    index: Int32;
+    title?: string;
+    language?: string;
+    type?: string;
+    selected?: boolean;
+  }[];
 }>;
 
 export type OnVideoTextTrackDataChangedEvent = Readonly<{
@@ -248,11 +229,22 @@ export type OnVideoTextTrackDataChangedEvent = Readonly<{
 }>;
 
 export type OnVideoVideoTracksEvent = Readonly<{
-  videoTracks: ReadonlyArray<Readonly<NativeVideoTrackInfo>>;
+  videoTracks: {
+    index: Int32;
+    trackId?: string;
+    codecs?: string;
+    width?: Int32;
+    height?: Int32;
+    bitrate?: Double;
+    selected?: boolean;
+  }[];
 }>;
 
 export type OnVideoTimedMetadataEvent = Readonly<{
-  metadata: ReadonlyArray<Readonly<NativeTimedMetadata>>;
+  metadata: {
+    value: string;
+    identifier: string;
+  }[];
 }>;
 
 export type OnVideoReceiveAdEvent = Readonly<{
