@@ -104,9 +104,8 @@ export interface VideoSource {
   mainVer?: number;
   patchVer?: number;
   headers?: VideoSourceHeaders;
-  startPosition?: number;
-  cropStart?: number;
-  cropEnd?: number;
+  startTime?: number;
+  endTime?: number;
   drm?: DrmConfig;
   textTracks?: TextTrack[];
   metadata?: VideoMetadata;
