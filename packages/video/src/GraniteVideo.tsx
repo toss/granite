@@ -24,13 +24,30 @@ import NativeGraniteVideoView, {
   OnVideoPlaybackRateChangeEvent,
   OnVideoVolumeChangeEvent,
   OnVideoAudioFocusChangedEvent,
+  OnVideoAudioTracksEvent,
+  OnVideoTextTracksEvent,
+  OnVideoTextTrackDataChangedEvent,
+  OnVideoVideoTracksEvent,
+  OnVideoTimedMetadataEvent,
+  OnVideoReceiveAdEvent,
   OnVideoPictureInPictureStatusChangedEvent,
   OnVideoControlsVisibilityChangeEvent,
   OnVideoExternalPlaybackChangeEvent,
   OnVideoAspectRatioEvent,
   TransferEndEvent,
 } from './GraniteVideoNativeComponent';
-import type { VideoRef, VideoSource, VideoProps, OnLoadData } from './types';
+import type {
+  VideoRef,
+  VideoSource,
+  VideoProps,
+  OnLoadData,
+  OnAudioTracksData,
+  OnTextTracksData,
+  OnTextTrackDataChangedData,
+  OnVideoTracksData,
+  OnTimedMetadataData,
+  OnReceiveAdEventData,
+} from './types';
 
 const { GraniteVideoModule } = NativeModules;
 
@@ -143,6 +160,8 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     testID,
     // Style
     style,
+    // Progress
+    progressUpdateInterval,
     // Source
     source,
     // Poster
@@ -172,6 +191,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     selectedAudioTrack,
     selectedTextTrack,
     selectedVideoTrack,
+    textTracks,
     // DRM
     drm,
     localSourceEncryptionKeyScheme,
@@ -215,6 +235,11 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     onIdle,
     onReadyForDisplay,
     onAudioFocusChanged,
+    onAudioTracks,
+    onTextTracks,
+    onTextTrackDataChanged,
+    onVideoTracks,
+    onTimedMetadata,
     onAudioBecomingNoisy,
     onFullscreenPlayerWillPresent,
     onFullscreenPlayerDidPresent,
@@ -225,6 +250,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     onControlsVisibilityChange,
     onExternalPlaybackChange,
     onAspectRatio,
+    onReceiveAdEvent,
     onTransferEnd,
   } = props;
 
@@ -402,6 +428,41 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     [onAudioFocusChanged]
   );
 
+  const handleAudioTracks = useCallback(
+    (event: NativeSyntheticEvent<OnVideoAudioTracksEvent>) => {
+      onAudioTracks?.(event.nativeEvent as OnAudioTracksData);
+    },
+    [onAudioTracks]
+  );
+
+  const handleTextTracks = useCallback(
+    (event: NativeSyntheticEvent<OnVideoTextTracksEvent>) => {
+      onTextTracks?.(event.nativeEvent as OnTextTracksData);
+    },
+    [onTextTracks]
+  );
+
+  const handleTextTrackDataChanged = useCallback(
+    (event: NativeSyntheticEvent<OnVideoTextTrackDataChangedEvent>) => {
+      onTextTrackDataChanged?.(event.nativeEvent as OnTextTrackDataChangedData);
+    },
+    [onTextTrackDataChanged]
+  );
+
+  const handleVideoTracks = useCallback(
+    (event: NativeSyntheticEvent<OnVideoVideoTracksEvent>) => {
+      onVideoTracks?.(event.nativeEvent as OnVideoTracksData);
+    },
+    [onVideoTracks]
+  );
+
+  const handleTimedMetadata = useCallback(
+    (event: NativeSyntheticEvent<OnVideoTimedMetadataEvent>) => {
+      onTimedMetadata?.(event.nativeEvent as OnTimedMetadataData);
+    },
+    [onTimedMetadata]
+  );
+
   const handleAudioBecomingNoisy = useCallback(() => {
     onAudioBecomingNoisy?.();
   }, [onAudioBecomingNoisy]);
@@ -454,6 +515,13 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     [onAspectRatio]
   );
 
+  const handleReceiveAdEvent = useCallback(
+    (event: NativeSyntheticEvent<OnVideoReceiveAdEvent>) => {
+      onReceiveAdEvent?.(event.nativeEvent as OnReceiveAdEventData);
+    },
+    [onReceiveAdEvent]
+  );
+
   const handleTransferEnd = useCallback(
     (event: NativeSyntheticEvent<TransferEndEvent>) => {
       onTransferEnd?.(event.nativeEvent);
@@ -471,6 +539,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
         style={styles.video}
         // Cast needed: normalizeSource includes fields (drm.headers, cmcd.request/session/object/status,
         // ad.adTagParameters) that bypass Codegen typing and pass through ReadableMap directly.
+        progressUpdateInterval={progressUpdateInterval}
         source={normalizeSource(source)}
         poster={getPosterUri(poster)}
         posterResizeMode={posterResizeMode}
@@ -494,6 +563,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
         selectedAudioTrack={normalizeSelectedTrack(selectedAudioTrack)}
         selectedTextTrack={normalizeSelectedTrack(selectedTextTrack)}
         selectedVideoTrack={normalizeSelectedVideoTrack(selectedVideoTrack)}
+        textTracks={textTracks}
         drm={normalizeDrm(drm)}
         localSourceEncryptionKeyScheme={localSourceEncryptionKeyScheme}
         adTagUrl={adTagUrl}
@@ -530,6 +600,12 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
         onVideoIdle={handleIdle}
         onVideoReadyForDisplay={handleReadyForDisplay}
         onVideoAudioFocusChanged={handleAudioFocusChanged}
+        onVideoAudioTracks={handleAudioTracks}
+        onVideoTextTracks={handleTextTracks}
+        onVideoTextTrackDataChanged={handleTextTrackDataChanged}
+        onVideoVideoTracks={handleVideoTracks}
+        onVideoTimedMetadata={handleTimedMetadata}
+        onVideoReceiveAdEvent={handleReceiveAdEvent}
         onVideoAudioBecomingNoisy={handleAudioBecomingNoisy}
         onVideoFullscreenPlayerWillPresent={handleFullscreenPlayerWillPresent}
         onVideoFullscreenPlayerDidPresent={handleFullscreenPlayerDidPresent}

@@ -126,6 +126,38 @@ interface NativeDrmConfig {
   base64Certificate?: boolean;
 }
 
+interface NativeAudioTrack {
+  index: Int32;
+  title?: string;
+  language?: string;
+  bitrate?: Double;
+  type?: string;
+  selected?: boolean;
+}
+
+interface NativeTextTrackInfo {
+  index: Int32;
+  title?: string;
+  language?: string;
+  type?: string;
+  selected?: boolean;
+}
+
+interface NativeVideoTrackInfo {
+  index: Int32;
+  trackId?: string;
+  codecs?: string;
+  width?: Int32;
+  height?: Int32;
+  bitrate?: Double;
+  selected?: boolean;
+}
+
+interface NativeTimedMetadata {
+  value: string;
+  identifier: string;
+}
+
 export type OnVideoLoadStartEvent = Readonly<{
   isNetwork: boolean;
   type: string;
@@ -192,6 +224,30 @@ export type OnVideoAudioFocusChangedEvent = Readonly<{
   hasAudioFocus: boolean;
 }>;
 
+export type OnVideoAudioTracksEvent = Readonly<{
+  audioTracks: ReadonlyArray<Readonly<NativeAudioTrack>>;
+}>;
+
+export type OnVideoTextTracksEvent = Readonly<{
+  textTracks: ReadonlyArray<Readonly<NativeTextTrackInfo>>;
+}>;
+
+export type OnVideoTextTrackDataChangedEvent = Readonly<{
+  subtitleTracks: string;
+}>;
+
+export type OnVideoVideoTracksEvent = Readonly<{
+  videoTracks: ReadonlyArray<Readonly<NativeVideoTrackInfo>>;
+}>;
+
+export type OnVideoTimedMetadataEvent = Readonly<{
+  metadata: ReadonlyArray<Readonly<NativeTimedMetadata>>;
+}>;
+
+export type OnVideoReceiveAdEvent = Readonly<{
+  event: string;
+}>;
+
 export type OnVideoPictureInPictureStatusChangedEvent = Readonly<{
   isActive: boolean;
 }>;
@@ -215,6 +271,9 @@ export type TransferEndEvent = Readonly<{
 }>;
 
 export interface NativeProps extends ViewProps {
+  // Progress
+  progressUpdateInterval?: Double;
+
   // Source
   source?: NativeVideoSource;
 
@@ -249,6 +308,7 @@ export interface NativeProps extends ViewProps {
   selectedAudioTrack?: NativeSelectedTrack;
   selectedTextTrack?: NativeSelectedTrack;
   selectedVideoTrack?: NativeSelectedVideoTrack;
+  textTracks?: ReadonlyArray<Readonly<NativeTextTrack>>;
 
   // DRM
   drm?: NativeDrmConfig;
@@ -301,6 +361,12 @@ export interface NativeProps extends ViewProps {
   onVideoIdle?: DirectEventHandler<null>;
   onVideoReadyForDisplay?: DirectEventHandler<null>;
   onVideoAudioFocusChanged?: DirectEventHandler<OnVideoAudioFocusChangedEvent>;
+  onVideoAudioTracks?: DirectEventHandler<OnVideoAudioTracksEvent>;
+  onVideoTextTracks?: DirectEventHandler<OnVideoTextTracksEvent>;
+  onVideoTextTrackDataChanged?: DirectEventHandler<OnVideoTextTrackDataChangedEvent>;
+  onVideoVideoTracks?: DirectEventHandler<OnVideoVideoTracksEvent>;
+  onVideoTimedMetadata?: DirectEventHandler<OnVideoTimedMetadataEvent>;
+  onVideoReceiveAdEvent?: DirectEventHandler<OnVideoReceiveAdEvent>;
   onVideoAudioBecomingNoisy?: DirectEventHandler<null>;
   onVideoFullscreenPlayerWillPresent?: DirectEventHandler<null>;
   onVideoFullscreenPlayerDidPresent?: DirectEventHandler<null>;
