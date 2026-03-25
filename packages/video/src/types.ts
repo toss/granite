@@ -237,9 +237,6 @@ export interface OnVideoTracksData {
 
 export interface OnReceiveAdEventData {
   event: string;
-  data?: {
-    [key: string]: string | number | boolean;
-  };
 }
 
 export interface OnTransferEndData {

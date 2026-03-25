@@ -46,7 +46,6 @@ import type {
   OnTextTrackDataChangedData,
   OnVideoTracksData,
   OnTimedMetadataData,
-  OnReceiveAdEventData,
 } from './types';
 
 const { GraniteVideoModule } = NativeModules;
@@ -488,7 +487,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
 
   const handleReceiveAdEvent = useCallback(
     (event: NativeSyntheticEvent<OnVideoReceiveAdEvent>) => {
-      onReceiveAdEvent?.(event.nativeEvent as OnReceiveAdEventData);
+      onReceiveAdEvent?.(event.nativeEvent);
     },
     [onReceiveAdEvent]
   );
