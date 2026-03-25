@@ -122,9 +122,12 @@ interface NativeSelectedVideoTrack {
 interface NativeDrmConfig {
   type?: string;
   licenseServer?: string;
+  headers?: Readonly<Record<string, string>>;
   contentId?: string;
   certificateUrl?: string;
   base64Certificate?: boolean;
+  multiDrm?: boolean;
+  localSourceEncryptionKeyScheme?: string;
 }
 
 interface NativeAudioTrack {

@@ -111,19 +111,6 @@ function normalizeSelectedVideoTrack(
   };
 }
 
-function normalizeDrm(drm?: VideoProps['drm']): NativeProps['drm'] | undefined {
-  if (!drm) {
-    return undefined;
-  }
-  return {
-    type: drm.type,
-    licenseServer: drm.licenseServer,
-    contentId: drm.contentId,
-    certificateUrl: drm.certificateUrl,
-    base64Certificate: drm.base64Certificate,
-  };
-}
-
 function getPosterUri(poster?: VideoProps['poster']): string | undefined {
   if (!poster) {
     return undefined;
@@ -548,7 +535,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
         selectedTextTrack={normalizeSelectedTrack(selectedTextTrack)}
         selectedVideoTrack={normalizeSelectedVideoTrack(selectedVideoTrack)}
         textTracks={textTracks}
-        drm={normalizeDrm(drm)}
+        drm={drm}
         localSourceEncryptionKeyScheme={localSourceEncryptionKeyScheme}
         adTagUrl={adTagUrl}
         adLanguage={adLanguage}
