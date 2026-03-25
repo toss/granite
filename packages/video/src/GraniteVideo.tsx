@@ -55,9 +55,11 @@ function normalizeDrm(drm: VideoProps['drm']): NativeProps['drm'] | undefined {
     return undefined;
   }
 
+  const headers = drm.headers === undefined ? undefined : JSON.stringify(drm.headers);
+
   return {
     ...drm,
-    headers: drm.headers === undefined ? undefined : JSON.stringify(drm.headers),
+    headers,
   };
 }
 
@@ -76,12 +78,32 @@ function normalizeCmcd(cmcd: VideoSource['cmcd']) {
     // When true, use MODE_QUERY_PARAMETER as default
     return { mode: 1 };
   }
+
+  const request = cmcd.request === undefined ? undefined : JSON.stringify(cmcd.request);
+  const session = cmcd.session === undefined ? undefined : JSON.stringify(cmcd.session);
+  const object = cmcd.object === undefined ? undefined : JSON.stringify(cmcd.object);
+  const status = cmcd.status === undefined ? undefined : JSON.stringify(cmcd.status);
+
   return {
     mode: cmcd.mode ?? 1,
-    request: cmcd.request === undefined ? undefined : JSON.stringify(cmcd.request),
-    session: cmcd.session === undefined ? undefined : JSON.stringify(cmcd.session),
-    object: cmcd.object === undefined ? undefined : JSON.stringify(cmcd.object),
-    status: cmcd.status === undefined ? undefined : JSON.stringify(cmcd.status),
+    request,
+    session,
+    object,
+    status,
+  };
+}
+
+function normalizeAd(ad: VideoSource['ad']): NonNullable<NativeProps['source']>['ad'] | undefined {
+  if (!ad) {
+    return undefined;
+  }
+
+  const adTagParameters =
+    ad.type === 'ssai' && ad.adTagParameters !== undefined ? JSON.stringify(ad.adTagParameters) : undefined;
+
+  return {
+    ...ad,
+    adTagParameters,
   };
 }
 
@@ -91,21 +113,17 @@ function normalizeSource(source: VideoSource | number): NativeProps['source'] | 
     return undefined;
   }
 
+  const headers = source.headers === undefined ? undefined : JSON.stringify(source.headers);
+  const drm = normalizeDrm(source.drm);
+  const cmcd = normalizeCmcd(source.cmcd);
+  const ad = normalizeAd(source.ad);
+
   return {
     ...source,
-    headers: source.headers === undefined ? undefined : JSON.stringify(source.headers),
-    drm: normalizeDrm(source.drm),
-    cmcd: normalizeCmcd(source.cmcd),
-    ad:
-      source.ad === undefined
-        ? undefined
-        : {
-            ...source.ad,
-            adTagParameters:
-              source.ad.type === 'ssai' && source.ad.adTagParameters !== undefined
-                ? JSON.stringify(source.ad.adTagParameters)
-                : undefined,
-          },
+    headers,
+    drm,
+    cmcd,
+    ad,
   };
 }
 
