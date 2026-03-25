@@ -124,22 +124,6 @@ function normalizeDrm(drm?: VideoProps['drm']): NativeProps['drm'] | undefined {
   };
 }
 
-// Note: `live` is only available via source-embedded bufferConfig (NativeSourceBufferConfig),
-// not via the top-level bufferConfig prop (NativeBufferConfig).
-function normalizeBufferConfig(config?: VideoProps['bufferConfig']): NativeProps['bufferConfig'] | undefined {
-  if (!config) {
-    return undefined;
-  }
-  return {
-    minBufferMs: config.minBufferMs,
-    maxBufferMs: config.maxBufferMs,
-    bufferForPlaybackMs: config.bufferForPlaybackMs,
-    bufferForPlaybackAfterRebufferMs: config.bufferForPlaybackAfterRebufferMs,
-    backBufferDurationMs: config.backBufferDurationMs,
-    cacheSizeMB: config.cacheSizeMB,
-  };
-}
-
 function getPosterUri(poster?: VideoProps['poster']): string | undefined {
   if (!poster) {
     return undefined;
@@ -556,7 +540,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
         viewType={viewType}
         useTextureView={useTextureView}
         useSecureView={useSecureView}
-        bufferConfig={normalizeBufferConfig(bufferConfig)}
+        bufferConfig={bufferConfig}
         minLoadRetryCount={minLoadRetryCount}
         maxBitRate={maxBitRate}
         preferredForwardBufferDuration={preferredForwardBufferDuration}

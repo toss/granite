@@ -106,6 +106,7 @@ interface NativeBufferConfig {
   bufferForPlaybackAfterRebufferMs?: Int32;
   backBufferDurationMs?: Int32;
   cacheSizeMB?: Int32;
+  live?: NativeBufferConfigLive;
 }
 
 interface NativeSelectedTrack {
