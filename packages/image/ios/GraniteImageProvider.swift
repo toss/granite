@@ -67,4 +67,10 @@ public typealias GraniteImageCompletionBlock = (_ image: UIImage?, _ error: Erro
     ///   - tintColor: The color to apply
     ///   - view: The view to tint
     @objc optional func applyTintColor(_ tintColor: UIColor, to view: UIView)
+
+    /// Clears the in-memory image cache
+    @objc optional func clearMemoryCache()
+
+    /// Clears the on-disk image cache
+    @objc optional func clearDiskCache()
 }
