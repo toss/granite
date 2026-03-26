@@ -55,19 +55,6 @@ function resolveSource(source: AnimationSource): {
   return {};
 }
 
-function resolveEffectiveSpeed(
-  source: AnimationSource,
-  sourceJson: string | undefined,
-  speed: number,
-  duration?: number
-): number {
-  if (duration && sourceJson && (source as AnimationObject).fr) {
-    return Math.round((((source as AnimationObject).op / (source as AnimationObject).fr) * 1000) / duration);
-  }
-
-  return speed;
-}
-
 /**
  * LottieView - Pluggable Lottie animation component for React Native
  */
@@ -126,10 +113,13 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
 
   // Resolve source
   const resolvedSource = useMemo(() => resolveSource(source), [source]);
-  const resolvedSpeed = useMemo(
-    () => resolveEffectiveSpeed(source, resolvedSource.sourceJson, speed, duration),
-    [duration, resolvedSource.sourceJson, source, speed]
-  );
+  const resolvedSpeed = useMemo(() => {
+    const { sourceJson } = resolvedSource;
+    if (duration && sourceJson && (source as AnimationObject).fr) {
+      return Math.round((((source as AnimationObject).op / (source as AnimationObject).fr) * 1000) / duration);
+    }
+    return speed;
+  }, [duration, resolvedSource, source, speed]);
 
   // Event handlers
   const handleAnimationFinish = useCallback(
