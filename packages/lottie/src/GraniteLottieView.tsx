@@ -20,9 +20,9 @@ function resolveSource(source: AnimationSource): {
     const resolved = Image.resolveAssetSource(source);
     if (resolved?.uri) {
       if (resolved.uri.endsWith('.lottie')) {
-      return { sourceDotLottieURI: resolved.uri };
-    }
-    return { sourceURL: resolved.uri };
+        return { sourceDotLottieURI: resolved.uri };
+      }
+      return { sourceURL: resolved.uri };
     }
     return {};
   }
