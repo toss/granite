@@ -244,8 +244,8 @@ using namespace facebook::react;
     }
 
     videoSource.startPosition = source.startPosition;
-    videoSource.cropStart = source.cropStart;
-    videoSource.cropEnd = source.cropEnd;
+    videoSource.startTime = source.startTime;
+    videoSource.endTime = source.endTime;
 
     [_provider loadSource:videoSource];
 
