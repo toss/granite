@@ -198,7 +198,11 @@ __attribute__((used)) static void _forceIncludeGraniteImageComponentView(void) {
 
     if (shouldReload) {
         if (_currentUri.length > 0) {
-            [self loadImageWithProvider];
+            // 다음 runloop으로 지연하여 _eventEmitter 세팅 후 실행
+            __weak GraniteImageComponentView *weakSelf = self;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf loadImageWithProvider];
+            });
         } else {
             // URI가 비어있거나 nil인 경우 에러 발생
             [self showErrorViewWithMessage:@"No URI provided"];
@@ -264,12 +268,14 @@ __attribute__((used)) static void _forceIncludeGraniteImageComponentView(void) {
     if (!provider) {
         [self showErrorViewWithMessage:@"No GraniteImageProvidable registered"];
         [self emitOnError:@"No GraniteImageProvidable registered"];
+        [self emitOnLoadEnd];
         return;
     }
 
     if (!_currentUri || _currentUri.length == 0) {
         [self showErrorViewWithMessage:@"No URI provided"];
         [self emitOnError:@"No URI provided"];
+        [self emitOnLoadEnd];
         return;
     }
 
