@@ -141,6 +141,7 @@ import AVFoundation
     @objc optional func videoDidBecomeIdle()
     @objc optional func videoReadyForDisplay()
     @objc optional func videoAudioBecomingNoisy()
+    @objc optional func videoAudioFocusChanged(hasAudioFocus: Bool)
     @objc optional func videoFullscreenPlayerWillPresent()
     @objc optional func videoFullscreenPlayerDidPresent()
     @objc optional func videoFullscreenPlayerWillDismiss()

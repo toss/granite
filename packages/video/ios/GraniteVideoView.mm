@@ -534,6 +534,17 @@ using namespace facebook::react;
     }
 }
 
+- (void)videoAudioFocusChangedWithHasAudioFocus:(BOOL)hasAudioFocus
+{
+    if (_eventEmitter) {
+        auto emitter = std::static_pointer_cast<GraniteVideoViewEventEmitter const>(_eventEmitter);
+        facebook::react::GraniteVideoViewEventEmitter::OnVideoAudioFocusChanged event = {
+            .hasAudioFocus = hasAudioFocus
+        };
+        emitter->onVideoAudioFocusChanged(event);
+    }
+}
+
 - (void)videoFullscreenPlayerWillPresent
 {
     if (_eventEmitter) {
