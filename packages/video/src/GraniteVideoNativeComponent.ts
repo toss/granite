@@ -81,8 +81,8 @@ interface NativeVideoSource {
   uri?: string;
   type?: string;
   startPosition?: Double;
-  cropStart?: Double;
-  cropEnd?: Double;
+  startTime?: Double;
+  endTime?: Double;
   isNetwork?: boolean;
   isAsset?: boolean;
   isLocalAssetFile?: boolean;

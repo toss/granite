@@ -54,8 +54,8 @@ import AVFoundation
     @objc public var uri: String?
     @objc public var type: String?
     @objc public var startPosition: Double = 0
-    @objc public var cropStart: Double = 0
-    @objc public var cropEnd: Double = 0
+    @objc public var startTime: Double = 0
+    @objc public var endTime: Double = 0
     @objc public var headers: [String: String]?
     @objc public var drm: GraniteVideoDrmConfig?
 
@@ -141,6 +141,7 @@ import AVFoundation
     @objc optional func videoDidBecomeIdle()
     @objc optional func videoReadyForDisplay()
     @objc optional func videoAudioBecomingNoisy()
+    @objc optional func videoAudioFocusChanged(hasAudioFocus: Bool)
     @objc optional func videoFullscreenPlayerWillPresent()
     @objc optional func videoFullscreenPlayerDidPresent()
     @objc optional func videoFullscreenPlayerWillDismiss()

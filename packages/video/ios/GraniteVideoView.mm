@@ -244,8 +244,8 @@ using namespace facebook::react;
     }
 
     videoSource.startPosition = source.startPosition;
-    videoSource.cropStart = source.cropStart;
-    videoSource.cropEnd = source.cropEnd;
+    videoSource.startTime = source.startTime;
+    videoSource.endTime = source.endTime;
 
     [_provider loadSource:videoSource];
 
@@ -531,6 +531,17 @@ using namespace facebook::react;
     if (_eventEmitter) {
         auto emitter = std::static_pointer_cast<GraniteVideoViewEventEmitter const>(_eventEmitter);
         emitter->onVideoAudioBecomingNoisy({});
+    }
+}
+
+- (void)videoAudioFocusChangedWithHasAudioFocus:(BOOL)hasAudioFocus
+{
+    if (_eventEmitter) {
+        auto emitter = std::static_pointer_cast<GraniteVideoViewEventEmitter const>(_eventEmitter);
+        facebook::react::GraniteVideoViewEventEmitter::OnVideoAudioFocusChanged event = {
+            .hasAudioFocus = hasAudioFocus
+        };
+        emitter->onVideoAudioFocusChanged(event);
     }
 }
 
