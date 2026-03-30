@@ -102,4 +102,20 @@ interface GraniteImageProvider {
     fun applyTintColor(color: Int, view: View) {
         // Default implementation - do nothing
     }
+
+    /**
+     * Clears the memory cache.
+     * Default implementation is no-op. Override in provider implementations to clear actual cache.
+     */
+    fun clearMemoryCache(context: Context) {
+        // default: no-op
+    }
+
+    /**
+     * Clears the disk cache.
+     * Default implementation is no-op. Override in provider implementations to clear actual cache.
+     */
+    fun clearDiskCache(context: Context) {
+        // default: no-op
+    }
 }
