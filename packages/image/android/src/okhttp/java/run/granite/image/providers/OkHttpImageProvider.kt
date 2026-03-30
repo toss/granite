@@ -225,4 +225,19 @@ class OkHttpImageProvider : GraniteImageProvider {
             }
         )
     }
+
+    override fun clearMemoryCache(context: Context) {
+        // OkHttp: no built-in memory cache — no-op
+        Log.d(TAG, "Memory cache clear not supported (OkHttp)")
+    }
+
+    override fun clearDiskCache(context: Context) {
+        // OkHttp: evict all if client.cache is configured
+        try {
+            client.cache?.evictAll()
+            Log.d(TAG, "Disk cache cleared (OkHttp)")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to clear disk cache: ${e.message}")
+        }
+    }
 }

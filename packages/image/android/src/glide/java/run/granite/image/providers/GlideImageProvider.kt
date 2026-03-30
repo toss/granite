@@ -22,6 +22,9 @@ import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.Priority as GlidePriority
+import android.os.Handler
+import android.os.Looper
+import java.util.concurrent.Executors
 
 /**
  * GraniteImageProvider implementation using Glide.
@@ -164,5 +167,29 @@ class GlideImageProvider : GraniteImageProvider {
         // Glide preload is not directly supported without a context
         // This would need an Application context passed during initialization
         onCompletion?.invoke(false, 0, 0, "Preload not supported without context")
+    }
+
+    override fun clearMemoryCache(context: Context) {
+        // Glide: clearMemory() must be called on the main thread
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            Glide.get(context).clearMemory()
+        } else {
+            Handler(Looper.getMainLooper()).post {
+                Glide.get(context).clearMemory()
+            }
+        }
+        Log.d(TAG, "Memory cache cleared (Glide)")
+    }
+
+    override fun clearDiskCache(context: Context) {
+        // Glide: clearDiskCache() must be called on a background thread
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            Glide.get(context).clearDiskCache()
+        } else {
+            Executors.newSingleThreadExecutor().execute {
+                Glide.get(context).clearDiskCache()
+            }
+        }
+        Log.d(TAG, "Disk cache cleared (Glide)")
     }
 }
