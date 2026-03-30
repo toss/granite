@@ -1,5 +1,11 @@
 # create-granite-app
 
+## 1.0.11
+
+### Patch Changes
+
+- c5f1a07: fix: @granite-js/lottie LottieView duration doesn't work
+
 ## 1.0.10
 
 ### Patch Changes
