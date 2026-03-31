@@ -1,6 +1,7 @@
 package run.granite.image
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -10,9 +11,7 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactContext
-import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.events.EventDispatcher
 import org.json.JSONObject
@@ -203,35 +202,46 @@ class GraniteImage(context: Context) : FrameLayout(context) {
             },
             completionCallback = { bitmap, error, width, height ->
                 post {
-                    if (error != null) {
-                        emitError(error.message ?: "Unknown error")
-
-                        // Load fallback image if available
-                        currentFallbackSource?.let { fallback ->
-                            provider.loadImage(
-                                url = fallback,
-                                into = imageView,
-                                scaleType = currentScaleType,
-                                headers = null,
-                                priority = GraniteImagePriority.HIGH,
-                                cachePolicy = GraniteImageCachePolicy.DISK,
-                                defaultSource = null,
-                                progressCallback = null,
-                                completionCallback = null
-                            )
-                        }
-                    } else {
-                        emitLoad(width, height)
-
-                        // Apply tint color if set
-                        currentTintColor?.let { color ->
-                            provider.applyTintColor(color, imageView)
-                        }
-                    }
-                    emitLoadEnd()
+                    handleLoadCompletion(bitmap, error, width, height, imageView, provider)
                 }
             }
         )
+    }
+
+    private fun handleLoadCompletion(
+        bitmap: Bitmap?,
+        error: Exception?,
+        width: Int,
+        height: Int,
+        imageView: View,
+        provider: GraniteImageProvider
+    ) {
+        if (error != null) {
+            emitError(error.message ?: "Unknown error")
+
+            // Load fallback image if available
+            currentFallbackSource?.let { fallback ->
+                provider.loadImage(
+                    url = fallback,
+                    into = imageView,
+                    scaleType = currentScaleType,
+                    headers = null,
+                    priority = GraniteImagePriority.HIGH,
+                    cachePolicy = GraniteImageCachePolicy.DISK,
+                    defaultSource = null,
+                    progressCallback = null,
+                    completionCallback = null
+                )
+            }
+        } else {
+            emitLoad(width, height)
+
+            // Apply tint color if set
+            currentTintColor?.let { color ->
+                provider.applyTintColor(color, imageView)
+            }
+        }
+        emitLoadEnd()
     }
 
     private fun showErrorView(message: String) {

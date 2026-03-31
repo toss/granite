@@ -8,11 +8,19 @@ import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.module.annotations.ReactModule
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
 @ReactModule(name = GraniteImageModule.NAME)
 class GraniteImageModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+
+    private data class PreloadSource(
+        val uri: String,
+        val headers: Map<String, String>?,
+        val priority: GraniteImagePriority,
+        val cachePolicy: GraniteImageCachePolicy
+    )
 
     companion object {
         const val NAME = "GraniteImageModule"
@@ -49,8 +57,8 @@ class GraniteImageModule(reactContext: ReactApplicationContext) : ReactContextBa
 
                 for (i in 0 until sources.length()) {
                     val source = sources.getJSONObject(i)
-                    val uri = source.optString("uri", "")
-                    if (uri.isEmpty()) {
+                    val preloadSource = parsePreloadSource(source)
+                    if (preloadSource.uri.isEmpty()) {
                         if (completedCount.incrementAndGet() == totalCount) {
                             Log.d(TAG, "Preload completed: ${successCount.get()} succeeded, ${failCount.get()} failed")
                             promise.resolve(null)
@@ -58,45 +66,23 @@ class GraniteImageModule(reactContext: ReactApplicationContext) : ReactContextBa
                         continue
                     }
 
-                    val headersObj = source.optJSONObject("headers")
-                    val headers = mutableMapOf<String, String>()
-                    headersObj?.let {
-                        val keys = it.keys()
-                        while (keys.hasNext()) {
-                            val key = keys.next()
-                            headers[key] = it.getString(key)
-                        }
-                    }
-
-                    val priorityStr = source.optString("priority", "normal")
-                    val priority = GraniteImagePriority.fromString(priorityStr)
-
-                    // Module-side API uses FastImage-compatible names: "cacheOnly", "web"
-                    // (intentionally different from View-side API which uses "memory", "none")
-                    val cacheStr = source.optString("cache", "")
-                    val cachePolicy = when (cacheStr) {
-                        "cacheOnly" -> GraniteImageCachePolicy.DISK
-                        "web" -> GraniteImageCachePolicy.NONE
-                        else -> GraniteImageCachePolicy.DISK
-                    }
-
-                    Log.d(TAG, "Preloading: $uri")
+                    Log.d(TAG, "Preloading: ${preloadSource.uri}")
 
                     // Call provider's preload method (loadImage with null view for preload)
                     provider.loadImage(
-                        url = uri,
+                        url = preloadSource.uri,
                         imageView = null,
                         contentMode = "cover",
-                        headers = headers.ifEmpty { null },
-                        priority = priority,
-                        cachePolicy = cachePolicy,
+                        headers = preloadSource.headers,
+                        priority = preloadSource.priority,
+                        cachePolicy = preloadSource.cachePolicy,
                         onProgress = null,
                         onCompletion = { success, width, height, error ->
                             if (success) {
-                                Log.d(TAG, "Preloaded successfully: $uri (${width}x${height})")
+                                Log.d(TAG, "Preloaded successfully: ${preloadSource.uri} (${width}x${height})")
                                 successCount.incrementAndGet()
                             } else {
-                                Log.d(TAG, "Preload failed for $uri: $error")
+                                Log.d(TAG, "Preload failed for ${preloadSource.uri}: $error")
                                 failCount.incrementAndGet()
                             }
                             if (completedCount.incrementAndGet() == totalCount) {
@@ -111,6 +97,39 @@ class GraniteImageModule(reactContext: ReactApplicationContext) : ReactContextBa
                 promise.reject("PARSE_ERROR", "Failed to parse sources JSON: ${e.message}")
             }
         }
+    }
+
+    private fun parsePreloadSource(source: JSONObject): PreloadSource {
+        val uri = source.optString("uri", "")
+
+        val headersObj = source.optJSONObject("headers")
+        val headers = mutableMapOf<String, String>()
+        headersObj?.let {
+            val keys = it.keys()
+            while (keys.hasNext()) {
+                val key = keys.next()
+                headers[key] = it.getString(key)
+            }
+        }
+
+        val priorityStr = source.optString("priority", "normal")
+        val priority = GraniteImagePriority.fromString(priorityStr)
+
+        // Module-side API uses FastImage-compatible names: "cacheOnly", "web"
+        // (intentionally different from View-side API which uses "memory", "none")
+        val cacheStr = source.optString("cache", "")
+        val cachePolicy = when (cacheStr) {
+            "cacheOnly" -> GraniteImageCachePolicy.DISK
+            "web" -> GraniteImageCachePolicy.NONE
+            else -> GraniteImageCachePolicy.DISK
+        }
+
+        return PreloadSource(
+            uri = uri,
+            headers = headers.ifEmpty { null },
+            priority = priority,
+            cachePolicy = cachePolicy
+        )
     }
 
     @ReactMethod
