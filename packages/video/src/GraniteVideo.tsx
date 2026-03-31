@@ -39,16 +39,27 @@ import type {
 
 const { GraniteVideoModule } = NativeModules;
 
+function toNativeStringMapEntries(
+  value?: Record<string, string>
+): ReadonlyArray<{ name: string; value: string }> | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  return Object.entries(value).map(([name, value]) => ({
+    name,
+    value,
+  }));
+}
+
 function normalizeDrm(drm: VideoProps['drm']): NativeProps['drm'] | undefined {
   if (!drm) {
     return undefined;
   }
 
-  const headers = drm.headers === undefined ? undefined : JSON.stringify(drm.headers);
-
   return {
     ...drm,
-    headers,
+    headers: toNativeStringMapEntries(drm.headers),
   };
 }
 
@@ -68,17 +79,12 @@ function normalizeCmcd(cmcd: VideoSource['cmcd']) {
     return { mode: 1 };
   }
 
-  const request = cmcd.request === undefined ? undefined : JSON.stringify(cmcd.request);
-  const session = cmcd.session === undefined ? undefined : JSON.stringify(cmcd.session);
-  const object = cmcd.object === undefined ? undefined : JSON.stringify(cmcd.object);
-  const status = cmcd.status === undefined ? undefined : JSON.stringify(cmcd.status);
-
   return {
     mode: cmcd.mode ?? 1,
-    request,
-    session,
-    object,
-    status,
+    request: toNativeStringMapEntries(cmcd.request),
+    session: toNativeStringMapEntries(cmcd.session),
+    object: toNativeStringMapEntries(cmcd.object),
+    status: toNativeStringMapEntries(cmcd.status),
   };
 }
 
@@ -87,12 +93,9 @@ function normalizeAd(ad: VideoSource['ad']): NonNullable<NativeProps['source']>[
     return undefined;
   }
 
-  const adTagParameters =
-    ad.type === 'ssai' && ad.adTagParameters !== undefined ? JSON.stringify(ad.adTagParameters) : undefined;
-
   return {
     ...ad,
-    adTagParameters,
+    adTagParameters: ad.type === 'ssai' ? toNativeStringMapEntries(ad.adTagParameters) : undefined,
   };
 }
 
@@ -102,14 +105,13 @@ function normalizeSource(source: VideoSource | number): NativeProps['source'] | 
     return undefined;
   }
 
-  const headers = source.headers === undefined ? undefined : JSON.stringify(source.headers);
   const drm = normalizeDrm(source.drm);
   const cmcd = normalizeCmcd(source.cmcd);
   const ad = normalizeAd(source.ad);
 
   return {
     ...source,
-    headers,
+    headers: toNativeStringMapEntries(source.headers),
     drm,
     cmcd,
     ad,

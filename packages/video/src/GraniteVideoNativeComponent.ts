@@ -20,11 +20,16 @@ interface NativeVideoMetadata {
   imageUri?: string;
 }
 
+interface NativeStringMapEntry {
+  name: string;
+  value: string;
+}
+
 // Native DRM config (source-embedded DRM)
 interface NativeSourceDrmConfig {
   type?: string;
   licenseServer?: string;
-  headers?: string; // serialized object
+  headers?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
   contentId?: string;
   certificateUrl?: string;
   base64Certificate?: boolean;
@@ -35,10 +40,10 @@ interface NativeSourceDrmConfig {
 // Native CMCD config
 interface NativeCmcdConfiguration {
   mode?: Int32;
-  request?: string; // serialized object
-  session?: string; // serialized object
-  object?: string; // serialized object
-  status?: string; // serialized object
+  request?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
+  session?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
+  object?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
+  status?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
 }
 
 // Native text track
@@ -59,7 +64,7 @@ interface NativeAdsConfig {
   videoId?: string;
   assetKey?: string;
   format?: string;
-  adTagParameters?: string; // serialized object
+  adTagParameters?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
   fallbackUri?: string;
 }
 
@@ -86,7 +91,7 @@ interface NativeSourceBufferConfig {
 interface NativeVideoSource {
   uri?: string;
   type?: string;
-  headers?: string; // serialized object
+  headers?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
   startTime?: Double;
   endTime?: Double;
   isNetwork?: boolean;
@@ -129,7 +134,7 @@ interface NativeSelectedVideoTrack {
 interface NativeDrmConfig {
   type?: string;
   licenseServer?: string;
-  headers?: string; // serialized object
+  headers?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
   contentId?: string;
   certificateUrl?: string;
   base64Certificate?: boolean;
