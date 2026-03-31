@@ -12,6 +12,7 @@ import run.granite.image.GraniteImagePriority
 import run.granite.image.GraniteImageCachePolicy
 import run.granite.image.GraniteImageProgressCallback
 import run.granite.image.GraniteImageCompletionCallback
+import coil.Coil
 import coil.load
 import coil.request.CachePolicy
 import coil.request.ErrorResult
@@ -152,5 +153,15 @@ class CoilImageProvider : GraniteImageProvider {
     ) {
         // Coil preload is not directly supported without a context
         onCompletion?.invoke(false, 0, 0, "Preload not supported without context")
+    }
+
+    override fun clearMemoryCache(context: Context) {
+        Coil.imageLoader(context).memoryCache?.clear()
+        Log.d(TAG, "Memory cache cleared (Coil 2.x)")
+    }
+
+    override fun clearDiskCache(context: Context) {
+        // Coil 2.x: no public API for diskCache — no-op
+        Log.d(TAG, "Disk cache clear not supported (Coil 2.x)")
     }
 }
