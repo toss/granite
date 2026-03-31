@@ -123,14 +123,11 @@ class GraniteImage(context: Context) : FrameLayout(context) {
     }
 
     fun setPriority(priority: String?) {
-        currentPriority = when (priority) {
-            "low" -> GraniteImagePriority.LOW
-            "high" -> GraniteImagePriority.HIGH
-            else -> GraniteImagePriority.NORMAL
-        }
+        currentPriority = GraniteImagePriority.fromString(priority)
     }
 
     fun setCachePolicy(cachePolicy: String?) {
+        // View-side API uses canonical names: "memory", "none", "disk" (default)
         currentCachePolicy = when (cachePolicy) {
             "memory" -> GraniteImageCachePolicy.MEMORY
             "none" -> GraniteImageCachePolicy.NONE

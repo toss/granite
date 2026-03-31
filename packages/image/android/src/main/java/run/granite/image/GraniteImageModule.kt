@@ -69,12 +69,10 @@ class GraniteImageModule(reactContext: ReactApplicationContext) : ReactContextBa
                     }
 
                     val priorityStr = source.optString("priority", "normal")
-                    val priority = when (priorityStr) {
-                        "high" -> GraniteImagePriority.HIGH
-                        "low" -> GraniteImagePriority.LOW
-                        else -> GraniteImagePriority.NORMAL
-                    }
+                    val priority = GraniteImagePriority.fromString(priorityStr)
 
+                    // Module-side API uses FastImage-compatible names: "cacheOnly", "web"
+                    // (intentionally different from View-side API which uses "memory", "none")
                     val cacheStr = source.optString("cache", "")
                     val cachePolicy = when (cacheStr) {
                         "cacheOnly" -> GraniteImageCachePolicy.DISK

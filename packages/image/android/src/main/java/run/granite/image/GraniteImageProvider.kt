@@ -9,7 +9,15 @@ import android.widget.ImageView
  * Priority levels for image loading
  */
 enum class GraniteImagePriority {
-    LOW, NORMAL, HIGH
+    LOW, NORMAL, HIGH;
+
+    companion object {
+        fun fromString(value: String?): GraniteImagePriority = when (value) {
+            "low" -> LOW
+            "high" -> HIGH
+            else -> NORMAL
+        }
+    }
 }
 
 /**
