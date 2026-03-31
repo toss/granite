@@ -655,6 +655,7 @@ using namespace facebook::react;
 {
     [super prepareForRecycle];
     [_provider unload];
+    _props = std::make_shared<const GraniteVideoViewProps>();
 }
 
 - (void)dealloc
