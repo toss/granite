@@ -24,12 +24,6 @@ import NativeGraniteVideoView, {
   OnVideoPlaybackRateChangeEvent,
   OnVideoVolumeChangeEvent,
   OnVideoAudioFocusChangedEvent,
-  OnVideoAudioTracksEvent,
-  OnVideoTextTracksEvent,
-  OnVideoTextTrackDataChangedEvent,
-  OnVideoVideoTracksEvent,
-  OnVideoTimedMetadataEvent,
-  OnVideoReceiveAdEvent,
   OnVideoPictureInPictureStatusChangedEvent,
   OnVideoControlsVisibilityChangeEvent,
   OnVideoExternalPlaybackChangeEvent,
@@ -41,11 +35,6 @@ import type {
   VideoSource,
   VideoProps,
   OnLoadData,
-  OnAudioTracksData,
-  OnTextTracksData,
-  OnTextTrackDataChangedData,
-  OnVideoTracksData,
-  OnTimedMetadataData,
 } from './types';
 
 const { GraniteVideoModule } = NativeModules;
@@ -246,11 +235,6 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     onIdle,
     onReadyForDisplay,
     onAudioFocusChanged,
-    onAudioTracks,
-    onTextTracks,
-    onTextTrackDataChanged,
-    onVideoTracks,
-    onTimedMetadata,
     onAudioBecomingNoisy,
     onFullscreenPlayerWillPresent,
     onFullscreenPlayerDidPresent,
@@ -261,7 +245,6 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     onControlsVisibilityChange,
     onExternalPlaybackChange,
     onAspectRatio,
-    onReceiveAdEvent,
     onTransferEnd,
   } = props;
 
@@ -436,41 +419,6 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     [onAudioFocusChanged]
   );
 
-  const handleAudioTracks = useCallback(
-    (event: NativeSyntheticEvent<OnVideoAudioTracksEvent>) => {
-      onAudioTracks?.(event.nativeEvent as OnAudioTracksData);
-    },
-    [onAudioTracks]
-  );
-
-  const handleTextTracks = useCallback(
-    (event: NativeSyntheticEvent<OnVideoTextTracksEvent>) => {
-      onTextTracks?.(event.nativeEvent as OnTextTracksData);
-    },
-    [onTextTracks]
-  );
-
-  const handleTextTrackDataChanged = useCallback(
-    (event: NativeSyntheticEvent<OnVideoTextTrackDataChangedEvent>) => {
-      onTextTrackDataChanged?.(event.nativeEvent as OnTextTrackDataChangedData);
-    },
-    [onTextTrackDataChanged]
-  );
-
-  const handleVideoTracks = useCallback(
-    (event: NativeSyntheticEvent<OnVideoVideoTracksEvent>) => {
-      onVideoTracks?.(event.nativeEvent as OnVideoTracksData);
-    },
-    [onVideoTracks]
-  );
-
-  const handleTimedMetadata = useCallback(
-    (event: NativeSyntheticEvent<OnVideoTimedMetadataEvent>) => {
-      onTimedMetadata?.(event.nativeEvent as OnTimedMetadataData);
-    },
-    [onTimedMetadata]
-  );
-
   const handleAudioBecomingNoisy = useCallback(() => {
     onAudioBecomingNoisy?.();
   }, [onAudioBecomingNoisy]);
@@ -521,13 +469,6 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
       onAspectRatio?.(event.nativeEvent);
     },
     [onAspectRatio]
-  );
-
-  const handleReceiveAdEvent = useCallback(
-    (event: NativeSyntheticEvent<OnVideoReceiveAdEvent>) => {
-      onReceiveAdEvent?.(event.nativeEvent);
-    },
-    [onReceiveAdEvent]
   );
 
   const handleTransferEnd = useCallback(
@@ -606,12 +547,6 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
         onVideoIdle={handleIdle}
         onVideoReadyForDisplay={handleReadyForDisplay}
         onVideoAudioFocusChanged={handleAudioFocusChanged}
-        onVideoAudioTracks={handleAudioTracks}
-        onVideoTextTracks={handleTextTracks}
-        onVideoTextTrackDataChanged={handleTextTrackDataChanged}
-        onVideoVideoTracks={handleVideoTracks}
-        onVideoTimedMetadata={handleTimedMetadata}
-        onVideoReceiveAdEvent={handleReceiveAdEvent}
         onVideoAudioBecomingNoisy={handleAudioBecomingNoisy}
         onVideoFullscreenPlayerWillPresent={handleFullscreenPlayerWillPresent}
         onVideoFullscreenPlayerDidPresent={handleFullscreenPlayerDidPresent}

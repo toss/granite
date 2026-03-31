@@ -203,54 +203,6 @@ export type OnVideoAudioFocusChangedEvent = Readonly<{
   hasAudioFocus: boolean;
 }>;
 
-export type OnVideoAudioTracksEvent = Readonly<{
-  audioTracks: {
-    index: Int32;
-    title?: string;
-    language?: string;
-    bitrate?: Double;
-    type?: string;
-    selected?: boolean;
-  }[];
-}>;
-
-export type OnVideoTextTracksEvent = Readonly<{
-  textTracks: {
-    index: Int32;
-    title?: string;
-    language?: string;
-    type?: string;
-    selected?: boolean;
-  }[];
-}>;
-
-export type OnVideoTextTrackDataChangedEvent = Readonly<{
-  subtitleTracks: string;
-}>;
-
-export type OnVideoVideoTracksEvent = Readonly<{
-  videoTracks: {
-    index: Int32;
-    trackId?: string;
-    codecs?: string;
-    width?: Int32;
-    height?: Int32;
-    bitrate?: Double;
-    selected?: boolean;
-  }[];
-}>;
-
-export type OnVideoTimedMetadataEvent = Readonly<{
-  metadata: {
-    value: string;
-    identifier: string;
-  }[];
-}>;
-
-export type OnVideoReceiveAdEvent = Readonly<{
-  event: string;
-}>;
-
 export type OnVideoPictureInPictureStatusChangedEvent = Readonly<{
   isActive: boolean;
 }>;
@@ -364,12 +316,6 @@ export interface NativeProps extends ViewProps {
   onVideoIdle?: DirectEventHandler<null>;
   onVideoReadyForDisplay?: DirectEventHandler<null>;
   onVideoAudioFocusChanged?: DirectEventHandler<OnVideoAudioFocusChangedEvent>;
-  onVideoAudioTracks?: DirectEventHandler<OnVideoAudioTracksEvent>;
-  onVideoTextTracks?: DirectEventHandler<OnVideoTextTracksEvent>;
-  onVideoTextTrackDataChanged?: DirectEventHandler<OnVideoTextTrackDataChangedEvent>;
-  onVideoVideoTracks?: DirectEventHandler<OnVideoVideoTracksEvent>;
-  onVideoTimedMetadata?: DirectEventHandler<OnVideoTimedMetadataEvent>;
-  onVideoReceiveAdEvent?: DirectEventHandler<OnVideoReceiveAdEvent>;
   onVideoAudioBecomingNoisy?: DirectEventHandler<null>;
   onVideoFullscreenPlayerWillPresent?: DirectEventHandler<null>;
   onVideoFullscreenPlayerDidPresent?: DirectEventHandler<null>;
