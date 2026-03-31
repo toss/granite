@@ -13,7 +13,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.uimanager.UIManagerHelper
-import com.facebook.react.uimanager.events.EventDispatcher
+import com.facebook.react.uimanager.events.Event
 import org.json.JSONObject
 
 /**
@@ -39,46 +39,25 @@ class GraniteImage(context: Context) : FrameLayout(context) {
         Log.d(TAG, "GraniteImage initialized")
     }
 
-    // Event dispatching methods using modern EventDispatcher
-    private fun getEventDispatcher(): EventDispatcher? {
-        val reactContext = context as? ReactContext ?: return null
-        return UIManagerHelper.getEventDispatcherForReactTag(reactContext, id)
+    private fun dispatchEvent(event: Event<*>) {
+        val reactContext = context as? ReactContext ?: return
+        UIManagerHelper.getEventDispatcherForReactTag(reactContext, id)?.dispatchEvent(event)
     }
 
-    private fun emitLoadStart() {
-        Log.d(TAG, "emitLoadStart")
-        getEventDispatcher()?.dispatchEvent(
-            GraniteImageLoadStartEvent(UIManagerHelper.getSurfaceId(this), id)
-        )
-    }
+    private fun emitLoadStart() =
+        dispatchEvent(GraniteImageLoadStartEvent(UIManagerHelper.getSurfaceId(this), id))
 
-    private fun emitProgress(loaded: Int, total: Int) {
-        Log.d(TAG, "emitProgress: $loaded / $total")
-        getEventDispatcher()?.dispatchEvent(
-            GraniteImageProgressEvent(UIManagerHelper.getSurfaceId(this), id, loaded, total)
-        )
-    }
+    private fun emitProgress(loaded: Int, total: Int) =
+        dispatchEvent(GraniteImageProgressEvent(UIManagerHelper.getSurfaceId(this), id, loaded, total))
 
-    private fun emitLoad(width: Int, height: Int) {
-        Log.d(TAG, "emitLoad: ${width}x${height}")
-        getEventDispatcher()?.dispatchEvent(
-            GraniteImageLoadEvent(UIManagerHelper.getSurfaceId(this), id, width, height)
-        )
-    }
+    private fun emitLoad(width: Int, height: Int) =
+        dispatchEvent(GraniteImageLoadEvent(UIManagerHelper.getSurfaceId(this), id, width, height))
 
-    private fun emitError(error: String) {
-        Log.d(TAG, "emitError: $error")
-        getEventDispatcher()?.dispatchEvent(
-            GraniteImageErrorEvent(UIManagerHelper.getSurfaceId(this), id, error)
-        )
-    }
+    private fun emitError(error: String) =
+        dispatchEvent(GraniteImageErrorEvent(UIManagerHelper.getSurfaceId(this), id, error))
 
-    private fun emitLoadEnd() {
-        Log.d(TAG, "emitLoadEnd")
-        getEventDispatcher()?.dispatchEvent(
-            GraniteImageLoadEndEvent(UIManagerHelper.getSurfaceId(this), id)
-        )
-    }
+    private fun emitLoadEnd() =
+        dispatchEvent(GraniteImageLoadEndEvent(UIManagerHelper.getSurfaceId(this), id))
 
     fun setUri(uri: String?) {
         if (uri != currentUri) {

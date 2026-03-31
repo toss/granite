@@ -18,6 +18,7 @@ import coil.Coil
 import coil.load
 import coil.request.CachePolicy
 import coil.request.ErrorResult
+import coil.request.ImageRequest
 import coil.request.SuccessResult
 
 /**
@@ -49,22 +50,7 @@ class CoilImageProvider : GraniteImageProvider {
         progressCallback: GraniteImageProgressCallback?,
         completionCallback: GraniteImageCompletionCallback?
     ) {
-        val imageView: ImageView? = if (into != null) {
-            if (into !is ImageView) {
-                Log.e(TAG, "View is not an ImageView")
-                completionCallback?.invoke(null, Exception("View is not an ImageView"), 0, 0)
-                return
-            }
-            into.scaleType = scaleType
-            into
-        } else {
-            null
-        }
-
-        if (imageView == null) {
-            completionCallback?.invoke(null, Exception("No view provided"), 0, 0)
-            return
-        }
+        val imageView = validateImageView(into, scaleType, completionCallback) ?: return
 
         if (!isValidImageUrl(url)) {
             Log.e(TAG, "Invalid URL: $url")
@@ -73,52 +59,72 @@ class CoilImageProvider : GraniteImageProvider {
         }
 
         imageView.load(url) {
-            // Add headers if provided
-            headers?.forEach { (key, value) ->
-                addHeader(key, value)
-            }
-
-            // Apply cache policy
-            when (cachePolicy) {
-                GraniteImageCachePolicy.NONE -> {
-                    memoryCachePolicy(CachePolicy.DISABLED)
-                    diskCachePolicy(CachePolicy.DISABLED)
-                }
-                GraniteImageCachePolicy.MEMORY -> {
-                    memoryCachePolicy(CachePolicy.ENABLED)
-                    diskCachePolicy(CachePolicy.DISABLED)
-                }
-                GraniteImageCachePolicy.DISK -> {
-                    memoryCachePolicy(CachePolicy.ENABLED)
-                    diskCachePolicy(CachePolicy.ENABLED)
-                }
-            }
-
-            // Apply default source (placeholder)
-            if (!defaultSource.isNullOrEmpty()) {
-                val resourceId = imageView.context.resources.getIdentifier(defaultSource, "drawable", imageView.context.packageName)
-                if (resourceId != 0) {
-                    placeholder(resourceId)
-                }
-            }
-
+            headers?.forEach { (key, value) -> addHeader(key, value) }
+            applyCachePolicy(cachePolicy)
+            applyPlaceholder(imageView.context, defaultSource)
             listener(
-                onStart = {
-                    Log.d(TAG, "Loading started: $url")
-                },
-                onSuccess = { _, result ->
-                    val bitmap = (result.drawable as? BitmapDrawable)?.bitmap
-                    val width = bitmap?.width ?: 0
-                    val height = bitmap?.height ?: 0
-                    Log.d(TAG, "Loaded with Coil: $url")
-                    completionCallback?.invoke(bitmap, null, width, height)
-                },
-                onError = { _, result ->
-                    Log.e(TAG, "Error loading image: ${result.throwable.message}")
-                    completionCallback?.invoke(null, result.throwable as? Exception, 0, 0)
-                }
+                onStart = { Log.d(TAG, "Loading started: $url") },
+                onSuccess = { _, result -> handleSuccess(result, url, completionCallback) },
+                onError = { _, result -> handleError(result, completionCallback) }
             )
         }
+    }
+
+    private fun validateImageView(
+        into: View?,
+        scaleType: ImageView.ScaleType,
+        completionCallback: GraniteImageCompletionCallback?
+    ): ImageView? {
+        if (into == null) {
+            completionCallback?.invoke(null, Exception("No view provided"), 0, 0)
+            return null
+        }
+        if (into !is ImageView) {
+            Log.e(TAG, "View is not an ImageView")
+            completionCallback?.invoke(null, Exception("View is not an ImageView"), 0, 0)
+            return null
+        }
+        into.scaleType = scaleType
+        return into
+    }
+
+    private fun ImageRequest.Builder.applyCachePolicy(cachePolicy: GraniteImageCachePolicy) {
+        when (cachePolicy) {
+            GraniteImageCachePolicy.NONE -> {
+                memoryCachePolicy(CachePolicy.DISABLED)
+                diskCachePolicy(CachePolicy.DISABLED)
+            }
+            GraniteImageCachePolicy.MEMORY -> {
+                memoryCachePolicy(CachePolicy.ENABLED)
+                diskCachePolicy(CachePolicy.DISABLED)
+            }
+            GraniteImageCachePolicy.DISK -> {
+                memoryCachePolicy(CachePolicy.ENABLED)
+                diskCachePolicy(CachePolicy.ENABLED)
+            }
+        }
+    }
+
+    private fun ImageRequest.Builder.applyPlaceholder(context: Context, defaultSource: String?) {
+        if (!defaultSource.isNullOrEmpty()) {
+            val resourceId = context.resources.getIdentifier(defaultSource, "drawable", context.packageName)
+            if (resourceId != 0) placeholder(resourceId)
+        }
+    }
+
+    private fun handleSuccess(
+        result: SuccessResult,
+        url: String,
+        completionCallback: GraniteImageCompletionCallback?
+    ) {
+        val bitmap = (result.drawable as? BitmapDrawable)?.bitmap
+        Log.d(TAG, "Loaded with Coil: $url")
+        completionCallback?.invoke(bitmap, null, bitmap?.width ?: 0, bitmap?.height ?: 0)
+    }
+
+    private fun handleError(result: ErrorResult, completionCallback: GraniteImageCompletionCallback?) {
+        Log.e(TAG, "Error loading image: ${result.throwable.message}")
+        completionCallback?.invoke(null, result.throwable as? Exception, 0, 0)
     }
 
     override fun cancelLoad(view: View) {

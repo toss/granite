@@ -43,56 +43,73 @@ class GraniteImageModule(
             try {
                 val sources = JSONArray(sourcesJson)
                 val totalCount = sources.length()
-                val completedCount = AtomicInteger(0)
-                val successCount = AtomicInteger(0)
-                val failCount = AtomicInteger(0)
 
                 if (totalCount == 0) {
                     promise.resolve(null)
                     return@execute
                 }
 
-                for (i in 0 until sources.length()) {
-                    val source = sources.getJSONObject(i)
-                    val preloadSource = parsePreloadSource(source)
-                    if (preloadSource.uri.isEmpty()) {
-                        if (completedCount.incrementAndGet() == totalCount) {
-                            Log.d(TAG, "Preload completed: ${successCount.get()} succeeded, ${failCount.get()} failed")
-                            promise.resolve(null)
-                        }
-                        continue
-                    }
+                val completedCount = AtomicInteger(0)
+                val successCount = AtomicInteger(0)
+                val failCount = AtomicInteger(0)
 
-                    Log.d(TAG, "Preloading: ${preloadSource.uri}")
-
-                    // Call provider's preload method (loadImage with null view for preload)
-                    provider.loadImage(
-                        url = preloadSource.uri,
-                        imageView = null,
-                        contentMode = "cover",
-                        headers = preloadSource.headers,
-                        priority = preloadSource.priority,
-                        cachePolicy = preloadSource.cachePolicy,
-                        onProgress = null,
-                        onCompletion = { success, width, height, error ->
-                            if (success) {
-                                Log.d(TAG, "Preloaded successfully: ${preloadSource.uri} (${width}x${height})")
-                                successCount.incrementAndGet()
-                            } else {
-                                Log.d(TAG, "Preload failed for ${preloadSource.uri}: $error")
-                                failCount.incrementAndGet()
-                            }
-                            if (completedCount.incrementAndGet() == totalCount) {
-                                Log.d(TAG, "Preload completed: ${successCount.get()} succeeded, ${failCount.get()} failed")
-                                promise.resolve(null)
-                            }
-                        }
-                    )
+                for (i in 0 until totalCount) {
+                    val preloadSource = parsePreloadSource(sources.getJSONObject(i))
+                    preloadSingle(provider, preloadSource, completedCount, successCount, failCount, totalCount, promise)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to parse sources JSON: ${e.message}")
                 promise.reject("PARSE_ERROR", "Failed to parse sources JSON: ${e.message}")
             }
+        }
+    }
+
+    private fun preloadSingle(
+        provider: GraniteImageProvider,
+        source: PreloadSource,
+        completedCount: AtomicInteger,
+        successCount: AtomicInteger,
+        failCount: AtomicInteger,
+        totalCount: Int,
+        promise: Promise
+    ) {
+        if (source.uri.isEmpty()) {
+            checkPreloadCompletion(completedCount, successCount, failCount, totalCount, promise)
+            return
+        }
+
+        Log.d(TAG, "Preloading: ${source.uri}")
+        provider.loadImage(
+            url = source.uri,
+            imageView = null,
+            contentMode = "cover",
+            headers = source.headers,
+            priority = source.priority,
+            cachePolicy = source.cachePolicy,
+            onProgress = null,
+            onCompletion = { success, width, height, error ->
+                if (success) {
+                    Log.d(TAG, "Preloaded successfully: ${source.uri} (${width}x${height})")
+                    successCount.incrementAndGet()
+                } else {
+                    Log.d(TAG, "Preload failed for ${source.uri}: $error")
+                    failCount.incrementAndGet()
+                }
+                checkPreloadCompletion(completedCount, successCount, failCount, totalCount, promise)
+            }
+        )
+    }
+
+    private fun checkPreloadCompletion(
+        completedCount: AtomicInteger,
+        successCount: AtomicInteger,
+        failCount: AtomicInteger,
+        totalCount: Int,
+        promise: Promise
+    ) {
+        if (completedCount.incrementAndGet() == totalCount) {
+            Log.d(TAG, "Preload completed: ${successCount.get()} succeeded, ${failCount.get()} failed")
+            promise.resolve(null)
         }
     }
 

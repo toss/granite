@@ -136,54 +136,23 @@ class OkHttpImageProvider : GraniteImageProvider {
         completionCallback: GraniteImageCompletionCallback?
     ) {
         if (!response.isSuccessful) {
-            val error = Exception("HTTP error: ${response.code}")
-            Log.e(TAG, "HTTP error: ${response.code}")
-            mainHandler.post {
-                completionCallback?.invoke(null, error, 0, 0)
-            }
+            postError(Exception("HTTP error: ${response.code}"), completionCallback)
             return
         }
 
         val body = response.body
         if (body == null) {
-            val error = Exception("No data received")
-            Log.e(TAG, "No data received")
-            mainHandler.post {
-                completionCallback?.invoke(null, error, 0, 0)
-            }
+            postError(Exception("No data received"), completionCallback)
             return
         }
 
-        // Get content length for progress
-        val contentLength = body.contentLength()
-
-        // Read bytes with progress reporting
-        val inputStream = body.byteStream()
-        var totalBytesRead = 0L
-        val buffer = ByteArray(8192)
-        var bytesRead: Int
-
         try {
-            val outputStream = ByteArrayOutputStream()
-            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                outputStream.write(buffer, 0, bytesRead)
-                totalBytesRead += bytesRead
-                if (contentLength > 0) {
-                    progressCallback?.invoke(totalBytesRead, contentLength)
-                }
-            }
-            val imageBytes = outputStream.toByteArray()
-
-            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            val imageBytes = readResponseBytes(body, progressCallback)
+            val bitmap = decodeBitmap(imageBytes)
             if (bitmap == null) {
-                val error = Exception("Failed to decode image data")
-                Log.e(TAG, "Failed to decode image data")
-                mainHandler.post {
-                    completionCallback?.invoke(null, error, 0, 0)
-                }
+                postError(Exception("Failed to decode image data"), completionCallback)
                 return
             }
-
             mainHandler.post {
                 imageView?.setImageBitmap(bitmap)
                 Log.d(TAG, "Loaded with OkHttp: $url")
@@ -191,10 +160,35 @@ class OkHttpImageProvider : GraniteImageProvider {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error reading image data: ${e.message}")
-            mainHandler.post {
-                completionCallback?.invoke(null, e, 0, 0)
-            }
+            mainHandler.post { completionCallback?.invoke(null, e, 0, 0) }
         }
+    }
+
+    private fun readResponseBytes(
+        body: okhttp3.ResponseBody,
+        progressCallback: GraniteImageProgressCallback?
+    ): ByteArray {
+        val contentLength = body.contentLength()
+        val inputStream = body.byteStream()
+        val outputStream = ByteArrayOutputStream()
+        val buffer = ByteArray(8192)
+        var totalBytesRead = 0L
+        var bytesRead: Int
+        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+            outputStream.write(buffer, 0, bytesRead)
+            totalBytesRead += bytesRead
+            if (contentLength > 0) progressCallback?.invoke(totalBytesRead, contentLength)
+        }
+        return outputStream.toByteArray()
+    }
+
+    private fun decodeBitmap(imageBytes: ByteArray): Bitmap? {
+        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+    }
+
+    private fun postError(error: Exception, completionCallback: GraniteImageCompletionCallback?) {
+        Log.e(TAG, error.message ?: "Unknown error")
+        mainHandler.post { completionCallback?.invoke(null, error, 0, 0) }
     }
 
     override fun cancelLoad(view: View) {
