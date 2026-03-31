@@ -13,7 +13,11 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
 @ReactModule(name = GraniteImageModule.NAME)
-class GraniteImageModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+class GraniteImageModule(
+    reactContext: ReactApplicationContext,
+    private val providerResolver: () -> GraniteImageProvider? = { GraniteImageRegistry.provider },
+    private val executor: ExecutorService = Executors.newFixedThreadPool(4)
+) : ReactContextBaseJavaModule(reactContext) {
 
     private data class PreloadSource(
         val uri: String,
@@ -22,20 +26,13 @@ class GraniteImageModule(reactContext: ReactApplicationContext) : ReactContextBa
         val cachePolicy: GraniteImageCachePolicy
     )
 
-    companion object {
-        const val NAME = "GraniteImageModule"
-        private const val TAG = "GraniteImageModule"
-    }
-
-    private val executor = Executors.newFixedThreadPool(4)
-
     override fun getName(): String = NAME
 
     @ReactMethod
     fun preload(sourcesJson: String, promise: Promise) {
         Log.d(TAG, "preload called with: $sourcesJson")
 
-        val provider = GraniteImageRegistry.provider
+        val provider = providerResolver()
         if (provider == null) {
             Log.w(TAG, "No provider registered, cannot preload")
             promise.reject("NO_PROVIDER", "No provider registered, cannot preload")
@@ -135,7 +132,7 @@ class GraniteImageModule(reactContext: ReactApplicationContext) : ReactContextBa
     @ReactMethod
     fun clearMemoryCache(promise: Promise) {
         Log.d(TAG, "clearMemoryCache called")
-        val provider = GraniteImageRegistry.provider
+        val provider = providerResolver()
         val context = reactApplicationContext
         if (provider != null) {
             provider.clearMemoryCache(context)
@@ -146,11 +143,16 @@ class GraniteImageModule(reactContext: ReactApplicationContext) : ReactContextBa
     @ReactMethod
     fun clearDiskCache(promise: Promise) {
         Log.d(TAG, "clearDiskCache called")
-        val provider = GraniteImageRegistry.provider
+        val provider = providerResolver()
         val context = reactApplicationContext
         if (provider != null) {
             provider.clearDiskCache(context)
         }
         promise.resolve(null)
+    }
+
+    companion object {
+        const val NAME = "GraniteImageModule"
+        private const val TAG = "GraniteImageModule"
     }
 }

@@ -30,10 +30,6 @@ import java.util.concurrent.TimeUnit
  * This is analogous to iOS's URLSessionImageProvider.
  */
 class OkHttpImageProvider : GraniteImageProvider {
-    companion object {
-        private const val TAG = "OkHttpImageProvider"
-    }
-
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
@@ -251,5 +247,9 @@ class OkHttpImageProvider : GraniteImageProvider {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to clear disk cache: ${e.message}")
         }
+    }
+
+    companion object {
+        private const val TAG = "OkHttpImageProvider"
     }
 }

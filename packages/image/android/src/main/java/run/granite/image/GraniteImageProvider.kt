@@ -21,6 +21,7 @@ enum class GraniteImagePriority {
     }
 }
 
+
 /**
  * Cache policy for image loading
  */

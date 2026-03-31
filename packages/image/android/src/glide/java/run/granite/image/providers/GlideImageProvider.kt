@@ -4,14 +4,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import run.granite.image.GraniteImageProvider
-import run.granite.image.GraniteImagePriority
-import run.granite.image.GraniteImageCachePolicy
-import run.granite.image.GraniteImageProgressCallback
-import run.granite.image.GraniteImageCompletionCallback
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -21,18 +18,17 @@ import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.Priority as GlidePriority
-import android.os.Handler
-import android.os.Looper
+import run.granite.image.GraniteImageProvider
+import run.granite.image.GraniteImagePriority
+import run.granite.image.GraniteImageCachePolicy
+import run.granite.image.GraniteImageProgressCallback
+import run.granite.image.GraniteImageCompletionCallback
 import java.util.concurrent.Executors
 
 /**
  * GraniteImageProvider implementation using Glide.
  */
 class GlideImageProvider : GraniteImageProvider {
-    companion object {
-        private const val TAG = "GlideImageProvider"
-    }
-
     override fun loadImage(url: String, into: View, scaleType: ImageView.ScaleType) {
         loadImage(url, into, scaleType, null, GraniteImagePriority.NORMAL, GraniteImageCachePolicy.DISK, null, null, null)
     }
@@ -188,5 +184,9 @@ class GlideImageProvider : GraniteImageProvider {
             }
         }
         Log.d(TAG, "Disk cache cleared (Glide)")
+    }
+
+    companion object {
+        private const val TAG = "GlideImageProvider"
     }
 }

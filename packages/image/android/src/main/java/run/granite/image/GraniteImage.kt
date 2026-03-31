@@ -21,9 +21,7 @@ import org.json.JSONObject
  * It delegates actual image loading to the registered GraniteImageProvider.
  */
 class GraniteImage(context: Context) : FrameLayout(context) {
-    companion object {
-        private const val TAG = "GraniteImage"
-    }
+    internal var providerResolver: () -> GraniteImageProvider? = { GraniteImageRegistry.provider }
 
     private var containerView: View? = null
     private var currentUri: String? = null
@@ -159,7 +157,7 @@ class GraniteImage(context: Context) : FrameLayout(context) {
             containerView = null
         }
 
-        val provider = GraniteImageRegistry.provider
+        val provider = providerResolver()
 
         if (provider == null) {
             showErrorView("No GraniteImageProvider registered")
@@ -273,12 +271,16 @@ class GraniteImage(context: Context) : FrameLayout(context) {
     }
 
     fun cleanup() {
-        val provider = GraniteImageRegistry.provider
+        val provider = providerResolver()
         containerView?.let {
             provider?.cancelLoad(it)
             removeView(it)
         }
         containerView = null
         currentUri = null
+    }
+
+    companion object {
+        private const val TAG = "GraniteImage"
     }
 }

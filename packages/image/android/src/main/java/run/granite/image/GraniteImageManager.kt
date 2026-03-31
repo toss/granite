@@ -1,14 +1,12 @@
 package run.granite.image
 
 import android.util.Log
-import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.common.MapBuilder
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.uimanager.annotations.ReactProp
-import com.facebook.react.uimanager.events.EventDispatcher
 import com.facebook.react.viewmanagers.GraniteImageManagerDelegate
 import com.facebook.react.viewmanagers.GraniteImageManagerInterface
 
@@ -18,11 +16,6 @@ import com.facebook.react.viewmanagers.GraniteImageManagerInterface
  */
 @ReactModule(name = GraniteImageManager.NAME)
 class GraniteImageManager : SimpleViewManager<GraniteImage>(), GraniteImageManagerInterface<GraniteImage> {
-    companion object {
-        const val NAME = "GraniteImage"
-        private const val TAG = "GraniteImageManager"
-    }
-
     private val delegate: ViewManagerDelegate<GraniteImage> = GraniteImageManagerDelegate(this)
 
     override fun getName(): String = NAME
@@ -96,5 +89,10 @@ class GraniteImageManager : SimpleViewManager<GraniteImage>(), GraniteImageManag
             .put("onGraniteError", MapBuilder.of("registrationName", "onGraniteError"))
             .put("onGraniteLoadEnd", MapBuilder.of("registrationName", "onGraniteLoadEnd"))
             .build()
+    }
+
+    companion object {
+        const val NAME = "GraniteImage"
+        private const val TAG = "GraniteImageManager"
     }
 }

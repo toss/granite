@@ -24,10 +24,6 @@ import coil.request.SuccessResult
  * GraniteImageProvider implementation using Coil.
  */
 class CoilImageProvider : GraniteImageProvider {
-    companion object {
-        private const val TAG = "CoilImageProvider"
-    }
-
     override fun loadImage(url: String, into: View, scaleType: ImageView.ScaleType) {
         loadImage(url, into, scaleType, null, GraniteImagePriority.NORMAL, GraniteImageCachePolicy.DISK, null, null, null)
     }
@@ -159,5 +155,9 @@ class CoilImageProvider : GraniteImageProvider {
     override fun clearDiskCache(context: Context) {
         // Coil 2.x: no public API for diskCache — no-op
         Log.d(TAG, "Disk cache clear not supported (Coil 2.x)")
+    }
+
+    companion object {
+        private const val TAG = "CoilImageProvider"
     }
 }
