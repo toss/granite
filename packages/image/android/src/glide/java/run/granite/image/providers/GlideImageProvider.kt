@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -32,12 +31,6 @@ import java.util.concurrent.Executors
 class GlideImageProvider : GraniteImageProvider {
     companion object {
         private const val TAG = "GlideImageProvider"
-    }
-
-    override fun createImageView(context: Context): View {
-        return ImageView(context).apply {
-            setBackgroundColor(android.graphics.Color.LTGRAY)
-        }
     }
 
     override fun loadImage(url: String, into: View, scaleType: ImageView.ScaleType) {
@@ -78,7 +71,11 @@ class GlideImageProvider : GraniteImageProvider {
             GlideUrl(url)
         }
 
-        val context = imageView?.context ?: return
+        val context = imageView?.context
+        if (context == null) {
+            completionCallback?.invoke(null, Exception("Glide requires a view context for image loading"), 0, 0)
+            return
+        }
 
         // Build request
         var requestBuilder = Glide.with(context)

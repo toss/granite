@@ -2,6 +2,7 @@ package run.granite.image
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.view.View
 import android.widget.ImageView
 
@@ -45,8 +46,13 @@ interface GraniteImageProvider {
     /**
      * Creates and returns a new View that will be used to display the image.
      * The returned view should be capable of displaying images (typically ImageView).
+     * Default implementation creates an ImageView with a light gray background.
      */
-    fun createImageView(context: Context): View
+    fun createImageView(context: Context): View {
+        return ImageView(context).apply {
+            setBackgroundColor(Color.LTGRAY)
+        }
+    }
 
     /**
      * Loads an image from the given URL into the provided view.

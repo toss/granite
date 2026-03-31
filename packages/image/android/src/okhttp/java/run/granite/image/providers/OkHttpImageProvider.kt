@@ -1,6 +1,5 @@
 package run.granite.image.providers
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
@@ -41,12 +40,6 @@ class OkHttpImageProvider : GraniteImageProvider {
         .build()
     private val activeCalls = ConcurrentHashMap<View, Call>()
     private val mainHandler = Handler(Looper.getMainLooper())
-
-    override fun createImageView(context: Context): View {
-        return ImageView(context).apply {
-            setBackgroundColor(android.graphics.Color.LTGRAY)
-        }
-    }
 
     override fun loadImage(url: String, into: View, scaleType: ImageView.ScaleType) {
         loadImage(url, into, scaleType, null, GraniteImagePriority.NORMAL, GraniteImageCachePolicy.DISK, null, null, null)

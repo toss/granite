@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -26,21 +28,15 @@ class CoilImageProvider : GraniteImageProvider {
         private const val TAG = "CoilImageProvider"
     }
 
-    override fun createImageView(context: Context): View {
-        return ImageView(context).apply {
-            setBackgroundColor(android.graphics.Color.LTGRAY)
-        }
-    }
-
     override fun loadImage(url: String, into: View, scaleType: ImageView.ScaleType) {
         loadImage(url, into, scaleType, null, GraniteImagePriority.NORMAL, GraniteImageCachePolicy.DISK, null, null, null)
     }
 
     private fun isValidImageUrl(url: String): Boolean {
         return try {
-            val uri = android.net.Uri.parse(url)
+            val uri = Uri.parse(url)
             val scheme = uri.scheme?.lowercase()
-            scheme == "http" || scheme == "https"
+            scheme == "http" || scheme == "https" || scheme == "file" || scheme == "content"
         } catch (e: Exception) {
             false
         }
@@ -115,7 +111,7 @@ class CoilImageProvider : GraniteImageProvider {
                     Log.d(TAG, "Loading started: $url")
                 },
                 onSuccess = { _, result ->
-                    val bitmap = (result.drawable as? android.graphics.drawable.BitmapDrawable)?.bitmap
+                    val bitmap = (result.drawable as? BitmapDrawable)?.bitmap
                     val width = bitmap?.width ?: 0
                     val height = bitmap?.height ?: 0
                     Log.d(TAG, "Loaded with Coil: $url")
