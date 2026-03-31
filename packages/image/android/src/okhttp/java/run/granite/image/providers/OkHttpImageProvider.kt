@@ -21,8 +21,9 @@ import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.util.WeakHashMap
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 /**
@@ -38,7 +39,7 @@ class OkHttpImageProvider : GraniteImageProvider {
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
-    private val activeCalls = WeakHashMap<View, Call>()
+    private val activeCalls = ConcurrentHashMap<View, Call>()
     private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun createImageView(context: Context): View {
@@ -120,69 +121,70 @@ class OkHttpImageProvider : GraniteImageProvider {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                if (into != null) {
-                    activeCalls.remove(into)
-                }
-
-                if (!response.isSuccessful) {
-                    val error = Exception("HTTP error: ${response.code}")
-                    Log.e(TAG, "HTTP error: ${response.code}")
-                    mainHandler.post {
-                        completionCallback?.invoke(null, error, 0, 0)
+                response.use {
+                    if (into != null) {
+                        activeCalls.remove(into)
                     }
-                    return
-                }
 
-                val body = response.body
-                if (body == null) {
-                    val error = Exception("No data received")
-                    Log.e(TAG, "No data received")
-                    mainHandler.post {
-                        completionCallback?.invoke(null, error, 0, 0)
-                    }
-                    return
-                }
-
-                // Get content length for progress
-                val contentLength = body.contentLength()
-
-                // Read bytes with progress reporting
-                val inputStream = body.byteStream()
-                val bytes = ByteArray(contentLength.toInt().coerceAtLeast(1024))
-                var totalBytesRead = 0L
-                val buffer = ByteArray(8192)
-                var bytesRead: Int
-
-                try {
-                    val outputStream = java.io.ByteArrayOutputStream()
-                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                        outputStream.write(buffer, 0, bytesRead)
-                        totalBytesRead += bytesRead
-                        if (contentLength > 0) {
-                            progressCallback?.invoke(totalBytesRead, contentLength)
-                        }
-                    }
-                    val imageBytes = outputStream.toByteArray()
-
-                    val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                    if (bitmap == null) {
-                        val error = Exception("Failed to decode image data")
-                        Log.e(TAG, "Failed to decode image data")
+                    if (!response.isSuccessful) {
+                        val error = Exception("HTTP error: ${response.code}")
+                        Log.e(TAG, "HTTP error: ${response.code}")
                         mainHandler.post {
                             completionCallback?.invoke(null, error, 0, 0)
                         }
-                        return
+                        return@use
                     }
 
-                    mainHandler.post {
-                        imageView?.setImageBitmap(bitmap)
-                        Log.d(TAG, "Loaded with OkHttp: $url")
-                        completionCallback?.invoke(bitmap, null, bitmap.width, bitmap.height)
+                    val body = response.body
+                    if (body == null) {
+                        val error = Exception("No data received")
+                        Log.e(TAG, "No data received")
+                        mainHandler.post {
+                            completionCallback?.invoke(null, error, 0, 0)
+                        }
+                        return@use
                     }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error reading image data: ${e.message}")
-                    mainHandler.post {
-                        completionCallback?.invoke(null, e, 0, 0)
+
+                    // Get content length for progress
+                    val contentLength = body.contentLength()
+
+                    // Read bytes with progress reporting
+                    val inputStream = body.byteStream()
+                    var totalBytesRead = 0L
+                    val buffer = ByteArray(8192)
+                    var bytesRead: Int
+
+                    try {
+                        val outputStream = ByteArrayOutputStream()
+                        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                            outputStream.write(buffer, 0, bytesRead)
+                            totalBytesRead += bytesRead
+                            if (contentLength > 0) {
+                                progressCallback?.invoke(totalBytesRead, contentLength)
+                            }
+                        }
+                        val imageBytes = outputStream.toByteArray()
+
+                        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                        if (bitmap == null) {
+                            val error = Exception("Failed to decode image data")
+                            Log.e(TAG, "Failed to decode image data")
+                            mainHandler.post {
+                                completionCallback?.invoke(null, error, 0, 0)
+                            }
+                            return@use
+                        }
+
+                        mainHandler.post {
+                            imageView?.setImageBitmap(bitmap)
+                            Log.d(TAG, "Loaded with OkHttp: $url")
+                            completionCallback?.invoke(bitmap, null, bitmap.width, bitmap.height)
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error reading image data: ${e.message}")
+                        mainHandler.post {
+                            completionCallback?.invoke(null, e, 0, 0)
+                        }
                     }
                 }
             }
