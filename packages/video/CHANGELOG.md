@@ -1,5 +1,14 @@
 # @granite-js/video
 
+## 1.0.12
+
+### Patch Changes
+
+- 61b8058: Add iOS native implementation for onVideoAudioFocusChanged event
+- 61b8058: Improvement to Granite Video Props
+
+## 1.0.11
+
 ## 1.0.10
 
 ## 1.0.9

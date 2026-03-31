@@ -64,6 +64,7 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
     style,
     progress,
     speed = 1,
+    duration,
     loop = true,
     autoPlay = false,
     resizeMode = 'contain',
@@ -112,6 +113,14 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
 
   // Resolve source
   const resolvedSource = useMemo(() => resolveSource(source), [source]);
+  const resolvedSpeed = useMemo(() => {
+    const { sourceJson } = resolvedSource;
+    if (duration && sourceJson && (source as AnimationObject).fr) {
+      // reference: https://github.com/lottie-react-native/lottie-react-native/blob/a7a99137b6cd947a4b2881e3a8c2214b114015bc/packages/core/src/LottieView/index.tsx#L119-L124
+      return Math.round((((source as AnimationObject).op / (source as AnimationObject).fr) * 1000) / duration);
+    }
+    return speed;
+  }, [duration, resolvedSource, source, speed]);
 
   // Event handlers
   const handleAnimationFinish = useCallback(
@@ -143,7 +152,7 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
     testID,
     ...resolvedSource,
     progress,
-    speed,
+    speed: resolvedSpeed,
     loop,
     autoPlay,
     resizeMode,
@@ -168,6 +177,7 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
   }
 
   return <NativeGraniteLottieView ref={nativeRef} {...nativeProps} />;
+
 });
 
 LottieView.displayName = 'LottieView';

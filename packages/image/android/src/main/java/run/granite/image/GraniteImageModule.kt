@@ -118,14 +118,22 @@ class GraniteImageModule(reactContext: ReactApplicationContext) : ReactContextBa
     @ReactMethod
     fun clearMemoryCache(promise: Promise) {
         Log.d(TAG, "clearMemoryCache called")
-        // Memory cache clearing depends on provider implementation
+        val provider = GraniteImageRegistry.provider
+        val context = reactApplicationContext
+        if (provider != null) {
+            provider.clearMemoryCache(context)
+        }
         promise.resolve(null)
     }
 
     @ReactMethod
     fun clearDiskCache(promise: Promise) {
         Log.d(TAG, "clearDiskCache called")
-        // Disk cache clearing depends on provider implementation
+        val provider = GraniteImageRegistry.provider
+        val context = reactApplicationContext
+        if (provider != null) {
+            provider.clearDiskCache(context)
+        }
         promise.resolve(null)
     }
 }

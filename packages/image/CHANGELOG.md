@@ -1,5 +1,13 @@
 # @granite-js/image
 
+## 1.0.12
+
+## 1.0.11
+
+### Patch Changes
+
+- 1ad07a5: Granite Image Props 개선
+
 ## 1.0.10
 
 ## 1.0.9

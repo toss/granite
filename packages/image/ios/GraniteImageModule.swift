@@ -94,14 +94,24 @@ class GraniteImageModule: NSObject {
     @objc func clearMemoryCache(_ resolve: @escaping RCTPromiseResolveBlock,
                                  reject: @escaping RCTPromiseRejectBlock) {
         NSLog("[GraniteImageModule] clearMemoryCache called")
-        URLCache.shared.removeAllCachedResponses()
+        if let provider = GraniteImageRegistry.shared.provider,
+           let clearMemory = provider.clearMemoryCache {
+            clearMemory()
+        } else {
+            URLCache.shared.removeAllCachedResponses()
+        }
         resolve(nil)
     }
 
     @objc func clearDiskCache(_ resolve: @escaping RCTPromiseResolveBlock,
                                reject: @escaping RCTPromiseRejectBlock) {
         NSLog("[GraniteImageModule] clearDiskCache called")
-        URLCache.shared.removeAllCachedResponses()
+        if let provider = GraniteImageRegistry.shared.provider,
+           let clearDisk = provider.clearDiskCache {
+            clearDisk()
+        } else {
+            URLCache.shared.removeAllCachedResponses()
+        }
         resolve(nil)
     }
 }
