@@ -1,6 +1,5 @@
 package run.granite.image.providers
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
@@ -21,8 +20,9 @@ import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.util.WeakHashMap
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 /**
@@ -30,22 +30,12 @@ import java.util.concurrent.TimeUnit
  * This is analogous to iOS's URLSessionImageProvider.
  */
 class OkHttpImageProvider : GraniteImageProvider {
-    companion object {
-        private const val TAG = "OkHttpImageProvider"
-    }
-
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
-    private val activeCalls = WeakHashMap<View, Call>()
+    private val activeCalls = ConcurrentHashMap<View, Call>()
     private val mainHandler = Handler(Looper.getMainLooper())
-
-    override fun createImageView(context: Context): View {
-        return ImageView(context).apply {
-            setBackgroundColor(android.graphics.Color.LTGRAY)
-        }
-    }
 
     override fun loadImage(url: String, into: View, scaleType: ImageView.ScaleType) {
         loadImage(url, into, scaleType, null, GraniteImagePriority.NORMAL, GraniteImageCachePolicy.DISK, null, null, null)
@@ -85,24 +75,7 @@ class OkHttpImageProvider : GraniteImageProvider {
             }
         }
 
-        val requestBuilder = Request.Builder().url(url)
-
-        // Add headers
-        headers?.forEach { (key, value) ->
-            requestBuilder.addHeader(key, value)
-        }
-
-        // Apply cache policy
-        when (cachePolicy) {
-            GraniteImageCachePolicy.NONE -> {
-                requestBuilder.cacheControl(CacheControl.FORCE_NETWORK)
-            }
-            GraniteImageCachePolicy.MEMORY, GraniteImageCachePolicy.DISK -> {
-                // Use default caching
-            }
-        }
-
-        val request = requestBuilder.build()
+        val request = buildRequest(url, headers, cachePolicy)
         val call = client.newCall(request)
         if (into != null) {
             activeCalls[into] = call
@@ -120,73 +93,102 @@ class OkHttpImageProvider : GraniteImageProvider {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                if (into != null) {
-                    activeCalls.remove(into)
-                }
-
-                if (!response.isSuccessful) {
-                    val error = Exception("HTTP error: ${response.code}")
-                    Log.e(TAG, "HTTP error: ${response.code}")
-                    mainHandler.post {
-                        completionCallback?.invoke(null, error, 0, 0)
+                response.use {
+                    if (into != null) {
+                        activeCalls.remove(into)
                     }
-                    return
-                }
-
-                val body = response.body
-                if (body == null) {
-                    val error = Exception("No data received")
-                    Log.e(TAG, "No data received")
-                    mainHandler.post {
-                        completionCallback?.invoke(null, error, 0, 0)
-                    }
-                    return
-                }
-
-                // Get content length for progress
-                val contentLength = body.contentLength()
-
-                // Read bytes with progress reporting
-                val inputStream = body.byteStream()
-                val bytes = ByteArray(contentLength.toInt().coerceAtLeast(1024))
-                var totalBytesRead = 0L
-                val buffer = ByteArray(8192)
-                var bytesRead: Int
-
-                try {
-                    val outputStream = java.io.ByteArrayOutputStream()
-                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                        outputStream.write(buffer, 0, bytesRead)
-                        totalBytesRead += bytesRead
-                        if (contentLength > 0) {
-                            progressCallback?.invoke(totalBytesRead, contentLength)
-                        }
-                    }
-                    val imageBytes = outputStream.toByteArray()
-
-                    val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                    if (bitmap == null) {
-                        val error = Exception("Failed to decode image data")
-                        Log.e(TAG, "Failed to decode image data")
-                        mainHandler.post {
-                            completionCallback?.invoke(null, error, 0, 0)
-                        }
-                        return
-                    }
-
-                    mainHandler.post {
-                        imageView?.setImageBitmap(bitmap)
-                        Log.d(TAG, "Loaded with OkHttp: $url")
-                        completionCallback?.invoke(bitmap, null, bitmap.width, bitmap.height)
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error reading image data: ${e.message}")
-                    mainHandler.post {
-                        completionCallback?.invoke(null, e, 0, 0)
-                    }
+                    handleResponse(response, imageView, url, progressCallback, completionCallback)
                 }
             }
         })
+    }
+
+    private fun buildRequest(
+        url: String,
+        headers: Map<String, String>?,
+        cachePolicy: GraniteImageCachePolicy
+    ): Request {
+        val requestBuilder = Request.Builder().url(url)
+
+        // Add headers
+        headers?.forEach { (key, value) ->
+            requestBuilder.addHeader(key, value)
+        }
+
+        // Apply cache policy
+        when (cachePolicy) {
+            GraniteImageCachePolicy.NONE -> {
+                requestBuilder.cacheControl(CacheControl.FORCE_NETWORK)
+            }
+            GraniteImageCachePolicy.MEMORY, GraniteImageCachePolicy.DISK -> {
+                // Use default caching
+            }
+        }
+
+        return requestBuilder.build()
+    }
+
+    private fun handleResponse(
+        response: Response,
+        imageView: ImageView?,
+        url: String,
+        progressCallback: GraniteImageProgressCallback?,
+        completionCallback: GraniteImageCompletionCallback?
+    ) {
+        if (!response.isSuccessful) {
+            postError(Exception("HTTP error: ${response.code}"), completionCallback)
+            return
+        }
+
+        val body = response.body
+        if (body == null) {
+            postError(Exception("No data received"), completionCallback)
+            return
+        }
+
+        try {
+            val imageBytes = readResponseBytes(body, progressCallback)
+            val bitmap = decodeBitmap(imageBytes)
+            if (bitmap == null) {
+                postError(Exception("Failed to decode image data"), completionCallback)
+                return
+            }
+            mainHandler.post {
+                imageView?.setImageBitmap(bitmap)
+                Log.d(TAG, "Loaded with OkHttp: $url")
+                completionCallback?.invoke(bitmap, null, bitmap.width, bitmap.height)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error reading image data: ${e.message}")
+            mainHandler.post { completionCallback?.invoke(null, e, 0, 0) }
+        }
+    }
+
+    private fun readResponseBytes(
+        body: okhttp3.ResponseBody,
+        progressCallback: GraniteImageProgressCallback?
+    ): ByteArray {
+        val contentLength = body.contentLength()
+        val inputStream = body.byteStream()
+        val outputStream = ByteArrayOutputStream()
+        val buffer = ByteArray(8192)
+        var totalBytesRead = 0L
+        var bytesRead: Int
+        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+            outputStream.write(buffer, 0, bytesRead)
+            totalBytesRead += bytesRead
+            if (contentLength > 0) progressCallback?.invoke(totalBytesRead, contentLength)
+        }
+        return outputStream.toByteArray()
+    }
+
+    private fun decodeBitmap(imageBytes: ByteArray): Bitmap? {
+        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+    }
+
+    private fun postError(error: Exception, completionCallback: GraniteImageCompletionCallback?) {
+        Log.e(TAG, error.message ?: "Unknown error")
+        mainHandler.post { completionCallback?.invoke(null, error, 0, 0) }
     }
 
     override fun cancelLoad(view: View) {
@@ -239,5 +241,9 @@ class OkHttpImageProvider : GraniteImageProvider {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to clear disk cache: ${e.message}")
         }
+    }
+
+    companion object {
+        private const val TAG = "OkHttpImageProvider"
     }
 }

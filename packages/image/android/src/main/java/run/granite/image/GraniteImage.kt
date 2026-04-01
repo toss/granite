@@ -1,6 +1,7 @@
 package run.granite.image
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -10,11 +11,9 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactContext
-import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.UIManagerHelper
-import com.facebook.react.uimanager.events.EventDispatcher
+import com.facebook.react.uimanager.events.Event
 import org.json.JSONObject
 
 /**
@@ -22,9 +21,7 @@ import org.json.JSONObject
  * It delegates actual image loading to the registered GraniteImageProvider.
  */
 class GraniteImage(context: Context) : FrameLayout(context) {
-    companion object {
-        private const val TAG = "GraniteImage"
-    }
+    internal var providerResolver: () -> GraniteImageProvider? = { GraniteImageRegistry.provider }
 
     private var containerView: View? = null
     private var currentUri: String? = null
@@ -42,46 +39,25 @@ class GraniteImage(context: Context) : FrameLayout(context) {
         Log.d(TAG, "GraniteImage initialized")
     }
 
-    // Event dispatching methods using modern EventDispatcher
-    private fun getEventDispatcher(): EventDispatcher? {
-        val reactContext = context as? ReactContext ?: return null
-        return UIManagerHelper.getEventDispatcherForReactTag(reactContext, id)
+    private fun dispatchEvent(event: Event<*>) {
+        val reactContext = context as? ReactContext ?: return
+        UIManagerHelper.getEventDispatcherForReactTag(reactContext, id)?.dispatchEvent(event)
     }
 
-    private fun emitLoadStart() {
-        Log.d(TAG, "emitLoadStart")
-        getEventDispatcher()?.dispatchEvent(
-            GraniteImageLoadStartEvent(UIManagerHelper.getSurfaceId(this), id)
-        )
-    }
+    private fun emitLoadStart() =
+        dispatchEvent(GraniteImageLoadStartEvent(UIManagerHelper.getSurfaceId(this), id))
 
-    private fun emitProgress(loaded: Int, total: Int) {
-        Log.d(TAG, "emitProgress: $loaded / $total")
-        getEventDispatcher()?.dispatchEvent(
-            GraniteImageProgressEvent(UIManagerHelper.getSurfaceId(this), id, loaded, total)
-        )
-    }
+    private fun emitProgress(loaded: Int, total: Int) =
+        dispatchEvent(GraniteImageProgressEvent(UIManagerHelper.getSurfaceId(this), id, loaded, total))
 
-    private fun emitLoad(width: Int, height: Int) {
-        Log.d(TAG, "emitLoad: ${width}x${height}")
-        getEventDispatcher()?.dispatchEvent(
-            GraniteImageLoadEvent(UIManagerHelper.getSurfaceId(this), id, width, height)
-        )
-    }
+    private fun emitLoad(width: Int, height: Int) =
+        dispatchEvent(GraniteImageLoadEvent(UIManagerHelper.getSurfaceId(this), id, width, height))
 
-    private fun emitError(error: String) {
-        Log.d(TAG, "emitError: $error")
-        getEventDispatcher()?.dispatchEvent(
-            GraniteImageErrorEvent(UIManagerHelper.getSurfaceId(this), id, error)
-        )
-    }
+    private fun emitError(error: String) =
+        dispatchEvent(GraniteImageErrorEvent(UIManagerHelper.getSurfaceId(this), id, error))
 
-    private fun emitLoadEnd() {
-        Log.d(TAG, "emitLoadEnd")
-        getEventDispatcher()?.dispatchEvent(
-            GraniteImageLoadEndEvent(UIManagerHelper.getSurfaceId(this), id)
-        )
-    }
+    private fun emitLoadEnd() =
+        dispatchEvent(GraniteImageLoadEndEvent(UIManagerHelper.getSurfaceId(this), id))
 
     fun setUri(uri: String?) {
         if (uri != currentUri) {
@@ -123,14 +99,11 @@ class GraniteImage(context: Context) : FrameLayout(context) {
     }
 
     fun setPriority(priority: String?) {
-        currentPriority = when (priority) {
-            "low" -> GraniteImagePriority.LOW
-            "high" -> GraniteImagePriority.HIGH
-            else -> GraniteImagePriority.NORMAL
-        }
+        currentPriority = GraniteImagePriority.fromString(priority)
     }
 
     fun setCachePolicy(cachePolicy: String?) {
+        // View-side API uses canonical names: "memory", "none", "disk" (default)
         currentCachePolicy = when (cachePolicy) {
             "memory" -> GraniteImageCachePolicy.MEMORY
             "none" -> GraniteImageCachePolicy.NONE
@@ -163,7 +136,7 @@ class GraniteImage(context: Context) : FrameLayout(context) {
             containerView = null
         }
 
-        val provider = GraniteImageRegistry.provider
+        val provider = providerResolver()
 
         if (provider == null) {
             showErrorView("No GraniteImageProvider registered")
@@ -206,35 +179,46 @@ class GraniteImage(context: Context) : FrameLayout(context) {
             },
             completionCallback = { bitmap, error, width, height ->
                 post {
-                    if (error != null) {
-                        emitError(error.message ?: "Unknown error")
-
-                        // Load fallback image if available
-                        currentFallbackSource?.let { fallback ->
-                            provider.loadImage(
-                                url = fallback,
-                                into = imageView,
-                                scaleType = currentScaleType,
-                                headers = null,
-                                priority = GraniteImagePriority.HIGH,
-                                cachePolicy = GraniteImageCachePolicy.DISK,
-                                defaultSource = null,
-                                progressCallback = null,
-                                completionCallback = null
-                            )
-                        }
-                    } else {
-                        emitLoad(width, height)
-
-                        // Apply tint color if set
-                        currentTintColor?.let { color ->
-                            provider.applyTintColor(color, imageView)
-                        }
-                    }
-                    emitLoadEnd()
+                    handleLoadCompletion(bitmap, error, width, height, imageView, provider)
                 }
             }
         )
+    }
+
+    private fun handleLoadCompletion(
+        bitmap: Bitmap?,
+        error: Exception?,
+        width: Int,
+        height: Int,
+        imageView: View,
+        provider: GraniteImageProvider
+    ) {
+        if (error != null) {
+            emitError(error.message ?: "Unknown error")
+
+            // Load fallback image if available
+            currentFallbackSource?.let { fallback ->
+                provider.loadImage(
+                    url = fallback,
+                    into = imageView,
+                    scaleType = currentScaleType,
+                    headers = null,
+                    priority = GraniteImagePriority.HIGH,
+                    cachePolicy = GraniteImageCachePolicy.DISK,
+                    defaultSource = null,
+                    progressCallback = null,
+                    completionCallback = null
+                )
+            }
+        } else {
+            emitLoad(width, height)
+
+            // Apply tint color if set
+            currentTintColor?.let { color ->
+                provider.applyTintColor(color, imageView)
+            }
+        }
+        emitLoadEnd()
     }
 
     private fun showErrorView(message: String) {
@@ -266,12 +250,16 @@ class GraniteImage(context: Context) : FrameLayout(context) {
     }
 
     fun cleanup() {
-        val provider = GraniteImageRegistry.provider
+        val provider = providerResolver()
         containerView?.let {
             provider?.cancelLoad(it)
             removeView(it)
         }
         containerView = null
         currentUri = null
+    }
+
+    companion object {
+        private const val TAG = "GraniteImage"
     }
 }

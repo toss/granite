@@ -10,15 +10,21 @@ import com.facebook.react.uimanager.ViewManager
  * React Native Package that registers the GraniteImage component and GraniteImageModule.
  */
 class GraniteImagePackage : ReactPackage {
+    override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
+        ensureProviderRegistered()
+        return listOf(GraniteImageModule(reactContext))
+    }
+
+    override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
+        ensureProviderRegistered()
+        return listOf(GraniteImageManager())
+    }
+
     companion object {
         private const val TAG = "GraniteImagePackage"
         private var providerRegistered = false
 
-        init {
-            registerDefaultProvider()
-        }
-
-        private fun registerDefaultProvider() {
+        internal fun ensureProviderRegistered() {
             if (providerRegistered) return
 
             // Try to auto-register a provider based on available implementations
@@ -47,13 +53,5 @@ class GraniteImagePackage : ReactPackage {
                 Log.w(TAG, "No image provider found. Make sure to include one of: okhttp, glide, or coil flavor.")
             }
         }
-    }
-
-    override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-        return listOf(GraniteImageModule(reactContext))
-    }
-
-    override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
-        return listOf(GraniteImageManager())
     }
 }
