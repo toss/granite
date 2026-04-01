@@ -20,10 +20,16 @@ interface NativeVideoMetadata {
   imageUri?: string;
 }
 
+interface NativeStringMapEntry {
+  name: string;
+  value: string;
+}
+
 // Native DRM config (source-embedded DRM)
 interface NativeSourceDrmConfig {
   type?: string;
   licenseServer?: string;
+  headers?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
   contentId?: string;
   certificateUrl?: string;
   base64Certificate?: boolean;
@@ -34,6 +40,10 @@ interface NativeSourceDrmConfig {
 // Native CMCD config
 interface NativeCmcdConfiguration {
   mode?: Int32;
+  request?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
+  session?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
+  object?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
+  status?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
 }
 
 // Native text track
@@ -54,6 +64,7 @@ interface NativeAdsConfig {
   videoId?: string;
   assetKey?: string;
   format?: string;
+  adTagParameters?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
   fallbackUri?: string;
 }
 
@@ -80,7 +91,7 @@ interface NativeSourceBufferConfig {
 interface NativeVideoSource {
   uri?: string;
   type?: string;
-  startPosition?: Double;
+  headers?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
   startTime?: Double;
   endTime?: Double;
   isNetwork?: boolean;
@@ -107,6 +118,7 @@ interface NativeBufferConfig {
   bufferForPlaybackAfterRebufferMs?: Int32;
   backBufferDurationMs?: Int32;
   cacheSizeMB?: Int32;
+  live?: NativeBufferConfigLive;
 }
 
 interface NativeSelectedTrack {
@@ -122,9 +134,12 @@ interface NativeSelectedVideoTrack {
 interface NativeDrmConfig {
   type?: string;
   licenseServer?: string;
+  headers?: ReadonlyArray<Readonly<NativeStringMapEntry>>;
   contentId?: string;
   certificateUrl?: string;
   base64Certificate?: boolean;
+  multiDrm?: boolean;
+  localSourceEncryptionKeyScheme?: string;
 }
 
 export type OnVideoLoadStartEvent = Readonly<{
@@ -216,6 +231,9 @@ export type TransferEndEvent = Readonly<{
 }>;
 
 export interface NativeProps extends ViewProps {
+  // Progress
+  progressUpdateInterval?: Double;
+
   // Source
   source?: NativeVideoSource;
 
@@ -250,6 +268,7 @@ export interface NativeProps extends ViewProps {
   selectedAudioTrack?: NativeSelectedTrack;
   selectedTextTrack?: NativeSelectedTrack;
   selectedVideoTrack?: NativeSelectedVideoTrack;
+  textTracks?: ReadonlyArray<Readonly<NativeTextTrack>>;
 
   // DRM
   drm?: NativeDrmConfig;

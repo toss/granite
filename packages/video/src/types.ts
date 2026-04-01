@@ -104,7 +104,6 @@ export interface VideoSource {
   mainVer?: number;
   patchVer?: number;
   headers?: VideoSourceHeaders;
-  startPosition?: number;
   startTime?: number;
   endTime?: number;
   drm?: DrmConfig;
@@ -220,27 +219,8 @@ export interface OnTimedMetadataData {
   }>;
 }
 
-export interface OnAudioTracksData {
-  audioTracks: AudioTrack[];
-}
-
-export interface OnTextTracksData {
-  textTracks: TextTrackInfo[];
-}
-
-export interface OnTextTrackDataChangedData {
-  subtitleTracks: string;
-}
-
-export interface OnVideoTracksData {
-  videoTracks: VideoTrackInfo[];
-}
-
 export interface OnReceiveAdEventData {
   event: string;
-  data?: {
-    [key: string]: string | number | boolean;
-  };
 }
 
 export interface OnTransferEndData {
@@ -426,13 +406,6 @@ export interface VideoProps {
    * Callback when video is ready for display
    */
   onReadyForDisplay?: () => void;
-
-  // Track Events
-  onAudioTracks?: (data: OnAudioTracksData) => void;
-  onTextTracks?: (data: OnTextTracksData) => void;
-  onTextTrackDataChanged?: (data: OnTextTrackDataChangedData) => void;
-  onVideoTracks?: (data: OnVideoTracksData) => void;
-  onTimedMetadata?: (data: OnTimedMetadataData) => void;
 
   /**
    * Callback when video aspect ratio changes

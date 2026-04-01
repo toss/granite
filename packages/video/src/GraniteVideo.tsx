@@ -30,9 +30,38 @@ import NativeGraniteVideoView, {
   OnVideoAspectRatioEvent,
   TransferEndEvent,
 } from './GraniteVideoNativeComponent';
-import type { VideoRef, VideoSource, VideoProps, OnLoadData } from './types';
+import type {
+  VideoRef,
+  VideoSource,
+  VideoProps,
+  OnLoadData,
+} from './types';
 
 const { GraniteVideoModule } = NativeModules;
+
+function toNativeStringMapEntries(
+  value?: Record<string, string>
+): ReadonlyArray<{ name: string; value: string }> | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  return Object.entries(value).map(([name, value]) => ({
+    name,
+    value,
+  }));
+}
+
+function normalizeDrm(drm: VideoProps['drm']): NativeProps['drm'] | undefined {
+  if (!drm) {
+    return undefined;
+  }
+
+  return {
+    ...drm,
+    headers: toNativeStringMapEntries(drm.headers),
+  };
+}
 
 // For Fabric (New Architecture), the component is always available through codegenNativeComponent
 // We don't need to check UIManager.getViewManagerConfig which is Old Architecture only
@@ -49,12 +78,24 @@ function normalizeCmcd(cmcd: VideoSource['cmcd']) {
     // When true, use MODE_QUERY_PARAMETER as default
     return { mode: 1 };
   }
+
   return {
     mode: cmcd.mode ?? 1,
-    request: cmcd.request,   // passes as Record through ReadableMap
-    session: cmcd.session,
-    object: cmcd.object,
-    status: cmcd.status,
+    request: toNativeStringMapEntries(cmcd.request),
+    session: toNativeStringMapEntries(cmcd.session),
+    object: toNativeStringMapEntries(cmcd.object),
+    status: toNativeStringMapEntries(cmcd.status),
+  };
+}
+
+function normalizeAd(ad: VideoSource['ad']): NonNullable<NativeProps['source']>['ad'] | undefined {
+  if (!ad) {
+    return undefined;
+  }
+
+  return {
+    ...ad,
+    adTagParameters: ad.type === 'ssai' ? toNativeStringMapEntries(ad.adTagParameters) : undefined,
   };
 }
 
@@ -64,9 +105,16 @@ function normalizeSource(source: VideoSource | number): NativeProps['source'] | 
     return undefined;
   }
 
+  const drm = normalizeDrm(source.drm);
+  const cmcd = normalizeCmcd(source.cmcd);
+  const ad = normalizeAd(source.ad);
+
   return {
     ...source,
-    cmcd: normalizeCmcd(source.cmcd),
+    headers: toNativeStringMapEntries(source.headers),
+    drm,
+    cmcd,
+    ad,
   };
 }
 
@@ -94,35 +142,6 @@ function normalizeSelectedVideoTrack(
   };
 }
 
-function normalizeDrm(drm?: VideoProps['drm']): NativeProps['drm'] | undefined {
-  if (!drm) {
-    return undefined;
-  }
-  return {
-    type: drm.type,
-    licenseServer: drm.licenseServer,
-    contentId: drm.contentId,
-    certificateUrl: drm.certificateUrl,
-    base64Certificate: drm.base64Certificate,
-  };
-}
-
-// Note: `live` is only available via source-embedded bufferConfig (NativeSourceBufferConfig),
-// not via the top-level bufferConfig prop (NativeBufferConfig).
-function normalizeBufferConfig(config?: VideoProps['bufferConfig']): NativeProps['bufferConfig'] | undefined {
-  if (!config) {
-    return undefined;
-  }
-  return {
-    minBufferMs: config.minBufferMs,
-    maxBufferMs: config.maxBufferMs,
-    bufferForPlaybackMs: config.bufferForPlaybackMs,
-    bufferForPlaybackAfterRebufferMs: config.bufferForPlaybackAfterRebufferMs,
-    backBufferDurationMs: config.backBufferDurationMs,
-    cacheSizeMB: config.cacheSizeMB,
-  };
-}
-
 function getPosterUri(poster?: VideoProps['poster']): string | undefined {
   if (!poster) {
     return undefined;
@@ -143,6 +162,8 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     testID,
     // Style
     style,
+    // Progress
+    progressUpdateInterval,
     // Source
     source,
     // Poster
@@ -172,6 +193,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
     selectedAudioTrack,
     selectedTextTrack,
     selectedVideoTrack,
+    textTracks,
     // DRM
     drm,
     localSourceEncryptionKeyScheme,
@@ -312,16 +334,13 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
   const handleLoad = useCallback(
     (event: NativeSyntheticEvent<OnVideoLoadEvent>) => {
       const nativeEvent = event.nativeEvent;
-      const loadData: OnLoadData = {
+      const loadData = {
         ...nativeEvent,
         naturalSize: {
           ...nativeEvent.naturalSize,
           orientation: nativeEvent.naturalSize.orientation as OnLoadData['naturalSize']['orientation'],
         },
-        audioTracks: [],
-        textTracks: [],
-        videoTracks: [],
-      };
+      } as OnLoadData;
       onLoad?.(loadData);
     },
     [onLoad]
@@ -469,8 +488,7 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
       <NativeGraniteVideoView
         ref={nativeRef}
         style={styles.video}
-        // Cast needed: normalizeSource includes fields (drm.headers, cmcd.request/session/object/status,
-        // ad.adTagParameters) that bypass Codegen typing and pass through ReadableMap directly.
+        progressUpdateInterval={progressUpdateInterval}
         source={normalizeSource(source)}
         poster={getPosterUri(poster)}
         posterResizeMode={posterResizeMode}
@@ -487,13 +505,14 @@ const VideoBase = forwardRef<VideoRef, VideoProps>((props, ref) => {
         viewType={viewType}
         useTextureView={useTextureView}
         useSecureView={useSecureView}
-        bufferConfig={normalizeBufferConfig(bufferConfig)}
+        bufferConfig={bufferConfig}
         minLoadRetryCount={minLoadRetryCount}
         maxBitRate={maxBitRate}
         preferredForwardBufferDuration={preferredForwardBufferDuration}
         selectedAudioTrack={normalizeSelectedTrack(selectedAudioTrack)}
         selectedTextTrack={normalizeSelectedTrack(selectedTextTrack)}
         selectedVideoTrack={normalizeSelectedVideoTrack(selectedVideoTrack)}
+        textTracks={textTracks}
         drm={normalizeDrm(drm)}
         localSourceEncryptionKeyScheme={localSourceEncryptionKeyScheme}
         adTagUrl={adTagUrl}
