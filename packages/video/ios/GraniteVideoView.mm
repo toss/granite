@@ -243,6 +243,17 @@ using namespace facebook::react;
         videoSource.type = [NSString stringWithUTF8String:source.type.c_str()];
     }
 
+    // source.headers (vector<{name, value}>) → NSDictionary 변환
+    if (!source.headers.empty()) {
+        NSMutableDictionary *headers = [NSMutableDictionary dictionary];
+        for (const auto &header : source.headers) {
+            NSString *name = [NSString stringWithUTF8String:header.name.c_str()];
+            NSString *value = [NSString stringWithUTF8String:header.value.c_str()];
+            headers[name] = value;
+        }
+        videoSource.headers = headers;
+    }
+
     videoSource.startTime = source.startTime;
     videoSource.endTime = source.endTime;
 
