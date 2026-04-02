@@ -1,5 +1,11 @@
 # @granite-js/video
 
+## 1.0.15
+
+### Patch Changes
+
+- dfa2f63: Fix iOS video source headers not being passed to the native player
+
 ## 1.0.14
 
 ### Patch Changes
