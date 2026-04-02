@@ -33,7 +33,6 @@ enum class GraniteVideoAudioOutput {
 data class GraniteVideoSource(
     val uri: String? = null,
     val type: String? = null,
-    val startPosition: Double = 0.0,
     val startTime: Double = 0.0,
     val endTime: Double = 0.0,
     val headers: Map<String, String>? = null,

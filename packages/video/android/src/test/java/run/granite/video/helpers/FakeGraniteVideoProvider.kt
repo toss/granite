@@ -40,7 +40,7 @@ class FakeGraniteVideoProvider(
     override fun loadSource(source: GraniteVideoSource) {
         lastLoadedSource = source
         _duration = 0.0
-        _currentTime = source.startPosition
+        _currentTime = source.startTime
         delegate?.onLoadStart(
             isNetwork = source.uri?.startsWith("http") == true,
             type = source.type ?: "unknown",

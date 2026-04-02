@@ -243,7 +243,6 @@ using namespace facebook::react;
         videoSource.type = [NSString stringWithUTF8String:source.type.c_str()];
     }
 
-    videoSource.startPosition = source.startPosition;
     videoSource.startTime = source.startTime;
     videoSource.endTime = source.endTime;
 
@@ -670,4 +669,3 @@ Class<RCTComponentViewProtocol> GraniteVideoViewCls(void)
 {
     return GraniteVideoView.class;
 }
-

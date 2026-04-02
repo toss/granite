@@ -236,9 +236,9 @@ private class AVPlayerContainerView: UIView {
         // Replace current item
         player.replaceCurrentItem(with: item)
 
-        // Set start position if specified
-        if source.startPosition > 0 {
-            let seekTime = CMTime(seconds: source.startPosition, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        // Set start time if specified
+        if source.startTime > 0 {
+            let seekTime = CMTime(seconds: source.startTime, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
             player.seek(to: seekTime)
         }
 

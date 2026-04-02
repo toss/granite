@@ -75,7 +75,6 @@ class GraniteVideoView @JvmOverloads constructor(
         val videoSource = GraniteVideoSource(
             uri = source["uri"] as? String,
             type = source["type"] as? String,
-            startPosition = (source["startPosition"] as? Number)?.toDouble() ?: 0.0,
             startTime = (source["startTime"] as? Number)?.toDouble() ?: 0.0,
             endTime = (source["endTime"] as? Number)?.toDouble() ?: 0.0,
             headers = headers,

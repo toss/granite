@@ -53,7 +53,6 @@ import AVFoundation
 @objc public class GraniteVideoSource: NSObject {
     @objc public var uri: String?
     @objc public var type: String?
-    @objc public var startPosition: Double = 0
     @objc public var startTime: Double = 0
     @objc public var endTime: Double = 0
     @objc public var headers: [String: String]?
