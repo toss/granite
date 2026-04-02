@@ -1,5 +1,11 @@
 # @granite-js/video
 
+## 1.0.14
+
+### Patch Changes
+
+- 4263c41: fix: video native prop
+
 ## 1.0.13
 
 ### Patch Changes
