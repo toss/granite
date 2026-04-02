@@ -236,12 +236,6 @@ private class AVPlayerContainerView: UIView {
         // Replace current item
         player.replaceCurrentItem(with: item)
 
-        // Set start position if specified
-        if source.startPosition > 0 {
-            let seekTime = CMTime(seconds: source.startPosition, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-            player.seek(to: seekTime)
-        }
-
         // Add time observer for progress
         let interval = CMTime(seconds: 0.25, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in

@@ -162,11 +162,6 @@ class ExoPlayerProvider(
 
         player?.setMediaSource(mediaSource)
         player?.prepare()
-
-        // Seek to start position if specified
-        if (source.startPosition > 0) {
-            player?.seekTo(source.startPosition.toLong())
-        }
     }
 
     override fun unload() {

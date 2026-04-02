@@ -111,7 +111,6 @@ class GraniteVideoViewRobolectricTest {
         val source = mapOf(
             "uri" to "https://example.com/video.mp4",
             "type" to "mp4",
-            "startPosition" to 10.0,
             "headers" to mapOf("Authorization" to "Bearer token")
         )
         view.setSource(source)
@@ -120,7 +119,6 @@ class GraniteVideoViewRobolectricTest {
             mockProvider.loadSource(match<GraniteVideoSource> {
                 it.uri == "https://example.com/video.mp4" &&
                 it.type == "mp4" &&
-                it.startPosition == 10.0 &&
                 it.headers?.get("Authorization") == "Bearer token"
             })
         }
