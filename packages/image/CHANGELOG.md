@@ -1,5 +1,12 @@
 # @granite-js/image
 
+## 1.0.13
+
+### Patch Changes
+
+- e26b4ea: refactor(android): improve GraniteImage code quality - fix bugs, reduce complexity, introduce DI
+- eddab4b: feat(android): implement clearMemoryCache/clearDiskCache for GraniteImage Android
+
 ## 1.0.12
 
 ## 1.0.11

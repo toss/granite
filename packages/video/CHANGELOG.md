@@ -1,5 +1,12 @@
 # @granite-js/video
 
+## 1.0.13
+
+### Patch Changes
+
+- 4218c46: Fix Fabric view recycling bug where video fails to play when remounted with the same source URI
+- dcffed6: fix: make @granite-js/video compatible with react-native-video@6.0.0
+
 ## 1.0.12
 
 ### Patch Changes
