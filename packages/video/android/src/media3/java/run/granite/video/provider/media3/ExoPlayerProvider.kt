@@ -162,6 +162,11 @@ class ExoPlayerProvider(
 
         player?.setMediaSource(mediaSource)
         player?.prepare()
+
+        // Seek to start time if specified
+        if (source.startTime > 0) {
+            player?.seekTo(source.startTime.toLong())
+        }
     }
 
     override fun unload() {
