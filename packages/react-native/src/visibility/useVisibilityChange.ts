@@ -67,3 +67,4 @@ export function useVisibilityChange(callback: VisibilityCallback) {
     callback(isVisible ? 'visible' : 'hidden');
   }, [callback, isVisible, prevValue]);
 }
+
