@@ -1,5 +1,19 @@
 # @granite-js/react-native
 
+## 1.0.16
+
+### Patch Changes
+
+- e0cf72d: feat: add onVisibilityChange
+  - @granite-js/blur-view@1.0.16
+  - @granite-js/cli@1.0.16
+  - @granite-js/jest@1.0.16
+  - @granite-js/mpack@1.0.16
+  - @granite-js/native@1.0.16
+  - @granite-js/plugin-core@1.0.16
+  - @granite-js/style-utils@1.0.16
+  - @granite-js/video@1.0.16
+
 ## 1.0.15
 
 ### Patch Changes
