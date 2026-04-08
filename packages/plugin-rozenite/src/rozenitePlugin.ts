@@ -11,11 +11,6 @@ const createRozeniteMiddleware = (
   projectRoot: string,
   options: Omit<RozenitePluginOptions, 'enabled'>
 ): MetroMiddleware => {
-  // Default to explicit include to bypass node_modules auto-discovery (PnP compatible)
-  if (!options.include) {
-    options = { ...options, include: [] };
-  }
-
   let rozeniteMiddleware: MetroMiddleware | undefined;
 
   const middleware: MetroMiddleware = (
