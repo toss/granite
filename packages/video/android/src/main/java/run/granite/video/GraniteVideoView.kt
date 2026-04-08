@@ -249,6 +249,10 @@ class GraniteVideoView @JvmOverloads constructor(
         provider?.setPictureInPictureEnabled(enabled)
     }
 
+    fun setDisableAudioFocus(disable: Boolean) {
+        provider?.setDisableAudioFocus(disable)
+    }
+
     fun setPlayInBackground(enabled: Boolean) {
         provider?.setPlayInBackground(enabled)
     }

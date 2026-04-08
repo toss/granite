@@ -1,6 +1,7 @@
 package run.granite.video
 
 import android.graphics.Color
+import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.SimpleViewManager
@@ -55,6 +56,9 @@ class GraniteVideoViewManager(
         view.release()
     }
 
+    override fun setProgressUpdateInterval(view: GraniteVideoView?, value: Double) {
+    }
+
     // Props
     @ReactProp(name = "source")
     override fun setSource(view: GraniteVideoView?, source: ReadableMap?) {
@@ -107,6 +111,11 @@ class GraniteVideoViewManager(
         view?.setPictureInPicture(pictureInPicture)
     }
 
+    @ReactProp(name = "disableAudioFocus")
+    override fun setDisableAudioFocus(view: GraniteVideoView?, disableAudioFocus: Boolean) {
+        view?.setDisableAudioFocus(disableAudioFocus)
+    }
+
     @ReactProp(name = "playInBackground")
     override fun setPlayInBackground(view: GraniteVideoView?, playInBackground: Boolean) {
         view?.setPlayInBackground(playInBackground)
@@ -150,6 +159,9 @@ class GraniteVideoViewManager(
         val type = selectedVideoTrack?.getString("type") ?: "auto"
         val value = selectedVideoTrack?.getInt("value") ?: 0
         view?.setSelectedVideoTrack(type, value)
+    }
+
+    override fun setTextTracks(view: GraniteVideoView?, value: ReadableArray?) {
     }
 
     @ReactProp(name = "viewType")

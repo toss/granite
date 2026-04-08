@@ -247,6 +247,7 @@ export interface NativeProps extends ViewProps {
   volume?: Float;
   rate?: Float;
   repeat?: boolean;
+  disableAudioFocus?: boolean;
   playInBackground?: boolean;
   playWhenInactive?: boolean;
   automaticallyWaitsToMinimizeStalling?: boolean;
