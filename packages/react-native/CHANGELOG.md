@@ -1,5 +1,19 @@
 # @granite-js/react-native
 
+## 1.0.17
+
+### Patch Changes
+
+- Updated dependencies [c090579]
+  - @granite-js/video@1.0.17
+  - @granite-js/native@1.0.17
+  - @granite-js/blur-view@1.0.17
+  - @granite-js/jest@1.0.17
+  - @granite-js/style-utils@1.0.17
+  - @granite-js/cli@1.0.17
+  - @granite-js/mpack@1.0.17
+  - @granite-js/plugin-core@1.0.17
+
 ## 1.0.16
 
 ### Patch Changes
