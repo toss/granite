@@ -1,5 +1,11 @@
 # @granite-js/lottie
 
+## 1.0.17
+
+### Patch Changes
+
+- 98f8db8: Add duration prop support for Android native view
+
 ## 1.0.16
 
 ## 1.0.15

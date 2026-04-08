@@ -1,5 +1,11 @@
 # @granite-js/video
 
+## 1.0.17
+
+### Patch Changes
+
+- c090579: Add disableAudioFocus prop and ViewManager stubs for progressUpdateInterval and textTracks
+
 ## 1.0.16
 
 ## 1.0.15
