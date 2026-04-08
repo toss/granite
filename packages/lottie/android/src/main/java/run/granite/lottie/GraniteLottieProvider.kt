@@ -91,7 +91,8 @@ data class GraniteLottieLoadConfig(
     var enableMergePaths: Boolean = false,
     var enableSafeMode: Boolean = false,
     var hardwareAcceleration: Boolean = false,
-    var imageAssetsFolder: String? = null
+    var imageAssetsFolder: String? = null,
+    var duration: Float? = null
 )
 
 /**

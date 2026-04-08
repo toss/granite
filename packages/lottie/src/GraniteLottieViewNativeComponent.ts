@@ -49,6 +49,7 @@ export interface NativeProps extends ViewProps {
   // Animation control
   progress?: Float;
   speed?: Double;
+  duration?: Double;
   loop?: WithDefault<boolean, true>;
   autoPlay?: WithDefault<boolean, false>;
 

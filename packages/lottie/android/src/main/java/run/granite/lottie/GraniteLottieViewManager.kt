@@ -112,6 +112,11 @@ class GraniteLottieViewManager : SimpleViewManager<GraniteLottieView>(),
         view.setCacheComposition(value)
     }
 
+    @ReactProp(name = "duration")
+    override fun setDuration(view: GraniteLottieView, value: Double) {
+        view.setDuration(value)
+    }
+
     // Filter props
     @ReactProp(name = "colorFilters")
     override fun setColorFilters(view: GraniteLottieView, value: ReadableArray?) {
