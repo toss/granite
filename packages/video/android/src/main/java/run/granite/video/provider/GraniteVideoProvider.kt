@@ -214,6 +214,9 @@ interface GraniteVideoProvider {
     // Optional - Resize Mode
     fun setResizeMode(mode: GraniteVideoResizeMode) {}
 
+    // Optional - Audio Focus
+    fun setDisableAudioFocus(disable: Boolean) {}
+
     // Optional - Background Playback
     fun setPlayInBackground(enabled: Boolean) {}
     fun setPlayWhenInactive(enabled: Boolean) {}
