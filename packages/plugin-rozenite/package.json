@@ -43,7 +43,7 @@
   "dependencies": {
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/utils": "workspace:*",
-    "@rozenite/middleware": "1.2.0"
+    "@rozenite/middleware": "1.6.0"
   },
   "sideEffects": false
 }

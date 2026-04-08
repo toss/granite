@@ -6056,7 +6056,7 @@ __metadata:
   dependencies:
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/utils": "workspace:*"
-    "@rozenite/middleware": "npm:1.2.0"
+    "@rozenite/middleware": "npm:1.6.0"
     "@types/connect": "npm:^3.4.38"
     "@vitest/coverage-v8": "npm:^4.0.12"
     tsdown: "catalog:tools"
@@ -8743,32 +8743,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rozenite/middleware@npm:1.2.0":
-  version: 1.2.0
-  resolution: "@rozenite/middleware@npm:1.2.0"
+"@rozenite/middleware@npm:1.6.0":
+  version: 1.6.0
+  resolution: "@rozenite/middleware@npm:1.6.0"
   dependencies:
-    "@rozenite/runtime": "npm:1.2.0"
-    "@rozenite/tools": "npm:1.2.0"
+    "@rozenite/runtime": "npm:1.6.0"
+    "@rozenite/tools": "npm:1.6.0"
     express: "npm:^5.1.0"
     semver: "npm:^7.7.2"
     tslib: "npm:^2.3.0"
-  checksum: 10c0/f5649dcb1876d817d9aada6f563df759c28b2d73ec83fb3b6a129899f514b8a00077226655e79c6f449915ae9e74ce626ef49be4c329d8138f6aaf3828c8a0b2
+  checksum: 10c0/0be756c40b718f5f94431e2a93213f3e11413e38c234104f8d3a56366729f7b862f1363ba2bcd80fc3ed3439a966834039fb878568b5e93759b120ecc4bc4058
   languageName: node
   linkType: hard
 
-"@rozenite/runtime@npm:1.2.0":
-  version: 1.2.0
-  resolution: "@rozenite/runtime@npm:1.2.0"
+"@rozenite/runtime@npm:1.6.0":
+  version: 1.6.0
+  resolution: "@rozenite/runtime@npm:1.6.0"
   dependencies:
     tslib: "npm:^2.3.0"
-  checksum: 10c0/f0deb75fbec968fddb2b69d27fdf96d0f2b140646d96324d57ff6ee600daa69d6c1ab77934ec1ef238fdb10f68a6e6bae030c9f63846dcb7c4ff5a054ff66c39
+  checksum: 10c0/7f1252143eb540a1ee5386f3757ee2e0b88476421a4ce0d3c22ae838c82a3783abb23d951985b52a1835753571b98cdcb0e0bbe7d534fff4dc10f22497d4e9f9
   languageName: node
   linkType: hard
 
-"@rozenite/tools@npm:1.2.0":
-  version: 1.2.0
-  resolution: "@rozenite/tools@npm:1.2.0"
-  checksum: 10c0/9fe62836e2f77e8a647bf5eadda9c0ee63f41e6300e8c56344cbbfde022147a23961ac02fbf60610921f7a7b7668c68896a03c5b2a70b21c17f0a1e31a6da44a
+"@rozenite/tools@npm:1.6.0":
+  version: 1.6.0
+  resolution: "@rozenite/tools@npm:1.6.0"
+  checksum: 10c0/2c6f6227e3fc70ca64eee77556ed90822dccc2a1ff8d86a452cc03a0bec24ee26297b80e82796e795aa13d13abc4fc58b3073becf081ade2379070fb16f40734
   languageName: node
   linkType: hard
 
