@@ -154,6 +154,10 @@ class GraniteLottieView(context: Context) : FrameLayout(context), GraniteLottieL
         config.imageAssetsFolder = folder
     }
 
+    fun setDuration(duration: Double) {
+        config.duration = if (duration > 0) duration.toFloat() else null
+    }
+
     fun setColorFilters(filters: List<Map<String, Any>>?) {
         if (filters != null) {
             config.colorFilters = filters.mapNotNull { filter ->
