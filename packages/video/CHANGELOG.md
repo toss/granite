@@ -1,5 +1,7 @@
 # @granite-js/video
 
+## 1.0.18
+
 ## 1.0.17
 
 ### Patch Changes

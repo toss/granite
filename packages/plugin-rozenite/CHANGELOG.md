@@ -1,5 +1,13 @@
 # @granite-js/plugin-rozenite
 
+## 1.0.18
+
+### Patch Changes
+
+- a09e0fd: Stop disabling Rozenite auto-discovery by default and upgrade `@rozenite/middleware` to `1.6.0`.
+  - @granite-js/plugin-core@1.0.18
+  - @granite-js/utils@1.0.18
+
 ## 1.0.17
 
 ### Patch Changes

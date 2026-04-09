@@ -1,5 +1,19 @@
 # @granite-js/react-native
 
+## 1.0.18
+
+### Patch Changes
+
+- 96fe7c1: Use Android keyboard show/hide events in New Architecture for `useKeyboardAnimatedHeight`.
+  - @granite-js/blur-view@1.0.18
+  - @granite-js/cli@1.0.18
+  - @granite-js/jest@1.0.18
+  - @granite-js/mpack@1.0.18
+  - @granite-js/native@1.0.18
+  - @granite-js/plugin-core@1.0.18
+  - @granite-js/style-utils@1.0.18
+  - @granite-js/video@1.0.18
+
 ## 1.0.17
 
 ### Patch Changes
