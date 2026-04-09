@@ -1,8 +1,27 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Keyboard, Platform } from 'react-native';
+import { isNewArchEnabled } from '../utils/isNewArchEnabled';
+
+function getKeyboardEventNames() {
+  if (Platform.OS === 'ios') {
+    return {
+      show: 'keyboardWillShow',
+      hide: 'keyboardWillHide',
+    } as const;
+  }
+
+  if (Platform.OS === 'android' && isNewArchEnabled()) {
+    return {
+      show: 'keyboardDidShow',
+      hide: 'keyboardDidHide',
+    } as const;
+  }
+
+  return null;
+}
 
 function getInitialKeyboardHeight() {
-  if (Platform.OS !== 'ios') {
+  if (Platform.OS === 'android' && !isNewArchEnabled()) {
     return 0;
   }
 
@@ -26,7 +45,7 @@ function getInitialKeyboardHeight() {
  * @description
  * A Hook that returns an animatable value (`Animated.Value`) representing the keyboard height changes when the keyboard appears or disappears. You can smoothly animate UI elements according to the keyboard height as it rises or falls.
  *
- * This Hook is primarily used on iOS. On Android, it does not detect keyboard height changes and always returns an `Animated.Value` with an initial value of `0`. In other words, animations are not applied in the Android environment.
+ * This Hook uses `keyboardWillShow`/`keyboardWillHide` on iOS, and `keyboardDidShow`/`keyboardDidHide` on Android when React Native New Architecture is enabled. On Android Old Architecture, it always returns an `Animated.Value` with an initial value of `0`.
  *
  * @returns {Animated.Value} - An animation value representing the keyboard height.
  * @example
@@ -42,31 +61,34 @@ export function useKeyboardAnimatedHeight(): Animated.Value {
   const keyboardHeight = useRef(new Animated.Value(getInitialKeyboardHeight())).current;
 
   useEffect(() => {
-    if (Platform.OS === 'ios') {
-      const willShowSubscription = Keyboard.addListener('keyboardWillShow', (event) => {
-        const height = event.endCoordinates.height;
+    const keyboardEventNames = getKeyboardEventNames();
 
-        Animated.spring(keyboardHeight, {
-          toValue: height,
-          useNativeDriver: true,
-          ...spring.quick,
-        }).start();
-      });
-
-      const willHideSubscription = Keyboard.addListener('keyboardWillHide', () => {
-        Animated.spring(keyboardHeight, {
-          toValue: 0,
-          useNativeDriver: true,
-          ...spring.quick,
-        }).start();
-      });
-      return () => {
-        willShowSubscription.remove();
-        willHideSubscription.remove();
-      };
-    } else {
+    if (keyboardEventNames == null) {
       return;
     }
+
+    const showSubscription = Keyboard.addListener(keyboardEventNames.show, (event) => {
+      const height = event.endCoordinates.height;
+
+      Animated.spring(keyboardHeight, {
+        toValue: height,
+        useNativeDriver: true,
+        ...spring.quick,
+      }).start();
+    });
+
+    const hideSubscription = Keyboard.addListener(keyboardEventNames.hide, () => {
+      Animated.spring(keyboardHeight, {
+        toValue: 0,
+        useNativeDriver: true,
+        ...spring.quick,
+      }).start();
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
   }, [keyboardHeight]);
 
   return keyboardHeight;
