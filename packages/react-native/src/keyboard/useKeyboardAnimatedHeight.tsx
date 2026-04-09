@@ -1,17 +1,50 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Keyboard, Platform } from 'react-native';
 
-function getInitialKeyboardHeight() {
-  // React Native 0.68 does not provide Keyboard.metrics()
-  const keyboardWithMetrics = Keyboard as typeof Keyboard & {
-    metrics?: () => { height?: number } | undefined;
+function isNewArchEnabled() {
+  const globalObject = globalThis as typeof globalThis & {
+    nativeFabricUIManager?: unknown;
+    __turboModuleProxy?: unknown;
   };
 
-  if (typeof keyboardWithMetrics.metrics === 'function') {
-    return keyboardWithMetrics.metrics()?.height ?? 0;
+  return globalObject.nativeFabricUIManager != null || globalObject.__turboModuleProxy != null;
+}
+
+function getKeyboardEventNames() {
+  if (Platform.OS === 'ios') {
+    return {
+      show: 'keyboardWillShow',
+      hide: 'keyboardWillHide',
+    } as const;
   }
 
-  return 0;
+  if (Platform.OS === 'android' && isNewArchEnabled()) {
+    return {
+      show: 'keyboardDidShow',
+      hide: 'keyboardDidHide',
+    } as const;
+  }
+
+  return null;
+}
+
+function getInitialKeyboardHeight() {
+  if (Platform.OS === 'android' && !isNewArchEnabled()) {
+    return 0;
+  }
+
+  /**
+   * Branch handling for React Native 0.68.0 version where `metrics()` does not exist
+   */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  if (typeof Keyboard?.metrics === 'function') {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return Keyboard.metrics()?.height ?? 0;
+  } else {
+    return 0;
+  }
 }
 
 /**
@@ -20,7 +53,7 @@ function getInitialKeyboardHeight() {
  * @description
  * A Hook that returns an animatable value (`Animated.Value`) representing the keyboard height changes when the keyboard appears or disappears. You can smoothly animate UI elements according to the keyboard height as it rises or falls.
  *
- * This Hook is primarily used on iOS. On Android, it does not detect keyboard height changes and always returns an `Animated.Value` with an initial value of `0`. In other words, animations are not applied in the Android environment.
+ * This Hook uses `keyboardWillShow`/`keyboardWillHide` on iOS, and `keyboardDidShow`/`keyboardDidHide` on Android when React Native New Architecture is enabled. On Android Old Architecture, it always returns an `Animated.Value` with an initial value of `0`.
  *
  * @returns {Animated.Value} - An animation value representing the keyboard height.
  * @example
@@ -35,30 +68,29 @@ function getInitialKeyboardHeight() {
 export function useKeyboardAnimatedHeight(): Animated.Value {
   const keyboardHeight = useRef(new Animated.Value(getInitialKeyboardHeight())).current;
 
-  const animateToHeight = (height: number) => {
-    Animated.spring(keyboardHeight, {
-      toValue: height,
-      useNativeDriver: true,
-      ...spring.quick,
-    }).start();
-  };
-
   useEffect(() => {
-    const eventByPlatform = {
-      ios: { show: 'keyboardWillShow', hide: 'keyboardWillHide' },
-      android: { show: 'keyboardDidShow', hide: 'keyboardDidHide' },
-    } as const;
+    const keyboardEventNames = getKeyboardEventNames();
 
-    const platformEvents = eventByPlatform[Platform.OS as 'ios' | 'android'];
-    if (!platformEvents) {
+    if (keyboardEventNames == null) {
       return;
     }
 
-    const showSubscription = Keyboard.addListener(platformEvents.show, (event) => {
-      animateToHeight(event.endCoordinates.height);
+    const showSubscription = Keyboard.addListener(keyboardEventNames.show, (event) => {
+      const height = event.endCoordinates.height;
+
+      Animated.spring(keyboardHeight, {
+        toValue: height,
+        useNativeDriver: true,
+        ...spring.quick,
+      }).start();
     });
-    const hideSubscription = Keyboard.addListener(platformEvents.hide, () => {
-      animateToHeight(0);
+
+    const hideSubscription = Keyboard.addListener(keyboardEventNames.hide, () => {
+      Animated.spring(keyboardHeight, {
+        toValue: 0,
+        useNativeDriver: true,
+        ...spring.quick,
+      }).start();
     });
 
     return () => {
