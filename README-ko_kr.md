@@ -62,7 +62,7 @@ npm run granite-forge deploy --bucket your-s3-bucket-name
 
 ## 라이선스
 
-Apache 2.0 © Viva Republica, Inc. 자세한 내용은 [LICENCE](/LICENCE)를 참고하세요.
+Apache 2.0 © Viva Republica, Inc. 자세한 내용은 [LICENSE](./LICENSE)를 참고하세요.
 
 <a title="Toss" href="https://toss.im">
   <picture>
