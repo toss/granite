@@ -1,19 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Keyboard, Platform } from 'react-native';
-
-function isNewArchEnabled() {
-  const globalObject = globalThis as typeof globalThis & {
-    RN$Bridgeless?: boolean;
-    nativeFabricUIManager?: unknown;
-    __turboModuleProxy?: unknown;
-  };
-
-  return (
-    globalObject.RN$Bridgeless === true ||
-    globalObject.nativeFabricUIManager != null ||
-    globalObject.__turboModuleProxy != null
-  );
-}
+import { isNewArchEnabled } from '../utils/isNewArchEnabled';
 
 function getKeyboardEventNames() {
   if (Platform.OS === 'ios') {
