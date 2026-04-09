@@ -2,22 +2,16 @@ import { useEffect, useRef } from 'react';
 import { Animated, Keyboard, Platform } from 'react-native';
 
 function getInitialKeyboardHeight() {
-  if (Platform.OS !== 'ios') {
-    return 0;
+  // React Native 0.68 does not provide Keyboard.metrics()
+  const keyboardWithMetrics = Keyboard as typeof Keyboard & {
+    metrics?: () => { height?: number } | undefined;
+  };
+
+  if (typeof keyboardWithMetrics.metrics === 'function') {
+    return keyboardWithMetrics.metrics()?.height ?? 0;
   }
 
-  /**
-   * Branch handling for React Native 0.68.0 version where `metrics()` does not exist
-   */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  if (typeof Keyboard?.metrics === 'function') {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return Keyboard.metrics()?.height ?? 0;
-  } else {
-    return 0;
-  }
+  return 0;
 }
 
 /**
@@ -41,52 +35,36 @@ function getInitialKeyboardHeight() {
 export function useKeyboardAnimatedHeight(): Animated.Value {
   const keyboardHeight = useRef(new Animated.Value(getInitialKeyboardHeight())).current;
 
+  const animateToHeight = (height: number) => {
+    Animated.spring(keyboardHeight, {
+      toValue: height,
+      useNativeDriver: true,
+      ...spring.quick,
+    }).start();
+  };
+
   useEffect(() => {
-    if (Platform.OS === 'ios') {
-      const willShowSubscription = Keyboard.addListener('keyboardWillShow', (event) => {
-        const height = event.endCoordinates.height;
+    const eventByPlatform = {
+      ios: { show: 'keyboardWillShow', hide: 'keyboardWillHide' },
+      android: { show: 'keyboardDidShow', hide: 'keyboardDidHide' },
+    } as const;
 
-        Animated.spring(keyboardHeight, {
-          toValue: height,
-          useNativeDriver: true,
-          ...spring.quick,
-        }).start();
-      });
-
-      const willHideSubscription = Keyboard.addListener('keyboardWillHide', () => {
-        Animated.spring(keyboardHeight, {
-          toValue: 0,
-          useNativeDriver: true,
-          ...spring.quick,
-        }).start();
-      });
-      return () => {
-        willShowSubscription.remove();
-        willHideSubscription.remove();
-      };
-    } else if (Platform.OS === 'android') {
-      const willShowSubscription = Keyboard.addListener('keyboardDidShow', (event) => {
-        const height = event.endCoordinates.height;
-
-        Animated.spring(keyboardHeight, {
-          toValue: height,
-          useNativeDriver: true,
-          ...spring.quick,
-        }).start();
-      });
-
-      const willHideSubscription = Keyboard.addListener('keyboardDidHide', () => {
-        Animated.spring(keyboardHeight, {
-          toValue: 0,
-          useNativeDriver: true,
-          ...spring.quick,
-        }).start();
-      });
-      return () => {
-        willShowSubscription.remove();
-        willHideSubscription.remove();
-      };
+    const platformEvents = eventByPlatform[Platform.OS as 'ios' | 'android'];
+    if (!platformEvents) {
+      return;
     }
+
+    const showSubscription = Keyboard.addListener(platformEvents.show, (event) => {
+      animateToHeight(event.endCoordinates.height);
+    });
+    const hideSubscription = Keyboard.addListener(platformEvents.hide, () => {
+      animateToHeight(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
   }, [keyboardHeight]);
 
   return keyboardHeight;
