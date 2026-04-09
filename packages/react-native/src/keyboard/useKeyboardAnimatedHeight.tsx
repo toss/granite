@@ -64,8 +64,28 @@ export function useKeyboardAnimatedHeight(): Animated.Value {
         willShowSubscription.remove();
         willHideSubscription.remove();
       };
-    } else {
-      return;
+    } else if (Platform.OS === 'android') {
+      const willShowSubscription = Keyboard.addListener('keyboardDidShow', (event) => {
+        const height = event.endCoordinates.height;
+
+        Animated.spring(keyboardHeight, {
+          toValue: height,
+          useNativeDriver: true,
+          ...spring.quick,
+        }).start();
+      });
+
+      const willHideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+        Animated.spring(keyboardHeight, {
+          toValue: 0,
+          useNativeDriver: true,
+          ...spring.quick,
+        }).start();
+      });
+      return () => {
+        willShowSubscription.remove();
+        willHideSubscription.remove();
+      };
     }
   }, [keyboardHeight]);
 
