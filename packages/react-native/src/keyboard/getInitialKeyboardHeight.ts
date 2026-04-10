@@ -1,4 +1,4 @@
-import { Platform } from "react-native";
+import { Platform, Keyboard } from "react-native";
 import { isNewArchEnabled } from "../utils/isNewArchEnabled";
 
 export function getInitialKeyboardHeight() {
