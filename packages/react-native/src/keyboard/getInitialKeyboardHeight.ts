@@ -5,7 +5,7 @@ export function getInitialKeyboardHeight() {
     if (Platform.OS === 'android' && !isNewArchEnabled()) {
       return 0;
     }
-  
+
     /**
      * Branch handling for React Native 0.68.0 version where `metrics()` does not exist
      */

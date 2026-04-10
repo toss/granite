@@ -8,13 +8,13 @@ export function getKeyboardEventNames() {
         hide: 'keyboardWillHide',
       } as const;
     }
-  
+
     if (Platform.OS === 'android' && isNewArchEnabled()) {
       return {
         show: 'keyboardDidShow',
         hide: 'keyboardDidHide',
       } as const;
     }
-  
+
     return null;
   }
