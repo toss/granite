@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import { useInitialProps } from './InitialPropsContext';
+import { getSearchParamsFromUrl } from './getSearchParamsFromUrl';
 import { getSchemeUri } from '../../native-modules';
 
 /**
@@ -24,9 +26,5 @@ import { getSchemeUri } from '../../native-modules';
 export function useInitialSearchParams() {
   const scheme = useInitialProps().scheme ?? getSchemeUri();
 
-  try {
-    return Object.fromEntries(new URL(scheme).searchParams);
-  } catch {
-    return {};
-  }
+  return useMemo(() => getSearchParamsFromUrl(scheme), [scheme]);
 }
