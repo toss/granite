@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useRef, useCallback, useMemo } from 'react';
+import React, { forwardRef, useRef, useCallback, useMemo } from 'react';
 import { Image, type NativeSyntheticEvent, Platform } from 'react-native';
 import NativeGraniteLottieView, {
   Commands,
@@ -7,6 +7,39 @@ import NativeGraniteLottieView, {
   type NativeProps,
 } from './GraniteLottieViewNativeComponent';
 import type { LottieViewProps, LottieViewRef, AnimationSource, AnimationObject } from './types';
+
+type NativeLottieViewInstance = React.ElementRef<typeof NativeGraniteLottieView>;
+type NativeLottieViewHandle = NativeLottieViewInstance & LottieViewRef;
+
+function assignRef<T>(ref: React.ForwardedRef<T>, value: T | null) {
+  if (typeof ref === 'function') {
+    ref(value);
+    return;
+  }
+
+  if (ref != null) {
+    ref.current = value;
+  }
+}
+
+function attachImperativeMethods(instance: NativeLottieViewInstance): NativeLottieViewHandle {
+  const handle = instance as NativeLottieViewHandle;
+
+  handle.play = (startFrame?: number, endFrame?: number) => {
+    Commands.play(instance, startFrame ?? -1, endFrame ?? -1);
+  };
+  handle.pause = () => {
+    Commands.pause(instance);
+  };
+  handle.resume = () => {
+    Commands.resume(instance);
+  };
+  handle.reset = () => {
+    Commands.reset(instance);
+  };
+
+  return handle;
+}
 
 // Helper to resolve animation source
 function resolveSource(source: AnimationSource): {
@@ -85,31 +118,21 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
     ...restProps
   } = props;
 
-  const nativeRef = useRef<React.ElementRef<typeof NativeGraniteLottieView>>(null);
+  const nativeRef = useRef<NativeLottieViewInstance>(null);
 
-  // Imperative handle
-  useImperativeHandle(ref, () => ({
-    play: (startFrame?: number, endFrame?: number) => {
-      if (nativeRef.current) {
-        Commands.play(nativeRef.current, startFrame ?? -1, endFrame ?? -1);
+  const handleRef = useCallback(
+    (instance: NativeLottieViewInstance | null) => {
+      nativeRef.current = instance;
+
+      if (instance == null) {
+        assignRef(ref, null);
+        return;
       }
+
+      assignRef(ref, attachImperativeMethods(instance));
     },
-    pause: () => {
-      if (nativeRef.current) {
-        Commands.pause(nativeRef.current);
-      }
-    },
-    resume: () => {
-      if (nativeRef.current) {
-        Commands.resume(nativeRef.current);
-      }
-    },
-    reset: () => {
-      if (nativeRef.current) {
-        Commands.reset(nativeRef.current);
-      }
-    },
-  }));
+    [ref]
+  );
 
   // Resolve source
   const resolvedSource = useMemo(() => resolveSource(source), [source]);
@@ -176,8 +199,7 @@ export const LottieView = forwardRef<LottieViewRef, LottieViewProps>((props, ref
     nativeProps.textFiltersIOS = textFiltersIOS;
   }
 
-  return <NativeGraniteLottieView ref={nativeRef} {...nativeProps} />;
-
+  return <NativeGraniteLottieView ref={handleRef} {...nativeProps} />;
 });
 
 LottieView.displayName = 'LottieView';
