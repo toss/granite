@@ -1,5 +1,11 @@
 # @granite-js/lottie
 
+## 1.0.19
+
+### Patch Changes
+
+- 6803c3e: fix: lottie props
+
 ## 1.0.18
 
 ## 1.0.17

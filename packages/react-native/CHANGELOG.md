@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 1.0.19
+
+### Patch Changes
+
+- adfe616: perf(react-native): without new URL optimize
+- b084323: feat: add useKeyboardHeight
+  - @granite-js/native@1.0.19
+  - @granite-js/blur-view@1.0.19
+  - @granite-js/jest@1.0.19
+  - @granite-js/style-utils@1.0.19
+  - @granite-js/cli@1.0.19
+  - @granite-js/mpack@1.0.19
+  - @granite-js/plugin-core@1.0.19
+  - @granite-js/video@1.0.19
+
 ## 1.0.18
 
 ### Patch Changes
