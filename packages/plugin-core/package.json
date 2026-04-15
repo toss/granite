@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-core",
   "type": "module",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "The core plugin module for Granite",
   "scripts": {
     "prepack": "yarn build",
