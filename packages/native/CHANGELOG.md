@@ -1,5 +1,14 @@
 # @granite-js/native
 
+## 1.0.20
+
+### Patch Changes
+
+- 324827a: chore: bump react-navigation
+  - @granite-js/image@1.0.20
+  - @granite-js/lottie@1.0.20
+  - @granite-js/video@1.0.20
+
 ## 1.0.19
 
 ### Patch Changes
