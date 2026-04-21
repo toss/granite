@@ -41,8 +41,7 @@
   },
   "dependencies": {
     "@react-native/js-polyfills": "0.84.0",
-    "esbuild": "0.28.0",
-    "flow-remove-types": "^2.291.0",
+    "fast-flow-transform": "0.0.3",
     "regenerator-runtime": "^0.13.11"
   },
   "devDependencies": {

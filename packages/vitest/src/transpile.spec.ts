@@ -2,13 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { transformReactNativeSource } from './transpile';
 
 describe('transformReactNativeSource', () => {
-  it('transforms React Native .js files that contain JSX', () => {
+  it('strips Flow types and leaves JSX for the bundler pipeline', () => {
     const transformed = transformReactNativeSource(
       '/virtual/react-native/Libraries/Button.js',
-      'export function Button() { return <View />; }',
+      'export function Button(props: { label: string }) { return <View foo={props.label} />; }',
     );
 
-    expect(transformed).toContain('React.createElement');
+    expect(transformed).toContain('export function Button(props)');
+    expect(transformed).toContain('<View foo={props.label} />');
     expect(transformed).toContain('Button');
+    expect(transformed).not.toContain(': { label: string }');
   });
 });

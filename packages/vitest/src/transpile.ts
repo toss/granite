@@ -1,6 +1,5 @@
+import { createRequire } from 'node:module';
 import path from 'node:path';
-import esbuild from 'esbuild';
-import flowRemoveTypes from 'flow-remove-types';
 
 export const REACT_NATIVE_TRANSFORM_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx'] as const;
 export const REACT_NATIVE_TRANSFORM_ALLOWLIST = [
@@ -9,6 +8,31 @@ export const REACT_NATIVE_TRANSFORM_ALLOWLIST = [
   '@react-native',
   '@react-native-community',
 ] as const;
+
+type FastFlowTransformBinding = {
+  transform: (input: {
+    filename: string;
+    code: string;
+    dialect: 'flow' | 'flow-detect' | 'flow-unambiguous';
+    format: 'compact' | 'preserve' | 'pretty';
+    comments: boolean;
+    reactRuntimeTarget: '18' | '19';
+    sourcemap: boolean;
+  }) => {
+    ok: boolean;
+    code?: string;
+    errorMessage?: string;
+    errorLine?: number;
+    errorColumn?: number;
+  };
+};
+
+const require = createRequire(import.meta.url);
+const fastFlowTransformEntryPath = require.resolve('fast-flow-transform');
+const fastFlowTransformPackageRoot = path.dirname(path.dirname(fastFlowTransformEntryPath));
+const fastFlowTransformBinding = require(
+  path.join(fastFlowTransformPackageRoot, 'binding', 'bindings.cjs'),
+) as FastFlowTransformBinding;
 
 function normalizePath(filename: string) {
   return filename.replace(/\\/g, '/');
@@ -25,23 +49,6 @@ function isWithinPackageRoots(filename: string, packageRoots: readonly string[])
       normalizedFilename.startsWith(`${normalizedPackageRoot}/`)
     );
   });
-}
-
-function getEsbuildLoader(filename: string): 'js' | 'jsx' | 'ts' | 'tsx' {
-  const extension = path.extname(filename).toLowerCase();
-
-  switch (extension) {
-    case '.js':
-      return 'jsx';
-    case '.jsx':
-      return 'jsx';
-    case '.ts':
-      return 'ts';
-    case '.tsx':
-      return 'tsx';
-    default:
-      return 'js';
-  }
 }
 
 export function shouldTransformReactNativeFile(
@@ -77,13 +84,24 @@ export function shouldInlineReactNativeDependency(
 }
 
 export function transformReactNativeSource(sourcePath: string, source: string) {
-  const stripped = flowRemoveTypes(source, { all: true }).toString();
-  const transformed = esbuild.transformSync(stripped, {
-    format: 'cjs',
-    loader: getEsbuildLoader(sourcePath),
-    platform: 'node',
-    sourcefile: sourcePath,
+  const transformed = fastFlowTransformBinding.transform({
+    filename: sourcePath,
+    code: source,
+    dialect: 'flow-detect',
+    format: 'compact',
+    comments: false,
+    reactRuntimeTarget: '19',
+    sourcemap: false,
   });
+
+  if (!transformed.ok || transformed.code == null) {
+    const location =
+      transformed.errorLine != null && transformed.errorColumn != null
+        ? ` (${sourcePath}:${String(transformed.errorLine)}:${String(transformed.errorColumn)})`
+        : '';
+    const message = transformed.errorMessage ?? 'Unknown fast-flow-transform error';
+    throw new Error(`fast-flow-transform failed${location}: ${message}`);
+  }
 
   return transformed.code;
 }
