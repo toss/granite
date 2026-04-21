@@ -95,6 +95,7 @@ describe('reactNative', () => {
     const reactNativeEntryPath = packageRequire.resolve('react-native/package.json');
     const packageRoots = resolveReactNativePackageRoots(process.cwd());
 
+    expect(packageRoots.length).toBeGreaterThan(1);
     expect(packageRoots.some((packageRoot) => reactNativeEntryPath.startsWith(packageRoot))).toBe(true);
     expect(shouldInlineReactNativeDependency(reactNativeEntryPath, packageRoots)).toBe(true);
   });

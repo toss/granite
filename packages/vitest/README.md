@@ -25,7 +25,7 @@ The React Native mirror is stored as a content-addressed local cache:
 
 The cache key is derived from:
 
-- the mirrored `react-native`, `@react-native/*`, and `@react-native-community/*` file contents
+- the mirrored `react-native` and `@react-native/*` file contents
 - the local mirror/transform implementation
 - transform dependency versions
 

@@ -156,10 +156,6 @@ export function reactNative(options: ReactNativePluginOptions = {}): ReactNative
               find: /^@react-native\/(.*)$/,
               replacement: path.join(reactNativeMirrorRoot, '@react-native', '$1'),
             },
-            {
-              find: /^@react-native-community\/(.*)$/,
-              replacement: path.join(reactNativeMirrorRoot, '@react-native-community', '$1'),
-            },
           ],
           conditions: [...REACT_NATIVE_EXPORT_CONDITIONS],
           extensions: [...REACT_NATIVE_RESOLVE_EXTENSIONS],

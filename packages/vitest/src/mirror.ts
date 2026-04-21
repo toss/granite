@@ -42,10 +42,6 @@ function ensureDirectory(targetPath: string) {
   fs.mkdirSync(targetPath, { recursive: true });
 }
 
-function resolveWorkspaceRequire(workspaceRoot: string) {
-  return createRequire(path.join(workspaceRoot, 'package.json'));
-}
-
 function getReactNativeMirrorCacheRoot(workspaceRoot: string) {
   return path.join(workspaceRoot, GRANITE_VITEST_RN_CACHE_DIRECTORY);
 }
@@ -141,6 +137,19 @@ function hashImplementationFiles() {
   return hasher.digest('hex');
 }
 
+function getMirroredReactNativePackageNames(workspaceRoot: string) {
+  const reactNativePackageJsonPath = createRequire(path.join(workspaceRoot, 'package.json')).resolve(
+    'react-native/package.json',
+  );
+  const reactNativePackageJson = JSON.parse(fs.readFileSync(reactNativePackageJsonPath, 'utf8')) as {
+    dependencies?: Record<string, string>;
+  };
+
+  return Object.keys(reactNativePackageJson.dependencies ?? {}).filter((dependencyName) =>
+    dependencyName.startsWith('@react-native/'),
+  );
+}
+
 function computeReactNativeMirrorCacheKey(workspaceRoot: string) {
   const hasher = createHash('sha256');
   const packageRoots = resolveReactNativePackageRoots(workspaceRoot).sort();
@@ -170,7 +179,7 @@ function computeReactNativeMirrorCacheKey(workspaceRoot: string) {
   };
 }
 
-function getDirectorySize(targetPath: string) {
+function getDirectorySize(targetPath: string): number {
   const stat = fs.statSync(targetPath);
 
   if (stat.isFile()) {
@@ -181,7 +190,7 @@ function getDirectorySize(targetPath: string) {
     return 0;
   }
 
-  return fs.readdirSync(targetPath, { withFileTypes: true }).reduce((totalSize, entry) => {
+  return fs.readdirSync(targetPath, { withFileTypes: true }).reduce<number>((totalSize, entry) => {
     const entryPath = path.join(targetPath, entry.name);
 
     if (entry.isDirectory() || entry.isFile()) {
@@ -347,27 +356,12 @@ export function resolvePackageRoot(packageName: string, requireRoot: string) {
   return path.dirname(packageJsonPath);
 }
 
-export function getScopedReactNativePackageNames(workspaceRoot: string) {
-  const reactNativePackageJsonPath = resolveWorkspaceRequire(workspaceRoot).resolve(
-    'react-native/package.json',
-  );
-  const reactNativePackageJson = JSON.parse(fs.readFileSync(reactNativePackageJsonPath, 'utf8')) as {
-    dependencies?: Record<string, string>;
-  };
-
-  return Object.keys(reactNativePackageJson.dependencies ?? {}).filter(
-    (dependencyName) =>
-      dependencyName.startsWith('@react-native/') ||
-      dependencyName.startsWith('@react-native-community/'),
-  );
-}
-
 export function resolveReactNativePackageRoots(workspaceRoot: string) {
   const reactNativeRoot = resolvePackageRoot('react-native', workspaceRoot);
 
   return [
     reactNativeRoot,
-    ...getScopedReactNativePackageNames(workspaceRoot).map((dependencyName) =>
+    ...getMirroredReactNativePackageNames(workspaceRoot).map((dependencyName) =>
       resolvePackageRoot(dependencyName, reactNativeRoot),
     ),
   ];
@@ -491,7 +485,7 @@ export function buildReactNativeMirror(workspaceRoot: string) {
   try {
     mirrorResolvedPackage('react-native', workspaceRoot, temporaryPackagesRoot);
 
-    getScopedReactNativePackageNames(workspaceRoot).forEach((dependencyName) => {
+    getMirroredReactNativePackageNames(workspaceRoot).forEach((dependencyName) => {
       mirrorResolvedPackage(dependencyName, reactNativeRoot, temporaryPackagesRoot);
     });
 
