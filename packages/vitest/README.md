@@ -15,6 +15,28 @@ export default defineConfig({
 
 `reactNative()` injects the React Native mirror aliases, the Vitest `node` environment, `globals: true`, Jest-like test globs, and the packaged React Native runtime/setup files.
 
+## Mirror Cache
+
+The React Native mirror is stored as a content-addressed local cache:
+
+- cache root: `/.granite-vitest-rn-cache`
+- entries: `/.granite-vitest-rn-cache/entries/<cache-key>/packages`
+- metadata: `/.granite-vitest-rn-cache/entries/<cache-key>/meta.json`
+
+The cache key is derived from:
+
+- the mirrored `react-native`, `@react-native/*`, and `@react-native-community/*` file contents
+- the local mirror/transform implementation
+- transform dependency versions
+
+If the cache key matches, `reactNative()` reuses the existing mirror immediately instead of rebuilding it.
+
+Local garbage collection runs opportunistically while resolving the mirror cache:
+
+- stale entries older than 7 days are removed
+- temporary entries left behind by interrupted builds are removed
+- the cache is trimmed back to roughly 1 GB using least-recently-used eviction
+
 ## React Native Jest Preset Parity
 
 **Status:** `100%`
@@ -40,7 +62,7 @@ Here, `100%` means the tracked parity checklist for that surface is implemented 
 - `test.setupFiles = [reactNativeRuntime, setup]`
 - `resolve.conditions = ['require', 'react-native']`
 - `resolve.extensions = ['.ios.tsx', '.ios.ts', '.ios.jsx', '.ios.js', '.tsx', '.ts', '.jsx', '.js', '.json']`
-- React Native source mirroring plus Flow stripping before execution
+- content-addressed React Native source mirroring plus Flow stripping before execution
 - package-root-based resolution for Yarn PnP and regular installs
 
 ### 2. Global bootstrap
@@ -68,6 +90,8 @@ The runtime explicitly mocks these subpaths:
 - `react-native/Libraries/Core/InitializeCore`
 - `react-native/Libraries/Core/NativeExceptionsManager`
 - `react-native/Libraries/Components/Clipboard/Clipboard`
+- `react-native/Libraries/Utilities/codegenNativeCommands`
+- `react-native/Libraries/Utilities/codegenNativeComponent`
 - `react-native/Libraries/Components/RefreshControl/RefreshControl`
 - `react-native/Libraries/Components/ActivityIndicator/ActivityIndicator`
 - `react-native/Libraries/Image/Image`
@@ -125,6 +149,8 @@ The top-level `react-native` mock exports these components, APIs, and utilities:
 - `BackHandler`
 - `Button`
 - `Clipboard`
+- `codegenNativeCommands`
+- `codegenNativeComponent`
 - `DevMenu`
 - `DevSettings`
 - `DeviceEventEmitter`
@@ -229,6 +255,8 @@ The runtime also reproduces the host rendering semantics that RNTL depends on:
 - host components render to string host nodes such as `View`, `Text`, `TextInput`, `ScrollView`
 - native components preserve `_nativeTag` and native-style instance methods
 - `requireNativeComponent()` and `NativeComponentRegistry` resolve to host-renderable mock components
+- `codegenNativeComponent()` delegates to the mocked `requireNativeComponent()` layer
+- `codegenNativeCommands()` delegates to mocked `RendererProxy.dispatchCommand()`
 - `Animated` includes the preset-style mock surface, including `Value`, `ValueXY`, `Color`, `Interpolation`, `Node`, `timing`, `spring`, `decay`, `sequence`, `parallel`, `stagger`, `loop`, arithmetic helpers, `event`, `attachNativeEvent`, `forkEvent`, `unforkEvent`, and `Event`
 
 For the source of truth, see [src/reactNativeRuntime.ts](./src/reactNativeRuntime.ts), [src/runtimeBootstrap.ts](./src/runtimeBootstrap.ts), and [src/reactNative.ts](./src/reactNative.ts).

@@ -7,6 +7,9 @@ import {
   JEST_LIKE_TEST_PATTERNS,
   REACT_NATIVE_EXPORT_CONDITIONS,
   REACT_NATIVE_RESOLVE_EXTENSIONS,
+  GRANITE_VITEST_RN_CACHE_DIRECTORY,
+  GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
+  buildReactNativeMirror,
   getVitestJsxTransformConfig,
   reactNative,
   resolveReactNativePackageRoots,
@@ -95,4 +98,67 @@ describe('reactNative', () => {
     expect(packageRoots.some((packageRoot) => reactNativeEntryPath.startsWith(packageRoot))).toBe(true);
     expect(shouldInlineReactNativeDependency(reactNativeEntryPath, packageRoots)).toBe(true);
   });
+
+  it('reuses a content-addressed mirror entry when the inputs are unchanged', () => {
+    const workspaceRoot = process.cwd();
+    const firstMirrorRoot = buildReactNativeMirror(workspaceRoot);
+    const secondMirrorRoot = buildReactNativeMirror(workspaceRoot);
+    const firstEntryRoot = path.dirname(firstMirrorRoot);
+    const metadataPath = path.join(firstEntryRoot, 'meta.json');
+    const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8')) as {
+      cacheKey: string;
+      packageRoots: string[];
+      transformImplementationHash: string;
+    };
+
+    expect(secondMirrorRoot).toBe(firstMirrorRoot);
+    expect(firstMirrorRoot).toContain(
+      path.join(
+        GRANITE_VITEST_RN_CACHE_DIRECTORY,
+        GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
+      ),
+    );
+    expect(metadata.cacheKey).toBe(path.basename(firstEntryRoot));
+    expect(metadata.packageRoots.length).toBeGreaterThan(0);
+    expect(metadata.transformImplementationHash.length).toBeGreaterThan(0);
+  }, 60_000);
+
+  it('garbage-collects stale mirror entries while preserving the active one', () => {
+    const workspaceRoot = process.cwd();
+    const activeMirrorRoot = buildReactNativeMirror(workspaceRoot);
+    const entriesRoot = path.join(
+      workspaceRoot,
+      GRANITE_VITEST_RN_CACHE_DIRECTORY,
+      GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
+    );
+    const staleEntryRoot = path.join(entriesRoot, 'stale-entry-for-gc');
+    const stalePackagesRoot = path.join(staleEntryRoot, 'packages');
+
+    fs.rmSync(staleEntryRoot, { force: true, recursive: true });
+    fs.mkdirSync(stalePackagesRoot, { recursive: true });
+    fs.writeFileSync(path.join(stalePackagesRoot, 'placeholder.js'), 'module.exports = 1;\n');
+    fs.writeFileSync(
+      path.join(staleEntryRoot, 'meta.json'),
+      JSON.stringify(
+        {
+          cacheKey: 'stale-entry-for-gc',
+          createdAt: '2000-01-01T00:00:00.000Z',
+          lastAccessedAt: '2000-01-01T00:00:00.000Z',
+          packageRoots: [],
+          sizeBytes: 16,
+          transformDependencyVersions: {
+            fastFlowTransform: '0.0.0',
+          },
+          transformImplementationHash: 'stale',
+        },
+        null,
+        2,
+      ),
+    );
+
+    buildReactNativeMirror(workspaceRoot);
+
+    expect(fs.existsSync(activeMirrorRoot)).toBe(true);
+    expect(fs.existsSync(staleEntryRoot)).toBe(false);
+  }, 60_000);
 });

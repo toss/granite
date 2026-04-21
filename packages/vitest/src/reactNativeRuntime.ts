@@ -499,6 +499,7 @@ function createNativeExceptionsManagerMockModule() {
 
 function createRendererProxyMockModule() {
   const rendererProxy = {
+    dispatchCommand: vi.fn(),
     findNodeHandle: vi.fn((component: { _nativeTag?: number } | null | undefined) => {
       if (component == null) {
         return null;
@@ -560,11 +561,77 @@ function createRequireNativeComponentMockModule() {
   };
 }
 
+function createCodegenNativeComponentMockModule() {
+  const codegenNativeComponent = vi.fn(
+    (
+      componentName: string,
+      options?: {
+        interfaceOnly?: boolean;
+        paperComponentName?: string;
+        paperComponentNameDeprecated?: string;
+      },
+    ) => {
+      const { requireNativeComponentModule, uiManagerModule } = getSharedReactNativeMockModules();
+      const requireNativeComponent =
+        (requireNativeComponentModule as any).default ?? requireNativeComponentModule;
+      const uiManager = (uiManagerModule as any).default ?? uiManagerModule;
+
+      let componentNameInUse =
+        options?.paperComponentName != null ? options.paperComponentName : componentName;
+
+      if (
+        options?.paperComponentNameDeprecated != null &&
+        typeof uiManager?.hasViewManagerConfig === 'function'
+      ) {
+        if (uiManager.hasViewManagerConfig(componentName)) {
+          componentNameInUse = componentName;
+        } else if (uiManager.hasViewManagerConfig(options.paperComponentNameDeprecated)) {
+          componentNameInUse = options.paperComponentNameDeprecated;
+        }
+      }
+
+      return requireNativeComponent(componentNameInUse);
+    },
+  );
+
+  return {
+    __esModule: true,
+    default: codegenNativeComponent,
+  };
+}
+
+function createCodegenNativeCommandsMockModule() {
+  const codegenNativeCommands = vi.fn(
+    (options: {
+      supportedCommands?: string[];
+    }) => {
+      const { rendererProxyModule } = getSharedReactNativeMockModules();
+      const rendererProxy = (rendererProxyModule as any).default ?? rendererProxyModule;
+      const commandObject: Record<string, ReturnType<typeof vi.fn>> = {};
+
+      for (const command of options.supportedCommands ?? []) {
+        commandObject[command] = vi.fn((ref: unknown, ...args: unknown[]) => {
+          rendererProxy.dispatchCommand(ref, command, args);
+        });
+      }
+
+      return commandObject;
+    },
+  );
+
+  return {
+    __esModule: true,
+    default: codegenNativeCommands,
+  };
+}
+
 type SharedReactNativeMockModules = {
   accessibilityInfoModule: ReturnType<typeof createAccessibilityInfoMockModule>;
   activityIndicatorModule: ReturnType<typeof createActivityIndicatorMockModule>;
   appStateModule: ReturnType<typeof createAppStateMockModule>;
   clipboardModule: ReturnType<typeof createClipboardMockModule>;
+  codegenNativeCommandsModule: ReturnType<typeof createCodegenNativeCommandsMockModule>;
+  codegenNativeComponentModule: ReturnType<typeof createCodegenNativeComponentMockModule>;
   imageModule: ReturnType<typeof createImageMockModule>;
   initializeCoreModule: ReturnType<typeof createInitializeCoreMockModule>;
   linkingModule: ReturnType<typeof createLinkingMockModule>;
@@ -604,6 +671,8 @@ function getSharedReactNativeMockModules() {
     activityIndicatorModule: createActivityIndicatorMockModule(),
     appStateModule: createAppStateMockModule(),
     clipboardModule: createClipboardMockModule(),
+    codegenNativeCommandsModule: createCodegenNativeCommandsMockModule(),
+    codegenNativeComponentModule: createCodegenNativeComponentMockModule(),
     imageModule: createImageMockModule(),
     initializeCoreModule: createInitializeCoreMockModule(),
     linkingModule: createLinkingMockModule(),
@@ -642,6 +711,8 @@ function getSharedReactNativeExports() {
     activityIndicatorModule,
     appStateModule,
     clipboardModule,
+    codegenNativeCommandsModule,
+    codegenNativeComponentModule,
     imageModule,
     linkingModule,
     modalModule,
@@ -2073,6 +2144,10 @@ function getSharedReactNativeExports() {
     BackHandler,
     Button,
     Clipboard: (clipboardModule as any).default ?? clipboardModule,
+    codegenNativeCommands:
+      (codegenNativeCommandsModule as any).default ?? codegenNativeCommandsModule,
+    codegenNativeComponent:
+      (codegenNativeComponentModule as any).default ?? codegenNativeComponentModule,
     DevMenu,
     DevSettings,
     DeviceEventEmitter,
@@ -2202,6 +2277,14 @@ vi.mock(
   () => getSharedReactNativeMockModules().clipboardModule,
 );
 vi.mock(
+  'react-native/Libraries/Utilities/codegenNativeCommands',
+  () => getSharedReactNativeMockModules().codegenNativeCommandsModule,
+);
+vi.mock(
+  'react-native/Libraries/Utilities/codegenNativeComponent',
+  () => getSharedReactNativeMockModules().codegenNativeComponentModule,
+);
+vi.mock(
   'react-native/Libraries/Components/RefreshControl/RefreshControl',
   () => getSharedReactNativeMockModules().refreshControlModule,
 );
@@ -2316,6 +2399,20 @@ function patchReactNativeResolution() {
     'Components',
     'Clipboard',
     'Clipboard.js',
+  );
+  const codegenNativeCommandsMockPath = path.join(
+    reactNativeMirrorRoot,
+    'react-native',
+    'Libraries',
+    'Utilities',
+    'codegenNativeCommands.js',
+  );
+  const codegenNativeComponentMockPath = path.join(
+    reactNativeMirrorRoot,
+    'react-native',
+    'Libraries',
+    'Utilities',
+    'codegenNativeComponent.js',
   );
   const refreshControlMockPath = path.join(
     reactNativeMirrorRoot,
@@ -2506,6 +2603,14 @@ function patchReactNativeResolution() {
 
     if (resolved === clipboardMockPath) {
       return sharedMockModules.clipboardModule;
+    }
+
+    if (resolved === codegenNativeCommandsMockPath) {
+      return sharedMockModules.codegenNativeCommandsModule;
+    }
+
+    if (resolved === codegenNativeComponentMockPath) {
+      return sharedMockModules.codegenNativeComponentModule;
     }
 
     if (resolved === refreshControlMockPath) {
