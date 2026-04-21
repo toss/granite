@@ -4,8 +4,8 @@
   "scripts": {
     "dev": "granite dev",
     "build": "granite build",
-    "test": "jest --passWithNoTests",
-    "typecheck": "tsc --noEmit",
+    "test": "vitest --run --passWithNoTests",
+    "typecheck": "yarn tsc --noEmit",
     "lint": "biome check --write"
   },
   "dependencies": {
@@ -27,15 +27,16 @@
     "@granite-js/plugin-micro-frontend": "workspace:*",
     "@granite-js/plugin-router": "workspace:*",
     "@granite-js/plugin-sentry": "workspace:*",
+    "@granite-js/vitest": "workspace:*",
     "@react-native/babel-preset": "catalog:react-native",
     "@testing-library/react-native": "^12.9.0",
     "@types/babel__core": "^7.20.5",
-    "@types/jest": "^29.5.14",
     "@types/node": "catalog:tools",
     "@types/react": "catalog:react-native",
+    "@types/react-test-renderer": "19.1.0",
     "babel-preset-granite": "workspace:*",
-    "jest": "^29.7.0",
-    "react-test-renderer": "18.2.0",
-    "typescript": "catalog:tools"
+    "react-test-renderer": "19.2.3",
+    "typescript": "catalog:tools",
+    "vitest": "4.1.3"
   }
 }
