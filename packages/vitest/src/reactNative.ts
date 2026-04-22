@@ -165,6 +165,7 @@ export function reactNative(): Plugin {
         return undefined;
       }
 
+      // Match React Native's Jest asset transformer by exporting `{ testUri }`.
       const asset = {
         testUri: path
           .relative(currentDirectory, id.replace(/[?#].*$/, ''))
