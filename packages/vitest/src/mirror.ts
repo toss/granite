@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getLocalTempDirectoryPath } from '@granite-js/utils';
 import {
   shouldTransformReactNativeFile,
   transformReactNativeSource,
@@ -12,7 +11,6 @@ import {
 export const DEFAULT_PLATFORM = 'ios';
 export const GRANITE_VITEST_RN_CACHE_DIRECTORY = 'vitest-react-native-cache';
 export const GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY = 'entries';
-export const GRANITE_VITEST_RN_CACHE_ROOT_ENV = 'GRANITE_VITEST_RN_CACHE_ROOT';
 export const GRANITE_VITEST_RN_PACKAGES_DIRECTORY = 'packages';
 export const REACT_NATIVE_PLATFORMS = ['android', 'ios', 'native'] as const;
 
@@ -22,6 +20,7 @@ const GRANITE_VITEST_RN_CACHE_TMP_PREFIX = '.tmp-';
 const GRANITE_VITEST_RN_CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const GRANITE_VITEST_RN_CACHE_MAX_SIZE_BYTES = 1024 * 1024 * 1024;
 const GRANITE_VITEST_RN_TEMP_ENTRY_MAX_AGE_MS = 60 * 60 * 1000;
+const DEFAULT_VITEST_CACHE_DIRECTORY = '.vitest';
 const MIRROR_CACHE_KEY_VERSION = 'v1';
 
 type MirrorCacheMetadata = {
@@ -55,9 +54,13 @@ function ensureDirectory(targetPath: string) {
   fs.mkdirSync(targetPath, { recursive: true });
 }
 
+function resolveVitestCacheDirectory(workspaceRoot: string, cacheDirectory?: string) {
+  return cacheDirectory ?? path.join(workspaceRoot, DEFAULT_VITEST_CACHE_DIRECTORY);
+}
+
 function getReactNativeMirrorCacheRoot(workspaceRoot: string, cacheDirectory?: string) {
   return path.join(
-    cacheDirectory ?? getLocalTempDirectoryPath(workspaceRoot),
+    resolveVitestCacheDirectory(workspaceRoot, cacheDirectory),
     GRANITE_VITEST_RN_CACHE_DIRECTORY,
   );
 }
@@ -594,7 +597,9 @@ export async function buildReactNativeMirror(workspaceRoot: string, cacheDirecto
     try {
       fs.renameSync(temporaryEntryRoot, entryRoot);
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
+      const errorCode = (error as NodeJS.ErrnoException).code;
+
+      if (errorCode !== 'EEXIST' && errorCode !== 'ENOTEMPTY') {
         throw error;
       }
     }

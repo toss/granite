@@ -5,7 +5,7 @@
     "dev": "granite dev",
     "build": "granite build",
     "test": "vitest --run --passWithNoTests",
-    "typecheck": "yarn tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "lint": "biome check --write"
   },
   "dependencies": {

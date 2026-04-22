@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Plugin } from 'vitest/config';
-import * as vite from 'vitest/node'
+import * as vite from 'vitest/node';
 import {
   createReactNativeAssetModuleCode,
   isReactNativeAssetModuleId,
@@ -14,7 +14,6 @@ import {
   GRANITE_VITEST_RN_CACHE_DIRECTORY,
   GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
   GRANITE_VITEST_RN_PACKAGES_DIRECTORY,
-  GRANITE_VITEST_RN_CACHE_ROOT_ENV,
   REACT_NATIVE_PLATFORMS,
   resolvePackageRoot,
   resolveReactNativePackageRoots,
@@ -94,77 +93,94 @@ export function reactNative(): Plugin {
     enforce: 'pre',
     name: 'granite-react-native',
     async config(conf) {
-      const workspaceRoot = conf.root;
-
-      if(!workspaceRoot) {
-        throw new Error('workspaceRoot is required');
-      }
+      const workspaceRoot =
+        typeof conf.root === 'string' && conf.root.length > 0
+          ? conf.root
+          : 'configFile' in conf &&
+              typeof conf.configFile === 'string' &&
+              conf.configFile.length > 0
+            ? path.dirname(conf.configFile)
+            : process.cwd();
+      const cacheDir =
+        typeof conf.cacheDir === 'string' && conf.cacheDir.length > 0
+          ? conf.cacheDir
+          : '.vitest';
+      const cacheDirectory = path.isAbsolute(cacheDir)
+        ? cacheDir
+        : path.join(workspaceRoot, cacheDir);
 
       const reactNativeMirrorRoot = await buildReactNativeMirror(
         workspaceRoot,
-        path.join(workspaceRoot, conf.cacheDir ?? '.vitest'),
+        cacheDirectory,
       );
 
+      const resolve = {
+        alias: [
+          {
+            find: /^react-native$/,
+            replacement: path.join(reactNativeMirrorRoot, 'react-native', 'index.js'),
+          },
+          {
+            find: /^react-native\/(.*)$/,
+            replacement: path.join(reactNativeMirrorRoot, 'react-native', '$1'),
+          },
+          {
+            find: /^@react-native\/(.*)$/,
+            replacement: path.join(reactNativeMirrorRoot, '@react-native', '$1'),
+          },
+          {
+            find: /^@react-native-community\/([^/]+)$/,
+            replacement: path.join(reactNativeMirrorRoot, '@react-native-community', '$1'),
+          },
+          {
+            find: /^@react-native-community\/([^/]+)\/(.*)$/,
+            replacement: path.join(reactNativeMirrorRoot, '@react-native-community', '$1', '$2'),
+          },
+          {
+            find: /^jest-react-native$/,
+            replacement: path.join(reactNativeMirrorRoot, 'jest-react-native'),
+          },
+          {
+            find: /^jest-react-native\/(.*)$/,
+            replacement: path.join(reactNativeMirrorRoot, 'jest-react-native', '$1'),
+          },
+        ],
+        conditions: [...REACT_NATIVE_EXPORT_CONDITIONS],
+        extensions: [...REACT_NATIVE_RESOLVE_EXTENSIONS],
+      };
+
       const commonConfig = {
-        resolve: {
-          alias: [
-            {
-              find: /^react-native$/,
-              replacement: path.join(reactNativeMirrorRoot, 'react-native', 'index.js'),
-            },
-            {
-              find: /^react-native\/(.*)$/,
-              replacement: path.join(reactNativeMirrorRoot, 'react-native', '$1'),
-            },
-            {
-              find: /^@react-native\/(.*)$/,
-              replacement: path.join(reactNativeMirrorRoot, '@react-native', '$1'),
-            },
-            {
-              find: /^@react-native-community\/([^/]+)$/,
-              replacement: path.join(reactNativeMirrorRoot, '@react-native-community', '$1'),
-            },
-            {
-              find: /^@react-native-community\/([^/]+)\/(.*)$/,
-              replacement: path.join(reactNativeMirrorRoot, '@react-native-community', '$1', '$2'),
-            },
-            {
-              find: /^jest-react-native$/,
-              replacement: path.join(reactNativeMirrorRoot, 'jest-react-native'),
-            },
-            {
-              find: /^jest-react-native\/(.*)$/,
-              replacement: path.join(reactNativeMirrorRoot, 'jest-react-native', '$1'),
-            },
-          ],
-          conditions: [...REACT_NATIVE_EXPORT_CONDITIONS],
-          extensions: [...REACT_NATIVE_RESOLVE_EXTENSIONS],
+        define: {
+          'globalThis.__GRANITE_VITEST_RN_CACHE_ROOT__': JSON.stringify(reactNativeMirrorRoot),
         },
+        resolve,
         test: {
           environment: 'node',
           globals: true,
           include: [...JEST_LIKE_TEST_PATTERNS],
           setupFiles: resolveReactNativeSetupFiles(),
-        }
-      }
+        },
+      };
 
-      if('rollupVersion' in vite) {
+      if ('rolldownVersion' in vite) {
         return {
           oxc: {
-            jsx: 'automatic',
-            jsxImportSource: 'react',
+            jsx: {
+              importSource: 'react',
+              runtime: 'automatic',
+            },
           },
           ...commonConfig,
-        }
-      } else {
-        return {
-          esbuild: {
-            jsx: 'automatic',
-            jsxImportSource: 'react',
-          },
-          ...commonConfig,
-        }
+        };
       }
+
+      return {
+        esbuild: {
+          jsx: 'automatic',
+          jsxImportSource: 'react',
+        } as any,
+        ...commonConfig,
+      };
     },
     load(id: string) {
       if (!isReactNativeAssetModuleId(id)) {
@@ -181,7 +197,6 @@ export {
   GRANITE_VITEST_RN_CACHE_DIRECTORY,
   GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
   GRANITE_VITEST_RN_PACKAGES_DIRECTORY,
-  GRANITE_VITEST_RN_CACHE_ROOT_ENV,
   REACT_NATIVE_PLATFORMS,
   REACT_NATIVE_ASSET_EXTENSIONS,
   REACT_NATIVE_TRANSFORM_ALLOWLIST,

@@ -6,12 +6,15 @@ vi.mock('@react-native/js-polyfills/error-guard', () => ({}));
 describe('reactNativeRuntime parity surface', () => {
   let ReactNative: Record<string, any>;
   let RendererProxy: Record<string, any>;
-  const originalMirrorRoot = process.env.GRANITE_VITEST_RN_CACHE_ROOT;
+  const runtimeGlobals = globalThis as typeof globalThis & {
+    __GRANITE_VITEST_RN_CACHE_ROOT__?: string;
+  };
+  const originalMirrorRoot = runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__;
 
   beforeAll(async () => {
     const mirrorRoot = await buildReactNativeMirror(process.cwd());
 
-    process.env.GRANITE_VITEST_RN_CACHE_ROOT = mirrorRoot;
+    runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__ = mirrorRoot;
     vi.resetModules();
 
     await import('./reactNativeRuntime');
@@ -21,11 +24,11 @@ describe('reactNativeRuntime parity surface', () => {
 
   afterAll(() => {
     if (originalMirrorRoot == null) {
-      delete process.env.GRANITE_VITEST_RN_CACHE_ROOT;
+      delete runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__;
       return;
     }
 
-    process.env.GRANITE_VITEST_RN_CACHE_ROOT = originalMirrorRoot;
+    runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__ = originalMirrorRoot;
   });
 
   it('exposes the remaining top-level React Native facade exports', () => {

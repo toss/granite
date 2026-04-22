@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
-import { getLocalTempDirectoryPath } from '@granite-js/utils';
+import * as vite from 'vitest/node';
 import { describe, expect, it } from 'vitest';
 import {
   JEST_LIKE_TEST_PATTERNS,
@@ -19,6 +19,40 @@ import {
   shouldInlineReactNativeDependency,
   synthesizeDefaultPlatformFiles,
 } from './reactNative';
+
+async function runPluginConfig(plugin: ReturnType<typeof reactNative>, conf = {}) {
+  const configHook = plugin.config;
+
+  if (configHook == null) {
+    throw new Error('reactNative plugin must expose a config hook');
+  }
+
+  if (typeof configHook === 'function') {
+    return (await configHook.call({} as never, conf as never, {} as never)) as unknown as {
+      resolve: { alias: Array<{ replacement: string }> };
+      test: { setupFiles: string[] };
+    };
+  }
+
+  return (await configHook.handler.call({} as never, conf as never, {} as never)) as unknown as {
+    resolve: { alias: Array<{ replacement: string }> };
+    test: { setupFiles: string[] };
+  };
+}
+
+async function runPluginLoad(plugin: ReturnType<typeof reactNative>, id: string) {
+  const loadHook = plugin.load;
+
+  if (loadHook == null) {
+    return undefined;
+  }
+
+  if (typeof loadHook === 'function') {
+    return loadHook.call({} as never, id, undefined);
+  }
+
+  return loadHook.handler.call({} as never, id, undefined);
+}
 
 describe('reactNative', () => {
   it('returns shared JSX transform config for both oxc and esbuild', () => {
@@ -38,7 +72,7 @@ describe('reactNative', () => {
 
   it('provides a Vitest plugin-style config with packaged setup files', async () => {
     const plugin = reactNative();
-    const config = await plugin.config();
+    const config = await runPluginConfig(plugin, { cacheDir: '.vitest' });
 
     expect(plugin.name).toBe('granite-react-native');
     expect(config).toMatchObject({
@@ -55,7 +89,23 @@ describe('reactNative', () => {
       },
     });
 
-    expect(config).toMatchObject(getVitestJsxTransformConfig());
+    if ('rolldownVersion' in vite) {
+      expect(config).toMatchObject({
+        oxc: {
+          jsx: {
+            importSource: 'react',
+            runtime: 'automatic',
+          },
+        },
+      });
+    } else {
+      expect(config).toMatchObject({
+        esbuild: {
+          jsx: 'automatic',
+          jsxImportSource: 'react',
+        },
+      });
+    }
 
     for (const setupFile of config.test.setupFiles) {
       expect(fs.existsSync(setupFile)).toBe(true);
@@ -82,7 +132,7 @@ describe('reactNative', () => {
 
   it('mocks asset imports with `{ testUri }` objects', async () => {
     const plugin = reactNative();
-    const assetModuleCode = await plugin.load?.('/virtual/project/src/logo.png');
+    const assetModuleCode = await runPluginLoad(plugin, '/virtual/project/src/logo.png');
 
     expect(REACT_NATIVE_ASSET_EXTENSIONS).toContain('png');
     expect(assetModuleCode).toContain('testUri');
@@ -115,15 +165,19 @@ describe('reactNative', () => {
     expect(shouldInlineReactNativeDependency(reactNativeEntryPath, packageRoots)).toBe(true);
   });
 
-  it('defaults workspaceRoot to the nearest package root when omitted', async () => {
+  it('uses the config file directory as the workspace root when root is omitted', async () => {
     const originalCwd = process.cwd();
     const nestedCwd = path.join(originalCwd, 'src');
+    const configFilePath = path.join(originalCwd, 'vitest.config.mts');
 
     process.chdir(nestedCwd);
 
     try {
       const plugin = reactNative();
-      const config = await plugin.config();
+      const config = await runPluginConfig(plugin, {
+        cacheDir: '.vitest',
+        configFile: configFilePath,
+      });
 
       expect(config.resolve.alias[0]?.replacement).toContain(
         path.join(
@@ -153,7 +207,8 @@ describe('reactNative', () => {
     expect(secondMirrorRoot).toBe(firstMirrorRoot);
     expect(firstMirrorRoot).toContain(
       path.join(
-        getLocalTempDirectoryPath(workspaceRoot),
+        workspaceRoot,
+        '.vitest',
         GRANITE_VITEST_RN_CACHE_DIRECTORY,
         GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
       ),
@@ -167,7 +222,8 @@ describe('reactNative', () => {
     const workspaceRoot = process.cwd();
     const activeMirrorRoot = await buildReactNativeMirror(workspaceRoot);
     const entriesRoot = path.join(
-      getLocalTempDirectoryPath(workspaceRoot),
+      workspaceRoot,
+      '.vitest',
       GRANITE_VITEST_RN_CACHE_DIRECTORY,
       GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
     );
