@@ -1,7 +1,5 @@
-import type { ElementRef, ReactNode } from "react";
-import { useRef, useState } from "react";
-import { Text } from "react-native";
-import { codegenNativeCommands, codegenNativeComponent } from "react-native";
+import { type ElementRef, type ReactNode , useRef, useState } from "react";
+import { Text , codegenNativeCommands, codegenNativeComponent } from "react-native";
 import { Button } from "./Button";
 
 type GeneratedViewProps = {
