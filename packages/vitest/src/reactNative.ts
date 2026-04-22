@@ -68,20 +68,24 @@ type OxcTransformConfig = {
 
 type ReactNativeTransformConfig = EsbuildTransformConfig | OxcTransformConfig;
 
+type ReactNativeResolvedConfig = ReactNativeTransformConfig & {
+  resolve: {
+    alias: Array<{ find: RegExp; replacement: string }>;
+    conditions: string[];
+    extensions: string[];
+  };
+  test: {
+    environment: 'node';
+    globals: true;
+    include: string[];
+    setupFiles: string[];
+  };
+};
+
+type MaybePromise<T> = Promise<T> | T;
+
 type ReactNativePlugin = {
-  config: () => ReactNativeTransformConfig & {
-      resolve: {
-        alias: Array<{ find: RegExp; replacement: string }>;
-        conditions: string[];
-        extensions: string[];
-      };
-      test: {
-        environment: 'node';
-        globals: true;
-        include: string[];
-        setupFiles: string[];
-      };
-    };
+  config: () => MaybePromise<ReactNativeResolvedConfig>;
   name: string;
 };
 
@@ -135,8 +139,8 @@ export function reactNative(options: ReactNativePluginOptions = {}): ReactNative
 
   return {
     name: 'granite-react-native',
-    config() {
-      const reactNativeMirrorRoot = buildReactNativeMirror(workspaceRoot);
+    async config() {
+      const reactNativeMirrorRoot = await buildReactNativeMirror(workspaceRoot);
       const vitestVersion = resolveInstalledVitestVersion(workspaceRoot);
       process.env[GRANITE_VITEST_RN_CACHE_ROOT_ENV] = reactNativeMirrorRoot;
 

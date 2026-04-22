@@ -367,14 +367,15 @@ export function resolveReactNativePackageRoots(workspaceRoot: string) {
   ];
 }
 
-function mirrorFile(sourcePath: string, destinationPath: string) {
+async function mirrorFile(sourcePath: string, destinationPath: string) {
   ensureDirectory(path.dirname(destinationPath));
 
   if (shouldTransformReactNativeFile(sourcePath)) {
     const source = fs.readFileSync(sourcePath, 'utf8');
 
     try {
-      fs.writeFileSync(destinationPath, transformReactNativeSource(sourcePath, source));
+      const transformed = await transformReactNativeSource(sourcePath, source);
+      fs.writeFileSync(destinationPath, transformed);
       return;
     } catch {
       fs.writeFileSync(destinationPath, source);
@@ -385,7 +386,7 @@ function mirrorFile(sourcePath: string, destinationPath: string) {
   fs.copyFileSync(sourcePath, destinationPath);
 }
 
-function mirrorTree(sourceRoot: string, destinationRoot: string) {
+async function mirrorTree(sourceRoot: string, destinationRoot: string) {
   const entries = fs.readdirSync(sourceRoot, { withFileTypes: true }).sort((left, right) =>
     left.name.localeCompare(right.name),
   );
@@ -395,7 +396,7 @@ function mirrorTree(sourceRoot: string, destinationRoot: string) {
     const destinationPath = path.join(destinationRoot, entry.name);
 
     if (entry.isDirectory()) {
-      mirrorTree(sourcePath, destinationPath);
+      await mirrorTree(sourcePath, destinationPath);
       continue;
     }
 
@@ -403,7 +404,7 @@ function mirrorTree(sourceRoot: string, destinationRoot: string) {
       continue;
     }
 
-    mirrorFile(sourcePath, destinationPath);
+    await mirrorFile(sourcePath, destinationPath);
   }
 }
 
@@ -447,14 +448,18 @@ export function synthesizeDefaultPlatformFiles(destinationRoot: string) {
     });
 }
 
-function mirrorResolvedPackage(packageName: string, requireRoot: string, destinationRoot: string) {
+async function mirrorResolvedPackage(
+  packageName: string,
+  requireRoot: string,
+  destinationRoot: string,
+) {
   const sourceRoot = resolvePackageRoot(packageName, requireRoot);
   const destinationPath = path.join(destinationRoot, ...packageName.split('/'));
 
-  mirrorTree(sourceRoot, destinationPath);
+  await mirrorTree(sourceRoot, destinationPath);
 }
 
-export function buildReactNativeMirror(workspaceRoot: string) {
+export async function buildReactNativeMirror(workspaceRoot: string) {
   const reactNativeRoot = resolvePackageRoot('react-native', workspaceRoot);
   const cacheEntry = computeReactNativeMirrorCacheKey(workspaceRoot);
   const entryRoot = getReactNativeMirrorEntryRoot(workspaceRoot, cacheEntry.cacheKey);
@@ -483,11 +488,11 @@ export function buildReactNativeMirror(workspaceRoot: string) {
   ensureDirectory(temporaryPackagesRoot);
 
   try {
-    mirrorResolvedPackage('react-native', workspaceRoot, temporaryPackagesRoot);
+    await mirrorResolvedPackage('react-native', workspaceRoot, temporaryPackagesRoot);
 
-    getMirroredReactNativePackageNames(workspaceRoot).forEach((dependencyName) => {
-      mirrorResolvedPackage(dependencyName, reactNativeRoot, temporaryPackagesRoot);
-    });
+    for (const dependencyName of getMirroredReactNativePackageNames(workspaceRoot)) {
+      await mirrorResolvedPackage(dependencyName, reactNativeRoot, temporaryPackagesRoot);
+    }
 
     synthesizeDefaultPlatformFiles(temporaryPackagesRoot);
 

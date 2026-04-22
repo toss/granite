@@ -24,9 +24,9 @@ import {
 } from './vitestVersion';
 
 describe('reactNative', () => {
-  it('provides a Vitest plugin-style config with packaged setup files', () => {
+  it('provides a Vitest plugin-style config with packaged setup files', async () => {
     const plugin = reactNative({ workspaceRoot: process.cwd() });
-    const config = plugin.config();
+    const config = await plugin.config();
 
     expect(plugin.name).toBe('granite-react-native');
     expect(config).toMatchObject({
@@ -100,10 +100,10 @@ describe('reactNative', () => {
     expect(shouldInlineReactNativeDependency(reactNativeEntryPath, packageRoots)).toBe(true);
   });
 
-  it('reuses a content-addressed mirror entry when the inputs are unchanged', () => {
+  it('reuses a content-addressed mirror entry when the inputs are unchanged', async () => {
     const workspaceRoot = process.cwd();
-    const firstMirrorRoot = buildReactNativeMirror(workspaceRoot);
-    const secondMirrorRoot = buildReactNativeMirror(workspaceRoot);
+    const firstMirrorRoot = await buildReactNativeMirror(workspaceRoot);
+    const secondMirrorRoot = await buildReactNativeMirror(workspaceRoot);
     const firstEntryRoot = path.dirname(firstMirrorRoot);
     const metadataPath = path.join(firstEntryRoot, 'meta.json');
     const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8')) as {
@@ -124,9 +124,9 @@ describe('reactNative', () => {
     expect(metadata.transformImplementationHash.length).toBeGreaterThan(0);
   }, 60_000);
 
-  it('garbage-collects stale mirror entries while preserving the active one', () => {
+  it('garbage-collects stale mirror entries while preserving the active one', async () => {
     const workspaceRoot = process.cwd();
-    const activeMirrorRoot = buildReactNativeMirror(workspaceRoot);
+    const activeMirrorRoot = await buildReactNativeMirror(workspaceRoot);
     const entriesRoot = path.join(
       workspaceRoot,
       GRANITE_VITEST_RN_CACHE_DIRECTORY,
@@ -157,7 +157,7 @@ describe('reactNative', () => {
       ),
     );
 
-    buildReactNativeMirror(workspaceRoot);
+    await buildReactNativeMirror(workspaceRoot);
 
     expect(fs.existsSync(activeMirrorRoot)).toBe(true);
     expect(fs.existsSync(staleEntryRoot)).toBe(false);

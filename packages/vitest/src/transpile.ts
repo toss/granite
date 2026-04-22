@@ -1,4 +1,4 @@
-import { createRequire } from 'node:module';
+import transform from 'fast-flow-transform';
 import path from 'node:path';
 
 export const REACT_NATIVE_TRANSFORM_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx'] as const;
@@ -8,31 +8,6 @@ export const REACT_NATIVE_TRANSFORM_ALLOWLIST = [
   '@react-native',
   '@react-native-community',
 ] as const;
-
-type FastFlowTransformBinding = {
-  transform: (input: {
-    filename: string;
-    code: string;
-    dialect: 'flow' | 'flow-detect' | 'flow-unambiguous';
-    format: 'compact' | 'preserve' | 'pretty';
-    comments: boolean;
-    reactRuntimeTarget: '18' | '19';
-    sourcemap: boolean;
-  }) => {
-    ok: boolean;
-    code?: string;
-    errorMessage?: string;
-    errorLine?: number;
-    errorColumn?: number;
-  };
-};
-
-const require = createRequire(import.meta.url);
-const fastFlowTransformEntryPath = require.resolve('fast-flow-transform');
-const fastFlowTransformPackageRoot = path.dirname(path.dirname(fastFlowTransformEntryPath));
-const fastFlowTransformBinding = require(
-  path.join(fastFlowTransformPackageRoot, 'binding', 'bindings.cjs'),
-) as FastFlowTransformBinding;
 
 function normalizePath(filename: string) {
   return filename.replace(/\\/g, '/');
@@ -83,25 +58,16 @@ export function shouldInlineReactNativeDependency(
   );
 }
 
-export function transformReactNativeSource(sourcePath: string, source: string) {
-  const transformed = fastFlowTransformBinding.transform({
+export async function transformReactNativeSource(sourcePath: string, source: string) {
+  const transformed = await transform({
     filename: sourcePath,
-    code: source,
+    source,
     dialect: 'flow-detect',
     format: 'compact',
     comments: false,
     reactRuntimeTarget: '19',
     sourcemap: false,
   });
-
-  if (!transformed.ok || transformed.code == null) {
-    const location =
-      transformed.errorLine != null && transformed.errorColumn != null
-        ? ` (${sourcePath}:${String(transformed.errorLine)}:${String(transformed.errorColumn)})`
-        : '';
-    const message = transformed.errorMessage ?? 'Unknown fast-flow-transform error';
-    throw new Error(`fast-flow-transform failed${location}: ${message}`);
-  }
 
   return transformed.code;
 }
