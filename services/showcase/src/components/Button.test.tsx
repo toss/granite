@@ -1,17 +1,16 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
-import { describe, expect, it, vi } from 'vitest';
-import { Button } from './Button';
+import { fireEvent, render, screen } from "@testing-library/react-native";
+import { TouchableOpacity } from "react-native";
+import { describe, expect, it } from "vitest";
+import { ButtonTestScenario } from "./ButtonTestScenario";
 
-describe('Button', () => {
-  it('renders the label and calls onPress when pressed', () => {
-    const onPress = vi.fn();
-    render(<Button label="Go to About Page" onPress={onPress} />);
+describe("Button", () => {
+	it("runs the rendered button onPress flow when a user presses it", () => {
+		const { UNSAFE_getByType } = render(<ButtonTestScenario />);
 
-    const label = screen.getByText('Go to About Page');
+		expect(screen.getByText("Pressed: 0")).toBeTruthy();
 
-    expect(label).toBeTruthy();
-    fireEvent.press(label);
+		fireEvent.press(UNSAFE_getByType(TouchableOpacity));
 
-    expect(onPress).toHaveBeenCalledTimes(1);
-  });
+		expect(screen.getByText("Pressed: 1")).toBeTruthy();
+	});
 });

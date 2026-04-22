@@ -1,36 +1,19 @@
-import { render, screen } from '@testing-library/react-native';
-import { codegenNativeCommands, codegenNativeComponent } from 'react-native';
-import * as RendererProxy from 'react-native/Libraries/ReactNative/RendererProxy';
-import codegenNativeCommandsSubpath from 'react-native/Libraries/Utilities/codegenNativeCommands';
-import codegenNativeComponentSubpath from 'react-native/Libraries/Utilities/codegenNativeComponent';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { fireEvent, render, screen } from "@testing-library/react-native";
+import { TouchableOpacity } from "react-native";
+import { describe, expect, it } from "vitest";
+import { ReactNativeCodegenTestScenario } from "./ReactNativeCodegenTestScenario";
 
-describe('react-native codegen helpers', () => {
-  beforeEach(() => {
-    ((RendererProxy as any).dispatchCommand as { mockClear: () => void }).mockClear();
-  });
+describe("react-native codegen helpers", () => {
+	it("dispatches generated native commands when a rendered button triggers them", () => {
+		const { UNSAFE_getByType } = render(<ReactNativeCodegenTestScenario />);
 
-  it('keeps top-level and subpath codegen helpers aligned and renders generated components', () => {
-    expect(codegenNativeComponent).toBe(codegenNativeComponentSubpath);
-    expect(codegenNativeCommands).toBe(codegenNativeCommandsSubpath);
+		expect(screen.getByTestId("codegen-native-view")).toBeTruthy();
+		expect(screen.getByText("Last played: none")).toBeTruthy();
+		expect(screen.getByText("Generated view ref: missing")).toBeTruthy();
 
-    const GeneratedView = codegenNativeComponentSubpath<any>('GraniteCodegenView');
+		fireEvent.press(UNSAFE_getByType(TouchableOpacity));
 
-    render(<GeneratedView testID="codegen-native-view">Codegen Ready</GeneratedView>);
-
-    expect(screen.getByTestId('codegen-native-view')).toBeTruthy();
-  });
-
-  it('routes generated commands through RendererProxy.dispatchCommand', () => {
-    const commands = codegenNativeCommandsSubpath<{
-      play: (ref: unknown, source: string) => void;
-    }>({
-      supportedCommands: ['play'],
-    });
-    const ref = { current: { _nativeTag: 42 } };
-
-    commands.play(ref, 'intro.mp4');
-
-    expect((RendererProxy as any).dispatchCommand).toHaveBeenCalledWith(ref, 'play', ['intro.mp4']);
-  });
+		expect(screen.getByText("Last played: intro.mp4")).toBeTruthy();
+		expect(screen.getByText("Generated view ref: attached")).toBeTruthy();
+	});
 });
