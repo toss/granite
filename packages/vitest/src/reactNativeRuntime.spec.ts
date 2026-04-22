@@ -1,5 +1,12 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { buildReactNativeMirror } from './reactNative';
+import {
+  buildReactNativeMirror,
+  GRANITE_VITEST_RN_CACHE_DIRECTORY,
+  GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
+} from './reactNative';
 
 vi.mock('@react-native/js-polyfills/error-guard', () => ({}));
 
@@ -84,5 +91,22 @@ describe('reactNativeRuntime bootstrap', () => {
       findNodeHandle: expect.any(Function),
       unstable_batchedUpdates: expect.any(Function),
     });
+  });
+
+  it('does not treat an existing mirror cache entry as the source package roots', async () => {
+    const resolvedCacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'granite-vitest-runtime-cache-'));
+    const mirrorRoot = await buildReactNativeMirror(process.cwd(), resolvedCacheDir);
+    const metadataPath = path.join(path.dirname(mirrorRoot), 'meta.json');
+    const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8')) as {
+      packageRoots: string[];
+    };
+    const cacheEntriesPath = path.join(
+      GRANITE_VITEST_RN_CACHE_DIRECTORY,
+      GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
+    );
+
+    expect(metadata.packageRoots).toEqual(
+      expect.not.arrayContaining([expect.stringContaining(cacheEntriesPath)]),
+    );
   });
 });

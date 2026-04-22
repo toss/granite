@@ -2641,12 +2641,22 @@ function patchReactNativeResolution() {
     return null;
   };
 
+  const isMirroredPackageManifestRequest = (request: string) =>
+    request === 'react-native/package.json' ||
+    request === 'jest-react-native/package.json' ||
+    (request.startsWith('@react-native/') && request.endsWith('/package.json')) ||
+    (request.startsWith('@react-native-community/') && request.endsWith('/package.json'));
+
   moduleWithPrivateResolver._resolveFilename = function patchedResolveFilename(
     request,
     parent,
     isMain,
     options,
   ) {
+    if (isMirroredPackageManifestRequest(request)) {
+      return originalResolveFilename.call(this, request, parent, isMain, options);
+    }
+
     if (request === 'react-native') {
       return originalResolveFilename.call(this, reactNativeIndexPath, parent, isMain, options);
     }
