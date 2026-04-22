@@ -24,6 +24,7 @@ type PluginConfigResult = {
   };
   resolve: {
     alias: Array<{ find: unknown; replacement: string }>;
+    extensions: string[];
   };
   test: {
     environment?: string;
@@ -120,6 +121,14 @@ describe('reactNative plugin', () => {
         '/^jest-react-native$/',
       ]),
     );
+    expect(config.resolve.extensions).toEqual(
+      expect.arrayContaining([
+        '.android.tsx',
+        '.android.ts',
+        '.android.jsx',
+        '.android.js',
+      ]),
+    );
     expect(config.test.setupFiles).toHaveLength(2);
     for (const setupFile of config.test.setupFiles) {
       expect(fs.existsSync(setupFile)).toBe(true);
@@ -169,13 +178,17 @@ describe('reactNative plugin', () => {
     const buttonFallbackPath = path.join(temporaryRoot, 'Button.tsx');
     const cardPath = path.join(temporaryRoot, 'Card.native.tsx');
     const cardFallbackPath = path.join(temporaryRoot, 'Card.tsx');
+    const badgePath = path.join(temporaryRoot, 'Badge.android.tsx');
+    const badgeFallbackPath = path.join(temporaryRoot, 'Badge.tsx');
 
     fs.writeFileSync(buttonPath, 'export default "ios";');
     fs.writeFileSync(cardPath, 'export default "native";');
+    fs.writeFileSync(badgePath, 'export default "android";');
 
     synthesizeDefaultPlatformFiles(temporaryRoot);
 
     expect(fs.readFileSync(buttonFallbackPath, 'utf8')).toBe('export default "ios";');
     expect(fs.readFileSync(cardFallbackPath, 'utf8')).toBe('export default "native";');
+    expect(fs.readFileSync(badgeFallbackPath, 'utf8')).toBe('export default "android";');
   });
 });

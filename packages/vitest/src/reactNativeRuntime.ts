@@ -333,7 +333,7 @@ function createAppStateMockModule() {
       addEventListener: vi.fn(() => ({
         remove: vi.fn(),
       })),
-      currentState: vi.fn(),
+      currentState: 'active',
       removeEventListener: vi.fn(),
     },
   };

@@ -86,6 +86,14 @@ describe('reactNativeRuntime bootstrap', () => {
     expect(ReactNative.ReactNativeVersion.getVersionString()).toEqual(expect.any(String));
   });
 
+  it('matches the React Native AppState contract shape', () => {
+    expect(ReactNative.AppState).toMatchObject({
+      addEventListener: expect.any(Function),
+      removeEventListener: expect.any(Function),
+    });
+    expect(ReactNative.AppState.currentState).toBe('active');
+  });
+
   it('provides the renderer bridge RN test helpers expect', () => {
     expect(RendererProxy).toMatchObject({
       findNodeHandle: expect.any(Function),

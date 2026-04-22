@@ -433,6 +433,16 @@ async function mirrorTree(
 }
 
 export function synthesizeDefaultPlatformFiles(destinationRoot: string) {
+  const platformFallbackOrder = [
+    DEFAULT_PLATFORM,
+    'native',
+    ...REACT_NATIVE_PLATFORMS.filter(
+      (platform) => platform !== DEFAULT_PLATFORM && platform !== 'native',
+    ),
+  ];
+  const platformPriority = new Map(
+    platformFallbackOrder.map((platform, index) => [platform, index]),
+  );
   const fallbackCandidates: Array<{ sourcePath: string; fallbackPath: string; priority: number }> =
     [];
 
@@ -447,16 +457,22 @@ export function synthesizeDefaultPlatformFiles(destinationRoot: string) {
         continue;
       }
 
-      const match = entry.name.match(/^(.*)\.(ios|native)\.(js|jsx|ts|tsx)$/);
+      const match = entry.name.match(
+        new RegExp(`^(.*)\\.(${REACT_NATIVE_PLATFORMS.join('|')})\\.(js|jsx|ts|tsx)$`),
+      );
       if (match == null) {
         continue;
       }
 
       const [, basename, platform, extension] = match;
+      if (basename == null || platform == null || extension == null) {
+        continue;
+      }
+
       fallbackCandidates.push({
         sourcePath: entryPath,
         fallbackPath: path.join(currentRoot, `${basename}.${extension}`),
-        priority: platform === DEFAULT_PLATFORM ? 0 : 1,
+        priority: platformPriority.get(platform) ?? platformFallbackOrder.length,
       });
     }
   }

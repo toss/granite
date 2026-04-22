@@ -25,15 +25,19 @@ import {
   shouldTransformReactNativeFile,
 } from './transpile';
 
+const PLATFORM_RESOLUTION_ORDER = [
+  DEFAULT_PLATFORM,
+  'native',
+  ...REACT_NATIVE_PLATFORMS.filter(
+    (platform) => platform !== DEFAULT_PLATFORM && platform !== 'native',
+  ),
+] as const;
+const PLATFORM_EXTENSION_SUFFIXES = ['tsx', 'ts', 'jsx', 'js'] as const;
+
 export const REACT_NATIVE_RESOLVE_EXTENSIONS = [
-  '.ios.tsx',
-  '.ios.ts',
-  '.ios.jsx',
-  '.ios.js',
-  '.native.tsx',
-  '.native.ts',
-  '.native.jsx',
-  '.native.js',
+  ...PLATFORM_RESOLUTION_ORDER.flatMap((platform) =>
+    PLATFORM_EXTENSION_SUFFIXES.map((extension) => `.${platform}.${extension}`),
+  ),
   '.tsx',
   '.ts',
   '.jsx',
