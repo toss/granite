@@ -4,9 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { Plugin } from 'vitest/config';
 import * as vite from 'vitest/node';
 import {
-  createReactNativeAssetModuleCode,
-  isReactNativeAssetModuleId,
   REACT_NATIVE_ASSET_EXTENSIONS,
+  REACT_NATIVE_ASSET_MODULE_ID_PATTERN,
 } from './assets';
 import {
   DEFAULT_PLATFORM,
@@ -105,13 +104,13 @@ export function reactNative(): Plugin {
         typeof conf.cacheDir === 'string' && conf.cacheDir.length > 0
           ? conf.cacheDir
           : '.vitest';
-      const cacheDirectory = path.isAbsolute(cacheDir)
+      const resolvedCacheDir = path.isAbsolute(cacheDir)
         ? cacheDir
         : path.join(workspaceRoot, cacheDir);
 
       const reactNativeMirrorRoot = await buildReactNativeMirror(
         workspaceRoot,
-        cacheDirectory,
+        resolvedCacheDir,
       );
 
       const resolve = {
@@ -183,11 +182,23 @@ export function reactNative(): Plugin {
       };
     },
     load(id: string) {
-      if (!isReactNativeAssetModuleId(id)) {
+      const isReactNativeAsset = REACT_NATIVE_ASSET_MODULE_ID_PATTERN.test(id);
+
+      if (!isReactNativeAsset) {
         return undefined;
       }
 
-      return createReactNativeAssetModuleCode(id);
+      const asset = {
+        testUri: path
+          .relative(currentDirectory, id.replace(/[?#].*$/, ''))
+          .replace(/\\/g, '/'),
+      };
+
+      return [
+        `const asset = ${JSON.stringify(asset)};`,
+        'export const testUri = asset.testUri;',
+        'export default asset;',
+      ].join('\n');
     },
   };
 }

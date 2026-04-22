@@ -40,12 +40,16 @@ describe('collectMirroredReactNativePackageNames', () => {
 });
 
 describe('buildReactNativeMirror', () => {
-  it('uses cacheDir without treating it as the workspace root', async () => {
-    const cacheDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'granite-vitest-cache-dir-'));
-    const mirrorRoot = await buildReactNativeMirror(process.cwd(), cacheDirectory);
+  it('uses a resolved cache dir without treating it as the workspace root', async () => {
+    const resolvedCacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'granite-vitest-cache-dir-'));
+    const mirrorRoot = await buildReactNativeMirror(process.cwd(), resolvedCacheDir);
 
     expect(mirrorRoot).toContain(
-      path.join(cacheDirectory, GRANITE_VITEST_RN_CACHE_DIRECTORY, GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY),
+      path.join(
+        resolvedCacheDir,
+        GRANITE_VITEST_RN_CACHE_DIRECTORY,
+        GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
+      ),
     );
     expect(fs.existsSync(mirrorRoot)).toBe(true);
   }, 60_000);

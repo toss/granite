@@ -2,13 +2,11 @@
 // @ts-nocheck
 import path from 'node:path';
 import Module, { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 import '@react-native/js-polyfills/error-guard';
 import type { ReactNode } from 'react';
 import { vi } from 'vitest';
-import {
-  createReactNativeAssetModuleValue,
-  isReactNativeAssetModuleId,
-} from './assets';
+import { REACT_NATIVE_ASSET_MODULE_ID_PATTERN } from './assets';
 import {
   defineGlobalProperty,
   installNativeModuleProxy,
@@ -29,6 +27,7 @@ type ModuleWithPrivateResolver = typeof Module & {
 type ReactModule = typeof import('react');
 
 const runtimeGlobals = globalThis as RuntimeGlobals;
+const runtimeDirectory = path.dirname(fileURLToPath(import.meta.url));
 const runtimeRequire = createRequire(import.meta.url);
 const reactNativeMirrorRoot =
   typeof globalThis.__GRANITE_VITEST_RN_CACHE_ROOT__ === 'string'
@@ -2787,8 +2786,12 @@ function patchReactNativeResolution() {
       return sharedMockModules.styleSheetModule;
     }
 
-    if (isReactNativeAssetModuleId(resolved)) {
-      return createReactNativeAssetModuleValue(resolved);
+    if (REACT_NATIVE_ASSET_MODULE_ID_PATTERN.test(resolved)) {
+      return {
+        testUri: path
+          .relative(runtimeDirectory, resolved.replace(/[?#].*$/, ''))
+          .replace(/\\/g, '/'),
+      };
     }
 
     return originalLoad.call(this, request, parent, isMain);

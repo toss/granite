@@ -50,44 +50,6 @@ type MirroredReactNativePackage = {
 const currentMirrorModulePath = fs.realpathSync(fileURLToPath(import.meta.url));
 const currentMirrorModuleDirectory = path.dirname(currentMirrorModulePath);
 
-function ensureDirectory(targetPath: string) {
-  fs.mkdirSync(targetPath, { recursive: true });
-}
-
-function resolveVitestCacheDirectory(workspaceRoot: string, cacheDirectory?: string) {
-  return cacheDirectory ?? path.join(workspaceRoot, DEFAULT_VITEST_CACHE_DIRECTORY);
-}
-
-function getReactNativeMirrorCacheRoot(workspaceRoot: string, cacheDirectory?: string) {
-  return path.join(
-    resolveVitestCacheDirectory(workspaceRoot, cacheDirectory),
-    GRANITE_VITEST_RN_CACHE_DIRECTORY,
-  );
-}
-
-function getReactNativeMirrorEntriesRoot(workspaceRoot: string, cacheDirectory?: string) {
-  return path.join(
-    getReactNativeMirrorCacheRoot(workspaceRoot, cacheDirectory),
-    GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
-  );
-}
-
-function getReactNativeMirrorEntryRoot(
-  workspaceRoot: string,
-  cacheKey: string,
-  cacheDirectory?: string,
-) {
-  return path.join(getReactNativeMirrorEntriesRoot(workspaceRoot, cacheDirectory), cacheKey);
-}
-
-function getReactNativeMirrorPackagesRoot(entryRoot: string) {
-  return path.join(entryRoot, GRANITE_VITEST_RN_PACKAGES_DIRECTORY);
-}
-
-function getReactNativeMirrorMetadataPath(entryRoot: string) {
-  return path.join(entryRoot, GRANITE_VITEST_RN_CACHE_METADATA_FILENAME);
-}
-
 function getFastFlowTransformVersion() {
   const packageRequire = createRequire(import.meta.url);
   const fastFlowTransformEntryPath = packageRequire.resolve('fast-flow-transform');
@@ -100,10 +62,6 @@ function getFastFlowTransformVersion() {
   };
 
   return fastFlowTransformPackageJson.version ?? 'unknown';
-}
-
-function readPackageManifest(packageJsonPath: string) {
-  return JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as PackageManifest;
 }
 
 function getPackageManifestDependencyNames(packageManifest: PackageManifest) {
@@ -121,13 +79,6 @@ function shouldMirrorReactNativeDependency(packageName: string) {
     packageName.startsWith('@react-native/') ||
     packageName.startsWith('@react-native-community/')
   );
-}
-
-function hashFileContents(hasher: ReturnType<typeof createHash>, rootPath: string, filePath: string) {
-  hasher.update(path.relative(rootPath, filePath));
-  hasher.update('\0');
-  hasher.update(fs.readFileSync(filePath));
-  hasher.update('\0');
 }
 
 function hashDirectoryContents(
@@ -151,7 +102,10 @@ function hashDirectoryContents(
       continue;
     }
 
-    hashFileContents(hasher, rootPath, entryPath);
+    hasher.update(path.relative(rootPath, entryPath));
+    hasher.update('\0');
+    hasher.update(fs.readFileSync(entryPath));
+    hasher.update('\0');
   }
 }
 
@@ -204,8 +158,12 @@ export function collectMirroredReactNativePackageNames(
 
 function getMirroredReactNativePackages(workspaceRoot: string): MirroredReactNativePackage[] {
   const reactNativeRoot = resolvePackageRoot('react-native', workspaceRoot);
-  const workspacePackageManifest = readPackageManifest(path.join(workspaceRoot, 'package.json'));
-  const reactNativePackageManifest = readPackageManifest(path.join(reactNativeRoot, 'package.json'));
+  const workspacePackageManifest = JSON.parse(
+    fs.readFileSync(path.join(workspaceRoot, 'package.json'), 'utf8'),
+  ) as PackageManifest;
+  const reactNativePackageManifest = JSON.parse(
+    fs.readFileSync(path.join(reactNativeRoot, 'package.json'), 'utf8'),
+  ) as PackageManifest;
   const workspaceDependencyNames = new Set(getPackageManifestDependencyNames(workspacePackageManifest));
 
   return collectMirroredReactNativePackageNames(
@@ -215,10 +173,6 @@ function getMirroredReactNativePackages(workspaceRoot: string): MirroredReactNat
     packageName,
     requireRoot: workspaceDependencyNames.has(packageName) ? workspaceRoot : reactNativeRoot,
   }));
-}
-
-export function getMirroredReactNativePackageNames(workspaceRoot: string) {
-  return getMirroredReactNativePackages(workspaceRoot).map(({ packageName }) => packageName);
 }
 
 function computeReactNativeMirrorCacheKey(workspaceRoot: string) {
@@ -273,7 +227,7 @@ function getDirectorySize(targetPath: string): number {
 }
 
 function readMirrorCacheMetadata(entryRoot: string) {
-  const metadataPath = getReactNativeMirrorMetadataPath(entryRoot);
+  const metadataPath = path.join(entryRoot, GRANITE_VITEST_RN_CACHE_METADATA_FILENAME);
 
   if (!fs.existsSync(metadataPath)) {
     return null;
@@ -286,37 +240,15 @@ function readMirrorCacheMetadata(entryRoot: string) {
   }
 }
 
-function writeMirrorCacheMetadata(entryRoot: string, metadata: MirrorCacheMetadata) {
-  fs.writeFileSync(
-    getReactNativeMirrorMetadataPath(entryRoot),
-    JSON.stringify(metadata, null, 2),
-  );
-}
-
-function markMirrorCacheEntryAccessed(entryRoot: string) {
-  const metadata = readMirrorCacheMetadata(entryRoot);
-
-  if (metadata == null) {
-    return;
-  }
-
-  metadata.lastAccessedAt = new Date().toISOString();
-  writeMirrorCacheMetadata(entryRoot, metadata);
-}
-
-function removeIfExists(targetPath: string) {
-  fs.rmSync(targetPath, { force: true, recursive: true });
-}
-
 function withMirrorCacheGcLock(
   workspaceRoot: string,
-  cacheDirectory: string | undefined,
+  resolvedCacheDir: string = path.join(workspaceRoot, DEFAULT_VITEST_CACHE_DIRECTORY),
   callback: () => void,
 ) {
-  const cacheRoot = getReactNativeMirrorCacheRoot(workspaceRoot, cacheDirectory);
+  const cacheRoot = path.join(resolvedCacheDir, GRANITE_VITEST_RN_CACHE_DIRECTORY);
   const lockPath = path.join(cacheRoot, GRANITE_VITEST_RN_CACHE_GC_LOCK_FILENAME);
 
-  ensureDirectory(cacheRoot);
+  fs.mkdirSync(cacheRoot, { recursive: true });
 
   let lockHandle: number | null = null;
 
@@ -335,7 +267,7 @@ function withMirrorCacheGcLock(
   } finally {
     if (lockHandle != null) {
       fs.closeSync(lockHandle);
-      removeIfExists(lockPath);
+      fs.rmSync(lockPath, { force: true, recursive: true });
     }
   }
 }
@@ -343,10 +275,14 @@ function withMirrorCacheGcLock(
 function gcReactNativeMirrorCache(
   workspaceRoot: string,
   activeCacheKey: string,
-  cacheDirectory?: string,
+  resolvedCacheDir: string = path.join(workspaceRoot, DEFAULT_VITEST_CACHE_DIRECTORY),
 ) {
-  withMirrorCacheGcLock(workspaceRoot, cacheDirectory, () => {
-    const entriesRoot = getReactNativeMirrorEntriesRoot(workspaceRoot, cacheDirectory);
+  withMirrorCacheGcLock(workspaceRoot, resolvedCacheDir, () => {
+    const entriesRoot = path.join(
+      resolvedCacheDir,
+      GRANITE_VITEST_RN_CACHE_DIRECTORY,
+      GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
+    );
 
     if (!fs.existsSync(entriesRoot)) {
       return;
@@ -372,7 +308,7 @@ function gcReactNativeMirrorCache(
         const ageMs = now - fs.statSync(entryRoot).mtimeMs;
 
         if (ageMs > GRANITE_VITEST_RN_TEMP_ENTRY_MAX_AGE_MS) {
-          removeIfExists(entryRoot);
+          fs.rmSync(entryRoot, { force: true, recursive: true });
         }
 
         continue;
@@ -386,22 +322,23 @@ function gcReactNativeMirrorCache(
           lastAccessedAtMs:
             activeMetadata == null ? now : Date.parse(activeMetadata.lastAccessedAt),
           sizeBytes:
-            activeMetadata?.sizeBytes ?? getDirectorySize(getReactNativeMirrorPackagesRoot(entryRoot)),
+            activeMetadata?.sizeBytes ??
+            getDirectorySize(path.join(entryRoot, GRANITE_VITEST_RN_PACKAGES_DIRECTORY)),
         });
         continue;
       }
 
       const metadata = readMirrorCacheMetadata(entryRoot);
-      const packagesRoot = getReactNativeMirrorPackagesRoot(entryRoot);
+      const packagesRoot = path.join(entryRoot, GRANITE_VITEST_RN_PACKAGES_DIRECTORY);
 
       if (metadata == null || !fs.existsSync(packagesRoot)) {
-        removeIfExists(entryRoot);
+        fs.rmSync(entryRoot, { force: true, recursive: true });
         continue;
       }
 
       const lastAccessedAtMs = Date.parse(metadata.lastAccessedAt);
       if (Number.isNaN(lastAccessedAtMs) || now - lastAccessedAtMs > GRANITE_VITEST_RN_CACHE_MAX_AGE_MS) {
-        removeIfExists(entryRoot);
+        fs.rmSync(entryRoot, { force: true, recursive: true });
         continue;
       }
 
@@ -422,7 +359,7 @@ function gcReactNativeMirrorCache(
         break;
       }
 
-      removeIfExists(entry.entryRoot);
+      fs.rmSync(entry.entryRoot, { force: true, recursive: true });
       totalSizeBytes -= entry.sizeBytes;
     }
   });
@@ -451,7 +388,7 @@ async function mirrorFile(
   destinationPath: string,
   packageRoots: readonly string[],
 ) {
-  ensureDirectory(path.dirname(destinationPath));
+  fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
 
   if (shouldTransformReactNativeFile(sourcePath, packageRoots)) {
     const source = fs.readFileSync(sourcePath, 'utf8');
@@ -535,64 +472,84 @@ export function synthesizeDefaultPlatformFiles(destinationRoot: string) {
     });
 }
 
-async function mirrorResolvedPackage(
-  packageName: string,
-  requireRoot: string,
-  destinationRoot: string,
-  packageRoots: readonly string[],
+export async function buildReactNativeMirror(
+  workspaceRoot: string,
+  resolvedCacheDir: string = path.join(workspaceRoot, DEFAULT_VITEST_CACHE_DIRECTORY),
 ) {
-  const sourceRoot = resolvePackageRoot(packageName, requireRoot);
-  const destinationPath = path.join(destinationRoot, ...packageName.split('/'));
-
-  await mirrorTree(sourceRoot, destinationPath, packageRoots);
-}
-
-export async function buildReactNativeMirror(workspaceRoot: string, cacheDirectory?: string) {
   const cacheEntry = computeReactNativeMirrorCacheKey(workspaceRoot);
-  const entryRoot = getReactNativeMirrorEntryRoot(workspaceRoot, cacheEntry.cacheKey, cacheDirectory);
-  const packagesRoot = getReactNativeMirrorPackagesRoot(entryRoot);
-  const metadataPath = getReactNativeMirrorMetadataPath(entryRoot);
+  const entriesRoot = path.join(
+    resolvedCacheDir,
+    GRANITE_VITEST_RN_CACHE_DIRECTORY,
+    GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
+  );
+  const entryRoot = path.join(entriesRoot, cacheEntry.cacheKey);
+  const packagesRoot = path.join(entryRoot, GRANITE_VITEST_RN_PACKAGES_DIRECTORY);
+  const metadataPath = path.join(entryRoot, GRANITE_VITEST_RN_CACHE_METADATA_FILENAME);
 
-  ensureDirectory(getReactNativeMirrorEntriesRoot(workspaceRoot, cacheDirectory));
+  fs.mkdirSync(entriesRoot, { recursive: true });
 
   if (fs.existsSync(entryRoot) && (!fs.existsSync(packagesRoot) || !fs.existsSync(metadataPath))) {
-    removeIfExists(entryRoot);
+    fs.rmSync(entryRoot, { force: true, recursive: true });
   }
 
   if (fs.existsSync(packagesRoot) && fs.existsSync(metadataPath)) {
-    markMirrorCacheEntryAccessed(entryRoot);
-    gcReactNativeMirrorCache(workspaceRoot, cacheEntry.cacheKey, cacheDirectory);
+    const metadata = readMirrorCacheMetadata(entryRoot);
+    if (metadata != null) {
+      metadata.lastAccessedAt = new Date().toISOString();
+      fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
+    }
+
+    gcReactNativeMirrorCache(workspaceRoot, cacheEntry.cacheKey, resolvedCacheDir);
     return packagesRoot;
   }
 
   const temporaryEntryRoot = path.join(
-    getReactNativeMirrorEntriesRoot(workspaceRoot, cacheDirectory),
+    entriesRoot,
     `${GRANITE_VITEST_RN_CACHE_TMP_PREFIX}${process.pid}-${Date.now()}-${cacheEntry.cacheKey}`,
   );
-  const temporaryPackagesRoot = getReactNativeMirrorPackagesRoot(temporaryEntryRoot);
+  const temporaryPackagesRoot = path.join(temporaryEntryRoot, GRANITE_VITEST_RN_PACKAGES_DIRECTORY);
+  const temporaryMetadataPath = path.join(
+    temporaryEntryRoot,
+    GRANITE_VITEST_RN_CACHE_METADATA_FILENAME,
+  );
 
-  removeIfExists(temporaryEntryRoot);
-  ensureDirectory(temporaryPackagesRoot);
+  fs.rmSync(temporaryEntryRoot, { force: true, recursive: true });
+  fs.mkdirSync(temporaryPackagesRoot, { recursive: true });
 
   try {
-    await mirrorResolvedPackage('react-native', workspaceRoot, temporaryPackagesRoot, cacheEntry.packageRoots);
+    await mirrorTree(
+      resolvePackageRoot('react-native', workspaceRoot),
+      path.join(temporaryPackagesRoot, 'react-native'),
+      cacheEntry.packageRoots,
+    );
 
     for (const { packageName, requireRoot } of getMirroredReactNativePackages(workspaceRoot)) {
-      await mirrorResolvedPackage(packageName, requireRoot, temporaryPackagesRoot, cacheEntry.packageRoots);
+      await mirrorTree(
+        resolvePackageRoot(packageName, requireRoot),
+        path.join(temporaryPackagesRoot, ...packageName.split('/')),
+        cacheEntry.packageRoots,
+      );
     }
 
     synthesizeDefaultPlatformFiles(temporaryPackagesRoot);
 
     const now = new Date().toISOString();
-    writeMirrorCacheMetadata(temporaryEntryRoot, {
-      cacheKey: cacheEntry.cacheKey,
-      createdAt: now,
-      lastAccessedAt: now,
-      packageRoots: cacheEntry.packageRoots,
-      sizeBytes: getDirectorySize(temporaryPackagesRoot),
-      transformDependencyVersions: cacheEntry.transformDependencyVersions,
-      transformImplementationHash: cacheEntry.transformImplementationHash,
-    });
+    fs.writeFileSync(
+      temporaryMetadataPath,
+      JSON.stringify(
+        {
+          cacheKey: cacheEntry.cacheKey,
+          createdAt: now,
+          lastAccessedAt: now,
+          packageRoots: cacheEntry.packageRoots,
+          sizeBytes: getDirectorySize(temporaryPackagesRoot),
+          transformDependencyVersions: cacheEntry.transformDependencyVersions,
+          transformImplementationHash: cacheEntry.transformImplementationHash,
+        },
+        null,
+        2,
+      ),
+    );
 
     try {
       fs.renameSync(temporaryEntryRoot, entryRoot);
@@ -604,12 +561,17 @@ export async function buildReactNativeMirror(workspaceRoot: string, cacheDirecto
       }
     }
   } finally {
-    removeIfExists(temporaryEntryRoot);
+    fs.rmSync(temporaryEntryRoot, { force: true, recursive: true });
   }
 
   if (fs.existsSync(packagesRoot) && fs.existsSync(metadataPath)) {
-    markMirrorCacheEntryAccessed(entryRoot);
-    gcReactNativeMirrorCache(workspaceRoot, cacheEntry.cacheKey, cacheDirectory);
+    const metadata = readMirrorCacheMetadata(entryRoot);
+    if (metadata != null) {
+      metadata.lastAccessedAt = new Date().toISOString();
+      fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
+    }
+
+    gcReactNativeMirrorCache(workspaceRoot, cacheEntry.cacheKey, resolvedCacheDir);
     return packagesRoot;
   }
 
