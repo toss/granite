@@ -2,11 +2,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { mergeConfig } from 'vitest/config';
 import * as vite from 'vitest/node';
 import {
   GRANITE_VITEST_RN_CACHE_DIRECTORY,
   GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
+  JEST_LIKE_TEST_PATTERNS,
   reactNative,
+  resolveReactNativeSetupFiles,
   synthesizeDefaultPlatformFiles,
 } from './reactNative';
 
@@ -24,11 +27,13 @@ type PluginConfigResult = {
   };
   resolve: {
     alias: Array<{ find: unknown; replacement: string }>;
+    conditions?: string[];
     extensions: string[];
   };
   test: {
     environment?: string;
     globals?: boolean;
+    include?: string[];
     setupFiles: string[];
   };
 };
@@ -163,6 +168,39 @@ describe('reactNative plugin', () => {
       ),
     });
   }, 60_000);
+
+  it('preserves caller resolve and test config when Vitest merges plugin output', async () => {
+    const plugin = reactNative();
+    const callerConfig = {
+      resolve: {
+        alias: [{ find: '@', replacement: '/virtual/src' }],
+        conditions: ['custom-condition'],
+        extensions: ['.mjs'],
+      },
+      test: {
+        include: ['custom.test.ts'],
+        setupFiles: ['/virtual/setup.ts'],
+      },
+    };
+    const pluginConfig = await runPluginConfig(plugin, {});
+    const mergedConfig = mergeConfig(callerConfig, pluginConfig) as PluginConfigResult;
+
+    expect(mergedConfig.resolve.alias.map(({ find }) => String(find))).toEqual(
+      expect.arrayContaining(['@', '/^react-native$/']),
+    );
+    expect(mergedConfig.resolve.conditions).toEqual(
+      expect.arrayContaining(['custom-condition', 'require', 'react-native']),
+    );
+    expect(mergedConfig.resolve.extensions).toEqual(
+      expect.arrayContaining(['.mjs', '.ios.tsx', '.android.tsx']),
+    );
+    expect(mergedConfig.test.include).toEqual(
+      expect.arrayContaining(['custom.test.ts', ...JEST_LIKE_TEST_PATTERNS]),
+    );
+    expect(mergedConfig.test.setupFiles).toEqual(
+      expect.arrayContaining(['/virtual/setup.ts', ...resolveReactNativeSetupFiles()]),
+    );
+  });
 
   it('loads React Native assets as tiny testUri modules', async () => {
     const plugin = reactNative();

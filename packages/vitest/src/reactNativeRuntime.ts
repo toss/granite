@@ -29,17 +29,21 @@ type ReactModule = typeof import('react');
 const runtimeGlobals = globalThis as RuntimeGlobals;
 const runtimeDirectory = path.dirname(fileURLToPath(import.meta.url));
 const runtimeRequire = createRequire(import.meta.url);
-const reactNativeMirrorRoot =
-  typeof globalThis.__GRANITE_VITEST_RN_CACHE_ROOT__ === 'string'
-    ? path.resolve(globalThis.__GRANITE_VITEST_RN_CACHE_ROOT__)
-    : path.resolve(
-        process.cwd(),
-        '.vitest',
-        'vitest-react-native-cache',
-        'entries',
-        `${process.pid}`,
-        'packages',
-      );
+
+function resolveReactNativeMirrorRoot() {
+  if (
+    typeof globalThis.__GRANITE_VITEST_RN_CACHE_ROOT__ === 'string' &&
+    globalThis.__GRANITE_VITEST_RN_CACHE_ROOT__.length > 0
+  ) {
+    return path.resolve(globalThis.__GRANITE_VITEST_RN_CACHE_ROOT__);
+  }
+
+  throw new Error(
+    '[@granite-js/vitest] reactNativeRuntime requires reactNative() in vitest.config to set __GRANITE_VITEST_RN_CACHE_ROOT__.',
+  );
+}
+
+const reactNativeMirrorRoot = resolveReactNativeMirrorRoot();
 
 let nextNativeTag = 1;
 
