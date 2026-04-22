@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react-native';
 import { codegenNativeCommands, codegenNativeComponent } from 'react-native';
+import * as RendererProxy from 'react-native/Libraries/ReactNative/RendererProxy';
 import codegenNativeCommandsSubpath from 'react-native/Libraries/Utilities/codegenNativeCommands';
 import codegenNativeComponentSubpath from 'react-native/Libraries/Utilities/codegenNativeComponent';
-import * as RendererProxy from 'react-native/Libraries/ReactNative/RendererProxy';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('react-native codegen helpers', () => {
