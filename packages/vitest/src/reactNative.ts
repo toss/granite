@@ -50,8 +50,6 @@ export const JEST_LIKE_TEST_PATTERNS = [
 
 const currentFilePath = fs.realpathSync(fileURLToPath(import.meta.url));
 const currentDirectory = path.dirname(currentFilePath);
-const automaticJsxRuntime = 'automatic';
-const reactJsxImportSource = 'react';
 
 function getSetupFileExtension() {
   const extension = path.extname(currentFilePath);
@@ -70,21 +68,6 @@ export function resolveReactNativeSetupFiles() {
     path.join(currentDirectory, `reactNativeRuntime${extension}`),
     path.join(currentDirectory, `setup${extension}`),
   ];
-}
-
-export function getVitestJsxTransformConfig() {
-  return {
-    esbuild: {
-      jsx: automaticJsxRuntime,
-      jsxImportSource: reactJsxImportSource,
-    },
-    oxc: {
-      jsx: {
-        importSource: reactJsxImportSource,
-        runtime: automaticJsxRuntime,
-      },
-    },
-  };
 }
 
 export function reactNative(): Plugin {
