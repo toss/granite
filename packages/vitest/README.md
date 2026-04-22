@@ -1,6 +1,14 @@
 # `@granite-js/vitest`
 
-Vitest helpers for Granite React Native projects.
+Vitest helpers for React Native projects.
+
+This package is published from the Granite monorepo, but it does not require Granite-specific runtime packages. You can use it in a regular React Native project as long as you already have `react`, `react-native`, and `vitest`.
+
+## Installation
+
+```sh
+yarn add -D @granite-js/vitest vitest
+```
 
 ## Usage
 

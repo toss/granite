@@ -1,1 +1,2 @@
-This package is part of the Granite monorepo.
+This package is published from the Granite monorepo.
+It does not require Granite-specific runtime packages.

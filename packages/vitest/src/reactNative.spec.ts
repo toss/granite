@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
-import * as vite from 'vitest/node';
 import { describe, expect, it } from 'vitest';
+import * as vite from 'vitest/node';
 import {
   JEST_LIKE_TEST_PATTERNS,
   REACT_NATIVE_EXPORT_CONDITIONS,
