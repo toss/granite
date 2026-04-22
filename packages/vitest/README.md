@@ -13,7 +13,7 @@ export default defineConfig({
 });
 ```
 
-`reactNative()` injects the React Native mirror aliases, the Vitest `node` environment, `globals: true`, Jest-like test globs, and the packaged React Native runtime/setup files.
+`reactNative()` injects the React Native mirror aliases, the Vitest `node` environment, `globals: true`, Jest-like test globs, the packaged React Native runtime/setup files, and Jest-preset-style asset mocks.
 
 ## Mirror Cache
 
@@ -25,7 +25,7 @@ The React Native mirror is stored as a content-addressed local cache:
 
 The cache key is derived from:
 
-- the mirrored `react-native` and `@react-native/*` file contents
+- the mirrored `react-native` and installed RN-family allowlist package contents
 - the local mirror/transform implementation
 - transform dependency versions
 
@@ -39,7 +39,7 @@ Local garbage collection runs opportunistically while resolving the mirror cache
 
 ## React Native Jest Preset Parity
 
-**Status:** `100%`
+**Status:** tracked in [`JEST_PRESET_PARITY_CHECKLIST.md`](./JEST_PRESET_PARITY_CHECKLIST.md)
 
 This package currently treats the following contract as the parity target:
 
@@ -48,7 +48,7 @@ This package currently treats the following contract as the parity target:
 - `react-native/jest/setup.js`
 - the top-level `react-native` facade exposed by `react-native/index.js`
 
-Here, `100%` means the tracked parity checklist for that surface is implemented inside this package, not that every React Native ecosystem package is mocked.
+The checklist tracks how much of that surface is implemented inside this package. It does not mean every React Native ecosystem package is mocked.
 
 ## What Is Mocked
 
@@ -61,8 +61,10 @@ Here, `100%` means the tracked parity checklist for that surface is implemented 
 - `test.include = ['**/__tests__/**/*.test.{js,jsx,ts,tsx}', '**/__tests__/**/*.spec.{js,jsx,ts,tsx}', '**/?(*.)test.{js,jsx,ts,tsx}', '**/?(*.)spec.{js,jsx,ts,tsx}']`
 - `test.setupFiles = [reactNativeRuntime, setup]`
 - `resolve.conditions = ['require', 'react-native']`
-- `resolve.extensions = ['.ios.tsx', '.ios.ts', '.ios.jsx', '.ios.js', '.tsx', '.ts', '.jsx', '.js', '.json']`
+- `resolve.extensions = ['.ios.tsx', '.ios.ts', '.ios.jsx', '.ios.js', '.native.tsx', '.native.ts', '.native.jsx', '.native.js', '.tsx', '.ts', '.jsx', '.js', '.json']`
+- asset imports resolve to Jest-preset-style `{ testUri }` objects
 - content-addressed React Native source mirroring plus Flow stripping before execution
+- installed `jest-react-native`, `@react-native/*`, and `@react-native-community/*` packages join the same mirror/transform pipeline
 - package-root-based resolution for Yarn PnP and regular installs
 
 ### 2. Global bootstrap
@@ -81,6 +83,7 @@ The runtime installs the same core globals the preset expects:
 - `__turboModuleProxy`
 - `__fbBatchedBridgeConfig`
 - `globalThis.jest` bridge backed by `vi`
+- guarded `prettier` mocking equivalent to the React Native Jest setup workaround
 
 ### 3. Explicit `react-native/jest/setup.js`-style subpath mocks
 
@@ -173,6 +176,7 @@ The top-level `react-native` mock exports these components, APIs, and utilities:
 - `Linking`
 - `LogBox`
 - `Modal`
+- `NativeComponentRegistry`
 - `NativeAppEventEmitter`
 - `NativeDialogManagerAndroid`
 - `NativeEventEmitter`
@@ -211,12 +215,19 @@ The top-level `react-native` mock exports these components, APIs, and utilities:
 - `TurboModuleRegistry`
 - `UIManager`
 - `unstable_batchedUpdates`
+- `unstable_NativeText`
+- `unstable_NativeView`
+- `unstable_TextAncestorContext`
+- `unstable_VirtualView`
+- `ReactNativeVersion`
 - `useAnimatedValue`
 - `useColorScheme`
+- `usePressability`
 - `useWindowDimensions`
 - `UTFSequence`
 - `Vibration`
 - `View`
+- `VirtualViewMode`
 - `VirtualizedList`
 - `VirtualizedSectionList`
 

@@ -1,3 +1,4 @@
-import { installVitestJestBridge } from './jestBridge';
+import { installVitestJestBridge, installVitestPrettierWorkaround } from './jestBridge';
 
+installVitestPrettierWorkaround();
 installVitestJestBridge();

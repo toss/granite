@@ -8,6 +8,7 @@ import {
   JEST_LIKE_TEST_PATTERNS,
   REACT_NATIVE_EXPORT_CONDITIONS,
   REACT_NATIVE_RESOLVE_EXTENSIONS,
+  REACT_NATIVE_ASSET_EXTENSIONS,
   GRANITE_VITEST_RN_CACHE_DIRECTORY,
   GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
   buildReactNativeMirror,
@@ -18,15 +19,25 @@ import {
   shouldInlineReactNativeDependency,
   synthesizeDefaultPlatformFiles,
 } from './reactNative';
-import {
-  isVitestVersionAtLeast,
-  resolveInstalledVitestVersion,
-  VITEST_VITE_8_SUPPORT_VERSION,
-} from './vitestVersion';
 
 describe('reactNative', () => {
+  it('returns shared JSX transform config for both oxc and esbuild', () => {
+    expect(getVitestJsxTransformConfig()).toEqual({
+      esbuild: {
+        jsx: 'automatic',
+        jsxImportSource: 'react',
+      },
+      oxc: {
+        jsx: {
+          importSource: 'react',
+          runtime: 'automatic',
+        },
+      },
+    });
+  });
+
   it('provides a Vitest plugin-style config with packaged setup files', async () => {
-    const plugin = reactNative({ workspaceRoot: process.cwd() });
+    const plugin = reactNative();
     const config = await plugin.config();
 
     expect(plugin.name).toBe('granite-react-native');
@@ -44,35 +55,38 @@ describe('reactNative', () => {
       },
     });
 
-    expect(config).toMatchObject(getVitestJsxTransformConfig(resolveInstalledVitestVersion(process.cwd())));
+    expect(config).toMatchObject(getVitestJsxTransformConfig());
 
     for (const setupFile of config.test.setupFiles) {
       expect(fs.existsSync(setupFile)).toBe(true);
     }
   }, 60_000);
 
-  it('switches JSX transform config at Vitest 4.1.0', () => {
-    expect(isVitestVersionAtLeast('4.0.12', VITEST_VITE_8_SUPPORT_VERSION)).toBe(false);
-    expect(isVitestVersionAtLeast('4.1.0-beta.3', VITEST_VITE_8_SUPPORT_VERSION)).toBe(false);
-    expect(isVitestVersionAtLeast('4.1.0-beta.4', VITEST_VITE_8_SUPPORT_VERSION)).toBe(true);
-    expect(isVitestVersionAtLeast('4.1.0', VITEST_VITE_8_SUPPORT_VERSION)).toBe(true);
-    expect(isVitestVersionAtLeast('4.1.3', VITEST_VITE_8_SUPPORT_VERSION)).toBe(true);
+  it('resolves ios files before native fallbacks and then common files', () => {
+    expect(REACT_NATIVE_RESOLVE_EXTENSIONS).toEqual([
+      '.ios.tsx',
+      '.ios.ts',
+      '.ios.jsx',
+      '.ios.js',
+      '.native.tsx',
+      '.native.ts',
+      '.native.jsx',
+      '.native.js',
+      '.tsx',
+      '.ts',
+      '.jsx',
+      '.js',
+      '.json',
+    ]);
+  });
 
-    expect(getVitestJsxTransformConfig('4.0.12')).toEqual({
-      esbuild: {
-        jsx: 'automatic',
-        jsxImportSource: 'react',
-      },
-    });
+  it('mocks asset imports with `{ testUri }` objects', async () => {
+    const plugin = reactNative();
+    const assetModuleCode = await plugin.load?.('/virtual/project/src/logo.png');
 
-    expect(getVitestJsxTransformConfig('4.1.0')).toEqual({
-      oxc: {
-        jsx: {
-          runtime: 'automatic',
-          importSource: 'react',
-        },
-      },
-    });
+    expect(REACT_NATIVE_ASSET_EXTENSIONS).toContain('png');
+    expect(assetModuleCode).toContain('testUri');
+    expect(assetModuleCode).toContain('logo.png');
   });
 
   it('prefers ios files when synthesizing default platform fallbacks', () => {
@@ -113,7 +127,8 @@ describe('reactNative', () => {
 
       expect(config.resolve.alias[0]?.replacement).toContain(
         path.join(
-          getLocalTempDirectoryPath(originalCwd),
+          originalCwd,
+          '.vitest',
           GRANITE_VITEST_RN_CACHE_DIRECTORY,
           GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
         ),

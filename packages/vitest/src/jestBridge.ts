@@ -23,6 +23,15 @@ type RuntimeGlobals = typeof globalThis & {
   jest?: JestShim;
 };
 
+type RuntimeRequire = ReturnType<typeof createRequire>;
+
+export function installVitestPrettierWorkaround(runtimeRequire: RuntimeRequire = createRequire(import.meta.url)) {
+  try {
+    const prettierPath = runtimeRequire.resolve('prettier');
+    vi.doMock('prettier', () => runtimeRequire(prettierPath));
+  } catch {}
+}
+
 export function installVitestJestBridge() {
   const runtimeGlobals = globalThis as RuntimeGlobals;
   const runtimeRequire = createRequire(import.meta.url);

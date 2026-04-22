@@ -1,7 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getPackageRoot } from '@granite-js/utils';
+import { Plugin } from 'vitest/config';
+import * as vite from 'vitest/node'
+import {
+  createReactNativeAssetModuleCode,
+  isReactNativeAssetModuleId,
+  REACT_NATIVE_ASSET_EXTENSIONS,
+} from './assets';
 import {
   DEFAULT_PLATFORM,
   buildReactNativeMirror,
@@ -20,17 +26,16 @@ import {
   shouldInlineReactNativeDependency,
   shouldTransformReactNativeFile,
 } from './transpile';
-import {
-  isVitestVersionAtLeast,
-  resolveInstalledVitestVersion,
-  VITEST_VITE_8_SUPPORT_VERSION,
-} from './vitestVersion';
 
 export const REACT_NATIVE_RESOLVE_EXTENSIONS = [
   '.ios.tsx',
   '.ios.ts',
   '.ios.jsx',
   '.ios.js',
+  '.native.tsx',
+  '.native.ts',
+  '.native.jsx',
+  '.native.js',
   '.tsx',
   '.ts',
   '.jsx',
@@ -45,53 +50,10 @@ export const JEST_LIKE_TEST_PATTERNS = [
   '**/?(*.)spec.{js,jsx,ts,tsx}',
 ] as const;
 
-export interface ReactNativePluginOptions {
-  workspaceRoot?: string;
-}
-
-type EsbuildTransformConfig = {
-  esbuild: {
-    jsx: 'automatic';
-    jsxImportSource: 'react';
-  };
-  oxc?: never;
-};
-
-type OxcTransformConfig = {
-  oxc: {
-    jsx: {
-      runtime: 'automatic';
-      importSource: 'react';
-    };
-  };
-  esbuild?: never;
-};
-
-type ReactNativeTransformConfig = EsbuildTransformConfig | OxcTransformConfig;
-
-type ReactNativeResolvedConfig = ReactNativeTransformConfig & {
-  resolve: {
-    alias: Array<{ find: RegExp; replacement: string }>;
-    conditions: string[];
-    extensions: string[];
-  };
-  test: {
-    environment: 'node';
-    globals: true;
-    include: string[];
-    setupFiles: string[];
-  };
-};
-
-type MaybePromise<T> = Promise<T> | T;
-
-type ReactNativePlugin = {
-  config: () => MaybePromise<ReactNativeResolvedConfig>;
-  name: string;
-};
-
 const currentFilePath = fs.realpathSync(fileURLToPath(import.meta.url));
 const currentDirectory = path.dirname(currentFilePath);
+const automaticJsxRuntime = 'automatic';
+const reactJsxImportSource = 'react';
 
 function getSetupFileExtension() {
   const extension = path.extname(currentFilePath);
@@ -112,41 +74,38 @@ export function resolveReactNativeSetupFiles() {
   ];
 }
 
-export function getVitestJsxTransformConfig(vitestVersion: string | null): ReactNativeTransformConfig {
-  if (
-    vitestVersion != null &&
-    isVitestVersionAtLeast(vitestVersion, VITEST_VITE_8_SUPPORT_VERSION)
-  ) {
-    return {
-      oxc: {
-        jsx: {
-          runtime: 'automatic',
-          importSource: 'react',
-        },
-      },
-    };
-  }
-
+export function getVitestJsxTransformConfig() {
   return {
     esbuild: {
-      jsx: 'automatic',
-      jsxImportSource: 'react',
+      jsx: automaticJsxRuntime,
+      jsxImportSource: reactJsxImportSource,
+    },
+    oxc: {
+      jsx: {
+        importSource: reactJsxImportSource,
+        runtime: automaticJsxRuntime,
+      },
     },
   };
 }
 
-export function reactNative(options: ReactNativePluginOptions = {}): ReactNativePlugin {
-  const workspaceRoot = options.workspaceRoot ?? getPackageRoot();
-
+export function reactNative(): Plugin {
   return {
+    enforce: 'pre',
     name: 'granite-react-native',
-    async config() {
-      const reactNativeMirrorRoot = await buildReactNativeMirror(workspaceRoot);
-      const vitestVersion = resolveInstalledVitestVersion(workspaceRoot);
-      process.env[GRANITE_VITEST_RN_CACHE_ROOT_ENV] = reactNativeMirrorRoot;
+    async config(conf) {
+      const workspaceRoot = conf.root;
 
-      return {
-        ...getVitestJsxTransformConfig(vitestVersion),
+      if(!workspaceRoot) {
+        throw new Error('workspaceRoot is required');
+      }
+
+      const reactNativeMirrorRoot = await buildReactNativeMirror(
+        workspaceRoot,
+        path.join(workspaceRoot, conf.cacheDir ?? '.vitest'),
+      );
+
+      const commonConfig = {
         resolve: {
           alias: [
             {
@@ -161,6 +120,22 @@ export function reactNative(options: ReactNativePluginOptions = {}): ReactNative
               find: /^@react-native\/(.*)$/,
               replacement: path.join(reactNativeMirrorRoot, '@react-native', '$1'),
             },
+            {
+              find: /^@react-native-community\/([^/]+)$/,
+              replacement: path.join(reactNativeMirrorRoot, '@react-native-community', '$1'),
+            },
+            {
+              find: /^@react-native-community\/([^/]+)\/(.*)$/,
+              replacement: path.join(reactNativeMirrorRoot, '@react-native-community', '$1', '$2'),
+            },
+            {
+              find: /^jest-react-native$/,
+              replacement: path.join(reactNativeMirrorRoot, 'jest-react-native'),
+            },
+            {
+              find: /^jest-react-native\/(.*)$/,
+              replacement: path.join(reactNativeMirrorRoot, 'jest-react-native', '$1'),
+            },
           ],
           conditions: [...REACT_NATIVE_EXPORT_CONDITIONS],
           extensions: [...REACT_NATIVE_RESOLVE_EXTENSIONS],
@@ -170,8 +145,33 @@ export function reactNative(options: ReactNativePluginOptions = {}): ReactNative
           globals: true,
           include: [...JEST_LIKE_TEST_PATTERNS],
           setupFiles: resolveReactNativeSetupFiles(),
-        },
-      };
+        }
+      }
+
+      if('rollupVersion' in vite) {
+        return {
+          oxc: {
+            jsx: 'automatic',
+            jsxImportSource: 'react',
+          },
+          ...commonConfig,
+        }
+      } else {
+        return {
+          esbuild: {
+            jsx: 'automatic',
+            jsxImportSource: 'react',
+          },
+          ...commonConfig,
+        }
+      }
+    },
+    load(id: string) {
+      if (!isReactNativeAssetModuleId(id)) {
+        return undefined;
+      }
+
+      return createReactNativeAssetModuleCode(id);
     },
   };
 }
@@ -183,6 +183,7 @@ export {
   GRANITE_VITEST_RN_PACKAGES_DIRECTORY,
   GRANITE_VITEST_RN_CACHE_ROOT_ENV,
   REACT_NATIVE_PLATFORMS,
+  REACT_NATIVE_ASSET_EXTENSIONS,
   REACT_NATIVE_TRANSFORM_ALLOWLIST,
   REACT_NATIVE_TRANSFORM_EXTENSIONS,
   buildReactNativeMirror,
