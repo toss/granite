@@ -3,7 +3,6 @@
 import path from 'node:path';
 import Module, { createRequire } from 'node:module';
 import '@react-native/js-polyfills/error-guard';
-import 'regenerator-runtime/runtime';
 import type { ReactNode } from 'react';
 import { vi } from 'vitest';
 import {
