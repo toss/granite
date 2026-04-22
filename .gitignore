@@ -32,7 +32,6 @@ coverage
 __screenshots__
 vitest.config.ts.timestamp*
 tsconfig.vitest-temp.json
-**/.granite-vitest-rn-cache/
 
 .nx/cache
 .nx/workspace-data

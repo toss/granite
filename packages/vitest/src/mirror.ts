@@ -3,13 +3,14 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { getLocalTempDirectoryPath } from '@granite-js/utils';
 import {
   shouldTransformReactNativeFile,
   transformReactNativeSource,
 } from './transpile';
 
 export const DEFAULT_PLATFORM = 'ios';
-export const GRANITE_VITEST_RN_CACHE_DIRECTORY = '.granite-vitest-rn-cache';
+export const GRANITE_VITEST_RN_CACHE_DIRECTORY = 'vitest-react-native-cache';
 export const GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY = 'entries';
 export const GRANITE_VITEST_RN_CACHE_ROOT_ENV = 'GRANITE_VITEST_RN_CACHE_ROOT';
 export const GRANITE_VITEST_RN_PACKAGES_DIRECTORY = 'packages';
@@ -43,7 +44,7 @@ function ensureDirectory(targetPath: string) {
 }
 
 function getReactNativeMirrorCacheRoot(workspaceRoot: string) {
-  return path.join(workspaceRoot, GRANITE_VITEST_RN_CACHE_DIRECTORY);
+  return path.join(getLocalTempDirectoryPath(workspaceRoot), GRANITE_VITEST_RN_CACHE_DIRECTORY);
 }
 
 function getReactNativeMirrorEntriesRoot(workspaceRoot: string) {

@@ -40,6 +40,7 @@
     "build": "tsdown"
   },
   "dependencies": {
+    "@granite-js/utils": "workspace:*",
     "@react-native/js-polyfills": "0.84.0",
     "fast-flow-transform": "0.0.3",
     "regenerator-runtime": "^0.13.11"

@@ -5,6 +5,7 @@ import Module, { createRequire } from 'node:module';
 import '@react-native/js-polyfills/error-guard';
 import 'regenerator-runtime/runtime';
 import type { ReactNode } from 'react';
+import { getPackageRoot, getLocalTempDirectoryPath } from '@granite-js/utils';
 import { vi } from 'vitest';
 import {
   defineGlobalProperty,
@@ -29,7 +30,13 @@ const runtimeGlobals = globalThis as RuntimeGlobals;
 const runtimeRequire = createRequire(import.meta.url);
 const reactNativeMirrorRoot = process.env.GRANITE_VITEST_RN_CACHE_ROOT
   ? path.resolve(process.env.GRANITE_VITEST_RN_CACHE_ROOT)
-  : path.resolve(process.cwd(), '.granite-vitest-rn-cache', `${process.pid}`, 'packages');
+  : path.resolve(
+      getLocalTempDirectoryPath(getPackageRoot()),
+      'vitest-react-native-cache',
+      'entries',
+      `${process.pid}`,
+      'packages',
+    );
 
 let nextNativeTag = 1;
 

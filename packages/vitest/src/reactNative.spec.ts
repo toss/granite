@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
+import { getLocalTempDirectoryPath } from '@granite-js/utils';
 import { describe, expect, it } from 'vitest';
 import {
   JEST_LIKE_TEST_PATTERNS,
@@ -100,6 +101,28 @@ describe('reactNative', () => {
     expect(shouldInlineReactNativeDependency(reactNativeEntryPath, packageRoots)).toBe(true);
   });
 
+  it('defaults workspaceRoot to the nearest package root when omitted', async () => {
+    const originalCwd = process.cwd();
+    const nestedCwd = path.join(originalCwd, 'src');
+
+    process.chdir(nestedCwd);
+
+    try {
+      const plugin = reactNative();
+      const config = await plugin.config();
+
+      expect(config.resolve.alias[0]?.replacement).toContain(
+        path.join(
+          getLocalTempDirectoryPath(originalCwd),
+          GRANITE_VITEST_RN_CACHE_DIRECTORY,
+          GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
+        ),
+      );
+    } finally {
+      process.chdir(originalCwd);
+    }
+  });
+
   it('reuses a content-addressed mirror entry when the inputs are unchanged', async () => {
     const workspaceRoot = process.cwd();
     const firstMirrorRoot = await buildReactNativeMirror(workspaceRoot);
@@ -115,6 +138,7 @@ describe('reactNative', () => {
     expect(secondMirrorRoot).toBe(firstMirrorRoot);
     expect(firstMirrorRoot).toContain(
       path.join(
+        getLocalTempDirectoryPath(workspaceRoot),
         GRANITE_VITEST_RN_CACHE_DIRECTORY,
         GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
       ),
@@ -128,7 +152,7 @@ describe('reactNative', () => {
     const workspaceRoot = process.cwd();
     const activeMirrorRoot = await buildReactNativeMirror(workspaceRoot);
     const entriesRoot = path.join(
-      workspaceRoot,
+      getLocalTempDirectoryPath(workspaceRoot),
       GRANITE_VITEST_RN_CACHE_DIRECTORY,
       GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
     );

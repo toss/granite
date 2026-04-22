@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { getPackageRoot } from '@granite-js/utils';
 import {
   DEFAULT_PLATFORM,
   buildReactNativeMirror,
@@ -135,7 +136,7 @@ export function getVitestJsxTransformConfig(vitestVersion: string | null): React
 }
 
 export function reactNative(options: ReactNativePluginOptions = {}): ReactNativePlugin {
-  const workspaceRoot = options.workspaceRoot ?? process.cwd();
+  const workspaceRoot = options.workspaceRoot ?? getPackageRoot();
 
   return {
     name: 'granite-react-native',

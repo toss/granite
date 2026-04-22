@@ -19,9 +19,9 @@ export default defineConfig({
 
 The React Native mirror is stored as a content-addressed local cache:
 
-- cache root: `/.granite-vitest-rn-cache`
-- entries: `/.granite-vitest-rn-cache/entries/<cache-key>/packages`
-- metadata: `/.granite-vitest-rn-cache/entries/<cache-key>/meta.json`
+- cache root: `/.granite/vitest-react-native-cache`
+- entries: `/.granite/vitest-react-native-cache/entries/<cache-key>/packages`
+- metadata: `/.granite/vitest-react-native-cache/entries/<cache-key>/meta.json`
 
 The cache key is derived from:
 

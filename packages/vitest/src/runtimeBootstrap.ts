@@ -49,6 +49,23 @@ function createViewManagerConfig(name: string) {
   };
 }
 
+export function installRequestAnimationFrameShim(runtimeGlobals: RuntimeGlobals) {
+  Object.defineProperty(runtimeGlobals, 'requestAnimationFrame', {
+    configurable: true,
+    enumerable: true,
+    value: (callback: (time: number) => void) =>
+      setTimeout(() => callback(runtimeGlobals.jest?.now?.() ?? Date.now()), 0),
+    writable: true,
+  });
+
+  Object.defineProperty(runtimeGlobals, 'cancelAnimationFrame', {
+    configurable: true,
+    enumerable: true,
+    value: (id: ReturnType<typeof setTimeout>) => clearTimeout(id),
+    writable: true,
+  });
+}
+
 export function installReactNativeGlobals(runtimeGlobals: RuntimeGlobals) {
   const windowEventListeners = new Map<string, Set<(event: unknown) => void>>();
 
@@ -94,20 +111,7 @@ export function installReactNativeGlobals(runtimeGlobals: RuntimeGlobals) {
     writable: true,
   });
 
-  Object.defineProperty(runtimeGlobals, 'requestAnimationFrame', {
-    configurable: true,
-    enumerable: true,
-    value: (callback: (time: number) => void) =>
-      setTimeout(() => callback(runtimeGlobals.jest?.now?.() ?? Date.now()), 0),
-    writable: true,
-  });
-
-  Object.defineProperty(runtimeGlobals, 'cancelAnimationFrame', {
-    configurable: true,
-    enumerable: true,
-    value: (id: ReturnType<typeof setTimeout>) => clearTimeout(id),
-    writable: true,
-  });
+  installRequestAnimationFrameShim(runtimeGlobals);
 }
 
 export function installNativeModuleProxy(runtimeGlobals: RuntimeGlobals) {

@@ -1,5 +1,6 @@
 import { createRequire } from 'node:module';
 import { vi } from 'vitest';
+import { installRequestAnimationFrameShim } from './runtimeBootstrap';
 
 type JestShim = {
   advanceTimersByTime: typeof vi.advanceTimersByTime;
@@ -21,23 +22,6 @@ type JestShim = {
 type RuntimeGlobals = typeof globalThis & {
   jest?: JestShim;
 };
-
-function installRequestAnimationFrameShim(runtimeGlobals: RuntimeGlobals) {
-  Object.defineProperty(globalThis, 'requestAnimationFrame', {
-    configurable: true,
-    enumerable: true,
-    value: (callback: (time: number) => void) =>
-      setTimeout(() => callback(runtimeGlobals.jest?.now?.() ?? Date.now()), 0),
-    writable: true,
-  });
-
-  Object.defineProperty(globalThis, 'cancelAnimationFrame', {
-    configurable: true,
-    enumerable: true,
-    value: (id: ReturnType<typeof setTimeout>) => clearTimeout(id),
-    writable: true,
-  });
-}
 
 export function installVitestJestBridge() {
   const runtimeGlobals = globalThis as RuntimeGlobals;
