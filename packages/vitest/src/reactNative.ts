@@ -92,18 +92,8 @@ export function reactNative(): Plugin {
     enforce: 'pre',
     name: 'granite-react-native',
     async config(conf) {
-      const workspaceRoot =
-        typeof conf.root === 'string' && conf.root.length > 0
-          ? conf.root
-          : 'configFile' in conf &&
-              typeof conf.configFile === 'string' &&
-              conf.configFile.length > 0
-            ? path.dirname(conf.configFile)
-            : process.cwd();
-      const cacheDir =
-        typeof conf.cacheDir === 'string' && conf.cacheDir.length > 0
-          ? conf.cacheDir
-          : '.vitest';
+      const workspaceRoot = conf.root ?? conf.test?.root ?? process.cwd();
+      const cacheDir = conf.cacheDir ?? '.vitest';
       const resolvedCacheDir = path.isAbsolute(cacheDir)
         ? cacheDir
         : path.join(workspaceRoot, cacheDir);

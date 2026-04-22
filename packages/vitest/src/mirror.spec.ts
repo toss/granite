@@ -9,8 +9,8 @@ import {
   GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
 } from './mirror';
 
-describe('collectMirroredReactNativePackageNames', () => {
-  it('collects RN-family packages from both RN and workspace manifests', () => {
+describe('mirror helpers', () => {
+  it('selects the React Native package set that should be mirrored', () => {
     expect(
       collectMirroredReactNativePackageNames(
         {
@@ -37,12 +37,13 @@ describe('collectMirroredReactNativePackageNames', () => {
       'jest-react-native',
     ]);
   });
-});
 
-describe('buildReactNativeMirror', () => {
-  it('uses a resolved cache dir without treating it as the workspace root', async () => {
+  it('materializes the mirror under the Vitest cache directory and reuses it on the next build', async () => {
     const resolvedCacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'granite-vitest-cache-dir-'));
     const mirrorRoot = await buildReactNativeMirror(process.cwd(), resolvedCacheDir);
+    const cacheRoot = path.join(resolvedCacheDir, GRANITE_VITEST_RN_CACHE_DIRECTORY);
+    const cacheEntriesRoot = path.join(cacheRoot, GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY);
+    const secondMirrorRoot = await buildReactNativeMirror(process.cwd(), resolvedCacheDir);
 
     expect(mirrorRoot).toContain(
       path.join(
@@ -51,6 +52,9 @@ describe('buildReactNativeMirror', () => {
         GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
       ),
     );
+    expect(secondMirrorRoot).toBe(mirrorRoot);
     expect(fs.existsSync(mirrorRoot)).toBe(true);
+    expect(fs.existsSync(cacheRoot)).toBe(true);
+    expect(fs.existsSync(cacheEntriesRoot)).toBe(true);
   }, 60_000);
 });
