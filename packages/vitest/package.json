@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/vitest",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "type": "module",
   "description": "Vitest helpers for React Native",
   "types": "./dist/index.d.ts",
