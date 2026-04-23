@@ -1,5 +1,5 @@
 import path from 'node:path';
-import transform from 'fast-flow-transform';
+import flowRemoveTypes from 'flow-remove-types';
 
 export const REACT_NATIVE_TRANSFORM_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx'] as const;
 export const REACT_NATIVE_TRANSFORM_ALLOWLIST = [
@@ -58,16 +58,10 @@ export function shouldInlineReactNativeDependency(
   );
 }
 
-export async function transformReactNativeSource(sourcePath: string, source: string) {
-  const transformed = await transform({
-    filename: sourcePath,
-    source,
-    dialect: 'flow-detect',
-    format: 'compact',
-    comments: false,
-    reactRuntimeTarget: '19',
-    sourcemap: false,
-  });
-
-  return transformed.code;
+export async function transformReactNativeSource(_sourcePath: string, source: string) {
+  return flowRemoveTypes(source, {
+    all: true,
+    pretty: true,
+    removeEmptyImports: true,
+  }).toString();
 }
