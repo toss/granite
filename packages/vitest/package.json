@@ -26,7 +26,7 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "fast-flow-transform": "0.0.3"
+    "flow-remove-types": "2.291.0"
   },
   "devDependencies": {
     "@types/node": "catalog:tools",

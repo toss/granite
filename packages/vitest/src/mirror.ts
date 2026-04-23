@@ -30,7 +30,7 @@ type MirrorCacheMetadata = {
   packageRoots: string[];
   sizeBytes: number;
   transformDependencyVersions: {
-    fastFlowTransform: string;
+    flowRemoveTypes: string;
   };
   transformImplementationHash: string;
 };
@@ -50,18 +50,16 @@ type MirroredReactNativePackage = {
 const currentMirrorModulePath = fs.realpathSync(fileURLToPath(import.meta.url));
 const currentMirrorModuleDirectory = path.dirname(currentMirrorModulePath);
 
-function getFastFlowTransformVersion() {
+function getFlowRemoveTypesVersion() {
   const packageRequire = createRequire(import.meta.url);
-  const fastFlowTransformEntryPath = packageRequire.resolve('fast-flow-transform');
-  const fastFlowTransformPackageRoot = path.dirname(path.dirname(fastFlowTransformEntryPath));
-  const fastFlowTransformPackageJsonPath = path.join(fastFlowTransformPackageRoot, 'package.json');
-  const fastFlowTransformPackageJson = JSON.parse(
-    fs.readFileSync(fastFlowTransformPackageJsonPath, 'utf8'),
+  const flowRemoveTypesPackageJsonPath = packageRequire.resolve('flow-remove-types/package.json');
+  const flowRemoveTypesPackageJson = JSON.parse(
+    fs.readFileSync(flowRemoveTypesPackageJsonPath, 'utf8'),
   ) as {
     version?: string;
   };
 
-  return fastFlowTransformPackageJson.version ?? 'unknown';
+  return flowRemoveTypesPackageJson.version ?? 'unknown';
 }
 
 function getPackageManifestDependencyNames(packageManifest: PackageManifest) {
@@ -180,12 +178,12 @@ function computeReactNativeMirrorCacheKey(workspaceRoot: string) {
   const packageRoots = resolveReactNativePackageRoots(workspaceRoot).sort();
   const transformImplementationHash = hashImplementationFiles();
   const transformDependencyVersions = {
-    fastFlowTransform: getFastFlowTransformVersion(),
+    flowRemoveTypes: getFlowRemoveTypesVersion(),
   };
 
   hasher.update(`granite-vitest-rn-cache:${MIRROR_CACHE_KEY_VERSION}`);
   hasher.update('\0');
-  hasher.update(`fast-flow-transform:${transformDependencyVersions.fastFlowTransform}`);
+  hasher.update(`flow-remove-types:${transformDependencyVersions.flowRemoveTypes}`);
   hasher.update('\0');
   hasher.update(`transform:${transformImplementationHash}`);
   hasher.update('\0');
