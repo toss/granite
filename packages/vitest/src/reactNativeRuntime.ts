@@ -3,7 +3,6 @@
 import path from 'node:path';
 import Module, { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import '@react-native/js-polyfills/error-guard';
 import type { ReactNode } from 'react';
 import { vi } from 'vitest';
 import { REACT_NATIVE_ASSET_MODULE_ID_PATTERN } from './assets';
@@ -2813,6 +2812,8 @@ function patchReactNativeResolution() {
 
   runtimeGlobals.__rntlVitestRnResolverPatched__ = true;
 }
+
+runtimeRequire(path.join(reactNativeMirrorRoot, '@react-native', 'js-polyfills', 'error-guard.js'));
 
 // Yarn PnP: top-level ESM imports of `react-native` must resolve to the same
 // singleton facade that the CommonJS loader patch returns.
