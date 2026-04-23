@@ -6256,7 +6256,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@granite-js/vitest@workspace:packages/vitest"
   dependencies:
-    "@react-native/js-polyfills": "npm:0.84.0"
     "@types/node": "catalog:tools"
     "@types/react": "catalog:react-native"
     fast-flow-transform: "npm:0.0.3"
