@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.22
+
+### Patch Changes
+
+- 3553158: feat(vitest): fast-flow-transform -> flow-remove-types
+
 ## 1.0.21
 
 ### Patch Changes
