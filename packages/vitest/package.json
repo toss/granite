@@ -1,0 +1,64 @@
+{
+  "name": "@granite-js/vitest",
+  "version": "1.0.20",
+  "type": "module",
+  "description": "Vitest helpers for React Native",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/vitest"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./setup": {
+      "types": "./dist/setup.d.ts",
+      "import": "./dist/setup.js",
+      "default": "./dist/setup.js"
+    },
+    "./react-native-runtime": {
+      "types": "./dist/reactNativeRuntime.d.ts",
+      "import": "./dist/reactNativeRuntime.js",
+      "default": "./dist/reactNativeRuntime.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest --run",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@react-native/js-polyfills": "0.84.0",
+    "fast-flow-transform": "0.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:tools",
+    "@types/react": "catalog:react-native",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
+    "tsdown": "catalog:tools",
+    "typescript": "catalog:tools",
+    "vitest": "4.1.3"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "vitest": "*"
+  },
+  "sideEffects": [
+    "./dist/reactNativeRuntime.js",
+    "./dist/setup.js"
+  ]
+}
