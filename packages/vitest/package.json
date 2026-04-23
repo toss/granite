@@ -3,8 +3,6 @@
   "version": "1.0.20",
   "type": "module",
   "description": "Vitest helpers for React Native",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
@@ -12,21 +10,9 @@
     "directory": "packages/vitest"
   },
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./setup": {
-      "types": "./dist/setup.d.ts",
-      "import": "./dist/setup.js",
-      "default": "./dist/setup.js"
-    },
-    "./react-native-runtime": {
-      "types": "./dist/reactNativeRuntime.d.ts",
-      "import": "./dist/reactNativeRuntime.js",
-      "default": "./dist/reactNativeRuntime.js"
-    },
+    ".": "./dist/index.js",
+    "./reactNativeRuntime": "./dist/reactNativeRuntime.js",
+    "./setup": "./dist/setup.js",
     "./package.json": "./package.json"
   },
   "files": [
@@ -40,7 +26,6 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@react-native/js-polyfills": "0.84.0",
     "fast-flow-transform": "0.0.3"
   },
   "devDependencies": {

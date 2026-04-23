@@ -8,8 +8,6 @@ import {
   GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
 } from './reactNative';
 
-vi.mock('@react-native/js-polyfills/error-guard', () => ({}));
-
 describe('reactNativeRuntime bootstrap', () => {
   let ReactNative: Record<string, any>;
   let RendererProxy: Record<string, any>;
@@ -18,18 +16,25 @@ describe('reactNativeRuntime bootstrap', () => {
     __GRANITE_VITEST_RN_CACHE_ROOT__?: string;
     IS_REACT_ACT_ENVIRONMENT?: boolean;
     IS_REACT_NATIVE_TEST_ENVIRONMENT?: boolean;
+    ErrorUtils?: Record<string, unknown>;
     nativeFabricUIManager?: Record<string, unknown>;
     window?: typeof globalThis;
   };
   const originalMirrorRoot = runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__;
+  const originalErrorUtils = runtimeGlobals.ErrorUtils;
 
   afterAll(() => {
     if (originalMirrorRoot == null) {
       delete runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__;
-      return;
+    } else {
+      runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__ = originalMirrorRoot;
     }
 
-    runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__ = originalMirrorRoot;
+    if (originalErrorUtils == null) {
+      delete runtimeGlobals.ErrorUtils;
+    } else {
+      runtimeGlobals.ErrorUtils = originalErrorUtils;
+    }
   });
 
   it('fails fast when reactNative() did not configure the mirror cache root', async () => {
@@ -62,6 +67,16 @@ describe('reactNativeRuntime bootstrap', () => {
       expect(runtimeGlobals.performance.now).toEqual(expect.any(Function));
       expect(runtimeGlobals.requestAnimationFrame).toEqual(expect.any(Function));
       expect(runtimeGlobals.cancelAnimationFrame).toEqual(expect.any(Function));
+      expect(runtimeGlobals.ErrorUtils).toMatchObject({
+        applyWithGuard: expect.any(Function),
+        applyWithGuardIfNeeded: expect.any(Function),
+        getGlobalHandler: expect.any(Function),
+        guard: expect.any(Function),
+        inGuard: expect.any(Function),
+        reportError: expect.any(Function),
+        reportFatalError: expect.any(Function),
+        setGlobalHandler: expect.any(Function),
+      });
     });
 
     it('exposes a representative React Native facade for tests', () => {
