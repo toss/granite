@@ -1,0 +1,86 @@
+{
+  "name": "@granite-js/brownfield-module",
+  "type": "module",
+  "version": "1.0.20",
+  "description": "Brownfield bridge module for Granite React Native",
+  "main": "./dist/module/index.js",
+  "types": "./dist/typescript/index.d.ts",
+  "react-native": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/typescript/index.d.ts",
+      "react-native": "./src/index.ts",
+      "default": "./dist/module/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src/",
+    "ios/",
+    "android/",
+    "package.json",
+    "GraniteBrownfield.podspec"
+  ],
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "brick-codegen && bob build && tsc --project tsconfig.build.json"
+  },
+  "keywords": [
+    "react-native",
+    "brick",
+    "brick-module",
+    "brownfield",
+    "native-module"
+  ],
+  "license": "Apache-2.0",
+  "author": "Toss <opensource@toss.im>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/brownfield-module"
+  },
+  "bugs": {
+    "url": "https://github.com/toss/granite/issues"
+  },
+  "homepage": "https://github.com/toss/granite#readme",
+  "brickModule": {
+    "specSrc": "./src/spec",
+    "ios": {
+      "moduleName": "GraniteBrownfield",
+      "className": "GraniteBrownfieldModule"
+    },
+    "android": {
+      "package": "run.granite.brownfield",
+      "projectName": "brownfield",
+      "moduleName": "GraniteBrownfieldModule"
+    }
+  },
+  "peerDependencies": {
+    "brick-module": "*",
+    "react": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "brick-module": "catalog:brick-module",
+    "eslint": "^9.7.0",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
+    "react-native-builder-bob": "catalog:tools",
+    "typescript": "catalog:tools"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "dist",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ]
+    ]
+  }
+}

@@ -5624,6 +5624,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@granite-js/brownfield-module@workspace:*, @granite-js/brownfield-module@workspace:packages/brownfield-module":
+  version: 0.0.0-use.local
+  resolution: "@granite-js/brownfield-module@workspace:packages/brownfield-module"
+  dependencies:
+    brick-module: "catalog:brick-module"
+    eslint: "npm:^9.7.0"
+    react: "catalog:react-native"
+    react-native: "catalog:react-native"
+    react-native-builder-bob: "catalog:tools"
+    typescript: "catalog:tools"
+  peerDependencies:
+    brick-module: "*"
+    react: "*"
+    react-native: "*"
+  languageName: unknown
+  linkType: soft
+
 "@granite-js/cli@workspace:*, @granite-js/cli@workspace:packages/cli":
   version: 0.0.0-use.local
   resolution: "@granite-js/cli@workspace:packages/cli"
@@ -6115,6 +6132,7 @@ __metadata:
     "@babel/preset-env": "npm:7.28.5"
     "@babel/preset-typescript": "npm:7.28.5"
     "@granite-js/blur-view": "workspace:*"
+    "@granite-js/brownfield-module": "workspace:*"
     "@granite-js/cli": "workspace:*"
     "@granite-js/jest": "workspace:*"
     "@granite-js/mpack": "workspace:*"
@@ -6147,7 +6165,6 @@ __metadata:
   peerDependencies:
     "@granite-js/native": "workspace:*"
     "@types/react": "*"
-    brick-module: "*"
     react: "*"
     react-native: "*"
   bin:

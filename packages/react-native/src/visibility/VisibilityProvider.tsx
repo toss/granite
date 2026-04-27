@@ -1,7 +1,7 @@
+import { GraniteBrownfieldModule } from '@granite-js/brownfield-module';
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { AppStateProvider } from './useIsAppForeground';
 import { VisibilityChangedProvider } from './useVisibilityChanged';
-import { GraniteModule } from '../spec/GraniteBrownfieldModule.brick';
 
 interface Props {
   isVisible: boolean;
@@ -33,7 +33,7 @@ export function VisibilityProvider({ isVisible, children }: Props): ReactElement
   const [visible, setVisible] = useState(isVisible);
 
   useEffect(() => {
-    const subscription = GraniteModule.onVisibilityChanged(({ visible }) => {
+    const subscription = GraniteBrownfieldModule.onVisibilityChanged(({ visible }) => {
       setVisible(visible);
     });
 

@@ -1,4 +1,4 @@
-import { GraniteModule } from '../../spec/GraniteBrownfieldModule.brick';
+import { GraniteBrownfieldModule } from '@granite-js/brownfield-module';
 
 /**
  * @public
@@ -21,5 +21,5 @@ import { GraniteModule } from '../../spec/GraniteBrownfieldModule.brick';
  * ```
  */
 export async function closeView() {
-  return GraniteModule?.closeView();
+  return GraniteBrownfieldModule?.closeView();
 }
