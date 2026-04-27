@@ -10,37 +10,52 @@ interface RequireContextModule {
  * require context export 스크립트 반환
  *
  * ```js
- * export const context = require.context('../path'); // A
- * export default require.context('../path'); // B
+ * export const context1 = require.context('../path1'); // A
+ * export const context2 = require.context('../path2'); // B
+ * export default require.context('../path3');          // C
  * ```
  *
- * 형태의 코드를 아래와 같이 변경
+ * 형태의 코드를 아래와 같이 변경 (각 호출마다 고유한 변수로 격리)
  *
  * ```js
- * // Sample
- * import __context__ from 'require-context:../path';
+ * import __context_0__ from 'require-context:../path1';
+ * import __context_1__ from 'require-context:../path2';
+ * import __context_2__ from 'require-context:../path3';
  *
- * export var context = __context__; // A
- * export default __context__; // B
+ * export var context1 = __context_0__; // A
+ * export var context2 = __context_1__; // B
+ * export default __context_2__;        // C
  * ```
  */
 export function toRequireContextExportScript(content: string) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, source] = content.match(/require\.context\((.*?)\)/) ?? [];
-  const parsedSource = source?.replace(/['"]/g, '');
-
-  if (!parsedSource) {
-    throw new Error('유효하지 않은 require context 구문입니다');
-  }
-
-  const IMPORT_STATEMENT = `import __context__ from '${REQUIRE_CONTEXT_PROTOCOL}${parsedSource}';`;
+  const sources: string[] = [];
+  let idx = 0;
 
   // const -> var 변환 이유
   // esbuild config 에서 supported['const-and-let'] 를 false 로 넣어주고 있기 때문에 로드되기 전에 치환
-  const MODULE_BODY = content.replace(/require\.context\('(.*?)'\)/, '__context__').replace('const', 'var');
+  const MODULE_BODY = content
+    .replace(/require\.context\((['"])(.*?)\1\)/g, (_, _quote, source) => {
+      sources.push(source);
+      return `__context_${idx++}__`;
+    })
+    .replace('const', 'var');
+
+  if (sources.length === 0) {
+    throw new Error('유효하지 않은 require context 구문입니다');
+  }
+
+  for (const source of sources) {
+    if (!source) {
+      throw new Error('유효하지 않은 require context 구문입니다');
+    }
+  }
+
+  const IMPORT_STATEMENTS = sources
+    .map((source, i) => `import __context_${i}__ from '${REQUIRE_CONTEXT_PROTOCOL}${source}';`)
+    .join('\n');
 
   return `
-${IMPORT_STATEMENT}
+${IMPORT_STATEMENTS}
 
 ${MODULE_BODY}
 `.trim();
