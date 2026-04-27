@@ -1,3 +1,3 @@
-import { GraniteModule } from "../spec/GraniteBrownfieldModule.brick";
+import { GraniteBrownfieldModule } from '@granite-js/brownfield-module';
 
-export const onVisibilityChanged = GraniteModule.onVisibilityChanged;
+export const onVisibilityChanged = GraniteBrownfieldModule.onVisibilityChanged;

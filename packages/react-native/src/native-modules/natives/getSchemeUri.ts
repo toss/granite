@@ -1,4 +1,4 @@
-import { GraniteModule } from '../../spec/GraniteBrownfieldModule.brick';
+import { GraniteBrownfieldModule } from '@granite-js/brownfield-module';
 
 /**
  * @public
@@ -23,5 +23,5 @@ import { GraniteModule } from '../../spec/GraniteBrownfieldModule.brick';
  * ```
  */
 export function getSchemeUri() {
-  return GraniteModule.getConstants().schemeUri;
+  return GraniteBrownfieldModule.getConstants().schemeUri;
 }
