@@ -7,10 +7,10 @@ import * as vite from 'vitest/node';
 import {
   GRANITE_VITEST_RN_CACHE_DIRECTORY,
   GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
+  GRANITE_VITEST_RN_MANIFEST_FILENAME,
   JEST_LIKE_TEST_PATTERNS,
   reactNative,
   resolveReactNativeSetupFiles,
-  synthesizeDefaultPlatformFiles,
 } from './reactNative';
 
 type PluginConfigResult = {
@@ -26,7 +26,7 @@ type PluginConfigResult = {
     };
   };
   resolve: {
-    alias: Array<{ find: unknown; replacement: string }>;
+    alias?: Array<{ find: unknown; replacement: string }>;
     conditions?: string[];
     extensions: string[];
   };
@@ -46,18 +46,10 @@ async function runPluginConfig(plugin: ReturnType<typeof reactNative>, conf = {}
   }
 
   if (typeof configHook === 'function') {
-    return (await configHook.call(
-      {} as never,
-      conf as never,
-      {} as never,
-    )) as unknown as PluginConfigResult;
+    return (await configHook.call({} as never, conf as never, {} as never)) as unknown as PluginConfigResult;
   }
 
-  return (await configHook.handler.call(
-    {} as never,
-    conf as never,
-    {} as never,
-  )) as unknown as PluginConfigResult;
+  return (await configHook.handler.call({} as never, conf as never, {} as never)) as unknown as PluginConfigResult;
 }
 
 async function runPluginLoad(plugin: ReturnType<typeof reactNative>, id: string) {
@@ -72,6 +64,20 @@ async function runPluginLoad(plugin: ReturnType<typeof reactNative>, id: string)
   }
 
   return loadHook.handler.call({} as never, id, undefined);
+}
+
+async function runPluginResolveId(plugin: ReturnType<typeof reactNative>, id: string, importer?: string) {
+  const resolveIdHook = plugin.resolveId;
+
+  if (resolveIdHook == null) {
+    return undefined;
+  }
+
+  if (typeof resolveIdHook === 'function') {
+    return resolveIdHook.call({} as never, id, importer, {} as never);
+  }
+
+  return resolveIdHook.handler.call({} as never, id, importer, {} as never);
 }
 
 describe('reactNative plugin', () => {
@@ -92,15 +98,18 @@ describe('reactNative plugin', () => {
       });
 
       expect(config.define).toMatchObject({
-        'globalThis.__GRANITE_VITEST_RN_CACHE_ROOT__': expect.stringContaining(
+        'globalThis.__GRANITE_VITEST_RN_CACHE_MANIFEST__': expect.stringContaining(
           path.join(
             workspaceRoot,
             '.vitest',
             GRANITE_VITEST_RN_CACHE_DIRECTORY,
-            GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
-          ),
+            GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY
+          )
         ),
       });
+      expect(config.define?.['globalThis.__GRANITE_VITEST_RN_CACHE_MANIFEST__']).toContain(
+        GRANITE_VITEST_RN_MANIFEST_FILENAME
+      );
     } finally {
       process.chdir(originalCwd);
     }
@@ -118,21 +127,9 @@ describe('reactNative plugin', () => {
       environment: 'node',
       globals: true,
     });
-    const aliasPatterns = config.resolve.alias.map(({ find }) => String(find));
-    expect(aliasPatterns).toEqual(
-      expect.arrayContaining([
-        '/^react-native$/',
-        '/^@react-native\\/(.*)$/',
-        '/^jest-react-native$/',
-      ]),
-    );
+    expect(config.resolve.alias).toBeUndefined();
     expect(config.resolve.extensions).toEqual(
-      expect.arrayContaining([
-        '.android.tsx',
-        '.android.ts',
-        '.android.jsx',
-        '.android.js',
-      ]),
+      expect.arrayContaining(['.android.tsx', '.android.ts', '.android.jsx', '.android.js'])
     );
     expect(config.test.setupFiles).toHaveLength(2);
     for (const setupFile of config.test.setupFiles) {
@@ -158,15 +155,18 @@ describe('reactNative plugin', () => {
     }
 
     expect(config.define).toMatchObject({
-      'globalThis.__GRANITE_VITEST_RN_CACHE_ROOT__': expect.stringContaining(
+      'globalThis.__GRANITE_VITEST_RN_CACHE_MANIFEST__': expect.stringContaining(
         path.join(
           workspaceRoot,
           '.vitest',
           GRANITE_VITEST_RN_CACHE_DIRECTORY,
-          GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
-        ),
+          GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY
+        )
       ),
     });
+    expect(config.define?.['globalThis.__GRANITE_VITEST_RN_CACHE_MANIFEST__']).toContain(
+      GRANITE_VITEST_RN_MANIFEST_FILENAME
+    );
   }, 60_000);
 
   it('preserves caller resolve and test config when Vitest merges plugin output', async () => {
@@ -185,20 +185,14 @@ describe('reactNative plugin', () => {
     const pluginConfig = await runPluginConfig(plugin, {});
     const mergedConfig = mergeConfig(callerConfig, pluginConfig) as PluginConfigResult;
 
-    expect(mergedConfig.resolve.alias.map(({ find }) => String(find))).toEqual(
-      expect.arrayContaining(['@', '/^react-native$/']),
-    );
+    expect(mergedConfig.resolve.alias?.map(({ find }) => String(find))).toEqual(expect.arrayContaining(['@']));
     expect(mergedConfig.resolve.conditions).toEqual(
-      expect.arrayContaining(['custom-condition', 'require', 'react-native']),
+      expect.arrayContaining(['custom-condition', 'require', 'react-native'])
     );
-    expect(mergedConfig.resolve.extensions).toEqual(
-      expect.arrayContaining(['.mjs', '.ios.tsx', '.android.tsx']),
-    );
-    expect(mergedConfig.test.include).toEqual(
-      expect.arrayContaining(['custom.test.ts', ...JEST_LIKE_TEST_PATTERNS]),
-    );
+    expect(mergedConfig.resolve.extensions).toEqual(expect.arrayContaining(['.mjs', '.ios.tsx', '.android.tsx']));
+    expect(mergedConfig.test.include).toEqual(expect.arrayContaining(['custom.test.ts', ...JEST_LIKE_TEST_PATTERNS]));
     expect(mergedConfig.test.setupFiles).toEqual(
-      expect.arrayContaining(['/virtual/setup.ts', ...resolveReactNativeSetupFiles()]),
+      expect.arrayContaining(['/virtual/setup.ts', ...resolveReactNativeSetupFiles()])
     );
   });
 
@@ -210,23 +204,19 @@ describe('reactNative plugin', () => {
     expect(assetModuleCode).toContain('logo.png');
   });
 
-  it('materializes default platform files from platform-specific sources', () => {
-    const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'granite-vitest-platform-'));
-    const buttonPath = path.join(temporaryRoot, 'Button.ios.tsx');
-    const buttonFallbackPath = path.join(temporaryRoot, 'Button.tsx');
-    const cardPath = path.join(temporaryRoot, 'Card.native.tsx');
-    const cardFallbackPath = path.join(temporaryRoot, 'Card.tsx');
-    const badgePath = path.join(temporaryRoot, 'Badge.android.tsx');
-    const badgeFallbackPath = path.join(temporaryRoot, 'Badge.tsx');
+  it('resolves React Native modules through plugin resolveId without aliases', async () => {
+    const plugin = reactNative();
+    await runPluginConfig(plugin, {
+      cacheDir: fs.mkdtempSync(path.join(os.tmpdir(), 'granite-vitest-plugin-cache-')),
+    });
 
-    fs.writeFileSync(buttonPath, 'export default "ios";');
-    fs.writeFileSync(cardPath, 'export default "native";');
-    fs.writeFileSync(badgePath, 'export default "android";');
+    const resolvedReactNative = await runPluginResolveId(plugin, 'react-native');
+    const platformShim = await runPluginResolveId(plugin, 'react-native/Libraries/Utilities/Platform.js');
+    const platformFallback = await runPluginResolveId(plugin, './Platform', String(platformShim));
 
-    synthesizeDefaultPlatformFiles(temporaryRoot);
-
-    expect(fs.readFileSync(buttonFallbackPath, 'utf8')).toBe('export default "ios";');
-    expect(fs.readFileSync(cardFallbackPath, 'utf8')).toBe('export default "native";');
-    expect(fs.readFileSync(badgeFallbackPath, 'utf8')).toBe('export default "android";');
-  });
+    expect(String(resolvedReactNative)).toMatch(/[a-f0-9]+\.js$/);
+    expect(String(platformShim)).toMatch(/[a-f0-9]+\.js$/);
+    expect(String(platformFallback)).toMatch(/[a-f0-9]+\.js$/);
+    expect(platformFallback).not.toBe(platformShim);
+  }, 60_000);
 });

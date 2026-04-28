@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
-  buildReactNativeMirror,
+  buildReactNativeTransformCache,
   GRANITE_VITEST_RN_CACHE_DIRECTORY,
   GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
 } from './reactNative';
@@ -13,21 +13,21 @@ describe('reactNativeRuntime bootstrap', () => {
   let RendererProxy: Record<string, any>;
   const runtimeGlobals = globalThis as typeof globalThis & {
     __DEV__?: boolean;
-    __GRANITE_VITEST_RN_CACHE_ROOT__?: string;
+    __GRANITE_VITEST_RN_CACHE_MANIFEST__?: string;
     IS_REACT_ACT_ENVIRONMENT?: boolean;
     IS_REACT_NATIVE_TEST_ENVIRONMENT?: boolean;
     ErrorUtils?: Record<string, unknown>;
     nativeFabricUIManager?: Record<string, unknown>;
     window?: typeof globalThis;
   };
-  const originalMirrorRoot = runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__;
+  const originalManifestPath = runtimeGlobals.__GRANITE_VITEST_RN_CACHE_MANIFEST__;
   const originalErrorUtils = runtimeGlobals.ErrorUtils;
 
   afterAll(() => {
-    if (originalMirrorRoot == null) {
-      delete runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__;
+    if (originalManifestPath == null) {
+      delete runtimeGlobals.__GRANITE_VITEST_RN_CACHE_MANIFEST__;
     } else {
-      runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__ = originalMirrorRoot;
+      runtimeGlobals.__GRANITE_VITEST_RN_CACHE_MANIFEST__ = originalManifestPath;
     }
 
     if (originalErrorUtils == null) {
@@ -38,19 +38,19 @@ describe('reactNativeRuntime bootstrap', () => {
   });
 
   it('fails fast when reactNative() did not configure the mirror cache root', async () => {
-    delete runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__;
+    delete runtimeGlobals.__GRANITE_VITEST_RN_CACHE_MANIFEST__;
     vi.resetModules();
 
     await expect(import('./reactNativeRuntime')).rejects.toThrow(
-      'reactNativeRuntime requires reactNative() in vitest.config',
+      'reactNativeRuntime requires reactNative() in vitest.config'
     );
   });
 
   describe('with a configured mirror cache root', () => {
     beforeAll(async () => {
-      const mirrorRoot = await buildReactNativeMirror(process.cwd());
+      const cache = await buildReactNativeTransformCache(process.cwd());
 
-      runtimeGlobals.__GRANITE_VITEST_RN_CACHE_ROOT__ = mirrorRoot;
+      runtimeGlobals.__GRANITE_VITEST_RN_CACHE_MANIFEST__ = cache.manifestPath;
       vi.resetModules();
 
       await import('./reactNativeRuntime');
@@ -98,7 +98,7 @@ describe('reactNativeRuntime bootstrap', () => {
           onBlur: () => undefined,
           onPress: () => undefined,
           unstable_pressDelay: 10,
-        }),
+        })
       ).toEqual({
         onBlur: expect.any(Function),
         onPress: expect.any(Function),
@@ -127,22 +127,26 @@ describe('reactNativeRuntime bootstrap', () => {
     });
 
     it('does not treat an existing mirror cache entry as the source package roots', async () => {
-      const resolvedCacheDir = fs.mkdtempSync(
-        path.join(os.tmpdir(), 'granite-vitest-runtime-cache-'),
-      );
-      const mirrorRoot = await buildReactNativeMirror(process.cwd(), resolvedCacheDir);
-      const metadataPath = path.join(path.dirname(mirrorRoot), 'meta.json');
+      const resolvedCacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'granite-vitest-runtime-cache-'));
+      const cache = await buildReactNativeTransformCache(process.cwd(), resolvedCacheDir);
+      const metadataPath = path.join(cache.entryRoot, 'meta.json');
       const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8')) as {
         packageRoots: string[];
       };
-      const cacheEntriesPath = path.join(
-        GRANITE_VITEST_RN_CACHE_DIRECTORY,
-        GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY,
-      );
+      const cacheEntriesPath = path.join(GRANITE_VITEST_RN_CACHE_DIRECTORY, GRANITE_VITEST_RN_CACHE_ENTRIES_DIRECTORY);
 
-      expect(metadata.packageRoots).toEqual(
-        expect.not.arrayContaining([expect.stringContaining(cacheEntriesPath)]),
-      );
+      expect(metadata.packageRoots).toEqual(expect.not.arrayContaining([expect.stringContaining(cacheEntriesPath)]));
+    });
+
+    it('stores transformed React Native files without package boundaries', async () => {
+      const resolvedCacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'granite-vitest-runtime-cache-'));
+      const cache = await buildReactNativeTransformCache(process.cwd(), resolvedCacheDir);
+      const cacheEntryBasenames = fs
+        .readdirSync(cache.entryRoot, { recursive: true })
+        .map((entry) => path.basename(String(entry)));
+
+      expect(cacheEntryBasenames).not.toContain('packages');
+      expect(cacheEntryBasenames).not.toContain('package.json');
     });
   });
 });

@@ -7,6 +7,11 @@ import type { ReactNode } from 'react';
 import { vi } from 'vitest';
 import { REACT_NATIVE_ASSET_MODULE_ID_PATTERN } from './assets';
 import {
+  loadReactNativeTransformCacheManifest,
+  resolveReactNativeModuleFromManifest,
+  type ReactNativeTransformCacheManifest,
+} from './mirror';
+import {
   defineGlobalProperty,
   installNativeModuleProxy,
   installReactNativeGlobals,
@@ -15,12 +20,7 @@ import {
 
 type ModuleWithPrivateResolver = typeof Module & {
   _load: (request: string, parent: any, isMain: boolean) => unknown;
-  _resolveFilename: (
-    request: string,
-    parent: any,
-    isMain: boolean,
-    options?: Record<string, unknown>,
-  ) => string;
+  _resolveFilename: (request: string, parent: any, isMain: boolean, options?: Record<string, unknown>) => string;
 };
 
 type ReactModule = typeof import('react');
@@ -29,20 +29,34 @@ const runtimeGlobals = globalThis as RuntimeGlobals;
 const runtimeDirectory = path.dirname(fileURLToPath(import.meta.url));
 const runtimeRequire = createRequire(import.meta.url);
 
-function resolveReactNativeMirrorRoot() {
+function resolveReactNativeManifestPath() {
   if (
-    typeof globalThis.__GRANITE_VITEST_RN_CACHE_ROOT__ === 'string' &&
-    globalThis.__GRANITE_VITEST_RN_CACHE_ROOT__.length > 0
+    typeof globalThis.__GRANITE_VITEST_RN_CACHE_MANIFEST__ === 'string' &&
+    globalThis.__GRANITE_VITEST_RN_CACHE_MANIFEST__.length > 0
   ) {
-    return path.resolve(globalThis.__GRANITE_VITEST_RN_CACHE_ROOT__);
+    return path.resolve(globalThis.__GRANITE_VITEST_RN_CACHE_MANIFEST__);
   }
 
   throw new Error(
-    '[@granite-js/vitest] reactNativeRuntime requires reactNative() in vitest.config to set __GRANITE_VITEST_RN_CACHE_ROOT__.',
+    '[@granite-js/vitest] reactNativeRuntime requires reactNative() in vitest.config to set __GRANITE_VITEST_RN_CACHE_MANIFEST__.'
   );
 }
 
-const reactNativeMirrorRoot = resolveReactNativeMirrorRoot();
+const reactNativeTransformCacheManifest = loadReactNativeTransformCacheManifest(resolveReactNativeManifestPath());
+
+function resolveReactNativeObjectPath(
+  request: string,
+  importer?: string,
+  manifest: ReactNativeTransformCacheManifest = reactNativeTransformCacheManifest
+) {
+  const resolved = resolveReactNativeModuleFromManifest(request, importer, manifest);
+
+  if (resolved == null) {
+    throw new Error(`[@granite-js/vitest] Failed to resolve React Native module: ${request}`);
+  }
+
+  return resolved.objectPath;
+}
 
 let nextNativeTag = 1;
 
@@ -62,7 +76,7 @@ function createMockHostComponent(
   displayName: string,
   hostType: string,
   instanceMethods: Record<string, unknown> = {},
-  realComponent?: any,
+  realComponent?: any
 ): any {
   const resolvedRealComponent = realComponent ?? null;
   const superClass =
@@ -311,7 +325,7 @@ function createScrollViewMockModule(sharedView?: unknown) {
         RCTScrollView,
         props as any,
         props.refreshControl,
-        React.createElement(View, null, props.children),
+        React.createElement(View, null, props.children)
       );
     }
   }
@@ -384,26 +398,25 @@ function createUseColorSchemeMockModule() {
 }
 
 function createPlatformMockModule() {
-  const platformConstants =
-    runtimeGlobals.nativeModuleProxy?.PlatformConstants?.getConstants?.() ?? {
-      forceTouchAvailable: false,
-      interfaceIdiom: 'phone',
-      isDisableAnimations: false,
-      isMacCatalyst: false,
-      isTesting: true,
-      osVersion: '17.0',
-      reactNativeVersion: {
-        major: 0,
-        minor: 79,
-        patch: 5,
-        prerelease: undefined,
-      },
-      systemName: 'iOS',
-    };
+  const platformConstants = runtimeGlobals.nativeModuleProxy?.PlatformConstants?.getConstants?.() ?? {
+    forceTouchAvailable: false,
+    interfaceIdiom: 'phone',
+    isDisableAnimations: false,
+    isMacCatalyst: false,
+    isTesting: true,
+    osVersion: '17.0',
+    reactNativeVersion: {
+      major: 0,
+      minor: 79,
+      patch: 5,
+      prerelease: undefined,
+    },
+    systemName: 'iOS',
+  };
 
   const platform = {
     OS: 'ios',
-    select: <T,>(spec: { default?: T; ios?: T; native?: T }) =>
+    select: <T>(spec: { default?: T; ios?: T; native?: T }) =>
       'ios' in spec ? spec.ios : 'native' in spec ? spec.native : spec.default,
     get Version() {
       return platformConstants.osVersion;
@@ -528,9 +541,7 @@ function createRendererProxyMockModule() {
     isProfilingRenderer: vi.fn(() => false),
     renderElement: vi.fn(),
     sendAccessibilityEvent: vi.fn(),
-    unstable_batchedUpdates: vi.fn(<T>(callback: (...args: any[]) => T, ...args: any[]) =>
-      callback(...args),
-    ),
+    unstable_batchedUpdates: vi.fn(<T>(callback: (...args: any[]) => T, ...args: any[]) => callback(...args)),
     unmountComponentAtNodeAndRemoveContainer: vi.fn(),
   };
 
@@ -557,11 +568,9 @@ function createNativeModulesMockModule() {
 
 function createNativeComponentRegistryMockModule() {
   const registry = {
-    get: vi.fn((name: string) =>
-      createMockNativeComponent(runtimeRequire('react') as ReactModule, name),
-    ),
+    get: vi.fn((name: string) => createMockNativeComponent(runtimeRequire('react') as ReactModule, name)),
     getWithFallback_DEPRECATED: vi.fn((name: string) =>
-      createMockNativeComponent(runtimeRequire('react') as ReactModule, name),
+      createMockNativeComponent(runtimeRequire('react') as ReactModule, name)
     ),
     setRuntimeConfigProvider: vi.fn(),
     unstable_hasStaticViewConfig: vi.fn(() => false),
@@ -577,9 +586,7 @@ function createNativeComponentRegistryMockModule() {
 function createRequireNativeComponentMockModule() {
   return {
     __esModule: true,
-    default: vi.fn((name: string) =>
-      createMockNativeComponent(runtimeRequire('react') as ReactModule, name),
-    ),
+    default: vi.fn((name: string) => createMockNativeComponent(runtimeRequire('react') as ReactModule, name)),
   };
 }
 
@@ -591,20 +598,15 @@ function createCodegenNativeComponentMockModule() {
         interfaceOnly?: boolean;
         paperComponentName?: string;
         paperComponentNameDeprecated?: string;
-      },
+      }
     ) => {
       const { requireNativeComponentModule, uiManagerModule } = getSharedReactNativeMockModules();
-      const requireNativeComponent =
-        (requireNativeComponentModule as any).default ?? requireNativeComponentModule;
+      const requireNativeComponent = (requireNativeComponentModule as any).default ?? requireNativeComponentModule;
       const uiManager = (uiManagerModule as any).default ?? uiManagerModule;
 
-      let componentNameInUse =
-        options?.paperComponentName != null ? options.paperComponentName : componentName;
+      let componentNameInUse = options?.paperComponentName != null ? options.paperComponentName : componentName;
 
-      if (
-        options?.paperComponentNameDeprecated != null &&
-        typeof uiManager?.hasViewManagerConfig === 'function'
-      ) {
+      if (options?.paperComponentNameDeprecated != null && typeof uiManager?.hasViewManagerConfig === 'function') {
         if (uiManager.hasViewManagerConfig(componentName)) {
           componentNameInUse = componentName;
         } else if (uiManager.hasViewManagerConfig(options.paperComponentNameDeprecated)) {
@@ -613,7 +615,7 @@ function createCodegenNativeComponentMockModule() {
       }
 
       return requireNativeComponent(componentNameInUse);
-    },
+    }
   );
 
   return {
@@ -623,23 +625,19 @@ function createCodegenNativeComponentMockModule() {
 }
 
 function createCodegenNativeCommandsMockModule() {
-  const codegenNativeCommands = vi.fn(
-    (options: {
-      supportedCommands?: string[];
-    }) => {
-      const { rendererProxyModule } = getSharedReactNativeMockModules();
-      const rendererProxy = (rendererProxyModule as any).default ?? rendererProxyModule;
-      const commandObject: Record<string, ReturnType<typeof vi.fn>> = {};
+  const codegenNativeCommands = vi.fn((options: { supportedCommands?: string[] }) => {
+    const { rendererProxyModule } = getSharedReactNativeMockModules();
+    const rendererProxy = (rendererProxyModule as any).default ?? rendererProxyModule;
+    const commandObject: Record<string, ReturnType<typeof vi.fn>> = {};
 
-      for (const command of options.supportedCommands ?? []) {
-        commandObject[command] = vi.fn((ref: unknown, ...args: unknown[]) => {
-          rendererProxy.dispatchCommand(ref, command, args);
-        });
-      }
+    for (const command of options.supportedCommands ?? []) {
+      commandObject[command] = vi.fn((ref: unknown, ...args: unknown[]) => {
+        rendererProxy.dispatchCommand(ref, command, args);
+      });
+    }
 
-      return commandObject;
-    },
-  );
+    return commandObject;
+  });
 
   return {
     __esModule: true,
@@ -755,21 +753,20 @@ function getSharedReactNativeExports() {
     viewNativeComponentModule,
   } = getSharedReactNativeMockModules();
 
-  const initialDimensions =
-    runtimeGlobals.nativeModuleProxy?.DeviceInfo?.getConstants?.().Dimensions ?? {
-      screen: {
-        fontScale: 2,
-        height: 1334,
-        scale: 2,
-        width: 750,
-      },
-      window: {
-        fontScale: 2,
-        height: 1334,
-        scale: 2,
-        width: 750,
-      },
-    };
+  const initialDimensions = runtimeGlobals.nativeModuleProxy?.DeviceInfo?.getConstants?.().Dimensions ?? {
+    screen: {
+      fontScale: 2,
+      height: 1334,
+      scale: 2,
+      width: 750,
+    },
+    window: {
+      fontScale: 2,
+      height: 1334,
+      scale: 2,
+      width: 750,
+    },
+  };
   let dimensionsState = initialDimensions;
   const dimensionListeners = new Set<(payload: typeof initialDimensions) => void>();
   const Dimensions = {
@@ -830,24 +827,19 @@ function getSharedReactNativeExports() {
     onFastRefresh: vi.fn(),
     reload: vi.fn(),
   };
-  const i18nConstants =
-    runtimeGlobals.nativeModuleProxy?.I18nManager?.getConstants?.() ?? {
-      doLeftAndRightSwapInRTL: true,
-      isRTL: false,
-      localeIdentifier: 'en_US',
-    };
+  const i18nConstants = runtimeGlobals.nativeModuleProxy?.I18nManager?.getConstants?.() ?? {
+    doLeftAndRightSwapInRTL: true,
+    isRTL: false,
+    localeIdentifier: 'en_US',
+  };
   const I18nManager = {
-    allowRTL: vi.fn((shouldAllow: boolean) =>
-      runtimeGlobals.nativeModuleProxy?.I18nManager?.allowRTL?.(shouldAllow),
-    ),
+    allowRTL: vi.fn((shouldAllow: boolean) => runtimeGlobals.nativeModuleProxy?.I18nManager?.allowRTL?.(shouldAllow)),
     doLeftAndRightSwapInRTL: i18nConstants.doLeftAndRightSwapInRTL,
-    forceRTL: vi.fn((shouldForce: boolean) =>
-      runtimeGlobals.nativeModuleProxy?.I18nManager?.forceRTL?.(shouldForce),
-    ),
+    forceRTL: vi.fn((shouldForce: boolean) => runtimeGlobals.nativeModuleProxy?.I18nManager?.forceRTL?.(shouldForce)),
     getConstants: vi.fn(() => i18nConstants),
     isRTL: i18nConstants.isRTL,
     swapLeftAndRightInRTL: vi.fn((shouldSwap: boolean) =>
-      runtimeGlobals.nativeModuleProxy?.I18nManager?.swapLeftAndRightInRTL?.(shouldSwap),
+      runtimeGlobals.nativeModuleProxy?.I18nManager?.swapLeftAndRightInRTL?.(shouldSwap)
     ),
   };
   const PlatformColor = (...names: string[]) => ({ semantic: names });
@@ -866,18 +858,15 @@ function getSharedReactNativeExports() {
   };
   const ActionSheetIOS = {
     dismissActionSheet: vi.fn(),
-    showActionSheetWithOptions: vi.fn(
-      (
-        _options: Record<string, unknown>,
-        callback: (buttonIndex: number) => void,
-      ) => callback(0),
+    showActionSheetWithOptions: vi.fn((_options: Record<string, unknown>, callback: (buttonIndex: number) => void) =>
+      callback(0)
     ),
     showShareActionSheetWithOptions: vi.fn(
       (
         _options: Record<string, unknown>,
         _failureCallback: (error: unknown) => void,
-        successCallback: (success: boolean, method: string | null) => void,
-      ) => successCallback(true, null),
+        successCallback: (success: boolean, method: string | null) => void
+      ) => successCallback(true, null)
     ),
   };
   const Alert = {
@@ -901,14 +890,12 @@ function getSharedReactNativeExports() {
   };
   const backPressSubscriptions = new Set<() => boolean | null | undefined>();
   const BackHandler = {
-    addEventListener: vi.fn(
-      (_eventName: string, handler: () => boolean | null | undefined) => {
-        backPressSubscriptions.add(handler);
-        return {
-          remove: () => backPressSubscriptions.delete(handler),
-        };
-      },
-    ),
+    addEventListener: vi.fn((_eventName: string, handler: () => boolean | null | undefined) => {
+      backPressSubscriptions.add(handler);
+      return {
+        remove: () => backPressSubscriptions.delete(handler),
+      };
+    }),
     exitApp: vi.fn(),
   };
   const DeviceEventEmitter = createEventEmitter();
@@ -923,9 +910,7 @@ function getSharedReactNativeExports() {
   const PixelRatio = {
     get: vi.fn(() => Dimensions.get('window').scale),
     getFontScale: vi.fn(() => Dimensions.get('window').fontScale || Dimensions.get('window').scale),
-    getPixelSizeForLayoutSize: vi.fn((layoutSize: number) =>
-      Math.round(layoutSize * Dimensions.get('window').scale),
-    ),
+    getPixelSizeForLayoutSize: vi.fn((layoutSize: number) => Math.round(layoutSize * Dimensions.get('window').scale)),
     roundToNearestPixel: vi.fn((layoutSize: number) => {
       const ratio = Dimensions.get('window').scale;
       return Math.round(layoutSize * ratio) / ratio;
@@ -970,21 +955,14 @@ function getSharedReactNativeExports() {
     })),
     sharedAction: 'sharedAction',
   };
-  const callableModules =
-    runtimeGlobals.__rntlCallableModules ?? {
-      callable: {},
-      lazy: {},
-    };
+  const callableModules = runtimeGlobals.__rntlCallableModules ?? {
+    callable: {},
+    lazy: {},
+  };
   defineGlobalProperty(runtimeGlobals, '__rntlCallableModules', callableModules);
   const registerCallableModule = vi.fn(
-    (
-      name: string,
-      moduleOrFactory: Record<string, unknown> | (() => Record<string, unknown>),
-    ) => {
-      if (
-        runtimeGlobals.RN$Bridgeless === true &&
-        typeof runtimeGlobals.RN$registerCallableModule === 'function'
-      ) {
+    (name: string, moduleOrFactory: Record<string, unknown> | (() => Record<string, unknown>)) => {
+      if (runtimeGlobals.RN$Bridgeless === true && typeof runtimeGlobals.RN$registerCallableModule === 'function') {
         if (typeof moduleOrFactory === 'function') {
           runtimeGlobals.RN$registerCallableModule(name, moduleOrFactory);
           return;
@@ -1002,7 +980,7 @@ function getSharedReactNativeExports() {
 
       callableModules.callable[name] = moduleOrFactory;
       delete callableModules.lazy[name];
-    },
+    }
   );
   const Button = ({
     accessibilityState,
@@ -1025,11 +1003,7 @@ function getSharedReactNativeExports() {
         },
         accessible: props.accessible ?? true,
       } as any,
-      React.createElement(
-        'Text',
-        null,
-        (platformModule as any).default?.OS === 'android' ? title.toUpperCase() : title,
-      ),
+      React.createElement('Text', null, (platformModule as any).default?.OS === 'android' ? title.toUpperCase() : title)
     );
   Button.displayName = 'Button';
   class DrawerLayoutAndroid extends React.Component<Record<string, unknown>> {
@@ -1076,7 +1050,11 @@ function getSharedReactNativeExports() {
       const { data, keyExtractor, renderItem, ...props } = this.props as Record<string, unknown> & {
         data?: any[];
         keyExtractor?: (item: any, index: number) => string;
-        renderItem?: (info: { item: any; index: number; separators: ReturnType<typeof createListSeparators> }) => ReactNode;
+        renderItem?: (info: {
+          item: any;
+          index: number;
+          separators: ReturnType<typeof createListSeparators>;
+        }) => ReactNode;
       };
       const ScrollViewComponent = (scrollViewModule as any).default ?? scrollViewModule;
       const items = Array.isArray(data) ? data : [];
@@ -1092,9 +1070,9 @@ function getSharedReactNativeExports() {
               index,
               item,
               separators: createListSeparators(),
-            }),
-          ),
-        ),
+            })
+          )
+        )
       );
     }
   }
@@ -1121,13 +1099,7 @@ function getSharedReactNativeExports() {
     };
 
     render(): ReactNode {
-      const {
-        data,
-        getItem,
-        getItemCount,
-        renderItem,
-        ...props
-      } = this.props as Record<string, unknown> & {
+      const { data, getItem, getItemCount, renderItem, ...props } = this.props as Record<string, unknown> & {
         data?: unknown;
         getItem?: (data: unknown, index: number) => any;
         getItemCount?: (data: unknown) => number;
@@ -1153,9 +1125,9 @@ function getSharedReactNativeExports() {
               index,
               item,
               separators: createListSeparators(),
-            }),
+            })
           );
-        }),
+        })
       );
     }
   }
@@ -1172,9 +1144,7 @@ function getSharedReactNativeExports() {
       this.viewRef?.setNativeProps?.(props);
     });
 
-    private captureViewRef = (
-      ref: { setNativeProps?: (props: Record<string, unknown>) => void } | null,
-    ) => {
+    private captureViewRef = (ref: { setNativeProps?: (props: Record<string, unknown>) => void } | null) => {
       this.viewRef = ref;
     };
 
@@ -1199,7 +1169,7 @@ function getSharedReactNativeExports() {
           ref: imageRef,
           style: imageStyle,
         }),
-        children,
+        children
       );
     }
   }
@@ -1209,10 +1179,7 @@ function getSharedReactNativeExports() {
     value: 'ImageBackground',
     writable: true,
   });
-  const InputAccessoryView = ({
-    children,
-    ...props
-  }: Record<string, unknown> & { children?: ReactNode }) => {
+  const InputAccessoryView = ({ children, ...props }: Record<string, unknown> & { children?: ReactNode }) => {
     if (React.Children.count(children) === 0) {
       return null;
     }
@@ -1220,41 +1187,30 @@ function getSharedReactNativeExports() {
     return React.createElement('InputAccessoryView', props as any, children);
   };
   InputAccessoryView.displayName = 'InputAccessoryView';
-  const LayoutConformance = createMockHostComponent(
-    React,
-    'LayoutConformance',
-    'LayoutConformance',
-  );
+  const LayoutConformance = createMockHostComponent(React, 'LayoutConformance', 'LayoutConformance');
   const KeyboardAvoidingView = createMockHostComponent(
     React,
     'KeyboardAvoidingView',
     'KeyboardAvoidingView',
-    createMockNativeMethods(),
+    createMockNativeMethods()
   );
-  const ProgressBarAndroid = createMockHostComponent(
-    React,
-    'ProgressBarAndroid',
-    'ProgressBarAndroid',
-  );
+  const ProgressBarAndroid = createMockHostComponent(React, 'ProgressBarAndroid', 'ProgressBarAndroid');
   class StatusBar extends React.Component<Record<string, unknown>> {
-    static currentHeight =
-      runtimeGlobals.nativeModuleProxy?.StatusBarManager?.getConstants?.().HEIGHT ?? 0;
+    static currentHeight = runtimeGlobals.nativeModuleProxy?.StatusBarManager?.getConstants?.().HEIGHT ?? 0;
     static setBackgroundColor = vi.fn((color: string, animated?: boolean) =>
-      runtimeGlobals.nativeModuleProxy?.StatusBarManager?.setBackgroundColor?.(color, animated),
+      runtimeGlobals.nativeModuleProxy?.StatusBarManager?.setBackgroundColor?.(color, animated)
     );
     static setBarStyle = vi.fn((style: string, animated?: boolean) =>
-      runtimeGlobals.nativeModuleProxy?.StatusBarManager?.setStyle?.(style, animated),
+      runtimeGlobals.nativeModuleProxy?.StatusBarManager?.setStyle?.(style, animated)
     );
     static setHidden = vi.fn((hidden: boolean, animation?: string) =>
-      runtimeGlobals.nativeModuleProxy?.StatusBarManager?.setHidden?.(hidden, animation),
+      runtimeGlobals.nativeModuleProxy?.StatusBarManager?.setHidden?.(hidden, animation)
     );
     static setNetworkActivityIndicatorVisible = vi.fn((visible: boolean) =>
-      runtimeGlobals.nativeModuleProxy?.StatusBarManager?.setNetworkActivityIndicatorVisible?.(
-        visible,
-      ),
+      runtimeGlobals.nativeModuleProxy?.StatusBarManager?.setNetworkActivityIndicatorVisible?.(visible)
     );
     static setTranslucent = vi.fn((translucent: boolean) =>
-      runtimeGlobals.nativeModuleProxy?.StatusBarManager?.setTranslucent?.(translucent),
+      runtimeGlobals.nativeModuleProxy?.StatusBarManager?.setTranslucent?.(translucent)
     );
 
     render() {
@@ -1322,11 +1278,7 @@ function getSharedReactNativeExports() {
         }
 
         if (typeof config.appKey === 'string' && typeof config.component === 'function') {
-          AppRegistry.registerComponent(
-            config.appKey,
-            config.component as () => unknown,
-            Boolean(config.section),
-          );
+          AppRegistry.registerComponent(config.appKey, config.component as () => unknown, Boolean(config.section));
         }
       });
     }),
@@ -1341,20 +1293,25 @@ function getSharedReactNativeExports() {
     setWrapperComponentProvider: vi.fn(),
   };
   const Easing = {
-    back: vi.fn((s: number = 1.70158) => (t: number) => t * t * ((s + 1) * t - s)),
+    back: vi.fn(
+      (s: number = 1.70158) =>
+        (t: number) =>
+          t * t * ((s + 1) * t - s)
+    ),
     bezier: vi.fn(() => (t: number) => t),
     bounce: vi.fn((t: number) => t * t),
     circle: vi.fn((t: number) => 1 - Math.sqrt(1 - t * t)),
     cubic: vi.fn((t: number) => t * t * t),
     ease: vi.fn((t: number) => t * t * (3 - 2 * t)),
-    elastic: vi.fn((bounciness: number = 1) => (t: number) =>
-      1 - Math.pow(Math.cos((t * Math.PI) / 2), 3) * Math.cos(t * bounciness * Math.PI),
+    elastic: vi.fn(
+      (bounciness: number = 1) =>
+        (t: number) =>
+          1 - Math.pow(Math.cos((t * Math.PI) / 2), 3) * Math.cos(t * bounciness * Math.PI)
     ),
     exp: vi.fn((t: number) => Math.pow(2, 10 * (t - 1))),
     in: vi.fn((easing: (t: number) => number) => (t: number) => easing(t)),
     inOut: vi.fn(
-      (easing: (t: number) => number) => (t: number) =>
-        t < 0.5 ? easing(t * 2) / 2 : 1 - easing((1 - t) * 2) / 2,
+      (easing: (t: number) => number) => (t: number) => (t < 0.5 ? easing(t * 2) / 2 : 1 - easing((1 - t) * 2) / 2)
     ),
     linear: vi.fn((t: number) => t),
     out: vi.fn((easing: (t: number) => number) => (t: number) => 1 - easing(1 - t)),
@@ -1414,11 +1371,7 @@ function getSharedReactNativeExports() {
     scaleXY: 'scaleXY',
     scaleY: 'scaleY',
   };
-  const createLayoutAnimationConfig = (
-    duration: number,
-    type?: string,
-    property?: string,
-  ) => ({
+  const createLayoutAnimationConfig = (duration: number, type?: string, property?: string) => ({
     create: { property, type },
     delete: { property, type },
     duration,
@@ -1449,28 +1402,24 @@ function getSharedReactNativeExports() {
     Types: layoutAnimationTypes,
     checkConfig: vi.fn(),
     configureNext: vi.fn(
-      (
-        _config: Record<string, unknown>,
-        onAnimationDidEnd?: () => void,
-        _onAnimationDidFail?: () => void,
-      ) => {
+      (_config: Record<string, unknown>, onAnimationDidEnd?: () => void, _onAnimationDidFail?: () => void) => {
         if (layoutAnimationEnabled) {
           onAnimationDidEnd?.();
         }
-      },
+      }
     ),
     create: vi.fn(createLayoutAnimationConfig),
     easeInEaseOut: vi.fn((onAnimationDidEnd?: () => void) =>
-      LayoutAnimation.configureNext(layoutAnimationPresets.easeInEaseOut, onAnimationDidEnd),
+      LayoutAnimation.configureNext(layoutAnimationPresets.easeInEaseOut, onAnimationDidEnd)
     ),
     linear: vi.fn((onAnimationDidEnd?: () => void) =>
-      LayoutAnimation.configureNext(layoutAnimationPresets.linear, onAnimationDidEnd),
+      LayoutAnimation.configureNext(layoutAnimationPresets.linear, onAnimationDidEnd)
     ),
     setEnabled: vi.fn((value: boolean) => {
       layoutAnimationEnabled = value;
     }),
     spring: vi.fn((onAnimationDidEnd?: () => void) =>
-      LayoutAnimation.configureNext(layoutAnimationPresets.spring, onAnimationDidEnd),
+      LayoutAnimation.configureNext(layoutAnimationPresets.spring, onAnimationDidEnd)
     ),
   };
   const NativeDialogManagerAndroid = {
@@ -1485,8 +1434,8 @@ function getSharedReactNativeExports() {
       (
         _config: Record<string, unknown>,
         _onError: (message: string) => void,
-        onAction: (action: string, buttonKey: string) => void,
-      ) => onAction('buttonClicked', 'buttonPositive'),
+        onAction: (action: string, buttonKey: string) => void
+      ) => onAction('buttonClicked', 'buttonPositive')
     ),
   };
   const networkingEventEmitter = createEventEmitter();
@@ -1504,8 +1453,8 @@ function getSharedReactNativeExports() {
         _responseType: string,
         _incrementalUpdates: boolean,
         _timeout: number,
-        callback: (requestId: number) => void,
-      ) => callback(1),
+        callback: (requestId: number) => void
+      ) => callback(1)
     ),
   };
   const permissionsResults = {
@@ -1522,7 +1471,7 @@ function getSharedReactNativeExports() {
     check: vi.fn(async () => true),
     request: vi.fn(async () => permissionsResults.GRANTED),
     requestMultiple: vi.fn(async (requestedPermissions: string[]) =>
-      Object.fromEntries(requestedPermissions.map((permission) => [permission, permissionsResults.GRANTED])),
+      Object.fromEntries(requestedPermissions.map((permission) => [permission, permissionsResults.GRANTED]))
     ),
     shouldShowRequestPermissionRationale: vi.fn(async () => false),
   };
@@ -1551,12 +1500,10 @@ function getSharedReactNativeExports() {
       removeListeners?: (count: number) => void;
     };
 
-    constructor(
-      nativeModule?: {
-        addListener?: (eventType: string) => void;
-        removeListeners?: (count: number) => void;
-      },
-    ) {
+    constructor(nativeModule?: {
+      addListener?: (eventType: string) => void;
+      removeListeners?: (count: number) => void;
+    }) {
       if ((platformModule as any).default?.OS === 'ios' && nativeModule == null) {
         throw new Error('NativeEventEmitter requires a non-null argument.');
       }
@@ -1626,16 +1573,12 @@ function getSharedReactNativeExports() {
           onMoveShouldSetResponderCapture: (...args: any[]) =>
             callbacks.onMoveShouldSetPanResponderCapture?.(...args, gestureState) ?? false,
           onResponderEnd: (...args: any[]) => callbacks.onPanResponderEnd?.(...args, gestureState),
-          onResponderGrant: (...args: any[]) =>
-            callbacks.onPanResponderGrant?.(...args, gestureState) ?? false,
+          onResponderGrant: (...args: any[]) => callbacks.onPanResponderGrant?.(...args, gestureState) ?? false,
           onResponderMove: (...args: any[]) => callbacks.onPanResponderMove?.(...args, gestureState),
-          onResponderReject: (...args: any[]) =>
-            callbacks.onPanResponderReject?.(...args, gestureState),
-          onResponderRelease: (...args: any[]) =>
-            callbacks.onPanResponderRelease?.(...args, gestureState),
+          onResponderReject: (...args: any[]) => callbacks.onPanResponderReject?.(...args, gestureState),
+          onResponderRelease: (...args: any[]) => callbacks.onPanResponderRelease?.(...args, gestureState),
           onResponderStart: (...args: any[]) => callbacks.onPanResponderStart?.(...args, gestureState),
-          onResponderTerminate: (...args: any[]) =>
-            callbacks.onPanResponderTerminate?.(...args, gestureState),
+          onResponderTerminate: (...args: any[]) => callbacks.onPanResponderTerminate?.(...args, gestureState),
           onResponderTerminationRequest: (...args: any[]) =>
             callbacks.onPanResponderTerminationRequest?.(...args, gestureState) ?? true,
           onStartShouldSetResponder: (...args: any[]) =>
@@ -1651,14 +1594,12 @@ function getSharedReactNativeExports() {
     abandonPermissions: vi.fn(() => pushNotificationManager?.abandonPermissions?.()),
     addEventListener: vi.fn(),
     getApplicationIconBadgeNumber: vi.fn((callback: (badge: number) => void) =>
-      pushNotificationManager?.getApplicationIconBadgeNumber?.(callback),
+      pushNotificationManager?.getApplicationIconBadgeNumber?.(callback)
     ),
     presentLocalNotification: vi.fn((notification: Record<string, unknown>) =>
-      pushNotificationManager?.presentLocalNotification?.(notification),
+      pushNotificationManager?.presentLocalNotification?.(notification)
     ),
-    removeAllDeliveredNotifications: vi.fn(() =>
-      pushNotificationManager?.removeAllDeliveredNotifications?.(),
-    ),
+    removeAllDeliveredNotifications: vi.fn(() => pushNotificationManager?.removeAllDeliveredNotifications?.()),
     removeEventListener: vi.fn(),
     requestPermissions: vi.fn(() => pushNotificationManager?.requestPermissions?.()),
   };
@@ -1709,13 +1650,13 @@ function getSharedReactNativeExports() {
     };
 
     render(): ReactNode {
-      const {
-        renderItem,
-        renderSectionHeader,
-        sections,
-        ...props
-      } = this.props as Record<string, unknown> & {
-        renderItem?: (info: { index: number; item: any; section: Record<string, unknown>; separators: ReturnType<typeof createListSeparators> }) => ReactNode;
+      const { renderItem, renderSectionHeader, sections, ...props } = this.props as Record<string, unknown> & {
+        renderItem?: (info: {
+          index: number;
+          item: any;
+          section: Record<string, unknown>;
+          separators: ReturnType<typeof createListSeparators>;
+        }) => ReactNode;
         renderSectionHeader?: (info: { section: Record<string, unknown> }) => ReactNode;
         sections?: Array<Record<string, unknown> & { data?: any[] }>;
       };
@@ -1740,11 +1681,11 @@ function getSharedReactNativeExports() {
                   item,
                   section,
                   separators: createListSeparators(),
-                }),
-              ),
-            ),
-          ),
-        ),
+                })
+              )
+            )
+          )
+        )
       );
     }
   }
@@ -1769,12 +1710,7 @@ function getSharedReactNativeExports() {
   const sharedNativeMethods = createMockNativeMethods();
   const NativeText = createMockNativeComponent(React, 'RCTText');
   const SafeAreaView = createMockHostComponent(React, 'SafeAreaView', 'View', sharedNativeMethods);
-  const VirtualView = createMockHostComponent(
-    React,
-    'VirtualView',
-    'VirtualView',
-    sharedNativeMethods,
-  );
+  const VirtualView = createMockHostComponent(React, 'VirtualView', 'VirtualView', sharedNativeMethods);
   const VirtualViewMode = Object.freeze({
     Hidden: 2,
     Prerender: 1,
@@ -1857,12 +1793,9 @@ function getSharedReactNativeExports() {
 
   const createAnimatedNode = (initialValue: any) => new AnimatedNode(initialValue);
 
-  const toAnimatedValue = (value: unknown) =>
-    value instanceof AnimatedNode ? value.__getValue() : value;
+  const toAnimatedValue = (value: unknown) => (value instanceof AnimatedNode ? value.__getValue() : value);
 
-  const createAnimation = (
-    startImpl: (callback?: (result: { finished: boolean }) => void) => void,
-  ) => ({
+  const createAnimation = (startImpl: (callback?: (result: { finished: boolean }) => void) => void) => ({
     reset: vi.fn(),
     start: (callback?: (result: { finished: boolean }) => void) => {
       startImpl(callback);
@@ -1874,7 +1807,7 @@ function getSharedReactNativeExports() {
     value: AnimatedValue,
     nextValue: number,
     duration: number | undefined,
-    callback?: (result: { finished: boolean }) => void,
+    callback?: (result: { finished: boolean }) => void
   ) => {
     setTimeout(() => {
       value.setValue(nextValue);
@@ -1892,9 +1825,7 @@ function getSharedReactNativeExports() {
     }
 
     if (style && typeof style === 'object') {
-      return Object.fromEntries(
-        Object.entries(style).map(([key, value]) => [key, resolveAnimatedStyle(value)]),
-      );
+      return Object.fromEntries(Object.entries(style).map(([key, value]) => [key, resolveAnimatedStyle(value)]));
     }
 
     return style;
@@ -1955,7 +1886,7 @@ function getSharedReactNativeExports() {
       return React.createElement(
         'View',
         { ...(this.props as any), style: resolvedStyle },
-        (this.props as any).children,
+        (this.props as any).children
       );
     }
   }
@@ -1969,7 +1900,7 @@ function getSharedReactNativeExports() {
       config?: {
         listener?: (...args: any[]) => void;
         useNativeDriver?: boolean;
-      },
+      }
     ) {
       this.__isNative = Boolean(config?.useNativeDriver);
       this.handler = (...args: any[]) => {
@@ -1981,7 +1912,7 @@ function getSharedReactNativeExports() {
   const createAnimatedComputation = (value: unknown) => createAnimatedNode(value);
   const createCombinedHandler = (
     baseHandler: ((...args: any[]) => void) | undefined,
-    nextHandler: ((...args: any[]) => void) | undefined,
+    nextHandler: ((...args: any[]) => void) | undefined
   ) =>
     Object.assign(
       (...args: any[]) => {
@@ -1991,7 +1922,7 @@ function getSharedReactNativeExports() {
       {
         __rntlBaseHandler: baseHandler,
         __rntlExtraHandler: nextHandler,
-      },
+      }
     );
 
   const Animated = {
@@ -2007,24 +1938,17 @@ function getSharedReactNativeExports() {
       detach: vi.fn(),
     })),
     View: AnimatedView,
-    createAnimatedComponent: <T,>(component: T) => component,
+    createAnimatedComponent: <T>(component: T) => component,
     decay: (value: AnimatedValue, config: { velocity?: number }) =>
       createAnimation((callback) =>
-        runValueAnimation(
-          value,
-          value.__getValue() + Number(config.velocity ?? 0),
-          0,
-          callback,
-        ),
+        runValueAnimation(value, value.__getValue() + Number(config.velocity ?? 0), 0, callback)
       ),
     delay: (duration: number) =>
       createAnimation((callback) => {
         setTimeout(() => callback?.({ finished: true }), duration);
       }),
     diffClamp: (value: unknown, min: number, max: number) =>
-      createAnimatedComputation(
-        Math.max(min, Math.min(max, Number(toAnimatedValue(value)))),
-      ),
+      createAnimatedComputation(Math.max(min, Math.min(max, Number(toAnimatedValue(value))))),
     divide: (left: unknown, right: unknown) =>
       createAnimatedComputation(Number(toAnimatedValue(left)) / Number(toAnimatedValue(right))),
     event: (
@@ -2032,15 +1956,17 @@ function getSharedReactNativeExports() {
       config?: {
         listener?: (...args: any[]) => void;
         useNativeDriver?: boolean;
-      },
+      }
     ) => new AnimatedEvent(argMapping, config).handler,
-    forkEvent: (
-      event: ((...args: any[]) => void) | undefined,
-      listener: ((...args: any[]) => void) | undefined,
-    ) => createCombinedHandler(event, listener),
+    forkEvent: (event: ((...args: any[]) => void) | undefined, listener: ((...args: any[]) => void) | undefined) =>
+      createCombinedHandler(event, listener),
     loop: (
-      animation: { start: (callback?: (result: { finished: boolean }) => void) => void; stop: () => void; reset?: () => void },
-      config?: { iterations?: number },
+      animation: {
+        start: (callback?: (result: { finished: boolean }) => void) => void;
+        stop: () => void;
+        reset?: () => void;
+      },
+      config?: { iterations?: number }
     ) =>
       createAnimation((callback) => {
         const iterations = config?.iterations ?? -1;
@@ -2069,7 +1995,7 @@ function getSharedReactNativeExports() {
         start: (callback?: (result: { finished: boolean }) => void) => void;
         stop: () => void;
         reset?: () => void;
-      }>,
+      }>
     ) =>
       createAnimation((callback) => {
         if (animations.length === 0) {
@@ -2092,7 +2018,7 @@ function getSharedReactNativeExports() {
         start: (callback?: (result: { finished: boolean }) => void) => void;
         stop: () => void;
         reset?: () => void;
-      }>,
+      }>
     ) =>
       createAnimation((callback) => {
         let index = 0;
@@ -2110,20 +2036,15 @@ function getSharedReactNativeExports() {
 
         run();
       }),
-    spring: (
-      value: AnimatedValue,
-      config: { toValue: number; useNativeDriver?: boolean },
-    ) =>
-      createAnimation((callback) =>
-        runValueAnimation(value, config.toValue, 0, callback),
-      ),
+    spring: (value: AnimatedValue, config: { toValue: number; useNativeDriver?: boolean }) =>
+      createAnimation((callback) => runValueAnimation(value, config.toValue, 0, callback)),
     stagger: (
       time: number,
       animations: Array<{
         start: (callback?: (result: { finished: boolean }) => void) => void;
         stop: () => void;
         reset?: () => void;
-      }>,
+      }>
     ) =>
       createAnimation((callback) => {
         if (animations.length === 0) {
@@ -2145,16 +2066,11 @@ function getSharedReactNativeExports() {
       }),
     subtract: (left: unknown, right: unknown) =>
       createAnimatedComputation(Number(toAnimatedValue(left)) - Number(toAnimatedValue(right))),
-    timing: (
-      value: AnimatedValue,
-      config: { duration?: number; toValue: number; useNativeDriver?: boolean },
-    ) =>
-      createAnimation((callback) =>
-        runValueAnimation(value, config.toValue, config.duration, callback),
-      ),
+    timing: (value: AnimatedValue, config: { duration?: number; toValue: number; useNativeDriver?: boolean }) =>
+      createAnimation((callback) => runValueAnimation(value, config.toValue, config.duration, callback)),
     unforkEvent: (
       event: ((...args: any[]) => void) & { __rntlBaseHandler?: (...args: any[]) => void },
-      _listener: ((...args: any[]) => void) | undefined,
+      _listener: ((...args: any[]) => void) | undefined
     ) => event.__rntlBaseHandler ?? event,
   };
   const useAnimatedValue = (initialValue: number) => {
@@ -2166,13 +2082,12 @@ function getSharedReactNativeExports() {
 
     return ref.current;
   };
-  const reactNativeVersion =
-    (platformModule as any).default?.constants?.reactNativeVersion ?? {
-      major: 0,
-      minor: 0,
-      patch: 0,
-      prerelease: null,
-    };
+  const reactNativeVersion = (platformModule as any).default?.constants?.reactNativeVersion ?? {
+    major: 0,
+    minor: 0,
+    patch: 0,
+    prerelease: null,
+  };
   class ReactNativeVersion {
     static major = reactNativeVersion.major ?? 0;
     static minor = reactNativeVersion.minor ?? 0;
@@ -2180,8 +2095,7 @@ function getSharedReactNativeExports() {
     static prerelease = reactNativeVersion.prerelease ?? null;
 
     static getVersionString() {
-      const prereleaseSuffix =
-        ReactNativeVersion.prerelease != null ? `-${ReactNativeVersion.prerelease}` : '';
+      const prereleaseSuffix = ReactNativeVersion.prerelease != null ? `-${ReactNativeVersion.prerelease}` : '';
       return `${ReactNativeVersion.major}.${ReactNativeVersion.minor}.${ReactNativeVersion.patch}${prereleaseSuffix}`;
     }
   }
@@ -2192,26 +2106,22 @@ function getSharedReactNativeExports() {
             [key: `on${string}`]: unknown;
           })
         | null
-        | undefined,
+        | undefined
     ) => {
       if (config == null) {
         return null;
       }
 
       return Object.fromEntries(
-        Object.entries(config).filter(
-          ([key, value]) => key.startsWith('on') && typeof value === 'function',
-        ),
+        Object.entries(config).filter(([key, value]) => key.startsWith('on') && typeof value === 'function')
       );
-    },
+    }
   );
 
   const reactNativeExports: Record<string, unknown> = {
     __esModule: true,
-    AccessibilityInfo:
-      (accessibilityInfoModule as any).default ?? accessibilityInfoModule,
-    ActivityIndicator:
-      (activityIndicatorModule as any).default ?? activityIndicatorModule,
+    AccessibilityInfo: (accessibilityInfoModule as any).default ?? accessibilityInfoModule,
+    ActivityIndicator: (activityIndicatorModule as any).default ?? activityIndicatorModule,
     ActionSheetIOS,
     Alert,
     Animated,
@@ -2221,10 +2131,8 @@ function getSharedReactNativeExports() {
     BackHandler,
     Button,
     Clipboard: (clipboardModule as any).default ?? clipboardModule,
-    codegenNativeCommands:
-      (codegenNativeCommandsModule as any).default ?? codegenNativeCommandsModule,
-    codegenNativeComponent:
-      (codegenNativeComponentModule as any).default ?? codegenNativeComponentModule,
+    codegenNativeCommands: (codegenNativeCommandsModule as any).default ?? codegenNativeCommandsModule,
+    codegenNativeComponent: (codegenNativeComponentModule as any).default ?? codegenNativeComponentModule,
     DevMenu,
     DevSettings,
     DeviceEventEmitter,
@@ -2245,8 +2153,7 @@ function getSharedReactNativeExports() {
     Linking: (linkingModule as any).default ?? linkingModule,
     LogBox,
     Modal: (modalModule as any).default ?? modalModule,
-    NativeComponentRegistry:
-      (nativeComponentRegistryModule as any).default ?? nativeComponentRegistryModule,
+    NativeComponentRegistry: (nativeComponentRegistryModule as any).default ?? nativeComponentRegistryModule,
     NativeDialogManagerAndroid,
     NativeEventEmitter,
     NativeModules: (nativeModulesModule as any).default ?? nativeModulesModule,
@@ -2264,8 +2171,7 @@ function getSharedReactNativeExports() {
     RefreshControl: (refreshControlModule as any).default ?? refreshControlModule,
     ReactNativeVersion,
     registerCallableModule,
-    requireNativeComponent:
-      (requireNativeComponentModule as any).default ?? requireNativeComponentModule,
+    requireNativeComponent: (requireNativeComponentModule as any).default ?? requireNativeComponentModule,
     RootTagContext,
     SafeAreaView,
     ScrollView: (scrollViewModule as any).default ?? scrollViewModule,
@@ -2288,8 +2194,7 @@ function getSharedReactNativeExports() {
     UTFSequence,
     unstable_batchedUpdates: (rendererProxyModule as any).unstable_batchedUpdates,
     unstable_NativeText: NativeText,
-    unstable_NativeView:
-      (viewNativeComponentModule as any).default ?? viewNativeComponentModule,
+    unstable_NativeView: (viewNativeComponentModule as any).default ?? viewNativeComponentModule,
     unstable_TextAncestorContext: TextAncestorContext,
     unstable_VirtualView: VirtualView,
     useAnimatedValue,
@@ -2349,86 +2254,74 @@ function getSharedReactNativeExports() {
 // the CommonJS loader patch uses below.
 vi.mock(
   'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo',
-  () => getSharedReactNativeMockModules().accessibilityInfoModule,
+  () => getSharedReactNativeMockModules().accessibilityInfoModule
 );
-vi.mock(
-  'react-native/Libraries/Core/InitializeCore',
-  () => getSharedReactNativeMockModules().initializeCoreModule,
-);
+vi.mock('react-native/Libraries/Core/InitializeCore', () => getSharedReactNativeMockModules().initializeCoreModule);
 vi.mock(
   'react-native/Libraries/Core/NativeExceptionsManager',
-  () => getSharedReactNativeMockModules().nativeExceptionsManagerModule,
+  () => getSharedReactNativeMockModules().nativeExceptionsManagerModule
 );
 vi.mock(
   'react-native/Libraries/Components/Clipboard/Clipboard',
-  () => getSharedReactNativeMockModules().clipboardModule,
+  () => getSharedReactNativeMockModules().clipboardModule
 );
 vi.mock(
   'react-native/Libraries/Utilities/codegenNativeCommands',
-  () => getSharedReactNativeMockModules().codegenNativeCommandsModule,
+  () => getSharedReactNativeMockModules().codegenNativeCommandsModule
 );
 vi.mock(
   'react-native/Libraries/Utilities/codegenNativeComponent',
-  () => getSharedReactNativeMockModules().codegenNativeComponentModule,
+  () => getSharedReactNativeMockModules().codegenNativeComponentModule
 );
 vi.mock(
   'react-native/Libraries/Components/RefreshControl/RefreshControl',
-  () => getSharedReactNativeMockModules().refreshControlModule,
+  () => getSharedReactNativeMockModules().refreshControlModule
 );
 vi.mock(
   'react-native/Libraries/Components/ActivityIndicator/ActivityIndicator',
-  () => getSharedReactNativeMockModules().activityIndicatorModule,
+  () => getSharedReactNativeMockModules().activityIndicatorModule
 );
 vi.mock('react-native/Libraries/Image/Image', () => getSharedReactNativeMockModules().imageModule);
 vi.mock('react-native/Libraries/Text/Text', () => getSharedReactNativeMockModules().textModule);
 vi.mock(
   'react-native/Libraries/Components/TextInput/TextInput',
-  () => getSharedReactNativeMockModules().textInputModule,
+  () => getSharedReactNativeMockModules().textInputModule
 );
 vi.mock('react-native/Libraries/Modal/Modal', () => getSharedReactNativeMockModules().modalModule);
 vi.mock('react-native/Libraries/Components/View/View', () => getSharedReactNativeMockModules().viewModule);
 vi.mock(
   'react-native/Libraries/Components/ScrollView/ScrollView',
-  () => getSharedReactNativeMockModules().scrollViewModule,
+  () => getSharedReactNativeMockModules().scrollViewModule
 );
 vi.mock(
   'react-native/Libraries/BatchedBridge/NativeModules',
-  () => getSharedReactNativeMockModules().nativeModulesModule,
+  () => getSharedReactNativeMockModules().nativeModulesModule
 );
-vi.mock(
-  'react-native/Libraries/ReactNative/UIManager',
-  () => getSharedReactNativeMockModules().uiManagerModule,
-);
+vi.mock('react-native/Libraries/ReactNative/UIManager', () => getSharedReactNativeMockModules().uiManagerModule);
 vi.mock('react-native/Libraries/AppState/AppState', () => getSharedReactNativeMockModules().appStateModule);
 vi.mock('react-native/Libraries/Linking/Linking', () => getSharedReactNativeMockModules().linkingModule);
 vi.mock('react-native/Libraries/Vibration/Vibration', () => getSharedReactNativeMockModules().vibrationModule);
 vi.mock(
   'react-native/Libraries/NativeComponent/NativeComponentRegistry',
-  () => getSharedReactNativeMockModules().nativeComponentRegistryModule,
+  () => getSharedReactNativeMockModules().nativeComponentRegistryModule
 );
 vi.mock(
   'react-native/Libraries/ReactNative/requireNativeComponent',
-  () => getSharedReactNativeMockModules().requireNativeComponentModule,
+  () => getSharedReactNativeMockModules().requireNativeComponentModule
 );
 vi.mock(
   'react-native/Libraries/Components/View/ViewNativeComponent',
-  () => getSharedReactNativeMockModules().viewNativeComponentModule,
+  () => getSharedReactNativeMockModules().viewNativeComponentModule
 );
-vi.mock(
-  'react-native/Libraries/StyleSheet/StyleSheet',
-  () => getSharedReactNativeMockModules().styleSheetModule,
-);
+vi.mock('react-native/Libraries/StyleSheet/StyleSheet', () => getSharedReactNativeMockModules().styleSheetModule);
 vi.mock(
   'react-native/Libraries/Utilities/useColorScheme',
-  () => getSharedReactNativeMockModules().useColorSchemeModule,
+  () => getSharedReactNativeMockModules().useColorSchemeModule
 );
-vi.mock(
-  'react-native/Libraries/Utilities/Platform',
-  () => getSharedReactNativeMockModules().platformModule,
-);
+vi.mock('react-native/Libraries/Utilities/Platform', () => getSharedReactNativeMockModules().platformModule);
 vi.mock(
   'react-native/Libraries/ReactNative/RendererProxy',
-  () => getSharedReactNativeMockModules().rendererProxyModule,
+  () => getSharedReactNativeMockModules().rendererProxyModule
 );
 
 // Yarn PnP: some consumers still reach RN through CommonJS `require()`, so
@@ -2442,251 +2335,100 @@ function patchReactNativeResolution() {
   const moduleWithPrivateResolver = Module as ModuleWithPrivateResolver;
   const originalResolveFilename = moduleWithPrivateResolver._resolveFilename;
   const originalLoad = moduleWithPrivateResolver._load;
-  const reactNativeIndexPath = path.join(reactNativeMirrorRoot, 'react-native', 'index.js');
-  const nativeComponentRegistryMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'NativeComponent',
-    'NativeComponentRegistry.js',
-  );
-  const requireNativeComponentMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'ReactNative',
-    'requireNativeComponent.js',
-  );
-  const initializeCoreMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Core',
-    'InitializeCore.js',
-  );
-  const nativeExceptionsManagerMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Core',
-    'NativeExceptionsManager.js',
-  );
-  const accessibilityInfoMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Components',
-    'AccessibilityInfo',
-    'AccessibilityInfo.js',
-  );
-  const clipboardMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Components',
-    'Clipboard',
-    'Clipboard.js',
-  );
-  const codegenNativeCommandsMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Utilities',
-    'codegenNativeCommands.js',
-  );
-  const codegenNativeComponentMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Utilities',
-    'codegenNativeComponent.js',
-  );
-  const refreshControlMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Components',
-    'RefreshControl',
-    'RefreshControl.js',
-  );
-  const activityIndicatorMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Components',
-    'ActivityIndicator',
-    'ActivityIndicator.js',
-  );
-  const imageMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Image',
-    'Image.js',
-  );
-  const textMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Text',
-    'Text.js',
-  );
-  const textInputMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Components',
-    'TextInput',
-    'TextInput.js',
-  );
-  const modalMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Modal',
-    'Modal.js',
-  );
-  const viewMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Components',
-    'View',
-    'View.js',
-  );
-  const scrollViewMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Components',
-    'ScrollView',
-    'ScrollView.js',
-  );
-  const nativeModulesMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'BatchedBridge',
-    'NativeModules.js',
-  );
-  const uiManagerMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'ReactNative',
-    'UIManager.js',
-  );
-  const appStateMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'AppState',
-    'AppState.js',
-  );
-  const linkingMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Linking',
-    'Linking.js',
-  );
-  const vibrationMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Vibration',
-    'Vibration.js',
-  );
-  const viewNativeComponentMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Components',
-    'View',
-    'ViewNativeComponent.js',
-  );
-  const useColorSchemeMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Utilities',
-    'useColorScheme.js',
-  );
-  const platformMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'Utilities',
-    'Platform.js',
-  );
-  const styleSheetMockPath = path.join(
-    reactNativeMirrorRoot,
-    'react-native',
-    'Libraries',
-    'StyleSheet',
-    'StyleSheet.js',
-  );
+  const reactNativeIndexPath = resolveReactNativeObjectPath('react-native');
   const sharedMockModules = getSharedReactNativeMockModules();
-
-  const tryResolveMirroredPackageRequest = (request: string) => {
-    if (request === 'jest-react-native') {
-      return path.join(reactNativeMirrorRoot, 'jest-react-native');
-    }
-
-    if (request.startsWith('jest-react-native/')) {
-      return path.join(reactNativeMirrorRoot, 'jest-react-native', request.slice('jest-react-native/'.length));
-    }
-
-    if (request.startsWith('@react-native-community/')) {
-      return path.join(reactNativeMirrorRoot, ...request.split('/'));
-    }
-
-    return null;
-  };
-
-  const isMirroredPackageManifestRequest = (request: string) =>
+  const sharedMockModuleByPath = new Map<string, unknown>([
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/NativeComponent/NativeComponentRegistry.js'),
+      sharedMockModules.nativeComponentRegistryModule,
+    ],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/ReactNative/requireNativeComponent.js'),
+      sharedMockModules.requireNativeComponentModule,
+    ],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/Core/InitializeCore.js'),
+      sharedMockModules.initializeCoreModule,
+    ],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/Core/NativeExceptionsManager.js'),
+      sharedMockModules.nativeExceptionsManagerModule,
+    ],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.js'),
+      sharedMockModules.accessibilityInfoModule,
+    ],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/Components/Clipboard/Clipboard.js'),
+      sharedMockModules.clipboardModule,
+    ],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/Utilities/codegenNativeCommands.js'),
+      sharedMockModules.codegenNativeCommandsModule,
+    ],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/Utilities/codegenNativeComponent.js'),
+      sharedMockModules.codegenNativeComponentModule,
+    ],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/Components/RefreshControl/RefreshControl.js'),
+      sharedMockModules.refreshControlModule,
+    ],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/Components/ActivityIndicator/ActivityIndicator.js'),
+      sharedMockModules.activityIndicatorModule,
+    ],
+    [resolveReactNativeObjectPath('react-native/Libraries/Image/Image.js'), sharedMockModules.imageModule],
+    [resolveReactNativeObjectPath('react-native/Libraries/Text/Text.js'), sharedMockModules.textModule],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/Components/TextInput/TextInput.js'),
+      sharedMockModules.textInputModule,
+    ],
+    [resolveReactNativeObjectPath('react-native/Libraries/Modal/Modal.js'), sharedMockModules.modalModule],
+    [resolveReactNativeObjectPath('react-native/Libraries/Components/View/View.js'), sharedMockModules.viewModule],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/Components/ScrollView/ScrollView.js'),
+      sharedMockModules.scrollViewModule,
+    ],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/BatchedBridge/NativeModules.js'),
+      sharedMockModules.nativeModulesModule,
+    ],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/ReactNative/UIManager.js'),
+      sharedMockModules.uiManagerModule,
+    ],
+    [resolveReactNativeObjectPath('react-native/Libraries/AppState/AppState.js'), sharedMockModules.appStateModule],
+    [resolveReactNativeObjectPath('react-native/Libraries/Linking/Linking.js'), sharedMockModules.linkingModule],
+    [resolveReactNativeObjectPath('react-native/Libraries/Vibration/Vibration.js'), sharedMockModules.vibrationModule],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/Components/View/ViewNativeComponent.js'),
+      sharedMockModules.viewNativeComponentModule,
+    ],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/Utilities/useColorScheme.js'),
+      sharedMockModules.useColorSchemeModule,
+    ],
+    [resolveReactNativeObjectPath('react-native/Libraries/Utilities/Platform.js'), sharedMockModules.platformModule],
+    [
+      resolveReactNativeObjectPath('react-native/Libraries/StyleSheet/StyleSheet.js'),
+      sharedMockModules.styleSheetModule,
+    ],
+  ]);
+  const isReactNativePackageManifestRequest = (request: string) =>
     request === 'react-native/package.json' ||
     request === 'jest-react-native/package.json' ||
     (request.startsWith('@react-native/') && request.endsWith('/package.json')) ||
     (request.startsWith('@react-native-community/') && request.endsWith('/package.json'));
 
-  moduleWithPrivateResolver._resolveFilename = function patchedResolveFilename(
-    request,
-    parent,
-    isMain,
-    options,
-  ) {
-    if (isMirroredPackageManifestRequest(request)) {
+  moduleWithPrivateResolver._resolveFilename = function patchedResolveFilename(request, parent, isMain, options) {
+    if (isReactNativePackageManifestRequest(request)) {
       return originalResolveFilename.call(this, request, parent, isMain, options);
     }
 
-    if (request === 'react-native') {
-      return originalResolveFilename.call(this, reactNativeIndexPath, parent, isMain, options);
-    }
-
-    if (request.startsWith('react-native/')) {
-      return originalResolveFilename.call(
-        this,
-        path.join(reactNativeMirrorRoot, 'react-native', request.slice('react-native/'.length)),
-        parent,
-        isMain,
-        options,
-      );
-    }
-
-    if (request.startsWith('@react-native/')) {
-      return originalResolveFilename.call(
-        this,
-        path.join(reactNativeMirrorRoot, request),
-        parent,
-        isMain,
-        options,
-      );
-    }
-
-    const mirroredPackageRequest = tryResolveMirroredPackageRequest(request);
-    if (mirroredPackageRequest != null) {
-      return originalResolveFilename.call(this, mirroredPackageRequest, parent, isMain, options);
+    const resolved = resolveReactNativeModuleFromManifest(request, parent?.filename, reactNativeTransformCacheManifest);
+    if (resolved != null) {
+      return resolved.objectPath;
     }
 
     return originalResolveFilename.call(this, request, parent, isMain, options);
@@ -2699,111 +2441,13 @@ function patchReactNativeResolution() {
       return getSharedReactNativeExports();
     }
 
-    if (resolved === nativeComponentRegistryMockPath) {
-      return sharedMockModules.nativeComponentRegistryModule;
-    }
-
-    if (resolved === requireNativeComponentMockPath) {
-      return sharedMockModules.requireNativeComponentModule;
-    }
-
-    if (resolved === initializeCoreMockPath) {
-      return sharedMockModules.initializeCoreModule;
-    }
-
-    if (resolved === nativeExceptionsManagerMockPath) {
-      return sharedMockModules.nativeExceptionsManagerModule;
-    }
-
-    if (resolved === accessibilityInfoMockPath) {
-      return sharedMockModules.accessibilityInfoModule;
-    }
-
-    if (resolved === clipboardMockPath) {
-      return sharedMockModules.clipboardModule;
-    }
-
-    if (resolved === codegenNativeCommandsMockPath) {
-      return sharedMockModules.codegenNativeCommandsModule;
-    }
-
-    if (resolved === codegenNativeComponentMockPath) {
-      return sharedMockModules.codegenNativeComponentModule;
-    }
-
-    if (resolved === refreshControlMockPath) {
-      return sharedMockModules.refreshControlModule;
-    }
-
-    if (resolved === activityIndicatorMockPath) {
-      return sharedMockModules.activityIndicatorModule;
-    }
-
-    if (resolved === imageMockPath) {
-      return sharedMockModules.imageModule;
-    }
-
-    if (resolved === textMockPath) {
-      return sharedMockModules.textModule;
-    }
-
-    if (resolved === textInputMockPath) {
-      return sharedMockModules.textInputModule;
-    }
-
-    if (resolved === modalMockPath) {
-      return sharedMockModules.modalModule;
-    }
-
-    if (resolved === viewMockPath) {
-      return sharedMockModules.viewModule;
-    }
-
-    if (resolved === scrollViewMockPath) {
-      return sharedMockModules.scrollViewModule;
-    }
-
-    if (resolved === nativeModulesMockPath) {
-      return sharedMockModules.nativeModulesModule;
-    }
-
-    if (resolved === uiManagerMockPath) {
-      return sharedMockModules.uiManagerModule;
-    }
-
-    if (resolved === appStateMockPath) {
-      return sharedMockModules.appStateModule;
-    }
-
-    if (resolved === linkingMockPath) {
-      return sharedMockModules.linkingModule;
-    }
-
-    if (resolved === vibrationMockPath) {
-      return sharedMockModules.vibrationModule;
-    }
-
-    if (resolved === viewNativeComponentMockPath) {
-      return sharedMockModules.viewNativeComponentModule;
-    }
-
-    if (resolved === useColorSchemeMockPath) {
-      return sharedMockModules.useColorSchemeModule;
-    }
-
-    if (resolved === platformMockPath) {
-      return sharedMockModules.platformModule;
-    }
-
-    if (resolved === styleSheetMockPath) {
-      return sharedMockModules.styleSheetModule;
+    if (sharedMockModuleByPath.has(resolved)) {
+      return sharedMockModuleByPath.get(resolved);
     }
 
     if (REACT_NATIVE_ASSET_MODULE_ID_PATTERN.test(resolved)) {
       return {
-        testUri: path
-          .relative(runtimeDirectory, resolved.replace(/[?#].*$/, ''))
-          .replace(/\\/g, '/'),
+        testUri: path.relative(runtimeDirectory, resolved.replace(/[?#].*$/, '')).replace(/\\/g, '/'),
       };
     }
 
@@ -2813,7 +2457,7 @@ function patchReactNativeResolution() {
   runtimeGlobals.__rntlVitestRnResolverPatched__ = true;
 }
 
-runtimeRequire(path.join(reactNativeMirrorRoot, '@react-native', 'js-polyfills', 'error-guard.js'));
+runtimeRequire(resolveReactNativeObjectPath('@react-native/js-polyfills/error-guard.js'));
 
 // Yarn PnP: top-level ESM imports of `react-native` must resolve to the same
 // singleton facade that the CommonJS loader patch returns.
