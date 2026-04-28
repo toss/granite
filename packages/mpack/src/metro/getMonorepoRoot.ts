@@ -3,7 +3,7 @@ import path from 'path';
 import { pnpapi } from './pnpapi';
 
 /**
- * 단일 혹은 워크스페이스 기반 프로젝트 환경에서 적절한 루트 경로를 가져오는 유틸입니다
+ * Returns the appropriate root path for either a single-package project or a workspace-based project.
  */
 export async function getMonorepoRoot(basePath: string) {
   if (pnpapi) {
@@ -12,15 +12,14 @@ export async function getMonorepoRoot(basePath: string) {
 
   let curr = basePath;
   while (curr !== path.dirname(curr)) {
-    if (await isWorkspace(basePath)) {
+    if (await isWorkspace(curr)) {
       return curr;
     }
 
     curr = path.dirname(curr);
   }
 
-  // 루트 경로까지 탐색해도 workspaces 필드를 가진 `package.json` 파일이 없는 경우,
-  // 워크스페이스 프로젝트가 아닌 단일 프로젝트로 간주하여 기준 경로를 그대로 반환
+  // If no workspace root is found up to the filesystem root, treat it as a single-package project.
   return basePath;
 }
 
@@ -46,7 +45,7 @@ async function isWorkspace(basePath: string) {
   const hasPackageJson = Boolean(packageJson);
   const hasWorkspacesField = Array.isArray(packageJson?.workspaces);
 
-  // NPM, Yarn
+  // npm, Yarn
   if (hasWorkspacesField) {
     return true;
   }
