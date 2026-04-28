@@ -113,7 +113,9 @@ ${MODULE_BODY}
  */
 function parseRegExpLiteral(literal: string): RegExp {
   const match = literal.match(/^\/(.*)\/(\w*)$/);
-  if (!match || match[1] == null) throw new Error(`유효하지 않은 정규식 리터럴: ${literal}`);
+  if (!match || match[1] == null) {
+    throw new Error(`유효하지 않은 정규식 리터럴: ${literal}`);
+  }
   return new RegExp(match[1], match[2] ?? '');
 }
 

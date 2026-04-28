@@ -14,7 +14,11 @@ export function findPreview(key: string): any | undefined {
 }
 
 export function normalizeGroup(group: string | string[] | undefined): string[] {
-  if (group == null) return ['Ungrouped'];
-  if (typeof group === 'string') return [group];
+  if (group == null) {
+    return ['Ungrouped'];
+  }
+  if (typeof group === 'string') {
+    return [group];
+  }
   return group.length === 0 ? ['Ungrouped'] : group;
 }
