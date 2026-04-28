@@ -6,6 +6,13 @@ interface RequireContextModule {
   relativePath: string;
 }
 
+interface RequireContextSource {
+  path: string;
+  deep: boolean;
+  filterSrc?: string;
+  filterFlags?: string;
+}
+
 /**
  * require context export 스크립트 반환
  *
@@ -28,30 +35,43 @@ interface RequireContextModule {
  * ```
  */
 export function toRequireContextExportScript(content: string) {
-  const sources: string[] = [];
+  const sources: RequireContextSource[] = [];
   let idx = 0;
 
   // const -> var 변환 이유
   // esbuild config 에서 supported['const-and-let'] 를 false 로 넣어주고 있기 때문에 로드되기 전에 치환
   const MODULE_BODY = content
-    .replace(/require\.context\((['"])(.*?)\1\)/g, (_, _quote, source) => {
-      sources.push(source);
-      return `__context_${idx++}__`;
-    })
-    .replace('const', 'var');
+    .replace(
+      /require\.context\((['"])(.*?)\1(?:\s*,\s*(true|false))?(?:\s*,\s*(\/.*?\/\w*))?\)/g,
+      (_, _quote, sourcePath, deep, filterLiteral) => {
+        const filterRegex = filterLiteral ? parseRegExpLiteral(filterLiteral) : undefined;
+        sources.push({
+          path: sourcePath,
+          deep: deep !== 'false',
+          filterSrc: filterRegex?.source,
+          filterFlags: filterRegex?.flags,
+        });
+        return `__context_${idx++}__`;
+      }
+    )
+    .replace(/\b(const|let)\b/g, 'var');
 
   if (sources.length === 0) {
     throw new Error('유효하지 않은 require context 구문입니다');
   }
 
   for (const source of sources) {
-    if (!source) {
+    if (!source.path) {
       throw new Error('유효하지 않은 require context 구문입니다');
     }
   }
 
   const IMPORT_STATEMENTS = sources
-    .map((source, i) => `import __context_${i}__ from '${REQUIRE_CONTEXT_PROTOCOL}${source}';`)
+    .map((source, i) => {
+      const query = buildQueryString(source);
+      const protocolPath = `${REQUIRE_CONTEXT_PROTOCOL}${source.path}${query}`;
+      return `import __context_${i}__ from '${protocolPath}';`;
+    })
     .join('\n');
 
   return `
@@ -91,6 +111,28 @@ ${MODULE_BODY}
  * export default requireContext;
  * ```
  */
+function parseRegExpLiteral(literal: string): RegExp {
+  const match = literal.match(/^\/(.*)\/(\w*)$/);
+  if (!match || match[1] == null) throw new Error(`유효하지 않은 정규식 리터럴: ${literal}`);
+  return new RegExp(match[1], match[2] ?? '');
+}
+
+function buildQueryString(source: RequireContextSource): string {
+  const params = new URLSearchParams();
+  if (!source.deep) {
+    params.set('deep', 'false')
+  };
+  if (source.filterSrc != null) {
+    params.set('filterSrc', source.filterSrc)
+  };
+  if (source.filterFlags != null) {
+    params.set('filterFlags', source.filterFlags)
+  };
+  
+  const qs = params.toString();
+  return qs ? `?${qs}` : '';
+}
+
 export function getRequireContextScript(modules: RequireContextModule[]) {
   const IMPORT_STATEMENTS = modules
     .map((module) => `import * as module${module.moduleIndex} from ${JSON.stringify(module.absolutePath)};`)

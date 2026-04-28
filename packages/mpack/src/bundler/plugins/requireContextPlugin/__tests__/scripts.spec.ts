@@ -44,7 +44,7 @@ describe('toRequireContextExportScript', () => {
         import __context_1__ from 'require-context:./moduleB';
 
         export var ctx1 = __context_0__;
-        export const ctx2 = __context_1__;"
+        export var ctx2 = __context_1__;"
       `);
     });
 
@@ -59,6 +59,46 @@ describe('toRequireContextExportScript', () => {
 
         export var ctx = __context_0__;
         export default __context_1__;"
+      `);
+    });
+
+    it('deep=false 파라미터가 쿼리스트링으로 인코딩된다', () => {
+      expect(
+        toRequireContextExportScript(`export default require.context('./module', false)`)
+      ).toMatchInlineSnapshot(`
+        "import __context_0__ from 'require-context:./module?deep=false';
+
+        export default __context_0__"
+      `);
+    });
+
+    it('deep=true 이면 쿼리스트링에 포함되지 않는다', () => {
+      expect(
+        toRequireContextExportScript(`export default require.context('./module', true)`)
+      ).toMatchInlineSnapshot(`
+        "import __context_0__ from 'require-context:./module';
+
+        export default __context_0__"
+      `);
+    });
+
+    it('filter 파라미터가 쿼리스트링으로 인코딩된다', () => {
+      expect(
+        toRequireContextExportScript(`export default require.context('../../', true, /\\.preview\\.tsx$/)`)
+      ).toMatchInlineSnapshot(`
+        "import __context_0__ from 'require-context:../../?filterSrc=%5C.preview%5C.tsx%24&filterFlags=';
+
+        export default __context_0__"
+      `);
+    });
+
+    it('deep=false + filter 파라미터가 함께 쿼리스트링으로 인코딩된다', () => {
+      expect(
+        toRequireContextExportScript(`export default require.context('../../', false, /\\.preview\\.tsx$/)`)
+      ).toMatchInlineSnapshot(`
+        "import __context_0__ from 'require-context:../../?deep=false&filterSrc=%5C.preview%5C.tsx%24&filterFlags=';
+
+        export default __context_0__"
       `);
     });
   });

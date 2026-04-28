@@ -5,7 +5,7 @@ import { toRequireContextExportScript, getRequireContextScript } from './scripts
 import { REQUIRE_CONTEXT_PROTOCOL } from '../../../constants';
 import { normalizePath } from '../../../utils/esbuildUtils';
 
-async function getFilePaths(rootDir: string) {
+async function getFilePaths(rootDir: string, deep = true): Promise<string[]> {
   const filenames: string[] = [];
 
   const rootFilenames = await fs.readdirSync(rootDir);
@@ -14,7 +14,9 @@ async function getFilePaths(rootDir: string) {
     const filePath = path.join(rootDir, filename);
 
     if (fs.lstatSync(filePath).isDirectory()) {
-      filenames.push(...(await getFilePaths(filePath)));
+      if (deep) {
+        filenames.push(...(await getFilePaths(filePath, deep)));
+      }
     } else {
       filenames.push(filePath);
     }
@@ -46,13 +48,26 @@ export function requireContextPlugin(): Plugin {
 
       /**
        * "require-context:./path/to/module" 로 되어있으면 ./path/to/module 로 resolve 합니다.
+       * 쿼리스트링으로 deep / filter 파라미터를 전달받아 pluginData 에 파싱하여 전달합니다.
        */
       build.onResolve({ filter: new RegExp(`^${REQUIRE_CONTEXT_PROTOCOL}.*`) }, (args) => {
+        const rawPath = args.path.slice(REQUIRE_CONTEXT_PROTOCOL.length);
+        const qIdx = rawPath.indexOf('?');
+        const contextPath = qIdx === -1 ? rawPath : rawPath.slice(0, qIdx);
+        const params = new URLSearchParams(qIdx === -1 ? '' : rawPath.slice(qIdx + 1));
+
+        const deep = params.get('deep') !== 'false';
+        const filterSrc = params.get('filterSrc');
+        const filterFlags = params.get('filterFlags') ?? '';
+        const filter = filterSrc != null ? new RegExp(filterSrc, filterFlags) : undefined;
+
         return {
           namespace: 'require-context',
-          path: args.path.slice(REQUIRE_CONTEXT_PROTOCOL.length),
+          path: contextPath,
           pluginData: {
             importer: args.resolveDir,
+            deep,
+            filter,
           },
         };
       });
@@ -67,9 +82,12 @@ export function requireContextPlugin(): Plugin {
           throw new Error(`importer가 주어져야 합니다.`);
         }
 
+        const { deep, filter } = args.pluginData as { deep: boolean; filter?: RegExp };
         const targetDir = path.resolve(importer, args.path);
         const basePath = path.join(importer, args.path);
-        const filePaths = await getFilePaths(targetDir);
+
+        const allPaths = await getFilePaths(targetDir, deep);
+        const filePaths = filter ? allPaths.filter((fp) => filter.test(path.basename(fp))) : allPaths;
 
         const requireContextModules = filePaths.map((filePath, index) => {
           const pagePath = path.relative(basePath, filePath);
