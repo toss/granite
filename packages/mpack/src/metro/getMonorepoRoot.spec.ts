@@ -37,6 +37,18 @@ describe('getMonorepoRoot', () => {
     await expect(getMonorepoRoot(appPath)).resolves.toBe(appPath);
   });
 
+  it('returns the base path itself when it is the workspace root', async () => {
+    const getMonorepoRoot = await importGetMonorepoRoot();
+    const workspaceRoot = path.join(tempDir, 'workspace');
+
+    await writePackageJson(workspaceRoot, {
+      name: 'workspace',
+      workspaces: ['apps/*'],
+    });
+
+    await expect(getMonorepoRoot(workspaceRoot)).resolves.toBe(workspaceRoot);
+  });
+
   it('returns the parent npm or Yarn workspace root', async () => {
     const getMonorepoRoot = await importGetMonorepoRoot();
     const workspaceRoot = path.join(tempDir, 'workspace');
