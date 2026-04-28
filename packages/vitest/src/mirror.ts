@@ -746,7 +746,3 @@ export async function buildReactNativeMirror(
   const cache = await buildReactNativeTransformCache(workspaceRoot, resolvedCacheDir);
   return cache.objectsRoot;
 }
-
-export function synthesizeDefaultPlatformFiles(_destinationRoot: string) {
-  // Platform fallback is handled by resolveReactNativeModuleFromManifest().
-}

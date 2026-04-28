@@ -17,7 +17,6 @@ import {
   resolveReactNativeModuleFromManifest,
   resolvePackageRoot,
   resolveReactNativePackageRoots,
-  synthesizeDefaultPlatformFiles,
   type ReactNativeTransformCache,
 } from './mirror';
 import {
@@ -171,7 +170,6 @@ export {
   resolvePackageRoot,
   resolveReactNativeModuleFromManifest,
   resolveReactNativePackageRoots,
-  synthesizeDefaultPlatformFiles,
   shouldInlineReactNativeDependency,
   shouldTransformReactNativeFile,
 };
