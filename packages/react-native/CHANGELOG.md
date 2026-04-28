@@ -1,5 +1,22 @@
 # @granite-js/react-native
 
+## 1.0.23
+
+### Patch Changes
+
+- d4d3993: feat(brownfield): sep brownfield module
+- Updated dependencies [63217da]
+- Updated dependencies [d4d3993]
+  - @granite-js/mpack@1.0.23
+  - @granite-js/brownfield-module@1.0.23
+  - @granite-js/native@1.0.23
+  - @granite-js/cli@1.0.23
+  - @granite-js/blur-view@1.0.23
+  - @granite-js/jest@1.0.23
+  - @granite-js/style-utils@1.0.23
+  - @granite-js/plugin-core@1.0.23
+  - @granite-js/video@1.0.23
+
 ## 1.0.22
 
 ### Patch Changes

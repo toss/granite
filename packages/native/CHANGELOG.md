@@ -1,5 +1,14 @@
 # @granite-js/native
 
+## 1.0.23
+
+### Patch Changes
+
+- d4d3993: feat(brownfield): sep brownfield module
+  - @granite-js/image@1.0.23
+  - @granite-js/lottie@1.0.23
+  - @granite-js/video@1.0.23
+
 ## 1.0.22
 
 ### Patch Changes
