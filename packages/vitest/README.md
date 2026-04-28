@@ -21,31 +21,37 @@ export default defineConfig({
 });
 ```
 
-`reactNative()` injects the React Native mirror aliases, the Vitest `node` environment, `globals: true`, Jest-like test globs, the packaged React Native runtime/setup files, and Jest-preset-style asset mocks.
+`reactNative()` injects the React Native manifest resolver, the Vitest `node` environment, `globals: true`, Jest-like test globs, the packaged React Native runtime/setup files, and Jest-preset-style asset mocks.
 
-## Mirror Cache
+## Transform Cache
 
-The React Native mirror is stored as a content-addressed local cache:
+React Native sources are stored as a content-addressed flat transform cache:
 
 - cache root: `<cacheDir>/vitest-react-native-cache`
-- entries: `<cacheDir>/vitest-react-native-cache/entries/<cache-key>/packages`
+- transformed objects: `<cacheDir>/vitest-react-native-cache/entries/<cache-key>/objects/<content-hash>.<ext>`
+- manifest: `<cacheDir>/vitest-react-native-cache/entries/<cache-key>/manifest.json`
 - metadata: `<cacheDir>/vitest-react-native-cache/entries/<cache-key>/meta.json`
 
 By default, `cacheDir` is Vitest's `.vitest` directory unless your `vitest.config.*` overrides it.
 
 The cache key is derived from:
 
-- the mirrored `react-native` and installed RN-family allowlist package contents
+- the `react-native` and installed RN-family allowlist package contents
 - the local mirror/transform implementation
 - transform dependency versions
 
-If the cache key matches, `reactNative()` reuses the existing mirror immediately instead of rebuilding it.
+If the cache key matches, `reactNative()` reuses the existing transform cache immediately instead of rebuilding it.
+Only one completed React Native transform cache entry is retained per cache directory. When the cache key changes,
+the previous entry is removed before the new cache is transformed and materialized.
 
-Local garbage collection runs opportunistically while resolving the mirror cache:
+The cache intentionally does not materialize package trees such as `packages/react-native/package.json`.
+React Native package and relative imports are resolved through `manifest.json` and then redirected to flat
+object files, so file scanners do not discover duplicate package boundaries inside the cache.
 
-- stale entries older than 7 days are removed
+Local garbage collection runs opportunistically while resolving the transform cache:
+
 - temporary entries left behind by interrupted builds are removed
-- the cache is trimmed back to roughly 1 GB using least-recently-used eviction
+- inactive completed entries are removed
 
 ## React Native Jest Preset Parity
 
