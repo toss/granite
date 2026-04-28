@@ -132,7 +132,7 @@ function buildQueryString(source: RequireContextSource): string {
   };
   
   const qs = params.toString();
-  return qs ? `?${qs}` : '';
+  return `?${qs}`;
 }
 
 export function getRequireContextScript(modules: RequireContextModule[]) {
