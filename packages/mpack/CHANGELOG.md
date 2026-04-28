@@ -1,5 +1,13 @@
 # @granite-js/mpack
 
+## 1.0.23
+
+### Patch Changes
+
+- 63217da: fix(mpack): support deep and filter params in require.context(), isolate require context
+  - @granite-js/plugin-core@1.0.23
+  - @granite-js/utils@1.0.23
+
 ## 1.0.22
 
 ### Patch Changes

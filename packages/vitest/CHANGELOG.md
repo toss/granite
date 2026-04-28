@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.23
+
+### Patch Changes
+
+- faf7ec4: feat: change react-native package tree to object + virtual
+
 ## 1.0.22
 
 ### Patch Changes

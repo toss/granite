@@ -1,5 +1,12 @@
 # @granite-js/jest
 
+## 1.0.23
+
+### Patch Changes
+
+- Updated dependencies [d4d3993]
+  - @granite-js/native@1.0.23
+
 ## 1.0.22
 
 ### Patch Changes
