@@ -12,7 +12,7 @@ export async function getMonorepoRoot(basePath: string) {
 
   let curr = basePath;
   while (curr !== path.dirname(curr)) {
-    if (await isWorkspace(basePath)) {
+    if (await isWorkspace(curr)) {
       return curr;
     }
 
