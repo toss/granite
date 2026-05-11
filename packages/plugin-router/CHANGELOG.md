@@ -1,5 +1,13 @@
 # @granite-js/plugin-router
 
+## 1.0.25
+
+### Patch Changes
+
+- d44c0b0: export withIO API
+- Updated dependencies [d44c0b0]
+  - @granite-js/plugin-core@1.0.25
+
 ## 1.0.24
 
 ### Patch Changes
