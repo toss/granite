@@ -1,5 +1,15 @@
 # @granite-js/native
 
+## 1.0.25
+
+### Patch Changes
+
+- d44c0b0: export withIO API
+- Updated dependencies [d44c0b0]
+  - @granite-js/lottie@1.0.25
+  - @granite-js/image@1.0.25
+  - @granite-js/video@1.0.25
+
 ## 1.0.24
 
 ### Patch Changes
