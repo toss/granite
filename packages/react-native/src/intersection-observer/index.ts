@@ -7,7 +7,7 @@ import {
   type IntersectionObserverOptions,
   type RootMargin,
 } from './IntersectionObserver';
-import type { IOComponentProps } from './withIO';
+import withIO, { type IOComponentProps} from './withIO';
 
 export type {
   IntersectionObserverEntry,
@@ -21,4 +21,4 @@ export type {
   IOScrollViewProps,
 };
 
-export { InView, IOContext, IOFlatList, IOScrollView };
+export { InView, IOContext, IOFlatList, IOScrollView, withIO };
