@@ -71,6 +71,16 @@ export interface BuildConfig {
    * Path to `react-native` package path
    */
   reactNativePath?: string;
+  /**
+   * Finalize esbuild build options dynamically
+   */
+  INTERNAL__esbuildOptions?: (
+    context: {
+      platform: string;
+      dev: boolean;
+    },
+    buildOptions: esbuild.BuildOptions
+  ) => Promise<esbuild.BuildOptions> | esbuild.BuildOptions;
 }
 
 export interface ResolverConfig {

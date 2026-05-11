@@ -9,9 +9,8 @@ import { mergeTransformer } from './mergeTransformer';
 export function mergeBuildConfigs(baseConfig: BuildConfig, ...otherConfigs: Partial<BuildConfig>[]): BuildConfig {
   const mergedConfig = otherConfigs.reduce(
     (acc, curr) => ({
-      entry: acc.entry ?? curr.entry,
-      outfile: acc.outfile ?? curr.outfile,
-      platform: acc.platform ?? curr.platform,
+      ...acc,
+      ...curr,
       resolver: mergeResolver(acc.resolver, curr.resolver),
       transformer: mergeTransformer(acc.transformer, curr.transformer),
       esbuild: mergeEsbuild(acc.esbuild, curr.esbuild),
