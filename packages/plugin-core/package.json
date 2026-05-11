@@ -46,12 +46,12 @@
     "@types/babel__core": "^7",
     "@types/connect": "^3",
     "@types/ws": "^8.18.0",
-    "cosmiconfig": "^9.0.0",
-    "cosmiconfig-typescript-loader": "^5.1.0",
-    "es-toolkit": "^1.39.8",
-    "esbuild": "^0.25.8",
+    "c12": "3.3.4",
+    "es-toolkit": "1.39.8",
+    "esbuild": "0.25.8",
     "fastify": "4.14.0",
-    "zod": "^4.0.10"
+    "jiti": "2.7.0",
+    "zod": "4.0.10"
   },
   "sideEffects": false
 }

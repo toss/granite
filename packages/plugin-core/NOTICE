@@ -63,35 +63,35 @@ Third-Party Libraries:
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/vitest-dev/vitest.git
 	
-8. **cosmiconfig**
+8. **c12**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/cosmiconfig/cosmiconfig.git
+   - Repository: git+https://github.com/unjs/c12.git
 	
-9. **cosmiconfig-typescript-loader**
-	
-   - License: MIT
-   - License Text: https://opensource.org/licenses/MIT
-   - Repository: git+https://github.com/Codex-/cosmiconfig-typescript-loader.git
-	
-10. **es-toolkit**
+9. **es-toolkit**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: https://github.com/toss/es-toolkit.git
 	
-11. **esbuild**
+10. **esbuild**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/evanw/esbuild.git
 	
-12. **fastify**
+11. **fastify**
 	
    - License: MIT
    - License Text: https://opensource.org/licenses/MIT
    - Repository: git+https://github.com/fastify/fastify.git
+	
+12. **jiti**
+	
+   - License: MIT
+   - License Text: https://opensource.org/licenses/MIT
+   - Repository: git+https://github.com/unjs/jiti.git
 	
 13. **tsdown**
 	
