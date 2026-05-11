@@ -1,9 +1,7 @@
 import path from 'path';
 import { getPackageRoot } from '@granite-js/utils';
-import { cosmiconfig, type CosmiconfigResult, type Options as CosmiconfigOptions } from 'cosmiconfig';
-import { TypeScriptLoader } from 'cosmiconfig-typescript-loader';
+import { loadConfig as loadC12Config } from 'c12';
 import { assert } from 'es-toolkit';
-import type { defineConfig } from './defineConfig';
 import type { CompleteGraniteConfig } from '../schema/pluginConfig';
 
 const MODULE_NAME = 'granite';
@@ -25,35 +23,17 @@ export interface LoadConfigOptions {
 }
 
 export const loadConfig = async (options: LoadConfigOptions = {}): Promise<CompleteGraniteConfig> => {
-  let result: CosmiconfigResult;
   const resolveRoot = options.root ?? getPackageRoot();
-
-  if (options.configFile) {
-    result = await getConfigExplorer().load(path.resolve(resolveRoot, options.configFile));
-  } else {
-    result = await getConfigExplorer({
-      searchPlaces: [
-        `${MODULE_NAME}.config.ts`,
-        `${MODULE_NAME}.config.mts`,
-        `${MODULE_NAME}.config.js`,
-        `${MODULE_NAME}.config.cjs`,
-      ],
-    }).search(resolveRoot);
-  }
-
-  assert(result, 'Config file not found');
-
-  const config: Awaited<ReturnType<typeof defineConfig>> = await result.config;
-
-  return config;
-};
-
-function getConfigExplorer(options?: Partial<CosmiconfigOptions>) {
-  return cosmiconfig(MODULE_NAME, {
-    loaders: {
-      '.ts': TypeScriptLoader(),
-      '.mts': TypeScriptLoader(),
-    },
-    ...options,
+  const result = await loadC12Config<CompleteGraniteConfig>({
+    name: MODULE_NAME,
+    cwd: resolveRoot,
+    configFile: options.configFile ? path.resolve(resolveRoot, options.configFile) : undefined,
+    rcFile: false,
+    envName: false,
+    extend: false,
   });
-}
+
+  assert(result._configFile != null, 'Config file not found');
+
+  return result.config;
+};
