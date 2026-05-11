@@ -1,5 +1,12 @@
 # @granite-js/plugin-core
 
+## 1.0.24
+
+### Patch Changes
+
+- e58d561: chore(config): migrate c12 config system
+  - @granite-js/utils@1.0.24
+
 ## 1.0.23
 
 ### Patch Changes

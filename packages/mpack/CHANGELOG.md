@@ -1,5 +1,14 @@
 # @granite-js/mpack
 
+## 1.0.24
+
+### Patch Changes
+
+- 49caba8: Fix monorepo root detection for nested workspace apps.
+- Updated dependencies [e58d561]
+  - @granite-js/plugin-core@1.0.24
+  - @granite-js/utils@1.0.24
+
 ## 1.0.23
 
 ### Patch Changes
