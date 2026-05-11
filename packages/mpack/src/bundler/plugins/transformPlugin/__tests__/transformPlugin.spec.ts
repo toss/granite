@@ -16,7 +16,7 @@ describe('transformPlugin', () => {
       },
     };
 
-    const code = await buildWithEsbuild(buildConfig, {
+    const result = await buildWithEsbuild(buildConfig, {
       plugins: [
         transformPlugin({
           context: {
@@ -33,6 +33,6 @@ describe('transformPlugin', () => {
       ],
     });
 
-    expect(await evaluate(code)).toContain('passed');
+    expect(await evaluate(result.code)).toContain('passed');
   });
 });

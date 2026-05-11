@@ -3,7 +3,14 @@ import type { BuildConfig } from '@granite-js/plugin-core';
 import { omit, toMerged } from 'es-toolkit';
 import * as esbuild from 'esbuild';
 
-export async function buildWithEsbuild(buildConfig: BuildConfig, options?: esbuild.BuildOptions) {
+export type BuildWithEsbuildResult = esbuild.BuildResult & {
+  readonly code: string;
+};
+
+export async function buildWithEsbuild(
+  buildConfig: BuildConfig,
+  options?: esbuild.BuildOptions
+): Promise<BuildWithEsbuildResult> {
   let esbuildOptions = options;
 
   if (buildConfig?.esbuild) {
@@ -17,9 +24,17 @@ export async function buildWithEsbuild(buildConfig: BuildConfig, options?: esbui
     write: false,
   });
 
-  const output = result.outputFiles?.[0]?.contents;
+  let code: string | undefined;
 
-  assert(output, 'output contents is empty');
+  Object.defineProperty(result, 'code', {
+    get() {
+      const output = result.outputFiles?.[0]?.contents;
+      assert(output, 'output contents is empty');
 
-  return Buffer.from(output).toString();
+      code ??= Buffer.from(output).toString();
+      return code;
+    },
+  });
+
+  return result as BuildWithEsbuildResult;
 }
