@@ -7,8 +7,7 @@ import {
   type IntersectionObserverOptions,
   type RootMargin,
 } from './IntersectionObserver';
-import type { IOComponentProps } from './withIO';
-import withIO from './withIO';
+import withIO, { type IOComponentProps} from './withIO';
 
 export type {
   IntersectionObserverEntry,
