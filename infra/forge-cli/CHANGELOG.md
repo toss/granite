@@ -1,5 +1,14 @@
 # @granite-js/forge-cli
 
+## 1.0.24
+
+### Patch Changes
+
+- d3d4e04: Await bundle uploads before updating deployment state.
+- Updated dependencies [e58d561]
+  - @granite-js/plugin-core@1.0.24
+  - @granite-js/deployment-manager@1.0.24
+
 ## 1.0.23
 
 ### Patch Changes
