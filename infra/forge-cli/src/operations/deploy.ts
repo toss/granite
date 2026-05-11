@@ -12,9 +12,7 @@ interface DeployConfig {
   groupId?: string;
 }
 
-export const deploy = handlePrompts<
-  ({ androidBundle, iosBundle, appName, tag }: DeployConfig, context: { s3Client: S3Client }) => void
->('Start deployment', deployImpl);
+export const deploy = handlePrompts('Start deployment', deployImpl);
 
 async function deployImpl({ androidBundle, iosBundle, appName, tag }: DeployConfig, context: { s3Client: S3Client }) {
   const { s3Client } = context;
@@ -78,7 +76,7 @@ async function deployImpl({ androidBundle, iosBundle, appName, tag }: DeployConf
     ].map(({ bundlePath, platform }) => ({
       title: `Uploading bundle... (${platform})`,
       task: async () => {
-        DeployManager.uploadBundle(
+        await DeployManager.uploadBundle(
           {
             bundlePath,
             appName,
