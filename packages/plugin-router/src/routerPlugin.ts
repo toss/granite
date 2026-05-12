@@ -11,6 +11,8 @@ const DEFAULT_OPTIONS: Required<RouterPluginOptions> = {
 };
 
 export const router = (options: RouterPluginOptions = DEFAULT_OPTIONS): GranitePluginCore => {
+  const resolvedOptions = { ...DEFAULT_OPTIONS, ...options };
+
   return {
     name: 'router-plugin',
     build: {
@@ -23,7 +25,7 @@ export const router = (options: RouterPluginOptions = DEFAULT_OPTIONS): GraniteP
       order: 'pre',
       handler: () => {
         generateRouterFile();
-        if (options.watch) {
+        if (resolvedOptions.watch) {
           watchRouter();
         }
       },
