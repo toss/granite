@@ -123,7 +123,7 @@ export interface AliasConfig extends Pick<esbuild.ResolveOptions, 'importer' | '
 
 export type ResolveResult = string | ResolveResultWithOptions;
 
-export interface ResolveResultWithOptions extends Omit<esbuild.ResolveOptions, 'pluginName' | 'pluginData'> {
+export interface ResolveResultWithOptions extends esbuild.ResolveOptions, esbuild.OnResolveResult {
   path: string;
 }
 
