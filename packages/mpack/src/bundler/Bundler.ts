@@ -49,7 +49,8 @@ export class Bundler {
     const { withDispose = true } = options ?? {};
 
     if (this.esbuildContext == null) {
-      this.esbuildContext = await esbuild.context(this.getBaseBuildOptions());
+      const buildOptions = await this.getBaseBuildOptions();
+      this.esbuildContext = await esbuild.context(buildOptions);
     }
 
     if (this.status === 'prepared' || this.status === 'building') {
@@ -87,8 +88,8 @@ export class Bundler {
     });
   }
 
-  private getBaseBuildOptions(): esbuild.BuildOptions {
-    const { rootDir, metafile, buildConfig } = this.config;
+  private async getBaseBuildOptions(): Promise<esbuild.BuildOptions> {
+    const { rootDir, metafile, dev, buildConfig } = this.config;
     const { platform, entry, outfile = 'bundle.js', esbuild = {} } = buildConfig;
     const { prelude: _, ...esbuildOptions } = esbuild;
 
@@ -111,7 +112,7 @@ export class Bundler {
 
     this.setupEnvironment();
 
-    return {
+    const baseBuildOptions: esbuild.BuildOptions = {
       entryPoints: [path.resolve(rootDir, entry)],
       outfile: path.resolve(rootDir, outfile),
       sourcemap: true,
@@ -167,6 +168,12 @@ export class Bundler {
         ...(esbuildOptions?.plugins ?? []),
       ].filter(isNotNil),
     };
+
+    const buildOptions = buildConfig.INTERNAL__esbuildOptions
+      ? await buildConfig.INTERNAL__esbuildOptions({ dev, platform }, baseBuildOptions)
+      : baseBuildOptions;
+
+    return buildOptions;
   }
 
   private setupEnvironment() {

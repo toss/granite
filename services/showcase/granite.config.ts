@@ -50,5 +50,16 @@ export default defineConfig({
         console.debug('[DEBUG] Context:', context);
       },
     },
+    {
+      name: 'esbuild-custom-build-options',
+      config: {
+        INTERNAL__esbuildOptions(context, buildOptions) {
+          console.debug('[DEBUG] Build options for:', context);
+
+          // You can modify build options dynamically
+          return buildOptions;
+        },
+      },
+    },
   ],
 });
