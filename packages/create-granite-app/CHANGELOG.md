@@ -1,5 +1,7 @@
 # create-granite-app
 
+## 1.0.26
+
 ## 1.0.25
 
 ### Patch Changes
