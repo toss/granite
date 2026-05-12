@@ -1,5 +1,7 @@
 # @granite-js/lottie
 
+## 1.0.26
+
 ## 1.0.25
 
 ### Patch Changes

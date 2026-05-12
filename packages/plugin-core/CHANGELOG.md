@@ -1,5 +1,13 @@
 # @granite-js/plugin-core
 
+## 1.0.26
+
+### Patch Changes
+
+- b50c12f: propagate esbuild resolve result options in alias resolver
+- 4acc9d6: Add INTERNAL\_\_esbuildOptions to allow dynamic configuration of esbuild build options.
+  - @granite-js/utils@1.0.26
+
 ## 1.0.25
 
 ### Patch Changes
