@@ -2,13 +2,16 @@ import { createRoute, Image } from '@granite-js/react-native';
 import { View } from 'react-native';
 
 export const Route = createRoute('/showcase/image', {
-  validateParams: (params) => params,
+  validateParams: (params) => params as { uri?: string },
   component: ShowcaseImage,
 });
 
 function ShowcaseImage() {
+  const params = Route.useParams();
+
   return (
     <View>
+      {params.uri ? <Image source={{ uri: params.uri }} style={{ width: 100, height: 100 }} /> : null}
       <Image
         style={{ width: 100, height: 100 }}
         source={{ uri: 'https://picsum.photos/200' }}
