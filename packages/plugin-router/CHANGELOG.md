@@ -1,5 +1,13 @@
 # @granite-js/plugin-router
 
+## 1.0.27
+
+### Patch Changes
+
+- 101b006: Add missing Apache-2.0 license metadata for npm package publishing.
+- 90ffc5f: Preserve the default route file watcher when router options are empty.
+  - @granite-js/plugin-core@1.0.27
+
 ## 1.0.26
 
 ### Patch Changes
