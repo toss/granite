@@ -5,6 +5,11 @@ import { router } from '@granite-js/plugin-router';
 import { sentry } from '@granite-js/plugin-sentry';
 import { defineConfig } from '@granite-js/react-native/config';
 
+const testStates = {
+  babelPrinted: false,
+  swcPrinted: false,
+};
+
 export default defineConfig({
   /**
    * granite://showcase
@@ -51,13 +56,28 @@ export default defineConfig({
       },
     },
     {
-      name: 'esbuild-custom-build-options',
+      name: 'custom-build-options',
       config: {
         INTERNAL__esbuildOptions(context, buildOptions) {
           console.debug('[DEBUG] Build options for:', context);
 
-          // You can modify build options dynamically
           return buildOptions;
+        },
+        INTERNAL__babelOptions(context, babelOptions) {
+          if (!testStates.babelPrinted) {
+            console.debug('[DEBUG] Babel options for:', context);
+            testStates.babelPrinted = true;
+          }
+
+          return babelOptions;
+        },
+        INTERNAL__swcOptions(context, swcOptions) {
+          if (!testStates.swcPrinted) {
+            console.debug('[DEBUG] Swc options for:', context);
+            testStates.swcPrinted = true;
+          }
+
+          return swcOptions;
         },
       },
     },

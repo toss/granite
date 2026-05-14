@@ -1,16 +1,21 @@
 import * as path from 'path';
 import * as babel from '@babel/core';
+import type { BuildConfig } from '@granite-js/plugin-core';
 import { AsyncTransformStep } from '../../../../transformer/TransformPipeline';
 import { defineStepName } from '../../../../utils/defineStepName';
 
 interface FullyTransformStepConfig {
   dev: boolean;
+  platform: string;
   additionalBabelOptions?: babel.TransformOptions;
+  INTERNAL__babelOptions?: BuildConfig['INTERNAL__babelOptions'];
 }
 
 export function createFullyTransformStep({
   dev,
+  platform,
   additionalBabelOptions,
+  INTERNAL__babelOptions,
 }: FullyTransformStepConfig): AsyncTransformStep {
   const baseOptions: babel.TransformOptions = {
     configFile: additionalBabelOptions?.configFile || false,
@@ -59,7 +64,7 @@ export function createFullyTransformStep({
   };
 
   const fullyTransformStep: AsyncTransformStep = async function fullyTransform(code, args) {
-    const babelOptions = babel.loadOptions({
+    const babelOptions: babel.TransformOptions = {
       minified: false,
       compact: false,
       babelrc: false,
@@ -72,17 +77,21 @@ export function createFullyTransformStep({
         name: 'mpack-fully-transform-plugin',
         supportsStaticESM: true,
       },
-    }) as babel.TransformOptions | null;
+    };
 
-    if (!babelOptions) {
+    const resolvedBabelOptions = babel.loadOptions(
+      INTERNAL__babelOptions ? await INTERNAL__babelOptions({ platform, dev }, babelOptions) : babelOptions
+    ) as babel.TransformOptions | null;
+
+    if (!resolvedBabelOptions) {
       return { code };
     }
 
-    if (babelOptions.sourceMaps) {
-      babelOptions.sourceFileName = path.basename(args.path);
+    if (resolvedBabelOptions.sourceMaps) {
+      resolvedBabelOptions.sourceFileName = path.basename(args.path);
     }
 
-    const result = await babel.transformAsync(code, babelOptions);
+    const result = await babel.transformAsync(code, resolvedBabelOptions);
 
     if (result?.code != null) {
       return { code: result.code };

@@ -8,12 +8,16 @@ import { swcHelperOptimizationRules } from '../../shared/swc';
 
 export interface TransformToHermesSyntaxStepConfig {
   dev: boolean;
+  platform: string;
   additionalSwcOptions?: BuildConfig['swc'];
+  INTERNAL__swcOptions?: BuildConfig['INTERNAL__swcOptions'];
 }
 
 export function createTransformToHermesSyntaxStep({
   dev,
+  platform,
   additionalSwcOptions = {},
+  INTERNAL__swcOptions,
 }: TransformToHermesSyntaxStepConfig): AsyncTransformStep {
   const plugins = (additionalSwcOptions.plugins ?? []).filter(isNotNil) as NonNullable<
     swc.JscConfig['experimental']
@@ -53,7 +57,9 @@ export function createTransformToHermesSyntaxStep({
       filename: path.basename(args.path),
     };
 
-    const result = await swc.transform(code, options);
+    const resolvedOptions = INTERNAL__swcOptions ? await INTERNAL__swcOptions({ platform, dev }, options) : options;
+    const result = await swc.transform(code, resolvedOptions);
+
     return { code: result.code };
   };
 
