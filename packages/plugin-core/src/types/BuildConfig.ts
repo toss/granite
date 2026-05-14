@@ -79,8 +79,28 @@ export interface BuildConfig {
       platform: string;
       dev: boolean;
     },
-    buildOptions: esbuild.BuildOptions
+    options: esbuild.BuildOptions
   ) => Promise<esbuild.BuildOptions> | esbuild.BuildOptions;
+  /**
+   * Finalize babel options dynamically
+   */
+  INTERNAL__babelOptions?: (
+    context: {
+      platform: string;
+      dev: boolean;
+    },
+    options: babel.TransformOptions
+  ) => Promise<babel.TransformOptions> | babel.TransformOptions;
+  /**
+   * Finalize swc options dynamically
+   */
+  INTERNAL__swcOptions?: (
+    context: {
+      platform: string;
+      dev: boolean;
+    },
+    options: swc.Options
+  ) => Promise<swc.Options> | swc.Options;
 }
 
 export interface ResolverConfig {

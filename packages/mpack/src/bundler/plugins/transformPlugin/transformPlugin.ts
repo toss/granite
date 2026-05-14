@@ -24,7 +24,7 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
     setup(build) {
       const { id, config } = context;
       const { dev, cache, buildConfig } = config;
-      const { esbuild, swc, babel } = buildConfig;
+      const { esbuild, swc, babel, platform } = buildConfig;
 
       assert(id, 'id 값이 존재하지 않습니다');
       assert(typeof dev === 'boolean', 'dev 값이 존재하지 않습니다');
@@ -46,7 +46,12 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
         })
         .addStep({
           if: ({ path, code }) => babel?.conditions?.some((cond) => cond(code, path)) ?? false,
-          then: createFullyTransformStep({ dev, additionalBabelOptions: babel }),
+          then: createFullyTransformStep({
+            dev,
+            platform,
+            additionalBabelOptions: babel,
+            INTERNAL__babelOptions: buildConfig.INTERNAL__babelOptions,
+          }),
           stopAfter: true,
         })
         .addStep({
@@ -54,7 +59,14 @@ export function transformPlugin({ context, ...options }: PluginOptions<Transform
           then: createTransformCodegenStep(),
           else: createFlowStripStep(),
         })
-        .addStep(createTransformToHermesSyntaxStep({ dev, additionalSwcOptions: swc }))
+        .addStep(
+          createTransformToHermesSyntaxStep({
+            dev,
+            platform,
+            additionalSwcOptions: swc,
+            INTERNAL__swcOptions: buildConfig.INTERNAL__swcOptions,
+          })
+        )
         .afterStep(cacheSteps.afterTransform);
 
       preludeScript.registerEntryPointMarker(build);
