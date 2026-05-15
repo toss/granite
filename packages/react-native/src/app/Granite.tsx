@@ -7,6 +7,7 @@ import { AppRoot } from './AppRoot';
 import { HostAppRoot } from './HostAppRoot';
 import { getSchemeUri } from '../constant-bridges';
 import { setupPolyfills } from '../polyfills';
+import { resolveInitialScheme } from './resolveInitialScheme';
 
 export interface GraniteProps {
   /**
@@ -76,7 +77,11 @@ const createApp = () => {
           <AppRoot
             container={AppContainer}
             initialProps={initialProps}
-            initialScheme={initialScheme ?? getSchemeUri()}
+            initialScheme={resolveInitialScheme({
+              initialPropsScheme: initialProps.scheme,
+              initialScheme,
+              getSchemeUri,
+            })}
             setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
             getInitialUrl={getInitialUrl}
             appName={appName}
