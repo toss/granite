@@ -29,10 +29,16 @@ export interface RegisterScreenInput {}
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface RegisterScreen {}
 
-export type NavigationProps = NativeStackNavigationProp<
+type RegisteredParamList = keyof RegisterScreenInput extends never ? ParamListBase : RegisterScreenInput;
+
+type NavigationParamsHelpers = Pick<
   // @ts-expect-error - override type
-  keyof RegisterScreenInput extends never ? ParamListBase : RegisterScreenInput
+  NativeStackNavigationProp<RegisteredParamList, keyof RegisteredParamList>,
+  'replaceParams' | 'setParams'
 >;
+
+export type NavigationProps = Omit<NativeStackNavigationProp<ParamListBase>, keyof NavigationParamsHelpers> &
+  NavigationParamsHelpers;
 
 export function useNavigation() {
   return useNavigationNative<NavigationProps>();
