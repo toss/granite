@@ -6,8 +6,13 @@ export interface GraniteBrownfieldModuleSpec extends BrickModuleSpec {
   readonly onVisibilityChanged: CodegenTypes.EventEmitter<{ visible: boolean }>;
 
   getConstants(): {
+    /**
+     * @deprecated Use `getSchemeUri()` instead. This will be removed in a future release.
+     */
     schemeUri: string;
   };
+
+  getSchemeUri(): string;
 
   closeView(): Promise<void>;
 }

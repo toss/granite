@@ -17,11 +17,15 @@ interface GraniteBrownfieldModuleSpec : BrickModuleBase {
 
     // MARK: - Module Constants
 
+    /**
+     * @deprecated Use `getSchemeUri()` instead. This will be removed in a future release.
+     */
     val schemeUri: String
 
 
     // MARK: - Module Methods
 
+    fun getSchemeUri(): String
     suspend fun closeView(): Unit
 
 

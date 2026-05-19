@@ -17,6 +17,9 @@ public protocol GraniteBrownfieldModuleSpec {
 
     // MARK: - Module Methods
 
+    /// getSchemeUri method
+    func getSchemeUri() throws -> String
+
     /// closeView method
     func closeView() async throws
 }
