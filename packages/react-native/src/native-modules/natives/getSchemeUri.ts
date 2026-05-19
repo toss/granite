@@ -1,27 +1,10 @@
-import { GraniteBrownfieldModule } from '@granite-js/brownfield-module';
+import { GraniteBrownfieldModule } from "@granite-js/brownfield-module";
 
-/**
- * @public
- * @name getSchemeUri
- * @category Environment Check
- * @kind function
- * @description Returns the scheme value when first entering the screen. URI changes due to page navigation are not reflected.
- * @returns {string} Returns the scheme value when first entering the screen.
- *
- * @example
- * ### Get initial scheme value
- *
- * ```tsx
- * import { getSchemeUri } from '@granite-js/react-native';
- * import { Text } from 'react-native';
- *
- * function MyPage() {
- *  const schemeUri = getSchemeUri();
- *
- *  return <Text>Initial scheme value: {schemeUri}</Text>
- * }
- * ```
- */
 export function getSchemeUri() {
-  return GraniteBrownfieldModule.getConstants().schemeUri;
+  try {
+    return GraniteBrownfieldModule.getSchemeUri();
+  } catch {
+    // Fallback to the deprecated `schemeUri` constant for older versions of the native module
+    return GraniteBrownfieldModule.getConstants().schemeUri;
+  }
 }

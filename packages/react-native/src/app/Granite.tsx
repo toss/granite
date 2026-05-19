@@ -31,7 +31,7 @@ export interface GraniteProps {
    * @description
    * The initial scheme of the app.
    */
-  initialScheme?: string;
+  initialScheme?: string | (() => string);
 
   /**
    * @description
@@ -63,7 +63,7 @@ const createApp = () => {
   }
 
   return {
-    registerApp(
+    registerApp( 
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
       { appName, context, router, initialScheme, setIosSwipeGestureEnabled, getInitialUrl }: GraniteProps
     ): (initialProps: InitialProps) => JSX.Element {
@@ -72,11 +72,13 @@ const createApp = () => {
       }
 
       function Root(initialProps: InitialProps) {
+        const initialSchemeValue = (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ?? getSchemeUri();
+
         return (
           <AppRoot
             container={AppContainer}
             initialProps={initialProps}
-            initialScheme={initialScheme ?? getSchemeUri()}
+            initialScheme={initialSchemeValue}
             setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
             getInitialUrl={getInitialUrl}
             appName={appName}
