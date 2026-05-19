@@ -162,6 +162,7 @@ class GraniteImage(context: Context) : FrameLayout(context) {
         )
         addView(imageView)
         containerView = imageView
+        layoutContainerViewIfPossible(imageView)
 
         // Load image using provider with full options
         provider.loadImage(
@@ -183,6 +184,17 @@ class GraniteImage(context: Context) : FrameLayout(context) {
                 }
             }
         )
+    }
+
+    private fun layoutContainerViewIfPossible(view: View) {
+        if (width <= 0 || height <= 0) {
+            return
+        }
+
+        val widthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
+        val heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
+        view.measure(widthSpec, heightSpec)
+        view.layout(0, 0, width, height)
     }
 
     private fun handleLoadCompletion(
