@@ -42,6 +42,7 @@ __attribute__((used)) static void _forceIncludeGraniteImageComponentView(void) {
 
 @implementation GraniteImageComponentView {
     UIView *_containerView;
+    UIView *_errorView;
     NSString *_currentUri;
     UIViewContentMode _currentContentMode;
     BOOL _needsInitialLoad;
@@ -198,11 +199,7 @@ __attribute__((used)) static void _forceIncludeGraniteImageComponentView(void) {
 
     if (shouldReload) {
         if (_currentUri.length > 0) {
-            // 다음 runloop으로 지연하여 _eventEmitter 세팅 후 실행
-            __weak GraniteImageComponentView *weakSelf = self;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [weakSelf loadImageWithProvider];
-            });
+            [self loadImageWithProvider];
         } else {
             // URI가 비어있거나 nil인 경우 에러 발생
             [self showErrorViewWithMessage:@"No URI provided"];
@@ -259,10 +256,6 @@ __attribute__((used)) static void _forceIncludeGraniteImageComponentView(void) {
 
 - (void)loadImageWithProvider
 {
-    // Remove existing container view
-    [_containerView removeFromSuperview];
-    _containerView = nil;
-
     id<GraniteImageProvidable> provider = [[GraniteImageRegistry shared] provider];
 
     if (!provider) {
@@ -279,15 +272,21 @@ __attribute__((used)) static void _forceIncludeGraniteImageComponentView(void) {
         return;
     }
 
-    // Emit load start event
+    [_errorView removeFromSuperview];
+    _errorView = nil;
+
     [self emitOnLoadStart];
 
-    // Create new image view from provider
-    UIView *imageView = [provider createImageView];
-    imageView.frame = self.bounds;
-    imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [self addSubview:imageView];
-    _containerView = imageView;
+    UIView *imageView = _containerView;
+    if (!imageView) {
+        imageView = [provider createImageView];
+        imageView.frame = self.bounds;
+        imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [self addSubview:imageView];
+        _containerView = imageView;
+    } else {
+        [provider cancelLoadWith:imageView];
+    }
 
     // Check if provider supports extended loading with callbacks
     __weak GraniteImageComponentView *weakSelf = self;
@@ -353,6 +352,8 @@ __attribute__((used)) static void _forceIncludeGraniteImageComponentView(void) {
 
 - (void)showErrorViewWithMessage:(NSString *)message
 {
+    [_errorView removeFromSuperview];
+
     UIView *errorView = [[UIView alloc] initWithFrame:self.bounds];
     errorView.backgroundColor = [UIColor redColor];
     errorView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -374,7 +375,7 @@ __attribute__((used)) static void _forceIncludeGraniteImageComponentView(void) {
     ]];
 
     [self addSubview:errorView];
-    _containerView = errorView;
+    _errorView = errorView;
 }
 
 - (void)prepareForRecycle
@@ -388,6 +389,8 @@ __attribute__((used)) static void _forceIncludeGraniteImageComponentView(void) {
 
     [_containerView removeFromSuperview];
     _containerView = nil;
+    [_errorView removeFromSuperview];
+    _errorView = nil;
     _currentUri = nil;
 }
 
