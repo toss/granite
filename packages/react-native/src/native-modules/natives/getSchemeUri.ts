@@ -1,13 +1,10 @@
 import { GraniteBrownfieldModule } from "@granite-js/brownfield-module";
 
-function __legacyGetSchemeUri() {
-  return GraniteBrownfieldModule.getConstants().schemeUri;
-}
-
 export function getSchemeUri() {
   try {
-    return getSchemeUri();
-  } catch (error) {
-    return __legacyGetSchemeUri(); 
+    return GraniteBrownfieldModule.getSchemeUri();
+  } catch {
+    // Fallback to the deprecated `schemeUri` constant for older versions of the native module
+    return GraniteBrownfieldModule.getConstants().schemeUri;
   }
 }
