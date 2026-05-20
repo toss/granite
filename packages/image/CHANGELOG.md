@@ -1,5 +1,12 @@
 # @granite-js/image
 
+## 1.0.28
+
+### Patch Changes
+
+- 0eb0277: Fix Android GraniteImage rendering when the native provider view is replaced after the parent view is already laid out.
+- 59a4ab7: Reuse the iOS image provider view across source changes.
+
 ## 1.0.27
 
 ## 1.0.26

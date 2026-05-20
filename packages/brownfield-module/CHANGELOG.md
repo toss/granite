@@ -1,5 +1,11 @@
 # @granite-js/brownfield-module
 
+## 1.0.28
+
+### Patch Changes
+
+- 494c13e: feat: schemeUri to `getSchemeUri`
+
 ## 1.0.27
 
 ## 1.0.26
