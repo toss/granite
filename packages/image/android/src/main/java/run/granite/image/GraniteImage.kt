@@ -130,11 +130,7 @@ class GraniteImage(context: Context) : FrameLayout(context) {
     }
 
     private fun loadImageIfReady() {
-        // Remove existing container view
-        containerView?.let {
-            removeView(it)
-            containerView = null
-        }
+        clearContainerView()
 
         val provider = providerResolver()
 
@@ -154,15 +150,8 @@ class GraniteImage(context: Context) : FrameLayout(context) {
         // Emit load start event
         emitLoadStart()
 
-        // Create new image view from provider
         val imageView = provider.createImageView(context)
-        imageView.layoutParams = LayoutParams(
-            LayoutParams.MATCH_PARENT,
-            LayoutParams.MATCH_PARENT
-        )
-        addView(imageView)
-        containerView = imageView
-        layoutContainerViewIfPossible(imageView)
+        attachContainerView(imageView)
 
         // Load image using provider with full options
         provider.loadImage(
@@ -186,6 +175,23 @@ class GraniteImage(context: Context) : FrameLayout(context) {
         )
     }
 
+    private fun attachContainerView(view: View) {
+        view.layoutParams = LayoutParams(
+            LayoutParams.MATCH_PARENT,
+            LayoutParams.MATCH_PARENT
+        )
+        addView(view)
+        containerView = view
+        layoutContainerViewIfPossible(view)
+    }
+
+    private fun clearContainerView() {
+        containerView?.let {
+            removeView(it)
+            containerView = null
+        }
+    }
+
     private fun layoutContainerViewIfPossible(view: View) {
         if (width <= 0 || height <= 0) {
             return
@@ -195,6 +201,16 @@ class GraniteImage(context: Context) : FrameLayout(context) {
         val heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
         view.measure(widthSpec, heightSpec)
         view.layout(0, 0, width, height)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        containerView?.let(::layoutContainerViewIfPossible)
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        containerView?.let(::layoutContainerViewIfPossible)
     }
 
     private fun handleLoadCompletion(
@@ -257,17 +273,15 @@ class GraniteImage(context: Context) : FrameLayout(context) {
         }
 
         errorView.addView(label)
-        addView(errorView)
-        containerView = errorView
+        attachContainerView(errorView)
     }
 
     fun cleanup() {
         val provider = providerResolver()
         containerView?.let {
             provider?.cancelLoad(it)
-            removeView(it)
         }
-        containerView = null
+        clearContainerView()
         currentUri = null
     }
 
