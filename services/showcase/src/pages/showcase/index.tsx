@@ -1,5 +1,5 @@
-import { createRoute, type RegisterScreenInput } from '@granite-js/react-native';
 import { CommonActions } from '@granite-js/native/@react-navigation/native';
+import { createRoute, type RegisterScreenInput } from '@granite-js/react-native';
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
