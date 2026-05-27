@@ -1,6 +1,15 @@
-import { createRoute, type RegisterScreen } from '@granite-js/react-native';
+import { createRoute, type RegisterScreenInput } from '@granite-js/react-native';
+import { CommonActions } from '@granite-js/native/@react-navigation/native';
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
+
+type OptionalParamsScreen = {
+  [Screen in keyof RegisterScreenInput]: undefined extends RegisterScreenInput[Screen]
+    ? Screen
+    : Partial<RegisterScreenInput[Screen]> extends RegisterScreenInput[Screen]
+      ? Screen
+      : never;
+}[keyof RegisterScreenInput];
 
 export const Route = createRoute('/showcase', {
   validateParams: (params) => params,
@@ -16,12 +25,12 @@ function Showcase() {
         .routeNames.filter((key) => {
           return key.startsWith('/showcase/') && !(key.endsWith('index.tsx') || key.endsWith('_layout.tsx'));
         })
-        .map((key) => key.replace(/^\.tsx$/g, '')) as (keyof RegisterScreen)[],
+        .map((key) => key.replace(/^\.tsx$/g, '')) as OptionalParamsScreen[],
     [navigation]
   );
 
-  const handlePressShowcaseItem = (page: keyof RegisterScreen) => {
-    navigation.navigate(page);
+  const handlePressShowcaseItem = (page: OptionalParamsScreen) => {
+    navigation.dispatch(CommonActions.navigate(page));
   };
 
   return (
