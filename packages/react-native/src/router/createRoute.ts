@@ -8,7 +8,7 @@ import {
   NativeStackNavigationProp,
 } from '@granite-js/native/@react-navigation/native-stack';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { RESERVED_PATHS } from './constants';
 import type { ErrorComponent } from './types';
 import { defaultParserParams } from './utils/defaultParserParams';
@@ -31,20 +31,18 @@ export interface RegisterScreen {}
 
 type RegisteredParamList = keyof RegisterScreenInput extends never ? ParamListBase : RegisterScreenInput;
 
-type NavigationParamsHelpers = Pick<
+export type NavigationProps = NativeStackNavigationProp<
   // @ts-expect-error - override type
-  NativeStackNavigationProp<RegisteredParamList, keyof RegisteredParamList>,
-  'replaceParams' | 'setParams'
+  RegisteredParamList
 >;
-
-export type NavigationProps = Omit<NativeStackNavigationProp<ParamListBase>, keyof NavigationParamsHelpers> &
-  NavigationParamsHelpers;
 
 export function useNavigation() {
   return useNavigationNative<NavigationProps>();
 }
 
-export type RouteHooksOptions<TScreen extends keyof RegisterScreen> =
+type RouteHookScreen = keyof RegisterScreenInput | keyof RegisterScreen;
+
+export type RouteHooksOptions<TScreen extends RouteHookScreen> =
   | {
       from: TScreen;
       strict?: true;
@@ -64,7 +62,7 @@ export const routeMap = new Map<
   }
 >();
 
-export function useMatchOptions<TScreen extends keyof RegisterScreen>(options: RouteHooksOptions<TScreen>) {
+export function useMatchOptions<TScreen extends RouteHookScreen>(options: RouteHooksOptions<TScreen>) {
   const route = useRoute();
   const from = 'from' in options ? options.from : (route.name as TScreen);
   const strict = 'from' in options ? true : options.strict;
@@ -78,11 +76,11 @@ export function useMatchOptions<TScreen extends keyof RegisterScreen>(options: R
       return null;
     }
 
-    if (!(routeMap.has(from) || RESERVED_PATHS.includes(from))) {
+    if (!(routeMap.has(from as keyof RegisterScreenInput) || RESERVED_PATHS.includes(from as string))) {
       throw new Error(`Route '${from}' is not registered`);
     }
 
-    const routeOptions = routeMap.get(from);
+    const routeOptions = routeMap.get(from as keyof RegisterScreenInput);
     return {
       ...routeOptions?.options,
       parserParams: routeOptions?.options.parserParams ?? defaultParserParams,
@@ -174,34 +172,69 @@ export function useParams<TScreen extends keyof RegisterScreen>(
   return params;
 }
 
+type SetParamsFunction<TParams> = (params: TParams extends undefined ? undefined : Partial<TParams>) => void;
+type ReplaceParamsFunction<TParams> = (params: TParams extends undefined ? undefined : TParams) => void;
+
+type CreatedRoute<TInput, TOutput> = {
+  _path: keyof RegisterScreenInput;
+  useNavigation: typeof useNavigation;
+  useParams: () => TOutput;
+  useSetParams: () => SetParamsFunction<TInput>;
+  useReplaceParams: () => ReplaceParamsFunction<TInput>;
+  _inputType: TInput;
+  _outputType: TOutput;
+};
+
+export function useSetParams<TScreen extends keyof RegisterScreenInput>(options: {
+  from: TScreen;
+  strict?: true;
+}): SetParamsFunction<RegisterScreenInput[TScreen]>;
+export function useSetParams(options: { strict: false }): SetParamsFunction<Readonly<object | undefined>>;
+
+export function useSetParams<TScreen extends keyof RegisterScreenInput>(
+  options: RouteHooksOptions<TScreen>
+): SetParamsFunction<RegisterScreenInput[TScreen]> | SetParamsFunction<Readonly<object | undefined>> {
+  useMatchOptions(options);
+  const navigation = useNavigationNative<NativeStackNavigationProp<ParamListBase>>();
+
+  return useCallback((params: never) => navigation.setParams(params), [navigation]) as
+    | SetParamsFunction<RegisterScreenInput[TScreen]>
+    | SetParamsFunction<Readonly<object | undefined>>;
+}
+
+export function useReplaceParams<TScreen extends keyof RegisterScreenInput>(options: {
+  from: TScreen;
+  strict?: true;
+}): ReplaceParamsFunction<RegisterScreenInput[TScreen]>;
+export function useReplaceParams(options: { strict: false }): ReplaceParamsFunction<Readonly<object | undefined>>;
+
+export function useReplaceParams<TScreen extends keyof RegisterScreenInput>(
+  options: RouteHooksOptions<TScreen>
+): ReplaceParamsFunction<RegisterScreenInput[TScreen]> | ReplaceParamsFunction<Readonly<object | undefined>> {
+  useMatchOptions(options);
+  const navigation = useNavigationNative<NativeStackNavigationProp<ParamListBase>>();
+
+  return useCallback((params: never) => navigation.replaceParams(params), [navigation]) as
+    | ReplaceParamsFunction<RegisterScreenInput[TScreen]>
+    | ReplaceParamsFunction<Readonly<object | undefined>>;
+}
+
 // Overload 1: StandardSchema pattern
 export function createRoute<TSchema extends StandardSchemaV1<any, any>>(
   path: keyof RegisterScreenInput,
   options: Omit<RouteOptions<any>, 'validateParams'> & {
     validateParams: TSchema;
   }
-): {
-  _path: keyof RegisterScreenInput;
-  useNavigation: typeof useNavigation;
-  useParams: () => InferOutput<TSchema>;
-  _inputType: InferInput<TSchema>;
-  _outputType: InferOutput<TSchema>;
-};
+): CreatedRoute<InferInput<TSchema>, InferOutput<TSchema>>;
 
 // Overload 2: Function pattern
 export function createRoute<T extends Readonly<object | undefined>>(
   path: keyof RegisterScreenInput,
   options: RouteOptions<T>
-): {
-  _path: keyof RegisterScreenInput;
-  useNavigation: typeof useNavigation;
-  useParams: () => T;
-  _inputType: T;
-  _outputType: T;
-};
+): CreatedRoute<T, T>;
 
 // Implementation
-export function createRoute(path: keyof RegisterScreenInput, options: RouteOptions<any>) {
+export function createRoute(path: keyof RegisterScreenInput, options: RouteOptions<any>): CreatedRoute<any, any> {
   const { component, screenOptions, errorComponent, ...restOptions } = options;
   routeMap.set(path, {
     options: restOptions,
@@ -215,6 +248,8 @@ export function createRoute(path: keyof RegisterScreenInput, options: RouteOptio
     _path,
     useNavigation,
     useParams: () => useParams({ from: _path as keyof RegisterScreen, strict: true }),
+    useSetParams: () => useSetParams({ from: _path, strict: true }),
+    useReplaceParams: () => useReplaceParams({ from: _path, strict: true }),
 
     // These properties are only used for type inference in the generated router files
     // The actual values are never accessed at runtime

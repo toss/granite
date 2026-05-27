@@ -1,6 +1,12 @@
 import { assertType, describe, it } from 'vitest';
 import { z } from 'zod';
-import { createRoute, useNavigation, useParams } from './createRoute';
+import {
+  createRoute,
+  useNavigation,
+  useParams,
+  useReplaceParams,
+  useSetParams,
+} from './createRoute';
 
 declare module './createRoute' {
   interface RegisterScreenInput {
@@ -18,6 +24,9 @@ declare module './createRoute' {
     '/test-with-defaults': {
       animation?: boolean;
     };
+    '/test-optional': {
+      uri?: string;
+    };
   }
 
   interface RegisterScreen {
@@ -34,6 +43,9 @@ declare module './createRoute' {
     };
     '/test-with-defaults': {
       animation: boolean;
+    };
+    '/test-optional': {
+      uri?: string;
     };
   }
 }
@@ -76,6 +88,52 @@ describe('createRoute', () => {
 
     // @ts-expect-error Type error should occur since 'from' and 'strict: false' are conflicting options
     assertType(useParams({ from: '/test', strict: false }));
+  });
+
+  it('useSetParams and useReplaceParams', () => {
+    const setRouteParams = Route.useSetParams();
+
+    assertType<(params: Partial<{ id: string; name: string }>) => void>(setRouteParams);
+    setRouteParams({ id: 'test-id' });
+    setRouteParams({ name: 'test-name' });
+
+    // @ts-expect-error Type error should occur when param type is invalid
+    setRouteParams({ id: 123 });
+
+    // @ts-expect-error Type error should occur when param key is invalid
+    setRouteParams({ count: 123 });
+
+    const setParams = useSetParams({ from: '/test' });
+    setParams({ id: 'test-id' });
+
+    // @ts-expect-error Type error should occur when path is not registered
+    assertType(useSetParams({ from: '/abcdefg' }));
+
+    // @ts-expect-error Type error should occur since 'from' and 'strict: false' are conflicting options
+    assertType(useSetParams({ from: '/test', strict: false }));
+
+    const replaceRouteParams = Route.useReplaceParams();
+
+    assertType<(params: { id: string; name: string }) => void>(replaceRouteParams);
+    replaceRouteParams({ id: 'test-id', name: 'test-name' });
+
+    // @ts-expect-error Type error should occur when required params are missing
+    replaceRouteParams({ id: 'test-id' });
+
+    // @ts-expect-error Type error should occur when param type is invalid
+    replaceRouteParams({ id: 123, name: 'test-name' });
+
+    // @ts-expect-error Type error should occur when param key is invalid
+    replaceRouteParams({ id: 'test-id', name: 'test-name', count: 123 });
+
+    const replaceParams = useReplaceParams({ from: '/test' });
+    replaceParams({ id: 'test-id', name: 'test-name' });
+
+    // @ts-expect-error Type error should occur when path is not registered
+    assertType(useReplaceParams({ from: '/abcdefg' }));
+
+    // @ts-expect-error Type error should occur since 'from' and 'strict: false' are conflicting options
+    assertType(useReplaceParams({ from: '/test', strict: false }));
   });
 
   it('should infer _inputType and _outputType without undefined for function pattern', () => {
@@ -165,10 +223,48 @@ describe('createRoute with StandardSchema', () => {
 
     // Should accept exact input type
     navigation.navigate('/test-schema', { id: 'test', count: 123 });
+
+    // @ts-expect-error Type error should occur when a required params object is missing
+    navigation.navigate('/test-schema');
+
+    // @ts-expect-error Type error should occur when navigate param type is invalid
+    navigation.navigate('/test-schema', { id: 'test', count: 'invalid' });
+
+    // @ts-expect-error Type error should occur when navigating to an unregistered path
+    navigation.navigate('/abcdefg');
+
+    navigation.navigate('/test-optional', {});
+    navigation.navigate('/test-optional', { uri: 'test-uri' });
+
+    // @ts-expect-error Type error should occur when navigate params include an unknown key
+    navigation.navigate('/test-optional', { name: '123' });
+
+    navigation.popTo('/test-optional', { uri: 'test-uri' });
+
+    // @ts-expect-error popTo should already reject unknown param keys
+    navigation.popTo('/test-optional', { name: '123' });
+
+    navigation.push('/test-optional', { uri: 'test-uri' });
+
+    // @ts-expect-error push should reject unknown param keys
+    navigation.push('/test-optional', { name: '123' });
+
+    navigation.replace('/test-optional', { uri: 'test-uri' });
+
+    // @ts-expect-error replace should reject unknown param keys
+    navigation.replace('/test-optional', { name: '123' });
+
+    // @ts-expect-error push should require params for required route params
+    navigation.push('/test-schema');
+
+    // @ts-expect-error replace should require params for required route params
+    navigation.replace('/test-schema');
+
+    // @ts-expect-error popTo should require params for required route params
+    navigation.popTo('/test-schema');
   });
 
   it('should infer output type from transformation', () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const RouteWithTransform = createRoute('/test-transform', {
       component: () => null,
       validateParams: z.object({
@@ -198,6 +294,24 @@ describe('createRoute with StandardSchema', () => {
     // useNavigation should accept input type (string)
     const navigation = useNavigation();
     navigation.navigate('/test-transform', { id: 'test-id' });
+
+    const setParams = RouteWithTransform.useSetParams();
+    setParams({ id: 'test-id' });
+
+    // @ts-expect-error setParams should accept input type, not output type
+    setParams({ id: 123 });
+
+    const setParamsFromHook = useSetParams({ from: '/test-transform' });
+    setParamsFromHook({ id: 'test-id' });
+
+    // @ts-expect-error useSetParams should accept input type, not output type
+    setParamsFromHook({ id: 123 });
+
+    const replaceParams = RouteWithTransform.useReplaceParams();
+    replaceParams({ id: 'test-id' });
+
+    // @ts-expect-error useReplaceParams should accept input type, not output type
+    replaceParams({ id: 123 });
 
     // Verify that input and output types are different
     type InputIsString = InputType extends { id: string } ? true : false;
@@ -241,5 +355,13 @@ describe('createRoute with StandardSchema', () => {
 
     // Should accept without animation parameter (default will be used)
     navigation.navigate('/test-with-defaults', {});
+
+    const setParams = RouteWithDefaults.useSetParams();
+    setParams({});
+    setParams({ animation: false });
+
+    const replaceParams = RouteWithDefaults.useReplaceParams();
+    replaceParams({});
+    replaceParams({ animation: false });
   });
 });
