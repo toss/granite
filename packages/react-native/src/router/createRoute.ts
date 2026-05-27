@@ -31,13 +31,10 @@ export interface RegisterScreen {}
 
 type RegisteredParamList = keyof RegisterScreenInput extends never ? ParamListBase : RegisterScreenInput;
 
-type NavigationBase = NativeStackNavigationProp<
+export type NavigationProps = NativeStackNavigationProp<
   // @ts-expect-error - override type
-  RegisteredParamList,
-  keyof RegisteredParamList
+  RegisteredParamList
 >;
-
-export type NavigationProps = NavigationBase;
 
 export function useNavigation() {
   return useNavigationNative<NavigationProps>();
