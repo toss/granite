@@ -37,50 +37,7 @@ type NavigationBase = NativeStackNavigationProp<
   keyof RegisteredParamList
 >;
 
-type OptionalRouteName = {
-  [TScreen in keyof RegisteredParamList]: undefined extends RegisteredParamList[TScreen]
-    ? TScreen
-    : object extends RegisteredParamList[TScreen]
-      ? TScreen
-      : never;
-}[keyof RegisteredParamList];
-
-type NavigateActionOptions = {
-  merge?: boolean;
-  pop?: boolean;
-};
-
-type NavigateArgs<TScreen extends keyof RegisteredParamList> = TScreen extends unknown
-  ? undefined extends RegisteredParamList[TScreen]
-    ? [screen: TScreen, params?: RegisteredParamList[TScreen], options?: NavigateActionOptions]
-    : [screen: TScreen, params: RegisteredParamList[TScreen], options?: NavigateActionOptions]
-  : never;
-
-type NavigateOptions<TScreen extends keyof RegisteredParamList> = TScreen extends unknown
-  ? undefined extends RegisteredParamList[TScreen]
-    ? {
-        name: TScreen;
-        params?: RegisteredParamList[TScreen];
-        path?: string;
-      } & NavigateActionOptions
-    : {
-        name: TScreen;
-        params: RegisteredParamList[TScreen];
-        path?: string;
-      } & NavigateActionOptions
-  : never;
-
-type NavigationNavigateHelper = {
-  <TScreen extends keyof RegisteredParamList>(...args: NavigateArgs<TScreen>): void;
-  <TScreen extends OptionalRouteName>(screen: TScreen): void;
-  <TScreen extends keyof RegisteredParamList>(options: NavigateOptions<TScreen>): void;
-};
-
-type NavigationParamsHelpers = Pick<NavigationBase, 'replaceParams' | 'setParams'> & {
-  navigate: NavigationNavigateHelper;
-};
-
-export type NavigationProps = Omit<NavigationBase, keyof NavigationParamsHelpers> & NavigationParamsHelpers;
+export type NavigationProps = NavigationBase;
 
 export function useNavigation() {
   return useNavigationNative<NavigationProps>();

@@ -204,11 +204,6 @@ describe('createRoute with StandardSchema', () => {
     // @ts-expect-error Type error should occur when navigating to an unregistered path
     navigation.navigate('/abcdefg');
 
-    navigation.navigate('/test-with-defaults');
-
-    const optionalScreen = '/test-with-defaults' as '/test-with-defaults' | '/test-optional';
-    navigation.navigate(optionalScreen);
-
     navigation.navigate('/test-optional', {});
     navigation.navigate('/test-optional', { uri: 'test-uri' });
 
@@ -219,6 +214,25 @@ describe('createRoute with StandardSchema', () => {
 
     // @ts-expect-error popTo should already reject unknown param keys
     navigation.popTo('/test-optional', { name: '123' });
+
+    navigation.push('/test-optional', { uri: 'test-uri' });
+
+    // @ts-expect-error push should reject unknown param keys
+    navigation.push('/test-optional', { name: '123' });
+
+    navigation.replace('/test-optional', { uri: 'test-uri' });
+
+    // @ts-expect-error replace should reject unknown param keys
+    navigation.replace('/test-optional', { name: '123' });
+
+    // @ts-expect-error push should require params for required route params
+    navigation.push('/test-schema');
+
+    // @ts-expect-error replace should require params for required route params
+    navigation.replace('/test-schema');
+
+    // @ts-expect-error popTo should require params for required route params
+    navigation.popTo('/test-schema');
   });
 
   it('should infer output type from transformation', () => {
