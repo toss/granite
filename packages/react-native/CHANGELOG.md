@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 1.0.29
+
+### Patch Changes
+
+- 1b504a1: feat(router): Route.useSetParams
+  - @granite-js/blur-view@1.0.29
+  - @granite-js/brownfield-module@1.0.29
+  - @granite-js/cli@1.0.29
+  - @granite-js/jest@1.0.29
+  - @granite-js/mpack@1.0.29
+  - @granite-js/native@1.0.29
+  - @granite-js/plugin-core@1.0.29
+  - @granite-js/style-utils@1.0.29
+  - @granite-js/video@1.0.29
+
 ## 1.0.28
 
 ### Patch Changes

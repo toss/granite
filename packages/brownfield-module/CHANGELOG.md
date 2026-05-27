@@ -1,5 +1,7 @@
 # @granite-js/brownfield-module
 
+## 1.0.29
+
 ## 1.0.28
 
 ### Patch Changes
