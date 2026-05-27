@@ -173,12 +173,14 @@ export function useParams<TScreen extends keyof RegisterScreen>(
 }
 
 type SetParamsFunction<TParams> = (params: TParams extends undefined ? undefined : Partial<TParams>) => void;
+type ReplaceParamsFunction<TParams> = (params: TParams extends undefined ? undefined : TParams) => void;
 
 type CreatedRoute<TInput, TOutput> = {
   _path: keyof RegisterScreenInput;
   useNavigation: typeof useNavigation;
   useParams: () => TOutput;
   useSetParams: () => SetParamsFunction<TInput>;
+  useReplaceParams: () => ReplaceParamsFunction<TInput>;
   _inputType: TInput;
   _outputType: TOutput;
 };
@@ -198,6 +200,23 @@ export function useSetParams<TScreen extends keyof RegisterScreenInput>(
   return useCallback((params: never) => navigation.setParams(params), [navigation]) as
     | SetParamsFunction<RegisterScreenInput[TScreen]>
     | SetParamsFunction<Readonly<object | undefined>>;
+}
+
+export function useReplaceParams<TScreen extends keyof RegisterScreenInput>(options: {
+  from: TScreen;
+  strict?: true;
+}): ReplaceParamsFunction<RegisterScreenInput[TScreen]>;
+export function useReplaceParams(options: { strict: false }): ReplaceParamsFunction<Readonly<object | undefined>>;
+
+export function useReplaceParams<TScreen extends keyof RegisterScreenInput>(
+  options: RouteHooksOptions<TScreen>
+): ReplaceParamsFunction<RegisterScreenInput[TScreen]> | ReplaceParamsFunction<Readonly<object | undefined>> {
+  useMatchOptions(options);
+  const navigation = useNavigationNative<NativeStackNavigationProp<ParamListBase>>();
+
+  return useCallback((params: never) => navigation.replaceParams(params), [navigation]) as
+    | ReplaceParamsFunction<RegisterScreenInput[TScreen]>
+    | ReplaceParamsFunction<Readonly<object | undefined>>;
 }
 
 // Overload 1: StandardSchema pattern
@@ -230,6 +249,7 @@ export function createRoute(path: keyof RegisterScreenInput, options: RouteOptio
     useNavigation,
     useParams: () => useParams({ from: _path as keyof RegisterScreen, strict: true }),
     useSetParams: () => useSetParams({ from: _path, strict: true }),
+    useReplaceParams: () => useReplaceParams({ from: _path, strict: true }),
 
     // These properties are only used for type inference in the generated router files
     // The actual values are never accessed at runtime

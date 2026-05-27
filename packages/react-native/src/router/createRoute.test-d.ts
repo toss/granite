@@ -1,6 +1,12 @@
 import { assertType, describe, it } from 'vitest';
 import { z } from 'zod';
-import { createRoute, useNavigation, useParams, useSetParams } from './createRoute';
+import {
+  createRoute,
+  useNavigation,
+  useParams,
+  useReplaceParams,
+  useSetParams,
+} from './createRoute';
 
 declare module './createRoute' {
   interface RegisterScreenInput {
@@ -84,7 +90,7 @@ describe('createRoute', () => {
     assertType(useParams({ from: '/test', strict: false }));
   });
 
-  it('useSetParams', () => {
+  it('useSetParams and useReplaceParams', () => {
     const setRouteParams = Route.useSetParams();
 
     assertType<(params: Partial<{ id: string; name: string }>) => void>(setRouteParams);
@@ -105,6 +111,29 @@ describe('createRoute', () => {
 
     // @ts-expect-error Type error should occur since 'from' and 'strict: false' are conflicting options
     assertType(useSetParams({ from: '/test', strict: false }));
+
+    const replaceRouteParams = Route.useReplaceParams();
+
+    assertType<(params: { id: string; name: string }) => void>(replaceRouteParams);
+    replaceRouteParams({ id: 'test-id', name: 'test-name' });
+
+    // @ts-expect-error Type error should occur when required params are missing
+    replaceRouteParams({ id: 'test-id' });
+
+    // @ts-expect-error Type error should occur when param type is invalid
+    replaceRouteParams({ id: 123, name: 'test-name' });
+
+    // @ts-expect-error Type error should occur when param key is invalid
+    replaceRouteParams({ id: 'test-id', name: 'test-name', count: 123 });
+
+    const replaceParams = useReplaceParams({ from: '/test' });
+    replaceParams({ id: 'test-id', name: 'test-name' });
+
+    // @ts-expect-error Type error should occur when path is not registered
+    assertType(useReplaceParams({ from: '/abcdefg' }));
+
+    // @ts-expect-error Type error should occur since 'from' and 'strict: false' are conflicting options
+    assertType(useReplaceParams({ from: '/test', strict: false }));
   });
 
   it('should infer _inputType and _outputType without undefined for function pattern', () => {
@@ -278,6 +307,12 @@ describe('createRoute with StandardSchema', () => {
     // @ts-expect-error useSetParams should accept input type, not output type
     setParamsFromHook({ id: 123 });
 
+    const replaceParams = RouteWithTransform.useReplaceParams();
+    replaceParams({ id: 'test-id' });
+
+    // @ts-expect-error useReplaceParams should accept input type, not output type
+    replaceParams({ id: 123 });
+
     // Verify that input and output types are different
     type InputIsString = InputType extends { id: string } ? true : false;
     type OutputIsNumber = OutputType extends { id: number } ? true : false;
@@ -324,5 +359,9 @@ describe('createRoute with StandardSchema', () => {
     const setParams = RouteWithDefaults.useSetParams();
     setParams({});
     setParams({ animation: false });
+
+    const replaceParams = RouteWithDefaults.useReplaceParams();
+    replaceParams({});
+    replaceParams({ animation: false });
   });
 });
