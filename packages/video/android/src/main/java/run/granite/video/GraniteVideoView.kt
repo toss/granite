@@ -66,11 +66,10 @@ class GraniteVideoView @JvmOverloads constructor(
     }
 
     // Source
-    @Suppress("UNCHECKED_CAST")
     fun setSource(source: Map<String, Any>?) {
         source ?: return
 
-        val headers = source["headers"] as? Map<String, String>
+        val headers = parseHeaders(source["headers"])
 
         val videoSource = GraniteVideoSource(
             uri = source["uri"] as? String,
@@ -113,13 +112,32 @@ class GraniteVideoView @JvmOverloads constructor(
             "clearkey" -> GraniteVideoDrmType.CLEARKEY
             else -> GraniteVideoDrmType.NONE
         }
-        val headers = map["headers"] as? Map<String, String>
+        val headers = parseHeaders(map["headers"])
         return GraniteVideoDrmConfig(
             type = drmType,
             licenseServer = map["licenseServer"] as? String,
             headers = headers,
             contentId = map["contentId"] as? String
         )
+    }
+
+    private fun parseHeaders(value: Any?): Map<String, String>? {
+        return when (value) {
+            is Map<*, *> -> value.entries.mapNotNull { (name, headerValue) ->
+                val headerName = name as? String ?: return@mapNotNull null
+                val headerStringValue = headerValue as? String ?: return@mapNotNull null
+                headerName to headerStringValue
+            }.toMap().ifEmpty { null }
+
+            is List<*> -> value.mapNotNull { entry ->
+                val header = entry as? Map<*, *> ?: return@mapNotNull null
+                val headerName = header["name"] as? String ?: return@mapNotNull null
+                val headerValue = header["value"] as? String ?: return@mapNotNull null
+                headerName to headerValue
+            }.toMap().ifEmpty { null }
+
+            else -> null
+        }
     }
 
     private fun parseMetadata(map: Map<String, Any>?): GraniteVideoMetadata? {
