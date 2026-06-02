@@ -1,0 +1,47 @@
+{
+  "name": "granite-release-profiler",
+  "version": "1.0.30",
+  "type": "module",
+  "description": "CLI server for profiling React Native release bundles",
+  "bin": "./dist/cli.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./cli": "./dist/cli.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "prepack": "yarn build",
+    "start": "tsx src/cli.ts",
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run"
+  },
+  "devDependencies": {
+    "@oxc-node/core": "^0.1.0",
+    "@types/node": "catalog:tools",
+    "@types/ws": "^8",
+    "tsdown": "catalog:tools",
+    "tsx": "^4.21.0",
+    "typescript": "catalog:tools",
+    "vitest": "^4.0.12"
+  },
+  "dependencies": {
+    "@fastify/middie": "^9.3.2",
+    "@react-native/dev-middleware": "catalog:react-native",
+    "@rozenite/middleware": "1.10.0",
+    "@rozenite/tanstack-query-plugin": "1.10.0",
+    "@tanstack/react-query": "^4.42.0",
+    "ajv": "^8.20.0",
+    "es-toolkit": "^1.46.1",
+    "fastify": "^5.8.5",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
+    "url": "^0.11.4",
+    "ws": "^8.20.0"
+  }
+}

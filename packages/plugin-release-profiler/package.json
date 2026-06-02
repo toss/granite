@@ -1,0 +1,39 @@
+{
+  "name": "@granite-js/plugin-release-profiler",
+  "version": "1.0.30",
+  "type": "module",
+  "description": "Granite plugin for React Native release profiler bundles",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./plugins": {
+      "import": "./dist/plugins/index.js",
+      "require": "./dist/plugins/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepack": "yarn build",
+    "test": "vitest --run",
+    "typecheck": "tsc --noEmit",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@granite-js/plugin-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:tools",
+    "tsdown": "catalog:tools",
+    "typescript": "catalog:tools",
+    "vitest": "^4.0.12"
+  },
+  "sideEffects": false
+}
