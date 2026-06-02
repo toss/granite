@@ -125,6 +125,31 @@ class GraniteVideoViewRobolectricTest {
     }
 
     @Test
+    fun `setSource with codegen header entries should restore headers map`() {
+        val view = GraniteVideoView(
+            context = context,
+            providerFactory = { mockProvider }
+        )
+
+        val source = mapOf(
+            "uri" to "https://example.com/protected.m3u8",
+            "headers" to listOf(
+                mapOf(
+                    "name" to "X-Auth-Token",
+                    "value" to "test-secret"
+                )
+            )
+        )
+        view.setSource(source)
+
+        verify {
+            mockProvider.loadSource(match<GraniteVideoSource> {
+                it.headers == mapOf("X-Auth-Token" to "test-secret")
+            })
+        }
+    }
+
+    @Test
     fun `setSource with null source should not call loadSource`() {
         val view = GraniteVideoView(
             context = context,
