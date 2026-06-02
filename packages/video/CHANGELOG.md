@@ -1,5 +1,11 @@
 # @granite-js/video
 
+## 1.0.30
+
+### Patch Changes
+
+- 4b2e737: Fix Android video source headers parsing for React Native codegen header entries.
+
 ## 1.0.29
 
 ## 1.0.28
