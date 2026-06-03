@@ -16,7 +16,7 @@ type TransformTemplateArgs<T extends string> = {
  * const result = transformTemplate(str, { name: "홍길동", age: "20" })
  * // 결과: "안녕하세요 홍길동님, 당신의 나이는 20살 입니다."
  */
-export function transformTemplate<T extends string>(templateString: T, values: TransformTemplateArgs<T>): string {
+export function transformTemplate<T extends string>(templateString: T, values: TransformTemplateArgs<T> | Record<string, string>): string {
   let result: string = templateString;
   for (const key in values) {
     const placeholder = `%%${key}%%`;

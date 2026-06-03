@@ -11,6 +11,24 @@ function getAppName(appPath: string) {
   return appPath.split('/').pop() || '';
 }
 
+function getNativeAppName(appName: string) {
+  return appName
+    .split(/[-_.]/)
+    .filter(Boolean)
+    .map((word) => `${word[0]?.toUpperCase() ?? ''}${word.slice(1)}`)
+    .join('');
+}
+
+function getDefaultNativeId(appName: string) {
+  return `run.granite.${appName.replaceAll('-', '')}`;
+}
+
+function assertValidNativeId(input: string, optionName: string) {
+  if (!input.match(/^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/)) {
+    throw new Error(`${optionName} must be a valid reverse-DNS identifier (e.g. run.granite.myapp)`);
+  }
+}
+
 function assertValidAppName(input: string) {
   const appName = getAppName(input);
   const kebabCaseAppName = kebabCase(appName);
@@ -38,6 +56,19 @@ async function run() {
         description: 'Select development tools to include in the project',
         default: [],
         choices: TOOL_TEMPLATE_LIST,
+      },
+      greenfield: {
+        type: 'boolean',
+        description: 'Create a React Native bare-style Granite app with iOS and Android projects',
+        default: false,
+      },
+      'bundle-id': {
+        type: 'string',
+        description: 'Override the iOS bundle identifier for --greenfield apps',
+      },
+      'android-package': {
+        type: 'string',
+        description: 'Override the Android application id/package for --greenfield apps',
       },
     })
     .help().argv;
@@ -71,6 +102,14 @@ async function run() {
   }
 
   assertValidAppName(appPath);
+  const appName = getAppName(appPath);
+  const bundleId = cli.bundleId ?? getDefaultNativeId(appName);
+  const androidPackage = cli.androidPackage ?? getDefaultNativeId(appName);
+
+  if (cli.greenfield) {
+    assertValidNativeId(bundleId, '--bundle-id');
+    assertValidNativeId(androidPackage, '--android-package');
+  }
 
   const toolTemplate = await resolveFallback(cli.tools.length > 0 ? cli.tools : null, async () =>
     multiselect({
@@ -93,9 +132,13 @@ async function run() {
       title: `Creating Granite App`,
       task: async () => {
         try {
-          await copyTemplate('granite-app', {
+          await copyTemplate(cli.greenfield ? 'greenfield-app' : 'granite-app', {
             appPath,
-            appName: getAppName(appPath),
+            appName,
+            bundleId,
+            androidPackage,
+            androidPackagePath: androidPackage.replaceAll('.', '/'),
+            nativeAppName: getNativeAppName(appName),
             needYarnrc: Boolean(pkgInfo.packageManager === 'yarn' && pkgInfo.version && pkgInfo?.version >= '2.0.0'),
           });
           await Promise.all(toolTemplate.map((tool) => copyToolTemplate(tool, { appPath })));
@@ -108,7 +151,15 @@ async function run() {
     },
   ]);
 
-  const nextSteps = [`cd ${appPath}`, `${pkgInfo.packageManager} install`, `${pkgInfo.packageManager} run dev`];
+  const nextSteps = cli.greenfield
+    ? [
+        `cd ${appPath}`,
+        `${pkgInfo.packageManager} install`,
+        `cd ios && pod install && cd ..`,
+        `${pkgInfo.packageManager} run dev`,
+        'Open ios/*.xcworkspace in Xcode or android/ in Android Studio',
+      ]
+    : [`cd ${appPath}`, `${pkgInfo.packageManager} install`, `${pkgInfo.packageManager} run dev`];
 
   note(nextSteps.join('\n'), 'Next steps');
   outro('Done');
