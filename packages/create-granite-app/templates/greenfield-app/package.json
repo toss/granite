@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@granite-js/brownfield-module": "workspace:*",
     "@granite-js/image": "workspace:*",
     "@granite-js/lottie": "workspace:*",
     "@granite-js/native": "workspace:*",
@@ -30,7 +31,8 @@
     "react-native-safe-area-context": "5.6.2",
     "react-native-screens": "4.23.0",
     "react-native-svg": "15.15.3",
-    "react-native-webview": "13.16.0"
+    "react-native-webview": "13.16.0",
+    "brick-module": "0.5.0"
   },
   "devDependencies": {
     "@granite-js/vitest": "workspace:*",

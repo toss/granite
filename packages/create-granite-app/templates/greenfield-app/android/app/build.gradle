@@ -54,6 +54,45 @@ react {
     autolinkLibrariesWithApp()
 }
 
+def generateBrickCodegenArtifacts = tasks.register("generateBrickCodegenArtifacts") {
+    group = "brick-module"
+    description = "Generates Brick Module JSI artifacts after React Native autolinking."
+
+    def projectRoot = rootDir.parentFile
+    def brickCodegen = new File(projectRoot, "node_modules/brick-module/bin/brick-codegen.js")
+    outputs.dir(file("${buildDir}/generated/autolinking/src/main/jni"))
+
+    doLast {
+        if (!brickCodegen.exists()) {
+            throw new GradleException("brick-codegen not found at ${brickCodegen}")
+        }
+
+        def process = new ProcessBuilder("node", brickCodegen.absolutePath, "--platform", "android", "--projectRoot", projectRoot.absolutePath, "--no-clean")
+            .directory(projectRoot)
+            .inheritIO()
+            .start()
+        def exitCode = process.waitFor()
+        if (exitCode != 0) {
+            throw new GradleException("brick-codegen failed with exit code ${exitCode}")
+        }
+    }
+}
+
+tasks.matching { it.name.startsWith("generateAutolinking") }.configureEach {
+    finalizedBy(generateBrickCodegenArtifacts)
+}
+
+generateBrickCodegenArtifacts.configure {
+    mustRunAfter(tasks.matching { it.name.startsWith("generateAutolinking") })
+}
+
+tasks.matching {
+    def taskName = it.name.toLowerCase()
+    taskName.contains("cmake") || taskName == "prebuild"
+}.configureEach {
+    dependsOn(generateBrickCodegenArtifacts)
+}
+
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */

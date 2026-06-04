@@ -1,0 +1,24 @@
+apply plugin: "com.android.library"
+apply plugin: "org.jetbrains.kotlin.android"
+
+android {
+    namespace "run.granite.brownfield"
+    compileSdk rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs += ["src/main/java"]
+        }
+    }
+}
+
+dependencies {
+    implementation(project(":brick-module"))
+    implementation("com.facebook.react:react-android")
+    implementation("com.google.code.gson:gson:2.8.9")
+}

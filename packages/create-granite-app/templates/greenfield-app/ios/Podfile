@@ -5,6 +5,24 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "brick-module/podfile_helper.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
+
+def patch_brick_codegen_podspec!(app_path)
+  podspec_path = File.join(app_path, 'ios/.brick/BrickCodegen.podspec')
+  return unless File.exist?(podspec_path)
+
+  content = File.read(podspec_path)
+  content = content.gsub(
+    's.source_files = "**/*.{h,m,mm,swift}", "Types/**/*.swift"',
+    's.source_files = "Brick*.{h,m,mm,swift}", "ReactCodegen/BrickModuleSpec/**/*.{h,m,mm}", "ReactCodegen/BrickModuleSpecJSI.h"'
+  )
+  File.write(podspec_path, content)
+end
+
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
@@ -19,6 +37,8 @@ target '%%nativeAppName%%' do
 
   ENV['GRANITE_IMAGE_DEFAULT_PROVIDER'] ||= 'false'
 
+  use_brick_modules!(app_path: app_path)
+  patch_brick_codegen_podspec!(app_path)
   config = use_native_modules!
 
   use_react_native!(

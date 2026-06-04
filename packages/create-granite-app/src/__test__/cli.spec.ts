@@ -233,17 +233,24 @@ describe('create a "greenfield-app" template', () => {
     await fs.access(path.join(appPath, 'ios/MyGreenfieldApp.xcodeproj/project.pbxproj'));
     await fs.access(path.join(appPath, 'ios/MyGreenfieldApp.xcodeproj/xcshareddata/xcschemes/MyGreenfieldApp.xcscheme'));
     await fs.access(path.join(appPath, 'ios/MyGreenfieldApp/AppDelegate.swift'));
+    await fs.access(path.join(appPath, 'ios/MyGreenfieldApp/GreenfieldViewController.swift'));
+    await fs.access(path.join(appPath, 'ios/MyGreenfieldApp/GreenfieldReactNativeFactory.swift'));
+    await fs.access(path.join(appPath, 'ios/MyGreenfieldApp/GreenfieldBundleLoader.swift'));
+    await fs.access(path.join(appPath, 'ios/scripts/bundle-granite.sh'));
     await fs.access(path.join(appPath, 'android/app/src/main/java/run/granite/mygreenfieldapp/MainActivity.kt'));
     await fs.access(path.join(appPath, 'android/app/src/main/java/run/granite/mygreenfieldapp/MainApplication.kt'));
+    await fs.access(path.join(appPath, 'android/app/src/main/java/run/granite/mygreenfieldapp/GreenfieldBundleLoader.kt'));
 
     const gradlewStat = await fs.stat(path.join(appPath, 'android/gradlew'));
     expect(gradlewStat.mode & 0o111).not.toBe(0);
 
     const packageJson = JSON.parse(await fs.readFile(path.join(appPath, 'package.json'), 'utf8'));
     const nativeDependencies = [
+      '@granite-js/brownfield-module',
       '@granite-js/image',
       '@granite-js/lottie',
       '@granite-js/native',
+      '@granite-js/react-native',
       '@granite-js/video',
       '@react-native-async-storage/async-storage',
       '@react-native-community/blur',
@@ -257,13 +264,12 @@ describe('create a "greenfield-app" template', () => {
       'react-native-screens',
       'react-native-svg',
       'react-native-webview',
+      'brick-module',
     ];
 
     expect(packageJson.dependencies).not.toHaveProperty('@granite-js/screen');
     expect(packageJson.dependencies).not.toHaveProperty('@granite-js/blur-view');
-    expect(packageJson.dependencies).not.toHaveProperty('@granite-js/brownfield-module');
     expect(packageJson.dependencies).not.toHaveProperty('@granite-js/cookies');
-    expect(packageJson.dependencies).not.toHaveProperty('brick-module');
     for (const dependency of nativeDependencies) {
       expect(packageJson.dependencies).toHaveProperty(dependency);
     }
@@ -276,11 +282,9 @@ describe('create a "greenfield-app" template', () => {
     expect(packageJson.devDependencies).toHaveProperty('@granite-js/vitest');
     expect(JSON.stringify(packageJson)).not.toContain('workspace:*');
 
-    await expect(fs.access(path.join(appPath, 'src/spec/GraniteBrownfieldModule.brick.ts'))).rejects.toThrow();
+    await fs.access(path.join(appPath, 'ios/MyGreenfieldApp/GraniteBrownfieldModule.swift'));
     await expect(fs.access(path.join(appPath, 'src/NativeApiCheckScreen.tsx'))).rejects.toThrow();
-    await expect(
-      fs.access(path.join(appPath, 'android/app/src/main/java/run/granite/mygreenfieldapp/GraniteBrownfieldModule.kt'))
-    ).rejects.toThrow();
+    await fs.access(path.join(appPath, 'android/app/src/main/java/run/granite/brownfield/GraniteBrownfieldModule.kt'));
 
     const vitestConfig = await fs.readFile(path.join(appPath, 'vitest.config.mts'), 'utf8');
     expect(vitestConfig).toContain("from '@granite-js/vitest'");
@@ -292,15 +296,30 @@ describe('create a "greenfield-app" template', () => {
 
     const pbxproj = await fs.readFile(path.join(appPath, 'ios/MyGreenfieldApp.xcodeproj/project.pbxproj'), 'utf8');
     expect(pbxproj).toContain('PRODUCT_BUNDLE_IDENTIFIER = "run.granite.mygreenfieldapp"');
+    expect(pbxproj).toContain('GreenfieldViewController.swift in Sources');
+    expect(pbxproj).toContain('GreenfieldReactNativeFactory.swift in Sources');
+    expect(pbxproj).toContain('GreenfieldBundleLoader.swift in Sources');
+    expect(pbxproj).toContain('scripts/bundle-granite.sh');
+    expect(pbxproj).not.toContain('react-native-xcode.sh');
+
+    const iosBundleScript = await fs.readFile(path.join(appPath, 'ios/scripts/bundle-granite.sh'), 'utf8');
+    expect(iosBundleScript).toContain('"$GRANITE_BIN" build');
+    expect(iosBundleScript).toContain('dist/bundle.ios.hbc');
+    expect(iosBundleScript).toContain('$BUNDLE_NAME.jsbundle');
 
     const buildGradle = await fs.readFile(path.join(appPath, 'android/app/build.gradle'), 'utf8');
     expect(buildGradle).toContain('applicationId "run.granite.mygreenfieldapp"');
-    expect(buildGradle).not.toContain('Brick');
-    expect(buildGradle).not.toContain('brownfield');
+    expect(buildGradle).toContain('generateBrickCodegenArtifacts');
 
     const rootBuildGradle = await fs.readFile(path.join(appPath, 'android/build.gradle'), 'utf8');
     expect(rootBuildGradle).toContain('granite-js_lottie');
     expect(rootBuildGradle).toContain('jvmTarget = "17"');
+
+    const settingsGradle = await fs.readFile(path.join(appPath, 'android/settings.gradle'), 'utf8');
+    expect(settingsGradle).toContain('brick_modules.gradle');
+    expect(settingsGradle).toContain('applyBrickModules');
+    expect(settingsGradle).toContain('brick-brownfield-module');
+    await fs.access(path.join(appPath, 'android/brick-brownfield-module/build.gradle'));
 
     const gradleProperties = await fs.readFile(path.join(appPath, 'android/gradle.properties'), 'utf8');
     expect(gradleProperties).toContain('GRANITE_IMAGE_DEFAULT_PROVIDER=false');
@@ -308,20 +327,80 @@ describe('create a "greenfield-app" template', () => {
     const podfile = await fs.readFile(path.join(appPath, 'ios/Podfile'), 'utf8');
     expect(podfile).toContain("ENV['GRANITE_IMAGE_DEFAULT_PROVIDER'] ||= 'false'");
     expect(podfile).not.toContain("pod 'SDWebImage'");
-    expect(podfile).not.toContain('brick-module');
-    expect(podfile).not.toContain('use_brick_modules!');
+    expect(podfile).toContain('brick-module/podfile_helper.rb');
+    expect(podfile).toContain('use_brick_modules!');
 
     const appDelegate = await fs.readFile(path.join(appPath, 'ios/MyGreenfieldApp/AppDelegate.swift'), 'utf8');
-    expect(appDelegate).toContain('GreenfieldReactNativeFactory');
+    expect(appDelegate).toContain('GreenfieldViewController');
+    expect(appDelegate).not.toContain('GreenfieldReactNativeFactory');
+    expect(appDelegate).not.toContain('BrickModuleRegistry');
+    expect(appDelegate).not.toContain('RCTAppDependencyProvider');
     expect(appDelegate).not.toContain('GraniteViewController');
-    expect(appDelegate).not.toContain('Brick');
-    expect(appDelegate).not.toContain('Brownfield');
     expect(appDelegate).not.toContain('SDWebImageProvider');
-    expect(appDelegate).toContain('GraniteVideoRegistry.shared.register(provider: AVPlayerProvider())');
+    expect(appDelegate).not.toContain('remoteBundleURLString');
+
+    const iosViewController = await fs.readFile(path.join(appPath, 'ios/MyGreenfieldApp/GreenfieldViewController.swift'), 'utf8');
+    expect(iosViewController).toContain('GreenfieldReactNativeFactory');
+    expect(iosViewController).toContain('BrickModuleRegistry');
+    expect(iosViewController).toContain('RCTAppDependencyProvider');
+    expect(iosViewController).toContain('GraniteVideoRegistry.shared.register(provider: AVPlayerProvider())');
+
+    const iosReactNativeFactory = await fs.readFile(
+      path.join(appPath, 'ios/MyGreenfieldApp/GreenfieldReactNativeFactory.swift'),
+      'utf8'
+    );
+    expect(iosReactNativeFactory).toContain('GreenfieldBundleLoader.bundleURL()');
+
+    const iosBundleLoader = await fs.readFile(path.join(appPath, 'ios/MyGreenfieldApp/GreenfieldBundleLoader.swift'), 'utf8');
+    expect(iosBundleLoader).toContain('remoteBundleURLString');
+    expect(iosBundleLoader).toContain('cachedLocalBundleURL()');
+    expect(iosBundleLoader).toContain('Bundle.main.url(forResource: embeddedBundleName');
+    expect(iosBundleLoader).toContain('downloadRemoteBundle()');
+
+    const androidBundleLoader = await fs.readFile(
+      path.join(appPath, 'android/app/src/main/java/run/granite/mygreenfieldapp/GreenfieldBundleLoader.kt'),
+      'utf8'
+    );
+    expect(androidBundleLoader).toContain('REMOTE_BUNDLE_URL');
+    expect(androidBundleLoader).toContain('cachedBundle.exists()');
+    expect(androidBundleLoader).toContain('"assets://$BUNDLE_ASSET_NAME"');
+    expect(androidBundleLoader).toContain('downloadBundle(remoteBundleURL, cachedBundle)');
+
+    const mainApplication = await fs.readFile(
+      path.join(appPath, 'android/app/src/main/java/run/granite/mygreenfieldapp/MainApplication.kt'),
+      'utf8'
+    );
+    expect(mainApplication).toContain('DefaultReactNativeHost');
+    expect(mainApplication).toContain('GreenfieldBundleLoader.resolveBundleFilePath(applicationContext)');
+
+    const iosBrownfieldModule = await fs.readFile(
+      path.join(appPath, 'ios/MyGreenfieldApp/GraniteBrownfieldModule.swift'),
+      'utf8'
+    );
+    expect(iosBrownfieldModule).toContain('BrickModuleBase');
+    expect(iosBrownfieldModule).toContain('GraniteBrownfieldModuleSpec');
+
+    const androidBrownfieldModule = await fs.readFile(
+      path.join(appPath, 'android/app/src/main/java/run/granite/brownfield/GraniteBrownfieldModule.kt'),
+      'utf8'
+    );
+    expect(androidBrownfieldModule).toContain('GraniteBrownfieldModuleSpec');
+
+    const androidBrownfieldSpec = await fs.readFile(
+      path.join(appPath, 'android/brick-brownfield-module/src/main/java/run/granite/brownfield/GraniteBrownfieldModuleSpec.java'),
+      'utf8'
+    );
+    expect(androidBrownfieldSpec).toContain('interface GraniteBrownfieldModuleSpec');
+    expect(androidBrownfieldSpec).toContain('String getSchemeUri();');
 
     const showcaseScreen = await fs.readFile(path.join(appPath, 'src/ShowcaseScreen.tsx'), 'utf8');
     expect(showcaseScreen).toContain('Granite Greenfield');
-    expect(showcaseScreen).not.toContain('Brownfield');
+
+    const readme = await fs.readFile(path.join(appPath, 'README.md'), 'utf8');
+    expect(readme).toContain('granite forge');
+    expect(readme).toContain('Local cached bundle');
+    expect(readme).toContain('Embedded React Native bundle');
+    expect(readme).toContain('Remote bundle downloaded from the CDN URL');
 
     const indexPage = await fs.readFile(path.join(appPath, 'src/pages/index.tsx'), 'utf8');
     expect(indexPage).toContain("import { ShowcaseScreen } from '../ShowcaseScreen'");
@@ -341,8 +420,6 @@ describe('create a "greenfield-app" template', () => {
     expect(activity).toContain('override fun getMainComponentName(): String = "shared"');
     expect(activity).toContain('ReactActivity()');
     expect(activity).not.toContain('GraniteActivity');
-    expect(activity).not.toContain('Brick');
-    expect(activity).not.toContain('Brownfield');
   });
 
   it.sequential('uses native id overrides', async () => {
