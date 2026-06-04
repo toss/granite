@@ -45,7 +45,8 @@ export interface IntersectionObserverOptions {
    */
   root: Root;
   rootMargin?: RootMargin;
-  threshold?: number | number[];
+  onLayoutThreshold?: number;
+  onScrollThreshold?: number;
 }
 
 export type IntersectionObserverCallback = (entries: IntersectionObserverEntry[]) => void;
@@ -57,7 +58,8 @@ export const defaultRootMargin: RootMargin = {
   bottom: 0,
 };
 
-export const defaultThreshold = 0;
+export const defaultOnLayoutThreshold = 300;
+export const defaultOnScrollThreshold = 100;
 
 /**
  * @kind class
@@ -72,13 +74,15 @@ class IntersectionObserver {
   protected callback: IntersectionObserverCallback;
   protected options: IntersectionObserverOptions;
   protected targets: Element[];
+  protected onLayoutHandler: () => void;
+  protected onScrollHandler: () => void;
 
   constructor(callback: IntersectionObserverCallback, options: IntersectionObserverOptions) {
     this.callback = callback;
     this.options = options;
     this.targets = [];
-    this.options.root.onLayout = this.handleLayout;
-    this.options.root.onScroll = this.handleScroll;
+    this.onLayoutHandler = this.options.root.onLayout = this.createOnLayoutHandler();
+    this.onScrollHandler = this.options.root.onScroll = this.createOnScrollHandler();
   }
 
   protected measureTarget = (target: Element) => {
@@ -91,111 +95,117 @@ class IntersectionObserver {
           width,
           height,
         };
-        this.handleScroll();
+        this.onScrollHandler();
       });
     }
   };
 
-  protected handleLayout = throttle(
-    () => {
-      for (let index = 0; index < this.targets.length; index += 1) {
-        const target = this.targets[index];
+  protected createOnLayoutHandler(): () => void {
+    const onLayoutThreshold = this.options?.onLayoutThreshold || defaultOnLayoutThreshold;
+    return throttle(
+      () => {
+        for (let index = 0; index < this.targets.length; index += 1) {
+          const target = this.targets[index];
 
-        if (target != null) {
-          this.measureTarget(target);
+          if (target != null) {
+            this.measureTarget(target);
+          }
         }
-      }
-    },
-    300,
-    { edges: ['trailing'] }
-  ) as () => void;
+      },
+      onLayoutThreshold,
+      { edges: ['leading', 'trailing'] }
+    );
+  }
 
-  protected handleScroll = throttle(
-    () => {
-      const rootMargin = this.options?.rootMargin || defaultRootMargin;
+  protected createOnScrollHandler() {
+    const onScrollThreshold = this.options?.onScrollThreshold || defaultOnScrollThreshold;
+    return throttle(
+      () => {
+        const rootMargin = this.options?.rootMargin || defaultRootMargin;
 
-      const {
-        horizontal,
-        current: { contentOffset, contentSize, layoutMeasurement },
-      } = this.options.root;
-      if (
-        contentSize.width <= 0 ||
-        contentSize.height <= 0 ||
-        layoutMeasurement.width <= 0 ||
-        layoutMeasurement.height <= 0
-      ) {
-        return;
-      }
-      const contentOffsetWithLayout = horizontal
-        ? contentOffset.x + layoutMeasurement.width
-        : contentOffset.y + layoutMeasurement.height;
-      const changedTargets: IntersectionObserverEntry[] = [];
-      for (let index = 0; index < this.targets.length; index += 1) {
-        const target = this.targets[index];
-
-        if (target == null) {
-          continue;
+        const {
+          horizontal,
+          current: { contentOffset, contentSize, layoutMeasurement },
+        } = this.options.root;
+        if (
+          contentSize.width <= 0 ||
+          contentSize.height <= 0 ||
+          layoutMeasurement.width <= 0 ||
+          layoutMeasurement.height <= 0
+        ) {
+          return;
         }
+        const contentOffsetWithLayout = horizontal
+          ? contentOffset.x + layoutMeasurement.width
+          : contentOffset.y + layoutMeasurement.height;
+        const changedTargets: IntersectionObserverEntry[] = [];
+        for (let index = 0; index < this.targets.length; index += 1) {
+          const target = this.targets[index];
 
-        const targetLayout = target.layout;
-        if (!targetLayout || targetLayout.width === 0 || targetLayout.height === 0) {
-          continue;
+          if (target == null) {
+            continue;
+          }
+
+          const targetLayout = target.layout;
+          if (!targetLayout || targetLayout.width === 0 || targetLayout.height === 0) {
+            continue;
+          }
+
+          const previousIntersectionRatio = target.intersectionRatio;
+
+          let isIntersecting = false;
+          let intersectionRatio = previousIntersectionRatio;
+
+          if (horizontal) {
+            const visibleTargetMinX = Math.max(contentOffset.x - (rootMargin.left || 0), targetLayout.x);
+            const visibleTargetMaxX = Math.min(
+              contentOffsetWithLayout + (rootMargin.left || 0),
+              targetLayout.x + targetLayout.width
+            );
+            const visibleHeight = Math.max(visibleTargetMaxX - visibleTargetMinX, 0);
+
+            intersectionRatio = visibleHeight / targetLayout.height;
+            isIntersecting =
+              contentOffsetWithLayout + (rootMargin.right || 0) >= targetLayout.x &&
+              contentOffset.x - (rootMargin.left || 0) <= targetLayout.x + targetLayout.width;
+          } else {
+            const visibleTargetMinY = Math.max(contentOffset.y - (rootMargin.top || 0), targetLayout.y);
+            const visibleTargetMaxY = Math.min(
+              contentOffsetWithLayout + (rootMargin.bottom || 0),
+              targetLayout.y + targetLayout.height
+            );
+            const visibleHeight = Math.max(visibleTargetMaxY - visibleTargetMinY, 0);
+
+            intersectionRatio = visibleHeight / targetLayout.height;
+            isIntersecting =
+              contentOffsetWithLayout + (rootMargin.bottom || 0) >= targetLayout.y &&
+              contentOffset.y - (rootMargin.top || 0) <= targetLayout.y + targetLayout.height;
+          }
+
+          intersectionRatio = Math.floor(intersectionRatio * 100) / 100;
+
+          if (target.inView !== isIntersecting || target.intersectionRatio !== intersectionRatio) {
+            target.inView = isIntersecting;
+            target.intersectionRatio = intersectionRatio;
+
+            changedTargets.push({
+              target,
+              isIntersecting,
+              intersectionRatio,
+            });
+          }
         }
-
-        const previousIntersectionRatio = target.intersectionRatio;
-
-        let isIntersecting = false;
-        let intersectionRatio = previousIntersectionRatio;
-
-        if (horizontal) {
-          const visibleTargetMinX = Math.max(contentOffset.x - (rootMargin.left || 0), targetLayout.x);
-          const visibleTargetMaxX = Math.min(
-            contentOffsetWithLayout + (rootMargin.left || 0),
-            targetLayout.x + targetLayout.width
-          );
-          const visibleHeight = Math.max(visibleTargetMaxX - visibleTargetMinX, 0);
-
-          intersectionRatio = visibleHeight / targetLayout.height;
-          isIntersecting =
-            contentOffsetWithLayout + (rootMargin.right || 0) >= targetLayout.x &&
-            contentOffset.x - (rootMargin.left || 0) <= targetLayout.x + targetLayout.width;
-        } else {
-          const visibleTargetMinY = Math.max(contentOffset.y - (rootMargin.top || 0), targetLayout.y);
-          const visibleTargetMaxY = Math.min(
-            contentOffsetWithLayout + (rootMargin.bottom || 0),
-            targetLayout.y + targetLayout.height
-          );
-          const visibleHeight = Math.max(visibleTargetMaxY - visibleTargetMinY, 0);
-
-          intersectionRatio = visibleHeight / targetLayout.height;
-          isIntersecting =
-            contentOffsetWithLayout + (rootMargin.bottom || 0) >= targetLayout.y &&
-            contentOffset.y - (rootMargin.top || 0) <= targetLayout.y + targetLayout.height;
-        }
-
-        intersectionRatio = Math.floor(intersectionRatio * 100) / 100;
-
-        if (target.inView !== isIntersecting || target.intersectionRatio !== intersectionRatio) {
-          target.inView = isIntersecting;
-          target.intersectionRatio = intersectionRatio;
-
-          changedTargets.push({
-            target,
-            isIntersecting,
-            intersectionRatio,
-          });
-        }
-      }
-      this.callback(changedTargets);
-    },
-    100,
-    { edges: ['trailing'] }
-  ) as () => void;
+        this.callback(changedTargets);
+      },
+      onScrollThreshold,
+      { edges: ['leading', 'trailing'] }
+    );
+  }
 
   public observe(target: Element) {
     const index = this.targets.indexOf(target);
     if (index < 0) {
-      target.onLayout = this.handleLayout;
+      target.onLayout = this.onLayoutHandler;
       this.targets.push(target);
     }
   }
