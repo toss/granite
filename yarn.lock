@@ -5987,6 +5987,7 @@ __metadata:
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/style-utils": "workspace:*"
     "@granite-js/video": "workspace:*"
+    "@granite-js/vitest": "workspace:*"
     "@standard-schema/spec": "npm:^1.0.0"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/react": "npm:^16.1.0"

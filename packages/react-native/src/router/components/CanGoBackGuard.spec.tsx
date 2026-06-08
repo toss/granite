@@ -1,12 +1,12 @@
 import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { __backHandlerMock } from '../../../test/reactNativeMock';
+import { BackHandler } from 'react-native';
 
 import { CanGoBackGuard } from './CanGoBackGuard';
 
 describe('CanGoBackGuard', () => {
   beforeEach(() => {
-    __backHandlerMock.reset();
+    vi.mocked(BackHandler.addEventListener).mockClear();
   });
 
   it('passes Android hardware back events to onBack and consumes the native event', () => {
@@ -18,9 +18,9 @@ describe('CanGoBackGuard', () => {
       </CanGoBackGuard>
     );
 
-    const [handler] = __backHandlerMock.handlers;
+    const handler = vi.mocked(BackHandler.addEventListener).mock.calls[0]?.[1];
 
-    expect(__backHandlerMock.addEventListener).toHaveBeenCalledWith('hardwareBackPress', expect.any(Function));
+    expect(BackHandler.addEventListener).toHaveBeenCalledWith('hardwareBackPress', expect.any(Function));
     expect(handler?.()).toBe(true);
     expect(onBack).toHaveBeenCalledWith({ source: 'androidHardwareBackPress' });
   });
@@ -34,7 +34,7 @@ describe('CanGoBackGuard', () => {
       </CanGoBackGuard>
     );
 
-    expect(__backHandlerMock.addEventListener).not.toHaveBeenCalled();
+    expect(BackHandler.addEventListener).not.toHaveBeenCalled();
   });
 
   it('registers the iOS swipe back handler while back events exist', () => {
