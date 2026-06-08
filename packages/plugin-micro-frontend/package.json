@@ -45,12 +45,14 @@
     "*.d.ts"
   ],
   "devDependencies": {
+    "@types/babel__core": "^7",
     "@vitest/coverage-v8": "^4.0.12",
     "tsdown": "catalog:tools",
     "typescript": "catalog:tools",
     "vitest": "^4.0.12"
   },
   "dependencies": {
+    "@babel/core": "7.28.5",
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/utils": "workspace:*",
     "es-toolkit": "^1.39.8",

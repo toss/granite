@@ -1,6 +1,13 @@
+import { getRemoteScope } from './remoteScope';
 import type { Module } from './types';
 
 export function getContainer(instanceName: string) {
+  const remoteScope = getRemoteScope(instanceName);
+
+  if (remoteScope?.container != null) {
+    return remoteScope.container;
+  }
+
   const containerIndex = __MICRO_FRONTEND__.__INSTANCES__[instanceName];
 
   return typeof containerIndex === 'number' ? __MICRO_FRONTEND__.__INSTANCES__[containerIndex]! : null;

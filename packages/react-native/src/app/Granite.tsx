@@ -48,12 +48,26 @@ export interface GraniteProps {
   getInitialUrl?: (initialScheme: string) => string | undefined | Promise<string | undefined>;
 }
 
+type RemoteRuntimeScope = {
+  released?: boolean;
+};
+
+type GlobalWithRemoteRuntime = typeof globalThis & {
+  __GRANITE_MICRO_FRONTEND_REMOTE__?: {
+    currentScope?: RemoteRuntimeScope | null;
+  };
+};
+
 const createApp = () => {
   let _appName: string | null = null;
 
   setupPolyfills();
 
   function registerComponent(appKey: string, component: React.ComponentType<any>): string {
+    if (isRemoteScopeActive()) {
+      return appKey;
+    }
+
     if (AppRegistry.getAppKeys().includes(appKey)) {
       // `AppRegistry.registerComponent` returns the app key.
       return appKey;
@@ -120,6 +134,22 @@ const createApp = () => {
     },
   };
 };
+
+function isRemoteScopeActive() {
+  const globalObject = globalThis as GlobalWithRemoteRuntime;
+  const remoteContext = globalObject.__GRANITE_MICRO_FRONTEND_REMOTE__;
+  const scope = remoteContext?.currentScope ?? null;
+
+  if (scope?.released === true) {
+    if (remoteContext != null) {
+      remoteContext.currentScope = null;
+    }
+
+    return false;
+  }
+
+  return scope != null;
+}
 
 /**
  * @public

@@ -5887,8 +5887,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@granite-js/plugin-micro-frontend@workspace:packages/plugin-micro-frontend"
   dependencies:
+    "@babel/core": "npm:7.28.5"
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/utils": "workspace:*"
+    "@types/babel__core": "npm:^7"
     "@vitest/coverage-v8": "npm:^4.0.12"
     es-toolkit: "npm:^1.39.8"
     picocolors: "npm:^1.1.1"

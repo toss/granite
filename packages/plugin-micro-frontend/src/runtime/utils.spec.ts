@@ -1,22 +1,35 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { createContainer } from './createContainer';
 import { exposeModule } from './exposeModule';
 import { normalizePath, parseRemotePath, importRemoteModule, getContainer, toESM } from './utils';
 
 describe('utils', () => {
-  describe('getContainer', () => {
-    beforeAll(() => {
-      global.__MICRO_FRONTEND__ = {
-        __INSTANCES__: [] as any,
-        __SHARED__: {},
-      };
-    });
+  beforeEach(() => {
+    global.__MICRO_FRONTEND__ = {
+      __INSTANCES__: [] as any,
+      __SHARED__: {},
+    };
+    delete (globalThis as any).__GRANITE_MICRO_FRONTEND_REMOTE__;
+  });
 
+  describe('getContainer', () => {
     it('should return the container', () => {
-      const container = createContainer('remoteApp', {});
+      const container = createContainer('remoteApp', {
+        remote: {
+          host: 'localhost',
+          port: 8082,
+        },
+      });
 
       expect(getContainer('remoteApp')).toBe(container);
       expect(getContainer('unknown')).toBe(null);
+    });
+
+    it('should return a scoped remote container', () => {
+      const container = createContainer('remoteApp', {});
+
+      expect(getContainer('remoteApp')).toBe(container);
+      expect(global.__MICRO_FRONTEND__.__INSTANCES__.length).toBe(0);
     });
   });
 
@@ -49,16 +62,14 @@ describe('utils', () => {
   });
 
   describe('importRemoteModule', () => {
-    beforeAll(() => {
-      global.__MICRO_FRONTEND__ = {
-        __INSTANCES__: [] as any,
-        __SHARED__: {},
-      };
-    });
-
     it('should return the exposed module', () => {
       const Button = {};
-      const container = createContainer('remoteApp', {});
+      const container = createContainer('remoteApp', {
+        remote: {
+          host: 'localhost',
+          port: 8082,
+        },
+      });
 
       exposeModule(container, './components/Button', { default: Button });
       exposeModule(container, '../../../components/Button', { default: Button });

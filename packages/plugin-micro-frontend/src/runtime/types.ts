@@ -13,6 +13,7 @@ export interface RuntimeContext {
 export interface Container {
   name: string;
   exposeMap: Record<string, Module>;
+  scope?: import('./remoteScope').RemoteScope | null;
   config: {
     remote?: RemoteConfig;
     shared?: SharedConfig;

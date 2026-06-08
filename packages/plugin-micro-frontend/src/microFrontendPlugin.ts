@@ -5,6 +5,7 @@ import { prepareLocalDirectory } from '@granite-js/utils';
 import { getPreludeConfig } from './prelude';
 import { fetchRemoteBundle } from './remote';
 import { virtualSharedConfig } from './resolver';
+import { createScopedTimersTransformer } from './scopedTimers';
 import type { MicroFrontendPluginOptions } from './types';
 import { intoShared } from './utils/intoShared';
 
@@ -35,10 +36,16 @@ export const microFrontendPlugin = async (options: MicroFrontendPluginOptions): 
   const isReactNativeShared = Boolean(nonEagerEntries.find(([libName]) => libName === 'react-native'));
 
   const virtualShared = virtualSharedConfig(nonEagerEntries);
+  const isRemoteContainer = options.remote == null;
 
   return {
     name: 'micro-frontend-plugin',
     config: {
+      transformer: isRemoteContainer
+        ? {
+            transformSync: createScopedTimersTransformer({ containerName: options.name }),
+          }
+        : undefined,
       extra: isReactNativeShared ? { skipReactNativePolyfills: true, skipReactNativeInitializeCore: true } : undefined,
       resolver: {
         alias: virtualShared.alias,
