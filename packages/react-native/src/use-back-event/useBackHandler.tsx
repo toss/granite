@@ -73,7 +73,7 @@ export function useBackHandler() {
         contextRemoveBackHandler(handler);
       }
     },
-    [contextRemoveBackHandler, handlersRef]
+    [contextRemoveBackHandler]
   );
 
   const addEventListener = useCallback(
@@ -85,7 +85,7 @@ export function useBackHandler() {
         remove: () => removeHandler(handler),
       };
     },
-    [contextAddBackHandler, handlersRef, removeHandler]
+    [contextAddBackHandler, removeHandler]
   );
 
   useEffect(() => {
@@ -102,7 +102,7 @@ export function useBackHandler() {
         contextRemoveBackHandler(handler);
       }
     };
-  }, [contextAddBackHandler, contextRemoveBackHandler, handlersRef, isVisible]);
+  }, [contextAddBackHandler, contextRemoveBackHandler, isVisible]);
 
   const backHandler = useMemo((): BackHandlerControls => {
     return {
