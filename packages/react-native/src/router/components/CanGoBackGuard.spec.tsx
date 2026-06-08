@@ -1,7 +1,6 @@
 import { render } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BackHandler } from 'react-native';
-
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CanGoBackGuard } from './CanGoBackGuard';
 
 describe('CanGoBackGuard', () => {

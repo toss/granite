@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useVisibility } from '../visibility';
-import type { BackEvent } from './useBackEvent';
-import { useBackEventContext } from './useBackEvent';
+import { type BackEvent , useBackEventContext } from './useBackEvent';
 
 export type BackHandlerCallback = (event: BackEvent) => boolean | void;
 

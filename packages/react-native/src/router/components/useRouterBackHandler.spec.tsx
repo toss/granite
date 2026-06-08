@@ -1,8 +1,8 @@
 import { act, renderHook } from '@testing-library/react';
 import { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { BackEventProvider, useBackEvent, useBackHandler } from '../../use-back-event';
 import { useInternalRouterBackHandler } from './useRouterBackHandler';
+import { BackEventProvider, useBackEvent, useBackHandler } from '../../use-back-event';
 
 vi.mock('../../visibility', () => ({
   useVisibility: () => true,
