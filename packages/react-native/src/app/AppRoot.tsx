@@ -16,6 +16,7 @@ interface AppRootProps extends GraniteProps {
   initialProps: InitialProps;
   initialScheme: string;
   setIosSwipeGestureEnabled?: ({ isEnabled }: { isEnabled: boolean }) => void;
+  setiOSBackPressHandler?: ({ handler }: { handler: () => void }) => Promise<void> | void;
   getInitialUrl: InternalRouterProps['getInitialUrl'];
 }
 
@@ -27,6 +28,7 @@ export function AppRoot({
   initialScheme,
   router,
   setIosSwipeGestureEnabled,
+  setiOSBackPressHandler,
   getInitialUrl,
 }: AppRootProps) {
   const prefix = getSchemePrefix({
@@ -47,6 +49,7 @@ export function AppRoot({
               container={Container}
               prefix={prefix}
               setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
+              setiOSBackPressHandler={setiOSBackPressHandler}
               getInitialUrl={getInitialUrl}
               {...router}
             />

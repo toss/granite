@@ -1,21 +1,27 @@
 import { ReactNode, useEffect } from 'react';
 import { BackHandler } from 'react-native';
+import type { BackEvent } from '../../use-back-event';
+
+type SetIosSwipeGestureEnabled = ({ isEnabled }: { isEnabled: boolean }) => Promise<void> | void;
+type SetIOSBackPressHandler = ({ handler }: { handler: () => void }) => Promise<void> | void;
 
 export function CanGoBackGuard({
   children,
   canGoBack,
+  hasBackEvent,
   onBack,
   isInitialScreen,
   setIosSwipeGestureEnabled,
+  setiOSBackPressHandler,
 }: {
   canGoBack: boolean;
+  hasBackEvent: boolean;
   isInitialScreen: boolean;
   children: ReactNode;
-  onBack?: () => void;
-  setIosSwipeGestureEnabled?: ({ isEnabled }: { isEnabled: boolean }) => void;
+  onBack?: (event: BackEvent) => void;
+  setIosSwipeGestureEnabled?: SetIosSwipeGestureEnabled;
+  setiOSBackPressHandler?: SetIOSBackPressHandler;
 }) {
-  const shouldBlockGoingBack = !canGoBack;
-
   useEffect(() => {
     if (!isInitialScreen || !canGoBack) {
       setIosSwipeGestureEnabled?.({ isEnabled: false });
@@ -29,19 +35,36 @@ export function CanGoBackGuard({
   }, [canGoBack, isInitialScreen, setIosSwipeGestureEnabled]);
 
   useEffect(() => {
-    if (shouldBlockGoingBack) {
-      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-        onBack?.();
-        return true;
-      });
-
-      return () => {
-        subscription.remove();
-      };
+    if (!hasBackEvent) {
+      return;
     }
 
-    return;
-  }, [shouldBlockGoingBack, onBack]);
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      onBack?.({ source: 'androidHardwareBackPress' });
+
+      return true;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [hasBackEvent, onBack]);
+
+  useEffect(() => {
+    if (!hasBackEvent || setiOSBackPressHandler == null) {
+      return;
+    }
+
+    setiOSBackPressHandler({
+      handler: () => {
+        onBack?.({ source: 'iosSwipeGesture' });
+      },
+    });
+
+    return () => {
+      setiOSBackPressHandler({ handler: () => {} });
+    };
+  }, [hasBackEvent, onBack, setiOSBackPressHandler]);
 
   return <>{children}</>;
 }

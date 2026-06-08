@@ -65,6 +65,7 @@ export interface InternalRouterProps {
   initialProps: InitialProps;
   initialScheme: string;
   setIosSwipeGestureEnabled?: ({ isEnabled }: { isEnabled: boolean }) => Promise<void> | void;
+  setiOSBackPressHandler?: ({ handler }: { handler: () => void }) => Promise<void> | void;
   getInitialUrl?: RouterControlsConfig['getInitialUrl'];
 }
 
@@ -148,6 +149,7 @@ export function Router({
   defaultErrorComponent,
   // Public props (StackNavigator)
   setIosSwipeGestureEnabled,
+  setiOSBackPressHandler,
   getInitialUrl,
   ...navigationContainerProps
 }: InternalRouterProps & RouterProps): ReactElement {
@@ -162,7 +164,7 @@ export function Router({
 
   const ref = useMemo(() => navigationContainerRef ?? createNavigationContainerRef<never>(), [navigationContainerRef]);
 
-  const { handler, canGoBack, onBack } = useInternalRouterBackHandler({
+  const { handler, handleBackEvent, canGoBack, hasBackEvent } = useInternalRouterBackHandler({
     navigationContainerRef: ref,
     onClose: closeView,
   });
@@ -195,9 +197,11 @@ export function Router({
     >
       <CanGoBackGuard
         canGoBack={canGoBack}
+        hasBackEvent={hasBackEvent}
         isInitialScreen={isInitialScreen}
-        onBack={onBack}
+        onBack={handleBackEvent}
         setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
+        setiOSBackPressHandler={setiOSBackPressHandler}
       >
         <Container {...initialProps}>
           <StackNavigator.Navigator screenOptions={screenOptions}>{Screens}</StackNavigator.Navigator>

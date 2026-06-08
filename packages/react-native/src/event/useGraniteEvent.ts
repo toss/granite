@@ -18,8 +18,10 @@ class BackEvent extends GraniteEventDefinition<void, void> {
   }
 
   listener(_: void, onEvent: (response: void) => void): void {
-    this.backEventControls.addEventListener(onEvent);
-    this.ref.remove = () => this.backEventControls.removeEventListener(onEvent);
+    const handler = () => onEvent(undefined);
+
+    this.backEventControls.addEventListener(handler);
+    this.ref.remove = () => this.backEventControls.removeEventListener(handler);
   }
 }
 
