@@ -5,7 +5,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@granite-js/brownfield-module': new URL('./test/brownfieldModuleMock.ts', import.meta.url).pathname,
-      '@granite-js/native/@react-navigation/native': new URL('./test/navigationNativeMock.ts', import.meta.url).pathname,
       'react-native': new URL('./test/reactNativeMock.ts', import.meta.url).pathname,
     },
   },
