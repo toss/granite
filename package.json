@@ -31,7 +31,8 @@
   },
   "resolutions": {
     "typescript": "5.8.3",
-    "@babel/core": "7.28.5"
+    "@babel/core": "7.28.5",
+    "rollipop": "1.0.0-alpha.22"
   },
   "dependenciesMeta": {
     "hermes-compiler": {

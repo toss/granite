@@ -6,6 +6,7 @@ export * from './utils/mergeBuildConfigs';
 export * from './utils/createPluginHooksDriver';
 export * from './utils/buildResult';
 export * from './utils/resolveConfig';
+export * from './utils/resolveRollipopAdapterConfig';
 
 export { defineConfig } from './config/defineConfig';
 export { loadConfig } from './config/loadConfig';

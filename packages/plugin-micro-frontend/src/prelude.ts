@@ -1,46 +1,45 @@
 import path from 'path';
 import type { MicroFrontendPluginOptions } from './types';
+import { intoShared } from './utils/intoShared';
 
 export function getPreludeConfig(options: MicroFrontendPluginOptions) {
-  const sharedEntries = Object.entries(options.shared ?? {});
+  const shared = intoShared(options.shared);
+  const sharedEntries = Object.entries(shared ?? {});
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const eagerEntries = sharedEntries.filter(([_, config]) => config.eager === true);
 
   const registerStatements = eagerEntries.map(([libName], index) => {
     const identifier = `__mod${index}`;
-    return `
-    // ${libName}
-    import * as ${identifier} from '${libName}';
-    registerShared('${libName}', ${identifier});
-    `;
+    return [`// ${libName}`, `import * as ${identifier} from '${libName}';`, `registerShared('${libName}', ${identifier});`].join(
+      '\n'
+    );
   });
 
   const exposeStatements = Object.entries(options.exposes ?? {}).map(([exposeName, modulePath], index) => {
     const identifier = `__expose${index}`;
     const resolvedModulePath = path.resolve(modulePath);
 
-    return `
-    import * as ${identifier} from '${resolvedModulePath}';
-    exposeModule(__container, '${exposeName}', ${identifier});
-    `;
+    return [`import * as ${identifier} from '${resolvedModulePath}';`, `exposeModule(__container, '${exposeName}', ${identifier});`].join(
+      '\n'
+    );
   });
 
   const preludeScript = [
     `import { registerShared, createContainer, exposeModule } from '@granite-js/plugin-micro-frontend/runtime';`,
-    `const __container = createContainer('${options.name}', ${JSON.stringify({ remote: options.remote, shared: options.shared })});`,
+    `const __container = createContainer('${options.name}', ${JSON.stringify({ remote: options.remote, shared })});`,
     ...registerStatements,
     ...exposeStatements,
   ].join('\n');
 
   return {
-    banner: `
-    if (global.__MICRO_FRONTEND__ == null) {
-      global.__MICRO_FRONTEND__ = {
-        __SHARED__: {},
-        __INSTANCES__: [],
-      };
-    }
-    `,
+    banner: [
+      'if (global.__MICRO_FRONTEND__ == null) {',
+      '  global.__MICRO_FRONTEND__ = {',
+      '    __SHARED__: {},',
+      '    __INSTANCES__: [],',
+      '  };',
+      '}',
+    ].join('\n'),
     preludeScript,
   };
 }

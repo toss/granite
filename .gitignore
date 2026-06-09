@@ -73,3 +73,5 @@ local.properties
 android.iml
 
 .xcode.env.local
+
+.rollipop/

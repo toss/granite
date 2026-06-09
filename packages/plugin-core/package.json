@@ -51,6 +51,7 @@
     "esbuild": "0.25.8",
     "fastify": "4.14.0",
     "jiti": "2.7.0",
+    "rollipop": "1.0.0-alpha.22",
     "zod": "4.0.10"
   },
   "sideEffects": false

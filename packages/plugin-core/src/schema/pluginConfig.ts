@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import type { Config as RollipopConfig } from 'rollipop';
 import type {
   AdditionalMetroConfig,
   DevServerConfig,
@@ -26,13 +27,16 @@ export const pluginConfigSchema = z.object({
   reactNativePath: z.string().optional(),
 });
 
-export type GraniteConfig = z.input<typeof pluginConfigSchema>;
+type GraniteConfigInput = z.input<typeof pluginConfigSchema>;
+export type GraniteRollipopConfig = Omit<RollipopConfig, 'root' | 'plugins'>;
+export type GraniteConfig = GraniteConfigInput & GraniteRollipopConfig;
 export type ParsedGraniteConfig = z.output<typeof pluginConfigSchema>;
 export type CompleteGraniteConfig = {
   cwd: ParsedGraniteConfig['cwd'];
   appName: ParsedGraniteConfig['appName'];
   entryFile: ParsedGraniteConfig['entryFile'];
   outdir: ParsedGraniteConfig['outdir'];
+  rollipopConfig?: GraniteRollipopConfig;
   pluginHooks: GranitePluginHooks;
   pluginConfigs: PluginConfig[];
   reactNativePath?: string;

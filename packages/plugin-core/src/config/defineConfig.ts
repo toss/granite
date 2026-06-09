@@ -2,8 +2,26 @@ import path from 'path';
 import { getPackageRoot } from '@granite-js/utils';
 import { isNotNil } from 'es-toolkit';
 import { prepareGraniteGlobalsScript } from './graniteGlobals';
-import { pluginConfigSchema, type CompleteGraniteConfig, type GraniteConfig } from '../schema/pluginConfig';
+import {
+  pluginConfigSchema,
+  type CompleteGraniteConfig,
+  type GraniteConfig,
+  type GraniteRollipopConfig,
+} from '../schema/pluginConfig';
 import { resolvePlugins } from '../utils/resolvePlugins';
+
+const GRANITE_CONFIG_KEYS = [
+  'cwd',
+  'appName',
+  'host',
+  'scheme',
+  'outdir',
+  'entryFile',
+  'build',
+  'devServer',
+  'metro',
+  'plugins',
+] as const;
 
 /**
  * @public
@@ -59,6 +77,7 @@ import { resolvePlugins } from '../utils/resolvePlugins';
  */
 export const defineConfig = async (config: GraniteConfig): Promise<CompleteGraniteConfig> => {
   const parsed = pluginConfigSchema.parse(config);
+  const rollipopConfig = extractRollipopConfig(config);
   const cwd = parsed.cwd ?? getPackageRoot();
   const appName = parsed.appName;
   const host = parsed.host ?? '';
@@ -82,8 +101,19 @@ export const defineConfig = async (config: GraniteConfig): Promise<CompleteGrani
     appName,
     entryFile,
     outdir,
+    rollipopConfig,
     pluginHooks,
     pluginConfigs: [parsedConfig, globalsScriptConfig, ...configs].filter(isNotNil),
     reactNativePath: parsed.reactNativePath,
   };
 };
+
+function extractRollipopConfig(config: GraniteConfig): GraniteRollipopConfig {
+  const rollipopConfig = { ...config };
+
+  for (const key of GRANITE_CONFIG_KEYS) {
+    delete rollipopConfig[key];
+  }
+
+  return rollipopConfig;
+}

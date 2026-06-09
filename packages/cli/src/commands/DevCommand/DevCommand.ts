@@ -1,11 +1,8 @@
-import { runServer, EXPERIMENTAL__server } from '@granite-js/mpack';
 import { loadConfig } from '@granite-js/plugin-core';
 import { Command, Option } from 'clipanion';
-import Debug from 'debug';
 import { ExitCode } from '../../constants';
 import { errorHandler } from '../../utils/command';
-
-const debug = Debug('cli');
+import { runRollipopServer } from '../../utils/rollipop';
 
 export class DevCommand extends Command {
   static paths = [[`dev`]];
@@ -22,37 +19,29 @@ export class DevCommand extends Command {
 
   host = Option.String('--host');
   port = Option.String('--port');
+  cache = Option.Boolean('--cache', {
+    description: 'Enable cache',
+  });
 
   disableEmbeddedReactDevTools = Option.Boolean('--disable-embedded-react-devtools', false);
 
-  // mpack dev-server
-  experimentalMode = Option.Boolean('--experimental-mode');
+  experimental = Option.Boolean('--experimental', false);
+  experimentalMode = Option.Boolean('--experimental-mode', false);
 
   async execute() {
     try {
-      process.env.MPACK_DEV_SERVER = 'true';
-
       const config = await loadConfig({ configFile: this.configFile });
-      const serverOptions = {
-        host: this.host,
-        port: this.port ? parseInt(this.port, 10) : undefined,
-      };
+      const port = this.port ? parseInt(this.port, 10) : undefined;
 
-      debug('StartCommand', {
-        ...serverOptions,
-        disableEmbeddedReactDevTools: this.disableEmbeddedReactDevTools,
-        experimentalMode: this.experimentalMode,
-      });
-
-      if (this.experimentalMode) {
-        /**
-         * @TODO Invoke pre and post handlers of devServer plugin hooks in experimental mode
-         */
-        await EXPERIMENTAL__server({ config, ...serverOptions });
+      if (this.experimental || this.experimentalMode) {
+        await runRollipopServer(config, { port, host: this.host, cache: this.cache ?? false });
       } else {
+        const { runServer } = await import('@granite-js/mpack');
         await runServer({
           config,
-          ...serverOptions,
+          port,
+          host: this.host,
+          enableEmbeddedReactDevTools: !this.disableEmbeddedReactDevTools,
         });
       }
 

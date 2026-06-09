@@ -1,9 +1,8 @@
-import { BuildUtils } from '@granite-js/mpack';
-import { statusPlugin } from '@granite-js/mpack/plugins';
 import { loadConfig } from '@granite-js/plugin-core';
 import { Command, Option } from 'clipanion';
 import { ExitCode } from '../../constants';
 import { errorHandler } from '../../utils/command';
+import { runRollipopBuildAll } from '../../utils/rollipop';
 
 export class BuildCommand extends Command {
   static paths = [[`build`]];
@@ -30,10 +29,25 @@ export class BuildCommand extends Command {
     description: 'Enable cache',
   });
 
+  experimental = Option.Boolean('--experimental', {
+    description: 'Build with Rollipop instead of mpack',
+  });
+
   async execute() {
     try {
-      const { configFile, cache = true, metafile = false, dev = false } = this;
+      const { configFile, metafile = false, dev = false, experimental = false } = this;
+      const cache = this.cache ?? !experimental;
       const config = await loadConfig({ configFile });
+
+      if (experimental) {
+        await runRollipopBuildAll(config, { cache, metafile, dev });
+        return ExitCode.SUCCESS;
+      }
+
+      const [{ BuildUtils }, { statusPlugin }] = await Promise.all([
+        import('@granite-js/mpack'),
+        import('@granite-js/mpack/plugins'),
+      ]);
       const options = (['android', 'ios'] as const).map((platform) => ({
         dev,
         cache,
