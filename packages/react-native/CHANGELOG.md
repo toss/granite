@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 1.0.32
+
+### Patch Changes
+
+- 20f2781: add opt-in back handler API
+  - @granite-js/blur-view@1.0.32
+  - @granite-js/brownfield-module@1.0.32
+  - @granite-js/cli@1.0.32
+  - @granite-js/jest@1.0.32
+  - @granite-js/mpack@1.0.32
+  - @granite-js/native@1.0.32
+  - @granite-js/plugin-core@1.0.32
+  - @granite-js/style-utils@1.0.32
+  - @granite-js/video@1.0.32
+
 ## 1.0.31
 
 ### Patch Changes
