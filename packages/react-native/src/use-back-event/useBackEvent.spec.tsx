@@ -56,4 +56,22 @@ describe('useBackEventState', () => {
     expect(result.current.hasBackEvent).toBe(false);
     expect(handler).not.toHaveBeenCalled();
   });
+
+  it('keeps the legacy state object stable while back event existence does not change', () => {
+    const firstHandler = vi.fn();
+    const secondHandler = vi.fn();
+    const { result } = renderHook(() => useBackEventState());
+
+    act(() => {
+      result.current.addEventListener(firstHandler);
+    });
+
+    const activeBackEvent = result.current;
+
+    act(() => {
+      result.current.addEventListener(secondHandler);
+    });
+
+    expect(result.current).toBe(activeBackEvent);
+  });
 });
