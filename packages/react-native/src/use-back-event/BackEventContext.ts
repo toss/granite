@@ -1,6 +1,6 @@
 import { createContext } from 'react';
-import type { BackHandlerCallback, BackHandlerControls } from './useBackHandler';
 import type { BackEvent, BackEventControls, BackEventHandler } from './useBackEvent';
+import type { BackHandlerCallback, BackHandlerControls } from './useBackHandler';
 
 export interface PrivateBackEventControls extends BackEventControls {
   handlersRef: Set<BackEventHandler>;
