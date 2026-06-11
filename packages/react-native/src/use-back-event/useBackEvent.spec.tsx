@@ -36,4 +36,24 @@ describe('useBackEventState', () => {
     expect(result.current.hasBackEvent).toBe(true);
     expect(handler).toHaveBeenCalledTimes(1);
   });
+
+  it('derives legacy back event state from registered handlers', () => {
+    const handler = vi.fn();
+    const { result } = renderHook(() => useBackEventState());
+
+    act(() => {
+      result.current.addEventListener(handler);
+    });
+
+    expect(result.current.hasBackEvent).toBe(true);
+
+    act(() => {
+      result.current.removeEventListener(handler);
+    });
+
+    result.current.onBack();
+
+    expect(result.current.hasBackEvent).toBe(false);
+    expect(handler).not.toHaveBeenCalled();
+  });
 });

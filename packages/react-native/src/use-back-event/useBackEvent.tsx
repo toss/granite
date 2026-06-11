@@ -16,8 +16,6 @@ export interface BackEventControls {
 }
 
 interface PrivateBackEventControls extends BackEventControls {
-  handlersRef: Set<BackEventHandler>;
-  backHandlersRef: Set<BackHandlerCallback>;
   hasBackEvent: boolean;
   hasBackHandler: boolean;
   addBackHandler: BackHandlerControls['addEventListener'];
@@ -84,81 +82,91 @@ export function BackEventProvider({ children }: { children: ReactNode }) {
  * ```
  */
 export function useBackEventState() {
-  const handlersRef = useRef<Set<BackEventHandler>>(new Set()).current;
-  const backHandlersRef = useRef<Set<BackHandlerCallback>>(new Set()).current;
-  const [hasBackEvent, setHasBackEvent] = useState(false);
-  const [hasBackHandler, setHasBackHandler] = useState(false);
-
-  const syncBackEventState = useCallback(() => {
-    setHasBackEvent(handlersRef.size > 0);
-  }, [handlersRef]);
-
-  const syncBackHandlerState = useCallback(() => {
-    setHasBackHandler(backHandlersRef.size > 0);
-  }, [backHandlersRef]);
+  const [handlers, setHandlers] = useState(() => new Set<BackEventHandler>());
+  const [backHandlers, setBackHandlers] = useState(() => new Set<BackHandlerCallback>());
+  const hasBackEvent = handlers.size > 0;
+  const hasBackHandler = backHandlers.size > 0;
 
   const removeEventListener = useCallback(
     (...handlers: Array<BackEventHandler>) => {
-      for (const handler of handlers) {
-        handlersRef.delete(handler);
-      }
+      setHandlers((prevHandlers) => {
+        const nextHandlers = new Set(prevHandlers);
 
-      syncBackEventState();
+        for (const handler of handlers) {
+          nextHandlers.delete(handler);
+        }
+
+        return nextHandlers.size === prevHandlers.size ? prevHandlers : nextHandlers;
+      });
     },
-    [handlersRef, syncBackEventState]
+    []
   );
 
   const addEventListener = useCallback(
     (...handlers: Array<BackEventHandler>) => {
-      for (const handler of handlers) {
-        handlersRef.add(handler);
-      }
+      setHandlers((prevHandlers) => {
+        const nextHandlers = new Set(prevHandlers);
 
-      syncBackEventState();
+        for (const handler of handlers) {
+          nextHandlers.add(handler);
+        }
+
+        return nextHandlers.size === prevHandlers.size ? prevHandlers : nextHandlers;
+      });
     },
-    [handlersRef, syncBackEventState]
+    []
   );
 
   const removeBackHandler = useCallback(
     (...handlers: Array<BackHandlerCallback>) => {
-      for (const handler of handlers) {
-        backHandlersRef.delete(handler);
-      }
+      setBackHandlers((prevHandlers) => {
+        const nextHandlers = new Set(prevHandlers);
 
-      syncBackHandlerState();
+        for (const handler of handlers) {
+          nextHandlers.delete(handler);
+        }
+
+        return nextHandlers.size === prevHandlers.size ? prevHandlers : nextHandlers;
+      });
     },
-    [backHandlersRef, syncBackHandlerState]
+    []
   );
 
   const addBackHandler = useCallback(
     (handler: BackHandlerCallback) => {
-      backHandlersRef.add(handler);
-      syncBackHandlerState();
+      setBackHandlers((prevHandlers) => {
+        if (prevHandlers.has(handler)) {
+          return prevHandlers;
+        }
+
+        const nextHandlers = new Set(prevHandlers);
+        nextHandlers.add(handler);
+
+        return nextHandlers;
+      });
 
       return {
         remove: () => removeBackHandler(handler),
       };
     },
-    [backHandlersRef, removeBackHandler, syncBackHandlerState]
+    [removeBackHandler]
   );
 
   const backEvent = useMemo((): PrivateBackEventControls => {
     return {
       addEventListener,
       removeEventListener,
-      handlersRef,
-      backHandlersRef,
       hasBackEvent,
       hasBackHandler,
       addBackHandler,
       removeBackHandler,
       onBack: () => {
-        handlersRef.forEach((handler) => handler());
+        handlers.forEach((handler) => handler());
       },
       onBackHandler: (event) => {
-        const backHandlers = Array.from(backHandlersRef).reverse();
+        const orderedBackHandlers = Array.from(backHandlers).reverse();
 
-        for (const handler of backHandlers) {
+        for (const handler of orderedBackHandlers) {
           const didHandleBackEvent = handler(event) === true;
 
           if (didHandleBackEvent) {
@@ -172,8 +180,8 @@ export function useBackEventState() {
   }, [
     addEventListener,
     addBackHandler,
-    backHandlersRef,
-    handlersRef,
+    backHandlers,
+    handlers,
     hasBackEvent,
     hasBackHandler,
     removeBackHandler,
