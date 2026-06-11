@@ -1,6 +1,7 @@
-import { NavigationContainerRefWithCurrent } from '@granite-js/native/@react-navigation/native';
+import type { NavigationContainerRefWithCurrent } from '@granite-js/native/@react-navigation/native';
 import { useCallback, useMemo } from 'react';
-import { useBackEventContext } from '../../use-back-event';
+import type { BackEvent } from '../../use-back-event';
+import { useBackEventContext } from '../../use-back-event/useBackEventContext';
 
 /**
  * @public
@@ -63,29 +64,49 @@ export function useInternalRouterBackHandler({
   navigationContainerRef: NavigationContainerRefWithCurrent<never>;
   onClose?: () => void;
 }) {
-  const { hasBackEvent, onBack } = useBackEventContext();
-  const canGoBack = !hasBackEvent;
+  const { hasBackEvent, hasBackHandler, onBack, onBackHandler } = useBackEventContext();
+  const hasRegisteredBackHandler = hasBackEvent || hasBackHandler;
+  const canGoBack = !hasRegisteredBackHandler;
 
-  const handler = useCallback(() => {
-    onBack?.();
-
-    if (!canGoBack) {
-      return;
-    }
-
+  const handleDefaultBack = useCallback(() => {
     if (navigationContainerRef.canGoBack()) {
       navigationContainerRef.goBack();
     } else {
       onClose?.();
     }
-  }, [canGoBack, onClose, navigationContainerRef, onBack]);
+  }, [navigationContainerRef, onClose]);
+
+  const handleBackEvent = useCallback(
+    (event: BackEvent) => {
+      const didHandleBackEvent = onBackHandler(event);
+
+      if (didHandleBackEvent) {
+        return;
+      }
+
+      onBack();
+
+      if (hasBackEvent) {
+        return;
+      }
+
+      handleDefaultBack();
+    },
+    [handleDefaultBack, hasBackEvent, onBack, onBackHandler]
+  );
+
+  const handler = useCallback(() => {
+    handleBackEvent({ source: 'backButton' });
+  }, [handleBackEvent]);
 
   return useMemo(
     () => ({
       handler,
+      handleBackEvent,
       canGoBack,
+      hasBackEvent: hasRegisteredBackHandler,
       onBack,
     }),
-    [canGoBack, handler, onBack]
+    [canGoBack, handleBackEvent, handler, hasRegisteredBackHandler, onBack]
   );
 }

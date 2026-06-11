@@ -1,18 +1,27 @@
-import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useVisibility } from '../visibility';
+import {
+  BackEventActionsContext,
+  BackEventStateContext,
+  type BackEventActionsContextValue,
+  type BackEventStateContextValue,
+  type PrivateBackEventControls,
+} from './BackEventContext';
+import { useBackEventActionsContext } from './useBackEventActionsContext';
+import type { BackHandlerCallback } from './useBackHandler';
+
+export type BackEventSource = 'backButton' | 'iosSwipeGesture' | 'androidHardwareBackPress';
+
+export interface BackEvent {
+  source: BackEventSource;
+}
+
+export type BackEventHandler = () => void;
 
 export interface BackEventControls {
-  addEventListener: (...handlers: Array<() => void>) => void;
-  removeEventListener: (...handlers: Array<() => void>) => void;
+  addEventListener: (...handlers: Array<BackEventHandler>) => void;
+  removeEventListener: (...handlers: Array<BackEventHandler>) => void;
 }
-
-interface PrivateBackEventControls extends BackEventControls {
-  handlersRef: Set<() => void>;
-  hasBackEvent: boolean;
-  onBack: () => void;
-}
-
-const BackEventContext = createContext<PrivateBackEventControls | null>(null);
 
 /**
  * @component
@@ -41,7 +50,37 @@ const BackEventContext = createContext<PrivateBackEventControls | null>(null);
 export function BackEventProvider({ children }: { children: ReactNode }) {
   const backEventState = useBackEventState();
 
-  return <BackEventContext.Provider value={backEventState}>{children}</BackEventContext.Provider>;
+  const actions = useMemo((): BackEventActionsContextValue => {
+    return {
+      addEventListener: backEventState.addEventListener,
+      removeEventListener: backEventState.removeEventListener,
+      addBackHandler: backEventState.addBackHandler,
+      removeBackHandler: backEventState.removeBackHandler,
+      onBack: backEventState.onBack,
+      onBackHandler: backEventState.onBackHandler,
+    };
+  }, [
+    backEventState.addBackHandler,
+    backEventState.addEventListener,
+    backEventState.onBack,
+    backEventState.onBackHandler,
+    backEventState.removeBackHandler,
+    backEventState.removeEventListener,
+  ]);
+
+  const state = useMemo((): BackEventStateContextValue => {
+    return {
+      handlersRef: backEventState.handlersRef,
+      hasBackEvent: backEventState.hasBackEvent,
+      hasBackHandler: backEventState.hasBackHandler,
+    };
+  }, [backEventState.handlersRef, backEventState.hasBackEvent, backEventState.hasBackHandler]);
+
+  return (
+    <BackEventActionsContext.Provider value={actions}>
+      <BackEventStateContext.Provider value={state}>{children}</BackEventStateContext.Provider>
+    </BackEventActionsContext.Provider>
+  );
 }
 
 /**
@@ -70,24 +109,13 @@ export function BackEventProvider({ children }: { children: ReactNode }) {
  * ```
  */
 export function useBackEventState() {
-  const handlersRef = useRef<Set<() => void>>(new Set()).current;
+  const handlersRef = useRef<Set<BackEventHandler>>(new Set()).current;
+  const backHandlersRef = useRef<Set<BackHandlerCallback>>(new Set()).current;
   const [hasBackEvent, setHasBackEvent] = useState(false);
-
-  const addEventListener = useCallback(
-    (...handlers: Array<() => void>) => {
-      for (const handler of handlers) {
-        handlersRef.add(handler);
-      }
-
-      if (handlersRef.size > 0) {
-        setHasBackEvent(true);
-      }
-    },
-    [handlersRef]
-  );
+  const [hasBackHandler, setHasBackHandler] = useState(false);
 
   const removeEventListener = useCallback(
-    (...handlers: Array<() => void>) => {
+    (...handlers: Array<BackEventHandler>) => {
       for (const handler of handlers) {
         handlersRef.delete(handler);
       }
@@ -99,17 +127,92 @@ export function useBackEventState() {
     [handlersRef]
   );
 
+  const addEventListener = useCallback(
+    (...handlers: Array<BackEventHandler>) => {
+      for (const handler of handlers) {
+        handlersRef.add(handler);
+      }
+
+      if (handlersRef.size > 0) {
+        setHasBackEvent(true);
+      }
+    },
+    [handlersRef]
+  );
+
+  const removeBackHandler = useCallback(
+    (...handlers: Array<BackHandlerCallback>) => {
+      for (const handler of handlers) {
+        backHandlersRef.delete(handler);
+      }
+
+      if (backHandlersRef.size === 0) {
+        setHasBackHandler(false);
+      }
+    },
+    [backHandlersRef]
+  );
+
+  const addBackHandler = useCallback(
+    (handler: BackHandlerCallback) => {
+      backHandlersRef.add(handler);
+
+      if (backHandlersRef.size > 0) {
+        setHasBackHandler(true);
+      }
+
+      return {
+        remove: () => removeBackHandler(handler),
+      };
+    },
+    [backHandlersRef, removeBackHandler]
+  );
+
+  const onBack = useCallback(() => {
+    handlersRef.forEach((handler) => handler());
+  }, [handlersRef]);
+
+  const onBackHandler = useCallback(
+    (event: BackEvent) => {
+      const orderedBackHandlers = Array.from(backHandlersRef).reverse();
+
+      for (const handler of orderedBackHandlers) {
+        const didHandleBackEvent = handler(event) === true;
+
+        if (didHandleBackEvent) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    [backHandlersRef]
+  );
+
   const backEvent = useMemo((): PrivateBackEventControls => {
     return {
       addEventListener,
       removeEventListener,
       handlersRef,
       hasBackEvent,
-      onBack: () => {
-        handlersRef.forEach((handler) => handler());
-      },
+      hasBackHandler,
+      addBackHandler,
+      removeBackHandler,
+      onBack,
+      onBackHandler,
     };
-  }, [addEventListener, handlersRef, hasBackEvent, removeEventListener]);
+  }, [
+    addEventListener,
+    addBackHandler,
+    backHandlersRef,
+    handlersRef,
+    hasBackEvent,
+    hasBackHandler,
+    onBack,
+    onBackHandler,
+    removeBackHandler,
+    removeEventListener,
+  ]);
 
   return backEvent;
 }
@@ -180,36 +283,32 @@ export function useBackEventState() {
  * ```
  */
 export function useBackEvent() {
-  const context = useContext(BackEventContext);
-  const handlersRef = useRef<Set<() => void>>(new Set()).current;
+  const context = useBackEventActionsContext();
+  const handlersRef = useRef<Set<BackEventHandler>>(new Set()).current;
 
   const isVisible = useVisibility();
-
-  if (context == null) {
-    throw new Error('useBackEvent must be used within a BackEventProvider');
-  }
 
   const contextAddEventListener = context.addEventListener;
   const contextRemoveEventListener = context.removeEventListener;
 
-  const addEventListener = useCallback(
-    (...handlers: Array<() => void>) => {
-      for (const handler of handlers) {
-        handlersRef.add(handler);
-        contextAddEventListener(handler);
-      }
-    },
-    [contextAddEventListener, handlersRef]
-  );
-
   const removeEventListener = useCallback(
-    (...handlers: Array<() => void>) => {
+    (...handlers: Array<BackEventHandler>) => {
       for (const handler of handlers) {
         handlersRef.delete(handler);
         contextRemoveEventListener(handler);
       }
     },
     [contextRemoveEventListener, handlersRef]
+  );
+
+  const addEventListener = useCallback(
+    (...handlers: Array<BackEventHandler>) => {
+      for (const handler of handlers) {
+        handlersRef.add(handler);
+        contextAddEventListener(handler);
+      }
+    },
+    [contextAddEventListener, handlersRef]
   );
 
   /**
@@ -241,13 +340,4 @@ export function useBackEvent() {
   }, [addEventListener, removeEventListener]);
 
   return backEvent;
-}
-
-export function useBackEventContext() {
-  const context = useContext(BackEventContext);
-  if (context == null) {
-    throw new Error('useBackEvent must be used within a BackEventProvider');
-  }
-
-  return context;
 }

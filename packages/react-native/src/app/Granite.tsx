@@ -41,6 +41,12 @@ export interface GraniteProps {
 
   /**
    * @description
+   * The function to register a handler that runs when the iOS swipe back gesture is detected.
+   */
+  setiOSBackPressHandler?: ({ handler }: { handler: () => void }) => Promise<void> | void;
+
+  /**
+   * @description
    * The function to provide the initial URL to router.
    * @param initialScheme The initial scheme of the app.
    * @returns
@@ -65,7 +71,7 @@ const createApp = () => {
   return {
     registerApp( 
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
-      { appName, context, router, initialScheme, setIosSwipeGestureEnabled, getInitialUrl }: GraniteProps
+      { appName, context, router, initialScheme, setIosSwipeGestureEnabled, setiOSBackPressHandler, getInitialUrl }: GraniteProps
     ): (initialProps: InitialProps) => JSX.Element {
       if (appName === ENTRY_BUNDLE_NAME) {
         throw new Error(`Reserved app name 'shared' cannot be used`);
@@ -80,6 +86,7 @@ const createApp = () => {
             initialProps={initialProps}
             initialScheme={initialSchemeValue}
             setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
+            setiOSBackPressHandler={setiOSBackPressHandler}
             getInitialUrl={getInitialUrl}
             appName={appName}
             context={context}
