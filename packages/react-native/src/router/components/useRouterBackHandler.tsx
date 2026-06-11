@@ -1,6 +1,7 @@
 import type { NavigationContainerRefWithCurrent } from '@granite-js/native/@react-navigation/native';
 import { useCallback, useMemo } from 'react';
-import { type BackEvent, useBackEventContext } from '../../use-back-event';
+import type { BackEvent } from '../../use-back-event';
+import { useBackEventContext } from '../../use-back-event/useBackEventContext';
 
 /**
  * @public
