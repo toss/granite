@@ -2,18 +2,15 @@ import fs from 'fs';
 import { createRequire } from 'module';
 import path from 'path';
 import type { Config as RollipopConfig, Plugin as RollipopPlugin } from 'rollipop';
-import type {
-  AliasConfig,
-  BuildConfig,
-  PluginConfigContext,
-  ProtocolConfig,
-  ResolvedPluginConfig,
-} from '../types';
+import type { AliasConfig, BuildConfig, PluginConfigContext, ProtocolConfig, ResolvedPluginConfig } from '../types';
 import type { CompleteGraniteConfig } from '../schema/pluginConfig';
 import { resolveConfig } from './resolveConfig';
+import { id, include } from 'rollipop/pluginutils';
 
 const moduleRequire = createRequire(import.meta.url);
 const GRANITE_ROLLIPOP_ENTRY_FILE = 'rollipop-entry.ts';
+const REQUIRE_CONTEXT_PROTOCOL = 'require-context:';
+const REQUIRE_CONTEXT_VIRTUAL_PREFIX = '\0granite:require-context?';
 
 type EsbuildConfig = NonNullable<BuildConfig['esbuild']>;
 type EsbuildBanner = EsbuildConfig['banner'] | EsbuildConfig['footer'];
@@ -21,6 +18,17 @@ type RollipopLoadResult = {
   code: string;
   moduleType: ReturnType<typeof toRollipopModuleType>;
 };
+interface RequireContextModule {
+  moduleIndex: number;
+  absolutePath: string;
+  relativePath: string;
+}
+interface RequireContextSource {
+  path: string;
+  deep: boolean;
+  filterSrc?: string;
+  filterFlags?: string;
+}
 
 export async function resolveRollipopAdapterConfig(
   config: CompleteGraniteConfig,
@@ -38,11 +46,8 @@ export async function resolveRollipopAdapterConfig(
     runtimeTarget: resolveRuntimeTarget(config.cwd),
     experimental: {
       nativeTransformPipeline: true,
-      flow: {
-        requireDirective: false,
-      },
     },
-    plugins: [graniteAdapterPlugin(resolvedConfig)],
+    plugins: [requireContextPlugin(), graniteAdapterPlugin(resolvedConfig)],
   };
 }
 
@@ -137,8 +142,8 @@ function resolveSerializerConfig(config: ResolvedPluginConfig): RollipopConfig['
 
   return {
     prelude: [...(esbuild?.prelude ?? []), ...metroPolyfills],
-    ...(banner == null ? null : { banner }),
-    ...(footer == null ? null : { footer }),
+    ...(banner == null ? null : { intro: banner }),
+    ...(footer == null ? null : { outro: footer }),
   };
 }
 
@@ -222,6 +227,234 @@ function graniteAdapterPlugin(config: ResolvedPluginConfig): RollipopPlugin {
       return { code: transformedCode, map: null };
     },
   };
+}
+
+function requireContextPlugin(): RollipopPlugin {
+  return {
+    name: 'granite:require-context',
+    resolveId: {
+      filter: [include(id(new RegExp(`^${REQUIRE_CONTEXT_PROTOCOL}.*`)))],
+      async handler(source, importer) {
+        if (importer == null) {
+          throw new Error(`require.context importer가 주어져야 합니다.`);
+        }
+
+        const { path: contextPath, deep, filterSrc, filterFlags } = parseRequireContextSource(source);
+        const importerDir = path.dirname(stripIdQuery(importer));
+        const params = new URLSearchParams({
+          contextPath,
+          importerDir,
+          deep: String(deep),
+        });
+
+        if (filterSrc != null) {
+          params.set('filterSrc', filterSrc);
+        }
+
+        if (filterFlags != null) {
+          params.set('filterFlags', filterFlags);
+        }
+
+        return `${REQUIRE_CONTEXT_VIRTUAL_PREFIX}${params.toString()}`;
+      },
+    },
+    load: {
+      filter: [include(id(new RegExp(`^${REQUIRE_CONTEXT_VIRTUAL_PREFIX}.*`)))],
+      async handler(id) {
+        const params = new URLSearchParams(id.slice(REQUIRE_CONTEXT_VIRTUAL_PREFIX.length));
+        const contextPath = params.get('contextPath');
+        const importerDir = params.get('importerDir');
+
+        if (contextPath == null || importerDir == null) {
+          throw new Error(`유효하지 않은 require.context 모듈입니다: ${id}`);
+        }
+
+        const deep = params.get('deep') !== 'false';
+        const filterSrc = params.get('filterSrc');
+        const filterFlags = params.get('filterFlags') ?? '';
+        const filter = filterSrc == null ? undefined : new RegExp(filterSrc, filterFlags);
+        const targetDir = path.resolve(importerDir, contextPath);
+        const basePath = path.join(importerDir, contextPath);
+        const allPaths = await getFilePaths(targetDir, deep);
+        const filePaths =
+          filter == null
+            ? allPaths
+            : allPaths.filter((filePath) => {
+                filter.lastIndex = 0;
+                return filter.test(path.basename(filePath));
+              });
+
+        return {
+          code: getRequireContextScript(
+            filePaths.map((filePath, index) => {
+              const pagePath = path.relative(basePath, filePath);
+              const normalizedPagePath = normalizePath(pagePath);
+
+              return {
+                moduleIndex: index,
+                relativePath: normalizedPagePath.startsWith('.') ? normalizedPagePath : `./${normalizedPagePath}`,
+                absolutePath: normalizePath(filePath),
+              };
+            })
+          ),
+          moduleType: 'js',
+        };
+      },
+    },
+    transform: {
+      filter: [include(id(/require\.context\.tsx?(?:[?#].*)?$/))],
+      async handler(code) {
+        return {
+          code: toRequireContextExportScript(code),
+          map: null,
+        };
+      },
+    },
+  };
+}
+
+async function getFilePaths(rootDir: string, deep = true): Promise<string[]> {
+  const dirents = await fs.promises.readdir(rootDir, { withFileTypes: true });
+  const filePaths: string[] = [];
+
+  for (const dirent of dirents) {
+    const filePath = path.join(rootDir, dirent.name);
+
+    if (dirent.isDirectory()) {
+      if (deep) {
+        filePaths.push(...(await getFilePaths(filePath, deep)));
+      }
+      continue;
+    }
+
+    filePaths.push(filePath);
+  }
+
+  return filePaths;
+}
+
+function stripIdQuery(id: string) {
+  return id.replace(/[?#].*$/, '');
+}
+
+function normalizePath(filePath: string) {
+  return filePath.replace(/\\/g, '/');
+}
+
+function parseRequireContextSource(source: string): RequireContextSource {
+  const rawPath = source.slice(REQUIRE_CONTEXT_PROTOCOL.length);
+  const queryIndex = rawPath.indexOf('?');
+  const contextPath = queryIndex === -1 ? rawPath : rawPath.slice(0, queryIndex);
+  const params = new URLSearchParams(queryIndex === -1 ? '' : rawPath.slice(queryIndex + 1));
+
+  return {
+    path: contextPath,
+    deep: params.get('deep') !== 'false',
+    filterSrc: params.get('filterSrc') ?? undefined,
+    filterFlags: params.get('filterFlags') ?? undefined,
+  };
+}
+
+function toRequireContextExportScript(content: string) {
+  const sources: RequireContextSource[] = [];
+  let index = 0;
+
+  const moduleBody = content
+    .replace(
+      /require\.context\((['"])(.*?)\1(?:\s*,\s*(true|false))?(?:\s*,\s*(\/.*?\/\w*))?\)/g,
+      (_, _quote, sourcePath, deep, filterLiteral) => {
+        const filterRegex = filterLiteral == null ? undefined : parseRegExpLiteral(filterLiteral);
+
+        sources.push({
+          path: sourcePath,
+          deep: deep !== 'false',
+          filterSrc: filterRegex?.source,
+          filterFlags: filterRegex?.flags,
+        });
+
+        return `__context_${index++}__`;
+      }
+    )
+    .replace(/\b(const|let)\b/g, 'var');
+
+  if (sources.length === 0) {
+    throw new Error('유효하지 않은 require context 구문입니다');
+  }
+
+  for (const source of sources) {
+    if (source.path.length === 0) {
+      throw new Error('유효하지 않은 require context 구문입니다');
+    }
+  }
+
+  const importStatements = sources
+    .map((source, sourceIndex) => {
+      const query = buildRequireContextQueryString(source);
+      return `import __context_${sourceIndex}__ from '${REQUIRE_CONTEXT_PROTOCOL}${source.path}${query}';`;
+    })
+    .join('\n');
+
+  return `
+${importStatements}
+
+${moduleBody}
+`.trim();
+}
+
+function parseRegExpLiteral(literal: string): RegExp {
+  const match = literal.match(/^\/(.*)\/(\w*)$/);
+
+  if (match == null || match[1] == null) {
+    throw new Error(`유효하지 않은 정규식 리터럴: ${literal}`);
+  }
+
+  return new RegExp(match[1], match[2] ?? '');
+}
+
+function buildRequireContextQueryString(source: RequireContextSource): string {
+  const params = new URLSearchParams();
+
+  if (!source.deep) {
+    params.set('deep', 'false');
+  }
+
+  if (source.filterSrc != null) {
+    params.set('filterSrc', source.filterSrc);
+  }
+
+  if (source.filterFlags != null) {
+    params.set('filterFlags', source.filterFlags);
+  }
+
+  const queryString = params.toString();
+  return queryString.length > 0 ? `?${queryString}` : '';
+}
+
+function getRequireContextScript(modules: RequireContextModule[]) {
+  const importStatements = modules
+    .map((module) => `import * as module${module.moduleIndex} from ${JSON.stringify(module.absolutePath)};`)
+    .join('\n');
+  const assignStatements = modules
+    .map((module) => `_modules[${JSON.stringify(module.relativePath)}] = module${module.moduleIndex};`)
+    .join('\n');
+
+  return `
+${importStatements}
+
+var requireContext = function(key) {
+  var _modules = {};
+
+  ${assignStatements}
+
+  return _modules[key];
+};
+
+requireContext.keys = function() {
+  return [${modules.map((module) => JSON.stringify(module.relativePath)).join(',')}];
+};
+
+export default requireContext;
+`.trim();
 }
 
 function usesSharedReactNative(config: ResolvedPluginConfig) {
