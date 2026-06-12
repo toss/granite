@@ -2,7 +2,7 @@ import { type ComponentProps, PureComponent, RefObject, createRef } from 'react'
 import { LayoutChangeEvent, NativeScrollEvent, NativeSyntheticEvent, ScrollView, View } from 'react-native';
 import IOContext, { IOContextValue } from './IOContext';
 import IOManager from './IOManager';
-import { Root, RootMargin } from './IntersectionObserver';
+import type { IntersectionObserverOptions, Root, RootMargin } from './IntersectionObserver';
 
 export interface IOComponentProps {
   rootMargin?: RootMargin;
@@ -25,7 +25,11 @@ function withIO<
     ComponentProps<typeof ScrollView>,
     'horizontal' | 'scrollEventThrottle' | 'onContentSizeChange' | 'onLayout' | 'onScroll'
   >,
->(BaseComponent: React.ComponentType<CompProps>, methods: string[]) {
+>(
+  BaseComponent: React.ComponentType<CompProps>,
+  methods: string[],
+  options?: Omit<IntersectionObserverOptions, 'root' | 'rootMargin'>
+) {
   type ScrollableComponentProps = CompProps & IOComponentProps;
   const IOScrollableComponent = class extends PureComponent<ScrollableComponentProps> {
     protected node: any;
@@ -75,6 +79,7 @@ function withIO<
         get rootMargin() {
           return self.props.rootMargin;
         },
+        ...options,
       });
       this.manager = manager;
       this.contextValue = {

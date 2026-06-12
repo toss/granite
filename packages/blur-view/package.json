@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/blur-view",
-  "version": "1.0.30",
+  "version": "1.0.32",
   "type": "module",
   "license": "Apache-2.0",
   "main": "./dist/module/index.js",
