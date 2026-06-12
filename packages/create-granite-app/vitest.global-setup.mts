@@ -8,6 +8,7 @@ const TARGET_PACKAGE_NAMES = [
   '@granite-js/brownfield-module',
   '@granite-js/plugin-router',
   '@granite-js/plugin-hermes',
+  '@granite-js/vitest',
   'babel-preset-granite',
 ];
 

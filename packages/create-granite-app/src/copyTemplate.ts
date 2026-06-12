@@ -1,11 +1,32 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { merge } from 'es-toolkit';
 import { __dirname } from './cwd';
 import { transformTemplate } from './transformTemplate';
 
 export const TEMPLATE_LIST = ['granite-app', 'greenfield-app'] as const;
 
 export type TemplateName = (typeof TEMPLATE_LIST)[number];
+
+interface TemplateComposition {
+  /**
+   * Template directories applied in order. The first layer is copied as-is,
+   * and each following layer is overlaid on top of it: files overwrite the
+   * previous layers, except `package.json` which is treated as a partial
+   * and deep-merged into the app's `package.json`.
+   */
+  layers: readonly string[];
+  /** Files from previous layers that must not be included in the final app. */
+  exclude?: readonly string[];
+}
+
+const TEMPLATE_COMPOSITIONS: Record<TemplateName, TemplateComposition> = {
+  'granite-app': { layers: ['granite-app'] },
+  'greenfield-app': {
+    layers: ['granite-app', 'greenfield-native'],
+    exclude: ['react-native.config.js'],
+  },
+};
 
 export async function copyTemplate(
   templateName: TemplateName,
@@ -19,14 +40,28 @@ export async function copyTemplate(
     nativeAppName?: string;
   }
 ) {
-  if (!TEMPLATE_LIST.includes(templateName)) {
+  const composition = TEMPLATE_COMPOSITIONS[templateName];
+
+  if (composition == null) {
     throw new Error(`Template ${templateName} not found`);
   }
 
-  const templatePath = path.resolve(__dirname, '..', 'templates', templateName);
   const _appPath = path.join(process.cwd(), templateOptions.appPath);
+  const [baseLayer, ...overlayLayers] = composition.layers;
 
-  await fs.cp(templatePath, _appPath, { recursive: true });
+  if (baseLayer == null) {
+    throw new Error(`Template ${templateName} has no layers`);
+  }
+
+  await fs.cp(getTemplatePath(baseLayer), _appPath, { recursive: true });
+
+  for (const overlayLayer of overlayLayers) {
+    await applyOverlayLayer(getTemplatePath(overlayLayer), _appPath);
+  }
+
+  await Promise.all(
+    (composition.exclude ?? []).map((file) => fs.rm(path.join(_appPath, file), { force: true, recursive: true }))
+  );
 
   const templateValues = {
     appName: templateOptions.appName,
@@ -64,6 +99,33 @@ export async function copyTemplate(
   if (templateOptions.needYarnrc) {
     await fs.writeFile(path.join(_appPath, '.yarnrc.yml'), 'enableGlobalCache: false');
   }
+}
+
+function getTemplatePath(layerName: string) {
+  return path.resolve(__dirname, '..', 'templates', layerName);
+}
+
+/**
+ * Copies an overlay layer on top of the app. The layer's `package.json` is a
+ * partial that is deep-merged into the app's `package.json` (same convention
+ * as tool templates), and every other file overwrites the app's copy.
+ */
+async function applyOverlayLayer(layerPath: string, appPath: string) {
+  const layerPackageJsonPath = path.join(layerPath, 'package.json');
+  const appPackageJsonPath = path.join(appPath, 'package.json');
+
+  const layerPackageJson = JSON.parse(await fs.readFile(layerPackageJsonPath, 'utf-8'));
+  const appPackageJson = JSON.parse(await fs.readFile(appPackageJsonPath, 'utf-8'));
+
+  const mergedPackageJson = merge(appPackageJson, layerPackageJson);
+  await fs.writeFile(appPackageJsonPath, JSON.stringify(mergedPackageJson, null, 2));
+
+  const files = await fs.readdir(layerPath);
+  await Promise.all(
+    files
+      .filter((file) => file !== 'package.json')
+      .map((file) => fs.cp(path.join(layerPath, file), path.join(appPath, file), { recursive: true }))
+  );
 }
 
 async function makeExecutableIfExists(filePath: string) {

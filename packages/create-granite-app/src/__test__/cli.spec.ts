@@ -43,6 +43,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     graniteNativePath,
     granitePluginRouterPath,
     granitePluginHermesPath,
+    graniteVitestPath,
     babelPresetGranitePath,
   ] = [
     findWorkspacePath(workspaceInfo, 'create-granite-app'),
@@ -50,6 +51,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     findWorkspacePath(workspaceInfo, '@granite-js/native'),
     findWorkspacePath(workspaceInfo, '@granite-js/plugin-router'),
     findWorkspacePath(workspaceInfo, '@granite-js/plugin-hermes'),
+    findWorkspacePath(workspaceInfo, '@granite-js/vitest'),
     findWorkspacePath(workspaceInfo, 'babel-preset-granite'),
   ];
 
@@ -60,6 +62,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
       graniteNativePath &&
       granitePluginRouterPath &&
       granitePluginHermesPath &&
+      graniteVitestPath &&
       babelPresetGranitePath
     )
   ) {
@@ -89,6 +92,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     packageJson.devDependencies['babel-preset-granite'] = path.join(babelPresetGranitePath, 'package.tgz');
     packageJson.devDependencies['@granite-js/plugin-router'] = path.join(granitePluginRouterPath, 'package.tgz');
     packageJson.devDependencies['@granite-js/plugin-hermes'] = path.join(granitePluginHermesPath, 'package.tgz');
+    packageJson.devDependencies['@granite-js/vitest'] = path.join(graniteVitestPath, 'package.tgz');
     await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
     const files = await fs.readdir(path.join(manager.dir, appName));
@@ -97,15 +101,15 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
       'README.md',
       'babel.config.js',
       'index.ts',
-      'jest.config.js',
       '.gitignore',
-      'jest.setup.ts',
       'package.json',
       'pages',
       'react-native.config.js',
       'require.context.ts',
       'src',
       'tsconfig.json',
+      'vitest.config.mts',
+      '__tests__',
     ];
 
     expect(files).toEqual(expect.arrayContaining([...commonFiles, ...toolSpecificFiles]));
@@ -138,6 +142,11 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
   it.sequential('yarn typecheck', async () => {
     await manager.$('yarn', ['typecheck'], { cwd: appName });
     console.log('✅ yarn typecheck');
+  });
+
+  it.sequential('yarn test', async () => {
+    await manager.$('yarn', ['test'], { cwd: appName });
+    console.log('✅ yarn test');
   });
 
   it.sequential('yarn lint', async () => {
@@ -393,8 +402,8 @@ describe('create a "greenfield-app" template', () => {
     expect(androidBrownfieldSpec).toContain('interface GraniteBrownfieldModuleSpec');
     expect(androidBrownfieldSpec).toContain('String getSchemeUri();');
 
-    const showcaseScreen = await fs.readFile(path.join(appPath, 'src/ShowcaseScreen.tsx'), 'utf8');
-    expect(showcaseScreen).toContain('Granite Greenfield');
+    // The JS layer must come from the base granite-app template as-is
+    await expect(fs.access(path.join(appPath, 'src/ShowcaseScreen.tsx'))).rejects.toThrow();
 
     const readme = await fs.readFile(path.join(appPath, 'README.md'), 'utf8');
     expect(readme).toContain('granite forge');
@@ -403,7 +412,8 @@ describe('create a "greenfield-app" template', () => {
     expect(readme).toContain('Remote bundle downloaded from the CDN URL');
 
     const indexPage = await fs.readFile(path.join(appPath, 'src/pages/index.tsx'), 'utf8');
-    expect(indexPage).toContain("import { ShowcaseScreen } from '../ShowcaseScreen'");
+    expect(indexPage).toContain("createRoute('/'");
+    expect(indexPage).toContain('🎉 Welcome! 🎉');
 
     await writeGreenfieldTestPage(appPath, greenfieldNativeModuleTestPage);
     const testPage = await fs.readFile(path.join(appPath, 'src/pages/index.tsx'), 'utf8');
