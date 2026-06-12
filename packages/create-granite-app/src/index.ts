@@ -29,6 +29,12 @@ function assertValidNativeId(input: string, optionName: string) {
   }
 }
 
+function assertValidScheme(input: string) {
+  if (!input.match(/^[a-z][a-z0-9+.-]*$/)) {
+    throw new Error('--scheme must be a valid URL scheme: lowercase letters, numbers, "+", "-", "." (e.g. myapp)');
+  }
+}
+
 function assertValidAppName(input: string) {
   const appName = getAppName(input);
   const kebabCaseAppName = kebabCase(appName);
@@ -61,6 +67,11 @@ async function run() {
         type: 'boolean',
         description: 'Create a React Native bare-style Granite app with iOS and Android projects',
         default: false,
+      },
+      scheme: {
+        type: 'string',
+        description: 'URL scheme used for deep links and the Granite router (default: granite)',
+        default: 'granite',
       },
       'bundle-id': {
         type: 'string',
@@ -103,8 +114,11 @@ async function run() {
 
   assertValidAppName(appPath);
   const appName = getAppName(appPath);
+  const scheme = cli.scheme;
   const bundleId = cli.bundleId ?? getDefaultNativeId(appName);
   const androidPackage = cli.androidPackage ?? getDefaultNativeId(appName);
+
+  assertValidScheme(scheme);
 
   if (cli.greenfield) {
     assertValidNativeId(bundleId, '--bundle-id');
@@ -135,6 +149,7 @@ async function run() {
           await copyTemplate(cli.greenfield ? 'greenfield-app' : 'granite-app', {
             appPath,
             appName,
+            scheme,
             bundleId,
             androidPackage,
             androidPackagePath: androidPackage.replaceAll('.', '/'),

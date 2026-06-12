@@ -9,5 +9,5 @@ function AppContainer({ children }: PropsWithChildren<InitialProps>) {
 export default Granite.registerApp(AppContainer, {
   appName: '%%appName%%',
   context,
-  initialScheme: 'granite://%%appName%%/',
+  initialScheme: '%%scheme%%://%%appName%%/',
 });

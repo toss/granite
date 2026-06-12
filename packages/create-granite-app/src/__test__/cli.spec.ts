@@ -415,6 +415,22 @@ describe('create a "greenfield-app" template', () => {
     expect(indexPage).toContain("createRoute('/'");
     expect(indexPage).toContain('🎉 Welcome! 🎉');
 
+    const appEntry = await fs.readFile(path.join(appPath, 'src/_app.tsx'), 'utf8');
+    expect(appEntry).toContain("initialScheme: 'granite://my-greenfield-app/'");
+
+    const graniteConfig = await fs.readFile(path.join(appPath, 'granite.config.ts'), 'utf8');
+    expect(graniteConfig).toContain("scheme: 'granite'");
+
+    const infoPlist = await fs.readFile(path.join(appPath, 'ios/MyGreenfieldApp/Info.plist'), 'utf8');
+    expect(infoPlist).toContain('<key>CFBundleURLSchemes</key>');
+    expect(infoPlist).toContain('<string>granite</string>');
+    expect(infoPlist).toContain('<string>run.granite.mygreenfieldapp</string>');
+
+    const manifest = await fs.readFile(path.join(appPath, 'android/app/src/main/AndroidManifest.xml'), 'utf8');
+    expect(manifest).toContain('android.intent.action.VIEW');
+    expect(manifest).toContain('android.intent.category.BROWSABLE');
+    expect(manifest).toContain('android:scheme="granite"');
+
     await writeGreenfieldTestPage(appPath, greenfieldNativeModuleTestPage);
     const testPage = await fs.readFile(path.join(appPath, 'src/pages/index.tsx'), 'utf8');
     expect(testPage).toContain("from '@granite-js/native/react-native-fast-image'");
@@ -446,6 +462,8 @@ describe('create a "greenfield-app" template', () => {
       'com.example.iosapp',
       '--android-package',
       'com.example.androidapp',
+      '--scheme',
+      'myapp',
       '--tools',
       'eslint-prettier',
     ]);
@@ -462,5 +480,18 @@ describe('create a "greenfield-app" template', () => {
       'utf8'
     );
     expect(activity).toContain('package com.example.androidapp');
+
+    const appEntry = await fs.readFile(path.join(appPath, 'src/_app.tsx'), 'utf8');
+    expect(appEntry).toContain("initialScheme: 'myapp://custom-greenfield-app/'");
+
+    const graniteConfig = await fs.readFile(path.join(appPath, 'granite.config.ts'), 'utf8');
+    expect(graniteConfig).toContain("scheme: 'myapp'");
+
+    const infoPlist = await fs.readFile(path.join(appPath, 'ios/CustomGreenfieldApp/Info.plist'), 'utf8');
+    expect(infoPlist).toContain('<string>myapp</string>');
+    expect(infoPlist).toContain('<string>com.example.iosapp</string>');
+
+    const manifest = await fs.readFile(path.join(appPath, 'android/app/src/main/AndroidManifest.xml'), 'utf8');
+    expect(manifest).toContain('android:scheme="myapp"');
   });
 });

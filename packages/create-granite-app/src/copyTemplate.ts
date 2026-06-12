@@ -34,6 +34,7 @@ export async function copyTemplate(
     appPath: string;
     appName: string;
     needYarnrc?: boolean;
+    scheme?: string;
     bundleId?: string;
     androidPackage?: string;
     androidPackagePath?: string;
@@ -65,6 +66,7 @@ export async function copyTemplate(
 
   const templateValues = {
     appName: templateOptions.appName,
+    scheme: templateOptions.scheme ?? 'granite',
     bundleId: templateOptions.bundleId ?? '',
     androidPackage: templateOptions.androidPackage ?? '',
     androidPackagePath: templateOptions.androidPackagePath ?? '',

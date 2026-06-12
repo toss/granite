@@ -14,15 +14,7 @@ describe('greenfield-native overlay', () => {
   const baseDir = path.join(TEMPLATES_DIR, 'granite-app');
 
   it('contains only native files and explicitly allowed overrides', async () => {
-    const allowedRootEntries = [
-      'README.md',
-      '_gitignore',
-      'android',
-      'ios',
-      'granite.config.ts',
-      'package.json',
-      'src',
-    ];
+    const allowedRootEntries = ['README.md', '_gitignore', 'android', 'ios', 'package.json', 'src'];
     const rootEntries = await fs.readdir(overlayDir);
     expect(allowedRootEntries).toEqual(expect.arrayContaining(rootEntries));
 
