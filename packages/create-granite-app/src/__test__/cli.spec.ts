@@ -255,7 +255,6 @@ describe('create a "greenfield-app" template', () => {
 
     const packageJson = JSON.parse(await fs.readFile(path.join(appPath, 'package.json'), 'utf8'));
     const nativeDependencies = [
-      '@granite-js/brownfield-module',
       '@granite-js/image',
       '@granite-js/lottie',
       '@granite-js/native',
@@ -291,9 +290,14 @@ describe('create a "greenfield-app" template', () => {
     expect(packageJson.devDependencies).toHaveProperty('@granite-js/vitest');
     expect(JSON.stringify(packageJson)).not.toContain('workspace:*');
 
-    await fs.access(path.join(appPath, 'ios/MyGreenfieldApp/GraniteBrownfieldModule.swift'));
+    // Standalone greenfield apps no longer ship brownfield module stubs
+    await expect(fs.access(path.join(appPath, 'ios/MyGreenfieldApp/GraniteBrownfieldModule.swift'))).rejects.toThrow();
     await expect(fs.access(path.join(appPath, 'src/NativeApiCheckScreen.tsx'))).rejects.toThrow();
-    await fs.access(path.join(appPath, 'android/app/src/main/java/run/granite/brownfield/GraniteBrownfieldModule.kt'));
+    await expect(
+      fs.access(path.join(appPath, 'android/app/src/main/java/run/granite/brownfield/GraniteBrownfieldModule.kt'))
+    ).rejects.toThrow();
+    await expect(fs.access(path.join(appPath, 'android/brick-brownfield-module'))).rejects.toThrow();
+    expect(packageJson.dependencies).not.toHaveProperty('@granite-js/brownfield-module');
 
     const vitestConfig = await fs.readFile(path.join(appPath, 'vitest.config.mts'), 'utf8');
     expect(vitestConfig).toContain("from '@granite-js/vitest'");
@@ -308,6 +312,7 @@ describe('create a "greenfield-app" template', () => {
     expect(pbxproj).toContain('GreenfieldViewController.swift in Sources');
     expect(pbxproj).toContain('GreenfieldReactNativeFactory.swift in Sources');
     expect(pbxproj).toContain('GreenfieldBundleLoader.swift in Sources');
+    expect(pbxproj).not.toContain('GraniteBrownfieldModule.swift');
     expect(pbxproj).toContain('scripts/bundle-granite.sh');
     expect(pbxproj).not.toContain('react-native-xcode.sh');
 
@@ -327,8 +332,7 @@ describe('create a "greenfield-app" template', () => {
     const settingsGradle = await fs.readFile(path.join(appPath, 'android/settings.gradle'), 'utf8');
     expect(settingsGradle).toContain('brick_modules.gradle');
     expect(settingsGradle).toContain('applyBrickModules');
-    expect(settingsGradle).toContain('brick-brownfield-module');
-    await fs.access(path.join(appPath, 'android/brick-brownfield-module/build.gradle'));
+    expect(settingsGradle).not.toContain('brick-brownfield-module');
 
     const gradleProperties = await fs.readFile(path.join(appPath, 'android/gradle.properties'), 'utf8');
     expect(gradleProperties).toContain('GRANITE_IMAGE_DEFAULT_PROVIDER=false');
@@ -341,6 +345,7 @@ describe('create a "greenfield-app" template', () => {
 
     const appDelegate = await fs.readFile(path.join(appPath, 'ios/MyGreenfieldApp/AppDelegate.swift'), 'utf8');
     expect(appDelegate).toContain('GreenfieldViewController');
+    expect(appDelegate).toContain('RCTLinkingManager');
     expect(appDelegate).not.toContain('GreenfieldReactNativeFactory');
     expect(appDelegate).not.toContain('BrickModuleRegistry');
     expect(appDelegate).not.toContain('RCTAppDependencyProvider');
@@ -351,6 +356,8 @@ describe('create a "greenfield-app" template', () => {
     const iosViewController = await fs.readFile(path.join(appPath, 'ios/MyGreenfieldApp/GreenfieldViewController.swift'), 'utf8');
     expect(iosViewController).toContain('GreenfieldReactNativeFactory');
     expect(iosViewController).toContain('BrickModuleRegistry');
+    expect(iosViewController).not.toContain('GraniteBrownfieldModule');
+    expect(iosViewController).not.toContain('launchSchemeUri');
     expect(iosViewController).toContain('RCTAppDependencyProvider');
     expect(iosViewController).toContain('GraniteVideoRegistry.shared.register(provider: AVPlayerProvider())');
 
@@ -382,26 +389,6 @@ describe('create a "greenfield-app" template', () => {
     expect(mainApplication).toContain('DefaultReactNativeHost');
     expect(mainApplication).toContain('GreenfieldBundleLoader.resolveBundleFilePath(applicationContext)');
 
-    const iosBrownfieldModule = await fs.readFile(
-      path.join(appPath, 'ios/MyGreenfieldApp/GraniteBrownfieldModule.swift'),
-      'utf8'
-    );
-    expect(iosBrownfieldModule).toContain('BrickModuleBase');
-    expect(iosBrownfieldModule).toContain('GraniteBrownfieldModuleSpec');
-
-    const androidBrownfieldModule = await fs.readFile(
-      path.join(appPath, 'android/app/src/main/java/run/granite/brownfield/GraniteBrownfieldModule.kt'),
-      'utf8'
-    );
-    expect(androidBrownfieldModule).toContain('GraniteBrownfieldModuleSpec');
-
-    const androidBrownfieldSpec = await fs.readFile(
-      path.join(appPath, 'android/brick-brownfield-module/src/main/java/run/granite/brownfield/GraniteBrownfieldModuleSpec.java'),
-      'utf8'
-    );
-    expect(androidBrownfieldSpec).toContain('interface GraniteBrownfieldModuleSpec');
-    expect(androidBrownfieldSpec).toContain('String getSchemeUri();');
-
     // The JS layer must come from the base granite-app template as-is
     await expect(fs.access(path.join(appPath, 'src/ShowcaseScreen.tsx'))).rejects.toThrow();
 
@@ -415,11 +402,13 @@ describe('create a "greenfield-app" template', () => {
     expect(indexPage).toContain("createRoute('/'");
     expect(indexPage).toContain('🎉 Welcome! 🎉');
 
+    // The standalone runtime resolves the initial URL itself, so the app entry is the base one
     const appEntry = await fs.readFile(path.join(appPath, 'src/_app.tsx'), 'utf8');
-    expect(appEntry).toContain("initialScheme: 'granite://my-greenfield-app/'");
+    expect(appEntry).not.toContain('initialScheme');
 
     const graniteConfig = await fs.readFile(path.join(appPath, 'granite.config.ts'), 'utf8');
     expect(graniteConfig).toContain("scheme: 'granite'");
+    expect(graniteConfig).toContain('standalone: true');
 
     const infoPlist = await fs.readFile(path.join(appPath, 'ios/MyGreenfieldApp/Info.plist'), 'utf8');
     expect(infoPlist).toContain('<key>CFBundleURLSchemes</key>');
@@ -482,10 +471,11 @@ describe('create a "greenfield-app" template', () => {
     expect(activity).toContain('package com.example.androidapp');
 
     const appEntry = await fs.readFile(path.join(appPath, 'src/_app.tsx'), 'utf8');
-    expect(appEntry).toContain("initialScheme: 'myapp://custom-greenfield-app/'");
+    expect(appEntry).not.toContain('initialScheme');
 
     const graniteConfig = await fs.readFile(path.join(appPath, 'granite.config.ts'), 'utf8');
     expect(graniteConfig).toContain("scheme: 'myapp'");
+    expect(graniteConfig).toContain('standalone: true');
 
     const infoPlist = await fs.readFile(path.join(appPath, 'ios/CustomGreenfieldApp/Info.plist'), 'utf8');
     expect(infoPlist).toContain('<string>myapp</string>');

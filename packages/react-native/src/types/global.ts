@@ -7,6 +7,8 @@ export interface GraniteGlobal {
     name: string;
     scheme: string;
     host: string;
+    /** Whether the app was built as a standalone (greenfield) app without a brownfield host. */
+    standalone?: boolean;
   };
 }
 

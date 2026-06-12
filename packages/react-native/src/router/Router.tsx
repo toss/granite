@@ -19,6 +19,7 @@ import {
 } from 'react';
 import { InitialProps } from '..';
 import { closeView } from '../native-modules';
+import { exitStandaloneApp, isStandaloneApp } from '../utils/standalone';
 import { BackButton } from './components/BackButton';
 import { CanGoBackGuard } from './components/CanGoBackGuard';
 import { StackNavigator } from './components/StackNavigator';
@@ -166,7 +167,9 @@ export function Router({
 
   const { handler, handleBackEvent, canGoBack, hasBackEvent } = useInternalRouterBackHandler({
     navigationContainerRef: ref,
-    onClose: closeView,
+    // Standalone (greenfield) apps have no brownfield host view to close.
+    // Leave the back action to the OS: Android exits the app, iOS does nothing.
+    onClose: isStandaloneApp() ? exitStandaloneApp : closeView,
   });
 
   const headerLeft = useCallback(

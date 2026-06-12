@@ -24,6 +24,7 @@ import { resolvePlugins } from '../utils/resolvePlugins';
  * @param config.appName - Your app's unique identifier
  * @param config.host - Host name for your app (e.g. 'scheme://host/app-name')
  * @param config.scheme - URL scheme for launching your app (e.g. 'granite')
+ * @param config.standalone - Whether the app runs standalone (greenfield) without a brownfield host. Deep links resolve as `scheme://path` without the app name, and brownfield-only APIs throw errors (defaults to false)
  * @param config.outdir - Where to output build files (defaults to 'dist')
  * @param config.entryFile - Your app's entry point (defaults to './src/_app.tsx')
  * @param config.build - Customize build settings
@@ -75,7 +76,13 @@ export const defineConfig = async (config: GraniteConfig): Promise<CompleteGrani
   };
 
   const { configs, pluginHooks } = await resolvePlugins(parsed.plugins);
-  const globalsScriptConfig = prepareGraniteGlobalsScript({ rootDir: cwd, appName, scheme, host });
+  const globalsScriptConfig = prepareGraniteGlobalsScript({
+    rootDir: cwd,
+    appName,
+    scheme,
+    host,
+    standalone: parsed.standalone,
+  });
 
   return {
     cwd,

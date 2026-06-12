@@ -17,6 +17,7 @@ export const pluginConfigSchema = z.object({
   appName: z.string(),
   host: z.string().optional(),
   scheme: z.string(),
+  standalone: z.boolean().default(false),
   outdir: z.string().default('dist'),
   entryFile: z.string().default('./src/_app.tsx'),
   build: z.custom<PluginBuildConfig>().optional(),

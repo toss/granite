@@ -7,8 +7,3 @@ includeBuild('../node_modules/@react-native/gradle-plugin')
 
 apply from: file("../node_modules/brick-module/android/brick_modules.gradle")
 applyBrickModules(settings, [projectRoot: "../", appProject: "app"])
-
-def brownfieldModuleProject = findProject(":granite-js_brownfield-module")
-if (brownfieldModuleProject != null) {
-    brownfieldModuleProject.projectDir = file("brick-brownfield-module")
-}

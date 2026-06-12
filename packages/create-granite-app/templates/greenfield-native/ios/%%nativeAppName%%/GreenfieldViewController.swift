@@ -1,6 +1,5 @@
 import UIKit
 import BrickModule
-import GraniteBrownfield
 import ReactAppDependencyProvider
 #if canImport(GraniteVideo)
 import GraniteVideo
@@ -10,17 +9,11 @@ final class GreenfieldViewController: UIViewController, BrickModuleRegistrableVi
   let moduleRegistry = BrickModuleRegistry()
 
   private let launchOptions: [UIApplication.LaunchOptionsKey: Any]
-  private let launchSchemeUri: String
   private var reactNativeDelegate: ReactNativeDelegate?
   private var reactNativeFactory: GreenfieldReactNativeFactory?
 
   init(launchOptions: [UIApplication.LaunchOptionsKey: Any]) {
     self.launchOptions = launchOptions
-    if let url = launchOptions[.url] as? URL {
-      self.launchSchemeUri = url.absoluteString
-    } else {
-      self.launchSchemeUri = ""
-    }
     super.init(nibName: nil, bundle: nil)
   }
 
@@ -32,17 +25,7 @@ final class GreenfieldViewController: UIViewController, BrickModuleRegistrableVi
     super.viewDidLoad()
     view.backgroundColor = .systemBackground
     registerNativeProviders()
-    registerModules()
     startReactNative()
-  }
-
-  func registerModules() {
-    moduleRegistry.register([
-      GraniteBrownfieldModule(
-        viewController: self,
-        schemeUriProvider: { [weak self] in self?.launchSchemeUri ?? "" }
-      )
-    ])
   }
 
   private func registerNativeProviders() {

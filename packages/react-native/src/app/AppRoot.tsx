@@ -35,6 +35,7 @@ export function AppRoot({
     appName,
     scheme: global.__granite.app.scheme,
     host: global.__granite.app.host,
+    standalone: global.__granite.app.standalone,
   });
 
   return (

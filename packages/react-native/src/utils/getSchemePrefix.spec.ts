@@ -41,4 +41,26 @@ describe('getSchemePrefix', () => {
 
     expect(result).toBe('myapp://myhost/production-app');
   });
+
+  it('should drop the appName segment for standalone apps', () => {
+    const result = getSchemePrefix({
+      scheme: 'myapp',
+      appName: 'testapp',
+      host: '',
+      standalone: true,
+    });
+
+    expect(result).toBe('myapp://');
+  });
+
+  it('should ignore host for standalone apps', () => {
+    const result = getSchemePrefix({
+      scheme: 'myapp',
+      appName: 'testapp',
+      host: 'super',
+      standalone: true,
+    });
+
+    expect(result).toBe('myapp://');
+  });
 });

@@ -5,7 +5,6 @@
     "android": "react-native run-android"
   },
   "dependencies": {
-    "@granite-js/brownfield-module": "workspace:*",
     "@granite-js/image": "workspace:*",
     "@granite-js/lottie": "workspace:*",
     "@granite-js/video": "workspace:*",

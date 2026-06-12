@@ -11,7 +11,6 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		5077D269D4DCD39D4802A1D0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
-		761780EF2CA45674006654EE /* GraniteBrownfieldModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EE2CA45674006654EE /* GraniteBrownfieldModule.swift */; };
 		761780F12CA45674006654EE /* GreenfieldBundleLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780F02CA45674006654EE /* GreenfieldBundleLoader.swift */; };
 		761780F32CA45674006654EE /* GreenfieldViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780F22CA45674006654EE /* GreenfieldViewController.swift */; };
 		761780F52CA45674006654EE /* GreenfieldReactNativeFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780F42CA45674006654EE /* GreenfieldReactNativeFactory.swift */; };
@@ -27,7 +26,6 @@
 		5709B34CF0A7D63546082F79 /* Pods-%%nativeAppName%%.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-%%nativeAppName%%.release.xcconfig"; path = "Target Support Files/Pods-%%nativeAppName%%/Pods-%%nativeAppName%%.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-%%nativeAppName%%.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-%%nativeAppName%%.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = %%nativeAppName%%/AppDelegate.swift; sourceTree = "<group>"; };
-		761780EE2CA45674006654EE /* GraniteBrownfieldModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GraniteBrownfieldModule.swift; path = %%nativeAppName%%/GraniteBrownfieldModule.swift; sourceTree = "<group>"; };
 		761780F02CA45674006654EE /* GreenfieldBundleLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GreenfieldBundleLoader.swift; path = %%nativeAppName%%/GreenfieldBundleLoader.swift; sourceTree = "<group>"; };
 		761780F22CA45674006654EE /* GreenfieldViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GreenfieldViewController.swift; path = %%nativeAppName%%/GreenfieldViewController.swift; sourceTree = "<group>"; };
 		761780F42CA45674006654EE /* GreenfieldReactNativeFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GreenfieldReactNativeFactory.swift; path = %%nativeAppName%%/GreenfieldReactNativeFactory.swift; sourceTree = "<group>"; };
@@ -55,7 +53,6 @@
 					761780F22CA45674006654EE /* GreenfieldViewController.swift */,
 					761780F42CA45674006654EE /* GreenfieldReactNativeFactory.swift */,
 					761780F02CA45674006654EE /* GreenfieldBundleLoader.swift */,
-					761780EE2CA45674006654EE /* GraniteBrownfieldModule.swift */,
 					13B07FB61A68108700A75B9A /* Info.plist */,
 					81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
@@ -262,7 +259,6 @@
 					761780F32CA45674006654EE /* GreenfieldViewController.swift in Sources */,
 					761780F52CA45674006654EE /* GreenfieldReactNativeFactory.swift in Sources */,
 					761780F12CA45674006654EE /* GreenfieldBundleLoader.swift in Sources */,
-					761780EF2CA45674006654EE /* GraniteBrownfieldModule.swift in Sources */,
 				);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

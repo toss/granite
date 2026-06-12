@@ -8,6 +8,7 @@ interface GraniteGlobalsConfig {
   appName: string;
   scheme: string;
   host: string;
+  standalone: boolean;
 }
 
 export function prepareGraniteGlobalsScript(config: GraniteGlobalsConfig): PluginConfig {
@@ -35,9 +36,9 @@ function writeGraniteGlobalsScript(config: GraniteGlobalsConfig) {
   return filePath;
 }
 
-function getGraniteGlobalScript({ appName, scheme, host }: GraniteGlobalsConfig) {
+function getGraniteGlobalScript({ appName, scheme, host, standalone }: GraniteGlobalsConfig) {
   return [
     'global.__granite = global.__granite || {};',
-    `global.__granite.app = { name: ${JSON.stringify(appName)}, scheme: ${JSON.stringify(scheme)}, host: ${JSON.stringify(host)} };`,
+    `global.__granite.app = { name: ${JSON.stringify(appName)}, scheme: ${JSON.stringify(scheme)}, host: ${JSON.stringify(host)}, standalone: ${JSON.stringify(standalone)} };`,
   ].join('\n');
 }

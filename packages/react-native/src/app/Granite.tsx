@@ -1,5 +1,5 @@
 import { ComponentType, type JSX, PropsWithChildren } from 'react';
-import { AppRegistry } from 'react-native';
+import { AppRegistry, Linking } from 'react-native';
 import { ENTRY_BUNDLE_NAME } from '../constants';
 import type { InitialProps } from '../initial-props';
 import type { RouterProps, RequireContext } from '../router';
@@ -7,6 +7,7 @@ import { AppRoot } from './AppRoot';
 import { HostAppRoot } from './HostAppRoot';
 import { getSchemeUri } from '../constant-bridges';
 import { setupPolyfills } from '../polyfills';
+import { isStandaloneApp } from '../utils/standalone';
 
 export interface GraniteProps {
   /**
@@ -54,6 +55,16 @@ export interface GraniteProps {
   getInitialUrl?: (initialScheme: string) => string | undefined | Promise<string | undefined>;
 }
 
+/**
+ * Default initial URL resolver for standalone (greenfield) apps. Prefers the
+ * deep link that launched the app (via React Native's `Linking`), falling back
+ * to the app's initial scheme so the index route renders on a plain cold start.
+ */
+async function getStandaloneInitialUrl(initialScheme: string) {
+  const launchUrl = await Linking.getInitialURL();
+  return launchUrl ?? decodeURI(initialScheme);
+}
+
 const createApp = () => {
   let _appName: string | null = null;
 
@@ -78,7 +89,10 @@ const createApp = () => {
       }
 
       function Root(initialProps: InitialProps) {
-        const initialSchemeValue = (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ?? getSchemeUri();
+        const standalone = isStandaloneApp();
+        const initialSchemeValue =
+          (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ??
+          (standalone ? `${global.__granite.app.scheme}:///` : getSchemeUri());
 
         return (
           <AppRoot
@@ -87,7 +101,7 @@ const createApp = () => {
             initialScheme={initialSchemeValue}
             setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
             setiOSBackPressHandler={setiOSBackPressHandler}
-            getInitialUrl={getInitialUrl}
+            getInitialUrl={getInitialUrl ?? (standalone ? getStandaloneInitialUrl : undefined)}
             appName={appName}
             context={context}
             router={router}
