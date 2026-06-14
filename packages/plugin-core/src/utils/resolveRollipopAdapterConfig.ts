@@ -38,7 +38,7 @@ export async function resolveRollipopAdapterConfig(
 
   return {
     root: config.cwd,
-    entry: resolveRollipopEntryFile(config.cwd, config.entryFile),
+    entry: config.entryFile,
     serializer: resolveSerializerConfig(resolvedConfig),
     transformer: resolveTransformerConfig(resolvedConfig),
     optimization: resolveOptimizationConfig(resolvedConfig),
@@ -47,21 +47,8 @@ export async function resolveRollipopAdapterConfig(
     experimental: {
       nativeTransformPipeline: true,
     },
-    plugins: [requireContextPlugin(), graniteAdapterPlugin(resolvedConfig)],
+    plugins: [requireContextPlugin(), graniteAdapterPlugin(resolvedConfig), graniteDevServerPlugin(resolvedConfig)],
   };
-}
-
-function resolveRollipopEntryFile(cwd: string, entryFile: string) {
-  const entryPath = path.join(cwd, '.granite', GRANITE_ROLLIPOP_ENTRY_FILE);
-  const code = createEntryCode(entryFile);
-
-  fs.mkdirSync(path.dirname(entryPath), { recursive: true });
-
-  if (!fs.existsSync(entryPath) || fs.readFileSync(entryPath, 'utf-8') !== code) {
-    fs.writeFileSync(entryPath, code);
-  }
-
-  return entryPath;
 }
 
 function resolveRuntimeTarget(cwd: string): RollipopConfig['runtimeTarget'] | undefined {
@@ -225,6 +212,21 @@ function graniteAdapterPlugin(config: ResolvedPluginConfig): RollipopPlugin {
       }
 
       return { code: transformedCode, map: null };
+    },
+  };
+}
+
+function graniteDevServerPlugin(config: ResolvedPluginConfig): RollipopPlugin {
+  return {
+    name: 'granite:dev-server',
+    async configureServer(server) {
+      for (const middleware of config.metro?.middlewares ?? []) {
+        server.middlewares.use(middleware as any);
+      }
+
+      for (const middleware of config.devServer?.middlewares ?? []) {
+        await server.instance.register(middleware as any);
+      }
     },
   };
 }
