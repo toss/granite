@@ -1,5 +1,5 @@
 import { createRoute } from '@granite-js/react-native';
-import type { ReactNode } from 'react';
+import type React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export const Route = createRoute('/', {
@@ -30,7 +30,7 @@ function Page() {
   );
 }
 
-function Container({ children }: { children: ReactNode }) {
+function Container({ children }: { children: React.ReactNode }) {
   return <View style={styles.container}>{children}</View>;
 }
 
