@@ -1,4 +1,4 @@
-import { isCancel, intro, text, tasks, cancel, note, outro, multiselect } from '@clack/prompts';
+import { isCancel, intro, text, tasks, cancel, note, outro, select } from '@clack/prompts';
 import { kebabCase } from 'es-toolkit/string';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -34,9 +34,8 @@ async function run() {
   const cli = await yargs(hideBin(process.argv))
     .options({
       tools: {
-        type: 'array',
-        description: 'Select development tools to include in the project',
-        default: [],
+        type: 'string',
+        description: 'Select a development tool to include in the project',
         choices: TOOL_TEMPLATE_LIST,
       },
     })
@@ -72,14 +71,13 @@ async function run() {
 
   assertValidAppName(appPath);
 
-  const toolTemplate = await resolveFallback(cli.tools.length > 0 ? cli.tools : null, async () =>
-    multiselect({
-      message: 'Select tools',
+  const toolTemplate = await resolveFallback(cli.tools ?? null, async () =>
+    select({
+      message: 'Select tool',
       options: [
         { value: 'eslint-prettier', label: 'ESLint + Prettier' },
         { value: 'biome', label: 'Biome' },
       ],
-      required: true,
     })
   );
 
@@ -98,7 +96,7 @@ async function run() {
             appName: getAppName(appPath),
             needYarnrc: Boolean(pkgInfo.packageManager === 'yarn' && pkgInfo.version && pkgInfo?.version >= '2.0.0'),
           });
-          await Promise.all(toolTemplate.map((tool) => copyToolTemplate(tool, { appPath })));
+          await copyToolTemplate(toolTemplate, { appPath });
         } catch (e) {
           console.error(e);
           throw e;
