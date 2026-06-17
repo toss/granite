@@ -1,6 +1,6 @@
 import { createRoute } from '@granite-js/react-native';
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import type { ReactNode } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export const Route = createRoute('/', {
   component: Page,
@@ -17,9 +17,12 @@ function Page() {
     <Container>
       <Text style={styles.title}>🎉 Welcome! 🎉</Text>
       <Text style={styles.subtitle}>
-        This is a demo page for the <Text style={styles.brandText}>Granite</Text> Framework.
+        This is a demo page for the{' '}
+        <Text style={styles.brandText}>Granite</Text> Framework.
       </Text>
-      <Text style={styles.description}>This page was created to showcase the features of the Granite.</Text>
+      <Text style={styles.description}>
+        This page was created to showcase the features of the Granite.
+      </Text>
       <TouchableOpacity style={styles.button} onPress={goToAboutPage}>
         <Text style={styles.buttonText}>Go to About Page</Text>
       </TouchableOpacity>
@@ -27,7 +30,7 @@ function Page() {
   );
 }
 
-function Container({ children }: { children: React.ReactNode }) {
+function Container({ children }: { children: ReactNode }) {
   return <View style={styles.container}>{children}</View>;
 }
 
