@@ -29,6 +29,7 @@ const YARN_CONFIGS: Record<string, string | string[]> = {
   ],
 };
 
+// additional package dependencies included in the sample project of `create-granite-app`
 const ADDITIONAL_PACKAGE_NAMES = [
   '@granite-js/react-native',
   '@granite-js/native',
@@ -60,37 +61,20 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
   const appName = `test-app-with-${toolType}`;
 
   const workspaceInfo = getYarnWorkspaces(process.cwd());
-  const [
-    createGraniteAppPath,
-    graniteReactNativePath,
-    graniteNativePath,
-    granitePluginRouterPath,
-    granitePluginHermesPath,
-    granitePluginMicroFrontendPath,
-    babelPresetGranitePath,
-  ] = [
-    findWorkspacePath(workspaceInfo, 'create-granite-app'),
-    findWorkspacePath(workspaceInfo, '@granite-js/react-native'),
-    findWorkspacePath(workspaceInfo, '@granite-js/native'),
-    findWorkspacePath(workspaceInfo, '@granite-js/plugin-router'),
-    findWorkspacePath(workspaceInfo, '@granite-js/plugin-hermes'),
-    findWorkspacePath(workspaceInfo, '@granite-js/plugin-micro-frontend'),
-    findWorkspacePath(workspaceInfo, 'babel-preset-granite'),
-  ];
-
-  if (
-    !(
-      createGraniteAppPath &&
-      graniteReactNativePath &&
-      graniteNativePath &&
-      granitePluginRouterPath &&
-      granitePluginHermesPath &&
-      granitePluginMicroFrontendPath &&
-      babelPresetGranitePath
-    )
-  ) {
+  const createGraniteAppPath = findWorkspacePath(workspaceInfo, 'create-granite-app');
+  if (!createGraniteAppPath) {
     throw new Error('Unable to find workspace packages');
   }
+
+  const additionalPackagePaths = ADDITIONAL_PACKAGE_NAMES.map((packageName) => {
+    const packagePath = findWorkspacePath(workspaceInfo, packageName);
+
+    if (!packagePath) {
+      throw new Error('Unable to find workspace packages');
+    }
+
+    return { packageName, packagePath };
+  });
 
   beforeAll(async () => {
     manager = await createTmpDir();
@@ -107,18 +91,21 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     const cga = await manager.$('npx', ['--package', packagePath, 'create-granite-app', appName, '--tools', toolType]);
     expect(cga.stdout).toContain('Done');
 
-    // Update package.json
     const packageJsonPath = path.join(manager.dir, appName, 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
-    packageJson.dependencies['@granite-js/react-native'] = path.join(graniteReactNativePath, 'package.tgz');
-    packageJson.dependencies['@granite-js/native'] = path.join(graniteNativePath, 'package.tgz');
-    packageJson.devDependencies['babel-preset-granite'] = path.join(babelPresetGranitePath, 'package.tgz');
-    packageJson.devDependencies['@granite-js/plugin-router'] = path.join(granitePluginRouterPath, 'package.tgz');
-    packageJson.devDependencies['@granite-js/plugin-hermes'] = path.join(granitePluginHermesPath, 'package.tgz');
-    packageJson.devDependencies['@granite-js/plugin-micro-frontend'] = path.join(
-      granitePluginMicroFrontendPath,
-      'package.tgz'
-    );
+
+    for (const { packageName, packagePath } of additionalPackagePaths) {
+      const packageTgzPath = path.join(packagePath, 'package.tgz');
+
+      if (packageName in packageJson.dependencies) {
+        packageJson.dependencies[packageName] = packageTgzPath;
+      }
+
+      if (packageName in packageJson.devDependencies) {
+        packageJson.devDependencies[packageName] = packageTgzPath;
+      }
+    }
+
     await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
     const files = await fs.readdir(path.join(manager.dir, appName));
