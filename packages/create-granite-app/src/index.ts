@@ -96,6 +96,7 @@ async function run() {
           await copyTemplate('granite-app', {
             appPath,
             appName: getAppName(appPath),
+            packageManager: pkgInfo.packageManager,
             needYarnrc: Boolean(pkgInfo.packageManager === 'yarn' && pkgInfo.version && pkgInfo?.version >= '2.0.0'),
           });
           await Promise.all(toolTemplate.map((tool) => copyToolTemplate(tool, { appPath })));

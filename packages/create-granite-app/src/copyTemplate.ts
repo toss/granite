@@ -9,7 +9,7 @@ export type TemplateName = (typeof TEMPLATE_LIST)[number];
 
 export async function copyTemplate(
   templateName: TemplateName,
-  templateOptions: { appPath: string; appName: string; needYarnrc?: boolean }
+  templateOptions: { appPath: string; appName: string; packageManager: string; needYarnrc?: boolean }
 ) {
   if (!TEMPLATE_LIST.includes(templateName)) {
     throw new Error(`Template ${templateName} not found`);
@@ -36,6 +36,7 @@ export async function copyTemplate(
       const content = await fs.readFile(filePath, 'utf-8');
       const newContent = transformTemplate(content, {
         appName: templateOptions.appName,
+        packageManager: templateOptions.packageManager,
       });
       await fs.writeFile(filePath, newContent);
     }

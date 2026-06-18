@@ -118,11 +118,22 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     console.log('✅ created files', files);
   });
 
+  it.sequential('checked README.md', async () => {
+    const readme = await fs.readFile(path.join(manager.dir, appName, 'README.md'), 'utf8');
+    expect(readme).toContain('npm install');
+    expect(readme).toContain('npm run dev');
+    expect(readme).toContain('npm run build');
+    expect(readme).toContain('npm run test');
+    expect(readme).toContain('npm run typecheck');
+    expect(readme).not.toContain('%%packageManager%%');
+    console.log('✅ checked README.md', readme);
+  });
+
   it.sequential('checked package.json', async () => {
     const packageJsonPath = path.join(manager.dir, appName, 'package.json');
-    const packageJson = await fs.readFile(packageJsonPath, 'utf8');
+    const updatedPackageJson = await fs.readFile(packageJsonPath, 'utf8');
 
-    console.log('✅ checked package.json', packageJson);
+    console.log('✅ checked package.json', updatedPackageJson);
   });
 
   it.sequential('yarn install', async () => {
@@ -207,10 +218,9 @@ const toolSpecificFilesMap: Record<ToolType, string[]> = {
   'eslint-prettier': ['.prettierrc', 'eslint.config.mjs'],
 };
 
-describe('create a "granite-app" template with "biome"', () => {
-  runTemplateTest('biome', toolSpecificFilesMap['biome'], { port: 8180 });
-});
-
-describe('create a "granite-app" template with "eslint-prettier"', () => {
-  runTemplateTest('eslint-prettier', toolSpecificFilesMap['eslint-prettier'], { port: 8181 });
+describe.concurrent.each([
+  { toolType: 'biome' as const, port: 8180 },
+  { toolType: 'eslint-prettier' as const, port: 8181 },
+])('create a "granite-app" template with "$toolType"', ({ toolType, port }) => {
+  runTemplateTest(toolType, toolSpecificFilesMap[toolType], { port });
 });
