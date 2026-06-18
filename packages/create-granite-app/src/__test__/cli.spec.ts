@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { $ } from 'execa';
 import killPort from 'kill-port';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import waitPort from 'wait-port';
@@ -28,7 +29,30 @@ const YARN_CONFIGS: Record<string, string | string[]> = {
   ],
 };
 
+const ADDITIONAL_PACKAGE_NAMES = [
+  '@granite-js/react-native',
+  '@granite-js/native',
+  '@granite-js/plugin-router',
+  '@granite-js/plugin-hermes',
+  '@granite-js/plugin-micro-frontend',
+  'babel-preset-granite',
+];
+
+const rootDir = path.resolve(import.meta.dirname, '..', '..', '..', '..');
+
 type ToolType = 'biome' | 'eslint-prettier';
+
+beforeAll(async () => {
+  console.log('\n\n👉 Packing...');
+
+  try {
+    await $`../../bin/tools linked-pack create-granite-app --packages ${ADDITIONAL_PACKAGE_NAMES.join(',')}`;
+
+    console.log('✅ Packing completed successfully');
+  } finally {
+    await $({ cwd: rootDir, shell: true })`git checkout -- packages/*/package.json`;
+  }
+});
 
 const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], options: { port: number }) => {
   let manager: TmpDirManager;
@@ -70,12 +94,12 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
 
   beforeAll(async () => {
     manager = await createTmpDir();
-    killPort(options.port).catch(noop);
+    await killPort(options.port).catch(noop);
   });
 
   afterAll(async () => {
-    manager.cleanup();
-    killPort(options.port).catch(noop);
+    await killPort(options.port).catch(noop);
+    await manager.cleanup();
   });
 
   it.sequential('create files', async () => {
@@ -120,11 +144,11 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
 
   it.sequential('checked README.md', async () => {
     const readme = await fs.readFile(path.join(manager.dir, appName, 'README.md'), 'utf8');
-    expect(readme).toContain('npm install');
-    expect(readme).toContain('npm run dev');
-    expect(readme).toContain('npm run build');
-    expect(readme).toContain('npm run test');
-    expect(readme).toContain('npm run typecheck');
+    expect(readme).toContain('yarn install');
+    expect(readme).toContain('yarn run dev');
+    expect(readme).toContain('yarn run build');
+    expect(readme).toContain('yarn run test');
+    expect(readme).toContain('yarn run typecheck');
     expect(readme).not.toContain('%%packageManager%%');
     console.log('✅ checked README.md', readme);
   });
