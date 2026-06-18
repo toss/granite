@@ -43,9 +43,9 @@ async function run() {
 
   intro('Create Granite App Project');
 
-  const argProjectPath = typeof cli._[0] === 'string' ? cli._[0] : null;
+  const appPathFromArg = typeof cli._[0] === 'string' ? cli._[0] : null;
 
-  const appPath = await resolveFallback(argProjectPath, () =>
+  const appPath = await resolveFallback(appPathFromArg, () =>
     text({
       message: 'Project name or path:',
       placeholder: 'my-granite-app',
