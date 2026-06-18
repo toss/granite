@@ -16,11 +16,13 @@ const rootDir = path.resolve(import.meta.dirname, '..', '..');
 export default async () => {
   console.log('\n\n👉 Packing...');
 
-  for (const packageName of TARGET_PACKAGE_NAMES) {
-    await $`../../bin/tools linked-pack ${packageName}`;
+  try {
+    for (const packageName of TARGET_PACKAGE_NAMES) {
+      await $`../../bin/tools linked-pack ${packageName}`;
+    }
+
+    console.log('✅ Global setup completed successfully');
+  } finally {
+    await $({ cwd: rootDir, shell: true })`git checkout -- packages/*/package.json`;
   }
-
-  await $({ cwd: rootDir, shell: true })`git checkout -- packages/*/package.json`;
-
-  console.log('✅ Global setup completed successfully');
 };
