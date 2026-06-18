@@ -7,6 +7,7 @@ const TARGET_PACKAGE_NAMES = [
   '@granite-js/native',
   '@granite-js/plugin-router',
   '@granite-js/plugin-hermes',
+  '@granite-js/plugin-micro-frontend',
   'babel-preset-granite',
 ];
 

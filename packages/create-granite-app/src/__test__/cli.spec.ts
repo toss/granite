@@ -42,6 +42,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     graniteNativePath,
     granitePluginRouterPath,
     granitePluginHermesPath,
+    granitePluginMicroFrontendPath,
     babelPresetGranitePath,
   ] = [
     findWorkspacePath(workspaceInfo, 'create-granite-app'),
@@ -49,6 +50,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     findWorkspacePath(workspaceInfo, '@granite-js/native'),
     findWorkspacePath(workspaceInfo, '@granite-js/plugin-router'),
     findWorkspacePath(workspaceInfo, '@granite-js/plugin-hermes'),
+    findWorkspacePath(workspaceInfo, '@granite-js/plugin-micro-frontend'),
     findWorkspacePath(workspaceInfo, 'babel-preset-granite'),
   ];
 
@@ -59,6 +61,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
       graniteNativePath &&
       granitePluginRouterPath &&
       granitePluginHermesPath &&
+      granitePluginMicroFrontendPath &&
       babelPresetGranitePath
     )
   ) {
@@ -88,6 +91,10 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     packageJson.devDependencies['babel-preset-granite'] = path.join(babelPresetGranitePath, 'package.tgz');
     packageJson.devDependencies['@granite-js/plugin-router'] = path.join(granitePluginRouterPath, 'package.tgz');
     packageJson.devDependencies['@granite-js/plugin-hermes'] = path.join(granitePluginHermesPath, 'package.tgz');
+    packageJson.devDependencies['@granite-js/plugin-micro-frontend'] = path.join(
+      granitePluginMicroFrontendPath,
+      'package.tgz'
+    );
     await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
     const files = await fs.readdir(path.join(manager.dir, appName));
@@ -153,6 +160,24 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
       expect.arrayContaining(['bundle.android.hbc', 'bundle.android.hbc.map', 'bundle.ios.hbc', 'bundle.ios.hbc.map'])
     );
     console.log('✅ yarn build');
+  });
+
+  it.sequential('assert remote app bundle size', async () => {
+    const distFolder = path.join(manager.dir, appName, 'dist');
+    for (const platform of ['android', 'ios']) {
+      const bundlePath = path.join(distFolder, `bundle.${platform}.js`);
+      const bundle = await fs.readFile(bundlePath, 'utf8');
+      const { size } = await fs.stat(bundlePath);
+
+      // 500kb limit
+      expect(size).toBeLessThan(500 * 1024);
+      // Check that React-related code is excluded
+      for (const marker of ['Minified React error #', 'ReactSharedInternals']) {
+        expect(bundle).not.toContain(marker);
+      }
+    }
+
+    console.log('✅ assert remote app bundle size');
   });
 
   it.sequential('yarn dev', async () => {
