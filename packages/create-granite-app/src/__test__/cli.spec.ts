@@ -55,6 +55,11 @@ beforeAll(async () => {
   }
 });
 
+const lintScriptMap: Record<ToolType, string> = {
+  biome: 'biome check',
+  'eslint-prettier': 'eslint .',
+};
+
 const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], options: { port: number }) => {
   let manager: TmpDirManager;
 
@@ -142,9 +147,10 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
 
   it.sequential('checked package.json', async () => {
     const packageJsonPath = path.join(manager.dir, appName, 'package.json');
-    const updatedPackageJson = await fs.readFile(packageJsonPath, 'utf8');
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
 
-    console.log('✅ checked package.json', updatedPackageJson);
+    expect(packageJson.scripts.lint).toBe(lintScriptMap[toolType]);
+    console.log('✅ checked package.json', packageJson);
   });
 
   it.sequential('yarn install', async () => {
