@@ -3,14 +3,13 @@ import path from 'path';
 import { createProjectGraphAsync, type ProjectGraph } from '@nx/devkit';
 import { isNotNil } from 'es-toolkit';
 import { $ } from 'zx';
-import { ensureExecuteCommand } from './utils';
 
-interface ProjectState {
+type ProjectState = {
   projectGraph: ProjectGraph;
   workspaceRoot: string;
-}
+};
 
-let cachedState: ProjectState | null = null;
+let cachedState: ProjectState | undefined;
 
 async function loadProject() {
   if (cachedState == null) {
@@ -22,7 +21,7 @@ async function loadProject() {
 
 function getProjectRootImpl() {
   let currentPath = process.cwd();
-  let latestPackageJsonPath: string | null = null;
+  let latestPackageJsonPath: string | undefined;
   const root = path.parse(currentPath).root;
 
   while (currentPath !== root) {
@@ -40,25 +39,20 @@ function getProjectRootImpl() {
   return latestPackageJsonPath;
 }
 
-async function projectRoot() {
-  const { workspaceRoot } = await loadProject();
-  return workspaceRoot;
-}
-
 async function dependenciesOf(packageName: string) {
   const { projectGraph, workspaceRoot } = await loadProject();
   const visited = new Set<string>();
   const result = new Set<string>();
   const pathMap: Record<string, string> = {};
 
-  const traverse = (packageName: string) => {
-    if (visited.has(packageName)) {
+  const traverse = (currentPackageName: string) => {
+    if (visited.has(currentPackageName)) {
       return;
     }
 
-    visited.add(packageName);
+    visited.add(currentPackageName);
 
-    const dependencies = projectGraph.dependencies[packageName] ?? [];
+    const dependencies = projectGraph.dependencies[currentPackageName] ?? [];
 
     for (const dependency of dependencies) {
       const targetNode = projectGraph.nodes[dependency.target];
@@ -90,20 +84,14 @@ async function locationOf(packageName: string) {
   return path.join(workspaceRoot, targetNode.data.root);
 }
 
-async function build(packages: string[]) {
-  const globPattern = utils.toGlobPattern(packages);
-  const $$ = $({ stdio: 'inherit' });
-  const task = $$`yarn workspaces foreach -A --topological-dev --include ${globPattern} build`;
-
-  await ensureExecuteCommand(task);
-}
-
 async function pack(packages: string[], outFile = 'package.tgz') {
   const globPattern = utils.toGlobPattern(packages);
   const $$ = $({ stdio: 'inherit' });
-  const task = $$`yarn workspaces foreach -A --topological-dev --include ${globPattern} pack --out ${outFile}`;
+  const result = await $$`yarn workspaces foreach -A --topological-dev --include ${globPattern} pack --out ${outFile}`;
 
-  await ensureExecuteCommand(task);
+  if (result.exitCode !== 0) {
+    throw result.cause;
+  }
 
   return Promise.all(packages.map(async (name) => ({ file: path.resolve(await locationOf(name), outFile), name })));
 }
@@ -135,13 +123,12 @@ async function packAndLinkWorkspacePackages(targetPackage: string, additionalPac
         const packageJson = JSON.parse(rawPackageJson);
         let edited = false;
 
-        for (const { name, path: packageRoot } of combinedDependencies) {
-          // Avoid self reference
+        for (const { name, path: dependencyPackageRoot } of combinedDependencies) {
           if (currentName === name) {
             continue;
           }
 
-          const packedFilePath = path.join(packageRoot, packedFile);
+          const packedFilePath = path.join(dependencyPackageRoot, packedFile);
 
           if (typeof packageJson.dependencies !== 'undefined' && name in packageJson.dependencies) {
             packageJson.dependencies[name] = packedFilePath;
@@ -205,11 +192,6 @@ const utils = {
 };
 
 export const Project = {
-  projectRoot,
-  locationOf,
-  dependenciesOf,
-  build,
-  pack,
   packAndLinkWorkspacePackages,
   getPackages,
 };

@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { $, execa } from 'execa';
+import { execa } from 'execa';
 import killPort from 'kill-port';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import waitPort from 'wait-port';
@@ -43,20 +43,36 @@ const ADDITIONAL_PACKAGE_NAMES = [
 
 const rootDir = path.resolve(import.meta.dirname, '..', '..', '..', '..');
 
+const createPackageJsonSnapshots = async () => {
+  const { stdout } = await execa('git', ['ls-files', 'packages/*/package.json'], { cwd: rootDir });
+  const packageJsonPaths = stdout.split('\n').filter(Boolean);
+
+  return Promise.all(
+    packageJsonPaths.map(async (filePath) => ({
+      filePath,
+      content: await fs.readFile(path.join(rootDir, filePath), 'utf8'),
+    }))
+  );
+};
+
+const restorePackageJsonSnapshots = async (snapshots: Awaited<ReturnType<typeof createPackageJsonSnapshots>>) => {
+  await Promise.all(snapshots.map(({ filePath, content }) => fs.writeFile(path.join(rootDir, filePath), content)));
+};
+
 beforeAll(async () => {
   console.log('\n\n👉 Packing...');
 
+  const packageJsonSnapshots = await createPackageJsonSnapshots();
   try {
-    await execa('granite-tools', [
-      'linked-pack',
-      'create-granite-app',
-      '--packages',
-      ADDITIONAL_PACKAGE_NAMES.join(','),
-    ]);
+    await execa(
+      'yarn',
+      ['tsx', '.scripts/linked-pack.ts', 'create-granite-app', '--packages', ...ADDITIONAL_PACKAGE_NAMES],
+      { cwd: rootDir }
+    );
 
     console.log('✅ Packing completed successfully');
   } finally {
-    await $({ cwd: rootDir, shell: true })`git checkout -- packages/*/package.json`;
+    await restorePackageJsonSnapshots(packageJsonSnapshots);
   }
 });
 

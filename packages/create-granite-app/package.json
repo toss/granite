@@ -28,7 +28,6 @@
     "test:no-parallel": "vitest --no-watch --coverage"
   },
   "devDependencies": {
-    "@granite-internal/tools": "workspace:*",
     "@types/kill-port": "2.0.1",
     "@types/node": "catalog:tools",
     "@types/yargs": "^17.0.33",

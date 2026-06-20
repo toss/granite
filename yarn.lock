@@ -3759,15 +3759,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commander-js/extra-typings@npm:^13.1.0":
-  version: 13.1.0
-  resolution: "@commander-js/extra-typings@npm:13.1.0"
-  peerDependencies:
-    commander: ~13.1.0
-  checksum: 10c0/ff799f0641f68855aa73c976912a607c25d564df34fd8e262927a80b19f6cccd882fe7ce098a0e072a497fd0020cbd19fd1e4d5cc98a461cd6623abf8ed5f4e7
-  languageName: node
-  linkType: hard
-
 "@commander-js/extra-typings@npm:^14.0.0":
   version: 14.0.0
   resolution: "@commander-js/extra-typings@npm:14.0.0"
@@ -5430,28 +5421,6 @@ __metadata:
     valibot: "npm:^1.1.0"
     vitest: "npm:4.1.3"
     zod: "npm:^4.1.12"
-  languageName: unknown
-  linkType: soft
-
-"@granite-internal/tools@workspace:*, @granite-internal/tools@workspace:tools":
-  version: 0.0.0-use.local
-  resolution: "@granite-internal/tools@workspace:tools"
-  dependencies:
-    "@commander-js/extra-typings": "npm:^13.1.0"
-    "@nx/devkit": "npm:^21.0.3"
-    "@types/node": "catalog:tools"
-    "@types/yargs": "npm:^17.0.33"
-    "@types/yauzl": "npm:^2.10.3"
-    commander: "npm:^13.1.0"
-    es-toolkit: "npm:^1.39.10"
-    nx: "npm:^21.0.3"
-    picocolors: "npm:^1.1.1"
-    tsup: "npm:^8.5.0"
-    tsx: "npm:^4.19.4"
-    typescript: "catalog:tools"
-    zx: "npm:^8.5.4"
-  bin:
-    granite-tools: ./dist/index.js
   languageName: unknown
   linkType: soft
 
@@ -13572,13 +13541,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^13.1.0":
-  version: 13.1.0
-  resolution: "commander@npm:13.1.0"
-  checksum: 10c0/7b8c5544bba704fbe84b7cab2e043df8586d5c114a4c5b607f83ae5060708940ed0b5bd5838cf8ce27539cde265c1cbd59ce3c8c6b017ed3eec8943e3a415164
-  languageName: node
-  linkType: hard
-
 "commander@npm:^14.0.0":
   version: 14.0.2
   resolution: "commander@npm:14.0.2"
@@ -13817,7 +13779,6 @@ __metadata:
   resolution: "create-granite-app@workspace:packages/create-granite-app"
   dependencies:
     "@clack/prompts": "npm:^0.8.2"
-    "@granite-internal/tools": "workspace:*"
     "@types/kill-port": "npm:2.0.1"
     "@types/node": "catalog:tools"
     "@types/yargs": "npm:^17.0.33"
@@ -17073,6 +17034,7 @@ __metadata:
     "@types/react": "catalog:react-native"
     "@yarnpkg/types": "npm:^4.0.0"
     chalk: "npm:^5.3.0"
+    es-toolkit: "npm:^1.39.10"
     eslint: "npm:^9.10.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-import: "npm:^2.29.1"
@@ -17086,6 +17048,7 @@ __metadata:
     hygen: "npm:6.2.11"
     knip: "npm:^1"
     nx: "npm:^21.0.3"
+    picocolors: "npm:^1.1.1"
     prettier: "npm:^3.3.3"
     rimraf: "npm:^6.0.1"
     ts-node: "npm:^10.9.2"
@@ -17094,6 +17057,7 @@ __metadata:
     typescript: "catalog:tools"
     typescript-eslint: "npm:^8.31.0"
     yargs: "npm:^17.7.2"
+    zx: "npm:^8.5.4"
   dependenciesMeta:
     hermes-compiler:
       unplugged: true
@@ -26126,7 +26090,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsx@npm:^4.19.3, tsx@npm:^4.19.4":
+"tsx@npm:^4.19.3":
   version: 4.20.6
   resolution: "tsx@npm:4.20.6"
   dependencies:
