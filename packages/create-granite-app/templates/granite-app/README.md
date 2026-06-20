@@ -26,6 +26,4 @@ Start the dev server:
 ## Project files
 
 - `granite.config.ts` defines the Granite app name, URL scheme, and plugins.
-- `src/_app.tsx` registers the app container.
-- `pages/` contains route files used by the router plugin.
-- `require.context.ts` wires page discovery for the app.
+- `src/_app.tsx` registers the app entry point.

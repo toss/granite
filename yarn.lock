@@ -13823,6 +13823,7 @@ __metadata:
     execa: "npm:^9.5.2"
     kill-port: "npm:2.0.1"
     tsup: "npm:^8.5.0"
+    tsx: "npm:^4.19.3"
     typescript: "catalog:tools"
     vitest: "npm:^4.0.12"
     wait-port: "npm:^1.1.0"

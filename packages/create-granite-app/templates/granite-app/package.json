@@ -23,7 +23,6 @@
     "@types/node": "^22.10.2",
     "@types/react": "19.2.0",
     "@types/react-test-renderer": "19.1.0",
-    "@granite-js/plugin-router": "workspace:*",
     "@granite-js/plugin-hermes": "workspace:*",
     "@granite-js/plugin-micro-frontend": "workspace:*",
     "babel-preset-granite": "workspace:*",

@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "@granite-js/plugin-router": "workspace:*"
+  }
+}

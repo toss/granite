@@ -2,10 +2,12 @@ import { isCancel, intro, text, tasks, cancel, note, outro, select } from '@clac
 import { kebabCase } from 'es-toolkit/string';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { copyTemplate } from './copyTemplate';
-import { copyToolTemplate, TOOL_TEMPLATE_LIST } from './copyToolTemplate';
+import { APP_TYPE_LIST, type AppType } from './appTypes';
+import { applyTemplateModule, copyTemplate } from './copyTemplate';
 import { getPackageManager } from './getPackageManager';
 import { resolveFallback } from './resolveFallback';
+import { APP_TYPE_TO_TEMPLATE_MODULE, TOOL_TYPE_TO_TEMPLATE_MODULE } from './templateModules';
+import { TOOL_TYPE_LIST, type ToolType } from './toolTypes';
 
 function getAppName(appPath: string) {
   return appPath.split('/').pop() || '';
@@ -36,7 +38,12 @@ async function run() {
       tools: {
         type: 'string',
         description: 'Select a development tool to include in the project',
-        choices: TOOL_TEMPLATE_LIST,
+        choices: TOOL_TYPE_LIST,
+      },
+      type: {
+        type: 'string',
+        description: 'Select Granite app type',
+        choices: APP_TYPE_LIST,
       },
     })
     .help().argv;
@@ -71,8 +78,24 @@ async function run() {
 
   assertValidAppName(appPath);
 
-  const toolTemplate = await resolveFallback(cli.tools ?? null, async () =>
-    select({
+  const appType = await resolveFallback((cli.type as AppType | undefined) ?? null, async () =>
+    select<AppType>({
+      message: 'Select app type',
+      initialValue: 'remote',
+      options: [
+        { value: 'remote', label: 'Remote or Apps In Toss' },
+        { value: 'shared', label: 'Shared' },
+      ],
+    })
+  );
+
+  if (isCancel(appType)) {
+    cancel('Operation cancelled.');
+    process.exit(0);
+  }
+
+  const toolType = await resolveFallback((cli.tools as ToolType | undefined) ?? null, async () =>
+    select<ToolType>({
       message: 'Select tool',
       options: [
         { value: 'eslint-prettier', label: 'ESLint + Prettier' },
@@ -81,7 +104,7 @@ async function run() {
     })
   );
 
-  if (isCancel(toolTemplate)) {
+  if (isCancel(toolType)) {
     cancel('Operation cancelled.');
     process.exit(0);
   }
@@ -91,13 +114,16 @@ async function run() {
       title: `Creating Granite App`,
       task: async () => {
         try {
-          await copyTemplate('granite-app', {
+          const templateOptions = {
             appPath,
             appName: getAppName(appPath),
             packageManager: pkgInfo.packageManager,
             needYarnrc: Boolean(pkgInfo.packageManager === 'yarn' && pkgInfo.version && pkgInfo?.version >= '2.0.0'),
-          });
-          await copyToolTemplate(toolTemplate, { appPath });
+          };
+
+          await copyTemplate(templateOptions);
+          await applyTemplateModule(APP_TYPE_TO_TEMPLATE_MODULE[appType], templateOptions);
+          await applyTemplateModule(TOOL_TYPE_TO_TEMPLATE_MODULE[toolType], templateOptions);
         } catch (e) {
           console.error(e);
           throw e;

@@ -13,7 +13,6 @@
   },
   "files": [
     "templates",
-    "tool-templates",
     "dist",
     "bin.js",
     "package.json"
@@ -21,8 +20,8 @@
   "license": "Apache-2.0",
   "description": "Create Granite App",
   "scripts": {
-    "prepack": "yarn build && node scripts/prepack.js",
-    "postpack": "node scripts/postpack.js",
+    "prepack": "yarn build && tsx scripts/rewriteTemplateDepVersions.ts fixed",
+    "postpack": "tsx scripts/rewriteTemplateDepVersions.ts workspace",
     "build": "tsup src/index.ts --format esm",
     "dev": "tsup src/index.ts --format esm --watch",
     "typecheck": "tsc --noEmit",
@@ -37,6 +36,7 @@
     "execa": "^9.5.2",
     "kill-port": "2.0.1",
     "tsup": "^8.5.0",
+    "tsx": "^4.19.3",
     "typescript": "catalog:tools",
     "vitest": "^4.0.12",
     "wait-port": "^1.1.0",

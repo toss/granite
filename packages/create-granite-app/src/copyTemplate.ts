@@ -1,50 +1,100 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { merge } from 'es-toolkit';
 import { __dirname } from './cwd';
+import { TEMPLATE_MODULE_LIST, type TemplateModuleName } from './templateModules';
 import { transformTemplate } from './transformTemplate';
 
-export const TEMPLATE_LIST = ['granite-app'] as const;
+const BASE_TEMPLATE_NAME = 'granite-app';
 
-export type TemplateName = (typeof TEMPLATE_LIST)[number];
+type TemplateOptions = {
+  appPath: string;
+  appName: string;
+  packageManager: string;
+  needYarnrc?: boolean;
+};
 
-export async function copyTemplate(
-  templateName: TemplateName,
-  templateOptions: { appPath: string; appName: string; packageManager: string; needYarnrc?: boolean }
-) {
-  if (!TEMPLATE_LIST.includes(templateName)) {
-    throw new Error(`Template ${templateName} not found`);
-  }
+type TemplateValues = {
+  appName: string;
+  packageManager: string;
+};
 
-  const templatePath = path.resolve(__dirname, '..', 'templates', templateName);
-  const _appPath = path.resolve(templateOptions.appPath);
+async function mergePackageJson(sourcePath: string, destPath: string, values: TemplateValues) {
+  const sourceContent = transformTemplate(await fs.readFile(sourcePath, 'utf-8'), values);
+  const sourcePackageJson = JSON.parse(sourceContent);
 
-  await fs.cp(templatePath, _appPath, { recursive: true });
-
-  const files = await fs.readdir(_appPath, { recursive: true });
-  const filePromises = files.map(async (file) => {
-    // When publishing to npm, .gitignore is automatically converted to .npmignore and ignored
-    // So we rename .gitignore to _gitignore for distribution
-    if (file === '_gitignore') {
-      await fs.rename(path.join(_appPath, file), path.join(_appPath, '.gitignore'));
+  try {
+    const destPackageJson = JSON.parse(await fs.readFile(destPath, 'utf-8'));
+    const mergedPackageJson = merge(destPackageJson, sourcePackageJson);
+    await fs.writeFile(destPath, JSON.stringify(mergedPackageJson, null, 2));
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+      await fs.mkdir(path.dirname(destPath), { recursive: true });
+      await fs.writeFile(destPath, JSON.stringify(sourcePackageJson, null, 2));
       return;
     }
 
-    const filePath = path.join(_appPath, file.toString());
-    const stat = await fs.stat(filePath);
+    throw error;
+  }
+}
 
-    if (stat.isFile()) {
-      const content = await fs.readFile(filePath, 'utf-8');
-      const newContent = transformTemplate(content, {
-        appName: templateOptions.appName,
-        packageManager: templateOptions.packageManager,
-      });
-      await fs.writeFile(filePath, newContent);
-    }
-  });
+async function writeTemplateFile(sourcePath: string, destPath: string, values: TemplateValues) {
+  await fs.mkdir(path.dirname(destPath), { recursive: true });
 
-  await Promise.all(filePromises);
+  const content = await fs.readFile(sourcePath, 'utf-8');
+  const newContent = transformTemplate(content, values);
+
+  await fs.writeFile(destPath, newContent);
+}
+
+async function applyTemplateDirectory(templatePath: string, templateOptions: TemplateOptions) {
+  const appPath = path.resolve(templateOptions.appPath);
+  const values = {
+    appName: templateOptions.appName,
+    packageManager: templateOptions.packageManager,
+  };
+
+  const files = await fs.readdir(templatePath, { recursive: true });
+
+  await Promise.all(
+    files.map(async (file) => {
+      const relativePath = file.toString();
+      const sourcePath = path.join(templatePath, relativePath);
+      const stat = await fs.stat(sourcePath);
+
+      if (!stat.isFile()) {
+        return;
+      }
+
+      const destRelativePath = relativePath === '_gitignore' ? '.gitignore' : relativePath;
+      const destPath = path.join(appPath, destRelativePath);
+
+      if (relativePath === 'package.json') {
+        await mergePackageJson(sourcePath, destPath, values);
+        return;
+      }
+
+      await writeTemplateFile(sourcePath, destPath, values);
+    })
+  );
+}
+
+export async function copyTemplate(templateOptions: TemplateOptions) {
+  const templatePath = path.resolve(__dirname, '..', 'templates', BASE_TEMPLATE_NAME);
+
+  await applyTemplateDirectory(templatePath, templateOptions);
 
   if (templateOptions.needYarnrc) {
-    await fs.writeFile(path.join(_appPath, '.yarnrc.yml'), 'enableGlobalCache: false');
+    await fs.writeFile(path.join(path.resolve(templateOptions.appPath), '.yarnrc.yml'), 'enableGlobalCache: false');
   }
+}
+
+export async function applyTemplateModule(moduleName: TemplateModuleName, templateOptions: TemplateOptions) {
+  if (!TEMPLATE_MODULE_LIST.includes(moduleName)) {
+    throw new Error(`Template module ${moduleName} not found`);
+  }
+
+  const modulePath = path.resolve(__dirname, '..', 'templates', 'modules', moduleName);
+
+  await applyTemplateDirectory(modulePath, templateOptions);
 }

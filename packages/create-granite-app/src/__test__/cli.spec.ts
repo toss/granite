@@ -5,6 +5,8 @@ import killPort from 'kill-port';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import waitPort from 'wait-port';
 import { getYarnWorkspaces, findWorkspacePath } from 'workspace-tools';
+import type { AppType } from '../appTypes';
+import type { ToolType } from '../toolTypes';
 import { createTmpDir, TmpDirManager } from './createTmpDir';
 
 const noop = () => {};
@@ -41,8 +43,6 @@ const ADDITIONAL_PACKAGE_NAMES = [
 
 const rootDir = path.resolve(import.meta.dirname, '..', '..', '..', '..');
 
-type ToolType = 'biome' | 'eslint-prettier';
-
 beforeAll(async () => {
   console.log('\n\n👉 Packing...');
 
@@ -60,10 +60,15 @@ const lintScriptMap: Record<ToolType, string> = {
   'eslint-prettier': 'eslint .',
 };
 
-const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], options: { port: number }) => {
+const runTemplateTest = (
+  appType: AppType,
+  toolType: ToolType,
+  toolSpecificFiles: string[],
+  options: { port: number }
+) => {
   let manager: TmpDirManager;
 
-  const appName = `test-app-with-${toolType}`;
+  const appName = `test-${appType}-app-with-${toolType}`;
 
   const workspaceInfo = getYarnWorkspaces(process.cwd());
   const createGraniteAppPath = findWorkspacePath(workspaceInfo, 'create-granite-app');
@@ -93,7 +98,16 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
 
   it.sequential('create files', async () => {
     const packagePath = path.join(createGraniteAppPath, 'package.tgz');
-    const cga = await manager.$('npx', ['--package', packagePath, 'create-granite-app', appName, '--tools', toolType]);
+    const cga = await manager.$('npx', [
+      '--package',
+      packagePath,
+      'create-granite-app',
+      appName,
+      '--type',
+      appType,
+      '--tools',
+      toolType,
+    ]);
     expect(cga.stdout).toContain('Done');
 
     const packageJsonPath = path.join(manager.dir, appName, 'package.json');
@@ -123,11 +137,10 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
       '.gitignore',
       'jest.setup.ts',
       'package.json',
-      'pages',
       'react-native.config.js',
-      'require.context.ts',
       'src',
       'tsconfig.json',
+      ...(appType === 'remote' ? ['pages', 'require.context.ts'] : []),
     ];
 
     expect(files).toEqual(expect.arrayContaining([...commonFiles, ...toolSpecificFiles]));
@@ -190,32 +203,44 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     console.log('✅ yarn build');
   });
 
-  it.sequential('assert remote app bundle size', async () => {
-    const distFolder = path.join(manager.dir, appName, 'dist');
-    for (const platform of ['android', 'ios']) {
-      const bundlePath = path.join(distFolder, `bundle.${platform}.js`);
-      const bundle = await fs.readFile(bundlePath, 'utf8');
-      const { size } = await fs.stat(bundlePath);
+  if (appType === 'remote') {
+    it.sequential('assert remote app bundle size', async () => {
+      const distFolder = path.join(manager.dir, appName, 'dist');
+      for (const platform of ['android', 'ios']) {
+        const bundlePath = path.join(distFolder, `bundle.${platform}.js`);
+        const bundle = await fs.readFile(bundlePath, 'utf8');
+        const { size } = await fs.stat(bundlePath);
 
-      // 500kb limit
-      expect(size).toBeLessThan(500 * 1024);
-      // Check that React-related code is excluded
-      for (const marker of ['Minified React error #', 'ReactSharedInternals']) {
-        expect(bundle).not.toContain(marker);
+        // 500kb limit
+        expect(size).toBeLessThan(500 * 1024);
+        // Check that React-related code is excluded
+        for (const marker of ['Minified React error #', 'ReactSharedInternals']) {
+          expect(bundle).not.toContain(marker);
+        }
       }
-    }
 
-    console.log('✅ assert remote app bundle size');
-  });
+      console.log('✅ assert remote app bundle size');
+    });
+  }
 
   it.sequential('yarn dev', async () => {
-    manager
-      .$('yarn', ['dev', '--port', options.port.toString()], {
-        cwd: appName,
-      })
-      .catch(noop);
+    const devProcess = manager.$('yarn', ['dev', '--port', options.port.toString()], {
+      cwd: appName,
+    });
+    const devExit = devProcess.then(
+      () => {
+        throw new Error('Dev server exited before the port was ready');
+      },
+      (error) => {
+        throw error;
+      }
+    );
 
-    await waitPort({ host: 'localhost', port: options.port });
+    try {
+      await Promise.race([waitPort({ host: 'localhost', port: options.port, timeout: 120_000 }), devExit]);
+    } finally {
+      devExit.catch(noop);
+    }
     console.log('✅ yarn dev');
     const platforms = ['android', 'ios'];
 
@@ -235,9 +260,11 @@ const toolSpecificFilesMap: Record<ToolType, string[]> = {
   'eslint-prettier': ['.prettierrc', 'eslint.config.mjs'],
 };
 
-describe.concurrent.each([
-  { toolType: 'biome' as const, port: 8180 },
-  { toolType: 'eslint-prettier' as const, port: 8181 },
-])('create a "granite-app" template with "$toolType"', ({ toolType, port }) => {
-  runTemplateTest(toolType, toolSpecificFilesMap[toolType], { port });
+describe.each([
+  { appType: 'remote' as const, toolType: 'biome' as const, port: 8180 },
+  { appType: 'remote' as const, toolType: 'eslint-prettier' as const, port: 8181 },
+  { appType: 'shared' as const, toolType: 'biome' as const, port: 8182 },
+  { appType: 'shared' as const, toolType: 'eslint-prettier' as const, port: 8183 },
+])('create a "$appType" template with "$toolType"', ({ appType, toolType, port }) => {
+  runTemplateTest(appType, toolType, toolSpecificFilesMap[toolType], { port });
 });
