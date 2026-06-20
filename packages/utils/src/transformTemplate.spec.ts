@@ -23,7 +23,7 @@ describe('transformTemplate', () => {
   });
 
   it('플레이스홀더가 없는 문자열은 그대로 반환해야 합니다', () => {
-    const result = transformTemplate('안녕하세요', {} as any);
+    const result = transformTemplate('안녕하세요', {});
     expect(result).toBe('안녕하세요');
   });
 });

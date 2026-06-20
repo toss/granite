@@ -5490,11 +5490,13 @@ __metadata:
   resolution: "@granite-js/plugin-router@workspace:packages/plugin-router"
   dependencies:
     "@granite-js/plugin-core": "workspace:*"
+    "@granite-js/utils": "workspace:*"
     "@swc/core": "catalog:swc"
     "@types/node": "catalog:tools"
     "@vitest/coverage-v8": "npm:^4.0.12"
     chokidar: "npm:4.0.1"
     es-toolkit: "npm:^1.39.8"
+    eslint: "npm:^9.10.0"
     tsdown: "catalog:tools"
     typescript: "catalog:tools"
     vitest: "npm:^4.0.12"
@@ -5653,8 +5655,10 @@ __metadata:
   dependencies:
     "@types/node": "catalog:tools"
     "@types/yauzl": "npm:^2.10.3"
+    "@vitest/coverage-v8": "npm:^4.0.12"
     tsup: "npm:^8.5.0"
     typescript: "catalog:tools"
+    vitest: "npm:^4.0.12"
     yauzl: "npm:^3.2.0"
   languageName: unknown
   linkType: soft
@@ -13202,6 +13206,7 @@ __metadata:
   resolution: "create-granite-app@workspace:packages/create-granite-app"
   dependencies:
     "@clack/prompts": "npm:^0.8.2"
+    "@granite-js/utils": "workspace:*"
     "@types/kill-port": "npm:2.0.1"
     "@types/node": "catalog:tools"
     "@types/yargs": "npm:^17.0.33"

@@ -3,9 +3,7 @@ type ExtractPlaceholders<T extends string> = T extends `${infer _Start}%%${infer
   ? Key | ExtractPlaceholders<Rest>
   : never;
 
-type TransformTemplateArgs<T extends string> = {
-  [Key in ExtractPlaceholders<T>]: string;
-};
+type TransformTemplateArgs<T extends string> = Record<ExtractPlaceholders<T>, string> & Record<string, string>;
 
 /**
  * 템플릿 문자열에서 %%key%% 형식의 플레이스홀더를 values 객체의 값으로 대체합니다.
@@ -20,7 +18,7 @@ export function transformTemplate<T extends string>(templateString: T, values: T
   let result: string = templateString;
   for (const key in values) {
     const placeholder = `%%${key}%%`;
-    result = result.replace(new RegExp(placeholder, 'g'), (values as any)[key]);
+    result = result.replace(new RegExp(placeholder, 'g'), values[key]!);
   }
   return result;
 }
