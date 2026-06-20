@@ -2,7 +2,7 @@
 
 ## Environment Baseline
 
-Local tool hints live in both `.nvmrc` and `mise.toml`; CI uses `.nvmrc` through `actions/setup-node@v4`, enables Corepack, and installs dependencies with `yarn install --immutable` in `.github/actions/setup-node-yarn/action.yml`.
+Local tool versions live in `mise.toml`; `.nvmrc` mirrors the Node version for local compatibility. CI runs `jdx/mise-action@v4` in `.github/actions/setup-node-yarn/action.yml`, which runs `mise install`, then installs dependencies with `yarn install --immutable`.
 
 Because Yarn Plug'n'Play is enabled, run commands through `yarn` from the relevant workspace instead of calling package binaries directly.
 

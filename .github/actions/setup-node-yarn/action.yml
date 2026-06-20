@@ -4,14 +4,10 @@ description: Setup Node & Yarn
 runs:
   using: composite
   steps:
-    - name: Setup Node
-      uses: actions/setup-node@v4
+    - name: Install Mise
+      uses: jdx/mise-action@v4
       with:
-        node-version-file: .nvmrc
-
-    - name: Setup Yarn
-      run: corepack enable
-      shell: bash
+        install: true
 
     - name: Install dependencies
       run: yarn install --immutable
