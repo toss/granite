@@ -2,6 +2,9 @@
   "name": "@granite-internal/tools",
   "private": true,
   "type": "module",
+  "bin": {
+    "granite-tools": "./dist/index.js"
+  },
   "scripts": {
     "prepack": "yarn build",
     "dev": "tsx src/index.ts --",

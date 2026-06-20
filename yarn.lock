@@ -5433,7 +5433,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@granite-internal/tools@workspace:tools":
+"@granite-internal/tools@workspace:*, @granite-internal/tools@workspace:tools":
   version: 0.0.0-use.local
   resolution: "@granite-internal/tools@workspace:tools"
   dependencies:
@@ -5450,6 +5450,8 @@ __metadata:
     tsx: "npm:^4.19.4"
     typescript: "catalog:tools"
     zx: "npm:^8.5.4"
+  bin:
+    granite-tools: ./dist/index.js
   languageName: unknown
   linkType: soft
 
@@ -13815,6 +13817,7 @@ __metadata:
   resolution: "create-granite-app@workspace:packages/create-granite-app"
   dependencies:
     "@clack/prompts": "npm:^0.8.2"
+    "@granite-internal/tools": "workspace:*"
     "@types/kill-port": "npm:2.0.1"
     "@types/node": "catalog:tools"
     "@types/yargs": "npm:^17.0.33"

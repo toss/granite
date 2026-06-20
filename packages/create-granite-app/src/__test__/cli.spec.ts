@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { $ } from 'execa';
+import { $, execa } from 'execa';
 import killPort from 'kill-port';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import waitPort from 'wait-port';
@@ -47,7 +47,12 @@ beforeAll(async () => {
   console.log('\n\n👉 Packing...');
 
   try {
-    await $`../../bin/tools linked-pack create-granite-app --packages ${ADDITIONAL_PACKAGE_NAMES.join(',')}`;
+    await execa('granite-tools', [
+      'linked-pack',
+      'create-granite-app',
+      '--packages',
+      ADDITIONAL_PACKAGE_NAMES.join(','),
+    ]);
 
     console.log('✅ Packing completed successfully');
   } finally {
