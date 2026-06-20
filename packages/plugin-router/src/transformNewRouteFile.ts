@@ -1,8 +1,8 @@
+import { transformTemplate } from '@granite-js/utils';
 import { getComponentName } from './getComponentName';
 import { getPageName } from './getPageName';
 import { getPath } from './getPath';
 import { NEW_LAYOUT_FILE_TEMPLATE, NEW_ROUTE_FILE_TEMPLATE } from './template';
-import { transformTemplate } from './utils/transformTemplate';
 
 export async function transformNewRouteFile(path: string) {
   return transformTemplate(NEW_ROUTE_FILE_TEMPLATE, {

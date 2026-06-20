@@ -6,6 +6,7 @@
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
+    "test": "vitest --no-watch --coverage",
     "build": "tsup"
   },
   "main": "./dist/index.cjs",
@@ -35,8 +36,10 @@
   "devDependencies": {
     "@types/node": "catalog:tools",
     "@types/yauzl": "^2.10.3",
+    "@vitest/coverage-v8": "^4.0.12",
     "tsup": "^8.5.0",
-    "typescript": "catalog:tools"
+    "typescript": "catalog:tools",
+    "vitest": "^4.0.12"
   },
   "dependencies": {
     "yauzl": "^3.2.0"

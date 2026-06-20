@@ -1,9 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { transformTemplate } from '@granite-js/utils';
 import { merge } from 'es-toolkit';
 import { __dirname } from './cwd';
 import { TEMPLATE_MODULE_LIST, type TemplateModuleName } from './templateModules';
-import { transformTemplate } from './transformTemplate';
 
 const BASE_TEMPLATE_NAME = 'granite-app';
 

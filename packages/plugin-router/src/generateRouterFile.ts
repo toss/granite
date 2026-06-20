@@ -1,10 +1,10 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { join, parse } from 'path';
+import { transformTemplate } from '@granite-js/utils';
 import { checkExportRoute } from './checkExportRoute';
 import { getComponentName } from './getComponentName';
 import { getPath } from './getPath';
 import { ROUTER_GEN_TEMPLATE } from './template';
-import { transformTemplate } from './utils/transformTemplate';
 
 export function generateRouterFile() {
   const cwd = process.cwd();
