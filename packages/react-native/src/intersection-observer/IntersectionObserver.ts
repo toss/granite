@@ -159,12 +159,12 @@ class IntersectionObserver {
           if (horizontal) {
             const visibleTargetMinX = Math.max(contentOffset.x - (rootMargin.left || 0), targetLayout.x);
             const visibleTargetMaxX = Math.min(
-              contentOffsetWithLayout + (rootMargin.left || 0),
+              contentOffsetWithLayout + (rootMargin.right || 0),
               targetLayout.x + targetLayout.width
             );
-            const visibleHeight = Math.max(visibleTargetMaxX - visibleTargetMinX, 0);
+            const visibleWidth = Math.max(visibleTargetMaxX - visibleTargetMinX, 0);
 
-            intersectionRatio = visibleHeight / targetLayout.height;
+            intersectionRatio = visibleWidth / targetLayout.width;
             isIntersecting =
               contentOffsetWithLayout + (rootMargin.right || 0) >= targetLayout.x &&
               contentOffset.x - (rootMargin.left || 0) <= targetLayout.x + targetLayout.width;
