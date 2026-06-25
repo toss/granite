@@ -1,6 +1,6 @@
 {
   "name": "create-granite-app",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "type": "module",
   "bin": {
     "cba": "./bin.js",
