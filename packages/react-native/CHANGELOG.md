@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 1.0.33
+
+### Patch Changes
+
+- 39e17bb: Fix horizontal `IntersectionObserver` ratio calculation
+  - @granite-js/blur-view@1.0.33
+  - @granite-js/brownfield-module@1.0.33
+  - @granite-js/cli@1.0.33
+  - @granite-js/jest@1.0.33
+  - @granite-js/mpack@1.0.33
+  - @granite-js/native@1.0.33
+  - @granite-js/plugin-core@1.0.33
+  - @granite-js/style-utils@1.0.33
+  - @granite-js/video@1.0.33
+
 ## 1.0.32
 
 ### Patch Changes
