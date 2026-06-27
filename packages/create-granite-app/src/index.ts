@@ -3,7 +3,7 @@ import { kebabCase } from 'es-toolkit/string';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { copyTemplate } from './copyTemplate';
-import { copyToolTemplate, TOOL_TEMPLATE_LIST } from './copyToolTemplate';
+import { copyToolTemplates, TOOL_TEMPLATE_LIST } from './copyToolTemplate';
 import { getPackageManager } from './getPackageManager';
 import { resolveFallback } from './resolveFallback';
 
@@ -98,7 +98,7 @@ async function run() {
             appName: getAppName(appPath),
             needYarnrc: Boolean(pkgInfo.packageManager === 'yarn' && pkgInfo.version && pkgInfo?.version >= '2.0.0'),
           });
-          await Promise.all(toolTemplate.map((tool) => copyToolTemplate(tool, { appPath })));
+          await copyToolTemplates(toolTemplate, { appPath });
         } catch (e) {
           console.error(e);
           throw e;
