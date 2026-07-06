@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 1.0.34
+
+### Patch Changes
+
+- 1cf5e91: remove default margin
+  - @granite-js/blur-view@1.0.34
+  - @granite-js/brownfield-module@1.0.34
+  - @granite-js/cli@1.0.34
+  - @granite-js/jest@1.0.34
+  - @granite-js/mpack@1.0.34
+  - @granite-js/native@1.0.34
+  - @granite-js/plugin-core@1.0.34
+  - @granite-js/style-utils@1.0.34
+  - @granite-js/video@1.0.34
+
 ## 1.0.33
 
 ### Patch Changes
