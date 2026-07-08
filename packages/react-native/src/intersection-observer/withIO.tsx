@@ -32,13 +32,18 @@ function withIO<
 ) {
   type ScrollableComponentProps = CompProps & IOComponentProps;
   const IOScrollableComponent = class extends PureComponent<ScrollableComponentProps> {
+    // Consume the enclosing IOContext so nested scroll containers can chain their
+    // managers. `contextType` makes the parent context available as the second
+    // constructor argument.
+    static contextType = IOContext;
+
     protected node: any;
     protected scroller: RefObject<any>;
     protected root: Root;
     protected manager: IOManager;
     protected contextValue: IOContextValue;
 
-    constructor(props: ScrollableComponentProps) {
+    constructor(props: ScrollableComponentProps, parentContext?: IOContextValue) {
       super(props);
 
       // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -84,6 +89,9 @@ function withIO<
       this.manager = manager;
       this.contextValue = {
         manager,
+        // Link to the enclosing scroll container (if any) so descendant `InView`
+        // components can compute intersection against every ancestor viewport.
+        parent: parentContext ?? null,
       };
     }
 
