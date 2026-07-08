@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 1.0.35
+
+### Patch Changes
+
+- 7e1fb60: fix: restore `useBackEventContext` root export removed in 1.0.32
+  - @granite-js/blur-view@1.0.35
+  - @granite-js/brownfield-module@1.0.35
+  - @granite-js/cli@1.0.35
+  - @granite-js/jest@1.0.35
+  - @granite-js/mpack@1.0.35
+  - @granite-js/native@1.0.35
+  - @granite-js/plugin-core@1.0.35
+  - @granite-js/style-utils@1.0.35
+  - @granite-js/video@1.0.35
+
 ## 1.0.34
 
 ### Patch Changes
