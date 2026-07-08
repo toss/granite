@@ -1,4 +1,4 @@
-import type { BuildResult } from '@granite-js/plugin-core';
+import type { BuildResult, TransformBundleContext, TransformBundleData, TransformerConfig } from '@granite-js/plugin-core';
 import * as esbuild from 'esbuild';
 import { logger } from '../../../logger';
 import { getBundleOutputs } from '../../../utils/getBundleOutputs';
@@ -41,17 +41,21 @@ export function buildStatusPlugin({ context, ...hooks }: PluginOptions<BuildStat
         const { buildConfig } = context.config;
         const { outfile, sourcemapOutfile, platform, extra } = buildConfig;
         const { source, sourcemap } = getBundleOutputs(outfile, result);
+        const bundle =
+          source && sourcemap
+            ? await transformBundle({ source, sourcemap }, { outfile, platform }, buildConfig.transformer)
+            : null;
         const buildResult = extendBuildResult(
           result,
-          source && sourcemap
+          bundle
             ? {
-                bundle: { source, sourcemap },
+                bundle,
                 outfile,
                 sourcemapOutfile: sourcemapOutfile ?? getSourcemapName(outfile),
                 platform,
                 extra,
                 duration,
-                size: source.contents.byteLength,
+                size: bundle.source.contents.byteLength,
                 totalModuleCount: moduleCount,
               }
             : { platform, extra, duration }
@@ -73,4 +77,13 @@ function extendBuildResult(result: esbuild.BuildResult, properties: Record<strin
     result,
     Object.fromEntries(Object.entries(properties).map(([property, value]) => [property, { value, enumerable: true }]))
   ) as BuildResult;
+}
+
+async function transformBundle(
+  bundle: TransformBundleData,
+  context: TransformBundleContext,
+  transformer: TransformerConfig = {}
+) {
+  const syncBundle = transformer.transformBundleSync?.(bundle, context) ?? bundle;
+  return (await transformer.transformBundleAsync?.(syncBundle, context)) ?? syncBundle;
 }

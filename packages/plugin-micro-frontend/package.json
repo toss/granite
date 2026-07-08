@@ -51,10 +51,12 @@
     "vitest": "^4.0.12"
   },
   "dependencies": {
+    "@babel/parser": "7.28.5",
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/utils": "workspace:*",
     "es-toolkit": "^1.39.8",
-    "picocolors": "^1.1.1"
+    "picocolors": "^1.1.1",
+    "source-map": "^0.7.4"
   },
   "sideEffects": false
 }

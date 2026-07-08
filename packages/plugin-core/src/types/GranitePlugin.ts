@@ -89,6 +89,7 @@ export type DynamicPluginConfig =
 
 export interface PluginConfigContext {
   command: 'build' | 'serve';
+  appName: string;
 }
 
 // Omitted options are configured by `PluginBuildConfig['babel']`, `PluginBuildConfig['transformer']`

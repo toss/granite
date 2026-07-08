@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { BuildConfig } from '../types';
+import type { BuildConfig, TransformBundleData } from '../types';
 import { mergeBuildConfigs } from './mergeBuildConfigs';
 
 describe('mergeBuildConfigs', () => {
@@ -89,4 +89,62 @@ describe('mergeBuildConfigs', () => {
       }
     `);
   });
+
+  it('bundle transform을 등록 순서대로 머지할 수 있다.', () => {
+    const config1: BuildConfig = {
+      platform: 'ios',
+      entry: './index.js',
+      outfile: './dist/index.js',
+      transformer: {
+        transformBundleSync: (bundle) => {
+          bundle.source.contents = Buffer.from(`${bundle.source.text}a`);
+          return bundle;
+        },
+      },
+    };
+
+    const config2: Partial<BuildConfig> = {
+      transformer: {
+        transformBundleSync: (bundle) => {
+          bundle.source.contents = Buffer.from(`${bundle.source.text}b`);
+          return bundle;
+        },
+      },
+    };
+
+    const merged = mergeBuildConfigs(config1, config2);
+    const bundle = createBundle('source');
+
+    const result = merged.transformer?.transformBundleSync?.(bundle, {
+      outfile: './dist/index.js',
+      platform: 'ios',
+    });
+
+    expect(result?.source.text).toBe('sourceab');
+  });
 });
+
+function createBundle(sourceText: string): TransformBundleData {
+  return {
+    source: createOutputFile('bundle.js', sourceText),
+    sourcemap: createOutputFile('bundle.js.map', '{}'),
+  };
+}
+
+function createOutputFile(path: string, text: string) {
+  let contents: Uint8Array = Buffer.from(text);
+
+  return {
+    path,
+    get contents() {
+      return contents;
+    },
+    set contents(value: Uint8Array) {
+      contents = value;
+    },
+    hash: '',
+    get text() {
+      return Buffer.from(contents).toString('utf-8');
+    },
+  };
+}

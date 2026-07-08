@@ -5337,6 +5337,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@granite-app/bare@workspace:services/bare":
+  version: 0.0.0-use.local
+  resolution: "@granite-app/bare@workspace:services/bare"
+  dependencies:
+    "@babel/core": "npm:7.28.5"
+    "@babel/runtime": "npm:7.18.9"
+    "@biomejs/biome": "npm:^1.9.4"
+    "@granite-js/forge-cli": "workspace:*"
+    "@granite-js/native": "workspace:*"
+    "@granite-js/plugin-env": "workspace:*"
+    "@granite-js/plugin-hermes": "workspace:*"
+    "@granite-js/plugin-micro-frontend": "workspace:*"
+    "@granite-js/plugin-router": "workspace:*"
+    "@granite-js/react-native": "workspace:*"
+    "@testing-library/react-native": "npm:^12.9.0"
+    "@types/babel__core": "npm:^7.20.5"
+    "@types/jest": "npm:^29.5.14"
+    "@types/node": "catalog:tools"
+    "@types/react": "catalog:react-native"
+    babel-preset-granite: "workspace:*"
+    jest: "npm:^29.7.0"
+    react: "catalog:react-native"
+    react-native: "catalog:react-native"
+    react-test-renderer: "npm:18.2.0"
+    typescript: "catalog:tools"
+  languageName: unknown
+  linkType: soft
+
 "@granite-app/counter@workspace:services/counter":
   version: 0.0.0-use.local
   resolution: "@granite-app/counter@workspace:services/counter"
@@ -5371,6 +5399,7 @@ __metadata:
   dependencies:
     "@babel/runtime": "npm:7.18.9"
     "@granite-js/forge-cli": "workspace:*"
+    "@granite-js/micro-frontend": "workspace:*"
     "@granite-js/mpack": "workspace:*"
     "@granite-js/native": "workspace:*"
     "@granite-js/plugin-hermes": "workspace:*"
@@ -5636,6 +5665,30 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@granite-js/micro-frontend@workspace:*, @granite-js/micro-frontend@workspace:packages/micro-frontend":
+  version: 0.0.0-use.local
+  resolution: "@granite-js/micro-frontend@workspace:packages/micro-frontend"
+  dependencies:
+    "@babel/runtime": "npm:^7"
+    "@granite-js/native": "workspace:*"
+    "@granite-js/react-native": "workspace:*"
+    "@react-native/babel-preset": "catalog:react-native"
+    "@types/react": "catalog:react-native"
+    brick-module: "catalog:brick-module"
+    react: "catalog:react-native"
+    react-native: "catalog:react-native"
+    react-native-builder-bob: "catalog:tools"
+    typescript: "catalog:tools"
+    vitest: "npm:^4.0.12"
+  peerDependencies:
+    "@granite-js/native": "workspace:*"
+    "@granite-js/react-native": "workspace:*"
+    brick-module: "*"
+    react: "*"
+    react-native: "*"
+  languageName: unknown
+  linkType: soft
+
 "@granite-js/mpack@workspace:*, @granite-js/mpack@workspace:packages/mpack":
   version: 0.0.0-use.local
   resolution: "@granite-js/mpack@workspace:packages/mpack"
@@ -5887,11 +5940,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@granite-js/plugin-micro-frontend@workspace:packages/plugin-micro-frontend"
   dependencies:
+    "@babel/parser": "npm:7.28.5"
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/utils": "workspace:*"
     "@vitest/coverage-v8": "npm:^4.0.12"
     es-toolkit: "npm:^1.39.8"
     picocolors: "npm:^1.1.1"
+    source-map: "npm:^0.7.4"
     tsdown: "catalog:tools"
     typescript: "catalog:tools"
     vitest: "npm:^4.0.12"

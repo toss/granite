@@ -70,7 +70,7 @@ async function buildImpl(
   config: CompleteGraniteConfig,
   { platform, outfile, minify = false, dev = true }: CommonMetroBuildOptions
 ) {
-  const context: PluginConfigContext = { command: 'build' };
+  const context: PluginConfigContext = { command: 'build', appName: config.appName };
   const resolvedConfig = await resolveConfig(config, context);
   const metroConfig = await getMetroConfig({ rootPath: config.cwd }, resolvedConfig?.metro ?? {});
   const outfileName = outfile == null ? getDefaultOutfileName(config.entryFile, platform) : outfile;

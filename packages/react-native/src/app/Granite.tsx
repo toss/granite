@@ -31,7 +31,7 @@ export interface GraniteProps {
    * @description
    * The initial scheme of the app.
    */
-  initialScheme?: string | (() => string);
+  initialScheme?: string | ((initialProps: InitialProps) => string);
 
   /**
    * @description
@@ -52,6 +52,12 @@ export interface GraniteProps {
    * @returns
    */
   getInitialUrl?: (initialScheme: string) => string | undefined | Promise<string | undefined>;
+}
+
+function isScopedMicroFrontendRuntime() {
+  return (
+    (globalThis as { __GRANITE_MICRO_FRONTEND_SCOPED__?: boolean }).__GRANITE_MICRO_FRONTEND_SCOPED__ === true
+  );
 }
 
 const createApp = () => {
@@ -78,7 +84,12 @@ const createApp = () => {
       }
 
       function Root(initialProps: InitialProps) {
-        const initialSchemeValue = (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ?? getSchemeUri();
+        // `getSchemeUri()` is a single per-runtime value; in a shared runtime
+        // the per-mount `initialProps.scheme` must win over it.
+        const initialSchemeValue =
+          (typeof initialScheme === 'function' ? initialScheme(initialProps) : initialScheme) ??
+          initialProps.scheme ??
+          getSchemeUri();
 
         return (
           <AppRoot
@@ -95,7 +106,13 @@ const createApp = () => {
         );
       }
 
-      registerComponent(appName, Root);
+      // In a scoped shared runtime the host mounts the returned Root
+      // directly; registering it into the host's AppRegistry would pin the
+      // first run's module graph for the runtime's lifetime.
+      if (!isScopedMicroFrontendRuntime()) {
+        registerComponent(appName, Root);
+      }
+
       _appName = appName;
 
       return Root;

@@ -1,4 +1,10 @@
-import type { BuildConfig, TransformSync, TransformAsync } from '../types';
+import type {
+  BuildConfig,
+  TransformAsync,
+  TransformBundleAsync,
+  TransformBundleSync,
+  TransformSync,
+} from '../types';
 
 export function mergeTransformer(
   source: BuildConfig['transformer'],
@@ -18,6 +24,8 @@ export function mergeTransformer(
 
   let transformSync: TransformSync | undefined;
   let transformAsync: TransformAsync | undefined;
+  let transformBundleSync: TransformBundleSync | undefined;
+  let transformBundleAsync: TransformBundleAsync | undefined;
 
   if (!(source.transformSync || target.transformSync)) {
     transformSync = undefined;
@@ -49,5 +57,31 @@ export function mergeTransformer(
     transformAsync = target.transformAsync;
   }
 
-  return { transformSync, transformAsync };
+  if (!(source.transformBundleSync || target.transformBundleSync)) {
+    transformBundleSync = undefined;
+  } else if (source.transformBundleSync && target.transformBundleSync) {
+    transformBundleSync = (bundle, context) => {
+      const sourceBundle = source.transformBundleSync?.(bundle, context) ?? bundle;
+      return target.transformBundleSync?.(sourceBundle, context) ?? sourceBundle;
+    };
+  } else if (source.transformBundleSync) {
+    transformBundleSync = source.transformBundleSync;
+  } else if (target.transformBundleSync) {
+    transformBundleSync = target.transformBundleSync;
+  }
+
+  if (!(source.transformBundleAsync || target.transformBundleAsync)) {
+    transformBundleAsync = undefined;
+  } else if (source.transformBundleAsync && target.transformBundleAsync) {
+    transformBundleAsync = async (bundle, context) => {
+      const sourceBundle = (await source.transformBundleAsync?.(bundle, context)) ?? bundle;
+      return (await target.transformBundleAsync?.(sourceBundle, context)) ?? sourceBundle;
+    };
+  } else if (source.transformBundleAsync) {
+    transformBundleAsync = source.transformBundleAsync;
+  } else if (target.transformBundleAsync) {
+    transformBundleAsync = target.transformBundleAsync;
+  }
+
+  return { transformSync, transformAsync, transformBundleSync, transformBundleAsync };
 }

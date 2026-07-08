@@ -101,7 +101,7 @@ describe('mergeConfig', () => {
 
     const result = await mergeConfig({
       configs: [source, target],
-      context: { command: 'build' },
+      context: { command: 'build', appName: 'test' },
     });
 
     expect(result).toEqual({
@@ -173,7 +173,7 @@ describe('mergeConfig', () => {
 
     const result = await mergeConfig({
       configs: [source, target],
-      context: { command: 'build' },
+      context: { command: 'build', appName: 'test' },
     });
 
     expect(result).toEqual({
@@ -199,7 +199,7 @@ describe('mergeConfig', () => {
 
     const result = await mergeConfig({
       configs: [source, target],
-      context: { command: 'build' },
+      context: { command: 'build', appName: 'test' },
     });
 
     expect(result?.extra).toEqual({
@@ -259,7 +259,7 @@ describe('mergeConfig', () => {
 
     const result = await mergeConfig({
       configs: [source, target],
-      context: { command: 'build' },
+      context: { command: 'build', appName: 'test' },
     });
 
     expect(result?.resolver?.alias).toHaveLength(2);
@@ -392,7 +392,7 @@ describe('mergeConfig', () => {
 
     const result = await mergeConfig({
       configs: [source, target1, target2, target3],
-      context: { command: 'build' },
+      context: { command: 'build', appName: 'test' },
     });
 
     expect(result).toEqual({
@@ -464,7 +464,7 @@ describe('mergeConfig', () => {
 
     const result = await mergeConfig({
       configs: [source, target1, target2, target3],
-      context: { command: 'build' },
+      context: { command: 'build', appName: 'test' },
     });
 
     expect(result?.babel?.presets).toEqual(['preset1', 'preset2', 'preset3', 'build-preset']);

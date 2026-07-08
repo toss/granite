@@ -17,6 +17,13 @@ export interface MicroFrontendOptions {
    */
   remote?: RemoteConfig;
   /**
+   * Named remote apps served by local dev servers. In development the host
+   * prefetches each app's bundle and `__mpackInternal.loadRemote(appName)`
+   * evaluates the matching one — unlike `remote`, multiple services can be
+   * loaded into one host.
+   */
+  remotes?: RemoteAppConfig[];
+  /**
    * Shared modules config
    */
   shared?: SharedConfig | string[];
@@ -24,6 +31,12 @@ export interface MicroFrontendOptions {
    * Configuration for exposing modules to other containers
    */
   exposes?: ExposeConfig;
+  /**
+   * Wrap the bundle body into a named callable entry.
+   *
+   * @default true
+   */
+  scopeBundle?: boolean;
 }
 
 export interface RemoteConfig {
@@ -35,6 +48,13 @@ export interface RemoteConfig {
    * Port number
    */
   port: number;
+}
+
+export interface RemoteAppConfig extends RemoteConfig {
+  /**
+   * App name of the remote service (its scoped entry registry key)
+   */
+  name: string;
 }
 
 export interface SharedConfig {

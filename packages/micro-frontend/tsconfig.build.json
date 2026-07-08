@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist/typescript"
+  },
+  "include": ["src"],
+  "exclude": ["**/dist/*", "**/*.spec.ts", "**/*.spec.tsx", "**/*.type-test.ts", "**/*.type-test.tsx"]
+}

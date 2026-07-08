@@ -1,28 +1,28 @@
-import type { RemoteConfig, SharedConfig, ExposeConfig } from '../types';
-import type { Container } from './types';
+import { assertRuntimeContextUsable, getRuntimeContext } from './context';
+import type { Container, ContainerConfig, RuntimeContext } from './types';
 
-export function createContainer(
-  name: string,
-  config: { remote?: RemoteConfig; shared?: SharedConfig; exposes?: ExposeConfig }
-) {
-  if (typeof global.__MICRO_FRONTEND__.__INSTANCES__[name] === 'number') {
+export function createContainer(name: string, config: ContainerConfig, context?: RuntimeContext) {
+  const runtimeContext = getRuntimeContext(context);
+  assertRuntimeContextUsable(runtimeContext);
+
+  if (typeof runtimeContext.__INSTANCES__[name] === 'number') {
     throw new Error(`'${name}' container already registered`);
   }
 
-  const containerIndex = global.__MICRO_FRONTEND__.__INSTANCES__.length;
+  const containerIndex = runtimeContext.__INSTANCES__.length;
   const container: Container = {
     name,
     config,
     exposeMap: {},
   };
 
-  Object.defineProperty(global.__MICRO_FRONTEND__.__INSTANCES__, name, {
+  Object.defineProperty(runtimeContext.__INSTANCES__, name, {
     value: containerIndex,
     enumerable: false,
     writable: false,
   });
 
-  global.__MICRO_FRONTEND__.__INSTANCES__.push(container);
+  runtimeContext.__INSTANCES__.push(container);
 
   return container;
 }

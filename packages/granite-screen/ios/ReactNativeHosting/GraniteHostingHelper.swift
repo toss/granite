@@ -64,6 +64,7 @@ public extension GraniteReactHost where Self: UIViewController {
         }
     }
 
+    @MainActor
     private func setGraniteBaseView(graniteBaseView: UIView) {
         self.graniteBaseView = graniteBaseView
         view.addSubview(graniteBaseView)

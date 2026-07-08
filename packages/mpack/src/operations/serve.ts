@@ -60,7 +60,7 @@ export async function runServer({
   const terminal = new Terminal(process.stdout);
   const terminalReporter = new TerminalReporter(terminal);
 
-  const context: PluginConfigContext = { command: 'serve' };
+  const context: PluginConfigContext = { command: 'serve', appName: config.appName };
   const resolvedConfig = await resolveConfig(config, context);
   const { middlewares = [], inspectorProxy, ...additionalMetroConfig } = resolvedConfig?.metro ?? {};
   const baseConfig = await getMetroConfig({ rootPath: config.cwd }, additionalMetroConfig);

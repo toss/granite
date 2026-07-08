@@ -21,15 +21,7 @@ describe('prelude', () => {
 
     expect(config).toMatchInlineSnapshot(`
       {
-        "banner": "
-          if (global.__MICRO_FRONTEND__ == null) {
-            global.__MICRO_FRONTEND__ = {
-              __SHARED__: {},
-              __INSTANCES__: [],
-            };
-          }
-          ",
-        "preludeScript": "import { registerShared, createContainer, exposeModule } from '@granite-js/plugin-micro-frontend/runtime';
+        "preludeScript": "import { registerShared, createContainer, exposeModule, toDuplicateTolerantNativeComponentRegistry } from '@granite-js/plugin-micro-frontend/runtime';
       const __container = createContainer('test', {"remote":{"host":"localhost","port":8082},"shared":{"react":{"eager":true},"react-native":{"eager":true}}});
 
           // react

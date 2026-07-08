@@ -4,7 +4,7 @@ import type { GranitePluginCore, PluginConfigContext } from '../types';
 import { resolvePlugins } from './resolvePlugins';
 
 describe('resolveConfig', () => {
-  const CONTEXT_SHIMS: PluginConfigContext = { command: 'build' };
+  const CONTEXT_SHIMS: PluginConfigContext = { command: 'build', appName: 'test' };
   const CONFIG_SHIMS = {
     appName: 'test',
     cwd: '/',

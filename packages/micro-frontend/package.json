@@ -1,0 +1,76 @@
+{
+  "name": "@granite-js/micro-frontend",
+  "version": "1.0.32",
+  "description": "Utilities for Granite micro-frontend service routes and host skeleton coordination",
+  "main": "./dist/module/index.js",
+  "types": "./dist/typescript/index.d.ts",
+  "exports": {
+    ".": {
+      "react-native": "./src/index.ts",
+      "source": "./src/index.ts",
+      "types": "./dist/typescript/index.d.ts",
+      "default": "./dist/module/index.js"
+    },
+    "./host": {
+      "react-native": "./src/host/index.ts",
+      "source": "./src/host/index.ts",
+      "types": "./dist/typescript/host/index.d.ts",
+      "default": "./dist/module/host/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "dist",
+    "!**/*.spec.ts",
+    "!**/*.spec.tsx",
+    "!**/*.type-test.ts",
+    "!**/*.type-test.tsx",
+    "!**/.*"
+  ],
+  "scripts": {
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run",
+    "build": "bob build && tsc --project tsconfig.build.json"
+  },
+  "devDependencies": {
+    "@babel/runtime": "^7",
+    "@granite-js/native": "workspace:*",
+    "@granite-js/react-native": "workspace:*",
+    "@react-native/babel-preset": "catalog:react-native",
+    "@types/react": "catalog:react-native",
+    "brick-module": "catalog:brick-module",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
+    "react-native-builder-bob": "catalog:tools",
+    "typescript": "catalog:tools",
+    "vitest": "^4.0.12"
+  },
+  "peerDependencies": {
+    "@granite-js/native": "*",
+    "@granite-js/react-native": "*",
+    "brick-module": "*",
+    "react": "*",
+    "react-native": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/micro-frontend"
+  },
+  "sideEffects": false,
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "dist",
+    "exclude": "{**/{__tests__,__fixtures__,__mocks__}/**,**/*.spec.ts,**/*.spec.tsx,**/*.type-test.ts,**/*.type-test.tsx}",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ]
+    ]
+  }
+}

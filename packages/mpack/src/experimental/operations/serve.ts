@@ -32,7 +32,7 @@ export async function EXPERIMENTAL__server({
   await driver.devServer.pre({ host, port });
 
   const rootDir = config.cwd;
-  const context: PluginConfigContext = { command: 'serve' };
+  const context: PluginConfigContext = { command: 'serve', appName: config.appName };
   const { metro: _, devServer, ...buildConfig } = (await resolveConfig(config, context)) ?? {};
   const server = new DevServer({
     buildConfig: { entry: config.entryFile, ...buildConfig },

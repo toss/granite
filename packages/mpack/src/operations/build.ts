@@ -79,7 +79,7 @@ async function buildImpl(
   plugins: PluginFactory[],
   { platform, outfile, cache = true, dev = true, metafile = false }: CommonBuildOptions
 ) {
-  const context: PluginConfigContext = { command: 'build' };
+  const context: PluginConfigContext = { command: 'build', appName: config.appName };
   const { metro: _metroConfig, devServer: _devServerConfig, ...buildConfig } = await resolveConfig(config, context);
   const outfileName = outfile == null ? getDefaultOutfileName(config.entryFile, platform) : outfile;
   const outfilePath = path.resolve(config.outdir, outfileName);

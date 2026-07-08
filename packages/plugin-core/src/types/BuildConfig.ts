@@ -30,6 +30,8 @@ export interface BuildConfig {
   transformer?: {
     transformSync?: TransformSync;
     transformAsync?: TransformAsync;
+    transformBundleSync?: TransformBundleSync;
+    transformBundleAsync?: TransformBundleAsync;
   };
   /**
    * esbuild configuration
@@ -205,10 +207,28 @@ export interface ProtocolConfig {
 export interface TransformerConfig {
   transformSync?: TransformSync;
   transformAsync?: TransformAsync;
+  transformBundleSync?: TransformBundleSync;
+  transformBundleAsync?: TransformBundleAsync;
 }
 
 export type TransformSync = (id: string, code: string) => string;
 export type TransformAsync = (id: string, code: string) => Promise<string>;
+export interface TransformBundleData {
+  source: esbuild.OutputFile;
+  sourcemap: esbuild.OutputFile;
+}
+export interface TransformBundleContext {
+  platform: BuildConfig['platform'];
+  outfile: BuildConfig['outfile'];
+}
+export type TransformBundleSync = (
+  bundle: TransformBundleData,
+  context: TransformBundleContext
+) => TransformBundleData | void;
+export type TransformBundleAsync = (
+  bundle: TransformBundleData,
+  context: TransformBundleContext
+) => Promise<TransformBundleData | void>;
 
 export interface EsbuildConfig extends esbuild.BuildOptions {
   /**
