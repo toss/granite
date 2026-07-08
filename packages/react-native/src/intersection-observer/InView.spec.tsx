@@ -10,7 +10,7 @@ import { Element } from './IntersectionObserver';
  * A stand-in for `IOManager` that captures the observed element/callback so the test
  * can drive intersection changes directly, without a real native scroll viewport.
  */
-class FakeManager {
+class FakeIntersectionObserverRegistry {
   observe = vi.fn((element: Element, callback: ObserverInstanceCallback): ObserverInstance => {
     this.callbacks.set(element, callback);
     return { callback, element, observerId: 1, observer: null as never };
@@ -46,7 +46,7 @@ function renderInView(contextValue: IOContextValue, onChange: (inView: boolean, 
 
 describe('InView', () => {
   it('observes the single ancestor manager and forwards its intersection changes', () => {
-    const manager = new FakeManager();
+    const manager = new FakeIntersectionObserverRegistry();
     const onChange = vi.fn();
 
     renderInView({ manager: manager.asManager, parent: { manager: null } }, onChange);
@@ -59,8 +59,8 @@ describe('InView', () => {
   });
 
   it('observes every ancestor viewport when scroll containers are nested', () => {
-    const inner = new FakeManager();
-    const outer = new FakeManager();
+    const inner = new FakeIntersectionObserverRegistry();
+    const outer = new FakeIntersectionObserverRegistry();
     const onChange = vi.fn();
 
     renderInView(
@@ -76,8 +76,8 @@ describe('InView', () => {
   });
 
   it('reports visible only when the element intersects ALL ancestor viewports (AND)', () => {
-    const inner = new FakeManager();
-    const outer = new FakeManager();
+    const inner = new FakeIntersectionObserverRegistry();
+    const outer = new FakeIntersectionObserverRegistry();
     const onChange = vi.fn();
 
     renderInView(
@@ -106,8 +106,8 @@ describe('InView', () => {
   });
 
   it('does not re-notify when the combined visibility is unchanged', () => {
-    const inner = new FakeManager();
-    const outer = new FakeManager();
+    const inner = new FakeIntersectionObserverRegistry();
+    const outer = new FakeIntersectionObserverRegistry();
     const onChange = vi.fn();
 
     renderInView(
@@ -129,8 +129,8 @@ describe('InView', () => {
   });
 
   it('unobserves every ancestor manager on unmount', () => {
-    const inner = new FakeManager();
-    const outer = new FakeManager();
+    const inner = new FakeIntersectionObserverRegistry();
+    const outer = new FakeIntersectionObserverRegistry();
     const onChange = vi.fn();
 
     const { unmount } = renderInView(
@@ -148,8 +148,8 @@ describe('InView', () => {
   });
 
   it('with triggerOnce, stops observing all ancestors once visible', () => {
-    const inner = new FakeManager();
-    const outer = new FakeManager();
+    const inner = new FakeIntersectionObserverRegistry();
+    const outer = new FakeIntersectionObserverRegistry();
     const onChange = vi.fn();
 
     render(
