@@ -1,8 +1,21 @@
 import { ComponentType, PureComponent, ReactElement, ReactNode, RefObject } from 'react';
 import { LayoutChangeEvent, View, ViewProps } from 'react-native';
 import IOContext, { IOContextValue } from './IOContext';
-import { ObserverInstance } from './IOManager';
+import IOManager from './IOManager';
 import { Element } from './IntersectionObserver';
+
+/**
+ * Per-manager observation state. A single `InView` can be observed by multiple
+ * `IOManager`s at once (one per ancestor scroll container). Each binding keeps its
+ * own `Element` because every observer measures the view against a different root
+ * and writes its own `layout`/`inView`/`intersectionRatio`.
+ */
+interface ManagerBinding {
+  manager: IOManager;
+  element: Element;
+  inView: boolean;
+  intersectionRatio: number;
+}
 
 export interface RenderProps {
   inView: boolean;
@@ -97,46 +110,98 @@ class InView<T = ViewProps> extends PureComponent<InViewProps<T>> {
   context: undefined | IOContextValue = undefined;
   mounted = false;
 
-  protected element: Element;
-  protected instance: undefined | ObserverInstance;
+  protected bindings: ManagerBinding[] = [];
+  protected combinedInView = false;
+  protected combinedRatio = 0;
+  protected lastWidth = 0;
+  protected lastHeight = 0;
   protected view: any;
-
-  constructor(props: InViewProps<T>) {
-    super(props);
-
-    this.element = {
-      inView: false,
-      intersectionRatio: 0,
-      layout: {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-      },
-      measureLayout: this.measureLayout,
-    };
-  }
 
   componentDidMount() {
     this.mounted = true;
-    if (this.context?.manager) {
-      this.instance = this.context.manager.observe(this.element, this.handleChange);
-    }
+    // Observe the element in every ancestor viewport, from the innermost scroll
+    // container up to the outermost. The element is considered visible only when it
+    // intersects *all* of them (AND), matching the web `IntersectionObserver`, which
+    // clips the target against every ancestor's scrollport.
+    this.bindings = this.collectManagers().map((manager) => {
+      const binding: ManagerBinding = {
+        manager,
+        inView: false,
+        intersectionRatio: 0,
+        element: {
+          inView: false,
+          intersectionRatio: 0,
+          layout: { x: 0, y: 0, width: 0, height: 0 },
+          measureLayout: this.measureLayout,
+        },
+      };
+      manager.observe(binding.element, (inView, intersectionRatio) =>
+        this.handleBindingChange(binding, inView, intersectionRatio)
+      );
+      return binding;
+    });
   }
 
   componentWillUnmount() {
     this.mounted = false;
-    if (this.context?.manager && this.instance) {
-      this.context.manager.unobserve(this.element);
+    for (const binding of this.bindings) {
+      binding.manager.unobserve(binding.element);
     }
+    this.bindings = [];
+  }
+
+  /**
+   * Walks the `IOContext` chain from the nearest scroll container to the outermost,
+   * collecting every non-null manager along the way.
+   */
+  protected collectManagers(): IOManager[] {
+    const managers: IOManager[] = [];
+    let context: IOContextValue | null | undefined = this.context;
+    while (context != null) {
+      if (context.manager != null) {
+        managers.push(context.manager);
+      }
+      context = context.parent;
+    }
+    return managers;
+  }
+
+  protected handleBindingChange = (binding: ManagerBinding, inView: boolean, intersectionRatio: number) => {
+    binding.inView = inView;
+    binding.intersectionRatio = intersectionRatio;
+    this.updateCombined();
+  };
+
+  /**
+   * Recomputes the combined visibility across all ancestor viewports and notifies
+   * `onChange` only when the AND-ed result actually changes. `intersectionRatio` is
+   * reported as the smallest ratio among ancestors — the most restrictive viewport.
+   */
+  protected updateCombined() {
+    if (!this.mounted || this.bindings.length === 0) {
+      return;
+    }
+
+    const inView = this.bindings.every((binding) => binding.inView);
+    const intersectionRatio = inView
+      ? this.bindings.reduce((min, binding) => Math.min(min, binding.intersectionRatio), 1)
+      : 0;
+
+    if (inView === this.combinedInView && intersectionRatio === this.combinedRatio) {
+      return;
+    }
+
+    this.combinedInView = inView;
+    this.combinedRatio = intersectionRatio;
+    this.handleChange(inView, intersectionRatio);
   }
 
   protected handleChange = (inView: boolean, areaThreshold: number) => {
     if (this.mounted) {
       const { triggerOnce, onChange } = this.props;
       if (inView && triggerOnce) {
-        if (this.context?.manager) {
-          this.context?.manager.unobserve(this.element);
+        for (const binding of this.bindings) {
+          binding.manager.unobserve(binding.element);
         }
       }
       if (onChange) {
@@ -153,9 +218,12 @@ class InView<T = ViewProps> extends PureComponent<InViewProps<T>> {
     const {
       nativeEvent: { layout },
     } = event;
-    if (layout.width !== this.element.layout.width || layout.height !== this.element.layout.height) {
-      if (this.element.onLayout) {
-        this.element.onLayout();
+    if (layout.width !== this.lastWidth || layout.height !== this.lastHeight) {
+      this.lastWidth = layout.width;
+      this.lastHeight = layout.height;
+      // Re-measure the target in every ancestor viewport when its size changes.
+      for (const binding of this.bindings) {
+        binding.element.onLayout?.();
       }
     }
     const { onLayout } = this.props;
