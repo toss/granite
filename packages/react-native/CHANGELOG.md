@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 1.0.36
+
+### Patch Changes
+
+- 9336784: fix(react-native): correct ImpressionArea/InView visibility in nested scroll views
+  - @granite-js/blur-view@1.0.36
+  - @granite-js/brownfield-module@1.0.36
+  - @granite-js/cli@1.0.36
+  - @granite-js/jest@1.0.36
+  - @granite-js/mpack@1.0.36
+  - @granite-js/native@1.0.36
+  - @granite-js/plugin-core@1.0.36
+  - @granite-js/style-utils@1.0.36
+  - @granite-js/video@1.0.36
+
 ## 1.0.35
 
 ### Patch Changes
