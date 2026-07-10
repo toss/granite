@@ -33,6 +33,9 @@
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=22.15.0"
+  },
   "devDependencies": {
     "@types/node": "catalog:tools",
     "@vitest/coverage-v8": "^4.0.12",
