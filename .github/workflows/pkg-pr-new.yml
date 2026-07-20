@@ -1,0 +1,26 @@
+name: pkg.pr.new
+
+on:
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: pkg-pr-new-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Publish preview packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup
+        uses: ./.github/actions/setup-node-yarn
+
+      - name: Build all packages
+        run: yarn build:all
+
+      - name: Publish preview packages
+        run: yarn pkg-pr-new publish './packages/*' './infra/*' --yarn --packageManager=yarn --no-template

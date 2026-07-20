@@ -17082,6 +17082,7 @@ __metadata:
     hygen: "npm:6.2.11"
     knip: "npm:^1"
     nx: "npm:^21.0.3"
+    pkg-pr-new: "npm:0.0.78"
     prettier: "npm:^3.3.3"
     rimraf: "npm:^6.0.1"
     ts-node: "npm:^10.9.2"
@@ -22724,6 +22725,15 @@ __metadata:
   dependencies:
     find-up: "npm:^6.3.0"
   checksum: 10c0/1afb23d2efb1ec9d8b2c4a0c37bf146822ad2774f074cb05b853be5dca1b40815c5960dd126df30ab8908349262a266f31b771e877235870a3b8fd313beebec5
+  languageName: node
+  linkType: hard
+
+"pkg-pr-new@npm:0.0.78":
+  version: 0.0.78
+  resolution: "pkg-pr-new@npm:0.0.78"
+  bin:
+    pkg-pr-new: bin/cli.js
+  checksum: 10c0/e8f97e7964c2a89dd4407891d95860e07052407463c65e5d46e23be2c675e2d5a05010de8a77554a7f8afb1c4aae7889b9b1c9cd38dec51c7dc188884938c0ef
   languageName: node
   linkType: hard
 
