@@ -8,6 +8,7 @@ export {
   ServiceModuleNotFoundError,
 } from './serviceBundleLoader';
 export { createServiceGlobalGuard } from './serviceGlobalGuard';
+export { isMonoHermes } from './monoHermes';
 
 export type { RuntimeContext, Container, Module, SharedModuleRegistry } from './types';
 export type {

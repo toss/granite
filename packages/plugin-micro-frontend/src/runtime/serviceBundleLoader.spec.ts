@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createContainer, createServiceBundleLoader, exposeModule } from './index';
+import { createContainer, createServiceBundleLoader, exposeModule, isMonoHermes } from './index';
 
 type Service = () => string;
 
@@ -30,6 +30,28 @@ describe('createServiceBundleLoader', () => {
 
   afterEach(() => {
     Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
+  });
+
+  it('marks the runtime as mono Hermes before evaluating a service bundle', async () => {
+    // Given
+    const evaluate = vi.fn(async () => {
+      expect(isMonoHermes()).toBe(true);
+      const container = createContainer('remote-alpha', {});
+      exposeModule(container, 'Service', { default: () => 'alpha' });
+    });
+    const loader = createServiceBundleLoader<Service>({
+      evaluate,
+      exposeName: 'Service',
+      getServiceKey: serviceKeyOf,
+      parseExposedModule: parseServiceModule,
+    });
+
+    // When
+    expect(isMonoHermes()).toBe(false);
+    await loader.load('service://alpha');
+
+    // Then
+    expect(isMonoHermes()).toBe(true);
   });
 
   it('resolves distinct services from containers appended by serialized evaluations', async () => {
@@ -140,6 +162,28 @@ describe('createServiceBundleLoader', () => {
 
     // Then
     expect(service).toBe(legacyService);
+    expect(isMonoHermes()).toBe(false);
+  });
+
+  it('keeps legacy runtime mode when an evaluated bundle does not expose the requested module', async () => {
+    // Given
+    const legacyService: Service = () => 'legacy';
+    const loader = createServiceBundleLoader<Service>({
+      evaluate: async () => {
+        createContainer('remote-without-service', {});
+      },
+      exposeName: 'Service',
+      fallback: async () => legacyService,
+      getServiceKey: serviceKeyOf,
+      parseExposedModule: parseServiceModule,
+    });
+
+    // When
+    const service = await loader.load('service://legacy');
+
+    // Then
+    expect(service).toBe(legacyService);
+    expect(isMonoHermes()).toBe(false);
   });
 
   it('does not hide an exposed-module parser defect behind fallback', async () => {

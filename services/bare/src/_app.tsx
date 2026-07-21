@@ -11,5 +11,4 @@ function AppContainer({ children }: PropsWithChildren<InitialProps>) {
 export default Granite.registerApp(AppContainer, {
   context,
   appName: APP_NAME,
-  router: { independent: true },
 });

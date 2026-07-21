@@ -118,6 +118,16 @@ const serviceLoader = createServiceBundleLoader<AppContainer>({
 const service = await serviceLoader.load('service://catalog');
 ```
 
+`isMonoHermes()` returns `true` while a service bundle is being evaluated and after the loader resolves a valid
+exposed module. It remains `false` for legacy execution and when loading falls back without resolving a service
+bundle. Runtime-aware libraries can use this helper without requiring service applications to pass a separate flag.
+
+```ts
+import { isMonoHermes } from '@granite-js/plugin-micro-frontend/runtime';
+
+const shouldUseIndependentNavigation = isMonoHermes();
+```
+
 Use the optional `fallback` callback only when the host has an explicit legacy resolution path. Parser errors are
 never routed through fallback because they indicate an invalid exposed-module contract.
 

@@ -6014,6 +6014,7 @@ __metadata:
     "@granite-js/mpack": "workspace:*"
     "@granite-js/native": "workspace:*"
     "@granite-js/plugin-core": "workspace:*"
+    "@granite-js/plugin-micro-frontend": "workspace:*"
     "@granite-js/style-utils": "workspace:*"
     "@granite-js/video": "workspace:*"
     "@granite-js/vitest": "workspace:*"

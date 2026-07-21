@@ -7,6 +7,7 @@ import {
   RouteProp,
 } from '@granite-js/native/@react-navigation/native';
 import { NativeStackNavigationOptions } from '@granite-js/native/@react-navigation/native-stack';
+import { isMonoHermes } from '@granite-js/plugin-micro-frontend/runtime';
 import {
   ComponentProps,
   ComponentType,
@@ -76,7 +77,7 @@ interface StackNavigatorProps {
   /**
    * Whether this router must be isolated from a parent NavigationContainer.
    * Enable this when mounting multiple Granite applications in one React tree.
-   * @default false
+   * Defaults to the current micro-frontend runtime mode.
    */
   independent?: boolean;
   /**
@@ -154,7 +155,7 @@ export function Router({
   defaultScreenOption,
   screenContainer,
   defaultErrorComponent,
-  independent = false,
+  independent = isMonoHermes(),
   // Public props (StackNavigator)
   setIosSwipeGestureEnabled,
   setiOSBackPressHandler,
