@@ -1,4 +1,5 @@
 import { render } from '@testing-library/react';
+import { forwardRef } from 'react';
 import { View } from 'react-native';
 import { describe, expect, it, vi } from 'vitest';
 import IOContext, { IOContextValue } from './IOContext';
@@ -145,6 +146,33 @@ describe('InView', () => {
 
     expect(inner.unobserve).toHaveBeenCalledTimes(1);
     expect(outer.unobserve).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not forward its own API props (onChange, triggerOnce) to the rendered view', () => {
+    const manager = new FakeIntersectionObserverRegistry();
+    const onChange = vi.fn();
+    const received: Record<string, unknown>[] = [];
+    const CaptureView = forwardRef<View, Record<string, unknown>>((props, ref) => {
+      received.push(props);
+      return <View ref={ref} />;
+    });
+
+    render(
+      <IOContext.Provider value={{ manager: manager.asManager, parent: { manager: null } }}>
+        <InView as={CaptureView} triggerOnce onChange={onChange} testID="target">
+          <View />
+        </InView>
+      </IOContext.Provider>
+    );
+
+    const props = received.at(-1);
+    // API props must not leak: `onChange` on a host View is a bubbling event handler,
+    // so change events from descendants (e.g. TextInput) would call the observer
+    // callback with a SyntheticEvent.
+    expect(props).not.toHaveProperty('onChange');
+    expect(props).not.toHaveProperty('triggerOnce');
+    // Regular ViewProps still pass through.
+    expect(props).toHaveProperty('testID', 'target');
   });
 
   it('with triggerOnce, stops observing all ancestors once visible', () => {
