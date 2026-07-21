@@ -32,6 +32,7 @@ export const DEBUGGER_FRONTEND_PATH = '/debugger-frontend';
 
 export const RESOLVER_MAIN_FIELDS = ['react-native', 'browser', 'main'];
 export const RESOLVER_EXPORTS_MAP_CONDITIONS = ['react-native'];
+export const RESOLVER_ALIAS_FIELDS = ['react-native', 'browser'];
 
 export const INTERNAL_NAMESPACE_IDENTIFIER = '__mpackInternal';
 export const INTERNAL_LOAD_REMOTE_IDENTIFIER = 'loadRemote';
