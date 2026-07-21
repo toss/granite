@@ -77,6 +77,75 @@ export default defineConfig({
 });
 ```
 
+### Loading multiple service bundles in one runtime
+
+The runtime entrypoint provides a loader for hosts that evaluate multiple service bundles in the same JavaScript
+runtime. Bundle fetching and evaluation stay platform-owned and are supplied through `evaluate`.
+
+Each service bundle must register a unique micro-frontend container name. The loader resolves the requested expose
+only from containers appended by that service's evaluation, serializes concurrent evaluations, caches successful
+loads by the caller-defined service key, and removes failed loads from the cache so they can be retried.
+
+```ts
+import { createServiceBundleLoader, createServiceGlobalGuard } from '@granite-js/plugin-micro-frontend/runtime';
+
+type Service = (props: unknown) => unknown;
+
+declare const serviceBundleEvaluator: {
+  evaluate(request: string): Promise<void>;
+};
+declare const monitoring: {
+  capture(report: unknown): void;
+};
+
+function isServiceModule(value: unknown): value is { readonly default: Service } {
+  return typeof value === 'object' && value !== null && 'default' in value && typeof value.default === 'function';
+}
+
+const globalGuard = createServiceGlobalGuard({
+  protectedKeys: ['__APP_RUNTIME__'],
+  onReport: (report) => monitoring.capture(report),
+});
+
+const serviceLoader = createServiceBundleLoader<Service>({
+  evaluate: (request) => serviceBundleEvaluator.evaluate(request),
+  exposeName: 'Service',
+  getServiceKey: (request) => /^service:\/\/([^/?#]+)/.exec(request)?.[1]?.toLowerCase() ?? null,
+  globalGuard,
+  parseExposedModule: (module) => (isServiceModule(module) ? module.default : null),
+});
+
+const service = await serviceLoader.load('service://catalog');
+```
+
+Use the optional `fallback` callback only when the host has an explicit legacy resolution path. Parser errors are
+never routed through fallback because they indicate an invalid exposed-module contract.
+
+### Setting up the shared registry in an experimental host
+
+Production host builds normally create `globalThis.__MICRO_FRONTEND__` and register eager shared modules in their
+prelude. An experimental Metro host has no production prelude, so it must mirror that registry before any service
+bundle is evaluated:
+
+```ts
+import { setupSharedRuntime } from '@granite-js/plugin-micro-frontend/runtime';
+import * as react from 'react';
+import * as reactNative from 'react-native';
+
+setupSharedRuntime({
+  react,
+  'react-native': reactNative,
+});
+```
+
+Call `setupSharedRuntime` at module scope before registering the host app. It creates the runtime when needed and
+preserves modules already installed by a production prelude, so the same entrypoint can run in both environments.
+The host and every service must use the same `shared` module names. A module included by both bundles can execute
+native registration twice; a module externalized by a service but missing from the host registry fails at runtime.
+
+`setupSharedRuntime` only registers modules. It does not fetch services, call `importLazy`, call
+`__mpackInternal.loadRemote`, or merge a service into the host bundle.
+
 ## License
 
 This software is licensed under the [Apache 2 license](LICENSE), quoted below.
