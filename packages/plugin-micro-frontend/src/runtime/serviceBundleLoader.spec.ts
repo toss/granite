@@ -34,8 +34,8 @@ describe('createServiceBundleLoader', () => {
 
   it('resolves distinct services from containers appended by serialized evaluations', async () => {
     // Given
-    const carEvaluationStarted = createDeferred();
-    const releaseCarEvaluation = createDeferred();
+    const alphaEvaluationStarted = createDeferred();
+    const releaseAlphaEvaluation = createDeferred();
     const evaluationOrder: string[] = [];
     const evaluate = vi.fn(async (request: string) => {
       const serviceKey = serviceKeyOf(request);
@@ -43,9 +43,9 @@ describe('createServiceBundleLoader', () => {
         throw new Error(`Unexpected request: ${request}`);
       }
       evaluationOrder.push(`start:${serviceKey}`);
-      if (serviceKey === 'car') {
-        carEvaluationStarted.resolve();
-        await releaseCarEvaluation.promise;
+      if (serviceKey === 'alpha') {
+        alphaEvaluationStarted.resolve();
+        await releaseAlphaEvaluation.promise;
       }
       const container = createContainer(`remote-${serviceKey}`, {});
       exposeModule(container, 'Service', { default: () => serviceKey });
@@ -59,24 +59,24 @@ describe('createServiceBundleLoader', () => {
     });
 
     // When
-    const car = loader.load('service://car');
-    const shopping = loader.load('service://shopping');
-    await carEvaluationStarted.promise;
+    const alpha = loader.load('service://alpha');
+    const beta = loader.load('service://beta');
+    await alphaEvaluationStarted.promise;
 
     // Then
-    expect(evaluationOrder).toEqual(['start:car']);
-    releaseCarEvaluation.resolve();
-    await expect(Promise.all([car, shopping])).resolves.toEqual([expect.any(Function), expect.any(Function)]);
-    expect((await car)()).toBe('car');
-    expect((await shopping)()).toBe('shopping');
-    expect(evaluationOrder).toEqual(['start:car', 'end:car', 'start:shopping', 'end:shopping']);
+    expect(evaluationOrder).toEqual(['start:alpha']);
+    releaseAlphaEvaluation.resolve();
+    await expect(Promise.all([alpha, beta])).resolves.toEqual([expect.any(Function), expect.any(Function)]);
+    expect((await alpha)()).toBe('alpha');
+    expect((await beta)()).toBe('beta');
+    expect(evaluationOrder).toEqual(['start:alpha', 'end:alpha', 'start:beta', 'end:beta']);
   });
 
   it('shares one in-flight evaluation for requests with the same caller-derived service key', async () => {
     // Given
     const evaluate = vi.fn(async () => {
-      const container = createContainer('remote-car', {});
-      exposeModule(container, 'Service', { default: () => 'car' });
+      const container = createContainer('remote-alpha', {});
+      exposeModule(container, 'Service', { default: () => 'alpha' });
     });
     const loader = createServiceBundleLoader<Service>({
       evaluate,
@@ -87,8 +87,8 @@ describe('createServiceBundleLoader', () => {
 
     // When
     const [first, second] = await Promise.all([
-      loader.load('service://car'),
-      loader.load('service://CAR?campaign=summer'),
+      loader.load('service://alpha'),
+      loader.load('service://ALPHA?variant=one'),
     ]);
 
     // Then
