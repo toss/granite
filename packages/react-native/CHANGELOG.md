@@ -1,5 +1,21 @@
 # @granite-js/react-native
 
+## 1.0.37
+
+### Patch Changes
+
+- e60a630: fix(react-native): stop forwarding InView API props to the host view
+- Updated dependencies [2096242]
+  - @granite-js/mpack@1.0.37
+  - @granite-js/cli@1.0.37
+  - @granite-js/blur-view@1.0.37
+  - @granite-js/brownfield-module@1.0.37
+  - @granite-js/jest@1.0.37
+  - @granite-js/native@1.0.37
+  - @granite-js/plugin-core@1.0.37
+  - @granite-js/style-utils@1.0.37
+  - @granite-js/video@1.0.37
+
 ## 1.0.36
 
 ### Patch Changes
