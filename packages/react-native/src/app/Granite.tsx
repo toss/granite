@@ -5,6 +5,7 @@ import type { InitialProps } from '../initial-props';
 import type { RouterProps, RequireContext } from '../router';
 import { AppRoot } from './AppRoot';
 import { HostAppRoot } from './HostAppRoot';
+import { resolveInitialScheme } from './resolveInitialScheme';
 import { getSchemeUri } from '../constant-bridges';
 import { setupPolyfills } from '../polyfills';
 
@@ -69,16 +70,24 @@ const createApp = () => {
   }
 
   return {
-    registerApp( 
+    registerApp(
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
-      { appName, context, router, initialScheme, setIosSwipeGestureEnabled, setiOSBackPressHandler, getInitialUrl }: GraniteProps
+      {
+        appName,
+        context,
+        router,
+        initialScheme,
+        setIosSwipeGestureEnabled,
+        setiOSBackPressHandler,
+        getInitialUrl,
+      }: GraniteProps
     ): (initialProps: InitialProps) => JSX.Element {
       if (appName === ENTRY_BUNDLE_NAME) {
         throw new Error(`Reserved app name 'shared' cannot be used`);
       }
 
       function Root(initialProps: InitialProps) {
-        const initialSchemeValue = (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ?? getSchemeUri();
+        const initialSchemeValue = resolveInitialScheme(initialScheme, initialProps, getSchemeUri);
 
         return (
           <AppRoot
