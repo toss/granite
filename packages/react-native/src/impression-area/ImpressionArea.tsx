@@ -330,6 +330,12 @@ function ImpressionAreaImpl({
   return (
     <InView
       onChange={(inView, currentThreshold) => {
+        // Guard against non-observer invocations (e.g. a bubbling native event reaching
+        // the callback): a wrong `false` here sticks forever because the observer only
+        // re-notifies when its own `inView` value changes.
+        if (typeof inView !== 'boolean' || typeof currentThreshold !== 'number') {
+          return;
+        }
         const isVisible = inView && currentThreshold >= areaThreshold;
         setInviewImpressed(isVisible);
       }}

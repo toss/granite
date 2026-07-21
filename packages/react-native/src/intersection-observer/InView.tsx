@@ -257,7 +257,12 @@ class InView<T = ViewProps> extends PureComponent<InViewProps<T>> {
   };
 
   render() {
-    const { as, children, ...props } = this.props;
+    // `onChange` and `triggerOnce` are InView's own API props and must not reach the
+    // rendered view. In React Native `onChange` is a bubbling event (`topChange`), so
+    // passing it through would make change events from descendants (e.g. a typing
+    // `TextInput`) invoke the observer callback with a SyntheticEvent instead of
+    // `(inView, intersectionRatio)`.
+    const { as, children, triggerOnce, onChange, ...props } = this.props;
     if (typeof children === 'function') {
       return null;
     }
