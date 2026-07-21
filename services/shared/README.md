@@ -101,8 +101,8 @@ may use that stable ID to associate the React Native view tree with its session 
 
 ### Service bundle
 
-Every service bundle must use a unique container name and expose a module named `Service`. A service that must also
-support the legacy track may expose both entry points from the same build:
+Every service bundle must use a unique container name and expose its existing Granite app as `AppContainer`. The
+legacy and service-session tracks consume the same entry point, so services do not need a session-specific wrapper:
 
 ```ts
 import { microFrontend } from '@granite-js/plugin-micro-frontend';
@@ -118,7 +118,6 @@ export default defineConfig({
       name: 'catalog-service',
       exposes: {
         './AppContainer': './src/_app.tsx',
-        './Service': './src/Service.tsx',
       },
       shared: ['react', 'react-native'],
     }),
@@ -126,36 +125,11 @@ export default defineConfig({
 });
 ```
 
-The exposed component receives both the original Granite props and the current session:
-
-```tsx
-import type { InitialProps } from '@granite-js/react-native';
-
-type ServiceProps = {
-  readonly initialProps: InitialProps;
-  readonly session: {
-    readonly identifier: string;
-    readonly bundleRequest: string;
-    readonly url: string;
-    readonly isVisible: boolean;
-  };
-};
-
-export default function Service({ initialProps, session }: ServiceProps) {
-  return (
-    <CatalogPage
-      colorPreference={initialProps.initialColorPreference}
-      isVisible={session.isVisible}
-      url={session.url}
-    />
-  );
-}
-```
-
-In a real application, place `ServiceProps` in a small contract package shared by the host and service bundles.
+The host renders `AppContainer` with the original Granite initial props and replaces `scheme` with the active
+session URL. From the service's perspective, startup is identical on both tracks.
 
 The repository includes [`services/bare`](../bare) as a minimal service structure and [`services/showcase`](../showcase)
-as a larger example. Both expose `./Service`; they are not injected into the shared development bundle. To exercise
+as a larger example. Both expose `./AppContainer`; they are not injected into the shared development bundle. To exercise
 them in an application, make their bundles available through the platform's `importService` implementation.
 
 The showcase home screen includes a URL-scheme input. Enter a value such as `granite://bare` or your host's

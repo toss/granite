@@ -2,9 +2,9 @@ import { createContainer, exposeModule } from '@granite-js/plugin-micro-frontend
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ServiceSessionEvent } from './serviceSession';
 import { getServiceSessionHost } from './serviceSessionHost';
-import { type ServiceComponent, createServiceSessionRuntime } from './serviceSessionRuntime';
+import { type AppContainerComponent, createServiceSessionRuntime } from './serviceSessionRuntime';
 
-const CatalogService: ServiceComponent = () => null;
+const CatalogApp: AppContainerComponent = () => null;
 
 describe('serviceSessionRuntime', () => {
   let nativeListener: ((event: unknown) => void) | null;
@@ -18,7 +18,7 @@ describe('serviceSessionRuntime', () => {
     Reflect.set(globalThis, '__GRANITE_SERVICE_SESSION_NATIVE__', {
       evaluateServiceBundle: async (bundleRequest: string) => {
         const container = createContainer(`${bundleRequest}-container`, {});
-        exposeModule(container, 'Service', { default: CatalogService });
+        exposeModule(container, 'AppContainer', { default: CatalogApp });
       },
       onSessionEvent: (listener: (event: unknown) => void) => {
         nativeListener = listener;
@@ -66,8 +66,7 @@ describe('serviceSessionRuntime', () => {
         url: 'service://catalog/products/42',
       },
     ]);
-    expect(component).toBe(CatalogService);
+    expect(component).toBe(CatalogApp);
     expect(nativeListener).toBeNull();
   });
-
 });

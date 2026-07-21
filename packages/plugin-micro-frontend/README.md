@@ -89,7 +89,7 @@ loads by the caller-defined service key, and removes failed loads from the cache
 ```ts
 import { createServiceBundleLoader, createServiceGlobalGuard } from '@granite-js/plugin-micro-frontend/runtime';
 
-type Service = (props: unknown) => unknown;
+type AppContainer = (props: unknown) => unknown;
 
 declare const serviceBundleEvaluator: {
   evaluate(request: string): Promise<void>;
@@ -98,7 +98,7 @@ declare const monitoring: {
   capture(report: unknown): void;
 };
 
-function isServiceModule(value: unknown): value is { readonly default: Service } {
+function isAppContainerModule(value: unknown): value is { readonly default: AppContainer } {
   return typeof value === 'object' && value !== null && 'default' in value && typeof value.default === 'function';
 }
 
@@ -107,12 +107,12 @@ const globalGuard = createServiceGlobalGuard({
   onReport: (report) => monitoring.capture(report),
 });
 
-const serviceLoader = createServiceBundleLoader<Service>({
+const serviceLoader = createServiceBundleLoader<AppContainer>({
   evaluate: (request) => serviceBundleEvaluator.evaluate(request),
-  exposeName: 'Service',
+  exposeName: 'AppContainer',
   getServiceKey: (request) => /^service:\/\/([^/?#]+)/.exec(request)?.[1]?.toLowerCase() ?? null,
   globalGuard,
-  parseExposedModule: (module) => (isServiceModule(module) ? module.default : null),
+  parseExposedModule: (module) => (isAppContainerModule(module) ? module.default : null),
 });
 
 const service = await serviceLoader.load('service://catalog');

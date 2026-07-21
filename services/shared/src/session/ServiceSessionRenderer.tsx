@@ -2,12 +2,12 @@ import type { InitialProps } from '@granite-js/react-native';
 import { Component, type PropsWithChildren, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SERVICE_SESSION_NATIVE_ID_PREFIX, type ServiceSession } from './serviceSession';
-import type { ServiceComponent, ServiceSessionRuntime } from './serviceSessionRuntime';
+import type { AppContainerComponent, ServiceSessionRuntime } from './serviceSessionRuntime';
 import { ErrorPage } from '../components/ErrorPage';
 
 type ServiceLoadState =
   | { readonly kind: 'loading' }
-  | { readonly kind: 'ready'; readonly ServiceContent: ServiceComponent }
+  | { readonly kind: 'ready'; readonly AppContainer: AppContainerComponent }
   | { readonly kind: 'failed'; readonly reason: string };
 
 interface ServiceRenderBoundaryState {
@@ -45,9 +45,9 @@ export function ServiceSessionRenderer({ initialProps, runtime, session }: Servi
 
     async function loadService() {
       try {
-        const ServiceContent = await runtime.load(session.bundleRequest);
+        const AppContainer = await runtime.load(session.bundleRequest);
         if (active) {
-          setLoadState({ kind: 'ready', ServiceContent });
+          setLoadState({ kind: 'ready', AppContainer });
         }
       } catch (cause) {
         if (active) {
@@ -72,10 +72,10 @@ export function ServiceSessionRenderer({ initialProps, runtime, session }: Servi
       case 'failed':
         return <ErrorPage reason={loadState.reason} />;
       case 'ready': {
-        const { ServiceContent } = loadState;
+        const { AppContainer } = loadState;
         return (
           <ServiceRenderBoundary>
-            <ServiceContent initialProps={initialProps} session={session} />
+            <AppContainer {...initialProps} scheme={session.url} />
           </ServiceRenderBoundary>
         );
       }

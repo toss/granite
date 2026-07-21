@@ -25,7 +25,6 @@ export default defineConfig({
       name: 'remoteApp',
       exposes: {
         './AppContainer': './src/_app.tsx',
-        './Service': './src/Service.tsx',
       },
       shared: [
         '@granite-js/image',

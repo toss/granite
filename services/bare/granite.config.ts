@@ -15,7 +15,6 @@ export default defineConfig({
       name: 'bare',
       exposes: {
         './AppContainer': './src/_app.tsx',
-        './Service': './src/Service.tsx',
       },
       shared: [
         '@granite-js/image',
