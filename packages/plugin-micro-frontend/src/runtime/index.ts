@@ -8,7 +8,6 @@ export {
   ServiceModuleNotFoundError,
 } from './serviceBundleLoader';
 export { createServiceGlobalGuard } from './serviceGlobalGuard';
-export { setupSharedRuntime } from './setupSharedRuntime';
 
 export type { RuntimeContext, Container, Module, SharedModuleRegistry } from './types';
 export type {
@@ -23,4 +22,3 @@ export type {
   TrackedGlobalRecord,
   TrackedGlobalRecordReport,
 } from './serviceGlobalGuard';
-export type { SharedRuntimeModules } from './setupSharedRuntime';

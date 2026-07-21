@@ -92,18 +92,9 @@ For example, `bare -> 8082` and `showcase -> 8083`. The native loader should req
 the service name. If development mode is off or no port is configured, it must fall through to the existing
 production bundle resolver.
 
-The shared entrypoint also calls `setupSharedRuntime` at module scope. This mirrors the production prelude for Metro:
-
-```ts
-import { setupSharedRuntime } from '@granite-js/plugin-micro-frontend/runtime';
-import * as react from 'react';
-import * as reactNative from 'react-native';
-
-setupSharedRuntime({ react, 'react-native': reactNative });
-```
-
-Keep the host and service `shared` lists aligned. Native libraries such as image, video, or pager modules must be
-registered by the host and externalized by every service that can import them.
+The micro-frontend plugin prelude owns shared-module registration in both production builds and the experimental
+development server. Keep the host and service `shared` lists aligned. Native libraries such as image, video, or pager
+modules must be registered by the host and externalized by every service that can import them.
 
 Each session root uses `nativeID="micro-frontend-session:<identifier>"` with view flattening disabled. A native host
 may use that stable ID to associate the React Native view tree with its session container.

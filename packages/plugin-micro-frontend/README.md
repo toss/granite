@@ -121,30 +121,10 @@ const service = await serviceLoader.load('service://catalog');
 Use the optional `fallback` callback only when the host has an explicit legacy resolution path. Parser errors are
 never routed through fallback because they indicate an invalid exposed-module contract.
 
-### Setting up the shared registry in an experimental host
-
-Production host builds normally create `globalThis.__MICRO_FRONTEND__` and register eager shared modules in their
-prelude. An experimental Metro host has no production prelude, so it must mirror that registry before any service
-bundle is evaluated:
-
-```ts
-import { setupSharedRuntime } from '@granite-js/plugin-micro-frontend/runtime';
-import * as react from 'react';
-import * as reactNative from 'react-native';
-
-setupSharedRuntime({
-  react,
-  'react-native': reactNative,
-});
-```
-
-Call `setupSharedRuntime` at module scope before registering the host app. It creates the runtime when needed and
-preserves modules already installed by a production prelude, so the same entrypoint can run in both environments.
-The host and every service must use the same `shared` module names. A module included by both bundles can execute
-native registration twice; a module externalized by a service but missing from the host registry fails at runtime.
-
-`setupSharedRuntime` only registers modules. It does not fetch services, call `importLazy`, call
-`__mpackInternal.loadRemote`, or merge a service into the host bundle.
+The micro-frontend plugin prelude owns the shared registry in both production builds and the experimental development
+server. The host and every service must use the same `shared` module names. A module included by both bundles can
+execute native registration twice; a module externalized by a service but missing from the host registry fails at
+runtime.
 
 ## License
 
