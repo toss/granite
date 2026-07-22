@@ -112,15 +112,15 @@ const createApp = () => {
       return Root;
     },
 
-    registerHostApp(
-      AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
+    registerHostApp<HostInitialProps extends InitialProps>(
+      AppContainer: ComponentType<PropsWithChildren<HostInitialProps>>,
       { appName }: Pick<GraniteProps, 'appName'>
-    ): (initialProps: InitialProps) => React.JSX.Element {
+    ): (initialProps: HostInitialProps) => React.JSX.Element {
       if (appName !== ENTRY_BUNDLE_NAME) {
         throw new Error(`Host appName must be 'shared'`);
       }
 
-      function Root(initialProps: InitialProps) {
+      function Root(initialProps: HostInitialProps) {
         initializeMonoHermes(initialProps);
         return <HostAppRoot container={AppContainer} initialProps={initialProps} />;
       }

@@ -5,12 +5,15 @@ import { App } from './App';
 /**
  * @internal
  */
-interface HostAppRootProps {
-  container: ComponentType<PropsWithChildren<InitialProps>>;
-  initialProps: InitialProps;
+interface HostAppRootProps<HostInitialProps extends InitialProps> {
+  container: ComponentType<PropsWithChildren<HostInitialProps>>;
+  initialProps: HostInitialProps;
 }
 
-export function HostAppRoot({ container: Container, initialProps }: HostAppRootProps) {
+export function HostAppRoot<HostInitialProps extends InitialProps>({
+  container: Container,
+  initialProps,
+}: HostAppRootProps<HostInitialProps>) {
   return (
     <App {...initialProps}>
       <Container {...initialProps} />
