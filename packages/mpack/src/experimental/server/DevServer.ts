@@ -1,6 +1,5 @@
 import assert from 'assert';
 import middie from '@fastify/middie';
-import type { BundleData } from '@granite-js/plugin-core';
 import { createDevMiddleware } from '@react-native/dev-middleware';
 import { createDevServerMiddleware } from '@react-native-community/cli-server-api';
 import Fastify, {
@@ -12,7 +11,6 @@ import Fastify, {
 import type { WebSocketServer } from 'ws';
 import { DebuggerEventHandler } from './debugger/DebuggerEventHandler';
 import { createBundlerForDevServer } from './helpers/createBundlerForDevServer';
-import { mergeBundles } from './helpers/mergeBundles';
 import { createLiveReloadMiddleware } from './middlewares';
 import * as serverPlugins from './plugins';
 import type { BroadcastCommand, DevServerContext, DevServerOptions, Platform } from './types';
@@ -253,30 +251,11 @@ export class DevServer {
   private async getBundle(platform: Platform) {
     const { bundler } = this.getContext()[platform];
     const buildResult = await bundler.build({ withDispose: false });
-    let targetBundle: BundleData;
 
     if ('bundle' in buildResult) {
-      if (globalThis.remoteBundles != null) {
-        const hostBundleContent = buildResult.bundle.source.text;
-        const remoteBundleContent = globalThis.remoteBundles[platform];
-        const mergedBundle = await mergeBundles({
-          platform,
-          hostBundleContent,
-          remoteBundleContent,
-        });
-
-        targetBundle = mergedBundle;
-      } else {
-        targetBundle = buildResult.bundle;
-      }
-
-      return targetBundle;
+      return buildResult.bundle;
     } else {
       throw new Error('Build failed');
     }
   }
-}
-
-declare global {
-  var remoteBundles: Record<'android' | 'ios', string> | null;
 }
