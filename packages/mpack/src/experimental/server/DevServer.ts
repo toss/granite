@@ -1,5 +1,6 @@
 import assert from 'assert';
 import middie from '@fastify/middie';
+import type { MetroMiddleware } from '@granite-js/plugin-core';
 import { createDevMiddleware } from '@react-native/dev-middleware';
 import { createDevServerMiddleware } from '@react-native-community/cli-server-api';
 import Fastify, {
@@ -36,7 +37,7 @@ type DevServerMiddleware = {
 };
 
 type FastifyWithUse = FastifyInstance & {
-  use: (middleware: (req: any, res: any, next: (error?: Error) => void) => void) => void;
+  use: (middleware: MetroMiddleware) => void;
 };
 
 export class DevServer {
@@ -109,6 +110,10 @@ export class DevServer {
     const devServerHostname = this.host === '0.0.0.0' ? 'localhost' : this.host;
     const serverBaseUrl = new URL(`http://${devServerHostname}:${this.port}`).origin;
     await app.register(middie);
+
+    for (const middleware of this.devServerOptions.metroMiddlewares ?? []) {
+      (app as FastifyWithUse).use(middleware);
+    }
 
     const {
       middleware: devServerMiddleware,
