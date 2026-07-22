@@ -118,9 +118,9 @@ const serviceLoader = createServiceBundleLoader<AppContainer>({
 const service = await serviceLoader.load('service://catalog');
 ```
 
-`isMonoHermes()` returns `true` while a service bundle is being evaluated and after the loader resolves a valid
-exposed module. It remains `false` for legacy execution and when loading falls back without resolving a service
-bundle. Runtime-aware libraries can use this helper without requiring service applications to pass a separate flag.
+Granite initializes the runtime mode from the host's initial props. `isMonoHermes()` returns `true` only when
+`_monoHermes` is explicitly `true`; an absent or false value does not write a runtime flag. Runtime-aware libraries
+can use this helper without requiring service applications to pass a separate flag.
 
 ```ts
 import { isMonoHermes } from '@granite-js/plugin-micro-frontend/runtime';

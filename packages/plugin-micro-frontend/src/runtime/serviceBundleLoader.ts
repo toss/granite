@@ -88,18 +88,10 @@ class DefaultServiceBundleLoader<TModule> implements ServiceBundleLoader<TModule
     const runtime = globalThis.__MICRO_FRONTEND__;
     const instances = runtime.__INSTANCES__;
     const startIndex = instances.length;
-    runtime.__MONO_HERMES_EVALUATIONS__ = (runtime.__MONO_HERMES_EVALUATIONS__ ?? 0) + 1;
     try {
       await this.options.evaluate(request);
     } catch (cause) {
       return this.resolveFallback(request, serviceKey, cause);
-    } finally {
-      const remainingEvaluations = (runtime.__MONO_HERMES_EVALUATIONS__ ?? 1) - 1;
-      if (remainingEvaluations === 0) {
-        Reflect.deleteProperty(runtime, '__MONO_HERMES_EVALUATIONS__');
-      } else {
-        runtime.__MONO_HERMES_EVALUATIONS__ = remainingEvaluations;
-      }
     }
 
     const normalizedExposeName = normalizePath(this.options.exposeName);
@@ -111,7 +103,6 @@ class DefaultServiceBundleLoader<TModule> implements ServiceBundleLoader<TModule
 
       const parsedModule = this.options.parseExposedModule(container.exposeMap[normalizedExposeName]);
       if (parsedModule != null) {
-        runtime.__IS_MONO_HERMES__ = true;
         return parsedModule;
       }
     }

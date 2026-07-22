@@ -9,7 +9,6 @@ export interface RuntimeContext {
   __INSTANCES__: Container[] & Record<string, number>;
   __SHARED__: SharedModuleRegistry;
   __IS_MONO_HERMES__?: boolean;
-  __MONO_HERMES_EVALUATIONS__?: number;
 }
 
 export interface Container {

@@ -19,11 +19,13 @@ export type ColorPreference = 'light' | 'dark';
  * @property {'ios' | 'android'} platform - Platform type
  * @property {ColorPreference} initialColorPreference - Initial color
  * @property {string} [scheme] - Executed scheme
+ * @property {boolean} [_monoHermes] - Whether this app runs in a shared Hermes runtime
  */
 type BaseInitialProps = {
   platform: 'ios' | 'android';
   initialColorPreference: ColorPreference;
   scheme?: string;
+  readonly _monoHermes?: boolean;
 };
 
 /**
@@ -67,6 +69,7 @@ export type IOSInitialProps = BaseInitialProps & {
  * @property {'ios' | 'android'} platform - The platform on which the app is currently running. Has a value of either `ios` or `android`.
  * @property {ColorPreference} initialColorPreference - The initial color theme. Represents the color theme set by the user.
  * @property {string} [scheme] - The URL scheme used to enter the current screen.
+ * @property {boolean} [_monoHermes] - Whether this app runs in a shared Hermes runtime.
  *
  * @example
  *

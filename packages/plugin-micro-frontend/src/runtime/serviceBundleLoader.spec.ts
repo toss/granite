@@ -32,10 +32,10 @@ describe('createServiceBundleLoader', () => {
     Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
   });
 
-  it('marks the runtime as mono Hermes before evaluating a service bundle', async () => {
+  it('does not infer mono Hermes mode from service evaluation', async () => {
     // Given
     const evaluate = vi.fn(async () => {
-      expect(isMonoHermes()).toBe(true);
+      expect(isMonoHermes()).toBe(false);
       const container = createContainer('remote-alpha', {});
       exposeModule(container, 'Service', { default: () => 'alpha' });
     });
@@ -51,7 +51,7 @@ describe('createServiceBundleLoader', () => {
     await loader.load('service://alpha');
 
     // Then
-    expect(isMonoHermes()).toBe(true);
+    expect(isMonoHermes()).toBe(false);
   });
 
   it('resolves distinct services from containers appended by serialized evaluations', async () => {

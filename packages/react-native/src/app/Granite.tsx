@@ -1,3 +1,4 @@
+import { initializeMonoHermes } from '@granite-js/plugin-micro-frontend/runtime';
 import { ComponentType, type JSX, PropsWithChildren } from 'react';
 import { AppRegistry } from 'react-native';
 import { ENTRY_BUNDLE_NAME } from '../constants';
@@ -87,6 +88,7 @@ const createApp = () => {
       }
 
       function Root(initialProps: InitialProps) {
+        initializeMonoHermes(initialProps);
         const initialSchemeValue = resolveInitialScheme(initialScheme, initialProps, getSchemeUri);
 
         return (
@@ -119,6 +121,7 @@ const createApp = () => {
       }
 
       function Root(initialProps: InitialProps) {
+        initializeMonoHermes(initialProps);
         return <HostAppRoot container={AppContainer} initialProps={initialProps} />;
       }
 
