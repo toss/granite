@@ -1,5 +1,6 @@
 import type { CompleteGraniteConfig } from '@granite-js/plugin-core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { EXPERIMENTAL__server } from './serve';
 
 const mocks = vi.hoisted(() => ({
   DevServer: vi.fn(),
@@ -21,8 +22,6 @@ vi.mock('../../operations/attachKeyHandlers', () => ({ default: mocks.attachKeyH
 vi.mock('../../operations/keyReporter', () => ({ keyReporter: {} }));
 vi.mock('../../utils/printLogo', () => ({ printLogo: vi.fn() }));
 vi.mock('../../utils/printServerUrl', () => ({ printServerUrl: vi.fn() }));
-
-import { EXPERIMENTAL__server } from './serve';
 
 describe('EXPERIMENTAL__server', () => {
   beforeEach(() => {
