@@ -33,9 +33,10 @@ export async function EXPERIMENTAL__server({
 
   const rootDir = config.cwd;
   const context: PluginConfigContext = { command: 'serve' };
-  const { metro: _, devServer, ...buildConfig } = (await resolveConfig(config, context)) ?? {};
+  const { metro, devServer, ...buildConfig } = (await resolveConfig(config, context)) ?? {};
   const server = new DevServer({
     buildConfig: { entry: config.entryFile, ...buildConfig },
+    metroMiddlewares: metro?.middlewares ?? [],
     middlewares: devServer?.middlewares ?? [],
     host,
     port,

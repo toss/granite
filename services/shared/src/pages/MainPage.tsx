@@ -1,19 +1,28 @@
 import type { InitialProps } from '@granite-js/react-native';
-import { ErrorBoundary } from '@toss/error-boundary';
-import React, { Suspense } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import { ErrorPage } from '../components/ErrorPage';
-import { loadAppContent } from '../utils/loadAppContent';
+import { LegacyMainPageTrack } from './MainPage/LegacyMainPageTrack';
+import { MonoHermesMainPageTrack } from './MainPage/MonoHermesMainPageTrack';
+import { resolveMainPageTrack } from './mainPageTrack';
 
-const AppContent = React.lazy(() => loadAppContent('remoteApp/AppContainer'));
+export type SharedInitialProps = InitialProps & {
+  readonly _monoHermes?: boolean;
+  readonly _serviceSessionBundleLoaderModuleName?: string;
+  readonly _serviceSessionEventModuleName?: string;
+};
 
-export function MainPage(props: InitialProps) {
+export function MainPage(props: SharedInitialProps) {
+  const track = resolveMainPageTrack(props);
+
   return (
-    <ErrorBoundary renderFallback={(props) => <ErrorPage reason={props.error.message} />}>
+    <ErrorBoundary renderFallback={(error) => <ErrorPage reason={error.message} />}>
       <SafeAreaProvider>
-        <Suspense fallback={null}>
-          <AppContent {...props} />
-        </Suspense>
+        {track === 'serviceSession' ? (
+          <MonoHermesMainPageTrack initialProps={props} />
+        ) : (
+          <LegacyMainPageTrack {...props} />
+        )}
       </SafeAreaProvider>
     </ErrorBoundary>
   );

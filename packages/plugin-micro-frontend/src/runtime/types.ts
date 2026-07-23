@@ -8,6 +8,7 @@ declare global {
 export interface RuntimeContext {
   __INSTANCES__: Container[] & Record<string, number>;
   __SHARED__: SharedModuleRegistry;
+  __IS_MONO_HERMES__?: boolean;
 }
 
 export interface Container {

@@ -13,7 +13,7 @@ export function createFlowStripStep(): AsyncTransformStep {
     }
 
     try {
-      const transformedCode = flowRemoveTypes(code, {});
+      const transformedCode = flowRemoveTypes(code, { removeEmptyImports: true });
 
       // @see https://flow.org/en/docs/react/component-syntax/
       // This is necessary to transform component syntax, etc.

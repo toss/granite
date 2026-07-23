@@ -1,0 +1,32 @@
+{
+  "name": "@granite-app/bare",
+  "private": true,
+  "scripts": {
+    "dev": "granite dev --experimental-mode",
+    "build": "granite build",
+    "test": "vitest --run --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --write"
+  },
+  "dependencies": {
+    "@granite-js/native": "workspace:*",
+    "@granite-js/react-native": "workspace:*",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native"
+  },
+  "devDependencies": {
+    "@babel/core": "7.28.5",
+    "@babel/runtime": "7.18.9",
+    "@granite-js/forge-cli": "workspace:*",
+    "@granite-js/plugin-env": "workspace:*",
+    "@granite-js/plugin-hermes": "workspace:*",
+    "@granite-js/plugin-micro-frontend": "workspace:*",
+    "@granite-js/plugin-router": "workspace:*",
+    "@react-native/babel-preset": "catalog:react-native",
+    "@types/node": "catalog:tools",
+    "@types/react": "catalog:react-native",
+    "babel-preset-granite": "workspace:*",
+    "typescript": "catalog:tools",
+    "vitest": "4.1.3"
+  }
+}

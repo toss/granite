@@ -7,6 +7,7 @@ import {
   RouteProp,
 } from '@granite-js/native/@react-navigation/native';
 import { NativeStackNavigationOptions } from '@granite-js/native/@react-navigation/native-stack';
+import { isMonoHermes } from '@granite-js/plugin-micro-frontend/runtime';
 import {
   ComponentProps,
   ComponentType,
@@ -26,6 +27,7 @@ import { useInternalRouterBackHandler } from './components/useRouterBackHandler'
 import { useRouterControls, type RouterControlsConfig } from './hooks/useRouterControls';
 import type { ErrorComponent, RequireContext } from './types';
 import { BASE_STACK_NAVIGATOR_STYLE } from './types/screen-option';
+import { createNavigationRoot } from './utils/createNavigationRoot';
 
 /**
  * @internal
@@ -72,6 +74,12 @@ export interface InternalRouterProps {
 export type RouterProps = StackNavigatorProps & NavigationContainerProps;
 
 interface StackNavigatorProps {
+  /**
+   * Whether this router must be isolated from a parent NavigationContainer.
+   * Enable this when mounting multiple Granite applications in one React tree.
+   * Defaults to the current micro-frontend runtime mode.
+   */
+  independent?: boolean;
   /**
    * @name navigationContainerRef
    * @description
@@ -147,6 +155,7 @@ export function Router({
   defaultScreenOption,
   screenContainer,
   defaultErrorComponent,
+  independent = isMonoHermes(),
   // Public props (StackNavigator)
   setIosSwipeGestureEnabled,
   setiOSBackPressHandler,
@@ -186,7 +195,7 @@ export function Router({
 
   const [isInitialScreen, setIsInitialScreen] = useState(true);
 
-  return (
+  const navigation = (
     <NavigationContainer
       onStateChange={(state) => {
         setIsInitialScreen(state ? state?.index === 0 : true);
@@ -209,4 +218,6 @@ export function Router({
       </CanGoBackGuard>
     </NavigationContainer>
   );
+
+  return createNavigationRoot(navigation, independent);
 }

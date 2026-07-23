@@ -77,6 +77,65 @@ export default defineConfig({
 });
 ```
 
+### Loading multiple service bundles in one runtime
+
+The runtime entrypoint provides a loader for hosts that evaluate multiple service bundles in the same JavaScript
+runtime. Bundle fetching and evaluation stay platform-owned and are supplied through `evaluate`.
+
+Each service bundle must register a unique micro-frontend container name. The loader resolves the requested expose
+only from containers appended by that service's evaluation, serializes concurrent evaluations, caches successful
+loads by the caller-defined service key, and removes failed loads from the cache so they can be retried.
+
+```ts
+import { createServiceBundleLoader, createServiceGlobalGuard } from '@granite-js/plugin-micro-frontend/runtime';
+
+type AppContainer = (props: unknown) => unknown;
+
+declare const serviceBundleEvaluator: {
+  evaluate(request: string): Promise<void>;
+};
+declare const monitoring: {
+  capture(report: unknown): void;
+};
+
+function isAppContainerModule(value: unknown): value is { readonly default: AppContainer } {
+  return typeof value === 'object' && value !== null && 'default' in value && typeof value.default === 'function';
+}
+
+const globalGuard = createServiceGlobalGuard({
+  protectedKeys: ['__APP_RUNTIME__'],
+  onReport: (report) => monitoring.capture(report),
+});
+
+const serviceLoader = createServiceBundleLoader<AppContainer>({
+  evaluate: (request) => serviceBundleEvaluator.evaluate(request),
+  exposeName: 'AppContainer',
+  getServiceKey: (request) => /^service:\/\/([^/?#]+)/.exec(request)?.[1]?.toLowerCase() ?? null,
+  globalGuard,
+  parseExposedModule: (module) => (isAppContainerModule(module) ? module.default : null),
+});
+
+const service = await serviceLoader.load('service://catalog');
+```
+
+Granite initializes the runtime mode from the host's initial props. `isMonoHermes()` returns `true` only when
+`_monoHermes` is explicitly `true`; an absent or false value does not write a runtime flag. Runtime-aware libraries
+can use this helper without requiring service applications to pass a separate flag.
+
+```ts
+import { isMonoHermes } from '@granite-js/plugin-micro-frontend/runtime';
+
+const shouldUseIndependentNavigation = isMonoHermes();
+```
+
+Use the optional `fallback` callback only when the host has an explicit legacy resolution path. Parser errors are
+never routed through fallback because they indicate an invalid exposed-module contract.
+
+The micro-frontend plugin prelude owns the shared registry in both production builds and the experimental development
+server. The host and every service must use the same `shared` module names. A module included by both bundles can
+execute native registration twice; a module externalized by a service but missing from the host registry fails at
+runtime.
+
 ## License
 
 This software is licensed under the [Apache 2 license](LICENSE), quoted below.

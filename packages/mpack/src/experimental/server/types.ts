@@ -1,4 +1,4 @@
-import type { Middleware, BuildConfig, InspectorProxyConfig } from '@granite-js/plugin-core';
+import type { Middleware, BuildConfig, InspectorProxyConfig, MetroMiddleware } from '@granite-js/plugin-core';
 import type { Bundler } from '../../bundler';
 import type { BuildStatusProgressBar } from '../../utils/progressBar';
 
@@ -9,6 +9,7 @@ export interface DevServerOptions {
   host?: string;
   port?: number;
   buildConfig: Omit<BuildConfig, 'platform' | 'outfile'>;
+  metroMiddlewares?: MetroMiddleware[];
   middlewares?: Middleware[];
   inspectorProxy?: InspectorProxyConfig;
 }

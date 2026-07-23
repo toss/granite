@@ -2,7 +2,7 @@
   "name": "@granite-app/showcase",
   "private": true,
   "scripts": {
-    "dev": "granite dev",
+    "dev": "granite dev --experimental-mode",
     "build": "granite build",
     "test": "vitest --run --passWithNoTests",
     "typecheck": "tsc --noEmit",
