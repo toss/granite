@@ -106,7 +106,7 @@ class DefaultServiceBundleLoader<TModule> implements ServiceBundleLoader<TModule
               request,
               serviceKey,
             });
-      await this.options.evaluate(resolvedRequest);
+      await this.evaluateWithServiceContainerName(resolvedRequest, serviceKey);
     } catch (cause) {
       return this.resolveFallback(request, serviceKey, cause);
     }
@@ -125,6 +125,21 @@ class DefaultServiceBundleLoader<TModule> implements ServiceBundleLoader<TModule
     }
 
     return this.resolveFallback(request, serviceKey, new ServiceModuleNotFoundError(serviceKey, normalizedExposeName));
+  }
+
+  private async evaluateWithServiceContainerName(request: string, serviceKey: string): Promise<void> {
+    const runtime = globalThis.__MICRO_FRONTEND__;
+    const previousContainerName = runtime.__SERVICE_CONTAINER_NAME__;
+    runtime.__SERVICE_CONTAINER_NAME__ = serviceKey;
+    try {
+      await this.options.evaluate(request);
+    } finally {
+      if (previousContainerName == null) {
+        Reflect.deleteProperty(runtime, '__SERVICE_CONTAINER_NAME__');
+      } else {
+        runtime.__SERVICE_CONTAINER_NAME__ = previousContainerName;
+      }
+    }
   }
 
   private async resolveFallback(request: string, serviceKey: string, cause: unknown): Promise<TModule> {

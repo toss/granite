@@ -5,18 +5,20 @@ export function createContainer(
   name: string,
   config: { remote?: RemoteConfig; shared?: SharedConfig; exposes?: ExposeConfig }
 ) {
-  if (typeof global.__MICRO_FRONTEND__.__INSTANCES__[name] === 'number') {
-    throw new Error(`'${name}' container already registered`);
+  const containerName = global.__MICRO_FRONTEND__.__SERVICE_CONTAINER_NAME__ ?? name;
+
+  if (typeof global.__MICRO_FRONTEND__.__INSTANCES__[containerName] === 'number') {
+    throw new Error(`'${containerName}' container already registered`);
   }
 
   const containerIndex = global.__MICRO_FRONTEND__.__INSTANCES__.length;
   const container: Container = {
-    name,
+    name: containerName,
     config,
     exposeMap: {},
   };
 
-  Object.defineProperty(global.__MICRO_FRONTEND__.__INSTANCES__, name, {
+  Object.defineProperty(global.__MICRO_FRONTEND__.__INSTANCES__, containerName, {
     value: containerIndex,
     enumerable: false,
     writable: false,

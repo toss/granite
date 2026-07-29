@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createContainer, createServiceBundleLoader, exposeModule, isMonoHermes } from './index';
+import { createContainer, createServiceBundleLoader, exposeModule, getContainer, isMonoHermes } from './index';
 
 type Service = () => string;
 
@@ -92,6 +92,35 @@ describe('createServiceBundleLoader', () => {
     expect((await alpha)()).toBe('alpha');
     expect((await beta)()).toBe('beta');
     expect(evaluationOrder).toEqual(['start:alpha', 'end:alpha', 'start:beta', 'end:beta']);
+  });
+
+  it('scopes a bundle-declared container name to each service key', async () => {
+    // Given
+    const evaluate = vi.fn(async (request: string) => {
+      const serviceKey = serviceKeyOf(request);
+      if (serviceKey == null) {
+        throw new Error(`Unexpected request: ${request}`);
+      }
+      const container = createContainer('remote', {});
+      exposeModule(container, 'Service', { default: () => serviceKey });
+    });
+    const loader = createServiceBundleLoader<Service>({
+      evaluate,
+      exposeName: 'Service',
+      getServiceKey: serviceKeyOf,
+      parseExposedModule: parseServiceModule,
+    });
+
+    // When
+    const car = await loader.load('service://car');
+    const shopping = await loader.load('service://shopping');
+
+    // Then
+    expect(car()).toBe('car');
+    expect(shopping()).toBe('shopping');
+    expect(getContainer('car')?.name).toBe('car');
+    expect(getContainer('shopping')?.name).toBe('shopping');
+    expect(getContainer('remote')).toBeNull();
   });
 
   it('shares one in-flight evaluation for requests with the same caller-derived service key', async () => {
