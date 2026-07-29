@@ -118,6 +118,44 @@ describe('createServiceBundleLoader', () => {
     expect(evaluate).toHaveBeenCalledTimes(1);
   });
 
+  it('resolves the evaluation request while preserving service-key caching', async () => {
+    // Given
+    const evaluate = vi.fn(async (request: string) => {
+      const container = createContainer(`remote-${request}`, {});
+      exposeModule(container, 'Service', { default: () => request });
+    });
+    const resolveRequest = vi.fn(
+      ({ serviceKey }: { readonly request: string; readonly serviceKey: string }) =>
+        `http://localhost:${serviceKey === 'car' ? 8082 : 8083}/index.bundle?platform=android`
+    );
+    const loader = createServiceBundleLoader<Service>({
+      evaluate,
+      exposeName: 'Service',
+      getServiceKey: serviceKeyOf,
+      parseExposedModule: parseServiceModule,
+      resolveRequest,
+    });
+
+    // When
+    const firstCar = await loader.load('service://car');
+    const secondCar = await loader.load('service://CAR?reentry=true');
+    const shopping = await loader.load('service://shopping');
+
+    // Then
+    expect(firstCar()).toBe('http://localhost:8082/index.bundle?platform=android');
+    expect(secondCar).toBe(firstCar);
+    expect(shopping()).toBe('http://localhost:8083/index.bundle?platform=android');
+    expect(evaluate).toHaveBeenCalledTimes(2);
+    expect(resolveRequest).toHaveBeenNthCalledWith(1, {
+      request: 'service://car',
+      serviceKey: 'car',
+    });
+    expect(resolveRequest).toHaveBeenNthCalledWith(2, {
+      request: 'service://shopping',
+      serviceKey: 'shopping',
+    });
+  });
+
   it('evicts a rejected evaluation so the next load can retry', async () => {
     // Given
     const retryService: Service = () => 'retry';

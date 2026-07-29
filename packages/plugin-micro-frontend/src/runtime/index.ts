@@ -7,6 +7,7 @@ export {
   InvalidServiceRequestError,
   ServiceModuleNotFoundError,
 } from './serviceBundleLoader';
+export { createDevelopmentServiceBundleRequestResolver } from './developmentServiceBundleRequestResolver';
 export { createServiceGlobalGuard } from './serviceGlobalGuard';
 export { initializeMonoHermes, isMonoHermes } from './monoHermes';
 export type { MonoHermesInitialProps } from './monoHermes';
@@ -16,7 +17,10 @@ export type {
   ServiceBundleFallbackContext,
   ServiceBundleLoader,
   ServiceBundleLoaderOptions,
+  ServiceBundleRequestContext,
+  ServiceBundleRequestResolver,
 } from './serviceBundleLoader';
+export type { DevelopmentServiceBundleRequestResolverOptions } from './developmentServiceBundleRequestResolver';
 export type {
   ServiceGlobalGuard,
   ServiceGlobalGuardOptions,

@@ -7,6 +7,15 @@ export interface ServiceBundleFallbackContext {
   readonly cause: unknown;
 }
 
+export interface ServiceBundleRequestContext {
+  readonly request: string;
+  readonly serviceKey: string;
+}
+
+export type ServiceBundleRequestResolver = (
+  context: ServiceBundleRequestContext
+) => string | Promise<string>;
+
 export interface ServiceBundleLoaderOptions<TModule> {
   readonly evaluate: (request: string) => void | Promise<void>;
   readonly exposeName: string;
@@ -14,6 +23,7 @@ export interface ServiceBundleLoaderOptions<TModule> {
   readonly getServiceKey: (request: string) => string | null;
   readonly globalGuard?: ServiceGlobalGuard;
   readonly parseExposedModule: (module: unknown) => TModule | null;
+  readonly resolveRequest?: ServiceBundleRequestResolver;
 }
 
 export interface ServiceBundleLoader<TModule> {
@@ -89,7 +99,14 @@ class DefaultServiceBundleLoader<TModule> implements ServiceBundleLoader<TModule
     const instances = runtime.__INSTANCES__;
     const startIndex = instances.length;
     try {
-      await this.options.evaluate(request);
+      const resolvedRequest =
+        this.options.resolveRequest == null
+          ? request
+          : await this.options.resolveRequest({
+              request,
+              serviceKey,
+            });
+      await this.options.evaluate(resolvedRequest);
     } catch (cause) {
       return this.resolveFallback(request, serviceKey, cause);
     }
