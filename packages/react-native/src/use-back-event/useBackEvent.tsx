@@ -218,6 +218,11 @@ export function useBackEventState() {
 }
 
 /**
+ * @deprecated Use `useBackHandler` instead. This will be removed in a future release.
+ * Handlers registered through `useBackHandler` receive a `BackEvent` object and can conditionally
+ * consume the back action by returning `true`. To keep the behavior of `useBackEvent`
+ * (always blocking default back navigation while registered), return `true` from the handler.
+ *
  * @public
  * @category Screen Control
  * @name useBackEvent
