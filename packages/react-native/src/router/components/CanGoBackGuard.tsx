@@ -1,5 +1,5 @@
 import { ReactNode, useEffect } from 'react';
-import { BackHandler } from 'react-native';
+import { BackHandler, Platform } from 'react-native';
 import type { BackEvent } from '../../use-back-event';
 
 type SetIosSwipeGestureEnabled = ({ isEnabled }: { isEnabled: boolean }) => Promise<void> | void;
@@ -23,6 +23,10 @@ export function CanGoBackGuard({
   setiOSBackPressHandler?: SetIOSBackPressHandler;
 }) {
   useEffect(() => {
+    if (Platform.OS !== 'ios') {
+      return;
+    }
+
     if (!isInitialScreen || !canGoBack) {
       setIosSwipeGestureEnabled?.({ isEnabled: false });
 
@@ -35,6 +39,10 @@ export function CanGoBackGuard({
   }, [canGoBack, isInitialScreen, setIosSwipeGestureEnabled]);
 
   useEffect(() => {
+    if (Platform.OS !== 'android') {
+      return;
+    }
+
     if (!hasBackEvent) {
       return;
     }
@@ -51,6 +59,10 @@ export function CanGoBackGuard({
   }, [hasBackEvent, onBack]);
 
   useEffect(() => {
+    if (Platform.OS !== 'ios') {
+      return;
+    }
+
     if (!hasBackEvent || setiOSBackPressHandler == null) {
       return;
     }

@@ -1,14 +1,24 @@
 import { render } from '@testing-library/react';
-import { BackHandler } from 'react-native';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { BackHandler, Platform } from 'react-native';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CanGoBackGuard } from './CanGoBackGuard';
+
+function mockPlatformOS(os: typeof Platform.OS) {
+  vi.spyOn(Platform, 'OS', 'get').mockReturnValue(os);
+}
 
 describe('CanGoBackGuard', () => {
   beforeEach(() => {
     vi.mocked(BackHandler.addEventListener).mockClear();
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('passes Android hardware back events to onBack and consumes the native event', () => {
+    mockPlatformOS('android');
+
     const onBack = vi.fn();
 
     render(
@@ -25,6 +35,8 @@ describe('CanGoBackGuard', () => {
   });
 
   it('does not register Android hardware back when no back event exists', () => {
+    mockPlatformOS('android');
+
     const onBack = vi.fn();
 
     render(
@@ -37,6 +49,8 @@ describe('CanGoBackGuard', () => {
   });
 
   it('registers the iOS swipe back handler while back events exist', () => {
+    mockPlatformOS('ios');
+
     const onBack = vi.fn();
     const setiOSBackPressHandler = vi.fn();
 
@@ -63,6 +77,8 @@ describe('CanGoBackGuard', () => {
   });
 
   it('disables iOS swipe when the current state should block default back navigation', () => {
+    mockPlatformOS('ios');
+
     const setIosSwipeGestureEnabled = vi.fn();
 
     const { unmount } = render(

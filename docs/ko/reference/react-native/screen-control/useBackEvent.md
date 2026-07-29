@@ -4,6 +4,43 @@ sourcePath: packages/react-native/src/use-back-event/useBackEvent.tsx
 
 # useBackEvent
 
+::: warning 지원 종료 예정 (Deprecated)
+`useBackEvent`는 지원 종료 예정이에요. 이후 릴리스에서 제거되니 [useBackHandler](/ko/reference/react-native/screen-control/useBackHandler)를 사용하세요.
+
+`useBackHandler`로 등록한 핸들러는 `BackEvent` 객체를 받고, `true`를 반환해서 조건에 따라 뒤로 가기 동작을 가로챌 수 있어요. `useBackEvent`처럼 등록돼 있는 동안 항상 기본 뒤로 가기를 막으려면 핸들러에서 `true`를 반환하세요.
+
+```tsx
+// Before
+const backEvent = useBackEvent();
+
+useEffect(() => {
+  const listener = () => {
+    // 뒤로 가기 동작 처리
+  };
+
+  backEvent.addEventListener(listener);
+
+  return () => {
+    backEvent.removeEventListener(listener);
+  };
+}, [backEvent]);
+
+// After
+const backHandler = useBackHandler();
+
+useEffect(() => {
+  const subscription = backHandler.addEventListener(() => {
+    // 뒤로 가기 동작 처리
+    return true; // 기본 뒤로 가기 동작을 막아요
+  });
+
+  return () => {
+    subscription.remove();
+  };
+}, [backHandler]);
+```
+:::
+
 뒤로 가기 이벤트를 등록하고 제거할 수 있는 컨트롤러 객체를 반환하는 Hook이에요. 이 Hook을 사용하면 특정 컴포넌트가 활성화되었을 때만 뒤로 가기 이벤트를 처리할 수 있어요.
 `addEventListener` 를 쓰면 뒤로 가기 이벤트를 등록할 수 있고, `removeEventListener` 를 쓰면 뒤로 가기 이벤트를 제거할 수 있어요.
 사용자가 화면을 보고 있을 때만 등록된 뒤로 가기 이벤트가 등록돼요. 화면을 보고 있다는 조건은 [useVisibility](/ko/reference/react-native/screen-control/useVisibility) 을 사용해요.

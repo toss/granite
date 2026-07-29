@@ -96,6 +96,10 @@
                   "link": "/reference/react-native/screen-control/useBackEvent"
                 },
                 {
+                  "text": "useBackHandler",
+                  "link": "/reference/react-native/screen-control/useBackHandler"
+                },
+                {
                   "text": "useParams",
                   "link": "/reference/react-native/screen-control/useParams"
                 },
