@@ -1,6 +1,14 @@
 import './types/global';
 
-export { Granite, useInitialSearchParams, useInitialProps } from './app';
+export {
+  Granite,
+  ServiceSessionBackGuard,
+  ServiceSessionProvider,
+  useInitialSearchParams,
+  useInitialProps,
+  useServiceSession,
+  type ServiceSessionContextValue,
+} from './app';
 export * from '@granite-js/style-utils';
 export {
   type GraniteImageSource,

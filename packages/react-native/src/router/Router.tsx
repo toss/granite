@@ -28,6 +28,7 @@ import { useRouterControls, type RouterControlsConfig } from './hooks/useRouterC
 import type { ErrorComponent, RequireContext } from './types';
 import { BASE_STACK_NAVIGATOR_STYLE } from './types/screen-option';
 import { createNavigationRoot } from './utils/createNavigationRoot';
+import { ServiceSessionBackGuard, useServiceSession } from '../app/ServiceSessionContext';
 
 /**
  * @internal
@@ -172,10 +173,11 @@ export function Router({
   });
 
   const ref = useMemo(() => navigationContainerRef ?? createNavigationContainerRef<never>(), [navigationContainerRef]);
+  const serviceSession = useServiceSession();
 
   const { handler, handleBackEvent, canGoBack, hasBackEvent } = useInternalRouterBackHandler({
     navigationContainerRef: ref,
-    onClose: closeView,
+    onClose: serviceSession == null ? closeView : () => void serviceSession.close(),
   });
 
   const headerLeft = useCallback(
@@ -219,5 +221,11 @@ export function Router({
     </NavigationContainer>
   );
 
-  return createNavigationRoot(navigation, independent);
+  return createNavigationRoot(
+    <>
+      {navigation}
+      <ServiceSessionBackGuard onBack={handleBackEvent} />
+    </>,
+    independent
+  );
 }

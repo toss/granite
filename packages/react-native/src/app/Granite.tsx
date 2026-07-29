@@ -1,5 +1,5 @@
 import { initializeMonoHermes } from '@granite-js/plugin-micro-frontend/runtime';
-import { ComponentType, type JSX, PropsWithChildren } from 'react';
+import { ComponentType, type JSX, PropsWithChildren, useState } from 'react';
 import { AppRegistry } from 'react-native';
 import { ENTRY_BUNDLE_NAME } from '../constants';
 import type { InitialProps } from '../initial-props';
@@ -7,6 +7,7 @@ import type { RouterProps, RequireContext } from '../router';
 import { AppRoot } from './AppRoot';
 import { HostAppRoot } from './HostAppRoot';
 import { resolveInitialScheme } from './resolveInitialScheme';
+import { resolveAppEnvironment } from './resolveAppEnvironment';
 import { getSchemeUri } from '../constant-bridges';
 import { setupPolyfills } from '../polyfills';
 
@@ -86,13 +87,17 @@ const createApp = () => {
       if (appName === ENTRY_BUNDLE_NAME) {
         throw new Error(`Reserved app name 'shared' cannot be used`);
       }
+      const appEnvironment = resolveAppEnvironment();
 
       function Root(initialProps: InitialProps) {
         initializeMonoHermes(initialProps);
-        const initialSchemeValue = resolveInitialScheme(initialScheme, initialProps, getSchemeUri);
+        const [initialSchemeValue] = useState(() =>
+          resolveInitialScheme(initialScheme, initialProps, getSchemeUri)
+        );
 
         return (
           <AppRoot
+            appEnvironment={appEnvironment}
             container={AppContainer}
             initialProps={initialProps}
             initialScheme={initialSchemeValue}
