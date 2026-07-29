@@ -1,5 +1,6 @@
-import type { InitialProps } from '@granite-js/react-native';
-import { Component, type PropsWithChildren, useEffect, useState } from 'react';
+import { ServiceSessionProvider, type InitialProps } from '@granite-js/react-native';
+import { Portal } from '@granite-js/portal';
+import { Component, type PropsWithChildren, useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SERVICE_SESSION_NATIVE_ID_PREFIX, type ServiceSession } from './serviceSession';
 import type { AppContainerComponent, ServiceSessionRuntime } from './serviceSessionRuntime';
@@ -39,6 +40,10 @@ export function ServiceSessionRenderer({ initialProps, runtime, session }: Servi
   const [loadState, setLoadState] = useState<ServiceLoadState>({
     kind: 'loading',
   });
+  const close = useCallback(
+    () => runtime.closeServiceActivity(session.identifier),
+    [runtime, session.identifier]
+  );
 
   useEffect(() => {
     let active = true;
@@ -74,9 +79,11 @@ export function ServiceSessionRenderer({ initialProps, runtime, session }: Servi
       case 'ready': {
         const { AppContainer } = loadState;
         return (
-          <ServiceRenderBoundary>
-            <AppContainer {...initialProps} scheme={session.url} />
-          </ServiceRenderBoundary>
+          <ServiceSessionProvider identifier={session.identifier} isVisible={session.isVisible} close={close}>
+            <ServiceRenderBoundary>
+              <AppContainer {...initialProps} />
+            </ServiceRenderBoundary>
+          </ServiceSessionProvider>
         );
       }
       default: {
@@ -87,12 +94,14 @@ export function ServiceSessionRenderer({ initialProps, runtime, session }: Servi
   })();
 
   return (
-    <View
-      collapsable={false}
-      nativeID={`${SERVICE_SESSION_NATIVE_ID_PREFIX}${session.identifier}`}
-      style={StyleSheet.absoluteFill}
-    >
-      {content}
-    </View>
+    <Portal hostName={session.identifier}>
+      <View
+        collapsable={false}
+        nativeID={`${SERVICE_SESSION_NATIVE_ID_PREFIX}${session.identifier}`}
+        style={StyleSheet.absoluteFill}
+      >
+        {content}
+      </View>
+    </Portal>
   );
 }

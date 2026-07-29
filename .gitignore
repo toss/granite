@@ -12,6 +12,7 @@
 dist
 esm
 *.tgz
+!services/shared/vendor/granite-js-portal-1.1.12.tgz
 *.tsbuildinfo
 .next
 node_modules

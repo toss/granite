@@ -2,14 +2,12 @@ import { BrickModule, type BrickModuleSpec } from 'brick-module';
 import { parseServiceSessionEvent } from './serviceSession';
 import type { ServiceSessionHost, ServiceSessionNativeSubscription } from './serviceSessionHost';
 
-interface HostEventModule extends BrickModuleSpec {
-  readonly moduleName: string;
-  readonly onSendEvent: (listener: (event: unknown) => void) => ServiceSessionNativeSubscription;
-}
-
 interface ServiceBundleLoaderModule extends BrickModuleSpec {
   readonly moduleName: string;
   readonly importService: (bundleRequest: string) => Promise<unknown>;
+  readonly closeServiceActivity: (identifier: string) => Promise<unknown>;
+  readonly startServiceSessionEvents: () => Promise<unknown>;
+  readonly onSendEvent: (listener: (event: unknown) => void) => ServiceSessionNativeSubscription;
 }
 
 export interface BrickServiceSessionHostOptions {
@@ -27,14 +25,20 @@ export function createBrickServiceSessionHost({
 
   const bundleLoaderModule =
     bundleLoaderModuleName.length === 0 ? null : BrickModule.get<ServiceBundleLoaderModule>(bundleLoaderModuleName);
-  const eventModule = BrickModule.get<HostEventModule>(eventModuleName);
+  const eventModule = BrickModule.get<ServiceBundleLoaderModule>(eventModuleName);
 
   return {
-    evaluate: async (bundleRequest) => {
+    importService: async (bundleRequest) => {
       if (bundleLoaderModule == null) {
         throw new Error('The platform did not install a service bundle loader.');
       }
       await bundleLoaderModule.importService(bundleRequest);
+    },
+    closeServiceActivity: async (identifier) => {
+      if (bundleLoaderModule == null) {
+        throw new Error('The platform did not install a service bundle loader.');
+      }
+      await bundleLoaderModule.closeServiceActivity(identifier);
     },
     subscribe: (listener) => {
       const subscription = eventModule.onSendEvent((nativeEvent) => {
@@ -43,6 +47,7 @@ export function createBrickServiceSessionHost({
           listener(event);
         }
       });
+      void eventModule.startServiceSessionEvents();
       return () => subscription.remove();
     },
   };

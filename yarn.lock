@@ -5401,8 +5401,10 @@ __metadata:
     "@granite-js/native": "workspace:*"
     "@granite-js/plugin-hermes": "workspace:*"
     "@granite-js/plugin-micro-frontend": "workspace:*"
+    "@granite-js/portal": "file:./vendor/granite-js-portal-1.1.12.tgz"
     "@granite-js/react-native": "workspace:*"
     "@granite-js/video": "workspace:*"
+    "@granite-js/vitest": "workspace:*"
     "@react-native-async-storage/async-storage": "catalog:react-native"
     "@react-native-community/blur": "catalog:react-native"
     "@react-native/babel-preset": "catalog:react-native"
@@ -5973,6 +5975,17 @@ __metadata:
     vitest: "npm:^4.0.12"
   languageName: unknown
   linkType: soft
+
+"@granite-js/portal@file:./vendor/granite-js-portal-1.1.12.tgz::locator=%40granite-app%2Fshared%40workspace%3Aservices%2Fshared":
+  version: 1.1.12
+  resolution: "@granite-js/portal@file:./vendor/granite-js-portal-1.1.12.tgz#./vendor/granite-js-portal-1.1.12.tgz::hash=618dd4&locator=%40granite-app%2Fshared%40workspace%3Aservices%2Fshared"
+  peerDependencies:
+    react: "*"
+    react-dom: "*"
+    react-native: "*"
+  checksum: 10c0/9a45510dc31f15d0f41377ddac96a2631d1c75e64b8750f0f904722873460d37e0d06dfaa28e590b31999ac48be6ef2eedde07aeb85555883ab76e7cff5ee834
+  languageName: node
+  linkType: hard
 
 "@granite-js/pulumi-aws@workspace:*, @granite-js/pulumi-aws@workspace:infra/pulumi-aws":
   version: 0.0.0-use.local

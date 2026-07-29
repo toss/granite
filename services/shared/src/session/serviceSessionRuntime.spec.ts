@@ -1,8 +1,13 @@
 import { createContainer, exposeModule } from '@granite-js/plugin-micro-frontend/runtime';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ServiceSessionEvent } from './serviceSession';
 import { getServiceSessionHost } from './serviceSessionHost';
 import { type AppContainerComponent, createServiceSessionRuntime } from './serviceSessionRuntime';
+
+vi.mock('react-native', () => ({
+  NativeEventEmitter: vi.fn(),
+  NativeModules: {},
+}));
 
 const CatalogApp: AppContainerComponent = () => null;
 

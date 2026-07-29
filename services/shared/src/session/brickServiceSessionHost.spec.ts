@@ -21,9 +21,14 @@ describe('createBrickServiceSessionHost', () => {
     const nativeListener: { current: ((event: unknown) => void) | null } = { current: null };
 
     Reflect.set(globalThis, '__mpackInternal', { loadRemote: fakeLoadRemote });
+    const closeServiceActivity = vi.fn(async () => undefined);
+    const startServiceSessionEvents = vi.fn(async () => undefined);
     brickModuleMock.get.mockImplementation((moduleName: string) => {
-      if (moduleName === 'HostEventModule') {
+      if (moduleName === 'ServiceSessionModule') {
         return {
+          importService,
+          closeServiceActivity,
+          startServiceSessionEvents,
           onSendEvent: (listener: (event: unknown) => void) => {
             nativeListener.current = listener;
             return {
@@ -34,15 +39,12 @@ describe('createBrickServiceSessionHost', () => {
           },
         };
       }
-      if (moduleName === 'ServiceBundleLoader') {
-        return { importService };
-      }
       throw new Error(`Unexpected module: ${moduleName}`);
     });
 
     const host = createBrickServiceSessionHost({
-      bundleLoaderModuleName: 'ServiceBundleLoader',
-      eventModuleName: 'HostEventModule',
+      bundleLoaderModuleName: 'ServiceSessionModule',
+      eventModuleName: 'ServiceSessionModule',
     });
     expect(host).not.toBeNull();
     if (host == null) {
@@ -51,7 +53,9 @@ describe('createBrickServiceSessionHost', () => {
 
     const received = vi.fn();
     const unsubscribe = host.subscribe(received);
-    await host.evaluate('service://catalog/products/42');
+    expect(startServiceSessionEvents).toHaveBeenCalledOnce();
+    await host.importService('service://catalog/products/42');
+    await host.closeServiceActivity('session-1');
     nativeListener.current?.({
       eventName: 'openService',
       body: {
@@ -62,6 +66,7 @@ describe('createBrickServiceSessionHost', () => {
     });
 
     expect(importService).toHaveBeenCalledWith('service://catalog/products/42');
+    expect(closeServiceActivity).toHaveBeenCalledWith('session-1');
     expect(fakeLoadRemote).not.toHaveBeenCalled();
     expect(received).toHaveBeenCalledWith({
       kind: 'open',
@@ -79,15 +84,16 @@ describe('createBrickServiceSessionHost', () => {
     const fakeLoadRemote = vi.fn(async () => {});
     Reflect.set(globalThis, '__mpackInternal', { loadRemote: fakeLoadRemote });
     brickModuleMock.get.mockReturnValue({
+      startServiceSessionEvents: async () => undefined,
       onSendEvent: () => ({ remove: () => {} }),
     });
 
     const host = createBrickServiceSessionHost({
       bundleLoaderModuleName: '',
-      eventModuleName: 'HostEventModule',
+      eventModuleName: 'ServiceSessionModule',
     });
 
-    await expect(host?.evaluate('service://catalog')).rejects.toThrow(
+    await expect(host?.importService('service://catalog')).rejects.toThrow(
       'The platform did not install a service bundle loader.'
     );
     expect(fakeLoadRemote).not.toHaveBeenCalled();
@@ -97,7 +103,7 @@ describe('createBrickServiceSessionHost', () => {
   it('returns null when the event Brick module name is missing', () => {
     expect(
       createBrickServiceSessionHost({
-        bundleLoaderModuleName: 'ServiceBundleLoader',
+        bundleLoaderModuleName: 'ServiceSessionModule',
         eventModuleName: '',
       })
     ).toBeNull();

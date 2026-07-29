@@ -1,4 +1,5 @@
 import type { InitialProps } from '@granite-js/react-native';
+import { PortalProvider } from '@granite-js/portal';
 import { useEffect, useReducer } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ServiceSessionRenderer } from './ServiceSessionRenderer';
@@ -18,16 +19,18 @@ export function ServiceSessionRouter({ initialProps, runtime }: ServiceSessionRo
   useEffect(() => runtime.subscribe(dispatch), [runtime]);
 
   return (
-    <View style={styles.container}>
-      {sessions.map((session) => (
-        <ServiceSessionRenderer
-          key={session.identifier}
-          initialProps={initialProps}
-          runtime={runtime}
-          session={session}
-        />
-      ))}
-    </View>
+    <PortalProvider>
+      <View style={styles.container}>
+        {sessions.map((session) => (
+          <ServiceSessionRenderer
+            key={session.identifier}
+            initialProps={initialProps}
+            runtime={runtime}
+            session={session}
+          />
+        ))}
+      </View>
+    </PortalProvider>
   );
 }
 

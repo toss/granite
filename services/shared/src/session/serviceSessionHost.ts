@@ -9,10 +9,12 @@ export interface ServiceSessionNativeSubscription {
 export interface ServiceSessionNativeModule {
   evaluateServiceBundle(bundleRequest: string): Promise<void>;
   onSessionEvent(listener: (event: unknown) => void): ServiceSessionNativeSubscription;
+  closeServiceActivity?(identifier: string): Promise<void>;
 }
 
 export interface ServiceSessionHost {
-  evaluate(bundleRequest: string): Promise<void>;
+  importService(bundleRequest: string): Promise<void>;
+  closeServiceActivity(identifier: string): Promise<void>;
   subscribe(listener: (event: ServiceSessionEvent) => void): () => void;
 }
 
@@ -29,20 +31,20 @@ function isServiceSessionNativeModule(value: unknown): value is ServiceSessionNa
 
 export function getServiceSessionHost(): ServiceSessionHost | null {
   const nativeModule: unknown = Reflect.get(globalThis, NATIVE_MODULE_GLOBAL_KEY);
-  if (!isServiceSessionNativeModule(nativeModule)) {
-    return null;
+  if (isServiceSessionNativeModule(nativeModule)) {
+    return {
+      importService: (bundleRequest) => nativeModule.evaluateServiceBundle(bundleRequest),
+      closeServiceActivity: (identifier) => nativeModule.closeServiceActivity?.(identifier) ?? Promise.resolve(),
+      subscribe: (listener) => {
+        const subscription = nativeModule.onSessionEvent((nativeEvent) => {
+          const event = parseServiceSessionEvent(nativeEvent);
+          if (event != null) {
+            listener(event);
+          }
+        });
+        return () => subscription.remove();
+      },
+    };
   }
-
-  return {
-    evaluate: (bundleRequest) => nativeModule.evaluateServiceBundle(bundleRequest),
-    subscribe: (listener) => {
-      const subscription = nativeModule.onSessionEvent((nativeEvent) => {
-        const event = parseServiceSessionEvent(nativeEvent);
-        if (event != null) {
-          listener(event);
-        }
-      });
-      return () => subscription.remove();
-    },
-  };
+  return null;
 }

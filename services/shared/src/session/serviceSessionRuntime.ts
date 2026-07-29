@@ -5,10 +5,13 @@ import { getServiceKey } from './serviceRequest';
 import type { ServiceSessionEvent } from './serviceSession';
 import type { ServiceSessionHost } from './serviceSessionHost';
 
+const SERVICE_SESSION_CONTEXT_GLOBAL_KEY = '__GRANITE_SERVICE_SESSION_CONTEXT__';
+
 export type AppContainerComponent = ComponentType<InitialProps>;
 
 export interface ServiceSessionRuntime {
   load(bundleRequest: string): Promise<AppContainerComponent>;
+  closeServiceActivity(identifier: string): Promise<void>;
   subscribe(listener: (event: ServiceSessionEvent) => void): () => void;
 }
 
@@ -18,17 +21,18 @@ function isAppContainerModule(value: unknown): value is { readonly default: AppC
 
 export function createServiceSessionRuntime(host: ServiceSessionHost): ServiceSessionRuntime {
   const loader = createServiceBundleLoader<AppContainerComponent>({
-    evaluate: (bundleRequest) => host.evaluate(bundleRequest),
+    evaluate: (bundleRequest) => host.importService(bundleRequest),
     exposeName: 'AppContainer',
     getServiceKey,
     globalGuard: createServiceGlobalGuard({
-      protectedKeys: ['__GRANITE_SERVICE_SESSION_NATIVE__'],
+      protectedKeys: ['__GRANITE_SERVICE_SESSION_NATIVE__', SERVICE_SESSION_CONTEXT_GLOBAL_KEY],
     }),
     parseExposedModule: (module) => (isAppContainerModule(module) ? module.default : null),
   });
 
   return {
     load: (bundleRequest) => loader.load(bundleRequest),
+    closeServiceActivity: (identifier) => host.closeServiceActivity(identifier),
     subscribe: (listener) => host.subscribe(listener),
   };
 }

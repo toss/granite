@@ -17,13 +17,13 @@ export function MainPage(props: SharedInitialProps) {
 
   return (
     <ErrorBoundary renderFallback={(error) => <ErrorPage reason={error.message} />}>
-      <SafeAreaProvider>
-        {track === 'serviceSession' ? (
-          <MonoHermesMainPageTrack initialProps={props} />
-        ) : (
+      {track === 'serviceSession' ? (
+        <MonoHermesMainPageTrack initialProps={props} />
+      ) : (
+        <SafeAreaProvider>
           <LegacyMainPageTrack {...props} />
-        )}
-      </SafeAreaProvider>
+        </SafeAreaProvider>
+      )}
     </ErrorBoundary>
   );
 }

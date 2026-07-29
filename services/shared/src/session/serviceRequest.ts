@@ -6,7 +6,7 @@ export function getServiceKey(bundleRequest: string): string | null {
 
   try {
     const url = new URL(normalizedRequest);
-    const serviceKey = url.hostname;
+    const serviceKey = url.host;
     return serviceKey == null || serviceKey.length === 0 ? null : serviceKey;
   } catch {
     const serviceKey = normalizedRequest.split(/[/?#]/, 1)[0];
