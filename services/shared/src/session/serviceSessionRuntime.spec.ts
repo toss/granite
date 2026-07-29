@@ -1,4 +1,8 @@
-import { createContainer, exposeModule } from '@granite-js/plugin-micro-frontend/runtime';
+import {
+  createContainer,
+  createDevelopmentServiceBundleRequestResolver,
+  exposeModule,
+} from '@granite-js/plugin-micro-frontend/runtime';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ServiceSessionEvent } from './serviceSession';
 import { getServiceSessionHost } from './serviceSessionHost';
@@ -73,5 +77,41 @@ describe('serviceSessionRuntime', () => {
     ]);
     expect(component).toBe(CatalogApp);
     expect(nativeListener).toBeNull();
+  });
+
+  it('maps service names to stable sequential development bundle ports', async () => {
+    // Given
+    const importService = vi.fn(async (bundleRequest: string) => {
+      const container = createContainer(`${bundleRequest}-container`, {});
+      exposeModule(container, 'AppContainer', { default: CatalogApp });
+    });
+    const runtime = createServiceSessionRuntime(
+      {
+        importService,
+        closeServiceActivity: async () => undefined,
+        subscribe: () => () => undefined,
+      },
+      {
+        resolveBundleRequest: createDevelopmentServiceBundleRequestResolver({
+          platform: 'android',
+        }),
+      }
+    );
+
+    // When
+    await runtime.load('service://car');
+    await runtime.load('service://shopping');
+    await runtime.load('service://car/reentry');
+
+    // Then
+    expect(importService).toHaveBeenNthCalledWith(
+      1,
+      'http://localhost:8082/index.bundle?platform=android&dev=true&minify=false'
+    );
+    expect(importService).toHaveBeenNthCalledWith(
+      2,
+      'http://localhost:8083/index.bundle?platform=android&dev=true&minify=false'
+    );
+    expect(importService).toHaveBeenCalledTimes(2);
   });
 });

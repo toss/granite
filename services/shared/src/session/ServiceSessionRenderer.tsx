@@ -2,7 +2,11 @@ import { ServiceSessionProvider, type InitialProps } from '@granite-js/react-nat
 import { Portal } from '@granite-js/portal';
 import { Component, type PropsWithChildren, useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { SERVICE_SESSION_NATIVE_ID_PREFIX, type ServiceSession } from './serviceSession';
+import {
+  createServiceSessionInitialProps,
+  SERVICE_SESSION_NATIVE_ID_PREFIX,
+  type ServiceSession,
+} from './serviceSession';
 import type { AppContainerComponent, ServiceSessionRuntime } from './serviceSessionRuntime';
 import { ErrorPage } from '../components/ErrorPage';
 
@@ -78,10 +82,11 @@ export function ServiceSessionRenderer({ initialProps, runtime, session }: Servi
         return <ErrorPage reason={loadState.reason} />;
       case 'ready': {
         const { AppContainer } = loadState;
+        const serviceInitialProps = createServiceSessionInitialProps(initialProps, session.url);
         return (
           <ServiceSessionProvider identifier={session.identifier} isVisible={session.isVisible} close={close}>
             <ServiceRenderBoundary>
-              <AppContainer {...initialProps} />
+              <AppContainer {...serviceInitialProps} />
             </ServiceRenderBoundary>
           </ServiceSessionProvider>
         );

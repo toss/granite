@@ -1,5 +1,7 @@
+import { createDevelopmentServiceBundleRequestResolver } from '@granite-js/plugin-micro-frontend/runtime';
 import type { InitialProps } from '@granite-js/react-native';
 import { useMemo } from 'react';
+import { Platform } from 'react-native';
 import { ErrorPage } from '../../components/ErrorPage';
 import { ServiceSessionRouter } from '../../session/ServiceSessionRouter';
 import { createBrickServiceSessionHost } from '../../session/brickServiceSessionHost';
@@ -23,7 +25,25 @@ export function MonoHermesMainPageTrack({ initialProps }: { readonly initialProp
       }),
     [bundleLoaderModuleName, eventModuleName]
   );
-  const runtime = useMemo(() => (host == null ? null : createServiceSessionRuntime(host)), [host]);
+  const resolveBundleRequest = useMemo(
+    () =>
+      __DEV__
+        ? createDevelopmentServiceBundleRequestResolver({
+            platform: Platform.OS,
+          })
+        : undefined,
+    []
+  );
+  const runtime = useMemo(
+    () =>
+      host == null
+        ? null
+        : createServiceSessionRuntime(
+            host,
+            resolveBundleRequest == null ? {} : { resolveBundleRequest }
+          ),
+    [host, resolveBundleRequest]
+  );
 
   if (runtime == null) {
     return <ErrorPage reason="The platform did not install a service-session bundle loader." />;

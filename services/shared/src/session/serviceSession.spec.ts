@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { parseServiceSessionEvent, reduceServiceSessions } from './serviceSession';
+import {
+  createServiceSessionInitialProps,
+  parseServiceSessionEvent,
+  reduceServiceSessions,
+} from './serviceSession';
 
 describe('serviceSession', () => {
   it('parses a native openService event into a session event', () => {
@@ -57,5 +61,27 @@ describe('serviceSession', () => {
     ]);
     expect(visible[0]?.isVisible).toBe(true);
     expect(closed).toEqual([]);
+  });
+
+  it('uses the complete service URL as the mounted app initial scheme', () => {
+    // Given
+    const initialProps = {
+      platform: 'android',
+      initialColorPreference: 'light',
+      scheme: 'granite://shared',
+    } as const;
+
+    // When
+    const serviceInitialProps = createServiceSessionInitialProps(
+      initialProps,
+      'granite://catalog/search'
+    );
+
+    // Then
+    expect(serviceInitialProps).toEqual({
+      platform: 'android',
+      initialColorPreference: 'light',
+      scheme: 'granite://catalog/search',
+    });
   });
 });

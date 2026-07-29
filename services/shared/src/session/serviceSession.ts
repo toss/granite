@@ -1,3 +1,4 @@
+import type { InitialProps } from '@granite-js/react-native';
 import { z } from 'zod';
 
 export const SERVICE_SESSION_NATIVE_ID_PREFIX = 'micro-frontend-session:';
@@ -22,6 +23,16 @@ export type ServiceSessionEvent =
       readonly identifier: string;
       readonly isVisible: boolean;
     };
+
+export function createServiceSessionInitialProps(
+  initialProps: InitialProps,
+  serviceUrl: string
+): InitialProps {
+  return {
+    ...initialProps,
+    scheme: serviceUrl,
+  };
+}
 
 const nativeServiceSessionEventSchema = z.discriminatedUnion('eventName', [
   z.object({
