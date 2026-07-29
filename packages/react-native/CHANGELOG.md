@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 1.0.38
+
+### Patch Changes
+
+- 757fa25: Deprecate `useBackEvent` in favor of `useBackHandler`. Handlers registered through `useBackHandler` receive a `BackEvent` object and can conditionally consume the back action by returning `true`. `useBackEvent` still works, but will be removed in a future release.
+  - @granite-js/blur-view@1.0.38
+  - @granite-js/brownfield-module@1.0.38
+  - @granite-js/cli@1.0.38
+  - @granite-js/jest@1.0.38
+  - @granite-js/mpack@1.0.38
+  - @granite-js/native@1.0.38
+  - @granite-js/plugin-core@1.0.38
+  - @granite-js/style-utils@1.0.38
+  - @granite-js/video@1.0.38
+
 ## 1.0.37
 
 ### Patch Changes
