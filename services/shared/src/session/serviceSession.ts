@@ -5,7 +5,7 @@ export const SERVICE_SESSION_NATIVE_ID_PREFIX = 'micro-frontend-session:';
 
 export type ServiceSession = {
   readonly identifier: string;
-  readonly bundleRequest: string;
+  readonly serviceName: string;
   readonly url: string;
   readonly isVisible: boolean;
 };
@@ -14,7 +14,7 @@ export type ServiceSessionEvent =
   | {
       readonly kind: 'open';
       readonly identifier: string;
-      readonly bundleRequest: string;
+      readonly serviceName: string;
       readonly url: string;
     }
   | { readonly kind: 'close'; readonly identifier: string }
@@ -39,7 +39,7 @@ const nativeServiceSessionEventSchema = z.discriminatedUnion('eventName', [
     eventName: z.literal('openService'),
     body: z.object({
       identifier: z.string().min(1),
-      bundleRequest: z.string().min(1),
+      serviceName: z.string().min(1),
       url: z.string().min(1),
     }),
   }),
@@ -64,7 +64,7 @@ export function parseServiceSessionEvent(value: unknown): ServiceSessionEvent | 
       return {
         kind: 'open',
         identifier: result.data.body.identifier,
-        bundleRequest: result.data.body.bundleRequest,
+        serviceName: result.data.body.serviceName,
         url: result.data.body.url,
       };
     case 'closeService':
@@ -94,7 +94,7 @@ export function reduceServiceSessions(
             ...sessions,
             {
               identifier: event.identifier,
-              bundleRequest: event.bundleRequest,
+              serviceName: event.serviceName,
               url: event.url,
               isVisible: false,
             },

@@ -54,7 +54,7 @@ export function ServiceSessionRenderer({ initialProps, runtime, session }: Servi
 
     async function loadService() {
       try {
-        const AppContainer = await runtime.load(session.bundleRequest);
+        const AppContainer = await runtime.load(session.serviceName);
         if (active) {
           setLoadState({ kind: 'ready', AppContainer });
         }
@@ -72,7 +72,7 @@ export function ServiceSessionRenderer({ initialProps, runtime, session }: Servi
     return () => {
       active = false;
     };
-  }, [runtime, session.bundleRequest]);
+  }, [runtime, session.serviceName]);
 
   const content = (() => {
     switch (loadState.kind) {

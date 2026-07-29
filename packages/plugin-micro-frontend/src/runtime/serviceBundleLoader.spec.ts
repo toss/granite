@@ -11,8 +11,9 @@ function parseServiceModule(value: unknown): Service | null {
   return isServiceModule(value) ? value.default : null;
 }
 
-function serviceKeyOf(request: string): string | null {
-  return /^service:\/\/([^/?#]+)/.exec(request)?.[1]?.toLowerCase() ?? null;
+function serviceKeyOf(serviceName: string): string | null {
+  const serviceKey = serviceName.trim().toLowerCase();
+  return serviceKey.length === 0 ? null : serviceKey;
 }
 
 function createDeferred(): { readonly promise: Promise<void>; readonly resolve: () => void } {
@@ -48,7 +49,7 @@ describe('createServiceBundleLoader', () => {
 
     // When
     expect(isMonoHermes()).toBe(false);
-    await loader.load('service://alpha');
+    await loader.load('alpha');
 
     // Then
     expect(isMonoHermes()).toBe(false);
@@ -81,8 +82,8 @@ describe('createServiceBundleLoader', () => {
     });
 
     // When
-    const alpha = loader.load('service://alpha');
-    const beta = loader.load('service://beta');
+    const alpha = loader.load('alpha');
+    const beta = loader.load('beta');
     await alphaEvaluationStarted.promise;
 
     // Then
@@ -112,8 +113,8 @@ describe('createServiceBundleLoader', () => {
     });
 
     // When
-    const car = await loader.load('service://car');
-    const shopping = await loader.load('service://shopping');
+    const car = await loader.load('car');
+    const shopping = await loader.load('shopping');
 
     // Then
     expect(car()).toBe('car');
@@ -138,8 +139,8 @@ describe('createServiceBundleLoader', () => {
 
     // When
     const [first, second] = await Promise.all([
-      loader.load('service://alpha'),
-      loader.load('service://ALPHA?variant=one'),
+      loader.load('alpha'),
+      loader.load(' ALPHA '),
     ]);
 
     // Then
@@ -166,9 +167,9 @@ describe('createServiceBundleLoader', () => {
     });
 
     // When
-    const firstCar = await loader.load('service://car');
-    const secondCar = await loader.load('service://CAR?reentry=true');
-    const shopping = await loader.load('service://shopping');
+    const firstCar = await loader.load('car');
+    const secondCar = await loader.load('CAR');
+    const shopping = await loader.load('shopping');
 
     // Then
     expect(firstCar()).toBe('http://localhost:8082/index.bundle?platform=android');
@@ -176,11 +177,11 @@ describe('createServiceBundleLoader', () => {
     expect(shopping()).toBe('http://localhost:8083/index.bundle?platform=android');
     expect(evaluate).toHaveBeenCalledTimes(2);
     expect(resolveRequest).toHaveBeenNthCalledWith(1, {
-      request: 'service://car',
+      request: 'car',
       serviceKey: 'car',
     });
     expect(resolveRequest).toHaveBeenNthCalledWith(2, {
-      request: 'service://shopping',
+      request: 'shopping',
       serviceKey: 'shopping',
     });
   });
@@ -203,8 +204,8 @@ describe('createServiceBundleLoader', () => {
     });
 
     // When
-    await expect(loader.load('service://retry')).rejects.toThrow('temporary failure');
-    const retried = await loader.load('service://retry');
+    await expect(loader.load('retry')).rejects.toThrow('temporary failure');
+    const retried = await loader.load('retry');
 
     // Then
     expect(retried).toBe(retryService);
@@ -225,7 +226,7 @@ describe('createServiceBundleLoader', () => {
     });
 
     // When
-    const service = await loader.load('service://legacy');
+    const service = await loader.load('legacy');
 
     // Then
     expect(service).toBe(legacyService);
@@ -246,7 +247,7 @@ describe('createServiceBundleLoader', () => {
     });
 
     // When
-    const service = await loader.load('service://legacy');
+    const service = await loader.load('legacy');
 
     // Then
     expect(service).toBe(legacyService);
@@ -270,7 +271,7 @@ describe('createServiceBundleLoader', () => {
     });
 
     // When
-    const loading = loader.load('service://invalid');
+    const loading = loader.load('invalid');
 
     // Then
     await expect(loading).rejects.toThrow('service module parser failed');

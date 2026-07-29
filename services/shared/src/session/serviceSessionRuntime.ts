@@ -14,7 +14,7 @@ const SERVICE_SESSION_CONTEXT_GLOBAL_KEY = '__GRANITE_SERVICE_SESSION_CONTEXT__'
 export type AppContainerComponent = ComponentType<InitialProps>;
 
 export interface ServiceSessionRuntime {
-  load(bundleRequest: string): Promise<AppContainerComponent>;
+  load(serviceName: string): Promise<AppContainerComponent>;
   closeServiceActivity(identifier: string): Promise<void>;
   subscribe(listener: (event: ServiceSessionEvent) => void): () => void;
 }
@@ -43,7 +43,7 @@ export function createServiceSessionRuntime(
   });
 
   return {
-    load: (bundleRequest) => loader.load(bundleRequest),
+    load: (serviceName) => loader.load(serviceName),
     closeServiceActivity: (identifier) => host.closeServiceActivity(identifier),
     subscribe: (listener) => host.subscribe(listener),
   };

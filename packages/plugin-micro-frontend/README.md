@@ -110,12 +110,12 @@ const globalGuard = createServiceGlobalGuard({
 const serviceLoader = createServiceBundleLoader<AppContainer>({
   evaluate: (request) => serviceBundleEvaluator.evaluate(request),
   exposeName: 'AppContainer',
-  getServiceKey: (request) => /^service:\/\/([^/?#]+)/.exec(request)?.[1]?.toLowerCase() ?? null,
+  getServiceKey: (serviceName) => serviceName.trim().toLowerCase() || null,
   globalGuard,
   parseExposedModule: (module) => (isAppContainerModule(module) ? module.default : null),
 });
 
-const service = await serviceLoader.load('service://catalog');
+const service = await serviceLoader.load('catalog');
 ```
 
 Granite initializes the runtime mode from the host's initial props. `isMonoHermes()` returns `true` only when

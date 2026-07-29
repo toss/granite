@@ -54,25 +54,25 @@ describe('createBrickServiceSessionHost', () => {
     const received = vi.fn();
     const unsubscribe = host.subscribe(received);
     expect(startServiceSessionEvents).toHaveBeenCalledOnce();
-    await host.importService('service://catalog/products/42');
+    await host.importService('http://localhost:8082/index.bundle?platform=android');
     await host.closeServiceActivity('session-1');
     nativeListener.current?.({
       eventName: 'openService',
       body: {
         identifier: 'session-1',
-        bundleRequest: 'service://catalog/products/42',
-        url: 'service://catalog/products/42',
+        serviceName: 'catalog',
+        url: 'granite://catalog/products/42',
       },
     });
 
-    expect(importService).toHaveBeenCalledWith('service://catalog/products/42');
+    expect(importService).toHaveBeenCalledWith('http://localhost:8082/index.bundle?platform=android');
     expect(closeServiceActivity).toHaveBeenCalledWith('session-1');
     expect(fakeLoadRemote).not.toHaveBeenCalled();
     expect(received).toHaveBeenCalledWith({
       kind: 'open',
       identifier: 'session-1',
-      bundleRequest: 'service://catalog/products/42',
-      url: 'service://catalog/products/42',
+      serviceName: 'catalog',
+      url: 'granite://catalog/products/42',
     });
 
     unsubscribe();
@@ -93,7 +93,7 @@ describe('createBrickServiceSessionHost', () => {
       eventModuleName: 'ServiceSessionModule',
     });
 
-    await expect(host?.importService('service://catalog')).rejects.toThrow(
+    await expect(host?.importService('http://localhost:8082/index.bundle')).rejects.toThrow(
       'The platform did not install a service bundle loader.'
     );
     expect(fakeLoadRemote).not.toHaveBeenCalled();

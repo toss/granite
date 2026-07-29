@@ -60,8 +60,8 @@ describe('serviceSessionRuntime', () => {
       eventName: 'openService',
       body: {
         identifier: 'session-1',
-        bundleRequest: 'catalog',
-        url: 'service://catalog/products/42',
+        serviceName: 'catalog',
+        url: 'granite://catalog/products/42',
       },
     });
     const component = await runtime.load('catalog');
@@ -71,8 +71,8 @@ describe('serviceSessionRuntime', () => {
       {
         kind: 'open',
         identifier: 'session-1',
-        bundleRequest: 'catalog',
-        url: 'service://catalog/products/42',
+        serviceName: 'catalog',
+        url: 'granite://catalog/products/42',
       },
     ]);
     expect(component).toBe(CatalogApp);
@@ -99,9 +99,9 @@ describe('serviceSessionRuntime', () => {
     );
 
     // When
-    await runtime.load('service://car');
-    await runtime.load('service://shopping');
-    await runtime.load('service://car/reentry');
+    await runtime.load('car');
+    await runtime.load('shopping');
+    await runtime.load('car');
 
     // Then
     expect(importService).toHaveBeenNthCalledWith(

@@ -3,14 +3,12 @@ import { getServiceKey } from './serviceRequest';
 
 describe('getServiceKey', () => {
   it.each([
-    ['service://catalog', 'catalog'],
-    ['service://gateway/catalog', 'gateway'],
-    ['granite://bare', 'bare'],
-    ['http://localhost:8082/index.bundle?platform=android', 'localhost:8082'],
-    ['http://localhost:8083/index.bundle?platform=android', 'localhost:8083'],
-  ])('derives the service key from %s', (bundleRequest, expected) => {
+    ['catalog', 'catalog'],
+    ['SHOPPING', 'shopping'],
+    [' bare ', 'bare'],
+  ])('normalizes the service key from %s', (serviceName, expected) => {
     // Given / When
-    const serviceKey = getServiceKey(bundleRequest);
+    const serviceKey = getServiceKey(serviceName);
 
     // Then
     expect(serviceKey).toBe(expected);

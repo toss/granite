@@ -10,19 +10,19 @@ describe('createDevelopmentServiceBundleRequestResolver', () => {
 
     // When
     const firstCar = resolveRequest({
-      request: 'service://car',
+      request: 'car',
       serviceKey: 'car',
     });
     const shopping = resolveRequest({
-      request: 'service://shopping',
+      request: 'shopping',
       serviceKey: 'shopping',
     });
     const secondCar = resolveRequest({
-      request: 'service://car/reentry',
+      request: 'car',
       serviceKey: 'car',
     });
     const insurance = resolveRequest({
-      request: 'service://insurance',
+      request: 'insurance',
       serviceKey: 'insurance',
     });
 
@@ -43,7 +43,7 @@ describe('createDevelopmentServiceBundleRequestResolver', () => {
 
     // When
     const request = resolveRequest({
-      request: 'service://catalog',
+      request: 'catalog',
       serviceKey: 'catalog',
     });
 

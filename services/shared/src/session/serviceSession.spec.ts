@@ -11,16 +11,16 @@ describe('serviceSession', () => {
       eventName: 'openService',
       body: {
         identifier: 'session-1',
-        bundleRequest: 'service://catalog',
-        url: 'service://catalog/products/42',
+        serviceName: 'catalog',
+        url: 'granite://catalog/products/42',
       },
     });
 
     expect(event).toEqual({
       kind: 'open',
       identifier: 'session-1',
-      bundleRequest: 'service://catalog',
-      url: 'service://catalog/products/42',
+      serviceName: 'catalog',
+      url: 'granite://catalog/products/42',
     });
   });
 
@@ -38,8 +38,8 @@ describe('serviceSession', () => {
     const opened = reduceServiceSessions([], {
       kind: 'open',
       identifier: 'session-1',
-      bundleRequest: 'service://catalog',
-      url: 'service://catalog/products/42',
+      serviceName: 'catalog',
+      url: 'granite://catalog/products/42',
     });
     const visible = reduceServiceSessions(opened, {
       kind: 'visibilityChanged',
@@ -54,8 +54,8 @@ describe('serviceSession', () => {
     expect(opened).toEqual([
       {
         identifier: 'session-1',
-        bundleRequest: 'service://catalog',
-        url: 'service://catalog/products/42',
+        serviceName: 'catalog',
+        url: 'granite://catalog/products/42',
         isVisible: false,
       },
     ]);
