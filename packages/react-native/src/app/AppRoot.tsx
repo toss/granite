@@ -1,10 +1,9 @@
-import { SafeAreaProvider, initialWindowMetrics } from '@granite-js/native/react-native-safe-area-context';
 import type { ComponentType, PropsWithChildren } from 'react';
-import { Dimensions } from 'react-native';
 import type { InitialProps } from '../initial-props';
 import { Router, type InternalRouterProps } from '../router';
 import { BackEventProvider } from '../use-back-event';
 import { App } from './App';
+import { AppSafeAreaProvider } from './AppSafeAreaProvider';
 import type { GraniteProps } from './Granite';
 import { useServiceSession } from './ServiceSessionContext';
 import { getSchemePrefix } from '../utils/getSchemePrefix';
@@ -42,19 +41,11 @@ export function AppRoot({
     scheme: appEnvironment.scheme,
     host: appEnvironment.host,
   });
-  const window = Dimensions.get('window');
-  const serviceInitialMetrics =
-    serviceSession == null
-      ? undefined
-      : (initialWindowMetrics ?? {
-          frame: { x: 0, y: 0, width: window.width, height: window.height },
-          insets: { top: 0, right: 0, bottom: 0, left: 0 },
-        });
 
   return (
     <InitialPropsProvider initialProps={initialProps}>
       <App {...initialProps}>
-        <SafeAreaProvider initialMetrics={serviceInitialMetrics}>
+        <AppSafeAreaProvider isolateFromParent={serviceSession != null}>
           <BackEventProvider>
             <Router
               context={context}
@@ -68,7 +59,7 @@ export function AppRoot({
               {...router}
             />
           </BackEventProvider>
-        </SafeAreaProvider>
+        </AppSafeAreaProvider>
       </App>
     </InitialPropsProvider>
   );
