@@ -55,15 +55,10 @@ object CppAutolinkingGenerator {
       // Fabric component descriptor headers
       if (fabricLibraries.isNotEmpty()) {
         appendLine("// Fabric component descriptor headers")
-        fabricLibraries.forEach { (libraryName, componentDescriptors) ->
+        fabricLibraries.forEach { (libraryName, _) ->
           appendLine("#if defined(__has_include) && __has_include(<react/renderer/components/$libraryName/ComponentDescriptors.h>)")
           appendLine("#include <react/renderer/components/$libraryName/ComponentDescriptors.h>")
           appendLine("#endif")
-          componentDescriptors.forEach { descriptor ->
-            appendLine("#if defined(__has_include) && __has_include(<react/renderer/components/$libraryName/$descriptor.h>)")
-            appendLine("#include <react/renderer/components/$libraryName/$descriptor.h>")
-            appendLine("#endif")
-          }
         }
         appendLine()
       }
@@ -78,13 +73,10 @@ object CppAutolinkingGenerator {
         appendLine("  // Register Fabric component descriptors from autolinked libraries")
         fabricLibraries.forEach { (libraryName, componentDescriptors) ->
           appendLine("#if defined(__has_include) && __has_include(<react/renderer/components/$libraryName/ComponentDescriptors.h>)")
-          appendLine("  ${libraryName}_registerComponentDescriptorsFromCodegen(registry);")
-          appendLine("#endif")
           componentDescriptors.forEach { descriptor ->
-            appendLine("#if defined(__has_include) && __has_include(<react/renderer/components/$libraryName/$descriptor.h>)")
             appendLine("  registry->add(concreteComponentDescriptorProvider<$descriptor>());")
-            appendLine("#endif")
           }
+          appendLine("#endif")
         }
       } else {
         appendLine("  // No autolinked Fabric components found")

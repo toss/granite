@@ -109,7 +109,7 @@ class CppAutolinkingGeneratorTest {
   }
 
   @Test
-  fun `generate with Fabric module includes component descriptor header and registration`() {
+  fun `generate with Fabric module registers descriptors exposed by aggregate header`() {
     val modules = listOf(
       NativeModule(
         name = "fabric-module",
@@ -132,10 +132,9 @@ class CppAutolinkingGeneratorTest {
     // Should include Fabric headers
     assertThat(generated).contains("// Fabric component descriptor headers")
     assertThat(generated).contains("<react/renderer/components/FabricModule/ComponentDescriptors.h>")
-    assertThat(generated).contains("<react/renderer/components/FabricModule/MyComponentDescriptor.h>")
+    assertThat(generated).doesNotContain("<react/renderer/components/FabricModule/MyComponentDescriptor.h>")
 
-    // Should register codegen components + custom component descriptors
-    assertThat(generated).contains("FabricModule_registerComponentDescriptorsFromCodegen(registry);")
+    assertThat(generated).doesNotContain("FabricModule_registerComponentDescriptorsFromCodegen(registry);")
     assertThat(generated).contains("registry->add(concreteComponentDescriptorProvider<MyComponentDescriptor>());")
     assertThat(generated).contains("registry->add(concreteComponentDescriptorProvider<AnotherComponentDescriptor>());")
   }
@@ -167,8 +166,8 @@ class CppAutolinkingGeneratorTest {
     // Should have Java provider calls
     assertThat(generated).contains("auto module_java_module = JavaLib_ModuleProvider(moduleName, params);")
     assertThat(generated).contains("auto module_mixed_module = MixedLib_ModuleProvider(moduleName, params);")
-    assertThat(generated).contains("FabricLib_registerComponentDescriptorsFromCodegen(registry);")
-    assertThat(generated).contains("MixedLib_registerComponentDescriptorsFromCodegen(registry);")
+    assertThat(generated).doesNotContain("FabricLib_registerComponentDescriptorsFromCodegen(registry);")
+    assertThat(generated).doesNotContain("MixedLib_registerComponentDescriptorsFromCodegen(registry);")
   }
 
   @Test
