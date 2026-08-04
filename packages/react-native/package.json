@@ -110,8 +110,7 @@
     "react-native": "catalog:react-native",
     "tsup": "^8.5.0",
     "typescript": "catalog:tools",
-    "vitest": "^4.0.12",
-    "zod": "^4.1.12"
+    "vitest": "^4.0.12"
   },
   "peerDependencies": {
     "@granite-js/native": "workspace:*",
@@ -132,7 +131,8 @@
     "@granite-js/video": "workspace:*",
     "@standard-schema/spec": "^1.0.0",
     "es-toolkit": "^1.39.8",
-    "react-native-url-polyfill": "3.0.0"
+    "react-native-url-polyfill": "3.0.0",
+    "zod": "^4.1.12"
   },
   "sideEffects": [
     "dist/async-bridges.*",
