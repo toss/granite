@@ -26,6 +26,8 @@ type BaseInitialProps = {
   initialColorPreference: ColorPreference;
   scheme?: string;
   readonly _monoHermes?: boolean;
+  readonly _serviceSessionBundleLoaderModuleName?: string;
+  readonly _serviceSessionEventModuleName?: string;
 };
 
 /**

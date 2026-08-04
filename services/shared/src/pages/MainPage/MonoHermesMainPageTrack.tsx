@@ -1,53 +1,69 @@
-import { createDevelopmentServiceBundleRequestResolver } from '@granite-js/plugin-micro-frontend/runtime';
-import type { InitialProps } from '@granite-js/react-native';
-import { useMemo } from 'react';
-import { Platform } from 'react-native';
-import { ErrorPage } from '../../components/ErrorPage';
-import { ServiceSessionRouter } from '../../session/ServiceSessionRouter';
-import { createBrickServiceSessionHost } from '../../session/brickServiceSessionHost';
-import { getServiceSessionHost } from '../../session/serviceSessionHost';
-import { createServiceSessionRuntime } from '../../session/serviceSessionRuntime';
+import { Portal, PortalProvider } from '@granite-js/portal';
+import { serviceSessions, type InitialProps } from '@granite-js/react-native';
+import { lazy, useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { ServiceSessionRenderer } from '../../session/ServiceSessionRenderer';
+import {
+  closeServiceSession,
+  createServiceSessionInitialProps,
+  openServiceSession,
+  SERVICE_SESSION_NATIVE_ID_PREFIX,
+  type ServiceSession,
+  updateServiceSessionVisibility,
+} from '../../session/serviceSession';
 
-type MonoHermesInitialProps = InitialProps & {
-  readonly _serviceSessionBundleLoaderModuleName?: string;
-  readonly _serviceSessionEventModuleName?: string;
-};
+const INITIAL_SESSIONS: readonly ServiceSession[] = [];
 
-export function MonoHermesMainPageTrack({ initialProps }: { readonly initialProps: MonoHermesInitialProps }) {
-  const bundleLoaderModuleName = initialProps._serviceSessionBundleLoaderModuleName ?? '';
-  const eventModuleName = initialProps._serviceSessionEventModuleName ?? '';
-  const host = useMemo(
-    () =>
-      getServiceSessionHost() ??
-      createBrickServiceSessionHost({
-        bundleLoaderModuleName,
-        eventModuleName,
-      }),
-    [bundleLoaderModuleName, eventModuleName]
+export function MonoHermesMainPageTrack({ initialProps }: { readonly initialProps: InitialProps }) {
+  const [sessions, setSessions] = useState(INITIAL_SESSIONS);
+
+  useEffect(() => {
+    const openSubscription = serviceSessions.addEventListener('openService', (event) => {
+      const ServiceComponent = lazy(() => serviceSessions.importService(event.serviceName));
+      setSessions((currentSessions) => openServiceSession(currentSessions, event, ServiceComponent));
+    });
+    const closeSubscription = serviceSessions.addEventListener('closeService', (event) => {
+      setSessions((currentSessions) => closeServiceSession(currentSessions, event));
+    });
+    const visibilitySubscription = serviceSessions.addEventListener('sessionVisibilityChanged', (event) => {
+      setSessions((currentSessions) => updateServiceSessionVisibility(currentSessions, event));
+    });
+
+    return () => {
+      openSubscription.remove();
+      closeSubscription.remove();
+      visibilitySubscription.remove();
+    };
+  }, []);
+
+  return (
+    <PortalProvider>
+      <View style={styles.container}>
+        {sessions.map((session) => {
+          const { ServiceComponent } = session;
+          const serviceInitialProps = createServiceSessionInitialProps(initialProps, session.url);
+
+          return (
+            <Portal key={session.identifier} hostName={session.identifier}>
+              <View
+                collapsable={false}
+                nativeID={`${SERVICE_SESSION_NATIVE_ID_PREFIX}${session.identifier}`}
+                style={StyleSheet.absoluteFill}
+              >
+                <ServiceSessionRenderer session={session}>
+                  <ServiceComponent {...serviceInitialProps} />
+                </ServiceSessionRenderer>
+              </View>
+            </Portal>
+          );
+        })}
+      </View>
+    </PortalProvider>
   );
-  const resolveBundleRequest = useMemo(
-    () =>
-      __DEV__
-        ? createDevelopmentServiceBundleRequestResolver({
-            platform: Platform.OS,
-          })
-        : undefined,
-    []
-  );
-  const runtime = useMemo(
-    () =>
-      host == null
-        ? null
-        : createServiceSessionRuntime(
-            host,
-            resolveBundleRequest == null ? {} : { resolveBundleRequest }
-          ),
-    [host, resolveBundleRequest]
-  );
-
-  if (runtime == null) {
-    return <ErrorPage reason="The platform did not install a service-session bundle loader." />;
-  }
-
-  return <ServiceSessionRouter initialProps={initialProps} runtime={runtime} />;
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

@@ -42,4 +42,14 @@ export * from '@granite-js/blur-view';
 export { BackButton, useRouterBackHandler } from './router';
 
 export type { InitialProps, ColorPreference } from './initial-props';
+export {
+  serviceSessions,
+  type ServiceComponent,
+  type ServiceModule,
+  type ServiceSessionEventListener,
+  type ServiceSessionEventMap,
+  type ServiceSessionEventName,
+  type ServiceSessionEventSubscription,
+  type ServiceSessions,
+} from './service-sessions/serviceSessions';
 export type { GraniteProps } from './app';

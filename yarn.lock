@@ -5426,7 +5426,6 @@ __metadata:
     react-native-webview: "catalog:react-native"
     typescript: "catalog:tools"
     vitest: "npm:^4.0.12"
-    zod: "npm:^4.1.12"
   languageName: unknown
   linkType: soft
 

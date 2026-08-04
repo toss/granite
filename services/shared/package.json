@@ -32,8 +32,7 @@
     "react-native-safe-area-context": "catalog:react-native",
     "react-native-screens": "catalog:react-native",
     "react-native-svg": "catalog:react-native",
-    "react-native-webview": "catalog:react-native",
-    "zod": "^4.1.12"
+    "react-native-webview": "catalog:react-native"
   },
   "devDependencies": {
     "@babel/runtime": "7.18.9",

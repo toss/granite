@@ -8,8 +8,6 @@ import { resolveMainPageTrack } from './mainPageTrack';
 
 export type SharedInitialProps = InitialProps & {
   readonly _monoHermes?: boolean;
-  readonly _serviceSessionBundleLoaderModuleName?: string;
-  readonly _serviceSessionEventModuleName?: string;
 };
 
 export function MainPage(props: SharedInitialProps) {

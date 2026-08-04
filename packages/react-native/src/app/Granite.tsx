@@ -10,6 +10,7 @@ import { resolveInitialScheme } from './resolveInitialScheme';
 import { resolveAppEnvironment } from './resolveAppEnvironment';
 import { getSchemeUri } from '../constant-bridges';
 import { setupPolyfills } from '../polyfills';
+import { initializeServiceSessions } from '../service-sessions/serviceSessions';
 
 export interface GraniteProps {
   /**
@@ -91,9 +92,7 @@ const createApp = () => {
 
       function Root(initialProps: InitialProps) {
         initializeMonoHermes(initialProps);
-        const [initialSchemeValue] = useState(() =>
-          resolveInitialScheme(initialScheme, initialProps, getSchemeUri)
-        );
+        const [initialSchemeValue] = useState(() => resolveInitialScheme(initialScheme, initialProps, getSchemeUri));
 
         return (
           <AppRoot
@@ -127,6 +126,7 @@ const createApp = () => {
 
       function Root(initialProps: HostInitialProps) {
         initializeMonoHermes(initialProps);
+        initializeServiceSessions(initialProps);
         return <HostAppRoot container={AppContainer} initialProps={initialProps} />;
       }
 
