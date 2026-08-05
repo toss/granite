@@ -17,6 +17,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)setName:(nullable NSString *)name;
 
+/// Called on the main thread whenever teleported content subviews are added
+/// or removed. Removal notifies on the next run loop so observers read the
+/// post-removal count. Set by native host owners (PortalHostContainerView);
+/// stays nil for hosts mounted inside the React tree.
+@property (nonatomic, copy, nullable) void (^onSubviewCountChanged)(void);
+
 /// Returns the index at which a portal child should be inserted.
 ///
 /// Within a single Fabric commit all mutations run synchronously on the main

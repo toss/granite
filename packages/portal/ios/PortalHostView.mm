@@ -71,6 +71,30 @@ using namespace facebook::react;
   }
 }
 
+- (void)didAddSubview:(UIView *)subview
+{
+  [super didAddSubview:subview];
+  if (self.onSubviewCountChanged) {
+    self.onSubviewCountChanged();
+  }
+}
+
+- (void)willRemoveSubview:(UIView *)subview
+{
+  [super willRemoveSubview:subview];
+  if (!self.onSubviewCountChanged) {
+    return;
+  }
+  // Notify on the next run loop so observers read the post-removal count.
+  __weak PortalHostView *weakSelf = self;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    PortalHostView *strongSelf = weakSelf;
+    if (strongSelf && strongSelf.onSubviewCountChanged) {
+      strongSelf.onSubviewCountChanged();
+    }
+  });
+}
+
 - (void)updateProps:(Props::Shared const &)props oldProps:(Props::Shared const &)oldProps
 {
   const auto &newViewProps = *std::static_pointer_cast<PortalHostViewProps const>(props);
