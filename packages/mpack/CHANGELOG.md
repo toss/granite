@@ -1,5 +1,13 @@
 # @granite-js/mpack
 
+## 1.0.39
+
+### Patch Changes
+
+- c790dbf: bump @swc/core to 1.15.46
+  - @granite-js/plugin-core@1.0.39
+  - @granite-js/utils@1.0.39
+
 ## 1.0.38
 
 ### Patch Changes
