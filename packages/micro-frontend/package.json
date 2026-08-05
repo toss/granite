@@ -1,0 +1,81 @@
+{
+  "name": "@granite-js/micro-frontend",
+  "version": "1.0.37",
+  "description": "Micro-frontend runtime and build plugin for Granite applications",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "react-native": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "react-native": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.js",
+      "require": "./dist/plugin.cjs"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "react-native": "./src/runtime/index.ts",
+      "import": "./dist/runtime.js",
+      "require": "./dist/runtime.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "!src/**/*.spec.*",
+    "dist",
+    "android",
+    "ios",
+    "*.podspec",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "prepack": "yarn build",
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/micro-frontend"
+  },
+  "dependencies": {
+    "@granite-js/plugin-core": "workspace:*",
+    "@granite-js/utils": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:tools",
+    "@types/react": "catalog:react-native",
+    "@types/react-test-renderer": "^19",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
+    "react-test-renderer": "19.2.3",
+    "tsdown": "catalog:tools",
+    "typescript": "catalog:tools",
+    "vitest": "^4.0.12"
+  },
+  "codegenConfig": {
+    "name": "GraniteMicroFrontendRuntimeSpec",
+    "type": "modules",
+    "jsSrcsDir": "src/specs",
+    "android": {
+      "javaPackageName": "run.granite.microfrontend"
+    }
+  },
+  "sideEffects": false
+}

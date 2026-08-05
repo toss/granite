@@ -1,0 +1,64 @@
+buildscript {
+  ext.safeExtGet = { name, fallback ->
+    rootProject.ext.has(name) ? rootProject.ext.get(name) : fallback
+  }
+
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:8.7.2"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${safeExtGet('kotlinVersion', project.properties['GraniteMicroFrontendRuntime_kotlinVersion'])}"
+  }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.facebook.react'
+
+def getIntegerProperty(name) {
+  return safeExtGet(name, project.properties["GraniteMicroFrontendRuntime_${name}"]).toInteger()
+}
+
+android {
+  namespace 'run.granite.microfrontend'
+  compileSdkVersion getIntegerProperty('compileSdkVersion')
+
+  defaultConfig {
+    minSdkVersion getIntegerProperty('minSdkVersion')
+    targetSdkVersion getIntegerProperty('targetSdkVersion')
+
+    externalNativeBuild {
+      cmake {
+        arguments '-DANDROID_STL=c++_shared'
+      }
+    }
+  }
+
+  buildFeatures {
+    prefab true
+  }
+
+  externalNativeBuild {
+    cmake {
+      path 'CMakeLists.txt'
+    }
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+
+  kotlinOptions {
+    jvmTarget = '17'
+  }
+}
+
+dependencies {
+  implementation 'com.facebook.react:react-android'
+  implementation 'com.facebook.fbjni:fbjni:0.7.0'
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:${safeExtGet('kotlinVersion', project.properties['GraniteMicroFrontendRuntime_kotlinVersion'])}"
+}
