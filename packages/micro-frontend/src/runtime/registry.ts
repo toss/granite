@@ -35,11 +35,11 @@ export interface MicroFrontendRuntimeContext {
 }
 
 declare global {
-  var __GRANITE_MICRO_FRONTEND__: MicroFrontendRuntimeContext | undefined;
+  var _graniteMicroFrontend: MicroFrontendRuntimeContext | undefined;
 }
 
 export function getMicroFrontendRuntimeContext(): MicroFrontendRuntimeContext {
-  const existingContext = globalThis.__GRANITE_MICRO_FRONTEND__;
+  const existingContext = globalThis._graniteMicroFrontend;
   if (existingContext != null) {
     return existingContext;
   }
@@ -48,7 +48,7 @@ export function getMicroFrontendRuntimeContext(): MicroFrontendRuntimeContext {
     containers: {},
     sharedModules: {},
   };
-  globalThis.__GRANITE_MICRO_FRONTEND__ = context;
+  globalThis._graniteMicroFrontend = context;
   return context;
 }
 

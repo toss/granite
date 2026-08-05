@@ -31,7 +31,7 @@ export function getPreludeConfig(
 
   return {
     banner: [
-      'global.__GRANITE_MICRO_FRONTEND__ = global.__GRANITE_MICRO_FRONTEND__ || {',
+      'global._graniteMicroFrontend = global._graniteMicroFrontend || {',
       '  containers: {},',
       '  sharedModules: {},',
       '};',
