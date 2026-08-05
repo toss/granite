@@ -42,9 +42,10 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
   [GraniteMicroFrontendRuntimeHost detachEventSink:self];
 }
 
-- (void)evaluateScript:(NSString *)filePath
+- (void)evaluateScript:(JS::NativeGraniteMicroFrontendRuntime::EvaluateScriptRequest &)request
                resolve:(RCTPromiseResolveBlock)resolve
                 reject:(RCTPromiseRejectBlock)reject {
+  NSString *filePath = request.filePath();
   if (![filePath isAbsolutePath]) {
     reject(@"INVALID_BUNDLE_PATH", @"Bundle path must be absolute", nil);
     return;
@@ -98,9 +99,10 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
   });
 }
 
-- (void)requestCloseSession:(NSString *)sessionId
+- (void)requestCloseSession:(JS::NativeGraniteMicroFrontendRuntime::CloseSessionRequest &)request
                     resolve:(RCTPromiseResolveBlock)resolve
                      reject:(RCTPromiseRejectBlock)reject {
+  NSString *sessionId = request.sessionId();
   dispatch_async(dispatch_get_main_queue(), ^{
     NSError *error = nil;
     if ([GraniteMicroFrontendRuntimeHost requestCloseSession:sessionId error:&error]) {

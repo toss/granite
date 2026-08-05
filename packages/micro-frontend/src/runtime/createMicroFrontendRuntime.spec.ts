@@ -68,7 +68,9 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     expect(second).toBe(appModule);
     expect(fixture.adapter.loadBundle).toHaveBeenCalledTimes(1);
     expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledOnce();
-    expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledWith('/bundles/cart.hbc');
+    expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledWith({
+      filePath: '/bundles/cart.hbc',
+    });
   });
 
   it('removes a failed evaluation so the next preload can retry', async () => {
@@ -116,7 +118,9 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     // Then
     expect(listener).toHaveBeenCalledOnce();
     expect(listener).toHaveBeenCalledWith(event);
-    expect(fixture.nativeRuntime.requestCloseSession).toHaveBeenCalledWith('session-1');
+    expect(fixture.nativeRuntime.requestCloseSession).toHaveBeenCalledWith({
+      sessionId: 'session-1',
+    });
     expect(fixture.nativeRuntime.startEventDelivery).toHaveBeenCalledOnce();
   });
 });

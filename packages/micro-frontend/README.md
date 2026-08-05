@@ -79,7 +79,7 @@ const App = await runtime.importApp<{
 
 ```text
 adapter.loadBundle('cart')
-  → GraniteMicroFrontendRuntime.evaluateScript(filePath)
+  → GraniteMicroFrontendRuntime.evaluateScript({ filePath })
   → verify that the cart container was registered
   → return the cart container's ./App module
 ```
@@ -93,12 +93,15 @@ The React Native Codegen module is named `GraniteMicroFrontendRuntime`.
 
 ```ts
 interface Spec extends TurboModule {
-  evaluateScript(filePath: string): Promise<void>;
-  requestCloseSession(sessionId: string): Promise<void>;
+  evaluateScript(request: { readonly filePath: string }): Promise<void>;
+  requestCloseSession(request: { readonly sessionId: string }): Promise<void>;
   startEventDelivery(): void;
   readonly onEvent: CodegenTypes.EventEmitter<NativeMicroFrontendRuntimeEvent>;
 }
 ```
+
+TurboModule methods use request objects so native integrations can add optional fields without changing positional
+arguments. The public JavaScript facade still accepts `evaluateScript(filePath)` and `closeSession(sessionId)`.
 
 `startEventDelivery()` is internal to the JavaScript facade. It flushes lifecycle events that arrived before the first
 `onEvent()` subscription.
