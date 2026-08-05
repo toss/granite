@@ -28,7 +28,7 @@ export function createSharedResolverConfig(
                     'if (sharedModule == null) {',
                     `  throw new Error('Shared module ' + ${moduleName} + ' is not registered');`,
                     '}',
-                    'module.exports = sharedModule.get();',
+                    'module.exports = Object.assign({}, sharedModule.get(), { __esModule: true });',
                   ].join('\n'),
                 };
               },
