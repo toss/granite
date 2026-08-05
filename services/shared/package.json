@@ -3,40 +3,29 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "granite dev",
+    "dev": "granite dev --experimental-mode",
     "build": "granite build --no-cache",
+    "test": "vitest --run",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write"
   },
   "dependencies": {
-    "@granite-js/mpack": "workspace:*",
+    "@granite-js/micro-frontend": "workspace:*",
+    "@granite-js/portal": "workspace:*",
     "@granite-js/react-native": "workspace:*",
-    "@react-native-async-storage/async-storage": "catalog:react-native",
-    "@react-native-community/blur": "catalog:react-native",
-    "@react-navigation/elements": "catalog:react-native",
-    "@react-navigation/native": "catalog:react-native",
-    "@react-navigation/native-stack": "catalog:react-native",
-    "@shopify/flash-list": "catalog:react-native",
-    "@toss/error-boundary": "^1.5.2",
-    "brick-module": "catalog:brick-module",
     "react": "catalog:react-native",
-    "react-native": "catalog:react-native",
-    "react-native-gesture-handler": "catalog:react-native",
-    "react-native-pager-view": "catalog:react-native",
-    "react-native-safe-area-context": "catalog:react-native",
-    "react-native-screens": "catalog:react-native",
-    "react-native-svg": "catalog:react-native",
-    "react-native-webview": "catalog:react-native"
+    "react-native": "catalog:react-native"
   },
   "devDependencies": {
     "@babel/runtime": "7.18.9",
     "@granite-js/forge-cli": "workspace:*",
     "@granite-js/native": "workspace:*",
     "@granite-js/plugin-hermes": "workspace:*",
-    "@granite-js/plugin-micro-frontend": "workspace:*",
+    "@granite-js/vitest": "workspace:*",
     "@react-native/babel-preset": "catalog:react-native",
     "@types/node": "catalog:tools",
     "@types/react": "catalog:react-native",
-    "typescript": "catalog:tools"
+    "typescript": "catalog:tools",
+    "vitest": "^4.0.12"
   }
 }
