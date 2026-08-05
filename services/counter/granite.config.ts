@@ -1,6 +1,6 @@
+import { microFrontend } from '@granite-js/micro-frontend/plugin';
 import { env } from '@granite-js/plugin-env';
 import { hermes } from '@granite-js/plugin-hermes';
-import { microFrontend } from '@granite-js/micro-frontend/plugin';
 import { router } from '@granite-js/plugin-router';
 import { defineConfig } from '@granite-js/react-native/config';
 

@@ -1,3 +1,4 @@
+import { MicroFrontendSessionProvider, type MicroFrontendRuntimeEvent } from '@granite-js/micro-frontend';
 import { Portal, PortalProvider } from '@granite-js/portal';
 import type { InitialProps } from '@granite-js/react-native';
 import {
@@ -12,10 +13,9 @@ import {
   type ReactNode,
 } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { MicroFrontendSessionProvider, type MicroFrontendRuntimeEvent } from '@granite-js/micro-frontend';
-import { ErrorPage } from '../components/ErrorPage';
 import { microFrontendRuntime } from './runtime';
 import { reduceSessions, type Session } from './sessionReducer';
+import { ErrorPage } from '../components/ErrorPage';
 
 interface AppModule {
   readonly default: ComponentType<InitialProps>;
