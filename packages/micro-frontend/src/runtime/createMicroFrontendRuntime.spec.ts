@@ -45,7 +45,7 @@ function createRuntimeFixture() {
 
 describe('createMicroFrontendRuntimeWithDependencies', () => {
   beforeEach(() => {
-    Reflect.deleteProperty(globalThis, '__GRANITE_MICRO_FRONTEND__');
+    Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
   });
 
   it('loads and evaluates an app once before importing its exposed module', async () => {

@@ -1,5 +1,5 @@
-import type { GranitePluginCore } from '@granite-js/plugin-core';
 import { microFrontend } from '@granite-js/micro-frontend/plugin';
+import type { GranitePluginCore } from '@granite-js/plugin-core';
 import type { MicroFrontendPluginOptions } from './types';
 
 /** @deprecated Use `microFrontend` from `@granite-js/micro-frontend/plugin`. */

@@ -21,7 +21,7 @@ describe('getPreludeConfig', () => {
     expect(config.preludeScript).toContain('from "@granite-js/micro-frontend/runtime"');
     expect(config.preludeScript).toContain('createContainer(global.__granite.app.name');
     expect(config.preludeScript).toContain('exposeModule(__container, "./App", __expose0)');
-    expect(config.banner).toContain('global.__GRANITE_MICRO_FRONTEND__');
+    expect(config.banner).toContain('global._graniteMicroFrontend');
   });
 
   it('accepts a resolved runtime path for transitive plugin consumers', () => {

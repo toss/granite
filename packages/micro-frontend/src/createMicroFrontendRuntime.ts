@@ -1,8 +1,8 @@
-import NativeGraniteMicroFrontendRuntime from './specs/NativeGraniteMicroFrontendRuntime';
-import type { MicroFrontendAdapter, MicroFrontendRuntimeApi } from './types';
 import { createMicroFrontendRuntimeWithDependencies } from './runtime/createMicroFrontendRuntime';
 import { parseNativeRuntimeEvent } from './runtime/parseNativeRuntimeEvent';
 import { microFrontendModuleRegistry } from './runtime/registry';
+import NativeGraniteMicroFrontendRuntime from './specs/NativeGraniteMicroFrontendRuntime';
+import type { MicroFrontendAdapter, MicroFrontendRuntimeApi } from './types';
 
 export interface CreateMicroFrontendRuntimeOptions {
   readonly adapter: MicroFrontendAdapter;

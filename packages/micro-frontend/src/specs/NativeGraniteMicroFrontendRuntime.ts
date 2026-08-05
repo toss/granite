@@ -1,5 +1,4 @@
-import type { CodegenTypes, TurboModule } from 'react-native';
-import { TurboModuleRegistry } from 'react-native';
+import { type CodegenTypes, type TurboModule, TurboModuleRegistry } from 'react-native';
 
 export interface NativeMicroFrontendRuntimeEventParams {
   readonly appName?: string;

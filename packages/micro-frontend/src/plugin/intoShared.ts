@@ -1,5 +1,5 @@
-import type { SharedConfig, SharedModuleConfig } from '../runtime/registry';
 import type { MicroFrontendPluginOptions } from './types';
+import type { SharedConfig, SharedModuleConfig } from '../runtime/registry';
 
 const SHARED_PRESETS = {
   react: ['react/jsx-runtime', 'react/jsx-dev-runtime'],
