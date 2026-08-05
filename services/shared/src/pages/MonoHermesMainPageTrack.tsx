@@ -8,47 +8,48 @@ import {
   useCallback,
   useEffect,
   useReducer,
-  type ComponentType,
   type PropsWithChildren,
-  type ReactNode,
 } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { microFrontendRuntime } from './runtime';
-import { reduceSessions, type Session } from './sessionReducer';
 import { ErrorPage } from '../components/ErrorPage';
+import { microFrontendRuntime } from '../micro-frontend/runtime';
+import {
+  type AppModule,
+  MICRO_FRONTEND_SESSION_NATIVE_ID_PREFIX,
+  type MicroFrontendSession,
+  reduceMicroFrontendSessions,
+} from '../micro-frontend/session';
 
-interface AppModule {
-  readonly default: ComponentType<InitialProps>;
+function reportMicroFrontendError(error: unknown): void {
+  console.error('[micro-frontend] Failed to preload app', error);
 }
 
-interface SessionRootProps {
-  readonly initialProps: InitialProps;
-  readonly session: Session;
-}
-
-interface ErrorBoundaryProps extends PropsWithChildren {
-  readonly renderFallback: (error: Error) => ReactNode;
-}
-
-interface ErrorBoundaryState {
+interface SessionErrorBoundaryState {
   readonly error: Error | null;
 }
 
-class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  state: ErrorBoundaryState = { error: null };
+class SessionErrorBoundary extends Component<PropsWithChildren, SessionErrorBoundaryState> {
+  state: SessionErrorBoundaryState = { error: null };
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): SessionErrorBoundaryState {
     return { error };
   }
 
   render() {
-    return this.state.error == null ? this.props.children : this.props.renderFallback(this.state.error);
+    if (this.state.error != null) {
+      return <ErrorPage reason={this.state.error.message} />;
+    }
+    return this.props.children;
   }
 }
 
-const INITIAL_SESSIONS: readonly Session[] = [];
-
-function SessionRoot({ initialProps, session }: SessionRootProps) {
+function SessionRoot({
+  initialProps,
+  session,
+}: {
+  readonly initialProps: InitialProps;
+  readonly session: MicroFrontendSession;
+}) {
   const close = useCallback(() => microFrontendRuntime.closeSession(session.sessionId), [session.sessionId]);
   const { App } = session;
 
@@ -56,35 +57,29 @@ function SessionRoot({ initialProps, session }: SessionRootProps) {
     <Portal hostName={session.sessionId}>
       <View
         collapsable={false}
-        nativeID={`micro-frontend-session:${session.sessionId}`}
+        nativeID={`${MICRO_FRONTEND_SESSION_NATIVE_ID_PREFIX}${session.sessionId}`}
         style={StyleSheet.absoluteFill}
       >
         <MicroFrontendSessionProvider sessionId={session.sessionId} isVisible={session.isVisible} close={close}>
-          <ErrorBoundary renderFallback={(error) => <ErrorPage reason={error.message} />}>
+          <SessionErrorBoundary>
             <Suspense fallback={null}>
               <App {...initialProps} scheme={session.scheme} />
             </Suspense>
-          </ErrorBoundary>
+          </SessionErrorBoundary>
         </MicroFrontendSessionProvider>
       </View>
     </Portal>
   );
 }
 
-export function MonoHermesTrack({ initialProps }: { readonly initialProps: InitialProps }) {
-  const [sessions, dispatch] = useReducer(reduceSessions, INITIAL_SESSIONS);
+export function MonoHermesMainPageTrack({ initialProps }: { readonly initialProps: InitialProps }) {
+  const [sessions, dispatch] = useReducer(reduceMicroFrontendSessions, []);
 
   useEffect(() => {
     const subscription = microFrontendRuntime.onEvent((event: MicroFrontendRuntimeEvent) => {
       switch (event.name) {
         case 'preloadApp':
-          void microFrontendRuntime.preloadApp(event.params.appName).catch((error: unknown) => {
-            if (error instanceof Error) {
-              console.error('Failed to preload a micro frontend', error);
-              return;
-            }
-            throw error;
-          });
+          void microFrontendRuntime.preloadApp(event.params.appName).catch(reportMicroFrontendError);
           return;
         case 'openApp': {
           const { appName, scheme, sessionId } = event.params;

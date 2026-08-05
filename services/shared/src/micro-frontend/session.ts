@@ -1,15 +1,21 @@
 import type { InitialProps } from '@granite-js/react-native';
 import type { ComponentType, LazyExoticComponent } from 'react';
 
-export interface Session {
+export const MICRO_FRONTEND_SESSION_NATIVE_ID_PREFIX = 'micro-frontend-session:';
+
+export interface AppModule {
+  readonly default: ComponentType<InitialProps>;
+}
+
+export interface MicroFrontendSession {
   readonly sessionId: string;
   readonly scheme: string;
   readonly isVisible: boolean;
   readonly App: LazyExoticComponent<ComponentType<InitialProps>>;
 }
 
-export type SessionAction =
-  | { readonly type: 'opened'; readonly session: Session }
+export type MicroFrontendSessionAction =
+  | { readonly type: 'opened'; readonly session: MicroFrontendSession }
   | { readonly type: 'closed'; readonly sessionId: string }
   | {
       readonly type: 'visibilityChanged';
@@ -17,7 +23,10 @@ export type SessionAction =
       readonly isVisible: boolean;
     };
 
-export function reduceSessions(sessions: readonly Session[], action: SessionAction): readonly Session[] {
+export function reduceMicroFrontendSessions(
+  sessions: readonly MicroFrontendSession[],
+  action: MicroFrontendSessionAction
+): readonly MicroFrontendSession[] {
   switch (action.type) {
     case 'opened':
       return sessions.some(({ sessionId }) => sessionId === action.session.sessionId)

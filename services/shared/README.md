@@ -1,40 +1,49 @@
 # Shared micro-frontend host
 
-This service demonstrates how independently built Granite apps can run in one React Native and Hermes runtime.
-The host does not keep a remote-app list. Native lifecycle events identify an app with the `appName` from its
-`granite.config.ts`.
+The shared app keeps its existing single-app track and enables the mono-Hermes micro-frontend host when native passes
+`{ _monoHermes: true }` as an initial prop.
 
-## Run the development bundles
-
-```sh
-yarn workspace @granite-app/shared dev --port 8081
-yarn workspace @granite-app/counter dev --port 8082
+```text
+preloadApp/openApp native event
+  -> adapter.loadBundle(appName)
+  -> GraniteMicroFrontendRuntime.evaluateScript({ filePath })
+  -> importApp(`${appName}/App`)
+  -> Portal mounted with the native sessionId
 ```
 
-The native application decides how an `appName` maps to a development server or production artifact. The example
-adapts a native `GraniteMicroFrontendBundleLoader` TurboModule to `MicroFrontendAdapter`:
+## Example bundle loader
+
+[`src/micro-frontend/runtime.ts`](./src/micro-frontend/runtime.ts) is a deliberately small adapter for the two example
+apps, `bare` and `showcase`. It delegates download, verification, and caching to this object-based TurboModule:
 
 ```ts
-interface GraniteMicroFrontendBundleLoader extends TurboModule {
-  loadBundle(appName: string): Promise<string>;
+interface GraniteExampleMicroFrontendBundleLoader extends TurboModule {
+  loadBundle(request: {
+    readonly appName: 'bare' | 'showcase';
+  }): Promise<string>;
 }
 ```
 
-`loadBundle()` must download or select the app bundle, verify it, cache it, and resolve to an absolute local file
-path. This module belongs to the embedding application, not `@granite-js/micro-frontend`; applications can replace
-it with any implementation of `MicroFrontendAdapter`.
+`loadBundle()` returns the absolute path of the locally cached bundle. The native example host can map the app name to
+development servers or production bundle storage without putting URLs in the JavaScript runtime contract.
 
-## Session flow
+Start the independent development bundles with:
 
-1. Native sends `preloadApp` or `openApp` with an `appName`.
-2. `MonoHermesTrack` calls `preloadApp(appName)` or `importApp(appName + '/App')`.
-3. The runtime loads and evaluates the app bundle once, then obtains its `./App` exposure.
-4. The app is mounted into a Portal named with the native `sessionId`.
-5. `closeApp` unmounts that session; evaluated app code remains available for another session.
+```bash
+yarn workspace @granite-app/shared dev --port 8081
+yarn workspace @granite-app/bare dev --port 8082
+yarn workspace @granite-app/showcase dev --port 8083
+```
 
-The reducer keeps open, close, and visibility changes isolated by `sessionId`. Native owns the matching Portal host
-and registers the same `sessionId` with `GraniteMicroFrontendRuntimeHost` so a remote app can request its screen to
-close through `useMicroFrontendSession()`.
+Both remote apps use `@granite-js/micro-frontend/plugin` and expose `./App`. The plugin derives each container name
+from its `appName` in `granite.config.ts`.
 
-`services/counter` is the remote example. Its bundle uses the same `appName: 'counter'`, exposes `./App`, and shares
-React and React Native with this host.
+## Session lifecycle
+
+[`MonoHermesMainPageTrack`](./src/pages/MonoHermesMainPageTrack.tsx) consumes `preloadApp`, `openApp`, `closeApp`, and
+`sessionVisibilityChanged` events. Its reducer owns the React session trees; native owns screen closure and sends
+`closeApp` after the transition completes.
+
+Every mounted root uses the native `sessionId` as its Portal host name and
+`nativeID="micro-frontend-session:<sessionId>"`. Remote apps read visibility and request close through
+`MicroFrontendSessionProvider` instead of receiving the session identifier as an app prop.

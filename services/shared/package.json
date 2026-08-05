@@ -11,10 +11,25 @@
   },
   "dependencies": {
     "@granite-js/micro-frontend": "workspace:*",
+    "@granite-js/mpack": "workspace:*",
     "@granite-js/portal": "workspace:*",
     "@granite-js/react-native": "workspace:*",
+    "@react-native-async-storage/async-storage": "catalog:react-native",
+    "@react-native-community/blur": "catalog:react-native",
+    "@react-navigation/elements": "catalog:react-native",
+    "@react-navigation/native": "catalog:react-native",
+    "@react-navigation/native-stack": "catalog:react-native",
+    "@shopify/flash-list": "catalog:react-native",
+    "@toss/error-boundary": "^1.5.2",
+    "brick-module": "catalog:brick-module",
     "react": "catalog:react-native",
-    "react-native": "catalog:react-native"
+    "react-native": "catalog:react-native",
+    "react-native-gesture-handler": "catalog:react-native",
+    "react-native-pager-view": "catalog:react-native",
+    "react-native-safe-area-context": "catalog:react-native",
+    "react-native-screens": "catalog:react-native",
+    "react-native-svg": "catalog:react-native",
+    "react-native-webview": "catalog:react-native"
   },
   "devDependencies": {
     "@babel/runtime": "7.18.9",
