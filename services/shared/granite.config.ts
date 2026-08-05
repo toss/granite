@@ -1,5 +1,5 @@
+import { microFrontend } from '@granite-js/micro-frontend/plugin';
 import { hermes } from '@granite-js/plugin-hermes';
-import { microFrontend } from '@granite-js/plugin-micro-frontend';
 import { defineConfig } from '@granite-js/react-native/config';
 
 const SHARED_MODULES = [
@@ -24,11 +24,6 @@ export default defineConfig({
   plugins: [
     hermes(),
     microFrontend({
-      name: 'shared',
-      remote: {
-        host: 'localhost',
-        port: 8082,
-      },
       shared: SHARED_MODULES.reduce(
         (prev, packageName) => ({
           ...prev,

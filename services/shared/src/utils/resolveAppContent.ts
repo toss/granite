@@ -1,17 +1,30 @@
-import { getContainer, parseRemotePath, importRemoteModule } from '@granite-js/plugin-micro-frontend/runtime';
+import { getContainer } from '@granite-js/micro-frontend/runtime';
+import type { InitialProps } from '@granite-js/react-native';
 import type { ComponentType } from 'react';
 import { waitForCondition } from './waitForCondition';
 
-export async function resolveAppContent(remotePath: string): Promise<ComponentType<any>> {
-  const { remoteName } = parseRemotePath(remotePath);
+interface AppModule {
+  readonly default?: ComponentType<InitialProps>;
+}
+
+export async function resolveAppContent(remotePath: string): Promise<ComponentType<InitialProps>> {
+  const separatorIndex = remotePath.indexOf('/');
+  if (separatorIndex <= 0 || separatorIndex === remotePath.length - 1) {
+    throw new Error(`Invalid remote app request: ${remotePath}`);
+  }
+  const appName = remotePath.slice(0, separatorIndex);
+  const exposedModule = `./${remotePath.slice(separatorIndex + 1)}`;
 
   const isRemoteReady = () => {
-    return Boolean(getContainer(remoteName));
+    return getContainer(appName) != null;
   };
 
   const getAppComponent = () => {
-    const module = importRemoteModule(remotePath);
-    return module?.default || module;
+    const module = getContainer(appName)?.exposedModules[exposedModule] as AppModule | undefined;
+    if (module?.default == null) {
+      throw new Error(`Remote app module is unavailable: ${remotePath}`);
+    }
+    return module.default;
   };
 
   if (isRemoteReady()) {
