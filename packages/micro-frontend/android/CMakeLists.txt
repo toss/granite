@@ -8,6 +8,7 @@ add_library(
   granite-micro-frontend
   SHARED
   src/main/cpp/BundleEvaluator.cpp
+  src/main/cpp/FileReader.cpp
   src/main/cpp/onLoad.cpp
 )
 

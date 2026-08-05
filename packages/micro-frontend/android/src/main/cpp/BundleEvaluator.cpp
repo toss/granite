@@ -1,8 +1,7 @@
 #include "BundleEvaluator.h"
+#include "FileReader.h"
 
-#include <fstream>
 #include <jsi/jsi.h>
-#include <sstream>
 
 namespace granite::microfrontend {
 
@@ -28,22 +27,28 @@ void BundleEvaluator::evaluateFileSync(
   }
 
   const std::string path = filePath->toStdString();
-  std::ifstream stream(path, std::ios::binary);
-  if (!stream.is_open()) {
-    facebook::jni::throwNewJavaException(
-        "java/io/FileNotFoundException", "Bundle file cannot be opened: %s", path.c_str());
+  std::string source;
+  try {
+    source = io::readFileToMemory(path);
+  } catch (const io::FileReaderError &error) {
+    switch (error.kind()) {
+      case io::FileReaderErrorKind::NotFound:
+        facebook::jni::throwNewJavaException(
+            "java/io/FileNotFoundException", "%s", error.what());
+        break;
+      case io::FileReaderErrorKind::StatFailed:
+      case io::FileReaderErrorKind::ReadFailed:
+        facebook::jni::throwNewJavaException(
+            "java/io/IOException", "%s", error.what());
+        break;
+      case io::FileReaderErrorKind::AllocationFailed:
+        facebook::jni::throwNewJavaException(
+            "java/lang/OutOfMemoryError", "%s", error.what());
+        break;
+    }
     return;
   }
 
-  std::ostringstream contents;
-  contents << stream.rdbuf();
-  if (stream.bad()) {
-    facebook::jni::throwNewJavaException(
-        "java/io/IOException", "Bundle file cannot be read: %s", path.c_str());
-    return;
-  }
-
-  std::string source = contents.str();
   if (source.empty()) {
     facebook::jni::throwNewJavaException(
         "java/io/IOException", "Bundle file is empty: %s", path.c_str());
@@ -52,7 +57,7 @@ void BundleEvaluator::evaluateFileSync(
 
   auto *runtime = reinterpret_cast<Runtime *>(runtimePointer);
   runtime->evaluateJavaScript(
-      std::make_unique<StringBuffer>(std::move(source)),
+      std::make_shared<StringBuffer>(std::move(source)),
       sourceUrl->toStdString());
 }
 
