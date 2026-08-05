@@ -13,9 +13,17 @@ export interface NativeMicroFrontendRuntimeEvent {
   readonly params: NativeMicroFrontendRuntimeEventParams;
 }
 
+export type EvaluateScriptRequest = Readonly<{
+  filePath: string;
+}>;
+
+export type CloseSessionRequest = Readonly<{
+  sessionId: string;
+}>;
+
 export interface Spec extends TurboModule {
-  evaluateScript(filePath: string): Promise<void>;
-  requestCloseSession(sessionId: string): Promise<void>;
+  evaluateScript(request: EvaluateScriptRequest): Promise<void>;
+  requestCloseSession(request: CloseSessionRequest): Promise<void>;
   startEventDelivery(): void;
   readonly onEvent: CodegenTypes.EventEmitter<NativeMicroFrontendRuntimeEvent>;
 }

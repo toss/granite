@@ -19,8 +19,8 @@ export interface NativeMicroFrontendRuntimeEvent {
 }
 
 export interface NativeMicroFrontendRuntime {
-  readonly evaluateScript: (filePath: string) => Promise<void>;
-  readonly requestCloseSession: (sessionId: string) => Promise<void>;
+  readonly evaluateScript: (request: { readonly filePath: string }) => Promise<void>;
+  readonly requestCloseSession: (request: { readonly sessionId: string }) => Promise<void>;
   readonly startEventDelivery: () => void;
   readonly onEvent: (
     listener: (event: NativeMicroFrontendRuntimeEvent) => void
@@ -64,7 +64,7 @@ export function createMicroFrontendRuntimeWithDependencies(
   async function evaluateApp(appName: string): Promise<void> {
     try {
       const filePath = await dependencies.adapter.loadBundle(appName);
-      await dependencies.nativeRuntime.evaluateScript(filePath);
+      await dependencies.nativeRuntime.evaluateScript({ filePath });
 
       if (!dependencies.registry.hasContainer(appName)) {
         throw new AppContainerNotFoundError(appName);
@@ -77,14 +77,14 @@ export function createMicroFrontendRuntimeWithDependencies(
   }
 
   return {
-    evaluateScript: (filePath) => dependencies.nativeRuntime.evaluateScript(filePath),
+    evaluateScript: (filePath) => dependencies.nativeRuntime.evaluateScript({ filePath }),
     preloadApp,
     async importApp<TModule>(request: AppRequest): Promise<TModule> {
       const { appName } = parseAppRequest(request);
       await preloadApp(appName);
       return dependencies.registry.importModule<TModule>(request);
     },
-    closeSession: (sessionId) => dependencies.nativeRuntime.requestCloseSession(sessionId),
+    closeSession: (sessionId) => dependencies.nativeRuntime.requestCloseSession({ sessionId }),
     onEvent(listener) {
       const subscription = dependencies.nativeRuntime.onEvent((event) => {
         listener(dependencies.parseEvent(event));

@@ -1,10 +1,10 @@
 package run.granite.microfrontend
 
-import com.facebook.fbreact.specs.NativeGraniteMicroFrontendRuntimeSpec
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.module.annotations.ReactModule
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.UiThreadUtil
+import com.facebook.react.module.annotations.ReactModule
 
 @ReactModule(name = NativeGraniteMicroFrontendRuntimeSpec.NAME)
 class GraniteMicroFrontendRuntimeModule(
@@ -24,7 +24,13 @@ class GraniteMicroFrontendRuntimeModule(
         super.invalidate()
     }
 
-    override fun evaluateScript(filePath: String, promise: Promise) {
+    override fun evaluateScript(request: ReadableMap, promise: Promise) {
+        val filePath = request.getString("filePath")
+        if (filePath == null) {
+            promise.reject(ERROR_INVALID_REQUEST, "evaluateScript requires request.filePath")
+            return
+        }
+
         val enqueued = reactApplicationContext.runOnJSQueueThread {
             try {
                 BundleEvaluator(reactApplicationContext).evaluateFile(filePath)
@@ -38,7 +44,13 @@ class GraniteMicroFrontendRuntimeModule(
         }
     }
 
-    override fun requestCloseSession(sessionId: String, promise: Promise) {
+    override fun requestCloseSession(request: ReadableMap, promise: Promise) {
+        val sessionId = request.getString("sessionId")
+        if (sessionId == null) {
+            promise.reject(ERROR_INVALID_REQUEST, "requestCloseSession requires request.sessionId")
+            return
+        }
+
         UiThreadUtil.runOnUiThread {
             when (val result = GraniteMicroFrontendRuntimeHost.requestCloseSession(sessionId)) {
                 CloseRequestResult.Accepted -> promise.resolve(null)
@@ -87,6 +99,7 @@ class GraniteMicroFrontendRuntimeModule(
     }
 
     private companion object {
+        const val ERROR_INVALID_REQUEST = "INVALID_REQUEST"
         const val ERROR_EVALUATE_SCRIPT = "EVALUATE_SCRIPT_FAILED"
         const val ERROR_SESSION_NOT_FOUND = "SESSION_NOT_FOUND"
         const val ERROR_CLOSE_SESSION = "CLOSE_SESSION_FAILED"
