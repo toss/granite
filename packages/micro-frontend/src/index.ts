@@ -1,5 +1,9 @@
 export { createMicroFrontendRuntime } from './createMicroFrontendRuntime';
 export type { CreateMicroFrontendRuntimeOptions } from './createMicroFrontendRuntime';
+export { createRoute } from './createRoute';
+export type { MicroFrontendRouteOptions } from './createRoute';
+export { hideHostSkeleton } from './host/hostSkeletonStore';
+export type { HostSkeletonComponent, HostSkeletonParams } from './host/types';
 export {
   MicroFrontendSessionProvider,
   MissingMicroFrontendSessionError,

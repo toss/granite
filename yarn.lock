@@ -5664,7 +5664,9 @@ __metadata:
   resolution: "@granite-js/micro-frontend@workspace:packages/micro-frontend"
   dependencies:
     "@granite-js/plugin-core": "workspace:*"
+    "@granite-js/react-native": "workspace:*"
     "@granite-js/utils": "workspace:*"
+    "@standard-schema/spec": "npm:^1.0.0"
     "@types/node": "catalog:tools"
     "@types/react": "catalog:react-native"
     "@types/react-test-renderer": "npm:^19"
@@ -5675,6 +5677,7 @@ __metadata:
     typescript: "catalog:tools"
     vitest: "npm:^4.0.12"
   peerDependencies:
+    "@granite-js/react-native": "*"
     react: "*"
     react-native: "*"
   languageName: unknown

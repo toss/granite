@@ -25,6 +25,12 @@
       "import": "./dist/runtime.js",
       "require": "./dist/runtime.cjs"
     },
+    "./host": {
+      "types": "./dist/host.d.ts",
+      "react-native": "./src/host/index.ts",
+      "import": "./dist/host.js",
+      "require": "./dist/host.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -54,13 +60,16 @@
   },
   "dependencies": {
     "@granite-js/plugin-core": "workspace:*",
-    "@granite-js/utils": "workspace:*"
+    "@granite-js/utils": "workspace:*",
+    "@standard-schema/spec": "^1.0.0"
   },
   "peerDependencies": {
+    "@granite-js/react-native": "*",
     "react": "*",
     "react-native": "*"
   },
   "devDependencies": {
+    "@granite-js/react-native": "workspace:*",
     "@types/node": "catalog:tools",
     "@types/react": "catalog:react-native",
     "@types/react-test-renderer": "^19",

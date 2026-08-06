@@ -87,6 +87,56 @@ adapter.loadBundle('cart')
 Concurrent preload/import calls for the same app share one evaluation. A successful evaluation remains cached for
 the JavaScript runtime lifetime. A failed evaluation and its partial container are removed so a later call can retry.
 
+## Host skeleton
+
+Remote apps register route skeletons with the package's `createRoute` wrapper. It delegates to Granite's
+`createRoute` and additionally associates `skeletonComponent` with the current `granite.config.ts` app name, scheme,
+and host.
+
+```tsx
+import { createRoute, hideHostSkeleton } from '@granite-js/micro-frontend';
+import { useEffect } from 'react';
+
+export const Route = createRoute('/products/:productId', {
+  component: ProductPage,
+  validateParams: parseProductParams,
+  skeletonComponent: ({ thumbnailUrl }) => <ProductSkeleton thumbnailUrl={thumbnailUrl} />,
+});
+
+function ProductPage() {
+  useEffect(() => {
+    hideHostSkeleton();
+  }, []);
+
+  return <Product />;
+}
+```
+
+The runtime host resolves the skeleton from the incoming URL. It resets the shared visibility state before opening a
+new session and keeps the app content hidden until the remote app calls `hideHostSkeleton()`.
+
+```tsx
+import {
+  HostSkeleton,
+  useIsHostSkeletonHidden,
+  useResolvedHostSkeleton,
+} from '@granite-js/micro-frontend/host';
+
+const resolved = useResolvedHostSkeleton(session.scheme);
+const hidden = useIsHostSkeletonHidden();
+const showSkeleton = resolved != null && !hidden;
+
+<>
+  <View style={{ flex: 1, opacity: showSkeleton ? 0 : 1 }}>
+    <RemoteApp scheme={session.scheme} />
+  </View>
+  {showSkeleton ? <HostSkeleton url={session.scheme} /> : null}
+</>;
+```
+
+The registry and visibility state live on the JavaScript global object, so separately bundled host and remote package
+instances communicate without an app-specific bridge.
+
 ## TurboModule
 
 The React Native Codegen module is named `GraniteMicroFrontendRuntime`.
