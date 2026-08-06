@@ -7,6 +7,7 @@ import {
   resetHostSkeleton,
   resetHostSkeletonStoreForTest,
   resolveHostSkeleton,
+  resolveHostSkeletonForAppUrl,
 } from './hostSkeletonStore';
 
 function ProductSkeleton(): ReactNode {
@@ -85,6 +86,33 @@ describe('host skeleton registry', () => {
 
     expect(resolveHostSkeleton({ appName: 'shopping', routePath: '/product' })?.component).toBe(ProductSkeleton);
     expect(resolveHostSkeleton({ appName: 'benefit', routePath: '/product' })?.component).toBe(FallbackSkeleton);
+  });
+
+  it('resolves a fallback skeleton from an app URL when the remote registered before its app config', () => {
+    registerHostSkeletonRoute('/product', {
+      component: ProductSkeleton,
+    });
+    registerHostSkeletonRoute('/product', {
+      component: FallbackSkeleton,
+      app: {
+        name: 'shared',
+        scheme: 'supertoss',
+        host: 'm',
+      },
+    });
+
+    const resolved = resolveHostSkeletonForAppUrl(
+      'shopping',
+      'supertoss://m/shopping/product?thumbnailUrl=https%3A%2F%2Fstatic.example.com%2Fimage.png'
+    );
+
+    expect(resolved?.component).toBe(ProductSkeleton);
+    expect(resolved).toMatchObject({
+      params: {
+        thumbnailUrl: 'https://static.example.com/image.png',
+      },
+      routePath: '/product',
+    });
   });
 
   it('shares visibility state across host and remote package instances', () => {

@@ -22,4 +22,5 @@ export {
   registerHostSkeletonRoute,
   resetHostSkeleton,
   resolveHostSkeleton,
+  resolveHostSkeletonForAppUrl,
 } from './hostSkeletonStore';
