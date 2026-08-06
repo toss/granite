@@ -32,6 +32,8 @@
     "!src/**/*.spec.*",
     "dist",
     "android",
+    "!android/.cxx",
+    "!android/build",
     "ios",
     "*.podspec",
     "README.md",
