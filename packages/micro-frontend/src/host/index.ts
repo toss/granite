@@ -19,7 +19,9 @@ export {
 } from './routeMatcher';
 export {
   hideHostSkeleton,
+  installHostSkeletonBridge,
   registerHostSkeletonRoute,
   resetHostSkeleton,
   resolveHostSkeleton,
+  resolveHostSkeletonForAppUrl,
 } from './hostSkeletonStore';

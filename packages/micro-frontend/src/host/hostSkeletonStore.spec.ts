@@ -1,12 +1,14 @@
 import type { ReactNode } from 'react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   getIsHostSkeletonHidden,
   hideHostSkeleton,
+  installHostSkeletonBridge,
   registerHostSkeletonRoute,
   resetHostSkeleton,
   resetHostSkeletonStoreForTest,
   resolveHostSkeleton,
+  resolveHostSkeletonForAppUrl,
 } from './hostSkeletonStore';
 
 function ProductSkeleton(): ReactNode {
@@ -30,6 +32,10 @@ const shoppingApp = {
 describe('host skeleton registry', () => {
   beforeEach(() => {
     resetHostSkeletonStoreForTest();
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(globalThis, 'hideSharedSkeleton');
   });
 
   it('resolves an app route and parses query params from its Granite URL', () => {
@@ -87,6 +93,33 @@ describe('host skeleton registry', () => {
     expect(resolveHostSkeleton({ appName: 'benefit', routePath: '/product' })?.component).toBe(FallbackSkeleton);
   });
 
+  it('resolves a fallback skeleton from an app URL when the remote registered before its app config', () => {
+    registerHostSkeletonRoute('/product', {
+      component: ProductSkeleton,
+    });
+    registerHostSkeletonRoute('/product', {
+      component: FallbackSkeleton,
+      app: {
+        name: 'shared',
+        scheme: 'supertoss',
+        host: 'm',
+      },
+    });
+
+    const resolved = resolveHostSkeletonForAppUrl(
+      'shopping',
+      'supertoss://m/shopping/product?thumbnailUrl=https%3A%2F%2Fstatic.example.com%2Fimage.png'
+    );
+
+    expect(resolved?.component).toBe(ProductSkeleton);
+    expect(resolved).toMatchObject({
+      params: {
+        thumbnailUrl: 'https://static.example.com/image.png',
+      },
+      routePath: '/product',
+    });
+  });
+
   it('shares visibility state across host and remote package instances', () => {
     expect(getIsHostSkeletonHidden()).toBe(false);
 
@@ -97,5 +130,18 @@ describe('host skeleton registry', () => {
     resetHostSkeleton();
 
     expect(getIsHostSkeletonHidden()).toBe(false);
+  });
+
+  it('keeps the legacy hide bridge compatible during package migration', () => {
+    const legacyHide = vi.fn();
+    Reflect.set(globalThis, 'hideSharedSkeleton', legacyHide);
+
+    hideHostSkeleton();
+
+    expect(legacyHide).toHaveBeenCalledOnce();
+
+    installHostSkeletonBridge();
+
+    expect(Reflect.get(globalThis, 'hideSharedSkeleton')).toBe(hideHostSkeleton);
   });
 });

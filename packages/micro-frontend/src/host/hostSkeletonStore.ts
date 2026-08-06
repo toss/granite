@@ -2,6 +2,7 @@ import { resolveHostSkeletonParams } from './resolveParams';
 import {
   createHostSkeletonRoutePrefix,
   getQueryParamsFromUrl,
+  getRoutePathFromAppUrl,
   getRoutePathFromUrl,
   matchRoutePath,
   normalizeHostSkeletonRoutePath,
@@ -42,10 +43,15 @@ interface HostSkeletonStore {
 
 interface GlobalWithHostSkeletonStore {
   __graniteMicroFrontendHostSkeletonStore?: HostSkeletonStore;
+  hideSharedSkeleton?: () => void;
+}
+
+function getGlobalObject() {
+  return globalThis as typeof globalThis & GlobalWithHostSkeletonStore;
 }
 
 function getHostSkeletonStore() {
-  const globalObject: typeof globalThis & GlobalWithHostSkeletonStore = globalThis;
+  const globalObject = getGlobalObject();
 
   if (globalObject.__graniteMicroFrontendHostSkeletonStore == null) {
     globalObject.__graniteMicroFrontendHostSkeletonStore = {
@@ -93,10 +99,19 @@ function setHostSkeletonHidden(hidden: boolean) {
 
 export function hideHostSkeleton() {
   setHostSkeletonHidden(true);
+
+  const hideSharedSkeleton = getGlobalObject().hideSharedSkeleton;
+  if (typeof hideSharedSkeleton === 'function' && hideSharedSkeleton !== hideHostSkeleton) {
+    hideSharedSkeleton();
+  }
 }
 
 export function resetHostSkeleton() {
   setHostSkeletonHidden(false);
+}
+
+export function installHostSkeletonBridge() {
+  getGlobalObject().hideSharedSkeleton = hideHostSkeleton;
 }
 
 export function registerHostSkeletonRoute<
@@ -130,6 +145,14 @@ export function registerHostSkeletonRoute<
 export function resolveHostSkeleton(request: HostSkeletonRouteRequest | string): ResolvedHostSkeleton | null {
   const matched = typeof request === 'string' ? findRouteByUrl(request) : findRouteByRequest(request);
 
+  return resolveMatchedHostSkeleton(matched);
+}
+
+export function resolveHostSkeletonForAppUrl(appName: string, url: string): ResolvedHostSkeleton | null {
+  return resolveMatchedHostSkeleton(findRouteByAppUrl(appName, url));
+}
+
+function resolveMatchedHostSkeleton(matched: MatchedHostSkeletonRoute | null): ResolvedHostSkeleton | null {
   if (matched == null) {
     return null;
   }
@@ -151,6 +174,47 @@ export function resolveHostSkeleton(request: HostSkeletonRouteRequest | string):
     routePath: matched.routePath,
     appName: matched.entry.appName,
   };
+}
+
+function findRouteByAppUrl(appName: string, url: string): MatchedHostSkeletonRoute | null {
+  const normalizedAppName = normalizeOptionalAppName(appName);
+  if (normalizedAppName == null) {
+    return null;
+  }
+
+  let fallbackMatch: MatchedHostSkeletonRoute | null = null;
+
+  for (let index = getHostSkeletonStore().entries.length - 1; index >= 0; index -= 1) {
+    const entry = getHostSkeletonStore().entries[index];
+    if (entry == null || (entry.appName != null && entry.appName !== normalizedAppName)) {
+      continue;
+    }
+
+    const routePath =
+      entry.routePrefix == null
+        ? getRoutePathFromAppUrl(url, normalizedAppName)
+        : getRoutePathFromUrl(url, entry.routePrefix);
+    const pathParams = routePath == null ? null : matchRoutePath(entry.routePath, routePath);
+    if (routePath == null || pathParams == null) {
+      continue;
+    }
+
+    const match = {
+      entry,
+      pathParams,
+      params: getQueryParamsFromUrl(url),
+      routePath,
+      url,
+    } satisfies MatchedHostSkeletonRoute;
+
+    if (entry.appName === normalizedAppName) {
+      return match;
+    }
+
+    fallbackMatch ??= match;
+  }
+
+  return fallbackMatch;
 }
 
 function findRouteByUrl(url: string): MatchedHostSkeletonRoute | null {
