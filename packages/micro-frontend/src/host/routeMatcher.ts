@@ -31,33 +31,6 @@ export function getRoutePathFromUrl(url: string, routePrefix: string) {
   return normalizeHostSkeletonRoutePath(urlWithoutSearch.slice(normalizedPrefix.length));
 }
 
-export function getRoutePathFromAppUrl(url: string, appName: string) {
-  let parsedUrl: URL;
-
-  try {
-    parsedUrl = new URL(url);
-  } catch (error) {
-    if (!(error instanceof TypeError)) {
-      throw error;
-    }
-
-    return null;
-  }
-
-  const normalizedAppName = normalizeAppName(appName);
-  if (parsedUrl.hostname === normalizedAppName) {
-    return normalizeHostSkeletonRoutePath(parsedUrl.pathname);
-  }
-
-  const pathSegments = parsedUrl.pathname.split('/').filter(Boolean);
-  const appNameIndex = pathSegments.indexOf(normalizedAppName);
-  if (appNameIndex === -1) {
-    return null;
-  }
-
-  return normalizeHostSkeletonRoutePath(pathSegments.slice(appNameIndex + 1).join('/'));
-}
-
 export function getQueryParamsFromUrl(url: string): Record<string, string> {
   try {
     return Object.fromEntries(new URL(url).searchParams.entries());

@@ -5,13 +5,11 @@ import {
   getIsHostSkeletonHidden,
   resetHostSkeleton,
   resolveHostSkeleton,
-  resolveHostSkeletonForAppUrl,
   subscribeHostSkeletonStore,
 } from './hostSkeletonStore';
 
 export interface HostSkeletonProps {
   readonly url: string | null | undefined;
-  readonly appName?: string | null;
 }
 
 export interface HostSkeletonController {
@@ -30,18 +28,14 @@ function useHostSkeletonStoreVersion() {
   return useSyncExternalStore(subscribeHostSkeletonStore, getHostSkeletonStoreVersion, getHostSkeletonStoreVersion);
 }
 
-export function useResolvedHostSkeleton(url: string | null | undefined, appName?: string | null) {
+export function useResolvedHostSkeleton(url: string | null | undefined) {
   useHostSkeletonStoreVersion();
 
-  if (url == null) {
-    return null;
-  }
-
-  return appName == null ? resolveHostSkeleton(url) : resolveHostSkeletonForAppUrl(appName, url);
+  return url == null ? null : resolveHostSkeleton(url);
 }
 
-export function HostSkeleton({ url, appName }: HostSkeletonProps) {
-  const resolvedSkeleton = useResolvedHostSkeleton(url, appName);
+export function HostSkeleton({ url }: HostSkeletonProps) {
+  const resolvedSkeleton = useResolvedHostSkeleton(url);
   const isHidden = useIsHostSkeletonHidden();
 
   if (resolvedSkeleton == null || isHidden) {
