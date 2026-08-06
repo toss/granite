@@ -9,7 +9,7 @@ import com.facebook.react.module.annotations.ReactModule
 @ReactModule(name = NativeGraniteMicroFrontendRuntimeSpec.NAME)
 class GraniteMicroFrontendRuntimeModule(
     reactContext: ReactApplicationContext,
-) : NativeGraniteMicroFrontendRuntimeSpec(reactContext) {
+) : NativeGraniteMicroFrontendRuntimeSpec(reactContext), GraniteMicroFrontendRuntimeEventTarget {
     private val eventLock = Any()
     private val pendingEvents = ArrayDeque<GraniteMicroFrontendEvent>()
     private var eventDeliveryStarted = false
@@ -75,10 +75,11 @@ class GraniteMicroFrontendRuntimeModule(
             eventDeliveryStarted = true
             pendingEvents.toList().also { pendingEvents.clear() }
         }
+        GraniteMicroFrontendRuntimeHost.startEventDelivery(this)
         events.forEach(::emitImmediately)
     }
 
-    internal fun emit(event: GraniteMicroFrontendEvent) {
+    override fun emit(event: GraniteMicroFrontendEvent) {
         val shouldEmit = synchronized(eventLock) {
             if (!eventDeliveryStarted) {
                 pendingEvents.addLast(event)

@@ -116,8 +116,12 @@ static __weak id<GraniteMicroFrontendRuntimeEventSink> eventSink;
   [sink enqueueRuntimeEvent:event];
 }
 
-+ (void)attachEventSink:(id<GraniteMicroFrontendRuntimeEventSink>)sink {
++ (void)startEventDeliveryToEventSink:(id<GraniteMicroFrontendRuntimeEventSink>)sink {
   [runtimeLock lock];
+  if (eventSink != nil && eventSink != sink) {
+    [runtimeLock unlock];
+    return;
+  }
   eventSink = sink;
   NSArray<NSDictionary *> *events = [pendingEvents copy];
   [pendingEvents removeAllObjects];

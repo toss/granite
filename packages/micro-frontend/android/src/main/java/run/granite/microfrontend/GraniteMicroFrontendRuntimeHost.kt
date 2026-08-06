@@ -1,13 +1,11 @@
 package run.granite.microfrontend
 
-import java.lang.ref.WeakReference
 import java.util.UUID
 
 object GraniteMicroFrontendRuntimeHost {
     private val lock = Any()
     private val sessions = mutableMapOf<String, SessionEntry>()
-    private val pendingEvents = ArrayDeque<GraniteMicroFrontendEvent>()
-    private var moduleReference = WeakReference<GraniteMicroFrontendRuntimeModule>(null)
+    private val eventRouter = GraniteMicroFrontendRuntimeEventRouter()
 
     @JvmStatic
     fun registerSession(sessionId: String, closeAction: Runnable): GraniteMicroFrontendSessionRegistration {
@@ -21,14 +19,7 @@ object GraniteMicroFrontendRuntimeHost {
     }
 
     @JvmStatic
-    fun emit(event: GraniteMicroFrontendEvent) {
-        val module = synchronized(lock) {
-            moduleReference.get()?.also { return@synchronized it }
-            pendingEvents.addLast(event)
-            null
-        }
-        module?.emit(event)
-    }
+    fun emit(event: GraniteMicroFrontendEvent) = eventRouter.emit(event)
 
     @JvmStatic
     fun emitPreloadApp(appName: String) = emit(GraniteMicroFrontendEvent.PreloadApp(appName))
@@ -44,21 +35,12 @@ object GraniteMicroFrontendRuntimeHost {
     fun emitSessionVisibilityChanged(sessionId: String, isVisible: Boolean) =
         emit(GraniteMicroFrontendEvent.SessionVisibilityChanged(sessionId, isVisible))
 
-    internal fun attach(module: GraniteMicroFrontendRuntimeModule) {
-        val events = synchronized(lock) {
-            moduleReference = WeakReference(module)
-            pendingEvents.toList().also { pendingEvents.clear() }
-        }
-        events.forEach(module::emit)
-    }
+    internal fun attach(module: GraniteMicroFrontendRuntimeModule) = eventRouter.attach(module)
 
-    internal fun detach(module: GraniteMicroFrontendRuntimeModule) {
-        synchronized(lock) {
-            if (moduleReference.get() === module) {
-                moduleReference.clear()
-            }
-        }
-    }
+    internal fun startEventDelivery(module: GraniteMicroFrontendRuntimeModule) =
+        eventRouter.startEventDelivery(module)
+
+    internal fun detach(module: GraniteMicroFrontendRuntimeModule) = eventRouter.detach(module)
 
     internal fun requestCloseSession(sessionId: String): CloseRequestResult {
         val action = synchronized(lock) {
@@ -90,6 +72,53 @@ object GraniteMicroFrontendRuntimeHost {
         val closeAction: Runnable,
         var closeRequested: Boolean = false,
     )
+}
+
+internal interface GraniteMicroFrontendRuntimeEventTarget {
+    fun emit(event: GraniteMicroFrontendEvent)
+}
+
+internal class GraniteMicroFrontendRuntimeEventRouter {
+    private val lock = Any()
+    private val pendingEvents = ArrayDeque<GraniteMicroFrontendEvent>()
+    private val attachedTargets = mutableSetOf<GraniteMicroFrontendRuntimeEventTarget>()
+    private var activeTarget: GraniteMicroFrontendRuntimeEventTarget? = null
+
+    fun attach(target: GraniteMicroFrontendRuntimeEventTarget) {
+        synchronized(lock) {
+            attachedTargets.add(target)
+        }
+    }
+
+    fun startEventDelivery(target: GraniteMicroFrontendRuntimeEventTarget) {
+        val events = synchronized(lock) {
+            check(target in attachedTargets) { "Runtime must be attached before starting event delivery" }
+            if (activeTarget != null && activeTarget !== target) {
+                return
+            }
+            activeTarget = target
+            pendingEvents.toList().also { pendingEvents.clear() }
+        }
+        events.forEach(target::emit)
+    }
+
+    fun emit(event: GraniteMicroFrontendEvent) {
+        val target = synchronized(lock) {
+            activeTarget?.also { return@synchronized it }
+            pendingEvents.addLast(event)
+            null
+        }
+        target?.emit(event)
+    }
+
+    fun detach(target: GraniteMicroFrontendRuntimeEventTarget) {
+        synchronized(lock) {
+            attachedTargets.remove(target)
+            if (activeTarget === target) {
+                activeTarget = null
+            }
+        }
+    }
 }
 
 class GraniteMicroFrontendSessionRegistration internal constructor(
