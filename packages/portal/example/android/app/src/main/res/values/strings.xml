@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Granite Portal</string>
+    <string name="launcher_title">Cross-Activity Portal Hosts</string>
+    <string name="launcher_description">Native Android routes into two independent React Native services.</string>
+    <string name="launcher_preparing">Preparing the shared React Native controller…</string>
+    <string name="open_store_activity">Open Northstar Store</string>
+    <string name="open_wallet_activity">Open Harbor Wallet</string>
+    <string name="store_portal_host_name" translatable="false">cross-activity-primary</string>
+    <string name="wallet_portal_host_name" translatable="false">cross-activity-secondary</string>
+</resources>
