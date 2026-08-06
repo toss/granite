@@ -39,7 +39,6 @@
     "typecheck": "tsc --noEmit",
     "build": "tsup && tsc -p tsconfig.build.json && node .scripts/copy-vendors-dts.mjs",
     "lint": "eslint .",
-    "find-deadcode": "ts-prune",
     "test:no-parallel": "vitest --no-watch --no-file-parallelism --coverage"
   },
   "devDependencies": {
@@ -70,7 +69,6 @@
     "execa": "^5.0.0",
     "fast-glob": "^3.3.2",
     "prettier-2": "npm:prettier@^2",
-    "ts-prune": "^0.10.3",
     "typescript": "catalog:tools",
     "vitest": "^4.0.12"
   },
