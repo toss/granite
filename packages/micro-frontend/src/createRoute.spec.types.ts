@@ -1,6 +1,7 @@
+import type { RouteOptions } from '@granite-js/react-native';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { expectTypeOf } from 'vitest';
-import { createRoute } from './createRoute';
+import { createRoute, type MicroFrontendRouteOptions } from './createRoute';
 
 interface ProductParams {
   readonly productId: string;
@@ -11,6 +12,15 @@ interface ProductSchemaInput {
   readonly productId: string | number;
   readonly thumbnailUrl?: string;
 }
+
+type OfficialRouteHasSkeletonComponent = 'skeletonComponent' extends keyof RouteOptions<ProductParams>
+  ? true
+  : false;
+type MicroFrontendRouteHasSkeletonComponent =
+  'skeletonComponent' extends keyof MicroFrontendRouteOptions<ProductParams> ? true : false;
+
+expectTypeOf<OfficialRouteHasSkeletonComponent>().toEqualTypeOf<false>();
+expectTypeOf<MicroFrontendRouteHasSkeletonComponent>().toEqualTypeOf<true>();
 
 declare module '@granite-js/react-native' {
   interface RegisterScreenInput {

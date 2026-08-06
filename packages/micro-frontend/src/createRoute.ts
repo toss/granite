@@ -10,13 +10,10 @@ import {
 } from './host/hostSkeletonStore';
 import type { HostSkeletonAppConfig, HostSkeletonComponent } from './host/types';
 
-declare module '@granite-js/react-native' {
-  interface RouteOptions<T extends Readonly<object | undefined>> {
-    skeletonComponent?: HostSkeletonComponent<T>;
-  }
-}
-
-export type MicroFrontendRouteOptions<TParams extends Readonly<object> | undefined> = RouteOptions<TParams>;
+export type MicroFrontendRouteOptions<TParams extends Readonly<object> | undefined> =
+  RouteOptions<TParams> & {
+    readonly skeletonComponent?: HostSkeletonComponent<TParams>;
+  };
 
 type SetParamsFunction<TParams> = (params: TParams extends undefined ? undefined : Partial<TParams>) => void;
 type ReplaceParamsFunction<TParams> = (params: TParams extends undefined ? undefined : TParams) => void;
@@ -35,10 +32,7 @@ export function createRoute<
   TSchema extends StandardSchemaV1<unknown, Readonly<object> | undefined>,
 >(
   path: keyof RegisterScreenInput,
-  options: Omit<
-    RouteOptions<StandardSchemaV1.InferOutput<TSchema>>,
-    'validateParams' | 'skeletonComponent'
-  > & {
+  options: Omit<RouteOptions<StandardSchemaV1.InferOutput<TSchema>>, 'validateParams'> & {
     readonly validateParams: TSchema;
     readonly skeletonComponent?: HostSkeletonComponent<StandardSchemaV1.InferOutput<TSchema>>;
   }
