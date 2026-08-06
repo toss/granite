@@ -20,10 +20,28 @@ export async function microFrontend(options: MicroFrontendPluginOptions = {}): P
   const runtimeModulePath = createRequire(import.meta.url).resolve('@granite-js/micro-frontend/runtime');
   const prelude = getPreludeConfig(normalizedOptions, runtimeModulePath);
   const resolver = createSharedResolverConfig(nonEagerEntries);
-  fs.writeFileSync(preludePath, prelude.preludeScript, 'utf8');
+
+  function writePrelude(appName?: string) {
+    const config = getPreludeConfig(normalizedOptions, runtimeModulePath, appName);
+    fs.writeFileSync(preludePath, config.preludeScript, 'utf8');
+  }
+
+  writePrelude();
 
   return {
     name: 'micro-frontend',
+    dev: {
+      order: 'pre',
+      handler({ appName }) {
+        writePrelude(appName);
+      },
+    },
+    build: {
+      order: 'pre',
+      handler({ appName }) {
+        writePrelude(appName);
+      },
+    },
     config: {
       extra: nonEagerEntries.some(([moduleName]) => moduleName === 'react-native')
         ? {

@@ -31,4 +31,13 @@ describe('getPreludeConfig', () => {
     // Then
     expect(config.preludeScript).toContain('from "/packages/micro-frontend/runtime.js"');
   });
+
+  it('embeds the remote app name instead of reading the host global at evaluation time', () => {
+    // When
+    const config = getPreludeConfig({}, '@granite-js/micro-frontend/runtime', 'shopping');
+
+    // Then
+    expect(config.preludeScript).toContain('createContainer("shopping"');
+    expect(config.preludeScript).not.toContain('global.__granite.app.name');
+  });
 });

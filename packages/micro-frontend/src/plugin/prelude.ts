@@ -8,7 +8,8 @@ export interface MicroFrontendPreludeConfig {
 
 export function getPreludeConfig(
   options: MicroFrontendPluginOptions,
-  runtimeModuleSpecifier = '@granite-js/micro-frontend/runtime'
+  runtimeModuleSpecifier = '@granite-js/micro-frontend/runtime',
+  appName?: string
 ): MicroFrontendPreludeConfig {
   const eagerSharedModules = Object.entries(options.shared ?? {}).filter(
     ([, config]) => !Array.isArray(options.shared) && config.eager === true
@@ -28,6 +29,7 @@ export function getPreludeConfig(
     ].join('\n');
   });
   const containerConfig = JSON.stringify({ shared: options.shared });
+  const containerName = appName == null ? 'global.__granite.app.name' : JSON.stringify(appName);
 
   return {
     banner: [
@@ -38,7 +40,7 @@ export function getPreludeConfig(
     ].join('\n'),
     preludeScript: [
       `import { createContainer, exposeModule, registerShared } from ${JSON.stringify(runtimeModuleSpecifier)};`,
-      `const __container = createContainer(global.__granite.app.name, ${containerConfig});`,
+      `const __container = createContainer(${containerName}, ${containerConfig});`,
       ...registerStatements,
       ...exposeStatements,
     ].join('\n'),
