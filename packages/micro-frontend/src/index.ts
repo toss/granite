@@ -14,6 +14,7 @@ export type {
   AppRequest,
   MicroFrontendAdapter,
   MicroFrontendBundle,
+  MicroFrontendBundleRequest,
   MicroFrontendRuntimeApi,
   MicroFrontendRuntimeEvent,
   MicroFrontendRuntimeEventSubscription,

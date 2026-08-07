@@ -1,11 +1,15 @@
 export type AppRequest = `${string}/${string}`;
 
+export interface MicroFrontendBundleRequest {
+  readonly appName: string;
+}
+
 export interface MicroFrontendBundle {
   readonly filePath: string;
 }
 
 export interface MicroFrontendAdapter {
-  readonly loadBundle: (appName: string) => Promise<MicroFrontendBundle>;
+  readonly loadBundle: (request: MicroFrontendBundleRequest) => Promise<MicroFrontendBundle>;
 }
 
 export type MicroFrontendRuntimeEvent =
