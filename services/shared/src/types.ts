@@ -1,5 +1,3 @@
-import type { RuntimeContext } from '@granite-js/plugin-micro-frontend/runtime';
-
 export interface GraniteGlobal {
   /**
    * @internal
@@ -11,10 +9,4 @@ export interface GraniteGlobal {
      */
     loadRemote: () => Promise<void>;
   };
-
-  /**
-   * @internal
-   * Micro frontend runtime
-   */
-  __MICRO_FRONTEND__: RuntimeContext;
 }

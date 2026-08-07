@@ -5337,6 +5337,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@granite-app/bare@workspace:services/bare":
+  version: 0.0.0-use.local
+  resolution: "@granite-app/bare@workspace:services/bare"
+  dependencies:
+    "@babel/core": "npm:7.28.5"
+    "@babel/runtime": "npm:7.18.9"
+    "@granite-js/forge-cli": "workspace:*"
+    "@granite-js/micro-frontend": "workspace:*"
+    "@granite-js/plugin-hermes": "workspace:*"
+    "@granite-js/react-native": "workspace:*"
+    "@react-native/babel-preset": "catalog:react-native"
+    "@types/node": "catalog:tools"
+    "@types/react": "catalog:react-native"
+    babel-preset-granite: "workspace:*"
+    react: "catalog:react-native"
+    react-native: "catalog:react-native"
+    typescript: "catalog:tools"
+  languageName: unknown
+  linkType: soft
+
 "@granite-app/counter@workspace:services/counter":
   version: 0.0.0-use.local
   resolution: "@granite-app/counter@workspace:services/counter"
@@ -5371,11 +5391,13 @@ __metadata:
   dependencies:
     "@babel/runtime": "npm:7.18.9"
     "@granite-js/forge-cli": "workspace:*"
+    "@granite-js/micro-frontend": "workspace:*"
     "@granite-js/mpack": "workspace:*"
     "@granite-js/native": "workspace:*"
     "@granite-js/plugin-hermes": "workspace:*"
-    "@granite-js/plugin-micro-frontend": "workspace:*"
+    "@granite-js/portal": "workspace:*"
     "@granite-js/react-native": "workspace:*"
+    "@granite-js/vitest": "workspace:*"
     "@react-native-async-storage/async-storage": "catalog:react-native"
     "@react-native-community/blur": "catalog:react-native"
     "@react-native/babel-preset": "catalog:react-native"
@@ -5396,6 +5418,7 @@ __metadata:
     react-native-svg: "catalog:react-native"
     react-native-webview: "catalog:react-native"
     typescript: "catalog:tools"
+    vitest: "npm:^4.0.12"
   languageName: unknown
   linkType: soft
 
@@ -5407,10 +5430,10 @@ __metadata:
     "@babel/runtime": "npm:7.18.9"
     "@biomejs/biome": "npm:^1.9.4"
     "@granite-js/forge-cli": "workspace:*"
+    "@granite-js/micro-frontend": "workspace:*"
     "@granite-js/native": "workspace:*"
     "@granite-js/plugin-env": "workspace:*"
     "@granite-js/plugin-hermes": "workspace:*"
-    "@granite-js/plugin-micro-frontend": "workspace:*"
     "@granite-js/plugin-router": "workspace:*"
     "@granite-js/plugin-sentry": "workspace:*"
     "@granite-js/react-native": "workspace:*"
@@ -5973,7 +5996,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@granite-js/portal@workspace:packages/portal":
+"@granite-js/portal@workspace:*, @granite-js/portal@workspace:packages/portal":
   version: 0.0.0-use.local
   resolution: "@granite-js/portal@workspace:packages/portal"
   dependencies:

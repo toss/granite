@@ -1,3 +1,4 @@
+import type { InitialProps } from '@granite-js/react-native';
 import { BrickModule } from 'brick-module';
 import type { ComponentType } from 'react';
 import { getGlobal } from './getGlobal';
@@ -5,7 +6,7 @@ import { isMetro } from './isMetro';
 import { resolveAppContent } from './resolveAppContent';
 
 interface LoadResult {
-  default: ComponentType<any>;
+  default: ComponentType<InitialProps>;
 }
 
 const global = getGlobal();
