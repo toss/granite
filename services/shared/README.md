@@ -5,7 +5,7 @@ The shared app keeps its existing single-app track and enables the mono-Hermes m
 
 ```text
 preloadApp/openApp native event
-  -> adapter.loadBundle(appName)
+  -> adapter.loadBundle({ appName })
   -> GraniteMicroFrontendRuntime.evaluateScript({ filePath })
   -> importApp(`${appName}/App`)
   -> Portal mounted with the native sessionId

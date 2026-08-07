@@ -68,7 +68,7 @@ export function createMicroFrontendRuntimeWithDependencies(
 
   async function evaluateApp(appName: string): Promise<void> {
     try {
-      const { filePath } = await dependencies.adapter.loadBundle(appName);
+      const { filePath } = await dependencies.adapter.loadBundle({ appName });
       await dependencies.nativeRuntime.evaluateScript({ filePath });
 
       if (!dependencies.registry.hasContainer(appName)) {

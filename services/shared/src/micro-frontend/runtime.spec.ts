@@ -23,12 +23,12 @@ describe('example micro-frontend bundle loader', () => {
   });
 
   it.each(['bare', 'showcase'] as const)('loads the %s app through an object request', async (appName) => {
-    await expect(loadBundle(appName)).resolves.toEqual({ filePath: `/bundles/${appName}.hbc` });
+    await expect(loadBundle({ appName })).resolves.toEqual({ filePath: `/bundles/${appName}.hbc` });
     expect(nativeLoadBundle).toHaveBeenLastCalledWith({ appName });
   });
 
   it('rejects apps outside the example allowlist', async () => {
-    await expect(loadBundle('unknown')).rejects.toThrow('Unknown example app: unknown');
+    await expect(loadBundle({ appName: 'unknown' })).rejects.toThrow('Unknown example app: unknown');
     expect(nativeLoadBundle).not.toHaveBeenCalled();
   });
 });

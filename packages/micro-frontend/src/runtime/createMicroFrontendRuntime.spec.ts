@@ -15,7 +15,9 @@ interface AppModule {
 function createRuntimeFixture() {
   const listeners = new Set<(event: NativeMicroFrontendRuntimeEvent) => void>();
   const adapter = {
-    loadBundle: vi.fn(async (appName: string) => ({ filePath: `/bundles/${appName}.hbc` })),
+    loadBundle: vi.fn(async ({ appName }: { readonly appName: string }) => ({
+      filePath: `/bundles/${appName}.hbc`,
+    })),
   };
   const nativeRuntime: NativeMicroFrontendRuntime = {
     evaluateScript: vi.fn(async () => undefined),
@@ -68,6 +70,7 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     expect(first).toBe(appModule);
     expect(second).toBe(appModule);
     expect(fixture.adapter.loadBundle).toHaveBeenCalledTimes(1);
+    expect(fixture.adapter.loadBundle).toHaveBeenCalledWith({ appName: 'cart' });
     expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledOnce();
     expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledWith({
       filePath: '/bundles/cart.hbc',

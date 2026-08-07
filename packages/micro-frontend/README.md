@@ -62,7 +62,7 @@ import type { ComponentType } from 'react';
 
 const runtime = createMicroFrontendRuntime({
   adapter: {
-    async loadBundle(appName) {
+    async loadBundle({ appName }) {
       const filePath = await bundleStore.loadBundle(appName);
       return { filePath };
     },
@@ -79,7 +79,7 @@ const App = await runtime.importApp<{
 `importApp('cart/App')` performs the following composition:
 
 ```text
-adapter.loadBundle('cart')
+adapter.loadBundle({ appName: 'cart' })
   → GraniteMicroFrontendRuntime.evaluateScript({ filePath })
   → verify that the cart container was registered
   → return the cart container's ./App module
