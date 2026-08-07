@@ -13,6 +13,7 @@ export type { MicroFrontendSession, MicroFrontendSessionProviderProps } from './
 export type {
   AppRequest,
   MicroFrontendAdapter,
+  MicroFrontendBundle,
   MicroFrontendRuntimeApi,
   MicroFrontendRuntimeEvent,
   MicroFrontendRuntimeEventSubscription,

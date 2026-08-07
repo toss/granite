@@ -20,12 +20,13 @@ apps, `bare` and `showcase`. It delegates download, verification, and caching to
 interface GraniteExampleMicroFrontendBundleLoader extends TurboModule {
   loadBundle(request: {
     readonly appName: 'bare' | 'showcase';
-  }): Promise<string>;
+  }): Promise<{ readonly filePath: string }>;
 }
 ```
 
-`loadBundle()` returns the absolute path of the locally cached bundle. The native example host can map the app name to
-development servers or production bundle storage without putting URLs in the JavaScript runtime contract.
+`loadBundle()` returns the absolute path of the locally cached bundle in an object. The native example host can map
+the app name to development servers or production bundle storage without putting URLs in the JavaScript runtime
+contract.
 
 Start the independent development bundles with:
 

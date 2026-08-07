@@ -15,7 +15,7 @@ interface AppModule {
 function createRuntimeFixture() {
   const listeners = new Set<(event: NativeMicroFrontendRuntimeEvent) => void>();
   const adapter = {
-    loadBundle: vi.fn(async (appName: string) => `/bundles/${appName}.hbc`),
+    loadBundle: vi.fn(async (appName: string) => ({ filePath: `/bundles/${appName}.hbc` })),
   };
   const nativeRuntime: NativeMicroFrontendRuntime = {
     evaluateScript: vi.fn(async () => undefined),

@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadBundle } from './runtime';
 
 const { nativeLoadBundle } = vi.hoisted(() => ({
-  nativeLoadBundle: vi.fn(async ({ appName }: { readonly appName: string }) => `/bundles/${appName}.hbc`),
+  nativeLoadBundle: vi.fn(async ({ appName }: { readonly appName: string }) => ({
+    filePath: `/bundles/${appName}.hbc`,
+  })),
 }));
 
 vi.mock('react-native', () => ({
@@ -21,7 +23,7 @@ describe('example micro-frontend bundle loader', () => {
   });
 
   it.each(['bare', 'showcase'] as const)('loads the %s app through an object request', async (appName) => {
-    await expect(loadBundle(appName)).resolves.toBe(`/bundles/${appName}.hbc`);
+    await expect(loadBundle(appName)).resolves.toEqual({ filePath: `/bundles/${appName}.hbc` });
     expect(nativeLoadBundle).toHaveBeenLastCalledWith({ appName });
   });
 

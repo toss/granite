@@ -1,13 +1,13 @@
-import { createMicroFrontendRuntime } from '@granite-js/micro-frontend';
+import { createMicroFrontendRuntime, type MicroFrontendBundle } from '@granite-js/micro-frontend';
 import { TurboModuleRegistry, type TurboModule } from 'react-native';
 
 type ExampleAppName = 'bare' | 'showcase';
 
 interface NativeExampleBundleLoader extends TurboModule {
-  readonly loadBundle: (request: { readonly appName: ExampleAppName }) => Promise<string>;
+  readonly loadBundle: (request: { readonly appName: ExampleAppName }) => Promise<MicroFrontendBundle>;
 }
 
-export function loadBundle(appName: string): Promise<string> {
+export function loadBundle(appName: string): Promise<MicroFrontendBundle> {
   if (appName !== 'bare' && appName !== 'showcase') {
     return Promise.reject(new Error(`Unknown example app: ${appName}`));
   }

@@ -53,8 +53,8 @@ registry.
 
 ## Runtime
 
-The adapter owns bundle selection, download, verification, and caching. Its only result contract is an absolute path
-to a locally evaluable bundle.
+The adapter owns bundle selection, download, verification, and caching. Its result contains the absolute path to a
+locally evaluable bundle.
 
 ```ts
 import { createMicroFrontendRuntime } from '@granite-js/micro-frontend';
@@ -63,7 +63,8 @@ import type { ComponentType } from 'react';
 const runtime = createMicroFrontendRuntime({
   adapter: {
     async loadBundle(appName) {
-      return bundleStore.loadBundle(appName);
+      const filePath = await bundleStore.loadBundle(appName);
+      return { filePath };
     },
   },
 });
