@@ -8,10 +8,14 @@ sealed interface GraniteMicroFrontendEvent {
 
     data class PreloadApp(
         val appName: String,
+        val requestId: String? = null,
     ) : GraniteMicroFrontendEvent {
         override fun toWritableMap(): WritableMap = eventMap(
             name = "preloadApp",
-            params = Arguments.createMap().apply { putString("appName", appName) },
+            params = Arguments.createMap().apply {
+                putString("appName", appName)
+                requestId?.let { putString("requestId", it) }
+            },
         )
     }
 

@@ -7,9 +7,11 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface GraniteMicroFrontendRuntimeHost (Internal)
-+ (void)attachEventSink:(id<GraniteMicroFrontendRuntimeEventSink>)eventSink;
++ (void)startEventDeliveryToEventSink:(id<GraniteMicroFrontendRuntimeEventSink>)eventSink;
 + (void)detachEventSink:(id<GraniteMicroFrontendRuntimeEventSink>)eventSink;
 + (BOOL)requestCloseSession:(NSString *)sessionId error:(NSError **)error;
++ (void)completePreloadApp:(NSString *)requestId errorMessage:(NSString *_Nullable)errorMessage;
++ (void)cancelPreloadApp:(NSString *)requestId;
 + (void)unregisterSession:(NSString *)sessionId token:(NSString *)token;
 @end
 

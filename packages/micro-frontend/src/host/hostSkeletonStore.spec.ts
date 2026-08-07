@@ -101,14 +101,14 @@ describe('host skeleton registry', () => {
       component: FallbackSkeleton,
       app: {
         name: 'shared',
-        scheme: 'supertoss',
-        host: 'm',
+        scheme: 'example',
+        host: 'app',
       },
     });
 
     const resolved = resolveHostSkeletonForAppUrl(
       'shopping',
-      'supertoss://m/shopping/product?thumbnailUrl=https%3A%2F%2Fstatic.example.com%2Fimage.png'
+      'example://app/shopping/product?thumbnailUrl=https%3A%2F%2Fstatic.example.com%2Fimage.png'
     );
 
     expect(resolved?.component).toBe(ProductSkeleton);

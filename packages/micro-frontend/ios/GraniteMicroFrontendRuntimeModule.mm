@@ -33,7 +33,6 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
   if (self != nil) {
     _eventLock = [[NSLock alloc] init];
     _pendingEvents = [[NSMutableArray alloc] init];
-    [GraniteMicroFrontendRuntimeHost attachEventSink:self];
   }
   return self;
 }
@@ -113,6 +112,11 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
   });
 }
 
+- (void)completePreloadApp:(JS::NativeGraniteMicroFrontendRuntime::CompletePreloadAppRequest &)request {
+  [GraniteMicroFrontendRuntimeHost completePreloadApp:request.requestId()
+                                         errorMessage:request.errorMessage()];
+}
+
 - (void)startEventDelivery {
   [_eventLock lock];
   if (_eventDeliveryStarted) {
@@ -124,6 +128,7 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
   [_pendingEvents removeAllObjects];
   [_eventLock unlock];
 
+  [GraniteMicroFrontendRuntimeHost startEventDeliveryToEventSink:self];
   for (NSDictionary *event in events) {
     [self emitRuntimeEvent:event];
   }

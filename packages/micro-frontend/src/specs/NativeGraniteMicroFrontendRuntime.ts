@@ -2,6 +2,7 @@ import { type CodegenTypes, type TurboModule, TurboModuleRegistry } from 'react-
 
 export interface NativeMicroFrontendRuntimeEventParams {
   readonly appName?: string;
+  readonly requestId?: string;
   readonly sessionId?: string;
   readonly scheme?: string;
   readonly isVisible?: boolean;
@@ -20,9 +21,15 @@ export type CloseSessionRequest = Readonly<{
   sessionId: string;
 }>;
 
+export type CompletePreloadAppRequest = Readonly<{
+  requestId: string;
+  errorMessage: string | null;
+}>;
+
 export interface Spec extends TurboModule {
   evaluateScript(request: EvaluateScriptRequest): Promise<void>;
   requestCloseSession(request: CloseSessionRequest): Promise<void>;
+  completePreloadApp(request: CompletePreloadAppRequest): void;
   startEventDelivery(): void;
   readonly onEvent: CodegenTypes.EventEmitter<NativeMicroFrontendRuntimeEvent>;
 }

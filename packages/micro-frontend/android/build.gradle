@@ -61,4 +61,5 @@ dependencies {
   implementation 'com.facebook.react:react-android'
   implementation 'com.facebook.fbjni:fbjni:0.7.0'
   implementation "org.jetbrains.kotlin:kotlin-stdlib:${safeExtGet('kotlinVersion', project.properties['GraniteMicroFrontendRuntime_kotlinVersion'])}"
+  testImplementation 'junit:junit:4.13.2'
 }
