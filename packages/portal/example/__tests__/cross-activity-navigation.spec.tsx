@@ -1,7 +1,6 @@
+import { PortalProvider } from "@granite-js/portal";
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { BackHandler, DeviceEventEmitter, Linking } from "react-native";
-import { PortalProvider } from "@granite-js/portal";
-
 import CrossActivityController from "../src/screens/CrossActivity/Controller";
 
 describe("cross-Activity navigation", () => {
