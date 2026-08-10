@@ -2,11 +2,10 @@ import { resolveHostSkeletonParams } from './resolveParams';
 import {
   createHostSkeletonRoutePrefix,
   getQueryParamsFromUrl,
-  getRoutePathFromAppUrl,
   getRoutePathFromUrl,
   matchRoutePath,
+  normalizeHostSkeletonAppName,
   normalizeHostSkeletonRoutePath,
-  normalizeOptionalAppName,
 } from './routeMatcher';
 import type {
   HostSkeletonComponent,
@@ -19,8 +18,8 @@ import type {
 interface HostSkeletonRouteEntry {
   readonly id: string;
   readonly routePath: string;
-  readonly routePrefix: string | null;
-  readonly appName: string | null;
+  readonly routePrefix: string;
+  readonly appName: string;
   readonly component: HostSkeletonComponent<Readonly<object>>;
   readonly parserParams?: (params: Record<string, unknown>) => Record<string, unknown>;
   readonly validateParams?: ValidateParams<Readonly<object> | undefined>;
@@ -119,9 +118,9 @@ export function registerHostSkeletonRoute<
 >(routePath: string, options: RegisterHostSkeletonRouteOptions<TParams>) {
   const store = getHostSkeletonStore();
   const normalizedRoutePath = normalizeHostSkeletonRoutePath(routePath);
-  const appName = normalizeOptionalAppName(options.appName ?? options.app?.name);
-  const routePrefix = options.app == null ? null : createHostSkeletonRoutePrefix(options.app);
-  const id = `${routePrefix ?? appName ?? '*'}:${normalizedRoutePath}`;
+  const appName = normalizeHostSkeletonAppName(options.app.name);
+  const routePrefix = createHostSkeletonRoutePrefix(options.app);
+  const id = `${routePrefix}:${normalizedRoutePath}`;
   const entry: HostSkeletonRouteEntry = {
     id,
     routePath: normalizedRoutePath,
@@ -148,10 +147,6 @@ export function resolveHostSkeleton(request: HostSkeletonRouteRequest | string):
   return resolveMatchedHostSkeleton(matched);
 }
 
-export function resolveHostSkeletonForAppUrl(appName: string, url: string): ResolvedHostSkeleton | null {
-  return resolveMatchedHostSkeleton(findRouteByAppUrl(appName, url));
-}
-
 function resolveMatchedHostSkeleton(matched: MatchedHostSkeletonRoute | null): ResolvedHostSkeleton | null {
   if (matched == null) {
     return null;
@@ -176,53 +171,12 @@ function resolveMatchedHostSkeleton(matched: MatchedHostSkeletonRoute | null): R
   };
 }
 
-function findRouteByAppUrl(appName: string, url: string): MatchedHostSkeletonRoute | null {
-  const normalizedAppName = normalizeOptionalAppName(appName);
-  if (normalizedAppName == null) {
-    return null;
-  }
-
-  let fallbackMatch: MatchedHostSkeletonRoute | null = null;
-
-  for (let index = getHostSkeletonStore().entries.length - 1; index >= 0; index -= 1) {
-    const entry = getHostSkeletonStore().entries[index];
-    if (entry == null || (entry.appName != null && entry.appName !== normalizedAppName)) {
-      continue;
-    }
-
-    const routePath =
-      entry.routePrefix == null
-        ? getRoutePathFromAppUrl(url, normalizedAppName)
-        : getRoutePathFromUrl(url, entry.routePrefix);
-    const pathParams = routePath == null ? null : matchRoutePath(entry.routePath, routePath);
-    if (routePath == null || pathParams == null) {
-      continue;
-    }
-
-    const match = {
-      entry,
-      pathParams,
-      params: getQueryParamsFromUrl(url),
-      routePath,
-      url,
-    } satisfies MatchedHostSkeletonRoute;
-
-    if (entry.appName === normalizedAppName) {
-      return match;
-    }
-
-    fallbackMatch ??= match;
-  }
-
-  return fallbackMatch;
-}
-
 function findRouteByUrl(url: string): MatchedHostSkeletonRoute | null {
   const entries = getHostSkeletonStore().entries;
 
   for (let index = entries.length - 1; index >= 0; index -= 1) {
     const entry = entries[index];
-    if (entry == null || entry.routePrefix == null) {
+    if (entry == null) {
       continue;
     }
 
@@ -239,12 +193,11 @@ function findRouteByUrl(url: string): MatchedHostSkeletonRoute | null {
 }
 
 function findRouteByRequest(request: HostSkeletonRouteRequest): MatchedHostSkeletonRoute | null {
-  const appName = normalizeOptionalAppName(request.appName);
-  let fallbackMatch: MatchedHostSkeletonRoute | null = null;
+  const appName = normalizeHostSkeletonAppName(request.appName);
 
   for (let index = getHostSkeletonStore().entries.length - 1; index >= 0; index -= 1) {
     const entry = getHostSkeletonStore().entries[index];
-    if (entry == null || (entry.appName != null && entry.appName !== appName)) {
+    if (entry == null || entry.appName !== appName) {
       continue;
     }
 
@@ -254,22 +207,16 @@ function findRouteByRequest(request: HostSkeletonRouteRequest): MatchedHostSkele
       continue;
     }
 
-    const match = {
+    return {
       entry,
       pathParams,
       params: request.params ?? {},
       routePath,
       url: request.url ?? null,
     } satisfies MatchedHostSkeletonRoute;
-
-    if (entry.appName === appName) {
-      return match;
-    }
-
-    fallbackMatch ??= match;
   }
 
-  return fallbackMatch;
+  return null;
 }
 
 export function resetHostSkeletonStoreForTest() {

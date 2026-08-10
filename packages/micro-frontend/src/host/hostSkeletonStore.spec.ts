@@ -8,14 +8,9 @@ import {
   resetHostSkeleton,
   resetHostSkeletonStoreForTest,
   resolveHostSkeleton,
-  resolveHostSkeletonForAppUrl,
 } from './hostSkeletonStore';
 
 function ProductSkeleton(): ReactNode {
-  return null;
-}
-
-function FallbackSkeleton(): ReactNode {
   return null;
 }
 
@@ -80,44 +75,14 @@ describe('host skeleton registry', () => {
     });
   });
 
-  it('prefers an app-specific skeleton over a fallback skeleton', () => {
-    registerHostSkeletonRoute('/product', {
-      component: FallbackSkeleton,
-    });
+  it('does not resolve a skeleton registered for another app', () => {
     registerHostSkeletonRoute('/product', {
       component: ProductSkeleton,
-      appName: 'shopping',
+      app: shoppingApp,
     });
 
     expect(resolveHostSkeleton({ appName: 'shopping', routePath: '/product' })?.component).toBe(ProductSkeleton);
-    expect(resolveHostSkeleton({ appName: 'benefit', routePath: '/product' })?.component).toBe(FallbackSkeleton);
-  });
-
-  it('resolves a fallback skeleton from an app URL when the remote registered before its app config', () => {
-    registerHostSkeletonRoute('/product', {
-      component: ProductSkeleton,
-    });
-    registerHostSkeletonRoute('/product', {
-      component: FallbackSkeleton,
-      app: {
-        name: 'shared',
-        scheme: 'example',
-        host: 'app',
-      },
-    });
-
-    const resolved = resolveHostSkeletonForAppUrl(
-      'shopping',
-      'example://app/shopping/product?thumbnailUrl=https%3A%2F%2Fstatic.example.com%2Fimage.png'
-    );
-
-    expect(resolved?.component).toBe(ProductSkeleton);
-    expect(resolved).toMatchObject({
-      params: {
-        thumbnailUrl: 'https://static.example.com/image.png',
-      },
-      routePath: '/product',
-    });
+    expect(resolveHostSkeleton({ appName: 'benefit', routePath: '/product' })).toBeNull();
   });
 
   it('shares visibility state across host and remote package instances', () => {

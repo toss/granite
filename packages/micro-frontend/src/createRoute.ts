@@ -1,5 +1,6 @@
 import {
   createRoute as createGraniteRoute,
+  getSchemeUri,
   type RegisterScreenInput,
   type RouteOptions,
   useNavigation,
@@ -49,52 +50,34 @@ export function createRoute<TParams extends Readonly<object> | undefined>(
 
   if (skeletonComponent != null) {
     registerHostSkeletonRoute(String(path), {
+      app: getCurrentGraniteApp(getSchemeUri()),
       component: skeletonComponent,
       parserParams: routeOptions.parserParams,
       validateParams: routeOptions.validateParams,
     });
-
-    const app = getCurrentGraniteApp();
-    if (app != null) {
-      registerHostSkeletonRoute(String(path), {
-        component: skeletonComponent,
-        parserParams: routeOptions.parserParams,
-        validateParams: routeOptions.validateParams,
-        app,
-      });
-    }
   }
 
   return createGraniteRoute(path, routeOptions);
 }
 
-function getCurrentGraniteApp(): HostSkeletonAppConfig | null {
+function getCurrentGraniteApp(schemeUri: string): HostSkeletonAppConfig {
   const granite: unknown = Reflect.get(globalThis, '__granite');
-  if (!isPropertyMap(granite)) {
-    return null;
+  if (!isPropertyMap(granite) || !isPropertyMap(granite['app'])) {
+    throw new TypeError('Granite app configuration is unavailable');
   }
 
-  const app = granite['app'];
-  if (!isPropertyMap(app)) {
-    return null;
+  const host = granite['app']['host'];
+  const name = granite['app']['name'];
+  if (typeof host !== 'string' || typeof name !== 'string') {
+    throw new TypeError('Granite app configuration is invalid');
   }
 
-  const name = app['name'];
-  const scheme = app['scheme'];
-  const host = app['host'];
-
-  if (typeof name !== 'string' || name.length === 0) {
-    return null;
-  }
-
-  if (typeof scheme !== 'string' || scheme.length === 0) {
-    return null;
-  }
+  const scheme = new URL(schemeUri).protocol.replace(/:$/g, '');
 
   return {
     name,
     scheme,
-    host: typeof host === 'string' ? host : '',
+    host,
   };
 }
 

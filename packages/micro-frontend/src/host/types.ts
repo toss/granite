@@ -26,14 +26,13 @@ export interface RegisterHostSkeletonRouteOptions<
   readonly component: HostSkeletonComponent<TParams>;
   readonly parserParams?: ParserParams;
   readonly validateParams?: ValidateParams<TParams>;
-  readonly app?: HostSkeletonAppConfig | null;
-  readonly appName?: string | null;
+  readonly app: HostSkeletonAppConfig;
 }
 
 export interface HostSkeletonRouteRequest {
   readonly routePath: string;
   readonly params?: Record<string, unknown>;
-  readonly appName?: string | null;
+  readonly appName: string;
   readonly url?: string | null;
 }
 

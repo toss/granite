@@ -10,7 +10,7 @@ export function normalizeHostSkeletonRoutePath(routePath: string) {
 
 export function createHostSkeletonRoutePrefix(app: HostSkeletonAppConfig) {
   const scheme = app.scheme.replace(/:$/g, '');
-  const appName = normalizeAppName(app.name);
+  const appName = normalizeHostSkeletonAppName(app.name);
   const host = app.host == null ? '' : app.host.replace(/^\/+|\/+$/g, '');
 
   return host.length > 0 ? `${scheme}://${host}/${appName}` : `${scheme}://${appName}`;
@@ -29,33 +29,6 @@ export function getRoutePathFromUrl(url: string, routePrefix: string) {
   }
 
   return normalizeHostSkeletonRoutePath(urlWithoutSearch.slice(normalizedPrefix.length));
-}
-
-export function getRoutePathFromAppUrl(url: string, appName: string) {
-  let parsedUrl: URL;
-
-  try {
-    parsedUrl = new URL(url);
-  } catch (error) {
-    if (!(error instanceof TypeError)) {
-      throw error;
-    }
-
-    return null;
-  }
-
-  const normalizedAppName = normalizeAppName(appName);
-  if (parsedUrl.hostname === normalizedAppName) {
-    return normalizeHostSkeletonRoutePath(parsedUrl.pathname);
-  }
-
-  const pathSegments = parsedUrl.pathname.split('/').filter(Boolean);
-  const appNameIndex = pathSegments.indexOf(normalizedAppName);
-  if (appNameIndex === -1) {
-    return null;
-  }
-
-  return normalizeHostSkeletonRoutePath(pathSegments.slice(appNameIndex + 1).join('/'));
 }
 
 export function getQueryParamsFromUrl(url: string): Record<string, string> {
@@ -114,11 +87,7 @@ export function matchRoutePath(pattern: string, routePath: string) {
   return params;
 }
 
-export function normalizeOptionalAppName(appName: string | null | undefined) {
-  return appName == null || appName.length === 0 ? null : normalizeAppName(appName);
-}
-
-function normalizeAppName(appName: string) {
+export function normalizeHostSkeletonAppName(appName: string) {
   return appName.replace(/^\/+|\/+$/g, '');
 }
 

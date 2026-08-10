@@ -27,7 +27,6 @@ export {
   registerHostSkeletonRoute,
   resetHostSkeleton,
   resolveHostSkeleton,
-  resolveHostSkeletonForAppUrl,
 } from './host/hostSkeletonStore';
 export {
   MicroFrontendSessionProvider,
