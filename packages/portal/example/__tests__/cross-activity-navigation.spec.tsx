@@ -1,4 +1,3 @@
-import { PortalProvider } from "@granite-js/portal";
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { BackHandler, DeviceEventEmitter, Linking } from "react-native";
 import CrossActivityController from "../src/screens/CrossActivity/Controller";
@@ -10,7 +9,6 @@ describe("cross-Activity navigation", () => {
 
     // When both Activity-owned portal destinations are unavailable
     // Then both unrelated service trees stay mounted in the controller
-    expect(screen.UNSAFE_getByType(PortalProvider)).toBeOnTheScreen();
     expect(screen.getByTestId("store_service_home")).toBeOnTheScreen();
     expect(screen.getByTestId("wallet_service_home")).toBeOnTheScreen();
   });

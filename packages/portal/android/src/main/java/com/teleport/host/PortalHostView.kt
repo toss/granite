@@ -6,6 +6,12 @@ import android.os.Looper
 import com.facebook.react.views.view.ReactViewGroup
 import com.teleport.global.PortalRegistry
 
+/**
+ * Native-owned destination for children moved out of a [com.teleport.portal.PortalView].
+ *
+ * A named host registers while attached to a Window. The matching source view keeps React/Fabric
+ * ownership of its children and only reparents their Android views into this container.
+ */
 class PortalHostView(
   context: Context?,
 ) : ReactViewGroup(context) {
@@ -14,7 +20,6 @@ class PortalHostView(
   private var batchBaseIndex = 0
   private var hasPendingCleanup = false
 
-  // region ViewManager methods
   fun setName(newName: String?) {
     if (name == newName) return
 
@@ -32,9 +37,6 @@ class PortalHostView(
 
     cleanupNow()
   }
-  // endregion
-
-  // region Portal insertion
 
   /**
    * Returns the index at which a portal child should be inserted.
@@ -53,9 +55,7 @@ class PortalHostView(
     }
     return minOf(batchBaseIndex + childIndex, childCount)
   }
-  // endregion
 
-  // region Lifecycle
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
     // A host can be named before its Activity installs it into the Window.
@@ -86,9 +86,7 @@ class PortalHostView(
       name?.let { PortalRegistry.unregisterHost(it, this) }
     }
   }
-  // endregion
 
-  // region Helpers
   private fun cleanupNow() {
     name?.let { PortalRegistry.unregisterHost(it, this) }
     name = null
@@ -96,5 +94,4 @@ class PortalHostView(
     batchBaseIndex = 0
     hasPendingCleanup = false
   }
-  // endregion
 }

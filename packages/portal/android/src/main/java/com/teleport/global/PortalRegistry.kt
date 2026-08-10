@@ -1,10 +1,17 @@
 package com.teleport.global
 
 import android.view.View
+import com.facebook.react.bridge.UiThreadUtil
 import com.teleport.host.PortalHostView
 import com.teleport.portal.PortalView
 import java.lang.ref.WeakReference
 
+/**
+ * Matches source [PortalView] instances with destination [PortalHostView] instances by name.
+ *
+ * The registry is confined to the Android UI thread because it stores and invokes [View]
+ * instances. Callers must not access it from background threads.
+ */
 object PortalRegistry {
   private val hosts: MutableMap<String, MutableList<WeakReference<PortalHostView>>> = HashMap()
   private val pendingPortals: MutableMap<String, MutableList<WeakReference<PortalView>>> = HashMap()
@@ -13,6 +20,7 @@ object PortalRegistry {
     name: String,
     view: PortalHostView,
   ) {
+    UiThreadUtil.assertOnUiThread()
     val namedHosts = hosts.getOrPut(name) { mutableListOf() }
     namedHosts.removeAll { it.get() == null || it.get() === view }
     namedHosts.add(WeakReference(view))
@@ -23,6 +31,7 @@ object PortalRegistry {
     name: String,
     view: PortalHostView,
   ) {
+    UiThreadUtil.assertOnUiThread()
     hosts[name]?.let { namedHosts ->
       namedHosts.removeAll { it.get() == null || it.get() === view }
       if (namedHosts.isEmpty()) {
@@ -43,6 +52,7 @@ object PortalRegistry {
   }
 
   fun notifyHostLayoutChanged(name: String) {
+    UiThreadUtil.assertOnUiThread()
     pendingPortals[name]?.let { portals ->
       val iterator = portals.iterator()
       while (iterator.hasNext()) {
@@ -61,6 +71,7 @@ object PortalRegistry {
     name: String?,
     sourceView: View,
   ): PortalHostView? {
+    UiThreadUtil.assertOnUiThread()
     if (name == null) return null
 
     val namedHosts = hosts[name] ?: return null
@@ -85,6 +96,7 @@ object PortalRegistry {
     hostName: String,
     portal: PortalView,
   ) {
+    UiThreadUtil.assertOnUiThread()
     val portals = pendingPortals.getOrPut(hostName) { mutableListOf() }
     portals.removeAll { it.get() == null || it.get() == portal }
     portals.add(WeakReference(portal))
@@ -94,6 +106,7 @@ object PortalRegistry {
     hostName: String,
     portal: PortalView,
   ) {
+    UiThreadUtil.assertOnUiThread()
     pendingPortals[hostName]?.let { portals ->
       portals.removeAll { it.get() == null || it.get() == portal }
       if (portals.isEmpty()) {
