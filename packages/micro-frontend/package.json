@@ -52,16 +52,22 @@
     "directory": "packages/micro-frontend"
   },
   "dependencies": {
-    "@granite-js/plugin-core": "workspace:*",
     "@granite-js/utils": "workspace:*",
     "@standard-schema/spec": "^1.0.0"
   },
   "peerDependencies": {
+    "@granite-js/plugin-core": "*",
     "@granite-js/react-native": "*",
     "react": "*",
     "react-native": "*"
   },
+  "peerDependenciesMeta": {
+    "@granite-js/plugin-core": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@granite-js/plugin-core": "workspace:*",
     "@granite-js/react-native": "workspace:*",
     "@types/node": "catalog:tools",
     "@types/react": "catalog:react-native",

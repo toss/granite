@@ -5654,9 +5654,13 @@ __metadata:
     typescript: "catalog:tools"
     vitest: "npm:^4.0.12"
   peerDependencies:
+    "@granite-js/plugin-core": "*"
     "@granite-js/react-native": "*"
     react: "*"
     react-native: "*"
+  peerDependenciesMeta:
+    "@granite-js/plugin-core":
+      optional: true
   languageName: unknown
   linkType: soft
 
