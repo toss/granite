@@ -1,12 +1,11 @@
-import { useState } from "react";
 import {
   createNavigationContainerRef,
   NavigationContainer,
   NavigationIndependentTree,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
-
 import { walletStyles } from "./WalletService.styles";
 
 type WalletStackParamList = {

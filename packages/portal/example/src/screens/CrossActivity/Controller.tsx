@@ -1,3 +1,4 @@
+import { Portal, PortalProvider } from "@granite-js/portal";
 import { useEffect, useRef } from "react";
 import {
   BackHandler,
@@ -5,8 +6,6 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { Portal, PortalProvider } from "@granite-js/portal";
-
 import {
   STORE_HOST_NAME,
   STORE_NAVIGATION_REF,

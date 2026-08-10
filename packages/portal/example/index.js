@@ -1,6 +1,6 @@
 import { AppRegistry } from "react-native";
-import CrossActivityController from "./src/screens/CrossActivity/Controller";
 import { name as appName } from "./app.json";
+import CrossActivityController from "./src/screens/CrossActivity/Controller";
 
 AppRegistry.registerComponent(appName, () => CrossActivityController);
 AppRegistry.registerComponent(
