@@ -20,9 +20,8 @@ microfrontend owns an independent `NavigationContainer`:
 
 ```text
 one React Native runtime
-└── PortalProvider
-    ├── Store NavigationContainer  ──portal──> Store Activity / ViewController
-    └── Wallet NavigationContainer ──portal──> Wallet Activity / ViewController
+├── Store NavigationContainer  ──portal──> Store Activity / ViewController
+└── Wallet NavigationContainer ──portal──> Wallet Activity / ViewController
 ```
 
 Native navigation changes the destination host, not the React Native runtime.
@@ -30,18 +29,18 @@ Each navigation tree therefore remains mounted when the user moves between
 native screens.
 
 ```tsx
-import { Portal, PortalProvider } from "@granite-js/portal";
+import { Portal } from "@granite-js/portal";
 
 export function MicrofrontendController() {
   return (
-    <PortalProvider>
+    <>
       <Portal hostName="store">
         <StoreNavigationContainer />
       </Portal>
       <Portal hostName="wallet">
         <WalletNavigationContainer />
       </Portal>
-    </PortalProvider>
+    </>
   );
 }
 ```

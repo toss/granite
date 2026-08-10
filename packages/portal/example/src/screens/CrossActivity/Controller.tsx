@@ -1,4 +1,4 @@
-import { Portal, PortalProvider } from "@granite-js/portal";
+import { Portal } from "@granite-js/portal";
 import { useEffect, useRef } from "react";
 import {
   BackHandler,
@@ -62,16 +62,14 @@ export default function CrossActivityController() {
   }, []);
 
   return (
-    <PortalProvider>
-      <View style={styles.controllerRoot}>
-        <Portal hostName={STORE_HOST_NAME}>
-          <StoreService />
-        </Portal>
-        <Portal hostName={WALLET_HOST_NAME}>
-          <WalletService />
-        </Portal>
-      </View>
-    </PortalProvider>
+    <View style={styles.controllerRoot}>
+      <Portal hostName={STORE_HOST_NAME}>
+        <StoreService />
+      </Portal>
+      <Portal hostName={WALLET_HOST_NAME}>
+        <WalletService />
+      </Portal>
+    </View>
   );
 }
 
