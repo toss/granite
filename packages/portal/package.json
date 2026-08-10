@@ -96,7 +96,7 @@
     "type": "all",
     "jsSrcsDir": "src/specs",
     "android": {
-      "javaPackageName": "com.teleport"
+      "javaPackageName": "run.granite.portal"
     },
     "ios": {
       "componentProvider": {
