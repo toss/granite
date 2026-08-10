@@ -187,8 +187,6 @@ using namespace facebook::react;
   NSString *newHostName =
       newHostStr.empty() ? nil : [NSString stringWithUTF8String:newHostStr.c_str()];
 
-  std::string newNameStr = newViewProps.name;
-
   if (![self.hostName isEqualToString:newHostName]) {
     if (self.hostName) {
       [[PortalRegistry sharedInstance] unregisterPendingPortal:self withHostName:self.hostName];

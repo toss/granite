@@ -37,14 +37,6 @@ class PortalViewManager :
     return super.updateState(view, props, stateWrapper)
   }
 
-  @ReactProp(name = "name")
-  override fun setName(
-    view: ReactViewGroup?,
-    name: String?,
-  ) {
-    // implement later if needed
-  }
-
   @ReactProp(name = "hostName")
   override fun setHostName(
     view: ReactViewGroup?,

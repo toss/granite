@@ -1,7 +1,7 @@
 import { codegenNativeComponent, type ViewProps } from "react-native";
 
 interface NativeProps extends ViewProps {
-  name?: string;
+  readonly name?: string;
 }
 
 export default codegenNativeComponent<NativeProps>("PortalHostView", {

@@ -5954,19 +5954,16 @@ __metadata:
     "@testing-library/react-native": "npm:^13.3.3"
     "@types/jest": "npm:^29.5.12"
     "@types/react": "catalog:react-native"
-    "@types/react-dom": "catalog:react-native"
     babel-jest: "npm:^29.7.0"
     eslint: "npm:^9.7.0"
     jest: "npm:^29.7.0"
     react: "catalog:react-native"
-    react-dom: "catalog:react-native"
     react-native: "catalog:react-native"
     react-native-builder-bob: "catalog:tools"
     react-test-renderer: "npm:19.2.3"
     typescript: "catalog:tools"
   peerDependencies:
     react: "*"
-    react-dom: "*"
     react-native: "*"
   languageName: unknown
   linkType: soft
