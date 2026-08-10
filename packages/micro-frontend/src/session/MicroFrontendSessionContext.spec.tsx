@@ -9,7 +9,7 @@ import {
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
 
 describe('MicroFrontendSessionProvider', () => {
-  it('provides the native session identity, visibility, and bound close action', async () => {
+  it('provides the native session identity and bound close action', async () => {
     // Given
     const close = vi.fn(async () => undefined);
     let receivedSession: MicroFrontendSession | null = null;
@@ -22,7 +22,7 @@ describe('MicroFrontendSessionProvider', () => {
     // When
     await act(async () => {
       create(
-        <MicroFrontendSessionProvider sessionId="session-1" isVisible={true} close={close}>
+        <MicroFrontendSessionProvider sessionId="session-1" close={close}>
           <Consumer />
         </MicroFrontendSessionProvider>
       );
@@ -31,7 +31,6 @@ describe('MicroFrontendSessionProvider', () => {
     // Then
     expect(receivedSession).toEqual({
       sessionId: 'session-1',
-      isVisible: true,
       close,
     });
   });

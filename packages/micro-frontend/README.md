@@ -222,10 +222,10 @@ that event arrives.
 import { Portal, PortalProvider } from '@granite-js/portal';
 import {
   createMicroFrontendRuntime,
-  MicroFrontendSessionProvider,
+  MicroFrontendSessionRenderer,
   type MicroFrontendRuntimeEvent,
 } from '@granite-js/micro-frontend';
-import { lazy, Suspense, useEffect, useReducer, type ComponentType, type LazyExoticComponent } from 'react';
+import { lazy, useEffect, useReducer, type ComponentType, type LazyExoticComponent } from 'react';
 
 interface AppProps {
   readonly scheme: string;
@@ -315,15 +315,13 @@ export function MonoHermesTrack() {
     <PortalProvider>
       {sessions.map(({ App, ...session }) => (
         <Portal key={session.sessionId} hostName={session.sessionId}>
-          <MicroFrontendSessionProvider
+          <MicroFrontendSessionRenderer
+            app={App}
             sessionId={session.sessionId}
+            scheme={session.scheme}
             isVisible={session.isVisible}
             close={() => runtime.closeSession(session.sessionId)}
-          >
-            <Suspense fallback={null}>
-              <App scheme={session.scheme} />
-            </Suspense>
-          </MicroFrontendSessionProvider>
+          />
         </Portal>
       ))}
     </PortalProvider>
@@ -331,5 +329,6 @@ export function MonoHermesTrack() {
 }
 ```
 
-Remote apps use `useMicroFrontendSession()` to read visibility or request a close without receiving `sessionId` as an
-application prop.
+Remote apps use Granite's `useVisibility()` for visibility and `useMicroFrontendSession()` to request a close without
+receiving `sessionId` as an application prop. The renderer keeps session visibility inside Granite's existing
+visibility provider chain, so remote applications do not need session-specific visibility code.

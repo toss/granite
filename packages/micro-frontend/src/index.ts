@@ -34,6 +34,8 @@ export {
   useMicroFrontendSession,
 } from './session/MicroFrontendSessionContext';
 export type { MicroFrontendSession, MicroFrontendSessionProviderProps } from './session/MicroFrontendSessionContext';
+export { MicroFrontendSessionRenderer } from './session/MicroFrontendSessionRenderer';
+export type { MicroFrontendSessionRendererProps } from './session/MicroFrontendSessionRenderer';
 export type {
   AppRequest,
   MicroFrontendAdapter,

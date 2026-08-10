@@ -2,7 +2,6 @@ import { createContext, useContext, useMemo, type ReactElement, type ReactNode }
 
 export interface MicroFrontendSession {
   readonly sessionId: string;
-  readonly isVisible: boolean;
   readonly close: () => Promise<void>;
 }
 
@@ -23,10 +22,9 @@ export function MicroFrontendSessionProvider(props: MicroFrontendSessionProvider
   const value = useMemo<MicroFrontendSession>(
     () => ({
       close: props.close,
-      isVisible: props.isVisible,
       sessionId: props.sessionId,
     }),
-    [props.close, props.isVisible, props.sessionId]
+    [props.close, props.sessionId]
   );
 
   return <MicroFrontendSessionContext.Provider value={value}>{props.children}</MicroFrontendSessionContext.Provider>;

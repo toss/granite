@@ -7,6 +7,13 @@ import { AppRoot } from './AppRoot';
 import { HostAppRoot } from './HostAppRoot';
 import { getSchemeUri } from '../constant-bridges';
 import { setupPolyfills } from '../polyfills';
+import { VisibilityChangedProvider } from '../visibility/useVisibilityChanged';
+
+interface GraniteAppRuntimeProps {
+  readonly presentationVisibility?: boolean;
+}
+
+type RegisteredAppProps = InitialProps & GraniteAppRuntimeProps;
 
 export interface GraniteProps {
   /**
@@ -72,26 +79,28 @@ const createApp = () => {
     registerApp( 
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
       { appName, context, router, initialScheme, setIosSwipeGestureEnabled, setiOSBackPressHandler, getInitialUrl }: GraniteProps
-    ): (initialProps: InitialProps) => JSX.Element {
+    ): (initialProps: RegisteredAppProps) => JSX.Element {
       if (appName === ENTRY_BUNDLE_NAME) {
         throw new Error(`Reserved app name 'shared' cannot be used`);
       }
 
-      function Root(initialProps: InitialProps) {
+      function Root({ presentationVisibility = true, ...initialProps }: RegisteredAppProps) {
         const initialSchemeValue = (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ?? getSchemeUri();
 
         return (
-          <AppRoot
-            container={AppContainer}
-            initialProps={initialProps}
-            initialScheme={initialSchemeValue}
-            setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
-            setiOSBackPressHandler={setiOSBackPressHandler}
-            getInitialUrl={getInitialUrl}
-            appName={appName}
-            context={context}
-            router={router}
-          />
+          <VisibilityChangedProvider isVisible={presentationVisibility}>
+            <AppRoot
+              container={AppContainer}
+              initialProps={initialProps}
+              initialScheme={initialSchemeValue}
+              setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
+              setiOSBackPressHandler={setiOSBackPressHandler}
+              getInitialUrl={getInitialUrl}
+              appName={appName}
+              context={context}
+              router={router}
+            />
+          </VisibilityChangedProvider>
         );
       }
 
