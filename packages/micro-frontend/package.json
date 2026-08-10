@@ -3,33 +3,28 @@
   "version": "1.0.37",
   "description": "Micro-frontend runtime and build plugin for Granite applications",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/module/index.js",
+  "types": "./dist/typescript/index.d.ts",
   "react-native": "./src/index.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/typescript/index.d.ts",
       "react-native": "./src/index.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "default": "./dist/module/index.js"
     },
     "./plugin": {
-      "types": "./dist/plugin.d.ts",
-      "import": "./dist/plugin.js",
-      "require": "./dist/plugin.cjs"
+      "types": "./dist/typescript/plugin/index.d.ts",
+      "default": "./dist/module/plugin/index.js"
     },
     "./runtime": {
-      "types": "./dist/runtime.d.ts",
+      "types": "./dist/typescript/runtime/index.d.ts",
       "react-native": "./src/runtime/index.ts",
-      "import": "./dist/runtime.js",
-      "require": "./dist/runtime.cjs"
+      "default": "./dist/module/runtime/index.js"
     },
     "./host": {
-      "types": "./dist/host.d.ts",
+      "types": "./dist/typescript/host/index.d.ts",
       "react-native": "./src/host/index.ts",
-      "import": "./dist/host.js",
-      "require": "./dist/host.cjs"
+      "default": "./dist/module/host/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -42,11 +37,21 @@
     "*.podspec",
     "README.md",
     "LICENSE",
-    "NOTICE"
+    "NOTICE",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*"
   ],
   "scripts": {
     "prepack": "yarn build",
-    "build": "tsdown",
+    "build": "bob build && tsc --project tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest --run"
   },
@@ -73,10 +78,23 @@
     "@types/react-test-renderer": "^19",
     "react": "catalog:react-native",
     "react-native": "catalog:react-native",
+    "react-native-builder-bob": "catalog:tools",
     "react-test-renderer": "19.2.3",
-    "tsdown": "catalog:tools",
     "typescript": "catalog:tools",
     "vitest": "^4.0.12"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "dist",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ]
+    ],
+    "exclude": "{**/{__tests__,__fixtures__,__mocks__}/**,**/*.spec.*,**/*.test.*}"
   },
   "codegenConfig": {
     "name": "GraniteMicroFrontendRuntimeSpec",
