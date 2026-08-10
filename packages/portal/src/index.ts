@@ -1,4 +1,2 @@
-export { default as PortalHost } from "./components/PortalHost";
-export { default as Portal } from "./components/Portal";
-export { default as PortalProvider } from "./PortalProvider";
-export { default as usePortal } from "./hooks/usePortal";
+export { Fragment as PortalProvider } from "react";
+export { default as Portal } from "./specs/PortalViewNativeComponent";
