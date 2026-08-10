@@ -2,8 +2,33 @@ export { createMicroFrontendRuntime } from './createMicroFrontendRuntime';
 export type { CreateMicroFrontendRuntimeOptions } from './createMicroFrontendRuntime';
 export { createRoute } from './createRoute';
 export type { MicroFrontendRouteOptions } from './createRoute';
-export { hideHostSkeleton } from './host/hostSkeletonStore';
-export type { HostSkeletonComponent, HostSkeletonParams } from './host/types';
+export type { HostSkeletonController, HostSkeletonProps } from './host/HostSkeleton';
+export {
+  HostSkeleton,
+  useHostSkeletonController,
+  useIsHostSkeletonHidden,
+  useResolvedHostSkeleton,
+} from './host/HostSkeleton';
+export type {
+  HostSkeletonAppConfig,
+  HostSkeletonComponent,
+  HostSkeletonParams,
+  HostSkeletonRouteRequest,
+  RegisterHostSkeletonRouteOptions,
+  ResolvedHostSkeleton,
+} from './host/types';
+export {
+  createHostSkeletonRoutePrefix,
+  normalizeHostSkeletonRoutePath,
+} from './host/routeMatcher';
+export {
+  hideHostSkeleton,
+  installHostSkeletonBridge,
+  registerHostSkeletonRoute,
+  resetHostSkeleton,
+  resolveHostSkeleton,
+  resolveHostSkeletonForAppUrl,
+} from './host/hostSkeletonStore';
 export {
   MicroFrontendSessionProvider,
   MissingMicroFrontendSessionError,

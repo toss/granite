@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import { createRequire } from 'node:module';
 import * as path from 'path';
 import type { GranitePluginCore } from '@granite-js/plugin-core';
 import { prepareLocalDirectory } from '@granite-js/utils';
@@ -17,12 +16,11 @@ export async function microFrontend(options: MicroFrontendPluginOptions = {}): P
   const nonEagerEntries = Object.entries(shared ?? {}).filter(([, config]) => config.eager !== true);
   const localDirectory = prepareLocalDirectory(process.cwd());
   const preludePath = path.join(localDirectory, 'micro-frontend-runtime.js');
-  const runtimeModulePath = createRequire(import.meta.url).resolve('@granite-js/micro-frontend/runtime');
-  const prelude = getPreludeConfig(normalizedOptions, runtimeModulePath);
+  const prelude = getPreludeConfig(normalizedOptions);
   const resolver = createSharedResolverConfig(nonEagerEntries);
 
   function writePrelude(appName?: string) {
-    const config = getPreludeConfig(normalizedOptions, runtimeModulePath, appName);
+    const config = getPreludeConfig(normalizedOptions, appName);
     fs.writeFileSync(preludePath, config.preludeScript, 'utf8');
   }
 

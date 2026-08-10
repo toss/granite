@@ -121,7 +121,7 @@ import {
   HostSkeleton,
   useIsHostSkeletonHidden,
   useResolvedHostSkeleton,
-} from '@granite-js/micro-frontend/host';
+} from '@granite-js/micro-frontend';
 
 const resolved = useResolvedHostSkeleton(session.scheme);
 const hidden = useIsHostSkeletonHidden();

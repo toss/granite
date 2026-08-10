@@ -16,16 +16,6 @@
       "types": "./dist/typescript/plugin/index.d.ts",
       "default": "./dist/module/plugin/index.js"
     },
-    "./runtime": {
-      "types": "./dist/typescript/runtime/index.d.ts",
-      "react-native": "./src/runtime/index.ts",
-      "default": "./dist/module/runtime/index.js"
-    },
-    "./host": {
-      "types": "./dist/typescript/host/index.d.ts",
-      "react-native": "./src/host/index.ts",
-      "default": "./dist/module/host/index.js"
-    },
     "./package.json": "./package.json"
   },
   "files": [
