@@ -9,6 +9,12 @@ import com.teleport.global.PortalRegistry
 import com.teleport.host.PortalHostView
 import java.util.ArrayList
 
+/**
+ * React/Fabric-owned source that moves its Android child views into a named [PortalHostView].
+ *
+ * Children remain logically owned by this view. They stay attached here while no destination is
+ * available, move to the matching attached host when it appears, and return here when it detaches.
+ */
 class PortalView(
   context: Context,
 ) : ReactViewGroup(context) {
