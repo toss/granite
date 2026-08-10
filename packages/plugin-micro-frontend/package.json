@@ -45,16 +45,12 @@
     "*.d.ts"
   ],
   "devDependencies": {
-    "@types/react": "catalog:react-native",
     "@vitest/coverage-v8": "^4.0.12",
-    "react": "catalog:react-native",
-    "react-native": "catalog:react-native",
     "tsdown": "catalog:tools",
     "typescript": "catalog:tools",
     "vitest": "^4.0.12"
   },
   "dependencies": {
-    "@granite-js/micro-frontend": "workspace:*",
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/utils": "workspace:*",
     "es-toolkit": "^1.39.8",

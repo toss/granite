@@ -5636,7 +5636,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@granite-js/micro-frontend@workspace:*, @granite-js/micro-frontend@workspace:packages/micro-frontend":
+"@granite-js/micro-frontend@workspace:packages/micro-frontend":
   version: 0.0.0-use.local
   resolution: "@granite-js/micro-frontend@workspace:packages/micro-frontend"
   dependencies:
@@ -5911,15 +5911,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@granite-js/plugin-micro-frontend@workspace:packages/plugin-micro-frontend"
   dependencies:
-    "@granite-js/micro-frontend": "workspace:*"
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/utils": "workspace:*"
-    "@types/react": "catalog:react-native"
     "@vitest/coverage-v8": "npm:^4.0.12"
     es-toolkit: "npm:^1.39.8"
     picocolors: "npm:^1.1.1"
-    react: "catalog:react-native"
-    react-native: "catalog:react-native"
     tsdown: "catalog:tools"
     typescript: "catalog:tools"
     vitest: "npm:^4.0.12"
