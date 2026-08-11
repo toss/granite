@@ -1,12 +1,13 @@
+import { VisibilityChangedProvider } from '@granite-js/react-native';
 import { createContext, useContext, useMemo, type ReactElement, type ReactNode } from 'react';
 
 export interface MicroFrontendSession {
   readonly sessionId: string;
-  readonly close: () => Promise<void>;
 }
 
 export interface MicroFrontendSessionProviderProps extends MicroFrontendSession {
   readonly children: ReactNode;
+  readonly presentationVisibility: boolean;
 }
 
 const MicroFrontendSessionContext = createContext<MicroFrontendSession | null>(null);
@@ -21,13 +22,18 @@ export class MissingMicroFrontendSessionError extends Error {
 export function MicroFrontendSessionProvider(props: MicroFrontendSessionProviderProps): ReactElement {
   const value = useMemo<MicroFrontendSession>(
     () => ({
-      close: props.close,
       sessionId: props.sessionId,
     }),
-    [props.close, props.sessionId]
+    [props.sessionId]
   );
 
-  return <MicroFrontendSessionContext.Provider value={value}>{props.children}</MicroFrontendSessionContext.Provider>;
+  return (
+    <MicroFrontendSessionContext.Provider value={value}>
+      <VisibilityChangedProvider isVisible={props.presentationVisibility}>
+        {props.children}
+      </VisibilityChangedProvider>
+    </MicroFrontendSessionContext.Provider>
+  );
 }
 
 export function useMicroFrontendSession(): MicroFrontendSession {

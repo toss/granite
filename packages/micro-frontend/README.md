@@ -19,8 +19,10 @@ shared-runtime session contract and is exported from this package.
 ```text
 Granite brownfield host
 ├── native screen lifecycle
-│   ├── session identity and close action
+│   ├── session identity
 │   └── presentation visibility
+├── Brownfield Brick registry
+│   └── close the current native view
 ├── one retained React Native runtime
 │   ├── evaluate remote bundle
 │   ├── keep one React tree per session
@@ -39,7 +41,7 @@ The session identifier joins the contracts:
 ```text
 register native session(sessionId)
   → openApp(sessionId, appName, scheme)
-  → <MicroFrontendSessionRenderer sessionId={sessionId}>
+  → <MicroFrontendSessionProvider sessionId={sessionId}>
   → <Portal hostName={sessionId}>
   → native Portal host named sessionId
 ```
@@ -144,35 +146,33 @@ The public runtime API is:
 | `preloadApp(appName)` | Load and evaluate one app without importing an exposed module. |
 | `importApp(request)` | Ensure the app is evaluated and import `appName/exposedModule`. |
 | `evaluateScript(filePath)` | Evaluate an already-local bundle in the retained runtime. |
-| `closeSession(sessionId)` | Ask native to run the close action registered for that session. |
 | `onEvent(listener)` | Subscribe to native preload, open, close, and visibility events. |
 
 ## Session rendering
 
-`MicroFrontendSessionRenderer` owns the Portal composition. Consumers should
-not wrap it in another Portal.
+The brownfield host owns the product-specific session track. Compose the Portal
+destination with `MicroFrontendSessionProvider` so native presentation state
+joins Granite's existing visibility context.
 
 ```tsx
-<MicroFrontendSessionRenderer
-  app={App}
-  sessionId={session.sessionId}
-  scheme={session.scheme}
-  isVisible={session.isVisible}
-  close={() => runtime.closeSession(session.sessionId)}
-/>
+<Portal hostName={session.sessionId}>
+  <MicroFrontendSessionProvider
+    sessionId={session.sessionId}
+    presentationVisibility={session.isVisible}
+  >
+    <App scheme={session.scheme} />
+  </MicroFrontendSessionProvider>
+</Portal>
 ```
 
-It performs three jobs:
-
-1. renders `<Portal hostName={sessionId}>`;
-2. provides `useMicroFrontendSession()` with the session identity and close
-   action; and
-3. passes native presentation state to the Granite app as
-   `presentationVisibility`.
+The provider exposes the native session identity and combines
+`presentationVisibility` with Granite's existing `VisibilityChangedProvider`.
+Remote apps continue to read the final app, navigation, and native-session
+visibility through `useVisibility()`.
 
 Remote apps use Granite's `useVisibility()` for visibility and
-`useMicroFrontendSession()` to request close. They do not receive `sessionId`
-as an application prop.
+`closeView()` to close the current brownfield view. They do not receive
+`sessionId` as an application prop.
 
 ## Host pending component
 
@@ -211,7 +211,6 @@ The Codegen TurboModule is named `GraniteMicroFrontendRuntime`.
 ```ts
 interface Spec extends TurboModule {
   evaluateScript(request: { readonly filePath: string }): Promise<void>;
-  requestCloseSession(request: { readonly sessionId: string }): Promise<void>;
   startEventDelivery(): void;
   readonly onEvent: CodegenTypes.EventEmitter<NativeMicroFrontendRuntimeEvent>;
 }
@@ -251,9 +250,10 @@ The brownfield application must:
    closing the current Granite view, in the Granite host integration. They are
    not duplicated by this package.
 
-Native owns how a destination closes. JavaScript `closeSession(sessionId)`
-executes the registered native close action; it never searches for an
-`Activity` or `UIViewController`.
+The container-owned Brownfield Brick registry defines how the current native
+view closes. JavaScript uses Granite's `closeView()` command. The session
+lifecycle remains separate: native emits `closeApp(sessionId)` only when the
+container actually tears down so JavaScript can unmount its React tree.
 
 ## Android native API
 
@@ -264,8 +264,8 @@ destination views in `com.teleport.host`.
 
 | API | Lifetime / behavior |
 | --- | --- |
-| `ActivitySessionBinding.bind(activity, sessionId, appName, scheme)` | Convenience binding for an `Activity`. Emits open, derives visibility from start/stop, runs `finish()` on close request, and emits close on destroy. Retain it for the Activity lifetime. |
-| `GraniteMicroFrontendRuntimeHost.registerSession(sessionId, closeAction)` | Register a custom native container and return a `GraniteMicroFrontendSessionRegistration`. |
+| `ActivitySessionBinding.bind(activity, sessionId, appName, scheme)` | Convenience binding for an `Activity`. Emits open, derives visibility from start/stop, and emits close on destroy. Retain it for the Activity lifetime. |
+| `GraniteMicroFrontendRuntimeHost.registerSession(sessionId)` | Register a custom native container and return a `GraniteMicroFrontendSessionRegistration`. |
 | `GraniteMicroFrontendSessionRegistration.openApp(appName, scheme)` | Emit `openApp` once. |
 | `GraniteMicroFrontendSessionRegistration.setVisible(isVisible)` | Emit a visibility event only when the value changes. |
 | `GraniteMicroFrontendSessionRegistration.closeApp()` | Emit `closeApp` once after open. |
@@ -374,9 +374,9 @@ Import public APIs from `GraniteMicroFrontendRuntime`.
 
 | API | Lifetime / behavior |
 | --- | --- |
-| `+[GraniteMicroFrontendViewControllerSessionBinding bindViewController:sessionId:appName:scheme:closeHandler:]` | Convenience binding for a `UIViewController`. Emits open and derives visibility from appearance callbacks. Retain until teardown. |
+| `+[GraniteMicroFrontendViewControllerSessionBinding bindViewController:sessionId:appName:scheme:]` | Convenience binding for a `UIViewController`. Emits open and derives visibility from appearance callbacks. Retain until teardown. |
 | `-[GraniteMicroFrontendViewControllerSessionBinding invalidate]` | Emit close and detach lifecycle observation. |
-| `+[GraniteMicroFrontendRuntimeHost registerSession:closeHandler:]` | Register a custom container and return a session registration. |
+| `+[GraniteMicroFrontendRuntimeHost registerSession:]` | Register a custom container and return a session registration. |
 | `-[GraniteMicroFrontendSessionRegistration openAppWithAppName:scheme:]` | Emit `openApp` once. |
 | `-[GraniteMicroFrontendSessionRegistration setVisible:]` | Emit visibility only when it changes. |
 | `-[GraniteMicroFrontendSessionRegistration closeApp]` | Emit `closeApp` once after open. |
@@ -432,13 +432,7 @@ final class CartViewController: UIViewController {
       sessionId: sessionId,
       appName: "cart",
       scheme: "granite://cart/products/1"
-    ) { [weak self] in
-      self?.dismiss(animated: true) { [weak self] in
-        self?.sessionBinding?.invalidate()
-        self?.sessionBinding = nil
-        self?.portalHostView.invalidate()
-      }
-    }
+    )
   }
 
   func reactRuntimeDidStart() {

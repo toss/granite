@@ -3,7 +3,6 @@ package run.granite.microfrontend
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import android.os.Handler
 import android.os.Looper
 import java.util.WeakHashMap
 
@@ -53,7 +52,6 @@ class ActivitySessionBinding private constructor(
     }
 
     companion object {
-        private val mainHandler = Handler(Looper.getMainLooper())
         private val boundBindings = WeakHashMap<Activity, ActivitySessionBinding>()
 
         @JvmStatic
@@ -67,13 +65,7 @@ class ActivitySessionBinding private constructor(
                 "ActivitySessionBinding.bind must be called on the main thread"
             }
             boundBindings[activity]?.also { return@synchronized it }
-            val registration = GraniteMicroFrontendRuntimeHost.registerSession(sessionId) {
-                if (Looper.myLooper() == Looper.getMainLooper()) {
-                    activity.finish()
-                } else {
-                    mainHandler.post { activity.finish() }
-                }
-            }
+            val registration = GraniteMicroFrontendRuntimeHost.registerSession(sessionId)
             ActivitySessionBinding(activity, registration).also { binding ->
                 boundBindings[activity] = binding
                 registration.openApp(appName, scheme)

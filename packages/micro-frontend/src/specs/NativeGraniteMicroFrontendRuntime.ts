@@ -16,13 +16,8 @@ export type EvaluateScriptRequest = Readonly<{
   filePath: string;
 }>;
 
-export type CloseSessionRequest = Readonly<{
-  sessionId: string;
-}>;
-
 export interface Spec extends TurboModule {
   evaluateScript(request: EvaluateScriptRequest): Promise<void>;
-  requestCloseSession(request: CloseSessionRequest): Promise<void>;
   startEventDelivery(): void;
   readonly onEvent: CodegenTypes.EventEmitter<NativeMicroFrontendRuntimeEvent>;
 }

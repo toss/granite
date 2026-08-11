@@ -15,7 +15,7 @@ class GraniteMicroFrontendSessionStoreTest {
     fun `session emits open visible close in native lifecycle order`() {
         val events = mutableListOf<GraniteMicroFrontendEvent>()
         val store = GraniteMicroFrontendSessionStore(events::add)
-        val registration = store.registerSession("session-1") {}
+        val registration = store.registerSession("session-1")
 
         registration.openApp("shopping", "granite://shopping")
         assertTrue(registration.setVisible(true))
@@ -36,7 +36,7 @@ class GraniteMicroFrontendSessionStoreTest {
     fun `open app is emitted only once per session`() {
         val events = mutableListOf<GraniteMicroFrontendEvent>()
         val store = GraniteMicroFrontendSessionStore(events::add)
-        val registration = store.registerSession("session-1") {}
+        val registration = store.registerSession("session-1")
 
         assertTrue(registration.openApp("shopping", "granite://shopping"))
         assertFalse(registration.openApp("shopping", "granite://shopping"))
@@ -51,7 +51,7 @@ class GraniteMicroFrontendSessionStoreTest {
     fun `session visibility updates are idempotent per session`() {
         val events = mutableListOf<GraniteMicroFrontendEvent>()
         val store = GraniteMicroFrontendSessionStore(events::add)
-        val registration = store.registerSession("session-1") {}
+        val registration = store.registerSession("session-1")
 
         assertTrue(registration.openApp("shopping", "granite://shopping"))
         assertTrue(registration.setVisible(true))
@@ -73,8 +73,8 @@ class GraniteMicroFrontendSessionStoreTest {
     fun `visibility deduplication is isolated per session`() {
         val events = mutableListOf<GraniteMicroFrontendEvent>()
         val store = GraniteMicroFrontendSessionStore(events::add)
-        val first = store.registerSession("session-1") {}
-        val second = store.registerSession("session-2") {}
+        val first = store.registerSession("session-1")
+        val second = store.registerSession("session-2")
 
         assertTrue(first.openApp("shopping", "granite://shopping"))
         assertTrue(second.openApp("payment", "granite://payment"))
@@ -106,7 +106,7 @@ class GraniteMicroFrontendSessionStoreTest {
             }
             events.add(event)
         }
-        val registration = store.registerSession("session-1") {}
+        val registration = store.registerSession("session-1")
         val openResult = AtomicBoolean()
         val closeResult = AtomicBoolean()
         val closeStarted = CountDownLatch(1)
@@ -149,7 +149,7 @@ class GraniteMicroFrontendSessionStoreTest {
     fun `visibility before open and after close is ignored`() {
         val events = mutableListOf<GraniteMicroFrontendEvent>()
         val store = GraniteMicroFrontendSessionStore(events::add)
-        val registration = store.registerSession("session-1") {}
+        val registration = store.registerSession("session-1")
 
         assertFalse(registration.setVisible(true))
         assertTrue(registration.openApp("shopping", "granite://shopping"))
@@ -168,24 +168,10 @@ class GraniteMicroFrontendSessionStoreTest {
     }
 
     @Test
-    fun `request close invokes native close action at most once`() {
-        var closeRequests = 0
-        val store = GraniteMicroFrontendSessionStore {}
-        store.registerSession("session-1") {
-            closeRequests += 1
-        }
-
-        assertEquals(CloseRequestResult.Accepted, store.requestCloseSession("session-1"))
-        assertEquals(CloseRequestResult.Accepted, store.requestCloseSession("session-1"))
-
-        assertEquals(1, closeRequests)
-    }
-
-    @Test
     fun `close app is emitted only once after open for actual teardown`() {
         val events = mutableListOf<GraniteMicroFrontendEvent>()
         val store = GraniteMicroFrontendSessionStore(events::add)
-        val registration = store.registerSession("session-1") {}
+        val registration = store.registerSession("session-1")
 
         assertFalse(registration.closeApp())
         assertTrue(registration.openApp("shopping", "granite://shopping"))

@@ -3,7 +3,6 @@ package run.granite.microfrontend
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
-import com.facebook.react.bridge.UiThreadUtil
 import com.facebook.react.module.annotations.ReactModule
 
 @ReactModule(name = NativeGraniteMicroFrontendRuntimeSpec.NAME)
@@ -40,29 +39,6 @@ class GraniteMicroFrontendRuntimeModule(
         }
     }
 
-    override fun requestCloseSession(request: ReadableMap, promise: Promise) {
-        val sessionId = request.getString("sessionId")
-        if (sessionId == null) {
-            promise.reject(ERROR_INVALID_REQUEST, "requestCloseSession requires request.sessionId")
-            return
-        }
-
-        UiThreadUtil.runOnUiThread {
-            when (val result = GraniteMicroFrontendRuntimeHost.requestCloseSession(sessionId)) {
-                CloseRequestResult.Accepted -> promise.resolve(null)
-                CloseRequestResult.NotFound -> promise.reject(
-                    ERROR_SESSION_NOT_FOUND,
-                    "No native host is registered for session '$sessionId'",
-                )
-                is CloseRequestResult.Failed -> promise.reject(
-                    ERROR_CLOSE_SESSION,
-                    result.cause.message,
-                    result.cause,
-                )
-            }
-        }
-    }
-
     override fun startEventDelivery() {
         GraniteMicroFrontendRuntimeHost.startEventDelivery(this)
     }
@@ -75,7 +51,5 @@ class GraniteMicroFrontendRuntimeModule(
     private companion object {
         const val ERROR_INVALID_REQUEST = "INVALID_REQUEST"
         const val ERROR_EVALUATE_SCRIPT = "EVALUATE_SCRIPT_FAILED"
-        const val ERROR_SESSION_NOT_FOUND = "SESSION_NOT_FOUND"
-        const val ERROR_CLOSE_SESSION = "CLOSE_SESSION_FAILED"
     }
 }

@@ -20,7 +20,6 @@ export interface NativeMicroFrontendRuntimeEvent {
 
 export interface NativeMicroFrontendRuntime {
   readonly evaluateScript: (request: { readonly filePath: string }) => Promise<void>;
-  readonly requestCloseSession: (request: { readonly sessionId: string }) => Promise<void>;
   readonly startEventDelivery: () => void;
   readonly onEvent: (
     listener: (event: NativeMicroFrontendRuntimeEvent) => void
@@ -125,7 +124,6 @@ export function createMicroFrontendRuntimeWithDependencies(
       await preloadApp(appName);
       return dependencies.registry.importModule<TModule>(request);
     },
-    closeSession: (sessionId) => dependencies.nativeRuntime.requestCloseSession({ sessionId }),
     onEvent(listener) {
       const subscription = dependencies.nativeRuntime.onEvent((event) => {
         const parsedEvent = dependencies.parseEvent(event);

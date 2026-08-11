@@ -6,31 +6,14 @@ internal class GraniteMicroFrontendSessionStore(
     private val lock = Any()
     private val sessions = mutableMapOf<String, SessionEntry>()
 
-    fun registerSession(sessionId: String, closeAction: Runnable): GraniteMicroFrontendSessionRegistration {
+    fun registerSession(sessionId: String): GraniteMicroFrontendSessionRegistration {
         require(sessionId.isNotBlank()) { "sessionId must not be blank" }
         val token = java.util.UUID.randomUUID().toString()
         synchronized(lock) {
             check(sessions[sessionId] == null) { "Session '$sessionId' is already registered" }
-            sessions[sessionId] = SessionEntry(token, closeAction)
+            sessions[sessionId] = SessionEntry(token)
         }
         return GraniteMicroFrontendSessionRegistration(this, sessionId, token)
-    }
-
-    fun requestCloseSession(sessionId: String): CloseRequestResult {
-        val action = synchronized(lock) {
-            val session = sessions[sessionId] ?: return CloseRequestResult.NotFound
-            if (session.closeRequested) {
-                return CloseRequestResult.Accepted
-            }
-            session.closeRequested = true
-            session.closeAction
-        }
-        return try {
-            action.run()
-            CloseRequestResult.Accepted
-        } catch (error: Exception) {
-            CloseRequestResult.Failed(error)
-        }
     }
 
     fun openApp(sessionId: String, token: String, appName: String, scheme: String): Boolean {
@@ -81,8 +64,6 @@ internal class GraniteMicroFrontendSessionStore(
 
     private data class SessionEntry(
         val token: String,
-        val closeAction: Runnable,
-        var closeRequested: Boolean = false,
         var opened: Boolean = false,
         var isVisible: Boolean = false,
         var closed: Boolean = false,
@@ -103,10 +84,4 @@ class GraniteMicroFrontendSessionRegistration internal constructor(
     override fun close() {
         store.unregisterSession(sessionId, token)
     }
-}
-
-internal sealed interface CloseRequestResult {
-    data object Accepted : CloseRequestResult
-    data object NotFound : CloseRequestResult
-    data class Failed(val cause: Exception) : CloseRequestResult
 }

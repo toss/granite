@@ -15,15 +15,13 @@ NS_ASSUME_NONNULL_BEGIN
 + (GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
                                                                sessionId:(NSString *)sessionId
                                                                  appName:(NSString *)appName
-                                                                  scheme:(NSString *)scheme
-                                                            closeHandler:(dispatch_block_t)closeHandler;
+                                                                  scheme:(NSString *)scheme;
 - (void)invalidate;
 @end
 
 @interface GraniteMicroFrontendRuntimeHost : NSObject
 
-+ (GraniteMicroFrontendSessionRegistration *)registerSession:(NSString *)sessionId
-                                                closeHandler:(dispatch_block_t)closeHandler;
++ (GraniteMicroFrontendSessionRegistration *)registerSession:(NSString *)sessionId;
 
 + (void)emitPreloadApp:(NSString *)appName;
 

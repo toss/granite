@@ -31,7 +31,6 @@ function createRuntimeFixture() {
   };
   const nativeRuntime: NativeMicroFrontendRuntime = {
     evaluateScript: vi.fn(async () => undefined),
-    requestCloseSession: vi.fn(async () => undefined),
     startEventDelivery: vi.fn(),
     onEvent(listener) {
       listeners.add(listener);
@@ -110,7 +109,7 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     expect(fixture.adapter.loadBundle).toHaveBeenCalledTimes(2);
   });
 
-  it('delegates session close and forwards parsed native events', async () => {
+  it('starts event delivery after registering the listener and forwards parsed native events', () => {
     // Given
     const fixture = createRuntimeFixture();
     const listener = vi.fn<(event: MicroFrontendRuntimeEvent) => void>();
@@ -126,16 +125,12 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
 
     // When
     fixture.emit(event);
-    await fixture.runtime.closeSession('session-1');
     subscription.remove();
     fixture.emit(event);
 
     // Then
     expect(listener).toHaveBeenCalledOnce();
     expect(listener).toHaveBeenCalledWith(event);
-    expect(fixture.nativeRuntime.requestCloseSession).toHaveBeenCalledWith({
-      sessionId: 'session-1',
-    });
     expect(fixture.nativeRuntime.startEventDelivery).toHaveBeenCalledOnce();
   });
 

@@ -8,6 +8,10 @@ export interface MicroFrontendBundle {
   readonly filePath: string;
 }
 
+export interface MicroFrontendAppProps {
+  readonly scheme: string;
+}
+
 export interface MicroFrontendAdapter {
   readonly loadBundle: (request: MicroFrontendBundleRequest) => Promise<MicroFrontendBundle>;
 }
@@ -45,6 +49,5 @@ export interface MicroFrontendRuntimeApi {
   readonly evaluateScript: (filePath: string) => Promise<void>;
   readonly preloadApp: (appName: string) => Promise<void>;
   readonly importApp: <TModule>(request: AppRequest) => Promise<TModule>;
-  readonly closeSession: (sessionId: string) => Promise<void>;
   readonly onEvent: (listener: (event: MicroFrontendRuntimeEvent) => void) => MicroFrontendRuntimeEventSubscription;
 }

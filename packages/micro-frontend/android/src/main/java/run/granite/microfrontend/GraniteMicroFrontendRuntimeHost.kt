@@ -5,8 +5,8 @@ object GraniteMicroFrontendRuntimeHost {
     private val sessionStore = GraniteMicroFrontendSessionStore(eventRouter::emit)
 
     @JvmStatic
-    fun registerSession(sessionId: String, closeAction: Runnable): GraniteMicroFrontendSessionRegistration =
-        sessionStore.registerSession(sessionId, closeAction)
+    fun registerSession(sessionId: String): GraniteMicroFrontendSessionRegistration =
+        sessionStore.registerSession(sessionId)
 
     @JvmSynthetic
     internal fun emit(event: GraniteMicroFrontendEvent) = eventRouter.emit(event)
@@ -34,10 +34,6 @@ object GraniteMicroFrontendRuntimeHost {
 
     @JvmSynthetic
     internal fun detach(module: GraniteMicroFrontendRuntimeModule) = eventRouter.detach(module)
-
-    @JvmSynthetic
-    internal fun requestCloseSession(sessionId: String): CloseRequestResult =
-        sessionStore.requestCloseSession(sessionId)
 
     @JvmSynthetic
     internal fun unregisterSession(sessionId: String, token: String) {

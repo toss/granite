@@ -87,20 +87,6 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
   });
 }
 
-- (void)requestCloseSession:(JS::NativeGraniteMicroFrontendRuntime::CloseSessionRequest &)request
-                    resolve:(RCTPromiseResolveBlock)resolve
-                     reject:(RCTPromiseRejectBlock)reject {
-  NSString *sessionId = request.sessionId();
-  dispatch_async(dispatch_get_main_queue(), ^{
-    NSError *error = nil;
-    if ([GraniteMicroFrontendRuntimeHost requestCloseSession:sessionId error:&error]) {
-      resolve(nil);
-    } else {
-      reject(@"SESSION_NOT_FOUND", error.localizedDescription, error);
-    }
-  });
-}
-
 - (void)startEventDelivery {
   [GraniteMicroFrontendRuntimeHost startEventDeliveryToEventSink:self];
 }
