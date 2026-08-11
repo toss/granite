@@ -48,7 +48,10 @@ static void GraniteMicroFrontendRequireMainThread(void) {
 @property(nonatomic, weak) UIViewController *viewController;
 @property(nonatomic, strong) GraniteMicroFrontendSessionRegistration *registration;
 @property(nonatomic, strong) GraniteMicroFrontendSessionLifecycleObserverViewController *observer;
+@property(nonatomic, assign) BOOL viewAppeared;
+@property(nonatomic, assign) BOOL applicationForeground;
 @property(nonatomic, assign) BOOL invalidated;
+- (void)updateVisibility;
 @end
 #endif
 
@@ -131,14 +134,14 @@ static void GraniteMicroFrontendRequireMainThread(void) {
 
 @implementation GraniteMicroFrontendSessionLifecycleObserverViewController
 
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-  [_binding.registration setVisible:YES];
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  _binding.viewAppeared = YES;
 }
 
-- (void)viewDidDisappear:(BOOL)animated {
-  [_binding.registration setVisible:NO];
-  [super viewDidDisappear:animated];
+- (void)viewWillDisappear:(BOOL)animated {
+  _binding.viewAppeared = NO;
+  [super viewWillDisappear:animated];
 }
 
 - (void)dealloc {
@@ -177,6 +180,17 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
   binding.viewController = viewController;
   binding.registration = registration;
   binding.observer = observer;
+  binding.applicationForeground =
+      UIApplication.sharedApplication.applicationState != UIApplicationStateBackground;
+
+  [NSNotificationCenter.defaultCenter addObserver:binding
+                                         selector:@selector(applicationWillEnterForeground)
+                                             name:UIApplicationWillEnterForegroundNotification
+                                           object:nil];
+  [NSNotificationCenter.defaultCenter addObserver:binding
+                                         selector:@selector(applicationDidEnterBackground)
+                                             name:UIApplicationDidEnterBackgroundNotification
+                                           object:nil];
 
   [viewController addChildViewController:observer];
   observer.view.hidden = YES;
@@ -191,7 +205,39 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
       binding,
       OBJC_ASSOCIATION_RETAIN_NONATOMIC);
   [registration openAppWithAppName:appName scheme:scheme];
+  [binding updateVisibility];
   return binding;
+}
+
+- (void)setViewAppeared:(BOOL)viewAppeared {
+  if (_viewAppeared == viewAppeared) {
+    return;
+  }
+  _viewAppeared = viewAppeared;
+  [self updateVisibility];
+}
+
+- (void)setApplicationForeground:(BOOL)applicationForeground {
+  if (_applicationForeground == applicationForeground) {
+    return;
+  }
+  _applicationForeground = applicationForeground;
+  [self updateVisibility];
+}
+
+- (void)applicationWillEnterForeground {
+  self.applicationForeground = YES;
+}
+
+- (void)applicationDidEnterBackground {
+  self.applicationForeground = NO;
+}
+
+- (void)updateVisibility {
+  if (_invalidated) {
+    return;
+  }
+  [_registration setVisible:(_viewAppeared && _applicationForeground)];
 }
 
 - (void)invalidate {
@@ -202,6 +248,13 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
     }
     _invalidated = YES;
   }
+
+  [NSNotificationCenter.defaultCenter removeObserver:self
+                                                name:UIApplicationWillEnterForegroundNotification
+                                              object:nil];
+  [NSNotificationCenter.defaultCenter removeObserver:self
+                                                name:UIApplicationDidEnterBackgroundNotification
+                                              object:nil];
 
   UIViewController *viewController = _viewController;
   _observer.binding = nil;

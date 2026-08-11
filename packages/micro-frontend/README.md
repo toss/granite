@@ -374,7 +374,7 @@ Import public APIs from `GraniteMicroFrontendRuntime`.
 
 | API | Lifetime / behavior |
 | --- | --- |
-| `+[GraniteMicroFrontendViewControllerSessionBinding bindViewController:sessionId:appName:scheme:]` | Convenience binding for a `UIViewController`. Emits open and derives visibility from appearance callbacks. Retain until teardown. |
+| `+[GraniteMicroFrontendViewControllerSessionBinding bindViewController:sessionId:appName:scheme:]` | Convenience binding for a `UIViewController`. Emits open and derives visibility from `viewWillAppear` / `viewWillDisappear` combined with app foreground and background transitions. Retain until teardown. |
 | `-[GraniteMicroFrontendViewControllerSessionBinding invalidate]` | Emit close and detach lifecycle observation. |
 | `+[GraniteMicroFrontendRuntimeHost registerSession:]` | Register a custom container and return a session registration. |
 | `-[GraniteMicroFrontendSessionRegistration openAppWithAppName:scheme:]` | Emit `openApp` once. |
@@ -441,8 +441,8 @@ final class CartViewController: UIViewController {
 }
 ```
 
-Create, activate, and invalidate these objects on the main thread. Weakly
-capture the controller in its close handler so the binding can be released
+Create, activate, and invalidate these objects on the main thread. Call
+`invalidate` during teardown so the binding and Portal destination are released
 with the controller.
 
 ## Portal primitive and example
