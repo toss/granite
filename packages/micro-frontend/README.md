@@ -85,14 +85,15 @@ adapter.loadBundle({ appName: 'cart' })
   → return the cart container's ./App module
 ```
 
-Concurrent preload/import calls for the same app share one evaluation. A successful evaluation remains cached for
-the JavaScript runtime lifetime. A failed evaluation and its partial container are removed so a later call can retry.
+Concurrent preload/import calls for the same app share one evaluation. A successful evaluation remains cached until
+the app's last native session closes. A failed evaluation and its partial container are removed so a later call can
+retry.
 
-## Host skeleton
+## Host pending component
 
-Remote apps register route skeletons with the package's `createRoute` wrapper. It delegates to Granite's
-`createRoute` and additionally associates `skeletonComponent` with the current `granite.config.ts` app name, scheme,
-and host.
+Remote apps register a route-level pending component with the package's `createRoute` wrapper. It delegates to
+Granite's `createRoute` and additionally associates `hostPendingComponent` with the current `granite.config.ts` app
+name, scheme, and host.
 
 ```tsx
 import { createRoute, hideHostSkeleton } from '@granite-js/micro-frontend';
@@ -101,7 +102,7 @@ import { useEffect } from 'react';
 export const Route = createRoute('/products/:productId', {
   component: ProductPage,
   validateParams: parseProductParams,
-  skeletonComponent: ({ thumbnailUrl }) => <ProductSkeleton thumbnailUrl={thumbnailUrl} />,
+  hostPendingComponent: ({ thumbnailUrl }) => <ProductSkeleton thumbnailUrl={thumbnailUrl} />,
 });
 
 function ProductPage() {
@@ -113,8 +114,8 @@ function ProductPage() {
 }
 ```
 
-The runtime host resolves the skeleton from the incoming URL. It resets the shared visibility state before opening a
-new session and keeps the app content hidden until the remote app calls `hideHostSkeleton()`.
+The runtime host resolves the pending component from the incoming URL. It resets the shared visibility state before
+opening a new session and keeps the app content hidden until the remote app calls `hideHostSkeleton()`.
 
 ```tsx
 import {

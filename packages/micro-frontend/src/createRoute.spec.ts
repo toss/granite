@@ -39,12 +39,12 @@ describe('createRoute', () => {
     Reflect.deleteProperty(globalThis, '__granite');
   });
 
-  it('registers the skeleton once for the native scheme without a cross-app fallback', () => {
+  it('registers the host pending component once for the native scheme without a cross-app fallback', () => {
     reactNative.getSchemeUri.mockReturnValue('example://app/shopping/product/123?tab=review');
 
     createRoute('/product/:productId', {
       component: ProductSkeleton,
-      skeletonComponent: ProductSkeleton,
+      hostPendingComponent: ProductSkeleton,
     });
 
     expect(reactNative.getSchemeUri).toHaveBeenCalledOnce();

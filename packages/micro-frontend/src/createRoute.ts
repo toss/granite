@@ -13,7 +13,7 @@ import type { HostSkeletonAppConfig, HostSkeletonComponent } from './host/types'
 
 export type MicroFrontendRouteOptions<TParams extends Readonly<object> | undefined> =
   RouteOptions<TParams> & {
-    readonly skeletonComponent?: HostSkeletonComponent<TParams>;
+    readonly hostPendingComponent?: HostSkeletonComponent<TParams>;
   };
 
 type SetParamsFunction<TParams> = (params: TParams extends undefined ? undefined : Partial<TParams>) => void;
@@ -35,7 +35,7 @@ export function createRoute<
   path: keyof RegisterScreenInput,
   options: Omit<RouteOptions<StandardSchemaV1.InferOutput<TSchema>>, 'validateParams'> & {
     readonly validateParams: TSchema;
-    readonly skeletonComponent?: HostSkeletonComponent<StandardSchemaV1.InferOutput<TSchema>>;
+    readonly hostPendingComponent?: HostSkeletonComponent<StandardSchemaV1.InferOutput<TSchema>>;
   }
 ): MicroFrontendRouteResult<StandardSchemaV1.InferInput<TSchema>, StandardSchemaV1.InferOutput<TSchema>>;
 export function createRoute<TParams extends Readonly<object> | undefined>(
@@ -46,12 +46,12 @@ export function createRoute<TParams extends Readonly<object> | undefined>(
   path: keyof RegisterScreenInput,
   options: MicroFrontendRouteOptions<TParams>
 ) {
-  const { skeletonComponent, ...routeOptions } = options;
+  const { hostPendingComponent, ...routeOptions } = options;
 
-  if (skeletonComponent != null) {
+  if (hostPendingComponent != null) {
     registerHostSkeletonRoute(String(path), {
       app: getCurrentGraniteApp(getSchemeUri()),
-      component: skeletonComponent,
+      component: hostPendingComponent,
       parserParams: routeOptions.parserParams,
       validateParams: routeOptions.validateParams,
     });
