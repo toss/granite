@@ -2,7 +2,7 @@ import { ComponentType, type JSX, PropsWithChildren } from 'react';
 import { AppRegistry } from 'react-native';
 import { ENTRY_BUNDLE_NAME } from '../constants';
 import type { InitialProps } from '../initial-props';
-import type { RouterProps, RequireContext } from '../router';
+import type { RouterProps, RequireContext, SetIOSBackPressHandler } from '../router';
 import { AppRoot } from './AppRoot';
 import { HostAppRoot } from './HostAppRoot';
 import { getSchemeUri } from '../constant-bridges';
@@ -42,8 +42,11 @@ export interface GraniteProps {
   /**
    * @description
    * The function to register a handler that runs when the iOS swipe back gesture is detected.
+   * Called with empty params (`{}`, no `handler`) when the handler should be unset — in
+   * that case the implementation must initialize the registered handler to `null`
+   * (e.g. call `unsetBackPressHandler()`), not keep an empty function registered.
    */
-  setiOSBackPressHandler?: ({ handler }: { handler: () => void }) => Promise<void> | void;
+  setiOSBackPressHandler?: SetIOSBackPressHandler;
 
   /**
    * @description

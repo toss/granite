@@ -3,7 +3,15 @@ import { BackHandler, Platform } from 'react-native';
 import type { BackEvent } from '../../use-back-event';
 
 type SetIosSwipeGestureEnabled = ({ isEnabled }: { isEnabled: boolean }) => Promise<void> | void;
-type SetIOSBackPressHandler = ({ handler }: { handler: () => void }) => Promise<void> | void;
+
+/**
+ * Registers the iOS back press handler. Called with empty params (`{}`, no
+ * `handler`) to unset — mirroring `unsetBackPressHandler()`, which calls
+ * `setBackPressHandler` with empty params. In that case implementations should
+ * initialize the registered handler to `null`, not keep an empty function
+ * registered.
+ */
+export type SetIOSBackPressHandler = ({ handler }: { handler?: () => void }) => Promise<void> | void;
 
 export function CanGoBackGuard({
   children,
@@ -74,7 +82,7 @@ export function CanGoBackGuard({
     });
 
     return () => {
-      setiOSBackPressHandler({ handler: () => {} });
+      setiOSBackPressHandler?.({});
     };
   }, [hasBackEvent, onBack, setiOSBackPressHandler]);
 
