@@ -3,24 +3,16 @@ package run.granite.microfrontend
 import java.util.UUID
 
 object GraniteMicroFrontendRuntimeHost {
-    private val lock = Any()
-    private val sessions = mutableMapOf<String, SessionEntry>()
     private val eventRouter = GraniteMicroFrontendRuntimeEventRouter()
     private val preloadRequests = GraniteMicroFrontendPreloadRequests()
+    private val sessionStore = GraniteMicroFrontendSessionStore(eventRouter::emit)
 
     @JvmStatic
-    fun registerSession(sessionId: String, closeAction: Runnable): GraniteMicroFrontendSessionRegistration {
-        require(sessionId.isNotBlank()) { "sessionId must not be blank" }
-        val token = UUID.randomUUID().toString()
-        synchronized(lock) {
-            check(sessions[sessionId] == null) { "Session '$sessionId' is already registered" }
-            sessions[sessionId] = SessionEntry(token, closeAction)
-        }
-        return GraniteMicroFrontendSessionRegistration(sessionId, token)
-    }
+    fun registerSession(sessionId: String, closeAction: Runnable): GraniteMicroFrontendSessionRegistration =
+        sessionStore.registerSession(sessionId, closeAction)
 
-    @JvmStatic
-    fun emit(event: GraniteMicroFrontendEvent) = eventRouter.emit(event)
+    @JvmSynthetic
+    internal fun emit(event: GraniteMicroFrontendEvent) = eventRouter.emit(event)
 
     @JvmStatic
     fun emitPreloadApp(appName: String) = emit(GraniteMicroFrontendEvent.PreloadApp(appName))
@@ -36,62 +28,45 @@ object GraniteMicroFrontendRuntimeHost {
         return GraniteMicroFrontendPreloadRegistration(requestId)
     }
 
-    @JvmStatic
-    fun emitOpenApp(sessionId: String, appName: String, scheme: String) =
+    @JvmSynthetic
+    internal fun emitOpenApp(sessionId: String, appName: String, scheme: String) =
         emit(GraniteMicroFrontendEvent.OpenApp(sessionId, appName, scheme))
 
-    @JvmStatic
-    fun emitCloseApp(sessionId: String) = emit(GraniteMicroFrontendEvent.CloseApp(sessionId))
+    @JvmSynthetic
+    internal fun emitCloseApp(sessionId: String) = emit(GraniteMicroFrontendEvent.CloseApp(sessionId))
 
-    @JvmStatic
-    fun emitSessionVisibilityChanged(sessionId: String, isVisible: Boolean) =
+    @JvmSynthetic
+    internal fun emitSessionVisibilityChanged(sessionId: String, isVisible: Boolean) =
         emit(GraniteMicroFrontendEvent.SessionVisibilityChanged(sessionId, isVisible))
 
+    @JvmSynthetic
     internal fun attach(module: GraniteMicroFrontendRuntimeModule) = eventRouter.attach(module)
 
+    @JvmSynthetic
     internal fun startEventDelivery(module: GraniteMicroFrontendRuntimeModule) =
         eventRouter.startEventDelivery(module)
 
+    @JvmSynthetic
     internal fun detach(module: GraniteMicroFrontendRuntimeModule) = eventRouter.detach(module)
 
-    internal fun requestCloseSession(sessionId: String): CloseRequestResult {
-        val action = synchronized(lock) {
-            val session = sessions[sessionId] ?: return CloseRequestResult.NotFound
-            if (session.closeRequested) {
-                return CloseRequestResult.Accepted
-            }
-            session.closeRequested = true
-            session.closeAction
-        }
-        return try {
-            action.run()
-            CloseRequestResult.Accepted
-        } catch (error: Exception) {
-            CloseRequestResult.Failed(error)
-        }
-    }
+    @JvmSynthetic
+    internal fun requestCloseSession(sessionId: String): CloseRequestResult =
+        sessionStore.requestCloseSession(sessionId)
 
+    @JvmSynthetic
     internal fun completePreloadApp(requestId: String, errorMessage: String?) {
         preloadRequests.complete(requestId, errorMessage)
     }
 
+    @JvmSynthetic
     internal fun cancelPreloadApp(requestId: String) {
         preloadRequests.cancel(requestId)
     }
 
+    @JvmSynthetic
     internal fun unregisterSession(sessionId: String, token: String) {
-        synchronized(lock) {
-            if (sessions[sessionId]?.token == token) {
-                sessions.remove(sessionId)
-            }
-        }
+        sessionStore.unregisterSession(sessionId, token)
     }
-
-    private data class SessionEntry(
-        val token: String,
-        val closeAction: Runnable,
-        var closeRequested: Boolean = false,
-    )
 }
 
 internal interface GraniteMicroFrontendRuntimeEventTarget {
@@ -181,19 +156,4 @@ internal class GraniteMicroFrontendPreloadRequests {
             callbacks.remove(requestId)
         }
     }
-}
-
-class GraniteMicroFrontendSessionRegistration internal constructor(
-    private val sessionId: String,
-    private val token: String,
-) : AutoCloseable {
-    override fun close() {
-        GraniteMicroFrontendRuntimeHost.unregisterSession(sessionId, token)
-    }
-}
-
-internal sealed interface CloseRequestResult {
-    data object Accepted : CloseRequestResult
-    data object NotFound : CloseRequestResult
-    data class Failed(val cause: Exception) : CloseRequestResult
 }

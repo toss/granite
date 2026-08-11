@@ -2,7 +2,21 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class UIViewController;
+
 @interface GraniteMicroFrontendSessionRegistration : NSObject
+- (void)openAppWithAppName:(NSString *)appName scheme:(NSString *)scheme;
+- (BOOL)setVisible:(BOOL)isVisible;
+- (BOOL)closeApp;
+- (void)invalidate;
+@end
+
+@interface GraniteMicroFrontendViewControllerSessionBinding : NSObject
++ (GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
+                                                               sessionId:(NSString *)sessionId
+                                                                 appName:(NSString *)appName
+                                                                  scheme:(NSString *)scheme
+                                                            closeHandler:(dispatch_block_t)closeHandler;
 - (void)invalidate;
 @end
 
@@ -20,12 +34,6 @@ typedef void (^GraniteMicroFrontendPreloadCompletion)(NSError *_Nullable error);
 + (void)emitPreloadApp:(NSString *)appName;
 + (GraniteMicroFrontendPreloadRegistration *)requestPreloadApp:(NSString *)appName
                                                    completion:(GraniteMicroFrontendPreloadCompletion)completion;
-+ (void)emitOpenApp:(NSString *)sessionId
-             appName:(NSString *)appName
-              scheme:(NSString *)scheme;
-+ (void)emitCloseApp:(NSString *)sessionId;
-+ (void)emitSessionVisibilityChanged:(NSString *)sessionId
-                           isVisible:(BOOL)isVisible;
 
 @end
 

@@ -167,34 +167,16 @@ events. `closeSession()` never searches for a ViewController or Activity from Ja
 ```kotlin
 class AppActivity : Activity() {
     private val sessionId = UUID.randomUUID().toString()
-    private lateinit var registration: GraniteMicroFrontendSessionRegistration
+    private lateinit var binding: ActivitySessionBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registration = GraniteMicroFrontendRuntimeHost.registerSession(sessionId) {
-            finish()
-        }
-        GraniteMicroFrontendRuntimeHost.emitOpenApp(
+        binding = ActivitySessionBinding.bind(
+            this,
             sessionId,
             "cart",
             intent.data.toString(),
         )
-    }
-
-    override fun onStart() {
-        super.onStart()
-        GraniteMicroFrontendRuntimeHost.emitSessionVisibilityChanged(sessionId, true)
-    }
-
-    override fun onStop() {
-        GraniteMicroFrontendRuntimeHost.emitSessionVisibilityChanged(sessionId, false)
-        super.onStop()
-    }
-
-    override fun onDestroy() {
-        GraniteMicroFrontendRuntimeHost.emitCloseApp(sessionId)
-        registration.close()
-        super.onDestroy()
     }
 }
 ```
@@ -202,19 +184,22 @@ class AppActivity : Activity() {
 ### iOS
 
 ```objc
-self.registration =
-    [GraniteMicroFrontendRuntimeHost registerSession:self.sessionId
-                                        closeHandler:^{
-  [viewController dismissViewControllerAnimated:YES completion:nil];
+self.binding =
+    [GraniteMicroFrontendViewControllerSessionBinding bindViewController:viewController
+                                                               sessionId:self.sessionId
+                                                                 appName:@"cart"
+                                                                  scheme:@"granite://cart/products/1"
+                                                            closeHandler:^{
+  [viewController dismissViewControllerAnimated:YES completion:^{
+    [self.binding invalidate];
+  }];
 }];
-
-[GraniteMicroFrontendRuntimeHost emitOpenApp:self.sessionId
-                                     appName:@"cart"
-                                      scheme:@"granite://cart/products/1"];
 ```
 
-The native host emits `closeApp` after its close transition completes. JavaScript keeps the React tree mounted until
-that event arrives.
+The binders emit `openApp` once when bound, deduplicate visibility from the native appearance lifecycle, and emit
+`closeApp` only when the native host is invalidated or deallocated after teardown. JavaScript keeps the React tree
+mounted until that event arrives. Custom hosts that cannot use the binders can retain a
+`GraniteMicroFrontendSessionRegistration` and call `openApp`, `setVisible`, and `closeApp` from their own lifecycle.
 
 ## Session rendering
 

@@ -1,12 +1,31 @@
 #import "GraniteMicroFrontendRuntimeHost+Internal.h"
+#import <objc/runtime.h>
+#import <TargetConditionals.h>
+
+#if TARGET_OS_IOS || TARGET_OS_TV
+#import <UIKit/UIKit.h>
+#define GRANITE_MICRO_FRONTEND_HAS_UIKIT 1
+#else
+#define GRANITE_MICRO_FRONTEND_HAS_UIKIT 0
+#endif
 
 static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
     @"GraniteMicroFrontendRuntime";
+
+@class GraniteMicroFrontendSessionEntry;
+
+static NSLock *runtimeLock;
+static NSMutableDictionary<NSString *, GraniteMicroFrontendSessionEntry *> *sessions;
+static NSMutableDictionary<NSString *, GraniteMicroFrontendPreloadCompletion> *preloadCompletions;
+static NSMutableArray<NSDictionary *> *pendingEvents;
+static __unsafe_unretained id<GraniteMicroFrontendRuntimeEventSink> eventSink;
 
 @interface GraniteMicroFrontendSessionEntry : NSObject
 @property(nonatomic, copy) NSString *token;
 @property(nonatomic, copy) dispatch_block_t closeHandler;
 @property(nonatomic, assign) BOOL closeRequested;
+@property(nonatomic, assign) BOOL isVisible;
+@property(nonatomic, assign) BOOL closed;
 @end
 
 @implementation GraniteMicroFrontendSessionEntry
@@ -18,12 +37,60 @@ static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
 @property(nonatomic, assign) BOOL invalidated;
 @end
 
+@class GraniteMicroFrontendSessionLifecycleObserverViewController;
+
+#if GRANITE_MICRO_FRONTEND_HAS_UIKIT
+@interface GraniteMicroFrontendViewControllerSessionBinding ()
+@property(nonatomic, assign) UIViewController *viewController;
+@property(nonatomic, strong) GraniteMicroFrontendSessionRegistration *registration;
+@property(nonatomic, strong) GraniteMicroFrontendSessionLifecycleObserverViewController *observer;
+@property(nonatomic, assign) BOOL invalidated;
+@end
+#endif
+
 @interface GraniteMicroFrontendPreloadRegistration ()
 @property(nonatomic, copy) NSString *requestId;
 @property(nonatomic, assign) BOOL invalidated;
 @end
 
 @implementation GraniteMicroFrontendSessionRegistration
+
+- (void)openAppWithAppName:(NSString *)appName scheme:(NSString *)scheme {
+  [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId appName:appName scheme:scheme];
+}
+
+- (BOOL)setVisible:(BOOL)isVisible {
+  BOOL shouldEmit = NO;
+  [runtimeLock lock];
+  GraniteMicroFrontendSessionEntry *entry = sessions[_sessionId];
+  if ([entry.token isEqualToString:_token] && !entry.closed && entry.isVisible != isVisible) {
+    entry.isVisible = isVisible;
+    shouldEmit = YES;
+  }
+  [runtimeLock unlock];
+
+  if (shouldEmit) {
+    [GraniteMicroFrontendRuntimeHost emitSessionVisibilityChanged:_sessionId
+                                                        isVisible:isVisible];
+  }
+  return shouldEmit;
+}
+
+- (BOOL)closeApp {
+  BOOL shouldEmit = NO;
+  [runtimeLock lock];
+  GraniteMicroFrontendSessionEntry *entry = sessions[_sessionId];
+  if ([entry.token isEqualToString:_token] && !entry.closed) {
+    entry.closed = YES;
+    shouldEmit = YES;
+  }
+  [runtimeLock unlock];
+
+  if (shouldEmit) {
+    [GraniteMicroFrontendRuntimeHost emitCloseApp:_sessionId];
+  }
+  return shouldEmit;
+}
 
 - (void)invalidate {
   @synchronized(self) {
@@ -40,6 +107,130 @@ static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
 }
 
 @end
+
+#if GRANITE_MICRO_FRONTEND_HAS_UIKIT
+
+@interface GraniteMicroFrontendSessionLifecycleObserverViewController : UIViewController
+@property(nonatomic, assign) GraniteMicroFrontendViewControllerSessionBinding *binding;
+@end
+
+@implementation GraniteMicroFrontendSessionLifecycleObserverViewController
+
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  [_binding.registration setVisible:YES];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+  [_binding.registration setVisible:NO];
+  [super viewDidDisappear:animated];
+}
+
+- (void)dealloc {
+  [_binding invalidate];
+}
+
+@end
+
+@implementation GraniteMicroFrontendViewControllerSessionBinding
+
+static char GraniteMicroFrontendViewControllerSessionBindingKey;
+
++ (GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
+                                                               sessionId:(NSString *)sessionId
+                                                                 appName:(NSString *)appName
+                                                                  scheme:(NSString *)scheme
+                                                            closeHandler:(dispatch_block_t)closeHandler {
+  NSParameterAssert(viewController != nil);
+  NSParameterAssert(sessionId.length > 0);
+  NSParameterAssert(appName.length > 0);
+  NSParameterAssert(scheme.length > 0);
+  NSParameterAssert(closeHandler != nil);
+
+  GraniteMicroFrontendViewControllerSessionBinding *existingBinding =
+      objc_getAssociatedObject(viewController, &GraniteMicroFrontendViewControllerSessionBindingKey);
+  if (existingBinding != nil) {
+    return existingBinding;
+  }
+
+  GraniteMicroFrontendSessionRegistration *registration =
+      [GraniteMicroFrontendRuntimeHost registerSession:sessionId closeHandler:closeHandler];
+  GraniteMicroFrontendViewControllerSessionBinding *binding =
+      [[GraniteMicroFrontendViewControllerSessionBinding alloc] init];
+  GraniteMicroFrontendSessionLifecycleObserverViewController *observer =
+      [[GraniteMicroFrontendSessionLifecycleObserverViewController alloc] init];
+  observer.binding = binding;
+  binding.viewController = viewController;
+  binding.registration = registration;
+  binding.observer = observer;
+
+  [viewController addChildViewController:observer];
+  observer.view.hidden = YES;
+  observer.view.frame = CGRectZero;
+  observer.view.userInteractionEnabled = NO;
+  [viewController.view addSubview:observer.view];
+  [observer didMoveToParentViewController:viewController];
+
+  objc_setAssociatedObject(
+      viewController,
+      &GraniteMicroFrontendViewControllerSessionBindingKey,
+      binding,
+      OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+  [registration openAppWithAppName:appName scheme:scheme];
+  return binding;
+}
+
+- (void)invalidate {
+  @synchronized(self) {
+    if (_invalidated) {
+      return;
+    }
+    _invalidated = YES;
+  }
+
+  UIViewController *viewController = _viewController;
+  if (_observer.parentViewController != nil) {
+    [_observer willMoveToParentViewController:nil];
+    [_observer.view removeFromSuperview];
+    [_observer removeFromParentViewController];
+  }
+  [_registration closeApp];
+  [_registration invalidate];
+  if (viewController != nil &&
+      objc_getAssociatedObject(viewController, &GraniteMicroFrontendViewControllerSessionBindingKey) == self) {
+    objc_setAssociatedObject(
+        viewController,
+        &GraniteMicroFrontendViewControllerSessionBindingKey,
+        nil,
+        OBJC_ASSOCIATION_ASSIGN);
+  }
+}
+
+- (void)dealloc {
+  [self invalidate];
+}
+
+@end
+
+#else
+
+@implementation GraniteMicroFrontendViewControllerSessionBinding
+
++ (GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
+                                                               sessionId:(NSString *)sessionId
+                                                                 appName:(NSString *)appName
+                                                                  scheme:(NSString *)scheme
+                                                            closeHandler:(dispatch_block_t)closeHandler {
+  NSParameterAssert(NO);
+  return [[GraniteMicroFrontendViewControllerSessionBinding alloc] init];
+}
+
+- (void)invalidate {
+}
+
+@end
+
+#endif
 
 @implementation GraniteMicroFrontendPreloadRegistration
 
@@ -60,12 +251,6 @@ static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
 @end
 
 @implementation GraniteMicroFrontendRuntimeHost
-
-static NSLock *runtimeLock;
-static NSMutableDictionary<NSString *, GraniteMicroFrontendSessionEntry *> *sessions;
-static NSMutableDictionary<NSString *, GraniteMicroFrontendPreloadCompletion> *preloadCompletions;
-static NSMutableArray<NSDictionary *> *pendingEvents;
-static __weak id<GraniteMicroFrontendRuntimeEventSink> eventSink;
 
 + (void)initialize {
   if (self != GraniteMicroFrontendRuntimeHost.class) {
