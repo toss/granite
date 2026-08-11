@@ -1,5 +1,20 @@
 # @granite-js/react-native
 
+## 1.0.40
+
+### Patch Changes
+
+- c7e7fc9: fix(react-native): unset iOS back press handler on cleanup instead of re-registering
+  - @granite-js/blur-view@1.0.40
+  - @granite-js/brownfield-module@1.0.40
+  - @granite-js/cli@1.0.40
+  - @granite-js/jest@1.0.40
+  - @granite-js/mpack@1.0.40
+  - @granite-js/native@1.0.40
+  - @granite-js/plugin-core@1.0.40
+  - @granite-js/style-utils@1.0.40
+  - @granite-js/video@1.0.40
+
 ## 1.0.39
 
 ### Patch Changes
