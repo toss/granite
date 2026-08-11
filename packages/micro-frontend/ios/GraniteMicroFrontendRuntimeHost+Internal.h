@@ -3,7 +3,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol GraniteMicroFrontendRuntimeEventSink <NSObject>
-- (void)enqueueRuntimeEvent:(NSDictionary *)event;
+- (BOOL)enqueueRuntimeEvent:(NSDictionary *)event;
 @end
 
 @interface GraniteMicroFrontendRuntimeHost (Internal)

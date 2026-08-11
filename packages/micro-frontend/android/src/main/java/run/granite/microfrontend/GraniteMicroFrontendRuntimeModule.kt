@@ -10,11 +10,6 @@ import com.facebook.react.module.annotations.ReactModule
 class GraniteMicroFrontendRuntimeModule(
     reactContext: ReactApplicationContext,
 ) : NativeGraniteMicroFrontendRuntimeSpec(reactContext), GraniteMicroFrontendRuntimeEventTarget {
-    private val eventLock = Any()
-    private val pendingEvents = ArrayDeque<GraniteMicroFrontendEvent>()
-    private var eventDeliveryStarted = false
-    private var isDeliveringEvents = false
-
     override fun initialize() {
         super.initialize()
         GraniteMicroFrontendRuntimeHost.attach(this)
@@ -75,53 +70,13 @@ class GraniteMicroFrontendRuntimeModule(
     }
 
     override fun startEventDelivery() {
-        synchronized(eventLock) {
-            if (eventDeliveryStarted) {
-                return
-            }
-            eventDeliveryStarted = true
-            isDeliveringEvents = true
-        }
         GraniteMicroFrontendRuntimeHost.startEventDelivery(this)
-        drainEvents()
     }
 
-    override fun emit(event: GraniteMicroFrontendEvent) {
-        val shouldDrain = synchronized(eventLock) {
-            pendingEvents.addLast(event)
-            if (!eventDeliveryStarted || isDeliveringEvents) {
-                return
-            }
-            isDeliveringEvents = true
-            true
+    override fun emit(event: GraniteMicroFrontendEvent): Boolean =
+        reactApplicationContext.runOnJSQueueThread {
+            emitOnEvent(event.toWritableMap())
         }
-        if (shouldDrain) {
-            drainEvents()
-        }
-    }
-
-    private fun drainEvents() {
-        while (true) {
-            val event = synchronized(eventLock) {
-                if (pendingEvents.isEmpty()) {
-                    isDeliveringEvents = false
-                    return
-                }
-                pendingEvents.removeFirst()
-            }
-            val enqueued = reactApplicationContext.runOnJSQueueThread {
-                emitOnEvent(event.toWritableMap())
-            }
-            if (!enqueued) {
-                synchronized(eventLock) {
-                    pendingEvents.addFirst(event)
-                    eventDeliveryStarted = false
-                    isDeliveringEvents = false
-                }
-                return
-            }
-        }
-    }
 
     private companion object {
         const val ERROR_INVALID_REQUEST = "INVALID_REQUEST"

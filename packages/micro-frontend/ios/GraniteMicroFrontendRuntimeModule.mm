@@ -15,11 +15,6 @@ static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
 
 @interface GraniteMicroFrontendRuntimeModule () <GraniteMicroFrontendRuntimeEventSink>
 @property(nonatomic, weak) RCTBridge *bridge;
-@property(nonatomic, strong) NSLock *eventLock;
-@property(nonatomic, strong) NSMutableArray<NSDictionary *> *pendingEvents;
-@property(nonatomic, assign) BOOL eventDeliveryStarted;
-@property(nonatomic, assign) BOOL isDeliveringEvents;
-- (void)drainRuntimeEvents;
 - (BOOL)scheduleRuntimeEvent:(NSDictionary *)event;
 @end
 
@@ -29,15 +24,6 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
 
 + (BOOL)requiresMainQueueSetup {
   return NO;
-}
-
-- (instancetype)init {
-  self = [super init];
-  if (self != nil) {
-    _eventLock = [[NSLock alloc] init];
-    _pendingEvents = [[NSMutableArray alloc] init];
-  }
-  return self;
 }
 
 - (void)dealloc {
@@ -121,52 +107,11 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
 }
 
 - (void)startEventDelivery {
-  [_eventLock lock];
-  if (_eventDeliveryStarted) {
-    [_eventLock unlock];
-    return;
-  }
-  _eventDeliveryStarted = YES;
-  _isDeliveringEvents = YES;
-  [_eventLock unlock];
-
   [GraniteMicroFrontendRuntimeHost startEventDeliveryToEventSink:self];
-  [self drainRuntimeEvents];
 }
 
-- (void)enqueueRuntimeEvent:(NSDictionary *)event {
-  [_eventLock lock];
-  [_pendingEvents addObject:event];
-  if (!_eventDeliveryStarted || _isDeliveringEvents) {
-    [_eventLock unlock];
-    return;
-  }
-  _isDeliveringEvents = YES;
-  [_eventLock unlock];
-  [self drainRuntimeEvents];
-}
-
-- (void)drainRuntimeEvents {
-  while (YES) {
-    [_eventLock lock];
-    if (_pendingEvents.count == 0) {
-      _isDeliveringEvents = NO;
-      [_eventLock unlock];
-      return;
-    }
-    NSDictionary *event = _pendingEvents.firstObject;
-    [_pendingEvents removeObjectAtIndex:0];
-    [_eventLock unlock];
-
-    if (![self scheduleRuntimeEvent:event]) {
-      [_eventLock lock];
-      [_pendingEvents insertObject:event atIndex:0];
-      _eventDeliveryStarted = NO;
-      _isDeliveringEvents = NO;
-      [_eventLock unlock];
-      return;
-    }
-  }
+- (BOOL)enqueueRuntimeEvent:(NSDictionary *)event {
+  return [self scheduleRuntimeEvent:event];
 }
 
 - (BOOL)scheduleRuntimeEvent:(NSDictionary *)event {

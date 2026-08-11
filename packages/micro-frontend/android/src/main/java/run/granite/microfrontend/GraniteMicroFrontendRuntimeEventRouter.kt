@@ -1,7 +1,7 @@
 package run.granite.microfrontend
 
 internal interface GraniteMicroFrontendRuntimeEventTarget {
-    fun emit(event: GraniteMicroFrontendEvent)
+    fun emit(event: GraniteMicroFrontendEvent): Boolean
 }
 
 internal class GraniteMicroFrontendRuntimeEventRouter {
@@ -70,13 +70,24 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
                     isDelivering = false
                     return
                 }
-                target to pendingEvents.removeFirst()
+                target to pendingEvents.first()
             }
             try {
-                target.emit(event)
+                if (!target.emit(event)) {
+                    val shouldResumeWithReplacement = synchronized(lock) {
+                        isDelivering = false
+                        activeTarget != null && activeTarget !== target && startDrainIfNeeded()
+                    }
+                    if (shouldResumeWithReplacement) {
+                        drain()
+                    }
+                    return
+                }
+                synchronized(lock) {
+                    pendingEvents.removeFirst()
+                }
             } catch (error: Throwable) {
                 val shouldResumeWithReplacement = synchronized(lock) {
-                    pendingEvents.addFirst(event)
                     isDelivering = false
                     activeTarget != null && activeTarget !== target && startDrainIfNeeded()
                 }
