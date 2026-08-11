@@ -35,7 +35,8 @@ export {
 } from './session/MicroFrontendSessionContext';
 export type { MicroFrontendSession, MicroFrontendSessionProviderProps } from './session/MicroFrontendSessionContext';
 export { MicroFrontendSessionRenderer } from './session/MicroFrontendSessionRenderer';
-export type { MicroFrontendSessionRendererProps } from './session/MicroFrontendSessionRenderer';
+export type { MicroFrontendAppProps, MicroFrontendSessionRendererProps } from './session/MicroFrontendSessionRenderer';
+export { default as Portal } from './specs/PortalViewNativeComponent';
 export type {
   AppRequest,
   MicroFrontendAdapter,

@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from 'react';
 import { MicroFrontendSessionProvider } from './MicroFrontendSessionContext';
+import Portal from '../specs/PortalViewNativeComponent';
 
 export interface MicroFrontendAppProps {
   readonly scheme: string;
@@ -32,10 +33,12 @@ export function MicroFrontendSessionRenderer({
   fallback = null,
 }: MicroFrontendSessionRendererProps): ReactElement {
   return (
-    <MicroFrontendSessionProvider sessionId={sessionId} close={close}>
-      <Suspense fallback={fallback}>
-        <App scheme={scheme} presentationVisibility={isVisible} />
-      </Suspense>
-    </MicroFrontendSessionProvider>
+    <Portal hostName={sessionId}>
+      <MicroFrontendSessionProvider sessionId={sessionId} close={close}>
+        <Suspense fallback={fallback}>
+          <App scheme={scheme} presentationVisibility={isVisible} />
+        </Suspense>
+      </MicroFrontendSessionProvider>
+    </Portal>
   );
 }

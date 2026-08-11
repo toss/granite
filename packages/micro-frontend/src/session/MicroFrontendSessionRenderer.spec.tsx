@@ -10,6 +10,7 @@ describe('MicroFrontendSessionRenderer', () => {
     // Given
     const close = vi.fn(async () => undefined);
     let receivedScheme: string | null = null;
+    let renderer: ReactTestRenderer | undefined;
 
     function App({ scheme }: { readonly scheme: string }) {
       receivedScheme = scheme;
@@ -18,7 +19,7 @@ describe('MicroFrontendSessionRenderer', () => {
 
     // When
     await act(async () => {
-      create(
+      renderer = create(
         <MicroFrontendSessionRenderer
           app={App}
           sessionId="session-1"
@@ -31,6 +32,13 @@ describe('MicroFrontendSessionRenderer', () => {
 
     // Then
     expect(receivedScheme).toBe('granite://cart');
+    if (renderer == null) {
+      throw new Error('The session renderer was not created');
+    }
+    expect(renderer.toJSON()).toMatchObject({
+      props: { hostName: 'session-1' },
+      type: 'PortalView',
+    });
   });
 
   it('injects session visibility into the Granite app without exposing it through the session hook', async () => {

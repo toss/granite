@@ -1,8 +1,7 @@
 {
   "name": "@granite-js/micro-frontend",
   "version": "1.0.37",
-  "description": "Micro-frontend runtime and build plugin for Granite applications",
-  "type": "module",
+  "description": "Micro-frontend build, runtime, session, and Portal contracts for Granite brownfield applications",
   "main": "./dist/module/index.js",
   "types": "./dist/typescript/index.d.ts",
   "react-native": "./src/index.ts",
@@ -24,9 +23,12 @@
     "dist",
     "android",
     "ios",
+    "common",
     "*.podspec",
+    "react-native.config.js",
     "README.md",
     "LICENSE",
+    "LICENSE.react-native-teleport",
     "NOTICE",
     "!ios/build",
     "!android/build",
@@ -34,6 +36,7 @@
     "!android/gradlew",
     "!android/gradlew.bat",
     "!android/local.properties",
+    "!examples/**",
     "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
@@ -94,10 +97,16 @@
   },
   "codegenConfig": {
     "name": "GraniteMicroFrontendRuntimeSpec",
-    "type": "modules",
+    "type": "all",
     "jsSrcsDir": "src/specs",
     "android": {
       "javaPackageName": "run.granite.microfrontend"
+    },
+    "ios": {
+      "componentProvider": {
+        "PortalView": "PortalView",
+        "PortalHostView": "PortalHostView"
+      }
     }
   },
   "sideEffects": false

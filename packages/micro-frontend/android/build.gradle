@@ -38,6 +38,7 @@ android {
   }
 
   buildFeatures {
+    buildConfig true
     prefab true
   }
 
@@ -54,6 +55,15 @@ android {
 
   kotlinOptions {
     jvmTarget = '17'
+  }
+
+  sourceSets {
+    main {
+      java.srcDirs += [
+        'generated/java',
+        'generated/jni'
+      ]
+    }
   }
 }
 

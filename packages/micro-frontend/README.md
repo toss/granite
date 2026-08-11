@@ -1,21 +1,69 @@
 # @granite-js/micro-frontend
 
-Runs independently built Granite applications in one React Native JavaScript runtime.
+Micro-frontend contracts for Granite React Native brownfield applications.
 
-The package contains three layers:
+This package is the complete micro-frontend feature boundary. It contains:
 
-- `@granite-js/micro-frontend/plugin`: builds a self-registering app bundle.
-- `@granite-js/micro-frontend`: loads, evaluates, and imports app modules.
-- `GraniteMicroFrontendRuntime`: evaluates local bundles and bridges native session lifecycle events.
+- the build plugin that produces self-registering remote bundles;
+- the JavaScript runtime that loads, evaluates, and imports remote modules;
+- the Mono-Hermes native session and visibility contract;
+- the host pending component contract; and
+- the Portal primitive that attaches a mounted React subtree to an
+  `Activity`- or `UIViewController`-owned destination.
 
-## Plugin
+`@granite-js/portal` is not a separate dependency. Portal is coupled to the
+shared-runtime session contract and is exported from this package.
 
-The app name comes from `granite.config.ts`. Hosts do not maintain a remote-app list.
+## Ownership model
+
+```text
+Granite brownfield host
+├── native screen lifecycle
+│   ├── session identity and close action
+│   └── presentation visibility
+├── one retained React Native runtime
+│   ├── evaluate remote bundle
+│   ├── keep one React tree per session
+│   └── render each tree through Portal
+└── native Portal destination
+    └── attach content by the same sessionId
+```
+
+Native screen lifecycle is the source of truth for visibility. Portal only
+owns where content is attached. A Portal host can remain attached while its
+screen is stopped or covered, so Portal attachment must not be used to infer
+presentation visibility.
+
+The session identifier joins the contracts:
+
+```text
+register native session(sessionId)
+  → openApp(sessionId, appName, scheme)
+  → <MicroFrontendSessionRenderer sessionId={sessionId}>
+  → <Portal hostName={sessionId}>
+  → native Portal host named sessionId
+```
+
+## Installation
+
+```sh
+yarn add @granite-js/micro-frontend
+```
+
+The package autolinks one Android library and one iOS Pod. Its React Native
+Codegen library, `GraniteMicroFrontendRuntimeSpec`, contains both the
+`GraniteMicroFrontendRuntime` TurboModule and the `PortalView` / `PortalHostView`
+Fabric components.
+
+## Build plugin
+
+The app name comes from `granite.config.ts`. Hosts do not maintain a separate
+remote-app list.
 
 ```ts
 // Remote app
-import { defineConfig } from '@granite-js/react-native/config';
 import { microFrontend } from '@granite-js/micro-frontend/plugin';
+import { defineConfig } from '@granite-js/react-native/config';
 
 export default defineConfig({
   appName: 'cart',
@@ -32,8 +80,8 @@ export default defineConfig({
 
 ```ts
 // Host app
-import { defineConfig } from '@granite-js/react-native/config';
 import { microFrontend } from '@granite-js/micro-frontend/plugin';
+import { defineConfig } from '@granite-js/react-native/config';
 
 export default defineConfig({
   appName: 'shared',
@@ -48,13 +96,13 @@ export default defineConfig({
 });
 ```
 
-When evaluated, the remote bundle registers its `appName` container and exposed modules in the shared runtime
-registry.
+When evaluated, a remote bundle registers its `appName` container and exposed
+modules in the shared runtime registry.
 
-## Runtime
+## JavaScript runtime
 
-The adapter owns bundle selection, download, verification, and caching. Its result contains the absolute path to a
-locally evaluable bundle.
+The adapter owns bundle selection, download, integrity verification, and
+caching. It returns an absolute local bundle path.
 
 ```ts
 import { createMicroFrontendRuntime } from '@granite-js/micro-frontend';
@@ -76,24 +124,60 @@ const App = await runtime.importApp<{
 }>('cart/App');
 ```
 
-`importApp('cart/App')` performs the following composition:
+`importApp('cart/App')` performs:
 
 ```text
 adapter.loadBundle({ appName: 'cart' })
   → GraniteMicroFrontendRuntime.evaluateScript({ filePath })
-  → verify that the cart container was registered
+  → verify that the cart container registered itself
   → return the cart container's ./App module
 ```
 
-Concurrent preload/import calls for the same app share one evaluation. A successful evaluation remains cached until
-the app's last native session closes. A failed evaluation and its partial container are removed so a later call can
-retry.
+Concurrent preload/import calls for one app share an evaluation. A successful
+evaluation remains cached until its last native session closes. Failed
+evaluation removes the partial container so a later request can retry.
+
+The public runtime API is:
+
+| API | Responsibility |
+| --- | --- |
+| `preloadApp(appName)` | Load and evaluate one app without importing an exposed module. |
+| `importApp(request)` | Ensure the app is evaluated and import `appName/exposedModule`. |
+| `evaluateScript(filePath)` | Evaluate an already-local bundle in the retained runtime. |
+| `closeSession(sessionId)` | Ask native to run the close action registered for that session. |
+| `onEvent(listener)` | Subscribe to native preload, open, close, and visibility events. |
+
+## Session rendering
+
+`MicroFrontendSessionRenderer` owns the Portal composition. Consumers should
+not wrap it in another Portal.
+
+```tsx
+<MicroFrontendSessionRenderer
+  app={App}
+  sessionId={session.sessionId}
+  scheme={session.scheme}
+  isVisible={session.isVisible}
+  close={() => runtime.closeSession(session.sessionId)}
+/>
+```
+
+It performs three jobs:
+
+1. renders `<Portal hostName={sessionId}>`;
+2. provides `useMicroFrontendSession()` with the session identity and close
+   action; and
+3. passes native presentation state to the Granite app as
+   `presentationVisibility`.
+
+Remote apps use Granite's `useVisibility()` for visibility and
+`useMicroFrontendSession()` to request close. They do not receive `sessionId`
+as an application prop.
 
 ## Host pending component
 
-Remote apps register a route-level pending component with the package's `createRoute` wrapper. It delegates to
-Granite's `createRoute` and additionally associates `hostPendingComponent` with the current `granite.config.ts` app
-name, scheme, and host.
+Remote apps register a route-level pending component with this package's
+`createRoute` wrapper.
 
 ```tsx
 import { createRoute, hidePendingHostComponent } from '@granite-js/micro-frontend';
@@ -102,7 +186,9 @@ import { useEffect } from 'react';
 export const Route = createRoute('/products/:productId', {
   component: ProductPage,
   validateParams: parseProductParams,
-  hostPendingComponent: ({ thumbnailUrl }) => <ProductPendingComponent thumbnailUrl={thumbnailUrl} />,
+  hostPendingComponent: ({ thumbnailUrl }) => (
+    <ProductPendingComponent thumbnailUrl={thumbnailUrl} />
+  ),
 });
 
 function ProductPage() {
@@ -114,94 +200,115 @@ function ProductPage() {
 }
 ```
 
-The runtime host resolves the pending component from the incoming URL. It resets the shared visibility state before
-opening a new session and keeps the app content hidden until the remote app calls `hidePendingHostComponent()`.
+The host resolves `PendingHostComponent` from the incoming scheme. The route
+registry and hidden state live on the JavaScript global object, so separately
+bundled host and remote package instances share the same state.
 
-```tsx
-import {
-  PendingHostComponent,
-  useIsPendingHostComponentHidden,
-  useResolvedPendingHostComponent,
-} from '@granite-js/micro-frontend';
+## Native event contract
 
-const resolved = useResolvedPendingHostComponent(session.scheme);
-const hidden = useIsPendingHostComponentHidden();
-const showPendingComponent = resolved != null && !hidden;
-
-<>
-  <View style={{ flex: 1, opacity: showPendingComponent ? 0 : 1 }}>
-    <RemoteApp scheme={session.scheme} />
-  </View>
-  {showPendingComponent ? <PendingHostComponent url={session.scheme} /> : null}
-</>;
-```
-
-The registry and visibility state live on the JavaScript global object, so separately bundled host and remote package
-instances communicate without an app-specific bridge.
-
-## TurboModule
-
-The React Native Codegen module is named `GraniteMicroFrontendRuntime`.
+The Codegen TurboModule is named `GraniteMicroFrontendRuntime`.
 
 ```ts
 interface Spec extends TurboModule {
   evaluateScript(request: { readonly filePath: string }): Promise<void>;
   requestCloseSession(request: { readonly sessionId: string }): Promise<void>;
+  completePreloadApp(request: {
+    readonly requestId: string;
+    readonly errorMessage: string | null;
+  }): void;
   startEventDelivery(): void;
   readonly onEvent: CodegenTypes.EventEmitter<NativeMicroFrontendRuntimeEvent>;
 }
 ```
 
-TurboModule methods use request objects so native integrations can add optional fields without changing positional
-arguments. The public JavaScript facade still accepts `evaluateScript(filePath)` and `closeSession(sessionId)`.
+These methods are implemented by this package. A brownfield application does
+not implement another TurboModule. Request objects are used so optional fields
+can be added without changing positional arguments. `startEventDelivery()`
+and `completePreloadApp()` are internal runtime plumbing.
 
-`startEventDelivery()` is internal to the JavaScript facade. It flushes lifecycle events that arrived before the first
-`onEvent()` subscription.
+Native emits the following events:
 
-## Brownfield integration
+| Event | Required params | Meaning |
+| --- | --- | --- |
+| `preloadApp` | `appName`; optional `requestId` | Warm an app. A request ID asks JavaScript to report completion. |
+| `openApp` | `sessionId`, `appName`, `scheme` | Create the session's React tree. |
+| `sessionVisibilityChanged` | `sessionId`, `isVisible` | Update presentation visibility from native lifecycle. |
+| `closeApp` | `sessionId` | Unmount the tree and release the app when its last session closes. |
 
-The package supplies the `GraniteMicroFrontendRuntime` TurboModule and native
-session registry. The brownfield app does not implement another TurboModule.
-It must:
+Events emitted before JavaScript subscribes are queued. Event delivery starts
+after the runtime installs its first listener.
 
-1. create a unique `sessionId` for each native screen;
-2. resolve the screen's `appName` and incoming `scheme`;
-3. bind the screen lifecycle with the APIs below;
-4. install a Portal host using that same `sessionId`; and
-5. provide the JavaScript `adapter.loadBundle()` implementation shown above.
+## Brownfield integration checklist
 
-The shared identifier joins the two packages:
+The brownfield application must:
 
-```text
-native session binding(sessionId)
-  → openApp event(sessionId, appName, scheme)
-  → <Portal hostName={sessionId}>
-  → native Portal host(sessionId)
-```
+1. retain one React Native runtime and the controller surface that renders the
+   session track;
+2. create a unique `sessionId` for every native destination screen;
+3. resolve `appName` and the incoming `scheme` at the native navigation
+   boundary;
+4. bind native screen lifecycle to the session APIs below;
+5. install a Portal destination with the same `sessionId`;
+6. provide `adapter.loadBundle()` and return an absolute verified bundle path;
+7. keep the React tree mounted until native teardown emits `closeApp`; and
+8. keep Granite's base brownfield view APIs, such as scheme resolution and
+   closing the current Granite view, in the Granite host integration. They are
+   not duplicated by this package.
 
-Native owns how the screen closes. `closeSession()` invokes the registered
-close action instead of searching for an `Activity` or `UIViewController` from
-JavaScript. The React tree remains mounted until native teardown emits
-`closeApp`.
+Native owns how a destination closes. JavaScript `closeSession(sessionId)`
+executes the registered native close action; it never searches for an
+`Activity` or `UIViewController`.
 
-The brownfield screen lifecycle is the source of truth for presentation
-visibility. This package transports that state through
-`sessionVisibilityChanged` and `MicroFrontendSessionRenderer`; Portal separately
-owns whether content is attached to a destination host. Do not derive screen
-visibility from Portal attachment because a host can stay attached while its
-native screen is not visible.
+## Android native API
 
-### Android
+All public Android APIs live in `run.granite.microfrontend`, except the Portal
+destination views in `com.teleport.host`.
+
+### Session APIs
+
+| API | Lifetime / behavior |
+| --- | --- |
+| `ActivitySessionBinding.bind(activity, sessionId, appName, scheme)` | Convenience binding for an `Activity`. Emits open, derives visibility from start/stop, runs `finish()` on close request, and emits close on destroy. Retain it for the Activity lifetime. |
+| `GraniteMicroFrontendRuntimeHost.registerSession(sessionId, closeAction)` | Register a custom native container and return a `GraniteMicroFrontendSessionRegistration`. |
+| `GraniteMicroFrontendSessionRegistration.openApp(appName, scheme)` | Emit `openApp` once. |
+| `GraniteMicroFrontendSessionRegistration.setVisible(isVisible)` | Emit a visibility event only when the value changes. |
+| `GraniteMicroFrontendSessionRegistration.closeApp()` | Emit `closeApp` once after open. |
+| `GraniteMicroFrontendSessionRegistration.close()` | Unregister the native session. Call after `closeApp()`. |
+| `GraniteMicroFrontendRuntimeHost.emitPreloadApp(appName)` | Fire-and-forget preload. |
+| `GraniteMicroFrontendRuntimeHost.requestPreloadApp(appName, callback)` | Request preload completion and return a cancellable registration. |
+| `GraniteMicroFrontendPreloadCallback` | Receives `onSuccess()` or `onFailure(errorMessage)`. |
+| `GraniteMicroFrontendPreloadRegistration.close()` | Cancel an outstanding preload callback. |
+
+### Portal destination APIs
+
+| API | Lifetime / behavior |
+| --- | --- |
+| `PortalHostView.setName(name)` | Register/unregister the destination name. Use `sessionId`. |
+| `PortalHostView.cleanup()` | Permanently unregister the destination during teardown. |
+| `PortalReactRootView(context, reactHost, surfaceId, moduleName)` | Detached Fabric root that forwards touch/pointer events through the retained `ReactHost`; it does not start another runtime or surface. |
+
+`PortalHostView` also re-registers on window attachment and temporarily
+unregisters while detached. `nextInsertionIndexForChildAt()` is renderer
+plumbing, not an application integration API.
+
+### Activity example
 
 ```kotlin
 import android.os.Bundle
+import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.facebook.react.ReactHost
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.uimanager.ThemedReactContext
+import com.teleport.host.PortalHostView
+import com.teleport.host.PortalReactRootView
 import java.util.UUID
 import run.granite.microfrontend.ActivitySessionBinding
 
 class CartActivity : AppCompatActivity() {
   private val sessionId = UUID.randomUUID().toString()
   private lateinit var sessionBinding: ActivitySessionBinding
+  private var portalHostView: PortalHostView? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -213,178 +320,154 @@ class CartActivity : AppCompatActivity() {
       appName = "cart",
       scheme = scheme,
     )
+  }
 
-    // Install the @granite-js/portal host with hostName = sessionId.
-    installPortalHost(sessionId)
+  fun installPortalHost(
+    reactContext: ReactApplicationContext,
+    reactHost: ReactHost,
+    controllerSurfaceId: Int,
+    controllerModuleName: String,
+  ) {
+    val themedContext = ThemedReactContext(
+      reactContext,
+      this,
+      controllerModuleName,
+      controllerSurfaceId,
+    )
+    val rootView = PortalReactRootView(
+      themedContext,
+      reactHost,
+      controllerSurfaceId,
+      controllerModuleName,
+    )
+    val hostView = PortalHostView(themedContext).apply { setName(sessionId) }
+
+    rootView.addView(
+      hostView,
+      FrameLayout.LayoutParams(
+        FrameLayout.LayoutParams.MATCH_PARENT,
+        FrameLayout.LayoutParams.MATCH_PARENT,
+      ),
+    )
+    portalHostView = hostView
+    setContentView(rootView)
+  }
+
+  override fun onDestroy() {
+    portalHostView?.cleanup()
+    portalHostView = null
+    super.onDestroy()
   }
 }
 ```
 
-`ActivitySessionBinding` emits `openApp` when bound, maps `onActivityStarted`
-and `onActivityStopped` to visibility, and emits `closeApp` when the activity is
-destroyed. A JavaScript `closeSession(sessionId)` request calls
-`Activity.finish()` on the main thread. Retain the binding for the lifetime of
-the activity; custom screen containers can instead retain
-`GraniteMicroFrontendRuntimeHost.registerSession()` and drive `openApp`,
-`setVisible`, `closeApp`, and `close()` themselves.
+Install the Portal host only after the retained `ReactHost` has an active
+`ReactApplicationContext`. The brownfield runtime owner still forwards normal
+resume, pause, destroy, and back events to its retained `ReactHost`.
 
-### iOS
+Custom screen containers use `registerSession()` and drive `openApp()`,
+`setVisible()`, `closeApp()`, and `close()` from their own lifecycle.
+
+## iOS native API
+
+Import public APIs from `GraniteMicroFrontendRuntime`.
 
 ```objc
 #import <GraniteMicroFrontendRuntime/GraniteMicroFrontendRuntimeHost.h>
-
-__weak typeof(self) weakSelf = self;
-self.sessionBinding =
-    [GraniteMicroFrontendViewControllerSessionBinding bindViewController:self
-                                                               sessionId:self.sessionId
-                                                                 appName:@"cart"
-                                                                  scheme:@"granite://cart/products/1"
-                                                            closeHandler:^{
-  [weakSelf dismissViewControllerAnimated:YES completion:^{
-    [weakSelf.sessionBinding invalidate];
-    weakSelf.sessionBinding = nil;
-  }];
-}];
-
-// Install the @granite-js/portal host with name = self.sessionId.
-[self installPortalHostWithName:self.sessionId];
+#import <GraniteMicroFrontendRuntime/PortalHostContainerView.h>
 ```
 
-Retain `sessionBinding` until the controller is dismissed. The binding emits
-`openApp` once, derives visibility from appearance callbacks, and emits
-`closeApp` only when it is invalidated or deallocated after teardown. Create
-and invalidate it on the main thread, and weakly capture the controller in the
-close handler so the binding can be released with its `UIViewController`.
+### Session APIs
 
-Custom containers can instead retain a
-`GraniteMicroFrontendSessionRegistration` from
-`GraniteMicroFrontendRuntimeHost.registerSession`, then call `openApp`,
-`setVisible`, `closeApp`, and `invalidate` from their own lifecycle.
+| API | Lifetime / behavior |
+| --- | --- |
+| `+[GraniteMicroFrontendViewControllerSessionBinding bindViewController:sessionId:appName:scheme:closeHandler:]` | Convenience binding for a `UIViewController`. Emits open and derives visibility from appearance callbacks. Retain until teardown. |
+| `-[GraniteMicroFrontendViewControllerSessionBinding invalidate]` | Emit close and detach lifecycle observation. |
+| `+[GraniteMicroFrontendRuntimeHost registerSession:closeHandler:]` | Register a custom container and return a session registration. |
+| `-[GraniteMicroFrontendSessionRegistration openAppWithAppName:scheme:]` | Emit `openApp` once. |
+| `-[GraniteMicroFrontendSessionRegistration setVisible:]` | Emit visibility only when it changes. |
+| `-[GraniteMicroFrontendSessionRegistration closeApp]` | Emit `closeApp` once after open. |
+| `-[GraniteMicroFrontendSessionRegistration invalidate]` | Unregister the session. Call after `closeApp`. |
+| `+[GraniteMicroFrontendRuntimeHost emitPreloadApp:]` | Fire-and-forget preload. |
+| `+[GraniteMicroFrontendRuntimeHost requestPreloadApp:completion:]` | Request completion and return a cancellable registration. |
+| `-[GraniteMicroFrontendPreloadRegistration invalidate]` | Cancel an outstanding completion callback. |
 
-### Optional native preload
+### Portal destination APIs
 
-Call `requestPreloadApp` when a native entry point must know whether JavaScript
-finished loading and evaluating an app before navigation. Its callback is
-completed by the JavaScript runtime after `adapter.loadBundle()` and
-`evaluateScript()` finish. Retain the returned registration while the request
-is relevant and close/invalidate it to cancel the callback.
+| API | Lifetime / behavior |
+| --- | --- |
+| `-initWithFrame:` | Create and immediately activate a UIKit-owned Portal destination after React has booted. |
+| `-initWithFrame:deferredActivation:` | Create before React boot without reading React feature flags. |
+| `-setName:` | Register/unregister the destination name. Use `sessionId`. |
+| `-activateIfNeeded` | Create the Fabric host, attach its touch handler, and apply the pending name. Main thread only, after React boot. |
+| `isActivated` | Whether the underlying Fabric host exists. |
+| `hasAttachedContent` | Whether teleported content is currently attached. This is readiness, not presentation visibility. |
+| `onContentDidAttach` / `onContentDidDetach` | Main-thread readiness callbacks for the first attach and last detach. |
+| `-invalidate` | Unregister the host and clear callbacks during teardown. |
 
-Use `emitPreloadApp` only for fire-and-forget warm-up when native does not need
-completion or failure reporting.
+### UIViewController example
 
-## Session rendering
+```objc
+@interface CartViewController ()
+@property(nonatomic, copy) NSString *sessionId;
+@property(nonatomic, strong) GraniteMicroFrontendViewControllerSessionBinding *sessionBinding;
+@property(nonatomic, strong) PortalHostContainerView *portalHostView;
+@end
+
+- (void)viewDidLoad {
+  [super viewDidLoad];
+
+  self.portalHostView = [[PortalHostContainerView alloc] initWithFrame:self.view.bounds
+                                                    deferredActivation:YES];
+  [self.portalHostView setName:self.sessionId];
+  [self.view addSubview:self.portalHostView];
+
+  __weak typeof(self) weakSelf = self;
+  self.sessionBinding =
+      [GraniteMicroFrontendViewControllerSessionBinding bindViewController:self
+                                                                 sessionId:self.sessionId
+                                                                   appName:@"cart"
+                                                                    scheme:@"granite://cart/products/1"
+                                                              closeHandler:^{
+    [weakSelf dismissViewControllerAnimated:YES completion:^{
+      [weakSelf.sessionBinding invalidate];
+      weakSelf.sessionBinding = nil;
+      [weakSelf.portalHostView invalidate];
+    }];
+  }];
+}
+
+- (void)reactRuntimeDidStart {
+  [self.portalHostView activateIfNeeded];
+}
+```
+
+Create, activate, and invalidate these objects on the main thread. Weakly
+capture the controller in its close handler so the binding can be released
+with the controller.
+
+## Portal primitive and example
+
+`Portal` remains public for a Portal-only integration or test fixture:
 
 ```tsx
-import { Portal, PortalProvider } from '@granite-js/portal';
-import {
-  createMicroFrontendRuntime,
-  MicroFrontendSessionRenderer,
-  type MicroFrontendRuntimeEvent,
-} from '@granite-js/micro-frontend';
-import { lazy, useEffect, useReducer, type ComponentType, type LazyExoticComponent } from 'react';
+import { Portal } from '@granite-js/micro-frontend';
 
-interface AppProps {
-  readonly scheme: string;
-}
-
-interface AppModule {
-  readonly default: ComponentType<AppProps>;
-}
-
-interface Session {
-  readonly sessionId: string;
-  readonly scheme: string;
-  readonly isVisible: boolean;
-  readonly App: LazyExoticComponent<ComponentType<AppProps>>;
-}
-
-type Action =
-  | { readonly type: 'opened'; readonly session: Session }
-  | { readonly type: 'closed'; readonly sessionId: string }
-  | {
-      readonly type: 'visibilityChanged';
-      readonly sessionId: string;
-      readonly isVisible: boolean;
-    };
-
-function reduceSessions(sessions: readonly Session[], action: Action): readonly Session[] {
-  switch (action.type) {
-    case 'opened':
-      return sessions.some(({ sessionId }) => sessionId === action.session.sessionId)
-        ? sessions
-        : [...sessions, action.session];
-    case 'closed':
-      return sessions.filter(({ sessionId }) => sessionId !== action.sessionId);
-    case 'visibilityChanged':
-      return sessions.map((session) =>
-        session.sessionId === action.sessionId ? { ...session, isVisible: action.isVisible } : session
-      );
-    default:
-      action satisfies never;
-      return sessions;
-  }
-}
-
-declare const runtime: ReturnType<typeof createMicroFrontendRuntime>;
-declare function reportError(error: unknown): void;
-
-export function MonoHermesTrack() {
-  const [sessions, dispatch] = useReducer(reduceSessions, []);
-
-  useEffect(() => {
-    const subscription = runtime.onEvent((event: MicroFrontendRuntimeEvent) => {
-      switch (event.name) {
-        case 'preloadApp':
-          void runtime.preloadApp(event.params.appName).catch(reportError);
-          return;
-        case 'openApp': {
-          const { appName, scheme, sessionId } = event.params;
-          dispatch({
-            type: 'opened',
-            session: {
-              sessionId,
-              scheme,
-              isVisible: false,
-              App: lazy(() => runtime.importApp<AppModule>(`${appName}/App`)),
-            },
-          });
-          return;
-        }
-        case 'closeApp':
-          dispatch({ type: 'closed', sessionId: event.params.sessionId });
-          return;
-        case 'sessionVisibilityChanged':
-          dispatch({
-            type: 'visibilityChanged',
-            sessionId: event.params.sessionId,
-            isVisible: event.params.isVisible,
-          });
-          return;
-        default:
-          event satisfies never;
-      }
-    });
-    return () => subscription.remove();
-  }, []);
-
-  return (
-    <PortalProvider>
-      {sessions.map(({ App, ...session }) => (
-        <Portal key={session.sessionId} hostName={session.sessionId}>
-          <MicroFrontendSessionRenderer
-            app={App}
-            sessionId={session.sessionId}
-            scheme={session.scheme}
-            isVisible={session.isVisible}
-            close={() => runtime.closeSession(session.sessionId)}
-          />
-        </Portal>
-      ))}
-    </PortalProvider>
-  );
-}
+<Portal hostName="store">
+  <StoreNavigationContainer />
+</Portal>;
 ```
 
-Remote apps use Granite's `useVisibility()` for visibility and `useMicroFrontendSession()` to request a close without
-receiving `sessionId` as an application prop. The renderer keeps session visibility inside Granite's existing
-visibility provider chain, so remote applications do not need session-specific visibility code.
+The React subtree keeps the same owner, context, and state while its native
+views move to the named destination. Host names are application data; a
+generic native destination should read the requested name at runtime.
+
+See [examples/portal/README.md](examples/portal/README.md) for the retained
+Portal-only cross-Activity / UIViewController example.
+
+## License and credit
+
+Apache-2.0. The Portal implementation is based on
+[react-native-teleport](https://github.com/kirillzyusko/react-native-teleport)
+by Kiryl Ziusko; see [NOTICE](NOTICE) and
+[LICENSE.react-native-teleport](LICENSE.react-native-teleport).
