@@ -115,14 +115,13 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
 }
 
 - (BOOL)scheduleRuntimeEvent:(NSDictionary *)event {
-  __weak GraniteMicroFrontendRuntimeModule *weakSelf = self;
   RCTBridgeProxy *bridgeProxy = (RCTBridgeProxy *)self.bridge;
   std::shared_ptr<facebook::react::CallInvoker> callInvoker = bridgeProxy.jsCallInvoker;
   if (callInvoker == nullptr) {
     return NO;
   }
-  callInvoker->invokeAsync([weakSelf, event] {
-    [weakSelf emitOnEvent:event];
+  callInvoker->invokeAsync([self, event] {
+    [self emitOnEvent:event];
   });
   return YES;
 }
