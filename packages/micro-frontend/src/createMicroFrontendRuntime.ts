@@ -1,3 +1,4 @@
+import { removeHostSkeletonRoutes } from './host/hostSkeletonStore';
 import { createMicroFrontendRuntimeWithDependencies } from './runtime/createMicroFrontendRuntime';
 import { parseNativeRuntimeEvent } from './runtime/parseNativeRuntimeEvent';
 import { microFrontendModuleRegistry } from './runtime/registry';
@@ -14,5 +15,6 @@ export function createMicroFrontendRuntime(options: CreateMicroFrontendRuntimeOp
     nativeRuntime: NativeGraniteMicroFrontendRuntime,
     parseEvent: parseNativeRuntimeEvent,
     registry: microFrontendModuleRegistry,
+    removeHostSkeletonRoutes,
   });
 }

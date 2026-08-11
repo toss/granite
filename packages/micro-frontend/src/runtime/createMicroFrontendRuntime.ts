@@ -42,6 +42,7 @@ export interface CreateMicroFrontendRuntimeDependencies {
   readonly adapter: MicroFrontendAdapter;
   readonly nativeRuntime: NativeMicroFrontendRuntime;
   readonly registry: MicroFrontendModuleRegistry;
+  readonly removeHostSkeletonRoutes: (appName: string) => void;
   readonly parseEvent: (event: NativeMicroFrontendRuntimeEvent) => MicroFrontendRuntimeEvent;
 }
 
@@ -50,6 +51,13 @@ export function createMicroFrontendRuntimeWithDependencies(
 ): MicroFrontendRuntimeApi {
   // A fulfilled promise is the evaluated-state cache. Rejected evaluations remove themselves.
   const appEvaluations = new Map<string, Promise<void>>();
+  const appSessions = new Map<string, Set<string>>();
+
+  function releaseApp(appName: string) {
+    appEvaluations.delete(appName);
+    dependencies.registry.removeContainer(appName);
+    dependencies.removeHostSkeletonRoutes(appName);
+  }
 
   function preloadApp(appName: string): Promise<void> {
     if (appName.length === 0) {
@@ -75,9 +83,42 @@ export function createMicroFrontendRuntimeWithDependencies(
         throw new AppContainerNotFoundError(appName);
       }
     } catch (error) {
-      dependencies.registry.removeContainer(appName);
-      appEvaluations.delete(appName);
+      releaseApp(appName);
       throw error;
+    }
+  }
+
+  function handleAppLifecycle(event: MicroFrontendRuntimeEvent) {
+    switch (event.name) {
+      case 'openApp': {
+        const sessions = appSessions.get(event.params.appName);
+        if (sessions == null) {
+          appSessions.set(event.params.appName, new Set([event.params.sessionId]));
+        } else {
+          sessions.add(event.params.sessionId);
+        }
+        return;
+      }
+      case 'closeApp': {
+        for (const [appName, sessions] of appSessions) {
+          if (!sessions.delete(event.params.sessionId)) {
+            continue;
+          }
+          if (sessions.size === 0) {
+            appSessions.delete(appName);
+            releaseApp(appName);
+          }
+          return;
+        }
+        return;
+      }
+      case 'preloadApp':
+      case 'sessionVisibilityChanged':
+        return;
+      default: {
+        const exhaustiveEvent: never = event;
+        return exhaustiveEvent;
+      }
     }
   }
 
@@ -113,7 +154,9 @@ export function createMicroFrontendRuntimeWithDependencies(
     onEvent(listener) {
       const subscription = dependencies.nativeRuntime.onEvent((event) => {
         completeNativePreloadRequest(event);
-        listener(dependencies.parseEvent(event));
+        const parsedEvent = dependencies.parseEvent(event);
+        handleAppLifecycle(parsedEvent);
+        listener(parsedEvent);
       });
       dependencies.nativeRuntime.startEventDelivery();
       return subscription;

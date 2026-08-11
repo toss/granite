@@ -141,6 +141,19 @@ export function registerHostSkeletonRoute<
   emitHostSkeletonStoreChange();
 }
 
+export function removeHostSkeletonRoutes(appName: string) {
+  const store = getHostSkeletonStore();
+  const normalizedAppName = normalizeHostSkeletonAppName(appName);
+  const remainingEntries = store.entries.filter(entry => entry.appName !== normalizedAppName);
+
+  if (remainingEntries.length === store.entries.length) {
+    return;
+  }
+
+  store.entries = remainingEntries;
+  emitHostSkeletonStoreChange();
+}
+
 export function resolveHostSkeleton(request: HostSkeletonRouteRequest | string): ResolvedHostSkeleton | null {
   const matched = typeof request === 'string' ? findRouteByUrl(request) : findRouteByRequest(request);
 

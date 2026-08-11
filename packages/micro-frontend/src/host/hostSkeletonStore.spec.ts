@@ -5,6 +5,7 @@ import {
   hideHostSkeleton,
   installHostSkeletonBridge,
   registerHostSkeletonRoute,
+  removeHostSkeletonRoutes,
   resetHostSkeleton,
   resetHostSkeletonStoreForTest,
   resolveHostSkeleton,
@@ -15,6 +16,10 @@ function ProductSkeleton(): ReactNode {
 }
 
 function DynamicProductSkeleton(): ReactNode {
+  return null;
+}
+
+function BenefitSkeleton(): ReactNode {
   return null;
 }
 
@@ -83,6 +88,25 @@ describe('host skeleton registry', () => {
 
     expect(resolveHostSkeleton({ appName: 'shopping', routePath: '/product' })?.component).toBe(ProductSkeleton);
     expect(resolveHostSkeleton({ appName: 'benefit', routePath: '/product' })).toBeNull();
+  });
+
+  it('removes only routes owned by the released app', () => {
+    // Given
+    registerHostSkeletonRoute('/product', {
+      component: ProductSkeleton,
+      app: shoppingApp,
+    });
+    registerHostSkeletonRoute('/coupon', {
+      component: BenefitSkeleton,
+      app: { host: 'app', name: 'benefit', scheme: 'example' },
+    });
+
+    // When
+    removeHostSkeletonRoutes('shopping');
+
+    // Then
+    expect(resolveHostSkeleton({ appName: 'shopping', routePath: '/product' })).toBeNull();
+    expect(resolveHostSkeleton({ appName: 'benefit', routePath: '/coupon' })?.component).toBe(BenefitSkeleton);
   });
 
   it('shares visibility state across host and remote package instances', () => {
