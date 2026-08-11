@@ -27,20 +27,22 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
             startDrainIfNeeded()
         }
         if (shouldDrain) {
-            drain(target)
+            drain()
         }
     }
 
     fun emit(event: GraniteMicroFrontendEvent) {
-        val target = synchronized(lock) {
+        val shouldDrain = synchronized(lock) {
             pendingEvents.addLast(event)
-            val target = activeTarget ?: return
+            activeTarget ?: return
             if (!startDrainIfNeeded()) {
                 return
             }
-            target
+            true
         }
-        drain(target)
+        if (shouldDrain) {
+            drain()
+        }
     }
 
     fun detach(target: GraniteMicroFrontendRuntimeEventTarget) {
@@ -60,21 +62,30 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
         return true
     }
 
-    private fun drain(target: GraniteMicroFrontendRuntimeEventTarget) {
+    private fun drain() {
         while (true) {
-            val event = synchronized(lock) {
-                if (activeTarget !== target || pendingEvents.isEmpty()) {
+            val (target, event) = synchronized(lock) {
+                val target = activeTarget
+                if (target == null || pendingEvents.isEmpty()) {
                     isDelivering = false
                     return
                 }
-                pendingEvents.removeFirst()
+                target to pendingEvents.removeFirst()
             }
             try {
                 target.emit(event)
             } catch (error: Throwable) {
-                synchronized(lock) {
+                val shouldResumeWithReplacement = synchronized(lock) {
                     pendingEvents.addFirst(event)
                     isDelivering = false
+                    activeTarget != null && activeTarget !== target && startDrainIfNeeded()
+                }
+                if (shouldResumeWithReplacement) {
+                    try {
+                        drain()
+                    } catch (replacementError: Throwable) {
+                        error.addSuppressed(replacementError)
+                    }
                 }
                 throw error
             }

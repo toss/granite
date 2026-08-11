@@ -13,6 +13,7 @@ class GraniteMicroFrontendRuntimeModule(
     private val eventLock = Any()
     private val pendingEvents = ArrayDeque<GraniteMicroFrontendEvent>()
     private var eventDeliveryStarted = false
+    private var isDeliveringEvents = false
 
     override fun initialize() {
         super.initialize()
@@ -74,34 +75,51 @@ class GraniteMicroFrontendRuntimeModule(
     }
 
     override fun startEventDelivery() {
-        val events = synchronized(eventLock) {
+        synchronized(eventLock) {
             if (eventDeliveryStarted) {
                 return
             }
             eventDeliveryStarted = true
-            pendingEvents.toList().also { pendingEvents.clear() }
+            isDeliveringEvents = true
         }
         GraniteMicroFrontendRuntimeHost.startEventDelivery(this)
-        events.forEach(::emitImmediately)
+        drainEvents()
     }
 
     override fun emit(event: GraniteMicroFrontendEvent) {
-        val shouldEmit = synchronized(eventLock) {
-            if (!eventDeliveryStarted) {
-                pendingEvents.addLast(event)
-                false
-            } else {
-                true
+        val shouldDrain = synchronized(eventLock) {
+            pendingEvents.addLast(event)
+            if (!eventDeliveryStarted || isDeliveringEvents) {
+                return
             }
+            isDeliveringEvents = true
+            true
         }
-        if (shouldEmit) {
-            emitImmediately(event)
+        if (shouldDrain) {
+            drainEvents()
         }
     }
 
-    private fun emitImmediately(event: GraniteMicroFrontendEvent) {
-        reactApplicationContext.runOnJSQueueThread {
-            emitOnEvent(event.toWritableMap())
+    private fun drainEvents() {
+        while (true) {
+            val event = synchronized(eventLock) {
+                if (pendingEvents.isEmpty()) {
+                    isDeliveringEvents = false
+                    return
+                }
+                pendingEvents.removeFirst()
+            }
+            val enqueued = reactApplicationContext.runOnJSQueueThread {
+                emitOnEvent(event.toWritableMap())
+            }
+            if (!enqueued) {
+                synchronized(eventLock) {
+                    pendingEvents.addFirst(event)
+                    eventDeliveryStarted = false
+                    isDeliveringEvents = false
+                }
+                return
+            }
         }
     }
 

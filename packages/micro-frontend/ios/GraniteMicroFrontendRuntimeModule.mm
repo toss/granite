@@ -18,6 +18,9 @@ static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
 @property(nonatomic, strong) NSLock *eventLock;
 @property(nonatomic, strong) NSMutableArray<NSDictionary *> *pendingEvents;
 @property(nonatomic, assign) BOOL eventDeliveryStarted;
+@property(nonatomic, assign) BOOL isDeliveringEvents;
+- (void)drainRuntimeEvents;
+- (BOOL)scheduleRuntimeEvent:(NSDictionary *)event;
 @end
 
 @implementation GraniteMicroFrontendRuntimeModule
@@ -124,41 +127,59 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
     return;
   }
   _eventDeliveryStarted = YES;
-  NSArray<NSDictionary *> *events = [_pendingEvents copy];
-  [_pendingEvents removeAllObjects];
+  _isDeliveringEvents = YES;
   [_eventLock unlock];
 
   [GraniteMicroFrontendRuntimeHost startEventDeliveryToEventSink:self];
-  for (NSDictionary *event in events) {
-    [self emitRuntimeEvent:event];
-  }
+  [self drainRuntimeEvents];
 }
 
 - (void)enqueueRuntimeEvent:(NSDictionary *)event {
   [_eventLock lock];
-  if (!_eventDeliveryStarted) {
-    [_pendingEvents addObject:event];
+  [_pendingEvents addObject:event];
+  if (!_eventDeliveryStarted || _isDeliveringEvents) {
     [_eventLock unlock];
     return;
   }
+  _isDeliveringEvents = YES;
   [_eventLock unlock];
-  [self emitRuntimeEvent:event];
+  [self drainRuntimeEvents];
 }
 
-- (void)emitRuntimeEvent:(NSDictionary *)event {
+- (void)drainRuntimeEvents {
+  while (YES) {
+    [_eventLock lock];
+    if (_pendingEvents.count == 0) {
+      _isDeliveringEvents = NO;
+      [_eventLock unlock];
+      return;
+    }
+    NSDictionary *event = _pendingEvents.firstObject;
+    [_pendingEvents removeObjectAtIndex:0];
+    [_eventLock unlock];
+
+    if (![self scheduleRuntimeEvent:event]) {
+      [_eventLock lock];
+      [_pendingEvents insertObject:event atIndex:0];
+      _eventDeliveryStarted = NO;
+      _isDeliveringEvents = NO;
+      [_eventLock unlock];
+      return;
+    }
+  }
+}
+
+- (BOOL)scheduleRuntimeEvent:(NSDictionary *)event {
   __weak GraniteMicroFrontendRuntimeModule *weakSelf = self;
   RCTBridgeProxy *bridgeProxy = (RCTBridgeProxy *)self.bridge;
   std::shared_ptr<facebook::react::CallInvoker> callInvoker = bridgeProxy.jsCallInvoker;
   if (callInvoker == nullptr) {
-    [_eventLock lock];
-    [_pendingEvents addObject:event];
-    _eventDeliveryStarted = NO;
-    [_eventLock unlock];
-    return;
+    return NO;
   }
   callInvoker->invokeAsync([weakSelf, event] {
     [weakSelf emitOnEvent:event];
   });
+  return YES;
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:

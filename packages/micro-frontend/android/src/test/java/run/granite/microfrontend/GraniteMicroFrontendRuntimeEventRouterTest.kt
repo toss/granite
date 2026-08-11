@@ -99,6 +99,44 @@ class GraniteMicroFrontendRuntimeEventRouterTest {
 
         assertEquals(listOf(open, close), events)
     }
+
+    @Test
+    fun `replacement runtime resumes a drain owned by a detached runtime`() {
+        val firstEvents = mutableListOf<GraniteMicroFrontendEvent>()
+        val secondEvents = mutableListOf<GraniteMicroFrontendEvent>()
+        val firstDeliveryStarted = CountDownLatch(1)
+        val continueFirstDelivery = CountDownLatch(1)
+        val router = GraniteMicroFrontendRuntimeEventRouter()
+        val firstTarget = object : GraniteMicroFrontendRuntimeEventTarget {
+            override fun emit(event: GraniteMicroFrontendEvent) {
+                firstDeliveryStarted.countDown()
+                assertTrue(continueFirstDelivery.await(5, TimeUnit.SECONDS))
+                firstEvents.add(event)
+            }
+        }
+        val secondTarget = object : GraniteMicroFrontendRuntimeEventTarget {
+            override fun emit(event: GraniteMicroFrontendEvent) {
+                secondEvents.add(event)
+            }
+        }
+        val open = GraniteMicroFrontendEvent.OpenApp("session-1", "shopping", "granite://shopping")
+        val close = GraniteMicroFrontendEvent.CloseApp("session-1")
+        router.attach(firstTarget)
+        router.startEventDelivery(firstTarget)
+
+        val firstEmitThread = thread { router.emit(open) }
+        assertTrue(firstDeliveryStarted.await(5, TimeUnit.SECONDS))
+        router.detach(firstTarget)
+        router.attach(secondTarget)
+        router.startEventDelivery(secondTarget)
+        router.emit(close)
+        continueFirstDelivery.countDown()
+        firstEmitThread.join(5_000)
+
+        assertFalse(firstEmitThread.isAlive)
+        assertEquals(listOf(open), firstEvents)
+        assertEquals(listOf(close), secondEvents)
+    }
 }
 
 private class RecordingEventTarget : GraniteMicroFrontendRuntimeEventTarget {

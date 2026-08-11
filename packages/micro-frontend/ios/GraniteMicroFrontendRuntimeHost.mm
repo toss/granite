@@ -404,24 +404,36 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 }
 
 + (void)drainEventsToSink:(id<GraniteMicroFrontendRuntimeEventSink>)sink {
+  id<GraniteMicroFrontendRuntimeEventSink> currentSink = sink;
   while (YES) {
     [runtimeLock lock];
-    if (eventSink != sink || pendingEvents.count == 0) {
+    id<GraniteMicroFrontendRuntimeEventSink> activeSink = eventSink;
+    if (activeSink == nil || pendingEvents.count == 0) {
       isDeliveringEvents = NO;
       [runtimeLock unlock];
       return;
     }
+    currentSink = activeSink;
     NSDictionary *event = pendingEvents.firstObject;
     [pendingEvents removeObjectAtIndex:0];
     [runtimeLock unlock];
 
     @try {
-      [sink enqueueRuntimeEvent:event];
+      [currentSink enqueueRuntimeEvent:event];
     } @catch (NSException *exception) {
       [runtimeLock lock];
       [pendingEvents insertObject:event atIndex:0];
       isDeliveringEvents = NO;
+      id<GraniteMicroFrontendRuntimeEventSink> replacementSink = eventSink;
+      BOOL shouldResumeWithReplacement =
+          replacementSink != nil && replacementSink != currentSink && pendingEvents.count > 0;
+      if (shouldResumeWithReplacement) {
+        isDeliveringEvents = YES;
+      }
       [runtimeLock unlock];
+      if (shouldResumeWithReplacement) {
+        [self drainEventsToSink:replacementSink];
+      }
       @throw exception;
     }
   }
