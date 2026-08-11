@@ -5,7 +5,7 @@ import {
   getRoutePathFromUrl,
   matchRoutePath,
   normalizeHostSkeletonAppName,
-  normalizeHostSkeletonRoutePath,
+  normalizeRoutePath,
 } from './routeMatcher';
 import type {
   HostSkeletonComponent,
@@ -117,7 +117,7 @@ export function registerHostSkeletonRoute<
   TParams extends Readonly<object> | undefined = undefined,
 >(routePath: string, options: RegisterHostSkeletonRouteOptions<TParams>) {
   const store = getHostSkeletonStore();
-  const normalizedRoutePath = normalizeHostSkeletonRoutePath(routePath);
+  const normalizedRoutePath = normalizeRoutePath(routePath);
   const appName = normalizeHostSkeletonAppName(options.app.name);
   const routePrefix = createHostSkeletonRoutePrefix(options.app);
   const id = `${routePrefix}:${normalizedRoutePath}`;
@@ -201,7 +201,7 @@ function findRouteByRequest(request: HostSkeletonRouteRequest): MatchedHostSkele
       continue;
     }
 
-    const routePath = normalizeHostSkeletonRoutePath(request.routePath);
+    const routePath = normalizeRoutePath(request.routePath);
     const pathParams = matchRoutePath(entry.routePath, routePath);
     if (pathParams == null) {
       continue;

@@ -15,7 +15,7 @@ export type {
 } from './types';
 export {
   createHostSkeletonRoutePrefix,
-  normalizeHostSkeletonRoutePath,
+  normalizeRoutePath,
 } from './routeMatcher';
 export {
   hideHostSkeleton,

@@ -1,6 +1,6 @@
 import type { HostSkeletonAppConfig } from './types';
 
-export function normalizeHostSkeletonRoutePath(routePath: string) {
+export function normalizeRoutePath(routePath: string) {
   const pathname = routePath.split('#')[0]?.split('?')[0] ?? '/';
   const pathWithLeadingSlash = pathname.startsWith('/') ? pathname : `/${pathname}`;
   const normalizedPathname = pathWithLeadingSlash.replace(/\/+/g, '/');
@@ -28,7 +28,7 @@ export function getRoutePathFromUrl(url: string, routePrefix: string) {
     return null;
   }
 
-  return normalizeHostSkeletonRoutePath(urlWithoutSearch.slice(normalizedPrefix.length));
+  return normalizeRoutePath(urlWithoutSearch.slice(normalizedPrefix.length));
 }
 
 export function getQueryParamsFromUrl(url: string): Record<string, string> {
@@ -92,7 +92,7 @@ export function normalizeHostSkeletonAppName(appName: string) {
 }
 
 function splitRoutePath(routePath: string) {
-  const normalizedRoutePath = normalizeHostSkeletonRoutePath(routePath);
+  const normalizedRoutePath = normalizeRoutePath(routePath);
   return normalizedRoutePath === '/' ? [] : normalizedRoutePath.slice(1).split('/');
 }
 

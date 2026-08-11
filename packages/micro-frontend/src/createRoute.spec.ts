@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createRoute } from './createRoute';
 import { resetHostSkeletonStoreForTest, resolveHostSkeleton } from './host/hostSkeletonStore';
 
 const reactNative = vi.hoisted(() => ({
@@ -9,8 +10,6 @@ const reactNative = vi.hoisted(() => ({
 }));
 
 vi.mock('@granite-js/react-native', () => reactNative);
-
-import { createRoute } from './createRoute';
 
 declare module '@granite-js/react-native' {
   interface RegisterScreenInput {
