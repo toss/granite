@@ -212,10 +212,6 @@ The Codegen TurboModule is named `GraniteMicroFrontendRuntime`.
 interface Spec extends TurboModule {
   evaluateScript(request: { readonly filePath: string }): Promise<void>;
   requestCloseSession(request: { readonly sessionId: string }): Promise<void>;
-  completePreloadApp(request: {
-    readonly requestId: string;
-    readonly errorMessage: string | null;
-  }): void;
   startEventDelivery(): void;
   readonly onEvent: CodegenTypes.EventEmitter<NativeMicroFrontendRuntimeEvent>;
 }
@@ -224,13 +220,13 @@ interface Spec extends TurboModule {
 These methods are implemented by this package. A brownfield application does
 not implement another TurboModule. Request objects are used so optional fields
 can be added without changing positional arguments. `startEventDelivery()`
-and `completePreloadApp()` are internal runtime plumbing.
+is internal runtime plumbing.
 
 Native emits the following events:
 
 | Event | Required params | Meaning |
 | --- | --- | --- |
-| `preloadApp` | `appName`; optional `requestId` | Warm an app. A request ID asks JavaScript to report completion. |
+| `preloadApp` | `appName` | Warm an app. |
 | `openApp` | `sessionId`, `appName`, `scheme` | Create the session's React tree. |
 | `sessionVisibilityChanged` | `sessionId`, `isVisible` | Update presentation visibility from native lifecycle. |
 | `closeApp` | `sessionId` | Unmount the tree and release the app when its last session closes. |
@@ -275,9 +271,6 @@ destination views in `com.teleport.host`.
 | `GraniteMicroFrontendSessionRegistration.closeApp()` | Emit `closeApp` once after open. |
 | `GraniteMicroFrontendSessionRegistration.close()` | Unregister the native session. Call after `closeApp()`. |
 | `GraniteMicroFrontendRuntimeHost.emitPreloadApp(appName)` | Fire-and-forget preload. |
-| `GraniteMicroFrontendRuntimeHost.requestPreloadApp(appName, callback)` | Request preload completion and return a cancellable registration. |
-| `GraniteMicroFrontendPreloadCallback` | Receives `onSuccess()` or `onFailure(errorMessage)`. |
-| `GraniteMicroFrontendPreloadRegistration.close()` | Cancel an outstanding preload callback. |
 
 ### Portal destination APIs
 
@@ -389,8 +382,6 @@ Import public APIs from `GraniteMicroFrontendRuntime`.
 | `-[GraniteMicroFrontendSessionRegistration closeApp]` | Emit `closeApp` once after open. |
 | `-[GraniteMicroFrontendSessionRegistration invalidate]` | Unregister the session. Call after `closeApp`. |
 | `+[GraniteMicroFrontendRuntimeHost emitPreloadApp:]` | Fire-and-forget preload. |
-| `+[GraniteMicroFrontendRuntimeHost requestPreloadApp:completion:]` | Request completion and return a cancellable registration. |
-| `-[GraniteMicroFrontendPreloadRegistration invalidate]` | Cancel an outstanding completion callback. |
 
 ### Portal destination APIs
 

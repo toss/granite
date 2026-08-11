@@ -13,8 +13,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)emitOpenApp:(NSString *)sessionId appName:(NSString *)appName scheme:(NSString *)scheme;
 + (void)emitCloseApp:(NSString *)sessionId;
 + (void)emitSessionVisibilityChanged:(NSString *)sessionId isVisible:(BOOL)isVisible;
-+ (void)completePreloadApp:(NSString *)requestId errorMessage:(NSString *_Nullable)errorMessage;
-+ (void)cancelPreloadApp:(NSString *)requestId;
 + (void)unregisterSession:(NSString *)sessionId token:(NSString *)token;
 @end
 

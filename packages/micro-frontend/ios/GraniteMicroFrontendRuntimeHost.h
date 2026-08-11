@@ -20,20 +20,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)invalidate;
 @end
 
-typedef void (^GraniteMicroFrontendPreloadCompletion)(NSError *_Nullable error);
-
-@interface GraniteMicroFrontendPreloadRegistration : NSObject
-- (void)invalidate;
-@end
-
 @interface GraniteMicroFrontendRuntimeHost : NSObject
 
 + (GraniteMicroFrontendSessionRegistration *)registerSession:(NSString *)sessionId
                                                 closeHandler:(dispatch_block_t)closeHandler;
 
 + (void)emitPreloadApp:(NSString *)appName;
-+ (GraniteMicroFrontendPreloadRegistration *)requestPreloadApp:(NSString *)appName
-                                                   completion:(GraniteMicroFrontendPreloadCompletion)completion;
 
 @end
 

@@ -12,7 +12,6 @@ export interface NativeMicroFrontendRuntimeEvent {
   readonly name: string;
   readonly params: {
     readonly appName?: string;
-    readonly requestId?: string;
     readonly sessionId?: string;
     readonly scheme?: string;
     readonly isVisible?: boolean;
@@ -22,10 +21,6 @@ export interface NativeMicroFrontendRuntimeEvent {
 export interface NativeMicroFrontendRuntime {
   readonly evaluateScript: (request: { readonly filePath: string }) => Promise<void>;
   readonly requestCloseSession: (request: { readonly sessionId: string }) => Promise<void>;
-  readonly completePreloadApp: (request: {
-    readonly requestId: string;
-    readonly errorMessage: string | null;
-  }) => void;
   readonly startEventDelivery: () => void;
   readonly onEvent: (
     listener: (event: NativeMicroFrontendRuntimeEvent) => void
@@ -122,26 +117,6 @@ export function createMicroFrontendRuntimeWithDependencies(
     }
   }
 
-  function completeNativePreloadRequest(event: NativeMicroFrontendRuntimeEvent) {
-    if (event.name !== 'preloadApp') {
-      return;
-    }
-
-    const { appName, requestId } = event.params;
-    if (typeof appName !== 'string' || appName.length === 0 || typeof requestId !== 'string' || requestId.length === 0) {
-      return;
-    }
-
-    void preloadApp(appName).then(
-      () => dependencies.nativeRuntime.completePreloadApp({ requestId, errorMessage: null }),
-      (error: unknown) =>
-        dependencies.nativeRuntime.completePreloadApp({
-          requestId,
-          errorMessage: error instanceof Error ? error.message : String(error),
-        })
-    );
-  }
-
   return {
     evaluateScript: (filePath) => dependencies.nativeRuntime.evaluateScript({ filePath }),
     preloadApp,
@@ -153,7 +128,6 @@ export function createMicroFrontendRuntimeWithDependencies(
     closeSession: (sessionId) => dependencies.nativeRuntime.requestCloseSession({ sessionId }),
     onEvent(listener) {
       const subscription = dependencies.nativeRuntime.onEvent((event) => {
-        completeNativePreloadRequest(event);
         const parsedEvent = dependencies.parseEvent(event);
         handleAppLifecycle(parsedEvent);
         listener(parsedEvent);

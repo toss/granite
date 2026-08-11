@@ -16,7 +16,6 @@ static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
 
 static NSRecursiveLock *runtimeLock;
 static NSMutableDictionary<NSString *, GraniteMicroFrontendSessionEntry *> *sessions;
-static NSMutableDictionary<NSString *, GraniteMicroFrontendPreloadCompletion> *preloadCompletions;
 static NSMutableArray<NSDictionary *> *pendingEvents;
 static __weak id<GraniteMicroFrontendRuntimeEventSink> eventSink;
 static BOOL isDeliveringEvents;
@@ -57,11 +56,6 @@ static void GraniteMicroFrontendRequireMainThread(void) {
 @property(nonatomic, assign) BOOL invalidated;
 @end
 #endif
-
-@interface GraniteMicroFrontendPreloadRegistration ()
-@property(nonatomic, copy) NSString *requestId;
-@property(nonatomic, assign) BOOL invalidated;
-@end
 
 @interface GraniteMicroFrontendRuntimeHost ()
 + (void)drainEventsToSink:(id<GraniteMicroFrontendRuntimeEventSink>)sink;
@@ -261,24 +255,6 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 
 #endif
 
-@implementation GraniteMicroFrontendPreloadRegistration
-
-- (void)invalidate {
-  @synchronized(self) {
-    if (_invalidated) {
-      return;
-    }
-    _invalidated = YES;
-  }
-  [GraniteMicroFrontendRuntimeHost cancelPreloadApp:_requestId];
-}
-
-- (void)dealloc {
-  [self invalidate];
-}
-
-@end
-
 @implementation GraniteMicroFrontendRuntimeHost
 
 + (void)initialize {
@@ -287,7 +263,6 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
   }
   runtimeLock = [[NSRecursiveLock alloc] init];
   sessions = [[NSMutableDictionary alloc] init];
-  preloadCompletions = [[NSMutableDictionary alloc] init];
   pendingEvents = [[NSMutableArray alloc] init];
 }
 
@@ -322,26 +297,6 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 
 + (void)emitPreloadApp:(NSString *)appName {
   [self emitEvent:@{ @"name" : @"preloadApp", @"params" : @{ @"appName" : appName } }];
-}
-
-+ (GraniteMicroFrontendPreloadRegistration *)requestPreloadApp:(NSString *)appName
-                                                   completion:(GraniteMicroFrontendPreloadCompletion)completion {
-  NSParameterAssert(appName.length > 0);
-  NSParameterAssert(completion != nil);
-  NSString *requestId = NSUUID.UUID.UUIDString;
-  [runtimeLock lock];
-  preloadCompletions[requestId] = [completion copy];
-  [runtimeLock unlock];
-
-  [self emitEvent:@{
-    @"name" : @"preloadApp",
-    @"params" : @{ @"appName" : appName, @"requestId" : requestId },
-  }];
-
-  GraniteMicroFrontendPreloadRegistration *registration =
-      [[GraniteMicroFrontendPreloadRegistration alloc] init];
-  registration.requestId = requestId;
-  return registration;
 }
 
 + (void)emitOpenApp:(NSString *)sessionId
@@ -489,29 +444,6 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 
   closeHandler();
   return YES;
-}
-
-+ (void)completePreloadApp:(NSString *)requestId errorMessage:(NSString *)errorMessage {
-  [runtimeLock lock];
-  GraniteMicroFrontendPreloadCompletion completion = preloadCompletions[requestId];
-  [preloadCompletions removeObjectForKey:requestId];
-  [runtimeLock unlock];
-  if (completion == nil) {
-    return;
-  }
-
-  NSError *error = errorMessage == nil
-      ? nil
-      : [NSError errorWithDomain:GraniteMicroFrontendRuntimeErrorDomain
-                            code:500
-                        userInfo:@{NSLocalizedDescriptionKey : errorMessage}];
-  completion(error);
-}
-
-+ (void)cancelPreloadApp:(NSString *)requestId {
-  [runtimeLock lock];
-  [preloadCompletions removeObjectForKey:requestId];
-  [runtimeLock unlock];
 }
 
 + (void)unregisterSession:(NSString *)sessionId token:(NSString *)token {

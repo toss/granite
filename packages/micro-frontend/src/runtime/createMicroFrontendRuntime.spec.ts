@@ -32,7 +32,6 @@ function createRuntimeFixture() {
   const nativeRuntime: NativeMicroFrontendRuntime = {
     evaluateScript: vi.fn(async () => undefined),
     requestCloseSession: vi.fn(async () => undefined),
-    completePreloadApp: vi.fn(),
     startEventDelivery: vi.fn(),
     onEvent(listener) {
       listeners.add(listener);
@@ -215,52 +214,4 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     expect(fixture.adapter.loadBundle).toHaveBeenCalledOnce();
   });
 
-  it('acknowledges a native preload request after the app is evaluated', async () => {
-    // Given
-    const fixture = createRuntimeFixture();
-    const listener = vi.fn<(event: MicroFrontendRuntimeEvent) => void>();
-    fixture.runtime.onEvent(listener);
-    vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(async () => {
-      createContainer('shopping');
-    });
-
-    // When
-    fixture.emit({
-      name: 'preloadApp',
-      params: { appName: 'shopping', requestId: 'preload-1' },
-    });
-
-    // Then
-    await vi.waitFor(() => {
-      expect(fixture.nativeRuntime.completePreloadApp).toHaveBeenCalledWith({
-        requestId: 'preload-1',
-        errorMessage: null,
-      });
-    });
-    expect(listener).toHaveBeenCalledWith({
-      name: 'preloadApp',
-      params: { appName: 'shopping' },
-    });
-  });
-
-  it('rejects a native preload request when app evaluation fails', async () => {
-    // Given
-    const fixture = createRuntimeFixture();
-    fixture.runtime.onEvent(() => undefined);
-    vi.mocked(fixture.nativeRuntime.evaluateScript).mockRejectedValueOnce(new Error('invalid bundle'));
-
-    // When
-    fixture.emit({
-      name: 'preloadApp',
-      params: { appName: 'shopping', requestId: 'preload-2' },
-    });
-
-    // Then
-    await vi.waitFor(() => {
-      expect(fixture.nativeRuntime.completePreloadApp).toHaveBeenCalledWith({
-        requestId: 'preload-2',
-        errorMessage: 'invalid bundle',
-      });
-    });
-  });
 });

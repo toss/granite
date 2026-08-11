@@ -63,12 +63,6 @@ class GraniteMicroFrontendRuntimeModule(
         }
     }
 
-    override fun completePreloadApp(request: ReadableMap) {
-        val requestId = request.getString("requestId") ?: return
-        val errorMessage = request.getString("errorMessage")
-        GraniteMicroFrontendRuntimeHost.completePreloadApp(requestId, errorMessage)
-    }
-
     override fun startEventDelivery() {
         GraniteMicroFrontendRuntimeHost.startEventDelivery(this)
     }

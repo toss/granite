@@ -101,11 +101,6 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
   });
 }
 
-- (void)completePreloadApp:(JS::NativeGraniteMicroFrontendRuntime::CompletePreloadAppRequest &)request {
-  [GraniteMicroFrontendRuntimeHost completePreloadApp:request.requestId()
-                                         errorMessage:request.errorMessage()];
-}
-
 - (void)startEventDelivery {
   [GraniteMicroFrontendRuntimeHost startEventDeliveryToEventSink:self];
 }
