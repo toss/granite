@@ -10,11 +10,13 @@ type SetIosSwipeGestureEnabled = ({ isEnabled }: { isEnabled: boolean }) => Prom
 export type SetIOSBackPressHandler = ({ handler }: { handler: () => void }) => Promise<void> | void;
 
 /**
- * Called with no arguments to unset the handler. Implementations should
- * initialize the registered handler to `null` (e.g. `unsetBackPressHandler()`),
- * not replace it with an empty function.
+ * Called with empty params (no `handler`) to unset the handler, mirroring
+ * `unsetBackPressHandler()` which calls `setBackPressHandler` with empty
+ * params. Implementations should initialize the registered handler to `null`,
+ * not replace it with an empty function. Params are always an object so that
+ * implementations destructuring `{ handler }` never crash.
  */
-export type UnsetIOSBackPressHandler = () => Promise<void> | void;
+export type UnsetIOSBackPressHandler = (params: { handler?: undefined }) => Promise<void> | void;
 
 export function CanGoBackGuard({
   children,
@@ -85,7 +87,7 @@ export function CanGoBackGuard({
     });
 
     return () => {
-      (setiOSBackPressHandler as UnsetIOSBackPressHandler)();
+      (setiOSBackPressHandler as UnsetIOSBackPressHandler)({});
     };
   }, [hasBackEvent, onBack, setiOSBackPressHandler]);
 

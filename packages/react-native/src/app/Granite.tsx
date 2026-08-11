@@ -42,8 +42,8 @@ export interface GraniteProps {
   /**
    * @description
    * The function to register a handler that runs when the iOS swipe back gesture is detected.
-   * Called with no arguments when the handler should be unset — in that case the
-   * implementation must initialize the registered handler to `null`
+   * Called with empty params (`{}`, no `handler`) when the handler should be unset — in
+   * that case the implementation must initialize the registered handler to `null`
    * (e.g. call `unsetBackPressHandler()`), not keep an empty function registered.
    */
   setiOSBackPressHandler?: SetIOSBackPressHandler | UnsetIOSBackPressHandler;

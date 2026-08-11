@@ -73,15 +73,16 @@ describe('CanGoBackGuard', () => {
 
     unmount();
 
-    expect(setiOSBackPressHandler).toHaveBeenLastCalledWith();
+    expect(setiOSBackPressHandler).toHaveBeenLastCalledWith({});
   });
 
   it('unsets the iOS back press handler on unmount so the registered handler is initialized to null', () => {
     mockPlatformOS('ios');
 
     let registeredHandler: (() => void) | null = null;
-    const setiOSBackPressHandler = vi.fn((params?: { handler: () => void }) => {
-      registeredHandler = params?.handler ?? null;
+    // destructures params like legacy host implementations — must not crash on unset
+    const setiOSBackPressHandler = vi.fn(({ handler }: { handler?: () => void }) => {
+      registeredHandler = handler ?? null;
     });
 
     const { unmount } = render(
@@ -99,7 +100,7 @@ describe('CanGoBackGuard', () => {
 
     unmount();
 
-    expect(setiOSBackPressHandler).toHaveBeenLastCalledWith();
+    expect(setiOSBackPressHandler).toHaveBeenLastCalledWith({});
     expect(registeredHandler).toBeNull();
   });
 
@@ -107,8 +108,9 @@ describe('CanGoBackGuard', () => {
     mockPlatformOS('ios');
 
     let registeredHandler: (() => void) | null = null;
-    const setiOSBackPressHandler = vi.fn((params?: { handler: () => void }) => {
-      registeredHandler = params?.handler ?? null;
+    // destructures params like legacy host implementations — must not crash on unset
+    const setiOSBackPressHandler = vi.fn(({ handler }: { handler?: () => void }) => {
+      registeredHandler = handler ?? null;
     });
 
     const { rerender } = render(
@@ -135,7 +137,7 @@ describe('CanGoBackGuard', () => {
       </CanGoBackGuard>
     );
 
-    expect(setiOSBackPressHandler).toHaveBeenLastCalledWith();
+    expect(setiOSBackPressHandler).toHaveBeenLastCalledWith({});
     expect(registeredHandler).toBeNull();
   });
 
