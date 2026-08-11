@@ -3,7 +3,18 @@ import { BackHandler, Platform } from 'react-native';
 import type { BackEvent } from '../../use-back-event';
 
 type SetIosSwipeGestureEnabled = ({ isEnabled }: { isEnabled: boolean }) => Promise<void> | void;
-type SetIOSBackPressHandler = ({ handler }: { handler: () => void }) => Promise<void> | void;
+
+/**
+ * Registers the iOS back press handler.
+ */
+export type SetIOSBackPressHandler = ({ handler }: { handler: () => void }) => Promise<void> | void;
+
+/**
+ * Called with no arguments to unset the handler. Implementations should
+ * initialize the registered handler to `null` (e.g. `unsetBackPressHandler()`),
+ * not replace it with an empty function.
+ */
+export type UnsetIOSBackPressHandler = () => Promise<void> | void;
 
 export function CanGoBackGuard({
   children,
@@ -20,7 +31,7 @@ export function CanGoBackGuard({
   children: ReactNode;
   onBack?: (event: BackEvent) => void;
   setIosSwipeGestureEnabled?: SetIosSwipeGestureEnabled;
-  setiOSBackPressHandler?: SetIOSBackPressHandler;
+  setiOSBackPressHandler?: SetIOSBackPressHandler | UnsetIOSBackPressHandler;
 }) {
   useEffect(() => {
     if (Platform.OS !== 'ios') {
@@ -67,14 +78,14 @@ export function CanGoBackGuard({
       return;
     }
 
-    setiOSBackPressHandler({
+    (setiOSBackPressHandler as SetIOSBackPressHandler)({
       handler: () => {
         onBack?.({ source: 'iosSwipeGesture' });
       },
     });
 
     return () => {
-      setiOSBackPressHandler({ handler: () => {} });
+      (setiOSBackPressHandler as UnsetIOSBackPressHandler)();
     };
   }, [hasBackEvent, onBack, setiOSBackPressHandler]);
 

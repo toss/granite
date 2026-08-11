@@ -73,7 +73,70 @@ describe('CanGoBackGuard', () => {
 
     unmount();
 
-    expect(setiOSBackPressHandler).toHaveBeenLastCalledWith({ handler: expect.any(Function) });
+    expect(setiOSBackPressHandler).toHaveBeenLastCalledWith();
+  });
+
+  it('unsets the iOS back press handler on unmount so the registered handler is initialized to null', () => {
+    mockPlatformOS('ios');
+
+    let registeredHandler: (() => void) | null = null;
+    const setiOSBackPressHandler = vi.fn((params?: { handler: () => void }) => {
+      registeredHandler = params?.handler ?? null;
+    });
+
+    const { unmount } = render(
+      <CanGoBackGuard
+        canGoBack={true}
+        hasBackEvent={true}
+        isInitialScreen={true}
+        setiOSBackPressHandler={setiOSBackPressHandler}
+      >
+        <div />
+      </CanGoBackGuard>
+    );
+
+    expect(registeredHandler).toEqual(expect.any(Function));
+
+    unmount();
+
+    expect(setiOSBackPressHandler).toHaveBeenLastCalledWith();
+    expect(registeredHandler).toBeNull();
+  });
+
+  it('unsets the iOS back press handler when back events no longer exist', () => {
+    mockPlatformOS('ios');
+
+    let registeredHandler: (() => void) | null = null;
+    const setiOSBackPressHandler = vi.fn((params?: { handler: () => void }) => {
+      registeredHandler = params?.handler ?? null;
+    });
+
+    const { rerender } = render(
+      <CanGoBackGuard
+        canGoBack={true}
+        hasBackEvent={true}
+        isInitialScreen={true}
+        setiOSBackPressHandler={setiOSBackPressHandler}
+      >
+        <div />
+      </CanGoBackGuard>
+    );
+
+    expect(registeredHandler).toEqual(expect.any(Function));
+
+    rerender(
+      <CanGoBackGuard
+        canGoBack={true}
+        hasBackEvent={false}
+        isInitialScreen={true}
+        setiOSBackPressHandler={setiOSBackPressHandler}
+      >
+        <div />
+      </CanGoBackGuard>
+    );
+
+    expect(setiOSBackPressHandler).toHaveBeenLastCalledWith();
+    expect(registeredHandler).toBeNull();
   });
 
   it('disables iOS swipe when the current state should block default back navigation', () => {
