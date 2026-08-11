@@ -2,7 +2,7 @@ import { ComponentType, type JSX, PropsWithChildren } from 'react';
 import { AppRegistry } from 'react-native';
 import { ENTRY_BUNDLE_NAME } from '../constants';
 import type { InitialProps } from '../initial-props';
-import type { RouterProps, RequireContext, SetIOSBackPressHandler, UnsetIOSBackPressHandler } from '../router';
+import type { RouterProps, RequireContext, SetIOSBackPressHandler } from '../router';
 import { AppRoot } from './AppRoot';
 import { HostAppRoot } from './HostAppRoot';
 import { getSchemeUri } from '../constant-bridges';
@@ -46,7 +46,7 @@ export interface GraniteProps {
    * that case the implementation must initialize the registered handler to `null`
    * (e.g. call `unsetBackPressHandler()`), not keep an empty function registered.
    */
-  setiOSBackPressHandler?: SetIOSBackPressHandler | UnsetIOSBackPressHandler;
+  setiOSBackPressHandler?: SetIOSBackPressHandler;
 
   /**
    * @description

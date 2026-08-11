@@ -1,12 +1,7 @@
 import { SafeAreaProvider } from '@granite-js/native/react-native-safe-area-context';
 import type { ComponentType, PropsWithChildren } from 'react';
 import type { InitialProps } from '../initial-props';
-import {
-  Router,
-  type InternalRouterProps,
-  type SetIOSBackPressHandler,
-  type UnsetIOSBackPressHandler,
-} from '../router';
+import { Router, type InternalRouterProps, type SetIOSBackPressHandler } from '../router';
 import { BackEventProvider } from '../use-back-event';
 import { App } from './App';
 import type { GraniteProps } from './Granite';
@@ -21,7 +16,7 @@ interface AppRootProps extends GraniteProps {
   initialProps: InitialProps;
   initialScheme: string;
   setIosSwipeGestureEnabled?: ({ isEnabled }: { isEnabled: boolean }) => void;
-  setiOSBackPressHandler?: SetIOSBackPressHandler | UnsetIOSBackPressHandler;
+  setiOSBackPressHandler?: SetIOSBackPressHandler;
   getInitialUrl: InternalRouterProps['getInitialUrl'];
 }
 

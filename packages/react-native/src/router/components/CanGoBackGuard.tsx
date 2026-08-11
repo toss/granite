@@ -5,18 +5,13 @@ import type { BackEvent } from '../../use-back-event';
 type SetIosSwipeGestureEnabled = ({ isEnabled }: { isEnabled: boolean }) => Promise<void> | void;
 
 /**
- * Registers the iOS back press handler.
+ * Registers the iOS back press handler. Called with empty params (`{}`, no
+ * `handler`) to unset — mirroring `unsetBackPressHandler()`, which calls
+ * `setBackPressHandler` with empty params. In that case implementations should
+ * initialize the registered handler to `null`, not keep an empty function
+ * registered.
  */
-export type SetIOSBackPressHandler = ({ handler }: { handler: () => void }) => Promise<void> | void;
-
-/**
- * Called with empty params (no `handler`) to unset the handler, mirroring
- * `unsetBackPressHandler()` which calls `setBackPressHandler` with empty
- * params. Implementations should initialize the registered handler to `null`,
- * not replace it with an empty function. Params are always an object so that
- * implementations destructuring `{ handler }` never crash.
- */
-export type UnsetIOSBackPressHandler = (params: { handler?: undefined }) => Promise<void> | void;
+export type SetIOSBackPressHandler = ({ handler }: { handler?: () => void }) => Promise<void> | void;
 
 export function CanGoBackGuard({
   children,
@@ -33,7 +28,7 @@ export function CanGoBackGuard({
   children: ReactNode;
   onBack?: (event: BackEvent) => void;
   setIosSwipeGestureEnabled?: SetIosSwipeGestureEnabled;
-  setiOSBackPressHandler?: SetIOSBackPressHandler | UnsetIOSBackPressHandler;
+  setiOSBackPressHandler?: SetIOSBackPressHandler;
 }) {
   useEffect(() => {
     if (Platform.OS !== 'ios') {
@@ -80,14 +75,14 @@ export function CanGoBackGuard({
       return;
     }
 
-    (setiOSBackPressHandler as SetIOSBackPressHandler)({
+    setiOSBackPressHandler({
       handler: () => {
         onBack?.({ source: 'iosSwipeGesture' });
       },
     });
 
     return () => {
-      (setiOSBackPressHandler as UnsetIOSBackPressHandler)({});
+      setiOSBackPressHandler?.({});
     };
   }, [hasBackEvent, onBack, setiOSBackPressHandler]);
 
