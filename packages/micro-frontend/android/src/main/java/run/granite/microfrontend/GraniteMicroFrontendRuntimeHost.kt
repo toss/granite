@@ -69,53 +69,6 @@ object GraniteMicroFrontendRuntimeHost {
     }
 }
 
-internal interface GraniteMicroFrontendRuntimeEventTarget {
-    fun emit(event: GraniteMicroFrontendEvent)
-}
-
-internal class GraniteMicroFrontendRuntimeEventRouter {
-    private val lock = Any()
-    private val pendingEvents = ArrayDeque<GraniteMicroFrontendEvent>()
-    private val attachedTargets = mutableSetOf<GraniteMicroFrontendRuntimeEventTarget>()
-    private var activeTarget: GraniteMicroFrontendRuntimeEventTarget? = null
-
-    fun attach(target: GraniteMicroFrontendRuntimeEventTarget) {
-        synchronized(lock) {
-            attachedTargets.add(target)
-        }
-    }
-
-    fun startEventDelivery(target: GraniteMicroFrontendRuntimeEventTarget) {
-        val events = synchronized(lock) {
-            check(target in attachedTargets) { "Runtime must be attached before starting event delivery" }
-            if (activeTarget != null && activeTarget !== target) {
-                return
-            }
-            activeTarget = target
-            pendingEvents.toList().also { pendingEvents.clear() }
-        }
-        events.forEach(target::emit)
-    }
-
-    fun emit(event: GraniteMicroFrontendEvent) {
-        val target = synchronized(lock) {
-            activeTarget?.also { return@synchronized it }
-            pendingEvents.addLast(event)
-            null
-        }
-        target?.emit(event)
-    }
-
-    fun detach(target: GraniteMicroFrontendRuntimeEventTarget) {
-        synchronized(lock) {
-            attachedTargets.remove(target)
-            if (activeTarget === target) {
-                activeTarget = null
-            }
-        }
-    }
-}
-
 interface GraniteMicroFrontendPreloadCallback {
     fun onSuccess()
     fun onFailure(errorMessage: String)

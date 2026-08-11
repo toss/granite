@@ -122,7 +122,11 @@ class GraniteMicroFrontendSessionStoreTest {
             closeCompleted.countDown()
         }
         assertTrue(closeStarted.await(5, TimeUnit.SECONDS))
-        assertFalse(closeCompleted.await(100, TimeUnit.MILLISECONDS))
+        val blockedDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5)
+        while (closeThread.isAlive && closeThread.state != Thread.State.BLOCKED && System.nanoTime() < blockedDeadline) {
+            Thread.yield()
+        }
+        assertEquals(Thread.State.BLOCKED, closeThread.state)
 
         continueOpenDelivery.countDown()
         openThread.join(5_000)

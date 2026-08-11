@@ -19,6 +19,7 @@ static NSMutableDictionary<NSString *, GraniteMicroFrontendSessionEntry *> *sess
 static NSMutableDictionary<NSString *, GraniteMicroFrontendPreloadCompletion> *preloadCompletions;
 static NSMutableArray<NSDictionary *> *pendingEvents;
 static __weak id<GraniteMicroFrontendRuntimeEventSink> eventSink;
+static BOOL isDeliveringEvents;
 
 static void GraniteMicroFrontendRequireMainThread(void) {
   if (!NSThread.isMainThread) {
@@ -60,6 +61,10 @@ static void GraniteMicroFrontendRequireMainThread(void) {
 @interface GraniteMicroFrontendPreloadRegistration ()
 @property(nonatomic, copy) NSString *requestId;
 @property(nonatomic, assign) BOOL invalidated;
+@end
+
+@interface GraniteMicroFrontendRuntimeHost ()
++ (void)drainEventsToSink:(id<GraniteMicroFrontendRuntimeEventSink>)sink;
 @end
 
 @implementation GraniteMicroFrontendSessionRegistration
@@ -369,12 +374,16 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 
 + (void)emitEvent:(NSDictionary *)event {
   [runtimeLock lock];
+  [pendingEvents addObject:event];
   id<GraniteMicroFrontendRuntimeEventSink> sink = eventSink;
-  if (sink == nil) {
-    [pendingEvents addObject:event];
+  BOOL shouldDrain = sink != nil && !isDeliveringEvents;
+  if (shouldDrain) {
+    isDeliveringEvents = YES;
   }
   [runtimeLock unlock];
-  [sink enqueueRuntimeEvent:event];
+  if (shouldDrain) {
+    [self drainEventsToSink:sink];
+  }
 }
 
 + (void)startEventDeliveryToEventSink:(id<GraniteMicroFrontendRuntimeEventSink>)sink {
@@ -384,12 +393,36 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
     return;
   }
   eventSink = sink;
-  NSArray<NSDictionary *> *events = [pendingEvents copy];
-  [pendingEvents removeAllObjects];
+  BOOL shouldDrain = !isDeliveringEvents && pendingEvents.count > 0;
+  if (shouldDrain) {
+    isDeliveringEvents = YES;
+  }
   [runtimeLock unlock];
+  if (shouldDrain) {
+    [self drainEventsToSink:sink];
+  }
+}
 
-  for (NSDictionary *event in events) {
-    [sink enqueueRuntimeEvent:event];
++ (void)drainEventsToSink:(id<GraniteMicroFrontendRuntimeEventSink>)sink {
+  while (YES) {
+    [runtimeLock lock];
+    if (eventSink != sink || pendingEvents.count == 0) {
+      isDeliveringEvents = NO;
+      [runtimeLock unlock];
+      return;
+    }
+    NSDictionary *event = pendingEvents.firstObject;
+    [pendingEvents removeObjectAtIndex:0];
+    [runtimeLock unlock];
+
+    @try {
+      [sink enqueueRuntimeEvent:event];
+    } @catch (NSException *exception) {
+      [runtimeLock lock];
+      isDeliveringEvents = NO;
+      [runtimeLock unlock];
+      @throw exception;
+    }
   }
 }
 
