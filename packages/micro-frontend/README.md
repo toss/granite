@@ -407,38 +407,52 @@ Import public APIs from `GraniteMicroFrontendRuntime`.
 
 ### UIViewController example
 
-```objc
-@interface CartViewController ()
-@property(nonatomic, copy) NSString *sessionId;
-@property(nonatomic, strong) GraniteMicroFrontendViewControllerSessionBinding *sessionBinding;
-@property(nonatomic, strong) PortalHostContainerView *portalHostView;
-@end
+```swift
+import GraniteMicroFrontendRuntime
+import UIKit
 
-- (void)viewDidLoad {
-  [super viewDidLoad];
+final class CartViewController: UIViewController {
+  private let sessionId: String
+  private var sessionBinding: GraniteMicroFrontendViewControllerSessionBinding?
+  private var portalHostView: PortalHostContainerView!
 
-  self.portalHostView = [[PortalHostContainerView alloc] initWithFrame:self.view.bounds
-                                                    deferredActivation:YES];
-  [self.portalHostView setName:self.sessionId];
-  [self.view addSubview:self.portalHostView];
+  init(sessionId: String) {
+    self.sessionId = sessionId
+    super.init(nibName: nil, bundle: nil)
+  }
 
-  __weak typeof(self) weakSelf = self;
-  self.sessionBinding =
-      [GraniteMicroFrontendViewControllerSessionBinding bindViewController:self
-                                                                 sessionId:self.sessionId
-                                                                   appName:@"cart"
-                                                                    scheme:@"granite://cart/products/1"
-                                                              closeHandler:^{
-    [weakSelf dismissViewControllerAnimated:YES completion:^{
-      [weakSelf.sessionBinding invalidate];
-      weakSelf.sessionBinding = nil;
-      [weakSelf.portalHostView invalidate];
-    }];
-  }];
-}
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
 
-- (void)reactRuntimeDidStart {
-  [self.portalHostView activateIfNeeded];
+  override func viewDidLoad() {
+    super.viewDidLoad()
+
+    portalHostView = PortalHostContainerView(
+      frame: view.bounds,
+      deferredActivation: true
+    )
+    portalHostView.setName(sessionId)
+    view.addSubview(portalHostView)
+
+    sessionBinding = GraniteMicroFrontendViewControllerSessionBinding.bindViewController(
+      self,
+      sessionId: sessionId,
+      appName: "cart",
+      scheme: "granite://cart/products/1"
+    ) { [weak self] in
+      self?.dismiss(animated: true) { [weak self] in
+        self?.sessionBinding?.invalidate()
+        self?.sessionBinding = nil
+        self?.portalHostView.invalidate()
+      }
+    }
+  }
+
+  func reactRuntimeDidStart() {
+    portalHostView.activateIfNeeded()
+  }
 }
 ```
 
