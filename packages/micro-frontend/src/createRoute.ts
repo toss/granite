@@ -7,13 +7,13 @@ import {
 } from '@granite-js/react-native';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import {
-  registerHostSkeletonRoute,
-} from './host/hostSkeletonStore';
-import type { HostSkeletonAppConfig, HostSkeletonComponent } from './host/types';
+  registerPendingHostComponentRoute,
+} from './host/pendingHostComponentStore';
+import type { PendingHostComponentAppConfig, PendingHostComponentRenderer } from './host/types';
 
 export type MicroFrontendRouteOptions<TParams extends Readonly<object> | undefined> =
   RouteOptions<TParams> & {
-    readonly skeletonComponent?: HostSkeletonComponent<TParams>;
+    readonly hostPendingComponent?: PendingHostComponentRenderer<TParams>;
   };
 
 type SetParamsFunction<TParams> = (params: TParams extends undefined ? undefined : Partial<TParams>) => void;
@@ -35,7 +35,7 @@ export function createRoute<
   path: keyof RegisterScreenInput,
   options: Omit<RouteOptions<StandardSchemaV1.InferOutput<TSchema>>, 'validateParams'> & {
     readonly validateParams: TSchema;
-    readonly skeletonComponent?: HostSkeletonComponent<StandardSchemaV1.InferOutput<TSchema>>;
+    readonly hostPendingComponent?: PendingHostComponentRenderer<StandardSchemaV1.InferOutput<TSchema>>;
   }
 ): MicroFrontendRouteResult<StandardSchemaV1.InferInput<TSchema>, StandardSchemaV1.InferOutput<TSchema>>;
 export function createRoute<TParams extends Readonly<object> | undefined>(
@@ -46,12 +46,12 @@ export function createRoute<TParams extends Readonly<object> | undefined>(
   path: keyof RegisterScreenInput,
   options: MicroFrontendRouteOptions<TParams>
 ) {
-  const { skeletonComponent, ...routeOptions } = options;
+  const { hostPendingComponent, ...routeOptions } = options;
 
-  if (skeletonComponent != null) {
-    registerHostSkeletonRoute(String(path), {
+  if (hostPendingComponent != null) {
+    registerPendingHostComponentRoute(String(path), {
       app: getCurrentGraniteApp(getSchemeUri()),
-      component: skeletonComponent,
+      component: hostPendingComponent,
       parserParams: routeOptions.parserParams,
       validateParams: routeOptions.validateParams,
     });
@@ -60,7 +60,7 @@ export function createRoute<TParams extends Readonly<object> | undefined>(
   return createGraniteRoute(path, routeOptions);
 }
 
-function getCurrentGraniteApp(schemeUri: string): HostSkeletonAppConfig {
+function getCurrentGraniteApp(schemeUri: string): PendingHostComponentAppConfig {
   const granite: unknown = Reflect.get(globalThis, '__granite');
   if (!isPropertyMap(granite) || !isPropertyMap(granite['app'])) {
     throw new TypeError('Granite app configuration is unavailable');

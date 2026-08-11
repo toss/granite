@@ -1,26 +1,26 @@
-export type { HostSkeletonController, HostSkeletonProps } from './HostSkeleton';
+export type { PendingHostComponentController, PendingHostComponentProps } from './PendingHostComponent';
 export {
-  HostSkeleton,
-  useHostSkeletonController,
-  useIsHostSkeletonHidden,
-  useResolvedHostSkeleton,
-} from './HostSkeleton';
+  PendingHostComponent,
+  usePendingHostComponentController,
+  useIsPendingHostComponentHidden,
+  useResolvedPendingHostComponent,
+} from './PendingHostComponent';
 export type {
-  HostSkeletonAppConfig,
-  HostSkeletonComponent,
-  HostSkeletonParams,
-  HostSkeletonRouteRequest,
-  RegisterHostSkeletonRouteOptions,
-  ResolvedHostSkeleton,
+  PendingHostComponentAppConfig,
+  PendingHostComponentRenderer,
+  PendingHostComponentParams,
+  PendingHostComponentRouteRequest,
+  RegisterPendingHostComponentRouteOptions,
+  ResolvedPendingHostComponent,
 } from './types';
 export {
-  createHostSkeletonRoutePrefix,
-  normalizeHostSkeletonRoutePath,
+  createPendingHostComponentRoutePrefix,
+  normalizeRoutePath,
 } from './routeMatcher';
 export {
-  hideHostSkeleton,
-  installHostSkeletonBridge,
-  registerHostSkeletonRoute,
-  resetHostSkeleton,
-  resolveHostSkeleton,
-} from './hostSkeletonStore';
+  hidePendingHostComponent,
+  installPendingHostComponentBridge,
+  registerPendingHostComponentRoute,
+  resetPendingHostComponent,
+  resolvePendingHostComponent,
+} from './pendingHostComponentStore';

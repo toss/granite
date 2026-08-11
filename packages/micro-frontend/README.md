@@ -85,53 +85,54 @@ adapter.loadBundle({ appName: 'cart' })
   → return the cart container's ./App module
 ```
 
-Concurrent preload/import calls for the same app share one evaluation. A successful evaluation remains cached for
-the JavaScript runtime lifetime. A failed evaluation and its partial container are removed so a later call can retry.
+Concurrent preload/import calls for the same app share one evaluation. A successful evaluation remains cached until
+the app's last native session closes. A failed evaluation and its partial container are removed so a later call can
+retry.
 
-## Host skeleton
+## Host pending component
 
-Remote apps register route skeletons with the package's `createRoute` wrapper. It delegates to Granite's
-`createRoute` and additionally associates `skeletonComponent` with the current `granite.config.ts` app name, scheme,
-and host.
+Remote apps register a route-level pending component with the package's `createRoute` wrapper. It delegates to
+Granite's `createRoute` and additionally associates `hostPendingComponent` with the current `granite.config.ts` app
+name, scheme, and host.
 
 ```tsx
-import { createRoute, hideHostSkeleton } from '@granite-js/micro-frontend';
+import { createRoute, hidePendingHostComponent } from '@granite-js/micro-frontend';
 import { useEffect } from 'react';
 
 export const Route = createRoute('/products/:productId', {
   component: ProductPage,
   validateParams: parseProductParams,
-  skeletonComponent: ({ thumbnailUrl }) => <ProductSkeleton thumbnailUrl={thumbnailUrl} />,
+  hostPendingComponent: ({ thumbnailUrl }) => <ProductPendingComponent thumbnailUrl={thumbnailUrl} />,
 });
 
 function ProductPage() {
   useEffect(() => {
-    hideHostSkeleton();
+    hidePendingHostComponent();
   }, []);
 
   return <Product />;
 }
 ```
 
-The runtime host resolves the skeleton from the incoming URL. It resets the shared visibility state before opening a
-new session and keeps the app content hidden until the remote app calls `hideHostSkeleton()`.
+The runtime host resolves the pending component from the incoming URL. It resets the shared visibility state before
+opening a new session and keeps the app content hidden until the remote app calls `hidePendingHostComponent()`.
 
 ```tsx
 import {
-  HostSkeleton,
-  useIsHostSkeletonHidden,
-  useResolvedHostSkeleton,
+  PendingHostComponent,
+  useIsPendingHostComponentHidden,
+  useResolvedPendingHostComponent,
 } from '@granite-js/micro-frontend';
 
-const resolved = useResolvedHostSkeleton(session.scheme);
-const hidden = useIsHostSkeletonHidden();
-const showSkeleton = resolved != null && !hidden;
+const resolved = useResolvedPendingHostComponent(session.scheme);
+const hidden = useIsPendingHostComponentHidden();
+const showPendingComponent = resolved != null && !hidden;
 
 <>
-  <View style={{ flex: 1, opacity: showSkeleton ? 0 : 1 }}>
+  <View style={{ flex: 1, opacity: showPendingComponent ? 0 : 1 }}>
     <RemoteApp scheme={session.scheme} />
   </View>
-  {showSkeleton ? <HostSkeleton url={session.scheme} /> : null}
+  {showPendingComponent ? <PendingHostComponent url={session.scheme} /> : null}
 </>;
 ```
 

@@ -1,6 +1,6 @@
-import type { HostSkeletonAppConfig } from './types';
+import type { PendingHostComponentAppConfig } from './types';
 
-export function normalizeHostSkeletonRoutePath(routePath: string) {
+export function normalizeRoutePath(routePath: string) {
   const pathname = routePath.split('#')[0]?.split('?')[0] ?? '/';
   const pathWithLeadingSlash = pathname.startsWith('/') ? pathname : `/${pathname}`;
   const normalizedPathname = pathWithLeadingSlash.replace(/\/+/g, '/');
@@ -8,9 +8,9 @@ export function normalizeHostSkeletonRoutePath(routePath: string) {
   return normalizedPathname === '/' ? '/' : normalizedPathname.replace(/\/+$/g, '');
 }
 
-export function createHostSkeletonRoutePrefix(app: HostSkeletonAppConfig) {
+export function createPendingHostComponentRoutePrefix(app: PendingHostComponentAppConfig) {
   const scheme = app.scheme.replace(/:$/g, '');
-  const appName = normalizeHostSkeletonAppName(app.name);
+  const appName = normalizePendingHostComponentAppName(app.name);
   const host = app.host == null ? '' : app.host.replace(/^\/+|\/+$/g, '');
 
   return host.length > 0 ? `${scheme}://${host}/${appName}` : `${scheme}://${appName}`;
@@ -28,7 +28,7 @@ export function getRoutePathFromUrl(url: string, routePrefix: string) {
     return null;
   }
 
-  return normalizeHostSkeletonRoutePath(urlWithoutSearch.slice(normalizedPrefix.length));
+  return normalizeRoutePath(urlWithoutSearch.slice(normalizedPrefix.length));
 }
 
 export function getQueryParamsFromUrl(url: string): Record<string, string> {
@@ -87,12 +87,12 @@ export function matchRoutePath(pattern: string, routePath: string) {
   return params;
 }
 
-export function normalizeHostSkeletonAppName(appName: string) {
+export function normalizePendingHostComponentAppName(appName: string) {
   return appName.replace(/^\/+|\/+$/g, '');
 }
 
 function splitRoutePath(routePath: string) {
-  const normalizedRoutePath = normalizeHostSkeletonRoutePath(routePath);
+  const normalizedRoutePath = normalizeRoutePath(routePath);
   return normalizedRoutePath === '/' ? [] : normalizedRoutePath.slice(1).split('/');
 }
 

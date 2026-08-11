@@ -5,7 +5,7 @@ type ResolvedParams =
   | { readonly status: 'resolved'; readonly value: Readonly<object> }
   | { readonly status: 'invalid'; readonly cause?: Error };
 
-export function resolveHostSkeletonParams(
+export function resolvePendingHostComponentParams(
   rawParams: Record<string, unknown>,
   parserParams: ParserParams | undefined,
   validateParams: ValidateParams<Readonly<object> | undefined> | undefined
@@ -21,7 +21,7 @@ export function resolveHostSkeletonParams(
       const result = validateParams['~standard'].validate(parsedParams);
 
       if (result instanceof Promise) {
-        return { status: 'invalid', cause: new Error('Async host skeleton validation is not supported') };
+        return { status: 'invalid', cause: new Error('Async pending host component validation is not supported') };
       }
 
       if (result.issues != null) {

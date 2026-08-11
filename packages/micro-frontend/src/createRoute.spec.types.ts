@@ -13,14 +13,17 @@ interface ProductSchemaInput {
   readonly thumbnailUrl?: string;
 }
 
-type OfficialRouteHasSkeletonComponent = 'skeletonComponent' extends keyof RouteOptions<ProductParams>
+type OfficialRouteHasHostPendingComponent = 'hostPendingComponent' extends keyof RouteOptions<ProductParams>
   ? true
   : false;
-type MicroFrontendRouteHasSkeletonComponent =
-  'skeletonComponent' extends keyof MicroFrontendRouteOptions<ProductParams> ? true : false;
+type MicroFrontendRouteHasHostPendingComponent =
+  'hostPendingComponent' extends keyof MicroFrontendRouteOptions<ProductParams> ? true : false;
+type MicroFrontendRouteHasPendingComponent =
+  'pendingComponent' extends keyof MicroFrontendRouteOptions<ProductParams> ? true : false;
 
-expectTypeOf<OfficialRouteHasSkeletonComponent>().toEqualTypeOf<false>();
-expectTypeOf<MicroFrontendRouteHasSkeletonComponent>().toEqualTypeOf<true>();
+expectTypeOf<OfficialRouteHasHostPendingComponent>().toEqualTypeOf<false>();
+expectTypeOf<MicroFrontendRouteHasHostPendingComponent>().toEqualTypeOf<true>();
+expectTypeOf<MicroFrontendRouteHasPendingComponent>().toEqualTypeOf<false>();
 
 declare module '@granite-js/react-native' {
   interface RegisterScreenInput {
@@ -44,7 +47,7 @@ const Route = createRoute('/product', {
 
     return thumbnailUrl == null ? { productId } : { productId, thumbnailUrl };
   },
-  skeletonComponent: params => {
+  hostPendingComponent: params => {
     expectTypeOf(params).toEqualTypeOf<ProductParams>();
     return null;
   },
@@ -76,7 +79,7 @@ function createProductSchema(): StandardSchemaV1<ProductSchemaInput, ProductPara
 const SchemaRoute = createRoute('/product', {
   component: ProductPage,
   validateParams: createProductSchema(),
-  skeletonComponent: params => {
+  hostPendingComponent: params => {
     expectTypeOf(params).toEqualTypeOf<ProductParams>();
     return null;
   },

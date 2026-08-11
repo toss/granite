@@ -95,7 +95,16 @@ export function getContainer(appName: string): AppContainer | null {
 }
 
 export function removeContainer(appName: string): void {
-  Reflect.deleteProperty(getMicroFrontendRuntimeContext().containers, appName);
+  const containers = getMicroFrontendRuntimeContext().containers;
+  const container = containers[appName];
+  if (container == null) {
+    return;
+  }
+
+  for (const exposedModule of Object.keys(container.exposedModules)) {
+    Reflect.deleteProperty(container.exposedModules, exposedModule);
+  }
+  Reflect.deleteProperty(containers, appName);
 }
 
 export function hasContainer(appName: string): boolean {
