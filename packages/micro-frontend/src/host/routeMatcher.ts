@@ -1,4 +1,4 @@
-import type { HostSkeletonAppConfig } from './types';
+import type { PendingHostComponentAppConfig } from './types';
 
 export function normalizeRoutePath(routePath: string) {
   const pathname = routePath.split('#')[0]?.split('?')[0] ?? '/';
@@ -8,9 +8,9 @@ export function normalizeRoutePath(routePath: string) {
   return normalizedPathname === '/' ? '/' : normalizedPathname.replace(/\/+$/g, '');
 }
 
-export function createHostSkeletonRoutePrefix(app: HostSkeletonAppConfig) {
+export function createPendingHostComponentRoutePrefix(app: PendingHostComponentAppConfig) {
   const scheme = app.scheme.replace(/:$/g, '');
-  const appName = normalizeHostSkeletonAppName(app.name);
+  const appName = normalizePendingHostComponentAppName(app.name);
   const host = app.host == null ? '' : app.host.replace(/^\/+|\/+$/g, '');
 
   return host.length > 0 ? `${scheme}://${host}/${appName}` : `${scheme}://${appName}`;
@@ -87,7 +87,7 @@ export function matchRoutePath(pattern: string, routePath: string) {
   return params;
 }
 
-export function normalizeHostSkeletonAppName(appName: string) {
+export function normalizePendingHostComponentAppName(appName: string) {
   return appName.replace(/^\/+|\/+$/g, '');
 }
 

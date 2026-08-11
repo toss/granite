@@ -2,32 +2,32 @@ export { createMicroFrontendRuntime } from './createMicroFrontendRuntime';
 export type { CreateMicroFrontendRuntimeOptions } from './createMicroFrontendRuntime';
 export { createRoute } from './createRoute';
 export type { MicroFrontendRouteOptions } from './createRoute';
-export type { HostSkeletonController, HostSkeletonProps } from './host/HostSkeleton';
+export type { PendingHostComponentController, PendingHostComponentProps } from './host/PendingHostComponent';
 export {
-  HostSkeleton,
-  useHostSkeletonController,
-  useIsHostSkeletonHidden,
-  useResolvedHostSkeleton,
-} from './host/HostSkeleton';
+  PendingHostComponent,
+  usePendingHostComponentController,
+  useIsPendingHostComponentHidden,
+  useResolvedPendingHostComponent,
+} from './host/PendingHostComponent';
 export type {
-  HostSkeletonAppConfig,
-  HostSkeletonComponent,
-  HostSkeletonParams,
-  HostSkeletonRouteRequest,
-  RegisterHostSkeletonRouteOptions,
-  ResolvedHostSkeleton,
+  PendingHostComponentAppConfig,
+  PendingHostComponentRenderer,
+  PendingHostComponentParams,
+  PendingHostComponentRouteRequest,
+  RegisterPendingHostComponentRouteOptions,
+  ResolvedPendingHostComponent,
 } from './host/types';
 export {
-  createHostSkeletonRoutePrefix,
+  createPendingHostComponentRoutePrefix,
   normalizeRoutePath,
 } from './host/routeMatcher';
 export {
-  hideHostSkeleton,
-  installHostSkeletonBridge,
-  registerHostSkeletonRoute,
-  resetHostSkeleton,
-  resolveHostSkeleton,
-} from './host/hostSkeletonStore';
+  hidePendingHostComponent,
+  installPendingHostComponentBridge,
+  registerPendingHostComponentRoute,
+  resetPendingHostComponent,
+  resolvePendingHostComponent,
+} from './host/pendingHostComponentStore';
 export {
   MicroFrontendSessionProvider,
   MissingMicroFrontendSessionError,

@@ -18,12 +18,12 @@ type OfficialRouteHasHostPendingComponent = 'hostPendingComponent' extends keyof
   : false;
 type MicroFrontendRouteHasHostPendingComponent =
   'hostPendingComponent' extends keyof MicroFrontendRouteOptions<ProductParams> ? true : false;
-type MicroFrontendRouteHasSkeletonComponent =
-  'skeletonComponent' extends keyof MicroFrontendRouteOptions<ProductParams> ? true : false;
+type MicroFrontendRouteHasPendingComponent =
+  'pendingComponent' extends keyof MicroFrontendRouteOptions<ProductParams> ? true : false;
 
 expectTypeOf<OfficialRouteHasHostPendingComponent>().toEqualTypeOf<false>();
 expectTypeOf<MicroFrontendRouteHasHostPendingComponent>().toEqualTypeOf<true>();
-expectTypeOf<MicroFrontendRouteHasSkeletonComponent>().toEqualTypeOf<false>();
+expectTypeOf<MicroFrontendRouteHasPendingComponent>().toEqualTypeOf<false>();
 
 declare module '@granite-js/react-native' {
   interface RegisterScreenInput {

@@ -42,7 +42,7 @@ export interface CreateMicroFrontendRuntimeDependencies {
   readonly adapter: MicroFrontendAdapter;
   readonly nativeRuntime: NativeMicroFrontendRuntime;
   readonly registry: MicroFrontendModuleRegistry;
-  readonly removeHostSkeletonRoutes: (appName: string) => void;
+  readonly removePendingHostComponentRoutes: (appName: string) => void;
   readonly parseEvent: (event: NativeMicroFrontendRuntimeEvent) => MicroFrontendRuntimeEvent;
 }
 
@@ -56,7 +56,7 @@ export function createMicroFrontendRuntimeWithDependencies(
   function releaseApp(appName: string) {
     appEvaluations.delete(appName);
     dependencies.registry.removeContainer(appName);
-    dependencies.removeHostSkeletonRoutes(appName);
+    dependencies.removePendingHostComponentRoutes(appName);
   }
 
   function preloadApp(appName: string): Promise<void> {

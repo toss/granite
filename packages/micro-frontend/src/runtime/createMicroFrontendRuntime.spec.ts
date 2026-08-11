@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  registerHostSkeletonRoute,
-  removeHostSkeletonRoutes,
-  resetHostSkeletonStoreForTest,
-  resolveHostSkeleton,
-} from '../host/hostSkeletonStore';
+  registerPendingHostComponentRoute,
+  removePendingHostComponentRoutes,
+  resetPendingHostComponentStoreForTest,
+  resolvePendingHostComponent,
+} from '../host/pendingHostComponentStore';
 import type { MicroFrontendRuntimeEvent } from '../types';
 import {
   createMicroFrontendRuntimeWithDependencies,
@@ -18,7 +18,7 @@ interface AppModule {
   readonly default: () => string;
 }
 
-function CartSkeleton() {
+function CartPendingComponent() {
   return null;
 }
 
@@ -43,7 +43,7 @@ function createRuntimeFixture() {
     adapter,
     nativeRuntime,
     registry: microFrontendModuleRegistry,
-    removeHostSkeletonRoutes,
+    removePendingHostComponentRoutes,
     parseEvent: parseNativeRuntimeEvent,
   });
 
@@ -60,7 +60,7 @@ function createRuntimeFixture() {
 describe('createMicroFrontendRuntimeWithDependencies', () => {
   beforeEach(() => {
     Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
-    resetHostSkeletonStoreForTest();
+    resetPendingHostComponentStoreForTest();
   });
 
   it('loads and evaluates an app once before importing its exposed module', async () => {
@@ -150,9 +150,9 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
       .mockImplementationOnce(async () => {
         const container = createContainer('cart');
         exposeModule(container, './App', firstModule);
-        registerHostSkeletonRoute('/products', {
+        registerPendingHostComponentRoute('/products', {
           app: { host: 'app', name: 'cart', scheme: 'granite' },
-          component: CartSkeleton,
+          component: CartPendingComponent,
         });
       })
       .mockImplementationOnce(async () => {
@@ -175,7 +175,7 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     // Then
     expect(microFrontendModuleRegistry.hasContainer('cart')).toBe(false);
     expect(() => microFrontendModuleRegistry.importModule('cart/App')).toThrow();
-    expect(resolveHostSkeleton('granite://app/cart/products')).toBeNull();
+    expect(resolvePendingHostComponent('granite://app/cart/products')).toBeNull();
     fixture.emit({
       name: 'openApp',
       params: {
