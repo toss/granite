@@ -419,6 +419,7 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
       [sink enqueueRuntimeEvent:event];
     } @catch (NSException *exception) {
       [runtimeLock lock];
+      [pendingEvents insertObject:event atIndex:0];
       isDeliveringEvents = NO;
       [runtimeLock unlock];
       @throw exception;

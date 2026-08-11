@@ -2,6 +2,7 @@ package run.granite.microfrontend
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Collections
@@ -71,6 +72,31 @@ class GraniteMicroFrontendRuntimeEventRouterTest {
         startThread.join(5_000)
 
         assertFalse(startThread.isAlive)
+        assertEquals(listOf(open, close), events)
+    }
+
+    @Test
+    fun `failed event delivery is retried before newer events`() {
+        val events = mutableListOf<GraniteMicroFrontendEvent>()
+        val router = GraniteMicroFrontendRuntimeEventRouter()
+        val open = GraniteMicroFrontendEvent.OpenApp("session-1", "shopping", "granite://shopping")
+        val close = GraniteMicroFrontendEvent.CloseApp("session-1")
+        var shouldFail = true
+        val target = object : GraniteMicroFrontendRuntimeEventTarget {
+            override fun emit(event: GraniteMicroFrontendEvent) {
+                if (shouldFail) {
+                    shouldFail = false
+                    throw IllegalStateException("delivery failed")
+                }
+                events.add(event)
+            }
+        }
+        router.attach(target)
+        router.startEventDelivery(target)
+
+        assertThrows(IllegalStateException::class.java) { router.emit(open) }
+        router.emit(close)
+
         assertEquals(listOf(open, close), events)
     }
 }

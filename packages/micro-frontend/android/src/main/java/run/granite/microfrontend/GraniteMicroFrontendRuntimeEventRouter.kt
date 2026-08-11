@@ -61,22 +61,23 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
     }
 
     private fun drain(target: GraniteMicroFrontendRuntimeEventTarget) {
-        try {
-            while (true) {
-                val event = synchronized(lock) {
-                    if (activeTarget !== target || pendingEvents.isEmpty()) {
-                        isDelivering = false
-                        return
-                    }
-                    pendingEvents.removeFirst()
+        while (true) {
+            val event = synchronized(lock) {
+                if (activeTarget !== target || pendingEvents.isEmpty()) {
+                    isDelivering = false
+                    return
                 }
+                pendingEvents.removeFirst()
+            }
+            try {
                 target.emit(event)
+            } catch (error: Throwable) {
+                synchronized(lock) {
+                    pendingEvents.addFirst(event)
+                    isDelivering = false
+                }
+                throw error
             }
-        } catch (error: Throwable) {
-            synchronized(lock) {
-                isDelivering = false
-            }
-            throw error
         }
     }
 }
