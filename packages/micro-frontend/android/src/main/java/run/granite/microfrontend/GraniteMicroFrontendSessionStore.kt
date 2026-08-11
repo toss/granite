@@ -36,17 +36,24 @@ internal class GraniteMicroFrontendSessionStore(
     fun openApp(sessionId: String, token: String, appName: String, scheme: String): Boolean {
         require(appName.isNotBlank()) { "appName must not be blank" }
         require(scheme.isNotBlank()) { "scheme must not be blank" }
-        if (!hasSession(sessionId, token)) {
-            return false
+        val shouldEmit = synchronized(lock) {
+            val session = sessions[sessionId] ?: return false
+            if (session.token != token || session.opened || session.closed) {
+                return false
+            }
+            session.opened = true
+            true
         }
-        emit(GraniteMicroFrontendEvent.OpenApp(sessionId, appName, scheme))
-        return true
+        if (shouldEmit) {
+            emit(GraniteMicroFrontendEvent.OpenApp(sessionId, appName, scheme))
+        }
+        return shouldEmit
     }
 
     fun setVisible(sessionId: String, token: String, isVisible: Boolean): Boolean {
         val shouldEmit = synchronized(lock) {
             val session = sessions[sessionId] ?: return false
-            if (session.token != token || session.closed || session.isVisible == isVisible) {
+            if (session.token != token || !session.opened || session.closed || session.isVisible == isVisible) {
                 return false
             }
             session.isVisible = isVisible
@@ -61,7 +68,7 @@ internal class GraniteMicroFrontendSessionStore(
     fun closeApp(sessionId: String, token: String): Boolean {
         val shouldEmit = synchronized(lock) {
             val session = sessions[sessionId] ?: return false
-            if (session.token != token || session.closed) {
+            if (session.token != token || !session.opened || session.closed) {
                 return false
             }
             session.closed = true
@@ -81,14 +88,11 @@ internal class GraniteMicroFrontendSessionStore(
         }
     }
 
-    private fun hasSession(sessionId: String, token: String): Boolean = synchronized(lock) {
-        sessions[sessionId]?.token == token
-    }
-
     private data class SessionEntry(
         val token: String,
         val closeAction: Runnable,
         var closeRequested: Boolean = false,
+        var opened: Boolean = false,
         var isVisible: Boolean = false,
         var closed: Boolean = false,
     )

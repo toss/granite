@@ -18,12 +18,13 @@ static NSLock *runtimeLock;
 static NSMutableDictionary<NSString *, GraniteMicroFrontendSessionEntry *> *sessions;
 static NSMutableDictionary<NSString *, GraniteMicroFrontendPreloadCompletion> *preloadCompletions;
 static NSMutableArray<NSDictionary *> *pendingEvents;
-static __unsafe_unretained id<GraniteMicroFrontendRuntimeEventSink> eventSink;
+static __weak id<GraniteMicroFrontendRuntimeEventSink> eventSink;
 
 @interface GraniteMicroFrontendSessionEntry : NSObject
 @property(nonatomic, copy) NSString *token;
 @property(nonatomic, copy) dispatch_block_t closeHandler;
 @property(nonatomic, assign) BOOL closeRequested;
+@property(nonatomic, assign) BOOL opened;
 @property(nonatomic, assign) BOOL isVisible;
 @property(nonatomic, assign) BOOL closed;
 @end
@@ -56,14 +57,26 @@ static __unsafe_unretained id<GraniteMicroFrontendRuntimeEventSink> eventSink;
 @implementation GraniteMicroFrontendSessionRegistration
 
 - (void)openAppWithAppName:(NSString *)appName scheme:(NSString *)scheme {
-  [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId appName:appName scheme:scheme];
+  BOOL shouldEmit = NO;
+  [runtimeLock lock];
+  GraniteMicroFrontendSessionEntry *entry = sessions[_sessionId];
+  if ([entry.token isEqualToString:_token] && !entry.opened && !entry.closed) {
+    entry.opened = YES;
+    shouldEmit = YES;
+  }
+  [runtimeLock unlock];
+
+  if (shouldEmit) {
+    [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId appName:appName scheme:scheme];
+  }
 }
 
 - (BOOL)setVisible:(BOOL)isVisible {
   BOOL shouldEmit = NO;
   [runtimeLock lock];
   GraniteMicroFrontendSessionEntry *entry = sessions[_sessionId];
-  if ([entry.token isEqualToString:_token] && !entry.closed && entry.isVisible != isVisible) {
+  if ([entry.token isEqualToString:_token] && entry.opened && !entry.closed &&
+      entry.isVisible != isVisible) {
     entry.isVisible = isVisible;
     shouldEmit = YES;
   }
@@ -80,7 +93,7 @@ static __unsafe_unretained id<GraniteMicroFrontendRuntimeEventSink> eventSink;
   BOOL shouldEmit = NO;
   [runtimeLock lock];
   GraniteMicroFrontendSessionEntry *entry = sessions[_sessionId];
-  if ([entry.token isEqualToString:_token] && !entry.closed) {
+  if ([entry.token isEqualToString:_token] && entry.opened && !entry.closed) {
     entry.closed = YES;
     shouldEmit = YES;
   }
@@ -116,8 +129,8 @@ static __unsafe_unretained id<GraniteMicroFrontendRuntimeEventSink> eventSink;
 
 @implementation GraniteMicroFrontendSessionLifecycleObserverViewController
 
-- (void)viewWillAppear:(BOOL)animated {
-  [super viewWillAppear:animated];
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
   [_binding.registration setVisible:YES];
 }
 
