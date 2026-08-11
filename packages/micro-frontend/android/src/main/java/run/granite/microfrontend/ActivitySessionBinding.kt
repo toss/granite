@@ -63,6 +63,9 @@ class ActivitySessionBinding private constructor(
             appName: String,
             scheme: String,
         ): ActivitySessionBinding = synchronized(boundBindings) {
+            check(Looper.myLooper() == Looper.getMainLooper()) {
+                "ActivitySessionBinding.bind must be called on the main thread"
+            }
             boundBindings[activity]?.also { return@synchronized it }
             val registration = GraniteMicroFrontendRuntimeHost.registerSession(sessionId) {
                 if (Looper.myLooper() == Looper.getMainLooper()) {

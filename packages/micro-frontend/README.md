@@ -185,14 +185,16 @@ class AppActivity : Activity() {
 ### iOS
 
 ```objc
+__weak typeof(self) weakSelf = self;
+__weak UIViewController *weakViewController = viewController;
 self.binding =
     [GraniteMicroFrontendViewControllerSessionBinding bindViewController:viewController
                                                                sessionId:self.sessionId
                                                                  appName:@"cart"
                                                                   scheme:@"granite://cart/products/1"
                                                             closeHandler:^{
-  [viewController dismissViewControllerAnimated:YES completion:^{
-    [self.binding invalidate];
+  [weakViewController dismissViewControllerAnimated:YES completion:^{
+    [weakSelf.binding invalidate];
   }];
 }];
 ```
@@ -201,6 +203,8 @@ The binders emit `openApp` once when bound, deduplicate visibility from the nati
 `closeApp` only when the native host is invalidated or deallocated after teardown. JavaScript keeps the React tree
 mounted until that event arrives. Custom hosts that cannot use the binders can retain a
 `GraniteMicroFrontendSessionRegistration` and call `openApp`, `setVisible`, and `closeApp` from their own lifecycle.
+Create and invalidate iOS bindings on the main thread, and weakly capture the owning controller from the close
+handler so the binding can be released with its ViewController.
 
 ## Session rendering
 

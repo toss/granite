@@ -14,11 +14,19 @@ static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
 
 @class GraniteMicroFrontendSessionEntry;
 
-static NSLock *runtimeLock;
+static NSRecursiveLock *runtimeLock;
 static NSMutableDictionary<NSString *, GraniteMicroFrontendSessionEntry *> *sessions;
 static NSMutableDictionary<NSString *, GraniteMicroFrontendPreloadCompletion> *preloadCompletions;
 static NSMutableArray<NSDictionary *> *pendingEvents;
 static __weak id<GraniteMicroFrontendRuntimeEventSink> eventSink;
+
+static void GraniteMicroFrontendRequireMainThread(void) {
+  if (!NSThread.isMainThread) {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:@"Session bindings must be used on the main thread"
+                                 userInfo:nil];
+  }
+}
 
 @interface GraniteMicroFrontendSessionEntry : NSObject
 @property(nonatomic, copy) NSString *token;
@@ -42,7 +50,7 @@ static __weak id<GraniteMicroFrontendRuntimeEventSink> eventSink;
 
 #if GRANITE_MICRO_FRONTEND_HAS_UIKIT
 @interface GraniteMicroFrontendViewControllerSessionBinding ()
-@property(nonatomic, assign) UIViewController *viewController;
+@property(nonatomic, weak) UIViewController *viewController;
 @property(nonatomic, strong) GraniteMicroFrontendSessionRegistration *registration;
 @property(nonatomic, strong) GraniteMicroFrontendSessionLifecycleObserverViewController *observer;
 @property(nonatomic, assign) BOOL invalidated;
@@ -57,34 +65,34 @@ static __weak id<GraniteMicroFrontendRuntimeEventSink> eventSink;
 @implementation GraniteMicroFrontendSessionRegistration
 
 - (void)openAppWithAppName:(NSString *)appName scheme:(NSString *)scheme {
-  BOOL shouldEmit = NO;
+  NSParameterAssert(appName.length > 0);
+  NSParameterAssert(scheme.length > 0);
   [runtimeLock lock];
-  GraniteMicroFrontendSessionEntry *entry = sessions[_sessionId];
-  if ([entry.token isEqualToString:_token] && !entry.opened && !entry.closed) {
-    entry.opened = YES;
-    shouldEmit = YES;
-  }
-  [runtimeLock unlock];
-
-  if (shouldEmit) {
-    [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId appName:appName scheme:scheme];
+  @try {
+    GraniteMicroFrontendSessionEntry *entry = sessions[_sessionId];
+    if ([entry.token isEqualToString:_token] && !entry.opened && !entry.closed) {
+      entry.opened = YES;
+      [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId appName:appName scheme:scheme];
+    }
+  } @finally {
+    [runtimeLock unlock];
   }
 }
 
 - (BOOL)setVisible:(BOOL)isVisible {
   BOOL shouldEmit = NO;
   [runtimeLock lock];
-  GraniteMicroFrontendSessionEntry *entry = sessions[_sessionId];
-  if ([entry.token isEqualToString:_token] && entry.opened && !entry.closed &&
-      entry.isVisible != isVisible) {
-    entry.isVisible = isVisible;
-    shouldEmit = YES;
-  }
-  [runtimeLock unlock];
-
-  if (shouldEmit) {
-    [GraniteMicroFrontendRuntimeHost emitSessionVisibilityChanged:_sessionId
-                                                        isVisible:isVisible];
+  @try {
+    GraniteMicroFrontendSessionEntry *entry = sessions[_sessionId];
+    if ([entry.token isEqualToString:_token] && entry.opened && !entry.closed &&
+        entry.isVisible != isVisible) {
+      entry.isVisible = isVisible;
+      shouldEmit = YES;
+      [GraniteMicroFrontendRuntimeHost emitSessionVisibilityChanged:_sessionId
+                                                          isVisible:isVisible];
+    }
+  } @finally {
+    [runtimeLock unlock];
   }
   return shouldEmit;
 }
@@ -92,15 +100,15 @@ static __weak id<GraniteMicroFrontendRuntimeEventSink> eventSink;
 - (BOOL)closeApp {
   BOOL shouldEmit = NO;
   [runtimeLock lock];
-  GraniteMicroFrontendSessionEntry *entry = sessions[_sessionId];
-  if ([entry.token isEqualToString:_token] && entry.opened && !entry.closed) {
-    entry.closed = YES;
-    shouldEmit = YES;
-  }
-  [runtimeLock unlock];
-
-  if (shouldEmit) {
-    [GraniteMicroFrontendRuntimeHost emitCloseApp:_sessionId];
+  @try {
+    GraniteMicroFrontendSessionEntry *entry = sessions[_sessionId];
+    if ([entry.token isEqualToString:_token] && entry.opened && !entry.closed) {
+      entry.closed = YES;
+      shouldEmit = YES;
+      [GraniteMicroFrontendRuntimeHost emitCloseApp:_sessionId];
+    }
+  } @finally {
+    [runtimeLock unlock];
   }
   return shouldEmit;
 }
@@ -124,7 +132,7 @@ static __weak id<GraniteMicroFrontendRuntimeEventSink> eventSink;
 #if GRANITE_MICRO_FRONTEND_HAS_UIKIT
 
 @interface GraniteMicroFrontendSessionLifecycleObserverViewController : UIViewController
-@property(nonatomic, assign) GraniteMicroFrontendViewControllerSessionBinding *binding;
+@property(nonatomic, weak) GraniteMicroFrontendViewControllerSessionBinding *binding;
 @end
 
 @implementation GraniteMicroFrontendSessionLifecycleObserverViewController
@@ -154,6 +162,7 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
                                                                  appName:(NSString *)appName
                                                                   scheme:(NSString *)scheme
                                                             closeHandler:(dispatch_block_t)closeHandler {
+  GraniteMicroFrontendRequireMainThread();
   NSParameterAssert(viewController != nil);
   NSParameterAssert(sessionId.length > 0);
   NSParameterAssert(appName.length > 0);
@@ -194,6 +203,7 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 }
 
 - (void)invalidate {
+  GraniteMicroFrontendRequireMainThread();
   @synchronized(self) {
     if (_invalidated) {
       return;
@@ -202,6 +212,7 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
   }
 
   UIViewController *viewController = _viewController;
+  _observer.binding = nil;
   if (_observer.parentViewController != nil) {
     [_observer willMoveToParentViewController:nil];
     [_observer.view removeFromSuperview];
@@ -269,7 +280,7 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
   if (self != GraniteMicroFrontendRuntimeHost.class) {
     return;
   }
-  runtimeLock = [[NSLock alloc] init];
+  runtimeLock = [[NSRecursiveLock alloc] init];
   sessions = [[NSMutableDictionary alloc] init];
   preloadCompletions = [[NSMutableDictionary alloc] init];
   pendingEvents = [[NSMutableArray alloc] init];
@@ -286,7 +297,14 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
   entry.closeHandler = closeHandler;
 
   [runtimeLock lock];
-  NSAssert(sessions[sessionId] == nil, @"Session '%@' is already registered", sessionId);
+  if (sessions[sessionId] != nil) {
+    [runtimeLock unlock];
+    @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                   reason:[NSString stringWithFormat:
+                                                       @"Session '%@' is already registered",
+                                                       sessionId]
+                                 userInfo:nil];
+  }
   sessions[sessionId] = entry;
   [runtimeLock unlock];
 

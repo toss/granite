@@ -36,48 +36,39 @@ internal class GraniteMicroFrontendSessionStore(
     fun openApp(sessionId: String, token: String, appName: String, scheme: String): Boolean {
         require(appName.isNotBlank()) { "appName must not be blank" }
         require(scheme.isNotBlank()) { "scheme must not be blank" }
-        val shouldEmit = synchronized(lock) {
+        return synchronized(lock) {
             val session = sessions[sessionId] ?: return false
             if (session.token != token || session.opened || session.closed) {
                 return false
             }
             session.opened = true
+            emit(GraniteMicroFrontendEvent.OpenApp(sessionId, appName, scheme))
             true
         }
-        if (shouldEmit) {
-            emit(GraniteMicroFrontendEvent.OpenApp(sessionId, appName, scheme))
-        }
-        return shouldEmit
     }
 
     fun setVisible(sessionId: String, token: String, isVisible: Boolean): Boolean {
-        val shouldEmit = synchronized(lock) {
+        return synchronized(lock) {
             val session = sessions[sessionId] ?: return false
             if (session.token != token || !session.opened || session.closed || session.isVisible == isVisible) {
                 return false
             }
             session.isVisible = isVisible
+            emit(GraniteMicroFrontendEvent.SessionVisibilityChanged(sessionId, isVisible))
             true
         }
-        if (shouldEmit) {
-            emit(GraniteMicroFrontendEvent.SessionVisibilityChanged(sessionId, isVisible))
-        }
-        return shouldEmit
     }
 
     fun closeApp(sessionId: String, token: String): Boolean {
-        val shouldEmit = synchronized(lock) {
+        return synchronized(lock) {
             val session = sessions[sessionId] ?: return false
             if (session.token != token || !session.opened || session.closed) {
                 return false
             }
             session.closed = true
+            emit(GraniteMicroFrontendEvent.CloseApp(sessionId))
             true
         }
-        if (shouldEmit) {
-            emit(GraniteMicroFrontendEvent.CloseApp(sessionId))
-        }
-        return shouldEmit
     }
 
     fun unregisterSession(sessionId: String, token: String) {
