@@ -158,53 +158,119 @@ arguments. The public JavaScript facade still accepts `evaluateScript(filePath)`
 `startEventDelivery()` is internal to the JavaScript facade. It flushes lifecycle events that arrived before the first
 `onEvent()` subscription.
 
-## Native session host
+## Brownfield integration
 
-Native creates the `sessionId`, registers how that native screen closes, and sends the same identifier with lifecycle
-events. `closeSession()` never searches for a ViewController or Activity from JavaScript.
+The package supplies the `GraniteMicroFrontendRuntime` TurboModule and native
+session registry. The brownfield app does not implement another TurboModule.
+It must:
+
+1. create a unique `sessionId` for each native screen;
+2. resolve the screen's `appName` and incoming `scheme`;
+3. bind the screen lifecycle with the APIs below;
+4. install a Portal host using that same `sessionId`; and
+5. provide the JavaScript `adapter.loadBundle()` implementation shown above.
+
+The shared identifier joins the two packages:
+
+```text
+native session binding(sessionId)
+  → openApp event(sessionId, appName, scheme)
+  → <Portal hostName={sessionId}>
+  → native Portal host(sessionId)
+```
+
+Native owns how the screen closes. `closeSession()` invokes the registered
+close action instead of searching for an `Activity` or `UIViewController` from
+JavaScript. The React tree remains mounted until native teardown emits
+`closeApp`.
+
+The brownfield screen lifecycle is the source of truth for presentation
+visibility. This package transports that state through
+`sessionVisibilityChanged` and `MicroFrontendSessionRenderer`; Portal separately
+owns whether content is attached to a destination host. Do not derive screen
+visibility from Portal attachment because a host can stay attached while its
+native screen is not visible.
 
 ### Android
 
 ```kotlin
-class AppActivity : Activity() {
-    private val sessionId = UUID.randomUUID().toString()
-    private lateinit var binding: ActivitySessionBinding
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import java.util.UUID
+import run.granite.microfrontend.ActivitySessionBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivitySessionBinding.bind(
-            this,
-            sessionId,
-            "cart",
-            intent.data.toString(),
-        )
-    }
+class CartActivity : AppCompatActivity() {
+  private val sessionId = UUID.randomUUID().toString()
+  private lateinit var sessionBinding: ActivitySessionBinding
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    val scheme = requireNotNull(intent.data).toString()
+
+    sessionBinding = ActivitySessionBinding.bind(
+      activity = this,
+      sessionId = sessionId,
+      appName = "cart",
+      scheme = scheme,
+    )
+
+    // Install the @granite-js/portal host with hostName = sessionId.
+    installPortalHost(sessionId)
+  }
 }
 ```
+
+`ActivitySessionBinding` emits `openApp` when bound, maps `onActivityStarted`
+and `onActivityStopped` to visibility, and emits `closeApp` when the activity is
+destroyed. A JavaScript `closeSession(sessionId)` request calls
+`Activity.finish()` on the main thread. Retain the binding for the lifetime of
+the activity; custom screen containers can instead retain
+`GraniteMicroFrontendRuntimeHost.registerSession()` and drive `openApp`,
+`setVisible`, `closeApp`, and `close()` themselves.
 
 ### iOS
 
 ```objc
+#import <GraniteMicroFrontendRuntime/GraniteMicroFrontendRuntimeHost.h>
+
 __weak typeof(self) weakSelf = self;
-__weak UIViewController *weakViewController = viewController;
-self.binding =
-    [GraniteMicroFrontendViewControllerSessionBinding bindViewController:viewController
+self.sessionBinding =
+    [GraniteMicroFrontendViewControllerSessionBinding bindViewController:self
                                                                sessionId:self.sessionId
                                                                  appName:@"cart"
                                                                   scheme:@"granite://cart/products/1"
                                                             closeHandler:^{
-  [weakViewController dismissViewControllerAnimated:YES completion:^{
-    [weakSelf.binding invalidate];
+  [weakSelf dismissViewControllerAnimated:YES completion:^{
+    [weakSelf.sessionBinding invalidate];
+    weakSelf.sessionBinding = nil;
   }];
 }];
+
+// Install the @granite-js/portal host with name = self.sessionId.
+[self installPortalHostWithName:self.sessionId];
 ```
 
-The binders emit `openApp` once when bound, deduplicate visibility from the native appearance lifecycle, and emit
-`closeApp` only when the native host is invalidated or deallocated after teardown. JavaScript keeps the React tree
-mounted until that event arrives. Custom hosts that cannot use the binders can retain a
-`GraniteMicroFrontendSessionRegistration` and call `openApp`, `setVisible`, and `closeApp` from their own lifecycle.
-Create and invalidate iOS bindings on the main thread, and weakly capture the owning controller from the close
-handler so the binding can be released with its ViewController.
+Retain `sessionBinding` until the controller is dismissed. The binding emits
+`openApp` once, derives visibility from appearance callbacks, and emits
+`closeApp` only when it is invalidated or deallocated after teardown. Create
+and invalidate it on the main thread, and weakly capture the controller in the
+close handler so the binding can be released with its `UIViewController`.
+
+Custom containers can instead retain a
+`GraniteMicroFrontendSessionRegistration` from
+`GraniteMicroFrontendRuntimeHost.registerSession`, then call `openApp`,
+`setVisible`, `closeApp`, and `invalidate` from their own lifecycle.
+
+### Optional native preload
+
+Call `requestPreloadApp` when a native entry point must know whether JavaScript
+finished loading and evaluating an app before navigation. Its callback is
+completed by the JavaScript runtime after `adapter.loadBundle()` and
+`evaluateScript()` finish. Retain the returned registration while the request
+is relevant and close/invalidate it to cancel the callback.
+
+Use `emitPreloadApp` only for fire-and-forget warm-up when native does not need
+completion or failure reporting.
 
 ## Session rendering
 

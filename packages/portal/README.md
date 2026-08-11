@@ -29,7 +29,7 @@ Each navigation tree therefore remains mounted when the user moves between
 native screens.
 
 ```tsx
-import { Portal } from "@granite-js/portal";
+import { Portal } from '@granite-js/portal';
 
 export function MicrofrontendController() {
   return (
@@ -55,6 +55,152 @@ class.
 ```sh
 yarn add @granite-js/portal
 ```
+
+## Brownfield integration
+
+The brownfield app owns the native destination screen. It must:
+
+1. keep the React Native runtime and controller surface that mounted `<Portal>` alive;
+2. create one native portal host in the destination `Activity` or `UIViewController`;
+3. register that host with the same `hostName` passed to `<Portal>`; and
+4. unregister the host when the native screen is torn down.
+
+Portal owns content attachment, not native screen visibility. An attached
+portal can remain in the view hierarchy while its `Activity` is stopped or its
+`UIViewController` is no longer visible. On iOS, use `hasAttachedContent`,
+`onContentDidAttach`, and `onContentDidDetach` for destination readiness. Use
+the native screen lifecycle on both platforms for presentation visibility.
+
+When this package is used with `@granite-js/micro-frontend`, use the native
+session identifier as the portal host name on both sides:
+
+```tsx
+<Portal hostName={session.sessionId}>
+  <RemoteApp />
+</Portal>
+```
+
+### Android
+
+Wait until the existing `ReactHost` has an active `ReactApplicationContext`,
+then install a `PortalHostView` in a `PortalReactRootView` owned by the
+destination `Activity`. `controllerSurfaceId` and `controllerModuleName` must
+refer to the already-mounted controller surface; this does not start another
+React Native runtime or surface.
+
+```kotlin
+import android.widget.FrameLayout
+import androidx.appcompat.app.AppCompatActivity
+import com.facebook.react.ReactHost
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.uimanager.ThemedReactContext
+import com.teleport.host.PortalHostView
+import com.teleport.host.PortalReactRootView
+
+class MicroFrontendActivity : AppCompatActivity() {
+  private var portalHostView: PortalHostView? = null
+
+  fun attachPortal(
+    reactContext: ReactApplicationContext,
+    reactHost: ReactHost,
+    controllerSurfaceId: Int,
+    controllerModuleName: String,
+    sessionId: String,
+  ) {
+    val themedContext = ThemedReactContext(
+      reactContext,
+      this,
+      controllerModuleName,
+      controllerSurfaceId,
+    )
+    val rootView = PortalReactRootView(
+      themedContext,
+      reactHost,
+      controllerSurfaceId,
+      controllerModuleName,
+    )
+    val hostView = PortalHostView(themedContext).apply {
+      setName(sessionId)
+    }
+
+    rootView.addView(
+      hostView,
+      FrameLayout.LayoutParams(
+        FrameLayout.LayoutParams.MATCH_PARENT,
+        FrameLayout.LayoutParams.MATCH_PARENT,
+      ),
+    )
+    portalHostView = hostView
+    setContentView(rootView)
+  }
+
+  override fun onDestroy() {
+    portalHostView?.setName(null)
+    portalHostView = null
+    super.onDestroy()
+  }
+}
+```
+
+The brownfield runtime owner is also responsible for forwarding the usual
+`Activity` resume, pause, destroy, and back events to its retained `ReactHost`.
+
+### iOS
+
+Add a `PortalHostContainerView` to the destination controller and register the
+session identifier. The container installs the Fabric touch handler required
+by content moved outside the original React view hierarchy.
+
+If the controller can be created before React Native boots, use deferred
+activation and call `activateIfNeeded()` on the main thread after the runtime
+is ready.
+
+```swift
+import GranitePortal
+import UIKit
+
+final class MicroFrontendViewController: UIViewController {
+  private let sessionId: String
+  private let portalHostView = PortalHostContainerView(
+    frame: .zero,
+    deferredActivation: true
+  )
+
+  init(sessionId: String) {
+    self.sessionId = sessionId
+    super.init(nibName: nil, bundle: nil)
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    nil
+  }
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    portalHostView.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(portalHostView)
+    NSLayoutConstraint.activate([
+      portalHostView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+      portalHostView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+      portalHostView.topAnchor.constraint(equalTo: view.topAnchor),
+      portalHostView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+    ])
+    portalHostView.setName(sessionId)
+  }
+
+  func reactRuntimeDidStart() {
+    portalHostView.activateIfNeeded()
+  }
+
+  deinit {
+    portalHostView.invalidate()
+  }
+}
+```
+
+Use `PortalHostContainerView(frame:)` instead when the React runtime is already
+ready before the controller is created.
 
 ## Example
 
