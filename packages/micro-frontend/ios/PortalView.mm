@@ -25,13 +25,26 @@ using namespace facebook::react;
 @interface PortalView () <RCTPortalViewViewProtocol>
 
 @property (nonatomic, strong) NSString *hostName;
-@property (nonatomic, strong) UIView *targetView;
+// Weak so a detached/dead host cannot keep the destination tree alive through
+// the portal after unregister. Falls back to contentView when nil.
+@property (nonatomic, weak) UIView *targetView;
 
 @end
 
 @implementation PortalView {
   NSMutableArray<UIView *> *_ownChildren;
   PortalViewShadowNode::ConcreteState::Shared _state;
+}
+
+static BOOL GranitePortalHostNamesEqual(NSString * _Nullable left, NSString * _Nullable right)
+{
+  if (left == right) {
+    return YES;
+  }
+  if (left == nil || right == nil) {
+    return NO;
+  }
+  return [left isEqualToString:right];
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
@@ -82,19 +95,35 @@ using namespace facebook::react;
       });
 }
 
+- (UIView *)resolvedTargetView
+{
+  return self.targetView ?: self.contentView;
+}
+
+- (nullable UIViewController *)nearestViewControllerForView:(UIView *)view
+{
+  for (UIResponder *responder = view; responder != nil; responder = responder.nextResponder) {
+    if ([responder isKindOfClass:[UIViewController class]]) {
+      return (UIViewController *)responder;
+    }
+  }
+  return nil;
+}
+
 - (void)updatePortalLayoutStateIfNeeded
 {
   if (!_state) {
     return;
   }
 
-  if (!self.hostName || ![self.targetView isKindOfClass:[PortalHostView class]]) {
+  UIView *targetView = [self resolvedTargetView];
+  if (!self.hostName || ![targetView isKindOfClass:[PortalHostView class]]) {
     [self resetPortalLayoutStateIfNeeded];
     return;
   }
 
   CGRect sourceRect = [self screenRectForView:self];
-  CGRect hostRect = [self screenRectForView:self.targetView];
+  CGRect hostRect = [self screenRectForView:targetView];
 
   if (CGRectIsNull(sourceRect) || CGRectIsNull(hostRect)) {
     return;
@@ -103,7 +132,7 @@ using namespace facebook::react;
   // Children are physically mounted under the host, but measured through this
   // PortalView shadow node. Store the host's native layout so Fabric
   // measurement follows the destination after it re-layouts.
-  CGSize hostSize = self.targetView.bounds.size;
+  CGSize hostSize = targetView.bounds.size;
 
   PortalViewState newData = {
       static_cast<Float>(hostSize.width),
@@ -126,7 +155,8 @@ using namespace facebook::react;
 - (void)moveOwnChildrenToTarget:(UIView *)target
 {
   NSArray<UIView *> *children = [_ownChildren copy];
-  [self detachViewControllersFromChildren:children];
+  NSArray<UIViewController *> *detachedViewControllers =
+      [self detachViewControllersFromChildren:children];
 
   if ([target isKindOfClass:[PortalHostView class]]) {
     PortalHostView *host = (PortalHostView *)target;
@@ -139,6 +169,8 @@ using namespace facebook::react;
       [target addSubview:child];
     }
   }
+
+  [self attachViewControllers:detachedViewControllers toView:target];
 }
 
 - (void)collectViewControllersInView:(UIView *)view
@@ -154,7 +186,7 @@ using namespace facebook::react;
   }
 }
 
-- (void)detachViewControllersFromChildren:(NSArray<UIView *> *)children
+- (NSArray<UIViewController *> *)detachViewControllersFromChildren:(NSArray<UIView *> *)children
 {
   NSMutableSet<UIViewController *> *viewControllers = [NSMutableSet set];
   for (UIView *child in children) {
@@ -177,6 +209,33 @@ using namespace facebook::react;
   for (UIViewController *viewController in viewControllersToDetach) {
     [viewController removeFromParentViewController];
   }
+
+  return viewControllersToDetach;
+}
+
+- (void)attachViewControllers:(NSArray<UIViewController *> *)viewControllers
+                       toView:(UIView *)target
+{
+  if (viewControllers.count == 0) {
+    return;
+  }
+
+  UIViewController *parentViewController = [self nearestViewControllerForView:target];
+  if (parentViewController == nil) {
+    return;
+  }
+
+  for (UIViewController *viewController in viewControllers) {
+    if (viewController.parentViewController == parentViewController) {
+      continue;
+    }
+    if (viewController.parentViewController != nil) {
+      [viewController willMoveToParentViewController:nil];
+      [viewController removeFromParentViewController];
+    }
+    [parentViewController addChildViewController:viewController];
+    [viewController didMoveToParentViewController:parentViewController];
+  }
 }
 
 - (void)updateProps:(Props::Shared const &)props oldProps:(Props::Shared const &)oldProps
@@ -187,7 +246,7 @@ using namespace facebook::react;
   NSString *newHostName =
       newHostStr.empty() ? nil : [NSString stringWithUTF8String:newHostStr.c_str()];
 
-  if (![self.hostName isEqualToString:newHostName]) {
+  if (!GranitePortalHostNamesEqual(self.hostName, newHostName)) {
     if (self.hostName) {
       [[PortalRegistry sharedInstance] unregisterPendingPortal:self withHostName:self.hostName];
     }
@@ -202,9 +261,8 @@ using namespace facebook::react;
 
     UIView *newTarget = hostView ? (UIView *)hostView : self.contentView;
 
-    if (newTarget != self.targetView) {
+    if (newTarget != [self resolvedTargetView]) {
       self.targetView = newTarget;
-
       [self moveOwnChildrenToTarget:newTarget];
     }
 
@@ -221,9 +279,10 @@ using namespace facebook::react;
 /// already present in the host.  Returns -1 when none is found (caller should append).
 - (NSInteger)findNextSiblingHostIndex:(NSInteger)ownIndex
 {
+  UIView *targetView = [self resolvedTargetView];
   for (NSInteger i = ownIndex + 1; i < (NSInteger)_ownChildren.count; i++) {
     UIView *sibling = _ownChildren[i];
-    NSInteger siblingIdx = [self.targetView.subviews indexOfObject:sibling];
+    NSInteger siblingIdx = [targetView.subviews indexOfObject:sibling];
     if (siblingIdx != NSNotFound) {
       return (NSInteger)siblingIdx;
     }
@@ -234,18 +293,21 @@ using namespace facebook::react;
 - (void)mountChildComponentView:(UIView<RCTComponentViewProtocol> *)childComponentView
                           index:(NSInteger)index
 {
-  [_ownChildren insertObject:childComponentView atIndex:MIN(index, (NSInteger)_ownChildren.count)];
+  NSInteger clampedIndex = MIN(MAX(index, 0), (NSInteger)_ownChildren.count);
+  [_ownChildren insertObject:childComponentView atIndex:clampedIndex];
 
-  if (self.targetView == self.contentView) {
+  UIView *targetView = [self resolvedTargetView];
+  if (targetView == self.contentView) {
     // when adding to self, preserve the React tree order with the provided index
-    [self.targetView insertSubview:childComponentView atIndex:index];
+    NSInteger subviewIndex = MIN(clampedIndex, (NSInteger)targetView.subviews.count);
+    [targetView insertSubview:childComponentView atIndex:subviewIndex];
   } else {
     NSInteger ownIndex = [_ownChildren indexOfObject:childComponentView];
     NSInteger hostIndex = [self findNextSiblingHostIndex:ownIndex];
     if (hostIndex >= 0) {
-      [self.targetView insertSubview:childComponentView atIndex:hostIndex];
+      [targetView insertSubview:childComponentView atIndex:hostIndex];
     } else {
-      [self.targetView addSubview:childComponentView];
+      [targetView addSubview:childComponentView];
     }
   }
 }
@@ -263,12 +325,19 @@ using namespace facebook::react;
                                                                        sourceView:self];
 
   if (!hostView) {
+    // Match updateProps: when the destination disappears, reclaim children under
+    // the local contentView so they are not stuck under a dead host.
+    UIView *fallbackTarget = self.contentView;
+    if ([self resolvedTargetView] != fallbackTarget) {
+      self.targetView = fallbackTarget;
+      [self moveOwnChildrenToTarget:fallbackTarget];
+    }
     [self resetPortalLayoutStateIfNeeded];
     return;
   }
 
   UIView *newTarget = hostView;
-  if (newTarget != self.targetView) {
+  if (newTarget != [self resolvedTargetView]) {
     self.targetView = newTarget;
     [self moveOwnChildrenToTarget:newTarget];
   }
@@ -331,7 +400,8 @@ using namespace facebook::react;
     // the strict containment policy (i.e., UIKit guarantees that every ancestor
     // of the hit view will return YES from -pointInside:withEvent:). See:
     //  - https://developer.apple.com/library/ios/qa/qa2013/qa1812.html
-    for (UIView *subview in [_targetView.subviews reverseObjectEnumerator]) {
+    UIView *targetView = [self resolvedTargetView];
+    for (UIView *subview in [targetView.subviews reverseObjectEnumerator]) {
       // Prevent circular hit-testing by checking if we're in the subview's hierarchy
       if ([self isDescendantOfView:subview]) {
         // Skip views that contain us to prevent cycles

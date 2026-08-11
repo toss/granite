@@ -12,16 +12,20 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface GraniteMicroFrontendViewControllerSessionBinding : NSObject
-+ (GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
-                                                               sessionId:(NSString *)sessionId
-                                                                 appName:(NSString *)appName
-                                                                  scheme:(NSString *)scheme;
+/// Returns an existing binding if this view controller is already bound.
+/// Returns `nil` if `sessionId` is already registered on another container.
++ (nullable GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
+                                                                        sessionId:(NSString *)sessionId
+                                                                          appName:(NSString *)appName
+                                                                           scheme:(NSString *)scheme;
 - (void)invalidate;
 @end
 
 @interface GraniteMicroFrontendRuntimeHost : NSObject
 
-+ (GraniteMicroFrontendSessionRegistration *)registerSession:(NSString *)sessionId;
+/// Registers a session. Returns `nil` if `sessionId` is already registered.
+/// Callers must use a unique id per destination and invalidate before reuse.
++ (nullable GraniteMicroFrontendSessionRegistration *)registerSession:(NSString *)sessionId;
 
 + (void)emitPreloadApp:(NSString *)appName;
 

@@ -11,6 +11,7 @@ static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
 
 @interface RCTBridge (GraniteMicroFrontendRuntime)
 - (void *)runtime;
+- (std::shared_ptr<facebook::react::CallInvoker>)jsCallInvoker;
 @end
 
 @interface GraniteMicroFrontendRuntimeModule () <GraniteMicroFrontendRuntimeEventSink>
@@ -28,6 +29,24 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
 
 - (void)dealloc {
   [GraniteMicroFrontendRuntimeHost detachEventSink:self];
+}
+
+- (std::shared_ptr<facebook::react::CallInvoker>)jsCallInvokerIfAvailable {
+  RCTBridge *bridge = self.bridge;
+  if (bridge == nil) {
+    return nullptr;
+  }
+  // Prefer the public CallInvoker on RCTBridge / bridge proxy without casting
+  // to a concrete bridge subclass.
+  return bridge.jsCallInvoker;
+}
+
+- (facebook::jsi::Runtime *)jsRuntimeIfAvailable {
+  RCTBridge *bridge = self.bridge;
+  if (bridge == nil || ![bridge respondsToSelector:@selector(runtime)]) {
+    return nullptr;
+  }
+  return reinterpret_cast<facebook::jsi::Runtime *>(bridge.runtime);
 }
 
 - (void)evaluateScript:(JS::NativeGraniteMicroFrontendRuntime::EvaluateScriptRequest &)request
@@ -57,20 +76,25 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
       reject(@"RUNTIME_UNAVAILABLE", @"JavaScript runtime is unavailable", nil);
       return;
     }
-    RCTBridgeProxy *bridgeProxy = (RCTBridgeProxy *)strongSelf.bridge;
-    std::shared_ptr<facebook::react::CallInvoker> callInvoker = bridgeProxy.jsCallInvoker;
-    facebook::jsi::Runtime *runtime =
-        reinterpret_cast<facebook::jsi::Runtime *>(strongSelf.bridge.runtime);
-    if (callInvoker == nullptr || runtime == nullptr) {
+
+    std::shared_ptr<facebook::react::CallInvoker> callInvoker =
+        [strongSelf jsCallInvokerIfAvailable];
+    if (callInvoker == nullptr) {
       reject(@"RUNTIME_UNAVAILABLE", @"JavaScript runtime is unavailable", nil);
       return;
     }
 
-    callInvoker->invokeAsync([source = std::move(source),
+    // Read the JSI runtime only on the JS queue owned by callInvoker.
+    callInvoker->invokeAsync([strongSelf,
+                              source = std::move(source),
                               sourceUrl = std::move(sourceUrl),
-                              runtime,
                               resolve,
                               reject]() mutable {
+      facebook::jsi::Runtime *runtime = [strongSelf jsRuntimeIfAvailable];
+      if (runtime == nullptr) {
+        reject(@"RUNTIME_UNAVAILABLE", @"JavaScript runtime is unavailable", nil);
+        return;
+      }
       try {
         runtime->evaluateJavaScript(
             std::make_unique<facebook::jsi::StringBuffer>(std::move(source)),
@@ -96,8 +120,7 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
 }
 
 - (BOOL)scheduleRuntimeEvent:(NSDictionary *)event {
-  RCTBridgeProxy *bridgeProxy = (RCTBridgeProxy *)self.bridge;
-  std::shared_ptr<facebook::react::CallInvoker> callInvoker = bridgeProxy.jsCallInvoker;
+  std::shared_ptr<facebook::react::CallInvoker> callInvoker = [self jsCallInvokerIfAvailable];
   if (callInvoker == nullptr) {
     return NO;
   }

@@ -64,15 +64,19 @@ static void GraniteMicroFrontendRequireMainThread(void) {
 - (void)openAppWithAppName:(NSString *)appName scheme:(NSString *)scheme {
   NSParameterAssert(appName.length > 0);
   NSParameterAssert(scheme.length > 0);
+  BOOL shouldEmit = NO;
   [runtimeLock lock];
   @try {
     GraniteMicroFrontendSessionEntry *entry = sessions[_sessionId];
     if ([entry.token isEqualToString:_token] && !entry.opened && !entry.closed) {
       entry.opened = YES;
-      [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId appName:appName scheme:scheme];
+      shouldEmit = YES;
     }
   } @finally {
     [runtimeLock unlock];
+  }
+  if (shouldEmit) {
+    [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId appName:appName scheme:scheme];
   }
 }
 
@@ -85,11 +89,13 @@ static void GraniteMicroFrontendRequireMainThread(void) {
         entry.isVisible != isVisible) {
       entry.isVisible = isVisible;
       shouldEmit = YES;
-      [GraniteMicroFrontendRuntimeHost emitSessionVisibilityChanged:_sessionId
-                                                          isVisible:isVisible];
     }
   } @finally {
     [runtimeLock unlock];
+  }
+  if (shouldEmit) {
+    [GraniteMicroFrontendRuntimeHost emitSessionVisibilityChanged:_sessionId
+                                                        isVisible:isVisible];
   }
   return shouldEmit;
 }
@@ -102,10 +108,12 @@ static void GraniteMicroFrontendRequireMainThread(void) {
     if ([entry.token isEqualToString:_token] && entry.opened && !entry.closed) {
       entry.closed = YES;
       shouldEmit = YES;
-      [GraniteMicroFrontendRuntimeHost emitCloseApp:_sessionId];
     }
   } @finally {
     [runtimeLock unlock];
+  }
+  if (shouldEmit) {
+    [GraniteMicroFrontendRuntimeHost emitCloseApp:_sessionId];
   }
   return shouldEmit;
 }
@@ -154,10 +162,10 @@ static void GraniteMicroFrontendRequireMainThread(void) {
 
 static char GraniteMicroFrontendViewControllerSessionBindingKey;
 
-+ (GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
-                                                               sessionId:(NSString *)sessionId
-                                                                 appName:(NSString *)appName
-                                                                  scheme:(NSString *)scheme {
++ (nullable GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
+                                                                        sessionId:(NSString *)sessionId
+                                                                          appName:(NSString *)appName
+                                                                           scheme:(NSString *)scheme {
   GraniteMicroFrontendRequireMainThread();
   NSParameterAssert(viewController != nil);
   NSParameterAssert(sessionId.length > 0);
@@ -172,6 +180,9 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 
   GraniteMicroFrontendSessionRegistration *registration =
       [GraniteMicroFrontendRuntimeHost registerSession:sessionId];
+  if (registration == nil) {
+    return nil;
+  }
   GraniteMicroFrontendViewControllerSessionBinding *binding =
       [[GraniteMicroFrontendViewControllerSessionBinding alloc] init];
   GraniteMicroFrontendSessionLifecycleObserverViewController *observer =
@@ -234,7 +245,12 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 }
 
 - (void)updateVisibility {
-  if (_invalidated) {
+  GraniteMicroFrontendRequireMainThread();
+  BOOL invalidated = NO;
+  @synchronized(self) {
+    invalidated = _invalidated;
+  }
+  if (invalidated) {
     return;
   }
   [_registration setVisible:(_viewAppeared && _applicationForeground)];
@@ -285,12 +301,12 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 
 @implementation GraniteMicroFrontendViewControllerSessionBinding
 
-+ (GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
-                                                               sessionId:(NSString *)sessionId
-                                                                 appName:(NSString *)appName
-                                                                  scheme:(NSString *)scheme {
++ (nullable GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
+                                                                        sessionId:(NSString *)sessionId
+                                                                          appName:(NSString *)appName
+                                                                           scheme:(NSString *)scheme {
   NSParameterAssert(NO);
-  return [[GraniteMicroFrontendViewControllerSessionBinding alloc] init];
+  return nil;
 }
 
 - (void)invalidate {
@@ -311,7 +327,7 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
   pendingEvents = [[NSMutableArray alloc] init];
 }
 
-+ (GraniteMicroFrontendSessionRegistration *)registerSession:(NSString *)sessionId {
++ (nullable GraniteMicroFrontendSessionRegistration *)registerSession:(NSString *)sessionId {
   NSParameterAssert(sessionId.length > 0);
 
   NSString *token = NSUUID.UUID.UUIDString;
@@ -321,11 +337,10 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
   [runtimeLock lock];
   if (sessions[sessionId] != nil) {
     [runtimeLock unlock];
-    @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                   reason:[NSString stringWithFormat:
-                                                       @"Session '%@' is already registered",
-                                                       sessionId]
-                                 userInfo:nil];
+    // Do not throw: Swift cannot catch NSException and a reuse race during
+    // VC teardown would crash the host. Callers must use unique sessionIds and
+    // invalidate the previous registration before reusing an id.
+    return nil;
   }
   sessions[sessionId] = entry;
   [runtimeLock unlock];

@@ -114,7 +114,9 @@ final class MainViewController: UIViewController {
 
 final class PortalHostViewController: UIViewController {
   private let hostName: String
-  private let portalHostView = PortalHostContainerView(frame: .zero)
+  // Defer Fabric host creation until after React has booted so feature-flag
+  // overrides are not locked by RCTViewComponentView init.
+  private let portalHostView = PortalHostContainerView(frame: .zero, deferredActivation: true)
 
   init(hostName: String) {
     self.hostName = hostName
@@ -142,9 +144,10 @@ final class PortalHostViewController: UIViewController {
 
     view = rootView
     portalHostView.setName(hostName)
+    portalHostView.activateIfNeeded()
   }
 
   deinit {
-    portalHostView.setName(nil)
+    portalHostView.invalidate()
   }
 }

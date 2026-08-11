@@ -128,7 +128,8 @@ final class NativeRouterViewController: UIViewController {
 
     isTransitioning = true
     toView.isHidden = false
-    let travelDistance = max(view.bounds.height, UIScreen.main.bounds.height)
+    let screenHeight = view.window?.windowScene?.screen.bounds.height ?? view.bounds.height
+    let travelDistance = max(view.bounds.height, screenHeight)
 
     switch direction {
     case .present:

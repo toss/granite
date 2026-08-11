@@ -13,6 +13,13 @@ NS_ASSUME_NONNULL_BEGIN
 @class PortalHostView;
 @class PortalView;
 
+/**
+ * Main-thread-only registry that joins Portal destinations to Portal views.
+ *
+ * Multiple hosts may share one name; resolve prefers the last registered host in
+ * the same window as the portal source, otherwise the last registered host that
+ * still has a window.
+ */
 @interface PortalRegistry : NSObject
 
 + (instancetype)sharedInstance;

@@ -9,6 +9,30 @@
 #import "PortalHostView.h"
 #import "PortalView.h"
 
+// NSPointerArray.compact is a documented no-op for sparse weak arrays unless a
+// NULL pointer is appended first (long-standing Foundation behavior / rdar).
+static void GranitePortalCompact(NSPointerArray *array)
+{
+  if (array == nil) {
+    return;
+  }
+  [array addPointer:NULL];
+  [array compact];
+}
+
+static NSArray *GranitePortalSnapshotNonNullPointers(NSPointerArray *array)
+{
+  GranitePortalCompact(array);
+  NSMutableArray *snapshot = [NSMutableArray arrayWithCapacity:array.count];
+  for (NSUInteger i = 0; i < array.count; i++) {
+    void *pointer = [array pointerAtIndex:i];
+    if (pointer != NULL) {
+      [snapshot addObject:(__bridge id)pointer];
+    }
+  }
+  return snapshot;
+}
+
 @interface PortalRegistry ()
 
 @property (nonatomic, strong) NSMutableDictionary<NSString *, NSPointerArray *> *hosts;
@@ -50,7 +74,7 @@
     self.hosts[name] = namedHosts;
   }
 
-  [namedHosts compact];
+  GranitePortalCompact(namedHosts);
   for (NSInteger index = (NSInteger)namedHosts.count - 1; index >= 0; index--) {
     PortalHostView *existingHost = (__bridge PortalHostView *)[namedHosts pointerAtIndex:index];
     if (existingHost == host) {
@@ -75,7 +99,7 @@
         [namedHosts removePointerAtIndex:index];
       }
     }
-    [namedHosts compact];
+    GranitePortalCompact(namedHosts);
     if (namedHosts.count == 0) {
       [self.hosts removeObjectForKey:name];
     }
@@ -90,13 +114,11 @@
     return;
   }
 
-  [portals compact];
-
-  for (NSUInteger i = 0; i < portals.count; i++) {
-    PortalView *portal = (__bridge PortalView *)[portals pointerAtIndex:i];
-    if (portal) {
-      [portal onHostChanged];
-    }
+  // Snapshot before notifying so a re-entrant register/unregister during
+  // onHostChanged cannot skip remaining subscribers.
+  NSArray *subscribers = GranitePortalSnapshotNonNullPointers(portals);
+  for (PortalView *portal in subscribers) {
+    [portal onHostChanged];
   }
 }
 
@@ -112,12 +134,14 @@
     return nil;
   }
 
-  [namedHosts compact];
+  GranitePortalCompact(namedHosts);
   if (namedHosts.count == 0) {
     [self.hosts removeObjectForKey:name];
     return nil;
   }
 
+  // Last registered host wins when multiple hosts share a name. Prefer the host
+  // in the same window as the portal source when available.
   UIWindow *sourceWindow = sourceView.window;
   if (sourceWindow) {
     for (NSInteger index = (NSInteger)namedHosts.count - 1; index >= 0; index--) {
@@ -148,13 +172,9 @@
     return;
   }
 
-  [portals compact];
-
-  for (NSUInteger i = 0; i < portals.count; i++) {
-    PortalView *portal = (__bridge PortalView *)[portals pointerAtIndex:i];
-    if (portal) {
-      [portal onHostLayoutChanged];
-    }
+  NSArray *subscribers = GranitePortalSnapshotNonNullPointers(portals);
+  for (PortalView *portal in subscribers) {
+    [portal onHostLayoutChanged];
   }
 }
 
@@ -170,6 +190,13 @@
     self.pendingPortals[hostName] = portals;
   }
 
+  GranitePortalCompact(portals);
+  for (NSInteger index = (NSInteger)portals.count - 1; index >= 0; index--) {
+    PortalView *existingPortal = (__bridge PortalView *)[portals pointerAtIndex:index];
+    if (existingPortal == portal) {
+      [portals removePointerAtIndex:index];
+    }
+  }
   [portals addPointer:(__bridge void *)portal];
 }
 
@@ -184,7 +211,6 @@
     return;
   }
 
-  // Remove the portal from the array
   for (NSUInteger i = 0; i < portals.count; i++) {
     PortalView *existingPortal = (__bridge PortalView *)[portals pointerAtIndex:i];
     if (existingPortal == portal) {
@@ -193,8 +219,7 @@
     }
   }
 
-  // Clean up if no more portals
-  [portals compact];
+  GranitePortalCompact(portals);
   if (portals.count == 0) {
     [self.pendingPortals removeObjectForKey:hostName];
   }

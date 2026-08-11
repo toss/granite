@@ -265,7 +265,7 @@ destination views in `com.teleport.host`.
 | API | Lifetime / behavior |
 | --- | --- |
 | `ActivitySessionBinding.bind(activity, sessionId, appName, scheme)` | Convenience binding for an `Activity`. Emits open, derives visibility from start/stop, and emits close on destroy. Retain it for the Activity lifetime. |
-| `GraniteMicroFrontendRuntimeHost.registerSession(sessionId)` | Register a custom native container and return a `GraniteMicroFrontendSessionRegistration`. |
+| `GraniteMicroFrontendRuntimeHost.registerSession(sessionId)` | Register a custom native container and return a `GraniteMicroFrontendSessionRegistration`. `sessionId` must be unique for every live destination; reuse only after the previous registration is closed/invalidated. |
 | `GraniteMicroFrontendSessionRegistration.openApp(appName, scheme)` | Emit `openApp` once. |
 | `GraniteMicroFrontendSessionRegistration.setVisible(isVisible)` | Emit a visibility event only when the value changes. |
 | `GraniteMicroFrontendSessionRegistration.closeApp()` | Emit `closeApp` once after open. |
@@ -374,9 +374,9 @@ Import public APIs from `GraniteMicroFrontendRuntime`.
 
 | API | Lifetime / behavior |
 | --- | --- |
-| `+[GraniteMicroFrontendViewControllerSessionBinding bindViewController:sessionId:appName:scheme:]` | Convenience binding for a `UIViewController`. Emits open and derives visibility from `viewWillAppear` / `viewWillDisappear` combined with app foreground and background transitions. Retain until teardown. |
+| `+[GraniteMicroFrontendViewControllerSessionBinding bindViewController:sessionId:appName:scheme:]` | Convenience binding for a `UIViewController`. Emits open and derives visibility from `viewWillAppear` / `viewWillDisappear` combined with app foreground and background transitions. Returns `nil` if `sessionId` is already registered. Retain until teardown. |
 | `-[GraniteMicroFrontendViewControllerSessionBinding invalidate]` | Emit close and detach lifecycle observation. |
-| `+[GraniteMicroFrontendRuntimeHost registerSession:]` | Register a custom container and return a session registration. |
+| `+[GraniteMicroFrontendRuntimeHost registerSession:]` | Register a custom container and return a session registration, or `nil` if `sessionId` is already registered. Use a unique id per destination and call `invalidate` before reuse. |
 | `-[GraniteMicroFrontendSessionRegistration openAppWithAppName:scheme:]` | Emit `openApp` once. |
 | `-[GraniteMicroFrontendSessionRegistration setVisible:]` | Emit visibility only when it changes. |
 | `-[GraniteMicroFrontendSessionRegistration closeApp]` | Emit `closeApp` once after open. |
@@ -403,19 +403,11 @@ import GraniteMicroFrontendRuntime
 import UIKit
 
 final class CartViewController: UIViewController {
-  private let sessionId: String
+  /// Create a new id for every push/present. Reusing an id before the previous
+  /// binding is invalidated fails registration.
+  private let sessionId = UUID().uuidString
   private var sessionBinding: GraniteMicroFrontendViewControllerSessionBinding?
   private var portalHostView: PortalHostContainerView!
-
-  init(sessionId: String) {
-    self.sessionId = sessionId
-    super.init(nibName: nil, bundle: nil)
-  }
-
-  @available(*, unavailable)
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -437,6 +429,11 @@ final class CartViewController: UIViewController {
 
   func reactRuntimeDidStart() {
     portalHostView.activateIfNeeded()
+  }
+
+  deinit {
+    sessionBinding?.invalidate()
+    portalHostView?.invalidate()
   }
 }
 ```
