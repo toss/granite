@@ -60,15 +60,6 @@ android {
     jvmTarget = '17'
   }
 
-  sourceSets {
-    main {
-      java.srcDirs += [
-        'generated/java',
-        'generated/jni'
-      ]
-    }
-  }
-
   testOptions {
     unitTests.returnDefaultValues = true
   }
