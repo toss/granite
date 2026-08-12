@@ -10,3 +10,4 @@
 #import <React/RCTRootView.h>
 #import <React/RCTBridgeDelegate.h>
 #import "GraniteDefaultModuleProvider.h"
+#import "GraniteNativeFactoryDelegate.h"
