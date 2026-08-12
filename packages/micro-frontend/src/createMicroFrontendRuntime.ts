@@ -7,12 +7,14 @@ import type { MicroFrontendAdapter, MicroFrontendRuntimeApi } from './types';
 
 export interface CreateMicroFrontendRuntimeOptions {
   readonly adapter: MicroFrontendAdapter;
+  readonly onPreloadError?: (error: unknown) => void;
 }
 
 export function createMicroFrontendRuntime(options: CreateMicroFrontendRuntimeOptions): MicroFrontendRuntimeApi {
   return createMicroFrontendRuntimeWithDependencies({
     adapter: options.adapter,
     nativeRuntime: NativeGraniteMicroFrontendRuntime,
+    onPreloadError: options.onPreloadError ?? (() => undefined),
     parseEvent: parseNativeRuntimeEvent,
     registry: microFrontendModuleRegistry,
     removePendingHostComponentRoutes,

@@ -138,6 +138,9 @@ adapter.loadBundle({ appName: 'cart' })
 Concurrent preload/import calls for one app share an evaluation. A successful
 evaluation remains cached until its last native session closes. Failed
 evaluation removes the partial container so a later request can retry.
+Native `preloadApp` events invoke `preloadApp()` inside the runtime and are not
+forwarded to session listeners. `onPreloadError` is optional and lets the host
+route best-effort native preload failures to its observability provider.
 
 The public runtime API is:
 
@@ -146,7 +149,7 @@ The public runtime API is:
 | `preloadApp(appName)` | Load and evaluate one app without importing an exposed module. |
 | `importApp(request)` | Ensure the app is evaluated and import `appName/exposedModule`. |
 | `evaluateScript(filePath)` | Evaluate an already-local bundle in the retained runtime. |
-| `onEvent(listener)` | Subscribe to native preload, open, close, and visibility events. |
+| `onEvent(listener)` | Subscribe to native open, close, and visibility events. |
 
 ## Session rendering
 

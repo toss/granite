@@ -5,7 +5,7 @@ import {
   resetPendingHostComponentStoreForTest,
   resolvePendingHostComponent,
 } from '../host/pendingHostComponentStore';
-import type { MicroFrontendRuntimeEvent } from '../types';
+import type { MicroFrontendSessionEvent } from '../types';
 import {
   createMicroFrontendRuntimeWithDependencies,
   type NativeMicroFrontendRuntime,
@@ -37,9 +37,11 @@ function createRuntimeFixture() {
       return { remove: () => listeners.delete(listener) };
     },
   };
+  const onPreloadError = vi.fn<(error: unknown) => void>();
   const runtime = createMicroFrontendRuntimeWithDependencies({
     adapter,
     nativeRuntime,
+    onPreloadError,
     registry: microFrontendModuleRegistry,
     removePendingHostComponentRoutes,
     parseEvent: parseNativeRuntimeEvent,
@@ -51,6 +53,7 @@ function createRuntimeFixture() {
       listeners.forEach((listener) => listener(event));
     },
     nativeRuntime,
+    onPreloadError,
     runtime,
   };
 }
@@ -112,7 +115,7 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
   it('starts event delivery after registering the listener and forwards parsed native events', () => {
     // Given
     const fixture = createRuntimeFixture();
-    const listener = vi.fn<(event: MicroFrontendRuntimeEvent) => void>();
+    const listener = vi.fn<(event: MicroFrontendSessionEvent) => void>();
     const subscription = fixture.runtime.onEvent(listener);
     const event = {
       name: 'openApp',
@@ -132,6 +135,46 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     expect(listener).toHaveBeenCalledOnce();
     expect(listener).toHaveBeenCalledWith(event);
     expect(fixture.nativeRuntime.startEventDelivery).toHaveBeenCalledOnce();
+  });
+
+  it('handles native preload requests without forwarding them to session listeners', async () => {
+    // Given
+    const fixture = createRuntimeFixture();
+    const listener = vi.fn<(event: MicroFrontendSessionEvent) => void>();
+    fixture.runtime.onEvent(listener);
+    vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(async () => {
+      createContainer('cart');
+    });
+
+    // When
+    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
+
+    // Then
+    await vi.waitFor(() => {
+      expect(fixture.adapter.loadBundle).toHaveBeenCalledWith({ appName: 'cart' });
+    });
+    expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledWith({
+      filePath: '/bundles/cart.hbc',
+    });
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it('reports native preload failures without forwarding them to session listeners', async () => {
+    // Given
+    const fixture = createRuntimeFixture();
+    const listener = vi.fn<(event: MicroFrontendSessionEvent) => void>();
+    fixture.runtime.onEvent(listener);
+    const preloadError = new Error('bundle unavailable');
+    fixture.adapter.loadBundle.mockRejectedValueOnce(preloadError);
+
+    // When
+    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
+
+    // Then
+    await vi.waitFor(() => {
+      expect(fixture.onPreloadError).toHaveBeenCalledWith(preloadError);
+    });
+    expect(listener).not.toHaveBeenCalled();
   });
 
   it('releases app resources after its last native session closes', async () => {

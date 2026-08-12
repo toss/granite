@@ -44,6 +44,7 @@ export type {
   MicroFrontendRuntimeApi,
   MicroFrontendRuntimeEvent,
   MicroFrontendRuntimeEventSubscription,
+  MicroFrontendSessionEvent,
 } from './types';
 export {
   AppContainerNotFoundError,

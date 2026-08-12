@@ -41,6 +41,8 @@ export type MicroFrontendRuntimeEvent =
       };
     };
 
+export type MicroFrontendSessionEvent = Exclude<MicroFrontendRuntimeEvent, { readonly name: 'preloadApp' }>;
+
 export interface MicroFrontendRuntimeEventSubscription {
   readonly remove: () => void;
 }
@@ -49,5 +51,5 @@ export interface MicroFrontendRuntimeApi {
   readonly evaluateScript: (filePath: string) => Promise<void>;
   readonly preloadApp: (appName: string) => Promise<void>;
   readonly importApp: <TModule>(request: AppRequest) => Promise<TModule>;
-  readonly onEvent: (listener: (event: MicroFrontendRuntimeEvent) => void) => MicroFrontendRuntimeEventSubscription;
+  readonly onEvent: (listener: (event: MicroFrontendSessionEvent) => void) => MicroFrontendRuntimeEventSubscription;
 }

@@ -4,6 +4,7 @@ import type {
   MicroFrontendRuntimeApi,
   MicroFrontendRuntimeEvent,
   MicroFrontendRuntimeEventSubscription,
+  MicroFrontendSessionEvent,
 } from '../types';
 import { AppContainerNotFoundError, InvalidAppNameError } from './errors';
 import { parseAppRequest } from './parseAppRequest';
@@ -35,6 +36,7 @@ export interface MicroFrontendModuleRegistry {
 export interface CreateMicroFrontendRuntimeDependencies {
   readonly adapter: MicroFrontendAdapter;
   readonly nativeRuntime: NativeMicroFrontendRuntime;
+  readonly onPreloadError: (error: unknown) => void;
   readonly registry: MicroFrontendModuleRegistry;
   readonly removePendingHostComponentRoutes: (appName: string) => void;
   readonly parseEvent: (event: NativeMicroFrontendRuntimeEvent) => MicroFrontendRuntimeEvent;
@@ -82,7 +84,7 @@ export function createMicroFrontendRuntimeWithDependencies(
     }
   }
 
-  function handleAppLifecycle(event: MicroFrontendRuntimeEvent) {
+  function handleAppLifecycle(event: MicroFrontendSessionEvent) {
     switch (event.name) {
       case 'openApp': {
         const sessions = appSessions.get(event.params.appName);
@@ -106,7 +108,6 @@ export function createMicroFrontendRuntimeWithDependencies(
         }
         return;
       }
-      case 'preloadApp':
       case 'sessionVisibilityChanged':
         return;
       default: {
@@ -127,8 +128,21 @@ export function createMicroFrontendRuntimeWithDependencies(
     onEvent(listener) {
       const subscription = dependencies.nativeRuntime.onEvent((event) => {
         const parsedEvent = dependencies.parseEvent(event);
-        handleAppLifecycle(parsedEvent);
-        listener(parsedEvent);
+        switch (parsedEvent.name) {
+          case 'preloadApp':
+            void preloadApp(parsedEvent.params.appName).catch(dependencies.onPreloadError);
+            return;
+          case 'openApp':
+          case 'closeApp':
+          case 'sessionVisibilityChanged':
+            handleAppLifecycle(parsedEvent);
+            listener(parsedEvent);
+            return;
+          default: {
+            const exhaustiveEvent: never = parsedEvent;
+            return exhaustiveEvent;
+          }
+        }
       });
       dependencies.nativeRuntime.startEventDelivery();
       return subscription;
