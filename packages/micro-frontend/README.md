@@ -158,15 +158,30 @@ destination with `MicroFrontendSessionProvider` so native presentation state
 joins Granite's existing visibility context.
 
 ```tsx
-<Portal hostName={session.sessionId}>
-  <MicroFrontendSessionProvider
-    sessionId={session.sessionId}
-    presentationVisibility={session.isVisible}
-  >
-    <App scheme={session.scheme} />
-  </MicroFrontendSessionProvider>
-</Portal>
+const sessions = useMicroFrontendSessions(runtime);
+
+function SessionRoot({ session }: { readonly session: MicroFrontendSessionState }) {
+  const App = useMemo(
+    () => lazy(() => runtime.importApp(`${session.appName}/App`)),
+    [session.appName]
+  );
+
+  return (
+    <Portal hostName={session.sessionId}>
+      <MicroFrontendSessionProvider
+        sessionId={session.sessionId}
+        presentationVisibility={session.isVisible}
+      >
+        <App scheme={session.scheme} />
+      </MicroFrontendSessionProvider>
+    </Portal>
+  );
+}
 ```
+
+`useMicroFrontendSessions(runtime)` owns the fixed React subscription and folds
+native open, close, and visibility events into session descriptors. The host
+continues to own module selection and the rendered Portal tree.
 
 The provider exposes the native session identity and combines
 `presentationVisibility` with Granite's existing `VisibilityChangedProvider`.
