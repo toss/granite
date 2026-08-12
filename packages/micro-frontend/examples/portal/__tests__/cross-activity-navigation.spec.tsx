@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
-import { BackHandler, DeviceEventEmitter, Linking } from "react-native";
+import { BackHandler, Linking } from "react-native";
 import CrossActivityController from "../src/screens/CrossActivity/Controller";
 
 describe("cross-Activity navigation", () => {
@@ -84,10 +84,17 @@ describe("cross-Activity navigation", () => {
     fireEvent.press(screen.getByTestId("wallet_open_transfer"));
 
     act(() => {
-      DeviceEventEmitter.emit(
-        "teleportActivityFocusChanged",
-        "cross-activity-secondary",
-      );
+      globalThis.emitMicroFrontendSessions([
+        {
+          appName: "cross-activity-secondary",
+          sessionId: "cross-activity-secondary",
+          scheme: "teleport-portal://cross-activity-secondary",
+          isVisible: true,
+        },
+      ]);
+    });
+
+    act(() => {
       activityBackHandler?.();
     });
 

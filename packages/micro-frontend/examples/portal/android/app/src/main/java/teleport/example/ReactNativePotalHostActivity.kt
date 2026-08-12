@@ -15,6 +15,7 @@ import com.facebook.react.modules.core.DefaultHardwareBackBtnHandler
 import com.facebook.react.uimanager.ThemedReactContext
 import com.teleport.host.PortalHostView
 import com.teleport.host.PortalReactRootView
+import run.granite.microfrontend.ActivitySessionBinding
 
 class ReactNativePotalHostActivity :
     AppCompatActivity(),
@@ -48,9 +49,17 @@ class ReactNativePotalHostActivity :
       }
 
   private var portalHostView: PortalHostView? = null
+  private lateinit var sessionBinding: ActivitySessionBinding
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    sessionBinding =
+        ActivitySessionBinding.bind(
+            activity = this,
+            sessionId = portalHostName,
+            appName = portalHostName,
+            scheme = requireNotNull(intent.data).toString(),
+        )
     onBackPressedDispatcher.addCallback(this, reactBackPressedCallback)
     setContentView(
         FrameLayout(this).apply {
@@ -65,18 +74,11 @@ class ReactNativePotalHostActivity :
   override fun onResume() {
     super.onResume()
     reactHost.onHostResume(this, this)
-    emitActivityFocus(portalHostName)
   }
 
   override fun onPause() {
-    emitActivityFocus(null)
     reactHost.onHostPause(this)
     super.onPause()
-  }
-
-  override fun onWindowFocusChanged(hasFocus: Boolean) {
-    super.onWindowFocusChanged(hasFocus)
-    emitActivityFocus(if (hasFocus) portalHostName else null)
   }
 
   override fun onDestroy() {
@@ -130,20 +132,9 @@ class ReactNativePotalHostActivity :
         ),
     )
     setContentView(activityRootView)
-    if (hasWindowFocus()) {
-      emitActivityFocus(portalHostName)
-    }
-  }
-
-  private fun emitActivityFocus(hostName: String?) {
-    reactHost.currentReactContext?.emitDeviceEvent(
-        ACTIVITY_FOCUS_EVENT,
-        hostName,
-    )
   }
 
   private companion object {
-    const val ACTIVITY_FOCUS_EVENT = "teleportActivityFocusChanged"
     const val CONTROLLER_MODULE_NAME = "TeleportController"
   }
 }

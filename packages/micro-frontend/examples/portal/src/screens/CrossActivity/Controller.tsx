@@ -1,11 +1,10 @@
-import { Portal } from "@granite-js/micro-frontend";
-import { useEffect, useRef } from "react";
 import {
-  BackHandler,
-  DeviceEventEmitter,
-  StyleSheet,
-  View,
-} from "react-native";
+  createMicroFrontendRuntime,
+  Portal,
+  useMicroFrontendSessions,
+} from "@granite-js/micro-frontend";
+import { useEffect } from "react";
+import { BackHandler, StyleSheet, View } from "react-native";
 import {
   STORE_HOST_NAME,
   STORE_NAVIGATION_REF,
@@ -17,28 +16,32 @@ import {
   WalletService,
 } from "./WalletService";
 
-const ACTIVITY_FOCUS_EVENT = "teleportActivityFocusChanged";
+// Both services ship inside this example's own bundle, so no app bundle is ever fetched. The
+// adapter exists because the runtime requires one; reaching it means something asked to preload.
+const runtime = createMicroFrontendRuntime({
+  adapter: {
+    loadBundle: ({ appName }) =>
+      Promise.reject(
+        new Error(
+          `The portal example does not load remote bundles (requested "${appName}")`,
+        ),
+      ),
+  },
+});
 
 export default function CrossActivityController() {
-  const activeHostNameRef = useRef<string | null>(null);
+  const sessions = useMicroFrontendSessions(runtime);
+  const activeHostName =
+    sessions.find(({ isVisible }) => isVisible)?.sessionId ?? null;
 
   useEffect(() => {
-    const focusSubscription = DeviceEventEmitter.addListener(
-      ACTIVITY_FOCUS_EVENT,
-      (hostName: unknown) => {
-        activeHostNameRef.current =
-          hostName === STORE_HOST_NAME || hostName === WALLET_HOST_NAME
-            ? hostName
-            : null;
-      },
-    );
     const backSubscription = BackHandler.addEventListener(
       "hardwareBackPress",
       () => {
         const navigationRef =
-          activeHostNameRef.current === STORE_HOST_NAME
+          activeHostName === STORE_HOST_NAME
             ? STORE_NAVIGATION_REF
-            : activeHostNameRef.current === WALLET_HOST_NAME
+            : activeHostName === WALLET_HOST_NAME
               ? WALLET_NAVIGATION_REF
               : null;
 
@@ -56,10 +59,9 @@ export default function CrossActivityController() {
     );
 
     return () => {
-      focusSubscription.remove();
       backSubscription.remove();
     };
-  }, []);
+  }, [activeHostName]);
 
   return (
     <View style={styles.controllerRoot}>
