@@ -49,17 +49,23 @@ describe("Android Activity contract", () => {
     expect(portalHostActivity).not.toContain("cross-activity-");
   });
 
-  it("uses the library-owned detached Fabric root with an app-selected module", () => {
+  // What PortalReactRootView promises about itself — Fabric rendering, the host's surface id, the
+  // host's JS module name — is asserted against the compiled class by
+  // ../../../android/src/test/java/com/teleport/host/PortalReactRootViewContractTest.kt. Matching
+  // those substrings from here proved nothing about whether the library compiled or behaved.
+  //
+  // Two checks stay. The first is app-side wiring: only this example knows it hands the library its
+  // own controller name. The second is about the library's source *text* rather than its behaviour —
+  // that name must not appear anywhere in it, comments and imports included, which no compiled
+  // assertion can see. That second check is also why this file still resolves a path into the
+  // library, and that path constant is what actually had to change when the package moved from
+  // packages/portal to packages/micro-frontend.
+  it("wires the library root view and keeps this app's controller name out of the library", () => {
     const portalHostActivity = readFileSync(portalHostActivityPath, "utf8");
     const portalReactRootView = readFileSync(portalReactRootViewPath, "utf8");
 
     expect(portalHostActivity).toContain("PortalReactRootView");
     expect(portalHostActivity).toContain("CONTROLLER_MODULE_NAME");
-    expect(portalReactRootView).toContain("class PortalReactRootView");
-    expect(portalReactRootView).toContain("private val moduleName: String");
-    expect(portalReactRootView).toContain(
-      "override fun getJSModuleName(): String = moduleName",
-    );
     expect(portalReactRootView).not.toContain("TeleportController");
   });
 });
