@@ -32,7 +32,10 @@ android {
 
     externalNativeBuild {
       cmake {
-        arguments '-DANDROID_STL=c++_shared'
+        // ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES is what aligns the AAR's .so to a 16 KB page
+        // boundary. React Native passes it for the app build; a library build has to pass it
+        // itself, otherwise the .so this module ships stays 4 KB aligned.
+        arguments '-DANDROID_STL=c++_shared', '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
       }
     }
   }
