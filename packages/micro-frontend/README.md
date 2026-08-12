@@ -302,6 +302,21 @@ destination views in `com.teleport.host`.
 unregisters while detached. `nextInsertionIndexForChildAt()` is renderer
 plumbing, not an application integration API.
 
+#### Props the Portal components do not apply
+
+`Portal` and the Portal host component are renderer plumbing, not styleable
+views. Their TypeScript props extend `ViewProps` because React Native's codegen
+only accepts `ViewProps` as a base, so the type advertises more than the native
+managers apply. The following are accepted by the type checker and silently
+ignored on Android: `pointerEvents` (the native manager pins it to `box-none`
+so touches reach the portalled tree), `hitSlop`, `focusable`, `accessible`,
+`nativeBackgroundAndroid`, `nativeForegroundAndroid`, `borderStyle`,
+`overflow`, `backfaceVisibility`, `collapsable`, `collapsableChildren`,
+`needsOffscreenAlphaCompositing`, `background*` shorthands, `hasTVPreferredFocus`
+and the `nextFocus*` family.
+
+Wrap the Portal in your own `<View>` when you need any of these.
+
 ### Activity example
 
 ```kotlin
