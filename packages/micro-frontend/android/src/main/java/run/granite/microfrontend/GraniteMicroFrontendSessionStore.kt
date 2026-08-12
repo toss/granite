@@ -1,5 +1,7 @@
 package run.granite.microfrontend
 
+import com.facebook.common.logging.FLog
+
 internal class GraniteMicroFrontendSessionStore(
     private val emit: (GraniteMicroFrontendEvent) -> Unit,
 ) {
@@ -9,10 +11,12 @@ internal class GraniteMicroFrontendSessionStore(
     fun registerSession(sessionId: String): GraniteMicroFrontendSessionRegistration {
         require(sessionId.isNotBlank()) { "sessionId must not be blank" }
         val token = java.util.UUID.randomUUID().toString()
-        synchronized(lock) {
+        val liveSessions = synchronized(lock) {
             check(sessions[sessionId] == null) { "Session '$sessionId' is already registered" }
             sessions[sessionId] = SessionEntry(token)
+            sessions.size
         }
+        FLog.d(TAG, "Registered session '%s' (%d live)", sessionId, liveSessions)
         return GraniteMicroFrontendSessionRegistration(this, sessionId, token)
     }
 
@@ -55,12 +59,33 @@ internal class GraniteMicroFrontendSessionStore(
     }
 
     fun unregisterSession(sessionId: String, token: String) {
-        synchronized(lock) {
-            if (sessions[sessionId]?.token == token) {
-                sessions.remove(sessionId)
+        val removed = synchronized(lock) {
+            val entry = sessions[sessionId]
+            when {
+                entry == null -> Outcome.UNKNOWN
+                entry.token != token -> Outcome.STALE_TOKEN
+                else -> {
+                    sessions.remove(sessionId)
+                    Outcome.REMOVED
+                }
             }
         }
+        // Both misses are silent no-ops today. They are worth a warning because each points at a
+        // different lifecycle bug and neither leaves any other trace.
+        when (removed) {
+            Outcome.REMOVED -> FLog.d(TAG, "Unregistered session '%s'", sessionId)
+            // Nothing to remove: this registration was already released, or was never made here.
+            Outcome.UNKNOWN ->
+                FLog.w(TAG, "Ignoring unregister for unknown session '%s'", sessionId)
+            // An entry under this id exists but belongs to a different registration, so whoever
+            // owns it never released it. The id stays occupied and registerSession() will keep
+            // throwing for it.
+            Outcome.STALE_TOKEN ->
+                FLog.w(TAG, "Ignoring unregister for session '%s': token belongs to another registration", sessionId)
+        }
     }
+
+    private enum class Outcome { REMOVED, UNKNOWN, STALE_TOKEN }
 
     private data class SessionEntry(
         val token: String,
@@ -68,6 +93,10 @@ internal class GraniteMicroFrontendSessionStore(
         var isVisible: Boolean = false,
         var closed: Boolean = false,
     )
+
+    private companion object {
+        private const val TAG = "GraniteMicroFrontendRuntime"
+    }
 }
 
 class GraniteMicroFrontendSessionRegistration internal constructor(

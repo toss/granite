@@ -3,6 +3,7 @@ package com.teleport.portal
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import com.facebook.common.logging.FLog
 import com.facebook.react.uimanager.StateWrapper
 import com.facebook.react.views.view.ReactViewGroup
 import com.teleport.global.PortalRegistry
@@ -43,7 +44,18 @@ class PortalView(
 
     hostName = name
 
-    val target: ViewGroup = name?.let { PortalRegistry.resolveHost(it, this) } ?: this
+    val resolved = name?.let { PortalRegistry.resolveHost(it, this) }
+    if (name != null && resolved == null) {
+      // Rendering in place is a legitimate state — the host may simply not have mounted yet — but
+      // it looks identical to a typo in hostName, and nothing else in this module says which one
+      // happened. Logged here rather than in resolveHost because that runs on every layout pass.
+      FLog.w(
+        TAG,
+        "Portal \"%s\" resolved no attached host; its children stay in the source tree until one registers",
+        name,
+      )
+    }
+    val target: ViewGroup = resolved ?: this
 
     if (target is PortalHostView) {
       for (i in children.indices) {
@@ -93,6 +105,12 @@ class PortalView(
         return
       }
       val list = detachOwnChildren()
+      FLog.w(
+        TAG,
+        "Portal \"%s\" lost its host; %d child view(s) returned to the source tree",
+        hostName,
+        list.size,
+      )
       // isTeleported is now false, so super.addView and addView are equivalent;
       // use super to be explicit that this is a physical re-attach.
       for (i in list.indices) {
@@ -284,4 +302,8 @@ class PortalView(
     // When teleported, do nothing—children are handled by the host's accessibility tree
   }
   // endregion
+
+  private companion object {
+    private const val TAG = "GraniteMicroFrontendPortal"
+  }
 }
