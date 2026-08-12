@@ -4,10 +4,16 @@ import com.facebook.common.logging.FLog
 
 internal interface GraniteMicroFrontendRuntimeEventTarget {
     /**
-     * Hands [event] to the runtime. Returning `true` means the target accepted delivery, not that
-     * delivery happened: the target must invoke [onDelivered] once the event actually reached
-     * JavaScript. An accepted event that is never acknowledged stays queued and is redelivered to
-     * the next runtime.
+     * Hands [event] to the runtime. Returning `true` means the target accepted the event, not that
+     * delivery happened: the target must invoke [onDelivered] once it has handed the event to the
+     * runtime's event emitter. An accepted event that is never acknowledged stays queued and is
+     * redelivered to the next runtime.
+     *
+     * [onDelivered] does not prove that JavaScript observed the event. The emitter dispatches to
+     * whatever listeners are registered at that moment and schedules each one on a later tick, so
+     * an event acknowledged while nothing is subscribed is dropped from the queue without anyone
+     * seeing it. The queue covers the gap between runtimes, not the gap between a live runtime and
+     * a subscribed listener.
      */
     fun emit(event: GraniteMicroFrontendEvent, onDelivered: () -> Unit): Boolean
 }
