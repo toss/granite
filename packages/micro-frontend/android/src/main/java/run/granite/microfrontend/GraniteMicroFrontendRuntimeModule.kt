@@ -43,9 +43,10 @@ class GraniteMicroFrontendRuntimeModule(
         GraniteMicroFrontendRuntimeHost.startEventDelivery(this)
     }
 
-    override fun emit(event: GraniteMicroFrontendEvent): Boolean =
+    override fun emit(event: GraniteMicroFrontendEvent, onDelivered: () -> Unit): Boolean =
         reactApplicationContext.runOnJSQueueThread {
             emitOnEvent(event.toWritableMap())
+            onDelivered()
         }
 
     private companion object {

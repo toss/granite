@@ -48,12 +48,13 @@ class GraniteMicroFrontendRuntimeEventRouterTest {
         val continuePendingDelivery = CountDownLatch(1)
         val router = GraniteMicroFrontendRuntimeEventRouter()
         val target = object : GraniteMicroFrontendRuntimeEventTarget {
-            override fun emit(event: GraniteMicroFrontendEvent): Boolean {
+            override fun emit(event: GraniteMicroFrontendEvent, onDelivered: () -> Unit): Boolean {
                 if (event is GraniteMicroFrontendEvent.OpenApp) {
                     pendingDeliveryStarted.countDown()
                     assertTrue(continuePendingDelivery.await(5, TimeUnit.SECONDS))
                 }
                 events.add(event)
+                onDelivered()
                 return true
             }
         }
@@ -84,12 +85,13 @@ class GraniteMicroFrontendRuntimeEventRouterTest {
         val close = GraniteMicroFrontendEvent.CloseApp("session-1")
         var shouldFail = true
         val target = object : GraniteMicroFrontendRuntimeEventTarget {
-            override fun emit(event: GraniteMicroFrontendEvent): Boolean {
+            override fun emit(event: GraniteMicroFrontendEvent, onDelivered: () -> Unit): Boolean {
                 if (shouldFail) {
                     shouldFail = false
                     throw IllegalStateException("delivery failed")
                 }
                 events.add(event)
+                onDelivered()
                 return true
             }
         }
@@ -110,16 +112,18 @@ class GraniteMicroFrontendRuntimeEventRouterTest {
         val continueFirstDelivery = CountDownLatch(1)
         val router = GraniteMicroFrontendRuntimeEventRouter()
         val firstTarget = object : GraniteMicroFrontendRuntimeEventTarget {
-            override fun emit(event: GraniteMicroFrontendEvent): Boolean {
+            override fun emit(event: GraniteMicroFrontendEvent, onDelivered: () -> Unit): Boolean {
                 firstDeliveryStarted.countDown()
                 assertTrue(continueFirstDelivery.await(5, TimeUnit.SECONDS))
                 firstEvents.add(event)
+                onDelivered()
                 return true
             }
         }
         val secondTarget = object : GraniteMicroFrontendRuntimeEventTarget {
-            override fun emit(event: GraniteMicroFrontendEvent): Boolean {
+            override fun emit(event: GraniteMicroFrontendEvent, onDelivered: () -> Unit): Boolean {
                 secondEvents.add(event)
+                onDelivered()
                 return true
             }
         }
@@ -147,7 +151,7 @@ class GraniteMicroFrontendRuntimeEventRouterTest {
         val events = mutableListOf<GraniteMicroFrontendEvent>()
         val router = GraniteMicroFrontendRuntimeEventRouter()
         val unavailableRuntime = object : GraniteMicroFrontendRuntimeEventTarget {
-            override fun emit(event: GraniteMicroFrontendEvent): Boolean = false
+            override fun emit(event: GraniteMicroFrontendEvent, onDelivered: () -> Unit): Boolean = false
         }
         val replacementRuntime = RecordingEventTarget()
         val open = GraniteMicroFrontendEvent.OpenApp("session-1", "shopping", "granite://shopping")
@@ -161,13 +165,52 @@ class GraniteMicroFrontendRuntimeEventRouterTest {
 
         assertEquals(listOf(open), replacementRuntime.events)
     }
+
+    @Test
+    fun `event accepted but never acknowledged is redelivered to the replacement runtime`() {
+        val acceptedEvents = mutableListOf<GraniteMicroFrontendEvent>()
+        val router = GraniteMicroFrontendRuntimeEventRouter()
+        val destroyedRuntime = object : GraniteMicroFrontendRuntimeEventTarget {
+            override fun emit(event: GraniteMicroFrontendEvent, onDelivered: () -> Unit): Boolean {
+                acceptedEvents.add(event)
+                return true
+            }
+        }
+        val replacementRuntime = RecordingEventTarget()
+        val open = GraniteMicroFrontendEvent.OpenApp("session-1", "shopping", "granite://shopping")
+        router.attach(destroyedRuntime)
+        router.startEventDelivery(destroyedRuntime)
+
+        router.emit(open)
+        router.detach(destroyedRuntime)
+        router.attach(replacementRuntime)
+        router.startEventDelivery(replacementRuntime)
+
+        assertEquals(listOf(open), acceptedEvents)
+        assertEquals(listOf(open), replacementRuntime.events)
+    }
+
+    @Test
+    fun `events beyond the pending limit are dropped while no runtime consumes them`() {
+        val router = GraniteMicroFrontendRuntimeEventRouter()
+        val runtime = RecordingEventTarget()
+        val limit = GraniteMicroFrontendRuntimeEventRouter.MAX_PENDING_EVENTS
+        val events = (1..limit + 8).map { GraniteMicroFrontendEvent.PreloadApp("app-$it") }
+
+        events.forEach(router::emit)
+        router.attach(runtime)
+        router.startEventDelivery(runtime)
+
+        assertEquals(events.take(limit), runtime.events)
+    }
 }
 
 private class RecordingEventTarget : GraniteMicroFrontendRuntimeEventTarget {
     val events = mutableListOf<GraniteMicroFrontendEvent>()
 
-    override fun emit(event: GraniteMicroFrontendEvent): Boolean {
+    override fun emit(event: GraniteMicroFrontendEvent, onDelivered: () -> Unit): Boolean {
         events.add(event)
+        onDelivered()
         return true
     }
 }

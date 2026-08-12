@@ -1,7 +1,15 @@
 package run.granite.microfrontend
 
+import com.facebook.common.logging.FLog
+
 internal interface GraniteMicroFrontendRuntimeEventTarget {
-    fun emit(event: GraniteMicroFrontendEvent): Boolean
+    /**
+     * Hands [event] to the runtime. Returning `true` means the target accepted delivery, not that
+     * delivery happened: the target must invoke [onDelivered] once the event actually reached
+     * JavaScript. An accepted event that is never acknowledged stays queued and is redelivered to
+     * the next runtime.
+     */
+    fun emit(event: GraniteMicroFrontendEvent, onDelivered: () -> Unit): Boolean
 }
 
 internal class GraniteMicroFrontendRuntimeEventRouter {
@@ -10,6 +18,8 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
     private val attachedTargets = mutableSetOf<GraniteMicroFrontendRuntimeEventTarget>()
     private var activeTarget: GraniteMicroFrontendRuntimeEventTarget? = null
     private var isDelivering = false
+    private var inFlight: Delivery? = null
+    private var didLoseActiveTarget = false
 
     fun attach(target: GraniteMicroFrontendRuntimeEventTarget) {
         synchronized(lock) {
@@ -23,6 +33,14 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
             if (activeTarget != null && activeTarget !== target) {
                 return
             }
+            if (didLoseActiveTarget) {
+                didLoseActiveTarget = false
+                FLog.w(
+                    TAG,
+                    "Runtime replaced while %d event(s) were pending; session state is redelivered from the queue",
+                    pendingEvents.size,
+                )
+            }
             activeTarget = target
             startDrainIfNeeded()
         }
@@ -33,6 +51,15 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
 
     fun emit(event: GraniteMicroFrontendEvent) {
         val shouldDrain = synchronized(lock) {
+            if (pendingEvents.size >= MAX_PENDING_EVENTS) {
+                FLog.w(
+                    TAG,
+                    "Dropping %s: %d event(s) already pending with no runtime consuming them",
+                    event::class.java.simpleName,
+                    pendingEvents.size,
+                )
+                return
+            }
             pendingEvents.addLast(event)
             activeTarget ?: return
             if (!startDrainIfNeeded()) {
@@ -50,6 +77,12 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
             attachedTargets.remove(target)
             if (activeTarget === target) {
                 activeTarget = null
+                didLoseActiveTarget = true
+            }
+            val delivery = inFlight
+            if (delivery != null && delivery.target === target && !delivery.isLoopOwned) {
+                inFlight = null
+                isDelivering = false
             }
         }
     }
@@ -64,32 +97,23 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
 
     private fun drain() {
         while (true) {
-            val (target, event) = synchronized(lock) {
+            val delivery = synchronized(lock) {
                 val target = activeTarget
                 if (target == null || pendingEvents.isEmpty()) {
                     isDelivering = false
+                    inFlight = null
                     return
                 }
-                target to pendingEvents.first()
+                Delivery(target, pendingEvents.first()).also { inFlight = it }
             }
-            try {
-                if (!target.emit(event)) {
-                    val shouldResumeWithReplacement = synchronized(lock) {
-                        isDelivering = false
-                        activeTarget != null && activeTarget !== target && startDrainIfNeeded()
-                    }
-                    if (shouldResumeWithReplacement) {
-                        drain()
-                    }
-                    return
-                }
-                synchronized(lock) {
-                    pendingEvents.removeFirst()
-                }
+            val accepted = try {
+                delivery.target.emit(delivery.event) { acknowledge(delivery) }
             } catch (error: Throwable) {
                 val shouldResumeWithReplacement = synchronized(lock) {
+                    delivery.isLoopOwned = false
+                    inFlight = null
                     isDelivering = false
-                    activeTarget != null && activeTarget !== target && startDrainIfNeeded()
+                    activeTarget != null && activeTarget !== delivery.target && startDrainIfNeeded()
                 }
                 if (shouldResumeWithReplacement) {
                     try {
@@ -100,6 +124,57 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
                 }
                 throw error
             }
+            synchronized(lock) {
+                delivery.isLoopOwned = false
+                if (!accepted) {
+                    inFlight = null
+                    isDelivering = false
+                    val shouldResumeWithReplacement =
+                        activeTarget != null && activeTarget !== delivery.target && startDrainIfNeeded()
+                    if (!shouldResumeWithReplacement) {
+                        return
+                    }
+                } else if (!delivery.isAcknowledged) {
+                    // Delivery is in flight. acknowledge() resumes the drain once it completes.
+                    return
+                } else {
+                    inFlight = null
+                }
+            }
         }
+    }
+
+    private fun acknowledge(delivery: Delivery) {
+        val shouldDrain = synchronized(lock) {
+            if (delivery.isAcknowledged) {
+                return
+            }
+            delivery.isAcknowledged = true
+            if (pendingEvents.firstOrNull() === delivery.event) {
+                pendingEvents.removeFirst()
+            }
+            if (delivery.isLoopOwned) {
+                return
+            }
+            inFlight = null
+            isDelivering = false
+            activeTarget != null && startDrainIfNeeded()
+        }
+        if (shouldDrain) {
+            drain()
+        }
+    }
+
+    private class Delivery(
+        val target: GraniteMicroFrontendRuntimeEventTarget,
+        val event: GraniteMicroFrontendEvent,
+    ) {
+        var isLoopOwned = true
+        var isAcknowledged = false
+    }
+
+    internal companion object {
+        private const val TAG = "GraniteMicroFrontendRuntime"
+        internal const val MAX_PENDING_EVENTS = 64
     }
 }
