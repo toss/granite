@@ -22,4 +22,23 @@ export interface Spec extends TurboModule {
   readonly onEvent: CodegenTypes.EventEmitter<NativeMicroFrontendRuntimeEvent>;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('GraniteMicroFrontendRuntime');
+let nativeModule: Spec | null = null;
+
+function getNativeModule() {
+  nativeModule ??= TurboModuleRegistry.getEnforcing<Spec>('GraniteMicroFrontendRuntime');
+  return nativeModule;
+}
+
+const NativeGraniteMicroFrontendRuntime: Spec = {
+  evaluateScript(request) {
+    return getNativeModule().evaluateScript(request);
+  },
+  startEventDelivery() {
+    getNativeModule().startEventDelivery();
+  },
+  onEvent(listener) {
+    return getNativeModule().onEvent(listener);
+  },
+};
+
+export default NativeGraniteMicroFrontendRuntime;

@@ -6,15 +6,12 @@ import {
   useNavigation,
 } from '@granite-js/react-native';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import {
-  registerPendingHostComponentRoute,
-} from './host/pendingHostComponentStore';
+import { registerPendingHostComponentRoute } from './host/pendingHostComponentStore';
 import type { PendingHostComponentAppConfig, PendingHostComponentRenderer } from './host/types';
 
-export type MicroFrontendRouteOptions<TParams extends Readonly<object> | undefined> =
-  RouteOptions<TParams> & {
-    readonly hostPendingComponent?: PendingHostComponentRenderer<TParams>;
-  };
+export type MicroFrontendRouteOptions<TParams extends Readonly<object> | undefined> = RouteOptions<TParams> & {
+  readonly hostPendingComponent?: PendingHostComponentRenderer<TParams>;
+};
 
 type SetParamsFunction<TParams> = (params: TParams extends undefined ? undefined : Partial<TParams>) => void;
 type ReplaceParamsFunction<TParams> = (params: TParams extends undefined ? undefined : TParams) => void;
@@ -29,9 +26,7 @@ type MicroFrontendRouteResult<TInput, TOutput> = {
   readonly _outputType: TOutput;
 };
 
-export function createRoute<
-  TSchema extends StandardSchemaV1<unknown, Readonly<object> | undefined>,
->(
+export function createRoute<TSchema extends StandardSchemaV1<unknown, Readonly<object> | undefined>>(
   path: keyof RegisterScreenInput,
   options: Omit<RouteOptions<StandardSchemaV1.InferOutput<TSchema>>, 'validateParams'> & {
     readonly validateParams: TSchema;
@@ -49,30 +44,33 @@ export function createRoute<TParams extends Readonly<object> | undefined>(
   const { hostPendingComponent, ...routeOptions } = options;
 
   if (hostPendingComponent != null) {
-    registerPendingHostComponentRoute(String(path), {
-      app: getCurrentGraniteApp(getSchemeUri()),
-      component: hostPendingComponent,
-      parserParams: routeOptions.parserParams,
-      validateParams: routeOptions.validateParams,
-    });
+    const app = getCurrentGraniteApp();
+    if (app != null) {
+      registerPendingHostComponentRoute(String(path), {
+        app,
+        component: hostPendingComponent,
+        parserParams: routeOptions.parserParams,
+        validateParams: routeOptions.validateParams,
+      });
+    }
   }
 
   return createGraniteRoute(path, routeOptions);
 }
 
-function getCurrentGraniteApp(schemeUri: string): PendingHostComponentAppConfig {
+function getCurrentGraniteApp(): PendingHostComponentAppConfig | null {
   const granite: unknown = Reflect.get(globalThis, '__granite');
   if (!isPropertyMap(granite) || !isPropertyMap(granite['app'])) {
-    throw new TypeError('Granite app configuration is unavailable');
+    return null;
   }
 
   const host = granite['app']['host'];
   const name = granite['app']['name'];
   if (typeof host !== 'string' || typeof name !== 'string') {
-    throw new TypeError('Granite app configuration is invalid');
+    return null;
   }
 
-  const scheme = new URL(schemeUri).protocol.replace(/:$/g, '');
+  const scheme = new URL(getSchemeUri()).protocol.replace(/:$/g, '');
 
   return {
     name,

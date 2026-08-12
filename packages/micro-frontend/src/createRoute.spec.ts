@@ -48,7 +48,25 @@ describe('createRoute', () => {
     });
 
     expect(reactNative.getSchemeUri).toHaveBeenCalledOnce();
-    expect(resolvePendingHostComponent('example://app/shopping/product/123?tab=review')?.component).toBe(ProductPendingComponent);
+    expect(resolvePendingHostComponent('example://app/shopping/product/123?tab=review')?.component).toBe(
+      ProductPendingComponent
+    );
     expect(resolvePendingHostComponent({ appName: 'benefit', routePath: '/product/123' })).toBeNull();
+  });
+
+  it('still creates the route when the host app configuration is unavailable', () => {
+    // Given
+    Reflect.deleteProperty(globalThis, '__granite');
+    reactNative.getSchemeUri.mockReturnValue('example://app/shopping/product/123');
+
+    // When
+    const route = createRoute('/product/:productId', {
+      component: ProductPendingComponent,
+      hostPendingComponent: ProductPendingComponent,
+    });
+
+    // Then
+    expect(route).toEqual({ route: true });
+    expect(resolvePendingHostComponent('example://app/shopping/product/123')).toBeNull();
   });
 });
