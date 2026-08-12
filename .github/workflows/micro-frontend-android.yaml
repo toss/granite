@@ -1,0 +1,91 @@
+name: Micro-frontend Android
+
+# Kept out of Integrations on purpose. An Android build needs a JDK, the Android SDK, and an NDK
+# download, so running it on every monorepo PR would tax changes that cannot affect it. The paths
+# filter below is the trade-off: this gate only fires for the sources it actually covers.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "packages/micro-frontend/android/**"
+      - "packages/micro-frontend/common/**"
+      - "packages/micro-frontend/examples/portal/**"
+      - "packages/micro-frontend/react-native.config.js"
+      - ".github/workflows/micro-frontend-android.yaml"
+
+jobs:
+  cpp:
+    name: C++ tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # android/test-cpp.sh fetches googletest through CMake FetchContent and runs ctest. It needs
+      # no Android toolchain — it compiles src/main/cpp against the host compiler.
+      - name: Run C++ tests
+        run: ./test-cpp.sh
+        working-directory: packages/micro-frontend/android
+
+  example:
+    name: Example app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      # examples/portal is not a workspace member (the root globs are packages/*, services/*,
+      # infra/*, tools, docs), so it installs on its own and does not see the Yarn PnP store.
+      # `npm install` rather than `npm ci`: the example ships no JS lockfile today.
+      - name: Install example dependencies
+        run: npm install
+        working-directory: packages/micro-frontend/examples/portal
+
+      - name: Run example Jest suite
+        run: npx jest
+        working-directory: packages/micro-frontend/examples/portal
+
+      # Two versions on purpose. The example pins 27.1.12297006 in android/build.gradle, while
+      # packages/micro-frontend/android/build.gradle sets no ndkVersion and so takes the AGP
+      # default (27.0.12077973). Installing both keeps the run deterministic instead of letting
+      # Gradle discover a missing NDK halfway through the build.
+      - name: Install NDKs
+        run: sdkmanager --install "ndk;27.1.12297006" "ndk;27.0.12077973"
+
+      - name: Run library unit tests
+        run: ./gradlew :granite-js_micro-frontend:testDebugUnitTest
+        working-directory: packages/micro-frontend/examples/portal/android
+
+      # Single ABI keeps the native build to one pass. The duplicate-.so defect the next step
+      # guards against reproduces on any single ABI, so coverage does not depend on all four.
+      # `shell: bash` is load-bearing: it turns on pipefail, without which `tee` would swallow a
+      # Gradle failure and this step would pass on a broken build.
+      - name: Assemble example app
+        shell: bash
+        run: |
+          ./gradlew :app:assembleDebug -PreactNativeArchitectures=arm64-v8a \
+            | tee "${RUNNER_TEMP}/assemble.log"
+        working-directory: packages/micro-frontend/examples/portal/android
+
+      # Regression guard for the cmakeListsPath defect: when the library's own externalNativeBuild
+      # and the autolinking entry point are the same CMake file, both targets get built twice and
+      # AGP silently picks the app copy. Its only signal is this warning in mergeNativeLibs — the
+      # build still succeeds, so nothing else here would catch it coming back.
+      - name: Assert no duplicate native libraries
+        run: |
+          if grep -F "files found for path 'lib/" "${RUNNER_TEMP}/assemble.log"; then
+            echo "::error::A native library was packaged from more than one source. See B-1."
+            exit 1
+          fi
