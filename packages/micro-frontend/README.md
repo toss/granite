@@ -282,7 +282,7 @@ destination views in `com.teleport.host`.
 
 | API | Lifetime / behavior |
 | --- | --- |
-| `ActivitySessionBinding.bind(activity, sessionId, appName, scheme)` | Convenience binding for an `Activity`. Emits open, derives visibility from start/stop, and emits close on destroy. Retain it for the Activity lifetime. |
+| `ActivitySessionBinding.bind(activity, sessionId, appName, scheme)` | Convenience binding for an `Activity`. Emits open, derives visibility from start/stop, and emits close on destroy. Bindings are keyed by `sessionId`, so a destroy caused by a configuration change keeps the session open and the next `bind()` with the same id rebinds the recreated instance instead of opening a second session. Use a `sessionId` that identifies the destination, not the Activity instance. Retain it for the Activity lifetime. |
 | `GraniteMicroFrontendRuntimeHost.registerSession(sessionId)` | Register a custom native container and return a `GraniteMicroFrontendSessionRegistration`. `sessionId` must be unique for every live destination; reuse only after the previous registration is closed/invalidated. |
 | `GraniteMicroFrontendSessionRegistration.openApp(appName, scheme)` | Emit `openApp` once. |
 | `GraniteMicroFrontendSessionRegistration.setVisible(isVisible)` | Emit a visibility event only when the value changes. |
@@ -313,11 +313,17 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ThemedReactContext
 import com.teleport.host.PortalHostView
 import com.teleport.host.PortalReactRootView
-import java.util.UUID
 import run.granite.microfrontend.ActivitySessionBinding
 
 class CartActivity : AppCompatActivity() {
-  private val sessionId = UUID.randomUUID().toString()
+  // The session id identifies the destination, not the Activity instance. A value generated per
+  // instance changes on every configuration change, so rotation would close and reopen the session
+  // and remount the React tree. Derive it from what the caller navigated to.
+  private val sessionId: String
+    get() = requireNotNull(intent.data?.host) {
+      "CartActivity requires the destination name as the URI host"
+    }
+
   private lateinit var sessionBinding: ActivitySessionBinding
   private var portalHostView: PortalHostView? = null
 

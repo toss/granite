@@ -4,10 +4,11 @@ import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 import android.os.Looper
-import java.util.WeakHashMap
 
 class ActivitySessionBinding private constructor(
-    private val activity: Activity,
+    private val sessionId: String,
+    private val application: Application,
+    private var activity: Activity?,
     private val registration: GraniteMicroFrontendSessionRegistration,
 ) : AutoCloseable {
     private val callbacks = object : Application.ActivityLifecycleCallbacks {
@@ -24,9 +25,16 @@ class ActivitySessionBinding private constructor(
         }
 
         override fun onActivityDestroyed(target: Activity) {
-            if (target === activity) {
-                close()
+            if (target !== activity) {
+                return
             }
+            // A configuration change destroys the Activity instance but not the destination. Keep
+            // the session registered and drop the instance so the recreated one can rebind to it.
+            if (target.isChangingConfigurations) {
+                activity = null
+                return
+            }
+            close()
         }
 
         override fun onActivityCreated(target: Activity, savedInstanceState: Bundle?) = Unit
@@ -36,23 +44,24 @@ class ActivitySessionBinding private constructor(
     }
 
     init {
-        activity.application.registerActivityLifecycleCallbacks(callbacks)
+        application.registerActivityLifecycleCallbacks(callbacks)
     }
 
     override fun close() {
         synchronized(boundBindings) {
-            if (boundBindings[activity] !== this) {
+            if (boundBindings[sessionId] !== this) {
                 return
             }
-            boundBindings.remove(activity)
+            boundBindings.remove(sessionId)
         }
-        activity.application.unregisterActivityLifecycleCallbacks(callbacks)
+        activity = null
+        application.unregisterActivityLifecycleCallbacks(callbacks)
         registration.closeApp()
         registration.close()
     }
 
     companion object {
-        private val boundBindings = WeakHashMap<Activity, ActivitySessionBinding>()
+        private val boundBindings = mutableMapOf<String, ActivitySessionBinding>()
 
         @JvmStatic
         fun bind(
@@ -64,10 +73,13 @@ class ActivitySessionBinding private constructor(
             check(Looper.myLooper() == Looper.getMainLooper()) {
                 "ActivitySessionBinding.bind must be called on the main thread"
             }
-            boundBindings[activity]?.also { return@synchronized it }
+            boundBindings[sessionId]?.also { binding ->
+                binding.activity = activity
+                return@synchronized binding
+            }
             val registration = GraniteMicroFrontendRuntimeHost.registerSession(sessionId)
-            ActivitySessionBinding(activity, registration).also { binding ->
-                boundBindings[activity] = binding
+            ActivitySessionBinding(sessionId, activity.application, activity, registration).also { binding ->
+                boundBindings[sessionId] = binding
                 registration.openApp(appName, scheme)
             }
         }
