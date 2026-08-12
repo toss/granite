@@ -70,4 +70,5 @@ dependencies {
   implementation 'com.facebook.fbjni:fbjni:0.7.0'
   implementation "org.jetbrains.kotlin:kotlin-stdlib:${safeExtGet('kotlinVersion', project.properties['GraniteMicroFrontendRuntime_kotlinVersion'])}"
   testImplementation 'junit:junit:4.13.2'
+  testImplementation 'org.mockito:mockito-core:5.14.2'
 }
