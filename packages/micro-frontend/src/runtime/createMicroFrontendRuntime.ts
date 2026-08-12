@@ -4,7 +4,6 @@ import type {
   MicroFrontendRuntimeApi,
   MicroFrontendRuntimeEvent,
   MicroFrontendRuntimeEventSubscription,
-  MicroFrontendSessionEvent,
 } from '../types';
 import { AppContainerNotFoundError, InvalidAppNameError } from './errors';
 import { parseAppRequest } from './parseAppRequest';
@@ -47,9 +46,8 @@ export function createMicroFrontendRuntimeWithDependencies(
 ): MicroFrontendRuntimeApi {
   // A fulfilled promise is the evaluated-state cache. Rejected evaluations remove themselves.
   const appEvaluations = new Map<string, Promise<void>>();
-  const appSessions = new Map<string, Set<string>>();
 
-  function releaseApp(appName: string) {
+  function resetFailedEvaluation(appName: string) {
     appEvaluations.delete(appName);
     dependencies.registry.removeContainer(appName);
     dependencies.removePendingHostComponentRoutes(appName);
@@ -79,41 +77,8 @@ export function createMicroFrontendRuntimeWithDependencies(
         throw new AppContainerNotFoundError(appName);
       }
     } catch (error) {
-      releaseApp(appName);
+      resetFailedEvaluation(appName);
       throw error;
-    }
-  }
-
-  function handleAppLifecycle(event: MicroFrontendSessionEvent) {
-    switch (event.name) {
-      case 'openApp': {
-        const sessions = appSessions.get(event.params.appName);
-        if (sessions == null) {
-          appSessions.set(event.params.appName, new Set([event.params.sessionId]));
-        } else {
-          sessions.add(event.params.sessionId);
-        }
-        return;
-      }
-      case 'closeApp': {
-        for (const [appName, sessions] of appSessions) {
-          if (!sessions.delete(event.params.sessionId)) {
-            continue;
-          }
-          if (sessions.size === 0) {
-            appSessions.delete(appName);
-            releaseApp(appName);
-          }
-          return;
-        }
-        return;
-      }
-      case 'sessionVisibilityChanged':
-        return;
-      default: {
-        const exhaustiveEvent: never = event;
-        return exhaustiveEvent;
-      }
     }
   }
 
@@ -135,7 +100,6 @@ export function createMicroFrontendRuntimeWithDependencies(
           case 'openApp':
           case 'closeApp':
           case 'sessionVisibilityChanged':
-            handleAppLifecycle(parsedEvent);
             listener(parsedEvent);
             return;
           default: {

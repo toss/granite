@@ -177,25 +177,19 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
-  it('releases app resources after its last native session closes', async () => {
+  it('reuses the evaluated app after its last native session closes', async () => {
     // Given
     const fixture = createRuntimeFixture();
     const firstModule: AppModule = { default: () => 'first cart' };
-    const secondModule: AppModule = { default: () => 'second cart' };
     fixture.runtime.onEvent(() => undefined);
-    vi.mocked(fixture.nativeRuntime.evaluateScript)
-      .mockImplementationOnce(async () => {
-        const container = createContainer('cart');
-        exposeModule(container, './App', firstModule);
-        registerPendingHostComponentRoute('/products', {
-          app: { host: 'app', name: 'cart', scheme: 'granite' },
-          component: CartPendingComponent,
-        });
-      })
-      .mockImplementationOnce(async () => {
-        const container = createContainer('cart');
-        exposeModule(container, './App', secondModule);
+    vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(async () => {
+      const container = createContainer('cart');
+      exposeModule(container, './App', firstModule);
+      registerPendingHostComponentRoute('/products', {
+        app: { host: 'app', name: 'cart', scheme: 'granite' },
+        component: CartPendingComponent,
       });
+    });
     fixture.emit({
       name: 'openApp',
       params: {
@@ -210,9 +204,9 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     fixture.emit({ name: 'closeApp', params: { sessionId: 'session-1' } });
 
     // Then
-    expect(microFrontendModuleRegistry.hasContainer('cart')).toBe(false);
-    expect(() => microFrontendModuleRegistry.importModule('cart/App')).toThrow();
-    expect(resolvePendingHostComponent('granite://app/cart/products')).toBeNull();
+    expect(microFrontendModuleRegistry.hasContainer('cart')).toBe(true);
+    expect(microFrontendModuleRegistry.importModule('cart/App')).toBe(firstModule);
+    expect(resolvePendingHostComponent('granite://app/cart/products')?.component).toBe(CartPendingComponent);
     fixture.emit({
       name: 'openApp',
       params: {
@@ -221,8 +215,9 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
         sessionId: 'session-2',
       },
     });
-    await expect(fixture.runtime.importApp<AppModule>('cart/App')).resolves.toBe(secondModule);
-    expect(fixture.adapter.loadBundle).toHaveBeenCalledTimes(2);
+    await expect(fixture.runtime.importApp<AppModule>('cart/App')).resolves.toBe(firstModule);
+    expect(fixture.adapter.loadBundle).toHaveBeenCalledOnce();
+    expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledOnce();
   });
 
   it('keeps app resources while another native session remains open', async () => {
