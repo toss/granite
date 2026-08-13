@@ -18,7 +18,7 @@ public protocol GraniteReactHost: AnyObject {
     var bundleLoader: BundleLoadable { get }
     func graniteSetupDidStart()
     /// Called right after the React Native instance is created, before the JS bundle is evaluated
-    /// Fires again the host is built, so a reload calls it once more
+    /// Fires again when the host is rebuilt, so a reload calls it once more
     func graniteHostDidStart()
     func graniteSetupDidFinish()
     func graniteSetupDidError(didFailWith error: Error)
