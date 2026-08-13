@@ -1,5 +1,14 @@
 # @granite-js/micro-frontend
 
+## 2.0.1
+
+### Patch Changes
+
+- c0440e5: Republish the micro-frontend package with normalized internal dependency versions.
+  - @granite-js/plugin-core@2.0.1
+  - @granite-js/react-native@2.0.1
+  - @granite-js/utils@2.0.1
+
 ## 2.0.0
 
 ### Patch Changes
