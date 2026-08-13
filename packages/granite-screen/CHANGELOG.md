@@ -1,5 +1,11 @@
 # @granite-js/screen
 
+## 1.0.42
+
+### Patch Changes
+
+- 8714f31: fix(screen): drop the stray return type on graniteHostDidStart
+
 ## 1.0.41
 
 ### Patch Changes
