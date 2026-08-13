@@ -36,6 +36,9 @@
   "dependenciesMeta": {
     "hermes-compiler": {
       "unplugged": true
+    },
+    "knip": {
+      "built": false
     }
   },
   "devDependencies": {

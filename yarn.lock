@@ -17142,6 +17142,8 @@ __metadata:
   dependenciesMeta:
     hermes-compiler:
       unplugged: true
+    knip:
+      built: false
   languageName: unknown
   linkType: soft
 
