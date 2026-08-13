@@ -1,5 +1,7 @@
 # @granite-js/screen
 
+## 2.0.0
+
 ## 1.0.42
 
 ### Patch Changes

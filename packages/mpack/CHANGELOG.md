@@ -1,5 +1,13 @@
 # @granite-js/mpack
 
+## 2.0.0
+
+### Patch Changes
+
+- 864fa2a: Remove runtime module edges left behind by inline Flow type-only imports.
+  - @granite-js/plugin-core@2.0.0
+  - @granite-js/utils@2.0.0
+
 ## 1.0.42
 
 ### Patch Changes

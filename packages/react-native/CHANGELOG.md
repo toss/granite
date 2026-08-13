@@ -1,5 +1,25 @@
 # @granite-js/react-native
 
+## 2.0.0
+
+### Major Changes
+
+- 864fa2a: Start the Granite v2 release line.
+
+### Patch Changes
+
+- 864fa2a: Route session visibility through Granite's existing visibility provider and expose native session lifecycle as React state so remote apps can continue using `useVisibility()`.
+- Updated dependencies [864fa2a]
+  - @granite-js/mpack@2.0.0
+  - @granite-js/cli@2.0.0
+  - @granite-js/blur-view@2.0.0
+  - @granite-js/brownfield-module@2.0.0
+  - @granite-js/jest@2.0.0
+  - @granite-js/native@2.0.0
+  - @granite-js/plugin-core@2.0.0
+  - @granite-js/style-utils@2.0.0
+  - @granite-js/video@2.0.0
+
 ## 1.0.42
 
 ### Patch Changes
