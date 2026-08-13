@@ -17,6 +17,9 @@ public protocol GraniteReactHost: AnyObject {
     /// Return nil to use the default bundle from app
     var bundleLoader: BundleLoadable { get }
     func graniteSetupDidStart()
+    /// Called right after the React Native instance is created, before the JS bundle is evaluated
+    /// Fires again the host is built, so a reload calls it once more
+    func graniteHostDidStart()
     func graniteSetupDidFinish()
     func graniteSetupDidError(didFailWith error: Error)
     /// Module instance creation (same as Objective-C)
@@ -29,6 +32,8 @@ public protocol GraniteReactHost: AnyObject {
 
 // Default implementation - returns nil
 extension GraniteReactHost {
+    public func graniteHostDidStart() {}  // Default does nothing
+
     public func getModuleInstance(from moduleClass: AnyClass) -> Any? {
         return nil  // Default returns nil
     }
