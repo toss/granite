@@ -1,0 +1,17 @@
+NOTICE
+
+@granite-js/micro-frontend
+Copyright 2026 Viva Republica, Inc.
+
+This product includes software developed by the React Native, React, TypeScript,
+Vitest, and react-native-builder-bob projects under their respective open-source
+licenses.
+
+The Portal implementation includes work derived from react-native-teleport by
+Kiryl Ziusko:
+https://github.com/kirillzyusko/react-native-teleport
+
+The original work is distributed under the MIT License. Its copyright and
+license text are preserved in LICENSE.react-native-teleport. Modifications and
+its integration into the Granite micro-frontend runtime are maintained by
+Granite contributors.

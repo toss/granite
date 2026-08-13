@@ -1,0 +1,113 @@
+{
+  "name": "@granite-js/micro-frontend",
+  "version": "1.0.37",
+  "description": "Micro-frontend build, runtime, session, and Portal contracts for Granite brownfield applications",
+  "main": "./dist/module/index.js",
+  "types": "./dist/typescript/index.d.ts",
+  "react-native": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/typescript/index.d.ts",
+      "react-native": "./src/index.ts",
+      "default": "./dist/module/index.js"
+    },
+    "./plugin": {
+      "types": "./dist/typescript/plugin/index.d.ts",
+      "default": "./dist/module/plugin/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "!src/**/*.spec.*",
+    "dist",
+    "android",
+    "ios",
+    "common",
+    "*.podspec",
+    "react-native.config.js",
+    "README.md",
+    "LICENSE",
+    "LICENSE.react-native-teleport",
+    "NOTICE",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!examples/**",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*"
+  ],
+  "scripts": {
+    "prepack": "yarn build",
+    "build": "bob build && tsc --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/micro-frontend"
+  },
+  "dependencies": {
+    "@granite-js/utils": "workspace:*",
+    "@standard-schema/spec": "^1.0.0"
+  },
+  "peerDependencies": {
+    "@granite-js/plugin-core": "*",
+    "@granite-js/react-native": "*",
+    "react": "*",
+    "react-native": "*"
+  },
+  "peerDependenciesMeta": {
+    "@granite-js/plugin-core": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@granite-js/plugin-core": "workspace:*",
+    "@granite-js/react-native": "workspace:*",
+    "@types/node": "catalog:tools",
+    "@types/react": "catalog:react-native",
+    "@types/react-test-renderer": "^19",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
+    "react-native-builder-bob": "catalog:tools",
+    "react-test-renderer": "19.2.3",
+    "typescript": "catalog:tools",
+    "vitest": "^4.0.12"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "dist",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ]
+    ],
+    "exclude": "{**/{__tests__,__fixtures__,__mocks__}/**,**/*.spec.*,**/*.test.*}"
+  },
+  "codegenConfig": {
+    "name": "GraniteMicroFrontendRuntimeSpec",
+    "type": "all",
+    "jsSrcsDir": "src/specs",
+    "android": {
+      "javaPackageName": "run.granite.microfrontend"
+    },
+    "ios": {
+      "componentProvider": {
+        "PortalView": "PortalView",
+        "PortalHostView": "PortalHostView"
+      }
+    }
+  },
+  "sideEffects": false
+}

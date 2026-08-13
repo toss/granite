@@ -1,0 +1,35 @@
+package run.granite.microfrontend
+
+import com.facebook.react.BaseReactPackage
+import com.facebook.react.bridge.NativeModule
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.module.model.ReactModuleInfo
+import com.facebook.react.module.model.ReactModuleInfoProvider
+import com.facebook.react.uimanager.ViewManager
+import com.teleport.host.PortalHostViewManager
+import com.teleport.portal.PortalViewManager
+
+class GraniteMicroFrontendRuntimePackage : BaseReactPackage() {
+    override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> =
+        listOf(PortalHostViewManager(), PortalViewManager())
+
+    override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? =
+        if (name == NativeGraniteMicroFrontendRuntimeSpec.NAME) {
+            GraniteMicroFrontendRuntimeModule(reactContext)
+        } else {
+            null
+        }
+
+    override fun getReactModuleInfoProvider(): ReactModuleInfoProvider = ReactModuleInfoProvider {
+        mapOf(
+            NativeGraniteMicroFrontendRuntimeSpec.NAME to ReactModuleInfo(
+                name = NativeGraniteMicroFrontendRuntimeSpec.NAME,
+                className = GraniteMicroFrontendRuntimeModule::class.java.name,
+                canOverrideExistingModule = false,
+                needsEagerInit = false,
+                isCxxModule = false,
+                isTurboModule = true,
+            ),
+        )
+    }
+}
