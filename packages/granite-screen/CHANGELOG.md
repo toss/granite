@@ -1,5 +1,11 @@
 # @granite-js/screen
 
+## 1.0.41
+
+### Patch Changes
+
+- 2b945a0: feat(screen): add graniteHostDidStart to GraniteReactHost
+
 ## 1.0.40
 
 ## 1.0.39

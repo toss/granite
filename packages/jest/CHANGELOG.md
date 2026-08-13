@@ -1,5 +1,11 @@
 # @granite-js/jest
 
+## 1.0.41
+
+### Patch Changes
+
+- @granite-js/native@1.0.41
+
 ## 1.0.40
 
 ### Patch Changes
