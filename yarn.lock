@@ -5636,6 +5636,34 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@granite-js/micro-frontend@workspace:packages/micro-frontend":
+  version: 0.0.0-use.local
+  resolution: "@granite-js/micro-frontend@workspace:packages/micro-frontend"
+  dependencies:
+    "@granite-js/plugin-core": "workspace:*"
+    "@granite-js/react-native": "workspace:*"
+    "@granite-js/utils": "workspace:*"
+    "@standard-schema/spec": "npm:^1.0.0"
+    "@types/node": "catalog:tools"
+    "@types/react": "catalog:react-native"
+    "@types/react-test-renderer": "npm:^19"
+    react: "catalog:react-native"
+    react-native: "catalog:react-native"
+    react-native-builder-bob: "catalog:tools"
+    react-test-renderer: "npm:19.2.3"
+    typescript: "catalog:tools"
+    vitest: "npm:^4.0.12"
+  peerDependencies:
+    "@granite-js/plugin-core": "*"
+    "@granite-js/react-native": "*"
+    react: "*"
+    react-native: "*"
+  peerDependenciesMeta:
+    "@granite-js/plugin-core":
+      optional: true
+  languageName: unknown
+  linkType: soft
+
 "@granite-js/mpack@workspace:*, @granite-js/mpack@workspace:packages/mpack":
   version: 0.0.0-use.local
   resolution: "@granite-js/mpack@workspace:packages/mpack"
@@ -10692,7 +10720,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-test-renderer@npm:19.1.0":
+"@types/react-test-renderer@npm:19.1.0, @types/react-test-renderer@npm:^19":
   version: 19.1.0
   resolution: "@types/react-test-renderer@npm:19.1.0"
   dependencies:

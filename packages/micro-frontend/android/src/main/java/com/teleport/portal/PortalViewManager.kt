@@ -1,0 +1,51 @@
+package com.teleport.portal
+
+import com.facebook.react.module.annotations.ReactModule
+import com.facebook.react.uimanager.ReactStylesDiffMap
+import com.facebook.react.uimanager.StateWrapper
+import com.facebook.react.uimanager.ThemedReactContext
+import com.facebook.react.uimanager.ViewManagerDelegate
+import com.facebook.react.uimanager.annotations.ReactProp
+import com.facebook.react.viewmanagers.PortalViewManagerDelegate
+import com.facebook.react.viewmanagers.PortalViewManagerInterface
+import com.facebook.react.views.view.ReactViewGroup
+import com.teleport.managers.TeleportViewManager
+
+@ReactModule(name = PortalViewManager.NAME)
+class PortalViewManager :
+  TeleportViewManager(),
+  PortalViewManagerInterface<ReactViewGroup> {
+  private val delegate = PortalViewManagerDelegate(this)
+
+  override fun getName(): String = NAME
+
+  override fun getDelegate(): ViewManagerDelegate<ReactViewGroup> = delegate
+
+  override fun createTeleportView(context: ThemedReactContext): ReactViewGroup = PortalView(context)
+
+  override fun onDropViewInstance(view: ReactViewGroup) {
+    (view as? PortalView)?.cleanup()
+    super.onDropViewInstance(view)
+  }
+
+  override fun updateState(
+    view: ReactViewGroup,
+    props: ReactStylesDiffMap?,
+    stateWrapper: StateWrapper?,
+  ): Any? {
+    (view as? PortalView)?.setStateWrapper(stateWrapper)
+    return super.updateState(view, props, stateWrapper)
+  }
+
+  @ReactProp(name = "hostName")
+  override fun setHostName(
+    view: ReactViewGroup?,
+    name: String?,
+  ) {
+    (view as? PortalView)?.setHostName(name)
+  }
+
+  companion object {
+    const val NAME = "PortalView"
+  }
+}
