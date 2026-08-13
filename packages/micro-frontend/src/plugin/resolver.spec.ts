@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createSharedResolverConfig } from './resolver';
 
 describe('createSharedResolverConfig', () => {
-  it('preserves the default export of a registered ESM namespace', () => {
+  it('creates a lazy shared-module forwarding loader', () => {
     const config = createSharedResolverConfig([['react-native-pager-view', {}]]);
     const loader = config.protocols?.['granite-micro-frontend-shared']?.load;
 
@@ -16,9 +16,7 @@ describe('createSharedResolverConfig', () => {
       })
     ).toMatchObject({
       loader: 'js',
-      contents: expect.stringContaining(
-        'module.exports = Object.assign({}, sharedModule.get(), { __esModule: true });'
-      ),
+      contents: expect.stringContaining('Object.defineProperty(moduleExports, key, {'),
     });
   });
 });
