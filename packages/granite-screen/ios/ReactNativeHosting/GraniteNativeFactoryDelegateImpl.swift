@@ -30,7 +30,7 @@ public class ReactNativeFactoryDelegate: GraniteNativeFactoryDelegate {
         return true
     }
 
-    public override func graniteHostDidStart() -> Bool {
+    public override func graniteHostDidStart() {
         reactHost?.graniteHostDidStart()
     }
 }
