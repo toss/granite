@@ -44,10 +44,9 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
 
 - (facebook::jsi::Runtime *)jsRuntimeIfAvailable {
   RCTBridge *bridge = self.bridge;
-  // RCTBridgeProxy는 NSProxy라 respondsToSelector: 메시지가 forwardInvocation으로 흘러
-  // 반환 버퍼가 0으로 남는다 — 직접 구현된 runtime조차 항상 NO가 되어 모든 서비스
-  // evaluate가 RUNTIME_UNAVAILABLE로 죽는다. 메시지 디스패치를 타지 않는 ObjC 런타임
-  // C 함수로 실제 클래스의 셀렉터 구현 여부를 판정한다.
+  // RCTBridgeProxy is an NSProxy, so respondsToSelector: is forwarded and
+  // leaves the BOOL return buffer as NO even when runtime is implemented.
+  // Probe the real class without going through message dispatch.
   if (bridge == nil ||
       !class_respondsToSelector(object_getClass(bridge), @selector(runtime))) {
     return nullptr;
