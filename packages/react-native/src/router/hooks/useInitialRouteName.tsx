@@ -5,6 +5,10 @@ export function useInitialRouteName({ prefix, initialScheme }: { prefix: string;
     return '/';
   }
 
+  if (!initialScheme.startsWith(prefix)) {
+    return '_404';
+  }
+
   const pathname = removeTrailingSlash(initialScheme).slice(prefix.length).split('?')[0];
   const shouldUseIndex = pathname?.length === 0;
 
