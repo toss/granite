@@ -2,6 +2,7 @@
 
 #import "GraniteMicroFrontendRuntimeHost+Internal.h"
 #import <React/RCTBridge.h>
+#import <objc/runtime.h>
 #import <React/RCTBridgeProxy+Cxx.h>
 #import <React-callinvoker/ReactCommon/CallInvoker.h>
 #import <jsi/jsi.h>
@@ -43,7 +44,11 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
 
 - (facebook::jsi::Runtime *)jsRuntimeIfAvailable {
   RCTBridge *bridge = self.bridge;
-  if (bridge == nil || ![bridge respondsToSelector:@selector(runtime)]) {
+  // RCTBridgeProxy is an NSProxy, so respondsToSelector: is forwarded and
+  // leaves the BOOL return buffer as NO even when runtime is implemented.
+  // Probe the real class without going through message dispatch.
+  if (bridge == nil ||
+      !class_respondsToSelector(object_getClass(bridge), @selector(runtime))) {
     return nullptr;
   }
   return reinterpret_cast<facebook::jsi::Runtime *>(bridge.runtime);
