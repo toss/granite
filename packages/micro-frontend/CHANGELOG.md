@@ -1,5 +1,14 @@
 # @granite-js/micro-frontend
 
+## 2.0.2
+
+### Patch Changes
+
+- e6a9c16: fix(micro-frontend): detect iOS JSI runtime without sending respondsToSelector: through RCTBridgeProxy
+  - @granite-js/plugin-core@2.0.2
+  - @granite-js/react-native@2.0.2
+  - @granite-js/utils@2.0.2
+
 ## 2.0.1
 
 ### Patch Changes
