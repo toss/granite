@@ -1,5 +1,12 @@
 # @granite-js/plugin-hermes
 
+## 2.0.2
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.0.2
+- @granite-js/utils@2.0.2
+
 ## 2.0.1
 
 ### Patch Changes
