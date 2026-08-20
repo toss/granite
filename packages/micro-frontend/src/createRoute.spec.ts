@@ -28,9 +28,9 @@ describe('createRoute', () => {
     reactNative.getSchemeUri.mockReset();
     Reflect.set(globalThis, '__granite', {
       app: {
-        host: 'app',
-        name: 'shopping',
-        scheme: 'legacy',
+        host: 'host',
+        name: 'app-1',
+        scheme: 'granite',
       },
     });
   });
@@ -40,7 +40,7 @@ describe('createRoute', () => {
   });
 
   it('registers the host pending component once for the native scheme without a cross-app fallback', () => {
-    reactNative.getSchemeUri.mockReturnValue('example://app/shopping/product/123?tab=review');
+    reactNative.getSchemeUri.mockReturnValue('granite://host/app-1/product/123?tab=review');
 
     createRoute('/product/:productId', {
       component: ProductPendingComponent,
@@ -48,16 +48,16 @@ describe('createRoute', () => {
     });
 
     expect(reactNative.getSchemeUri).toHaveBeenCalledOnce();
-    expect(resolvePendingHostComponent('example://app/shopping/product/123?tab=review')?.component).toBe(
+    expect(resolvePendingHostComponent('granite://host/app-1/product/123?tab=review')?.component).toBe(
       ProductPendingComponent
     );
-    expect(resolvePendingHostComponent({ appName: 'benefit', routePath: '/product/123' })).toBeNull();
+    expect(resolvePendingHostComponent({ appName: 'app-2', routePath: '/product/123' })).toBeNull();
   });
 
   it('still creates the route when the host app configuration is unavailable', () => {
     // Given
     Reflect.deleteProperty(globalThis, '__granite');
-    reactNative.getSchemeUri.mockReturnValue('example://app/shopping/product/123');
+    reactNative.getSchemeUri.mockReturnValue('granite://host/app-1/product/123');
 
     // When
     const route = createRoute('/product/:productId', {
@@ -67,6 +67,6 @@ describe('createRoute', () => {
 
     // Then
     expect(route).toEqual({ route: true });
-    expect(resolvePendingHostComponent('example://app/shopping/product/123')).toBeNull();
+    expect(resolvePendingHostComponent('granite://host/app-1/product/123')).toBeNull();
   });
 });

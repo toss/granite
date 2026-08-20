@@ -23,6 +23,8 @@ describe('getPreludeConfig', () => {
     expect(config.preludeScript).toContain('createContainer(global.__granite.app.name');
     expect(config.preludeScript).toContain('exposeModule(__container, "./App", __expose0)');
     expect(config.banner).toContain('global._graniteMicroFrontend');
+    expect(config.banner).toContain('function dispose(appName, callback)');
+    expect(config.banner).toContain('disposeCallbacksByApp');
   });
 
   it('creates a container without importing a private runtime entry', () => {
@@ -36,10 +38,10 @@ describe('getPreludeConfig', () => {
 
   it('embeds the remote app name instead of reading the host global at evaluation time', () => {
     // When
-    const config = getPreludeConfig({}, 'shopping');
+    const config = getPreludeConfig({}, 'app-1');
 
     // Then
-    expect(config.preludeScript).toContain('createContainer("shopping"');
+    expect(config.preludeScript).toContain('createContainer("app-1"');
     expect(config.preludeScript).not.toContain('global.__granite.app.name');
   });
 });

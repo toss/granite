@@ -25,13 +25,13 @@ describe('PendingHostComponent', () => {
   it('renders route params and disappears when the remote app hides it', async () => {
     const { PendingHostComponent } = await import('./PendingHostComponent');
     registerPendingHostComponentRoute('/product', {
-      app: { name: 'shopping', scheme: 'example', host: 'app' },
+      app: { name: 'app-1', scheme: 'granite', host: 'host' },
       component: ProductPendingComponent,
     });
     const result: { renderer: ReactTestRenderer | null } = { renderer: null };
 
     await act(async () => {
-      result.renderer = create(<PendingHostComponent url="example://app/shopping/product?count=2" />);
+      result.renderer = create(<PendingHostComponent url="granite://host/app-1/product?count=2" />);
     });
 
     const renderer = result.renderer;

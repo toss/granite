@@ -1,17 +1,18 @@
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
-import { describe, expect, it, vi } from 'vitest';
-import {
-  getIsPendingHostComponentHidden,
-  hidePendingHostComponent,
-} from '../host/pendingHostComponentStore';
-import type {
-  MicroFrontendRuntimeApi,
-  MicroFrontendSessionEvent,
-} from '../types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   type MicroFrontendSessionState,
   useMicroFrontendSessions,
 } from './useMicroFrontendSessions';
+import {
+  getIsPendingHostComponentHidden,
+  hidePendingHostComponent,
+} from '../host/pendingHostComponentStore';
+import { getMicroFrontendRuntimeContext } from '../runtime/registry';
+import type {
+  MicroFrontendRuntimeApi,
+  MicroFrontendSessionEvent,
+} from '../types';
 
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
 
@@ -58,6 +59,10 @@ function renderSessions(runtime: Pick<MicroFrontendRuntimeApi, 'onEvent'>) {
 }
 
 describe('useMicroFrontendSessions', () => {
+  beforeEach(() => {
+    Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
+  });
+
   it('adds an opened native session to React state', () => {
     // Given
     const fixture = createRuntimeFixture();
@@ -68,9 +73,9 @@ describe('useMicroFrontendSessions', () => {
       fixture.emit({
         name: 'openApp',
         params: {
-          appName: 'shopping',
-          scheme: 'supertoss://m/shopping/product/1',
-          sessionId: 'shopping:1',
+          appName: 'app-1',
+          scheme: 'granite://app-1/product/1',
+          sessionId: 'app-1:1',
         },
       });
     });
@@ -78,9 +83,9 @@ describe('useMicroFrontendSessions', () => {
     // Then
     expect(rendered.current).toEqual([
       {
-        appName: 'shopping',
-        sessionId: 'shopping:1',
-        scheme: 'supertoss://m/shopping/product/1',
+        appName: 'app-1',
+        sessionId: 'app-1:1',
+        scheme: 'granite://app-1/product/1',
         isVisible: false,
       },
     ]);
@@ -95,9 +100,9 @@ describe('useMicroFrontendSessions', () => {
       fixture.emit({
         name: 'openApp',
         params: {
-          appName: 'shopping',
-          scheme: 'supertoss://m/shopping/product/1',
-          sessionId: 'shopping:1',
+          appName: 'app-1',
+          scheme: 'granite://app-1/product/1',
+          sessionId: 'app-1:1',
         },
       });
     });
@@ -106,7 +111,7 @@ describe('useMicroFrontendSessions', () => {
     act(() => {
       fixture.emit({
         name: 'sessionVisibilityChanged',
-        params: { sessionId: 'shopping:1', isVisible: true },
+        params: { sessionId: 'app-1:1', isVisible: true },
       });
     });
 
@@ -123,9 +128,9 @@ describe('useMicroFrontendSessions', () => {
       fixture.emit({
         name: 'openApp',
         params: {
-          appName: 'shopping',
-          scheme: 'supertoss://m/shopping/product/1',
-          sessionId: 'shopping:1',
+          appName: 'app-1',
+          scheme: 'granite://app-1/product/1',
+          sessionId: 'app-1:1',
         },
       });
     });
@@ -136,9 +141,9 @@ describe('useMicroFrontendSessions', () => {
       fixture.emit({
         name: 'openApp',
         params: {
-          appName: 'shopping',
-          scheme: 'supertoss://m/shopping/product/2',
-          sessionId: 'shopping:1',
+          appName: 'app-1',
+          scheme: 'granite://app-1/product/2',
+          sessionId: 'app-1:1',
         },
       });
     });
@@ -157,20 +162,72 @@ describe('useMicroFrontendSessions', () => {
       fixture.emit({
         name: 'openApp',
         params: {
-          appName: 'shopping',
-          scheme: 'supertoss://m/shopping/product/1',
-          sessionId: 'shopping:1',
+          appName: 'app-1',
+          scheme: 'granite://app-1/product/1',
+          sessionId: 'app-1:1',
         },
       });
     });
 
     // When
     act(() => {
-      fixture.emit({ name: 'closeApp', params: { sessionId: 'shopping:1' } });
+      fixture.emit({ name: 'closeApp', params: { sessionId: 'app-1:1' } });
     });
 
     // Then
     expect(rendered.current).toEqual([]);
+    rendered.unmount();
+  });
+
+  it('runs retained app dispose callbacks when its last session closes', () => {
+    // Given
+    const fixture = createRuntimeFixture();
+    const rendered = renderSessions(fixture.runtime);
+    const dispose = vi.fn();
+    getMicroFrontendRuntimeContext().dispose('app-1', dispose);
+
+    // When
+    act(() => {
+      fixture.emit({
+        name: 'openApp',
+        params: {
+          appName: 'app-1',
+          scheme: 'granite://app-1/product/1',
+          sessionId: 'app-1:1',
+        },
+      });
+      fixture.emit({
+        name: 'openApp',
+        params: {
+          appName: 'app-1',
+          scheme: 'granite://app-1/product/2',
+          sessionId: 'app-1:2',
+        },
+      });
+    });
+    act(() => {
+      fixture.emit({ name: 'closeApp', params: { sessionId: 'app-1:2' } });
+    });
+    expect(dispose).not.toHaveBeenCalled();
+    act(() => {
+      fixture.emit({ name: 'closeApp', params: { sessionId: 'app-1:1' } });
+    });
+    act(() => {
+      fixture.emit({
+        name: 'openApp',
+        params: {
+          appName: 'app-1',
+          scheme: 'granite://app-1/product/3',
+          sessionId: 'app-1:3',
+        },
+      });
+    });
+    act(() => {
+      fixture.emit({ name: 'closeApp', params: { sessionId: 'app-1:3' } });
+    });
+
+    // Then
+    expect(dispose).toHaveBeenCalledTimes(2);
     rendered.unmount();
   });
 
@@ -185,9 +242,9 @@ describe('useMicroFrontendSessions', () => {
       fixture.emit({
         name: 'openApp',
         params: {
-          appName: 'shopping',
-          scheme: 'supertoss://m/shopping/product/1',
-          sessionId: 'shopping:1',
+          appName: 'app-1',
+          scheme: 'granite://app-1/product/1',
+          sessionId: 'app-1:1',
         },
       });
     });
