@@ -5640,10 +5640,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@granite-js/micro-frontend@workspace:packages/micro-frontend"
   dependencies:
+    "@babel/core": "npm:7.28.5"
+    "@babel/types": "npm:7.28.5"
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/react-native": "workspace:*"
     "@granite-js/utils": "workspace:*"
     "@standard-schema/spec": "npm:^1.0.0"
+    "@types/babel__core": "npm:^7.20.5"
     "@types/node": "catalog:tools"
     "@types/react": "catalog:react-native"
     "@types/react-test-renderer": "npm:^19"

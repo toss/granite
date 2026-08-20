@@ -23,10 +23,10 @@ function BenefitPendingComponent(): ReactNode {
   return null;
 }
 
-const shoppingApp = {
-  name: 'shopping',
-  scheme: 'example',
-  host: 'app',
+const appOne = {
+  name: 'app-1',
+  scheme: 'granite',
+  host: 'host',
 } as const;
 
 describe('pending host component registry', () => {
@@ -41,11 +41,11 @@ describe('pending host component registry', () => {
   it('resolves an app route and parses query params from its Granite URL', () => {
     registerPendingHostComponentRoute('/product', {
       component: ProductPendingComponent,
-      app: shoppingApp,
+      app: appOne,
     });
 
     const resolved = resolvePendingHostComponent(
-      'example://app/shopping/product?thumbnailUrl=https%3A%2F%2Fstatic.example.com%2Fimage.png&count=1&enabled=true'
+      'granite://host/app-1/product?thumbnailUrl=https%3A%2F%2Fstatic.example.com%2Fimage.png&count=1&enabled=true'
     );
 
     expect(resolved?.component).toBe(ProductPendingComponent);
@@ -56,14 +56,14 @@ describe('pending host component registry', () => {
         enabled: true,
       },
       routePath: '/product',
-      appName: 'shopping',
+      appName: 'app-1',
     });
   });
 
   it('merges dynamic path params before validating the pending component params', () => {
     registerPendingHostComponentRoute('/product/:id', {
       component: DynamicProductPendingComponent,
-      app: shoppingApp,
+      app: appOne,
       validateParams: params => {
         const id = params == null || !('id' in params) ? '' : String(params.id);
         const tab = params == null || !('tab' in params) ? 'detail' : String(params.tab);
@@ -72,7 +72,7 @@ describe('pending host component registry', () => {
       },
     });
 
-    const resolved = resolvePendingHostComponent('example://app/shopping/product/123?tab=review');
+    const resolved = resolvePendingHostComponent('granite://host/app-1/product/123?tab=review');
 
     expect(resolved?.params).toEqual({
       id: '123',
@@ -83,30 +83,30 @@ describe('pending host component registry', () => {
   it('does not resolve a pending component registered for another app', () => {
     registerPendingHostComponentRoute('/product', {
       component: ProductPendingComponent,
-      app: shoppingApp,
+      app: appOne,
     });
 
-    expect(resolvePendingHostComponent({ appName: 'shopping', routePath: '/product' })?.component).toBe(ProductPendingComponent);
-    expect(resolvePendingHostComponent({ appName: 'benefit', routePath: '/product' })).toBeNull();
+    expect(resolvePendingHostComponent({ appName: 'app-1', routePath: '/product' })?.component).toBe(ProductPendingComponent);
+    expect(resolvePendingHostComponent({ appName: 'app-2', routePath: '/product' })).toBeNull();
   });
 
   it('removes only routes owned by the released app', () => {
     // Given
     registerPendingHostComponentRoute('/product', {
       component: ProductPendingComponent,
-      app: shoppingApp,
+      app: appOne,
     });
     registerPendingHostComponentRoute('/coupon', {
       component: BenefitPendingComponent,
-      app: { host: 'app', name: 'benefit', scheme: 'example' },
+      app: { host: 'host', name: 'app-2', scheme: 'granite' },
     });
 
     // When
-    removePendingHostComponentRoutes('shopping');
+    removePendingHostComponentRoutes('app-1');
 
     // Then
-    expect(resolvePendingHostComponent({ appName: 'shopping', routePath: '/product' })).toBeNull();
-    expect(resolvePendingHostComponent({ appName: 'benefit', routePath: '/coupon' })?.component).toBe(BenefitPendingComponent);
+    expect(resolvePendingHostComponent({ appName: 'app-1', routePath: '/product' })).toBeNull();
+    expect(resolvePendingHostComponent({ appName: 'app-2', routePath: '/coupon' })?.component).toBe(BenefitPendingComponent);
   });
 
   it('shares visibility state across host and remote package instances', () => {
