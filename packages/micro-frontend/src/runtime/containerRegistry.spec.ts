@@ -180,6 +180,28 @@ describe('container registry', () => {
     expect(Reflect.has(getMicroFrontendRuntimeContext().containers, 'locked-length-app')).toBe(false);
   });
 
+  it('rolls back every registry slot when the legacy name definition throws after writing', () => {
+    // Given
+    const context = globalThis.__MICRO_FRONTEND__;
+    const instancesTarget: unknown[] = [];
+    const instances = new Proxy(instancesTarget, {
+      defineProperty(target, property, descriptor) {
+        Reflect.defineProperty(target, property, descriptor);
+        throw new Error('legacy name definition interrupted');
+      },
+    });
+    Reflect.set(context, '__INSTANCES__', instances);
+
+    // When
+    const registerContainer = () => createContainer('throwing-name-app');
+
+    // Then
+    expect(registerContainer).toThrow('legacy name definition interrupted');
+    expect(Reflect.has(instancesTarget, 'throwing-name-app')).toBe(false);
+    expect(instancesTarget).toHaveLength(0);
+    expect(Reflect.has(getMicroFrontendRuntimeContext().containers, 'throwing-name-app')).toBe(false);
+  });
+
   it('removes a middle modern container and rebuilds remaining mixed legacy indices', () => {
     // Given
     const first = createLegacyContainer('first-app', {});

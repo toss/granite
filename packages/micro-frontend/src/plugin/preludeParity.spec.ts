@@ -33,6 +33,11 @@ type AtomicExposureImplementation = {
   readonly setup: (globalObject: GlobalFixture, moduleValue: object) => AtomicExposure;
 };
 
+type AtomicRegistrationImplementation = {
+  readonly name: string;
+  readonly register: (globalObject: GlobalFixture) => void;
+};
+
 const scenarios: readonly Scenario[] = [
   { name: 'empty', createGlobal: () => ({}) },
   {
@@ -159,6 +164,27 @@ const atomicExposureImplementations: readonly AtomicExposureImplementation[] = [
   },
 ];
 
+const atomicRegistrationImplementations: readonly AtomicRegistrationImplementation[] = [
+  {
+    name: 'runtime',
+    register(globalObject) {
+      Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
+      Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
+      for (const key of Reflect.ownKeys(globalObject)) {
+        Reflect.set(globalThis, key, Reflect.get(globalObject, key));
+      }
+      createContainer('atomic-registration-app');
+    },
+  },
+  {
+    name: 'generated string',
+    register(globalObject) {
+      const config = getPreludeConfig({}, 'atomic-registration-app');
+      vm.runInNewContext(config.banner + '\n' + config.preludeScript, { global: globalObject });
+    },
+  },
+];
+
 afterEach(() => {
   Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
   Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
@@ -196,6 +222,29 @@ describe.each(atomicExposureImplementations)('$name atomic-exposure parity', ({ 
     expect(exposure.expose).toThrow();
     expect(Reflect.has(exposure.modernModules, './App')).toBe(false);
     expect(Reflect.has(exposure.legacyModules, 'App')).toBe(false);
+  });
+});
+
+describe.each(atomicRegistrationImplementations)('$name atomic-registration parity', ({ register }) => {
+  it('rolls back the legacy name when its definition throws after writing', () => {
+    // Given
+    const instancesTarget: unknown[] = [];
+    const instances = new Proxy(instancesTarget, {
+      defineProperty(target, property, descriptor) {
+        Reflect.defineProperty(target, property, descriptor);
+        throw new Error('legacy name definition interrupted');
+      },
+    });
+    const containers = {};
+    const globalObject: GlobalFixture = {
+      __MICRO_FRONTEND__: { __INSTANCES__: instances, __SHARED__: {}, __CONTAINERS__: containers },
+    };
+
+    // When / Then
+    expect(() => register(globalObject)).toThrow('legacy name definition interrupted');
+    expect(Reflect.has(instancesTarget, 'atomic-registration-app')).toBe(false);
+    expect(instancesTarget).toHaveLength(0);
+    expect(Reflect.has(containers, 'atomic-registration-app')).toBe(false);
   });
 });
 

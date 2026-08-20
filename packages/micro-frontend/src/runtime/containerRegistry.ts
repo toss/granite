@@ -32,13 +32,13 @@ export function createContainer(appName: string, config: AppContainerConfig = {}
   const legacyContainer: LegacyAppContainer = { name: appName, config, exposeMap: {} };
   const containerIndex = context.__INSTANCES__.length;
 
-  Reflect.defineProperty(context.__INSTANCES__, appName, {
-    configurable: true,
-    enumerable: false,
-    value: containerIndex,
-    writable: false,
-  });
   try {
+    Reflect.defineProperty(context.__INSTANCES__, appName, {
+      configurable: true,
+      enumerable: false,
+      value: containerIndex,
+      writable: false,
+    });
     context.__INSTANCES__.push(legacyContainer);
     if (
       !Reflect.set(context.__CONTAINERS__, appName, modernContainer) ||

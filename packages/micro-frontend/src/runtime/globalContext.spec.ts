@@ -148,4 +148,28 @@ describe('getMicroFrontendGlobalContext', () => {
     expect(canonicalContext.__SHARED__.react).toBe(canonicalSharedValue);
     expect(currentContext.sharedModules.react).toBe(currentSharedValue);
   });
+
+  it('rejects a false compatibility write and removes an earlier entry added by the attempt', () => {
+    // Given
+    const stableValue = {};
+    const sharedTarget = { stable: stableValue };
+    const shared = new Proxy(sharedTarget, {
+      set(target, property, value) {
+        return property === 'second' ? false : Reflect.set(target, property, value);
+      },
+    });
+    const compatibilityContext = { containers: {}, sharedModules: { first: {}, second: {} } };
+    const globalObject = {
+      [CANONICAL_GLOBAL_KEY]: { __INSTANCES__: [], __SHARED__: shared, __CONTAINERS__: {} },
+      [COMPATIBILITY_GLOBAL_KEY]: compatibilityContext,
+    };
+
+    // When
+    const initialize = () => getMicroFrontendGlobalContext(globalObject);
+
+    // Then
+    expect(initialize).toThrow(MicroFrontendGlobalContextCompatibilityError);
+    expect(sharedTarget).toEqual({ stable: stableValue });
+    expect(Reflect.get(globalObject, COMPATIBILITY_GLOBAL_KEY)).toBe(compatibilityContext);
+  });
 });

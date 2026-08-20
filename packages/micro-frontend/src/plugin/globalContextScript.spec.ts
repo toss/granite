@@ -24,6 +24,20 @@ const implementations: readonly BootstrapImplementation[] = [
   },
 ];
 
+const writeInterruptions = [
+  {
+    name: 'returns false',
+    interrupt: () => false,
+  },
+  {
+    name: 'throws after writing',
+    interrupt(target: Record<PropertyKey, unknown>, property: PropertyKey, value: unknown) {
+      Reflect.set(target, property, value);
+      throw new Error('compatibility adoption interrupted');
+    },
+  },
+] as const;
+
 describe.each(implementations)('$name global-context bootstrap', ({ bootstrap }) => {
   it('creates the exact canonical registry shape from an empty global', () => {
     // Given
@@ -106,4 +120,50 @@ describe.each(implementations)('$name global-context bootstrap', ({ bootstrap })
     expect(Reflect.get(globalObject, '__MICRO_FRONTEND__')).toBe(malformedContext);
     expect(Reflect.has(globalObject, '_graniteMicroFrontend')).toBe(false);
   });
+
+  it.each(writeInterruptions)(
+    'rolls back multiple pending entries when the second compatibility write $name, then retries',
+    ({ interrupt }) => {
+      // Given
+      const stableValue = {};
+      const sharedTarget = { stable: stableValue };
+      let shouldInterrupt = true;
+      const shared = new Proxy(sharedTarget, {
+        set(target, property, value) {
+          return property === 'second' && shouldInterrupt
+            ? interrupt(target, property, value)
+            : Reflect.set(target, property, value);
+        },
+      });
+      const firstValue = {};
+      const secondValue = {};
+      const compatibilityContext = {
+        containers: {},
+        sharedModules: { first: firstValue, second: secondValue },
+      };
+      const globalObject: GlobalFixture = {
+        __MICRO_FRONTEND__: { __INSTANCES__: [], __SHARED__: shared, __CONTAINERS__: {} },
+        _graniteMicroFrontend: compatibilityContext,
+      };
+
+      // When
+      const initialize = () => bootstrap(globalObject);
+
+      // Then
+      expect(initialize).toThrow();
+      expect(sharedTarget).toEqual({ stable: stableValue });
+      expect(Reflect.get(globalObject, '_graniteMicroFrontend')).toBe(compatibilityContext);
+
+      // When
+      shouldInterrupt = false;
+      const context = initialize();
+
+      // Then
+      expect(sharedTarget).toEqual({ stable: stableValue, first: firstValue, second: secondValue });
+      expect(Reflect.get(globalObject, '_graniteMicroFrontend')).not.toBe(compatibilityContext);
+      expect(Reflect.get(Reflect.get(globalObject, '_graniteMicroFrontend') ?? {}, 'sharedModules')).toBe(
+        Reflect.get(context ?? {}, '__SHARED__')
+      );
+    }
+  );
 });

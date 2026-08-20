@@ -124,6 +124,30 @@ describe('getPreludeConfig', () => {
     expect(Reflect.has(Reflect.get(globalObject.__MICRO_FRONTEND__, '__CONTAINERS__'), 'interrupted-app')).toBe(false);
   });
 
+  it('rolls back generated registry slots when the legacy name definition throws after writing', () => {
+    // Given
+    const instancesTarget: unknown[] = [];
+    const instances = new Proxy(instancesTarget, {
+      defineProperty(target, property, descriptor) {
+        Reflect.defineProperty(target, property, descriptor);
+        throw new Error('generated legacy name definition interrupted');
+      },
+    });
+    const globalObject = {
+      __MICRO_FRONTEND__: { __INSTANCES__: instances, __SHARED__: {}, __CONTAINERS__: {} },
+    };
+    const config = getPreludeConfig({}, 'throwing-name-app');
+
+    // When
+    const evaluate = () => vm.runInNewContext(config.banner + '\n' + config.preludeScript, { global: globalObject });
+
+    // Then
+    expect(evaluate).toThrow('generated legacy name definition interrupted');
+    expect(Reflect.has(instancesTarget, 'throwing-name-app')).toBe(false);
+    expect(instancesTarget).toHaveLength(0);
+    expect(Reflect.has(globalObject.__MICRO_FRONTEND__.__CONTAINERS__, 'throwing-name-app')).toBe(false);
+  });
+
   it('rolls back both container stores when canonical registration throws after writing', () => {
     // Given
     const containerTarget = {};

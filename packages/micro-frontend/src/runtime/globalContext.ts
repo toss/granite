@@ -1,10 +1,7 @@
 const CANONICAL_GLOBAL_KEY = '__MICRO_FRONTEND__';
 const COMPATIBILITY_GLOBAL_KEY = '_graniteMicroFrontend';
-const INSTANCES_KEY = '__INSTANCES__';
-const SHARED_KEY = '__SHARED__';
-const CONTAINERS_KEY = '__CONTAINERS__';
-
 type Registry = Record<string, unknown>;
+type RegistryAdoption = readonly [Registry, readonly (readonly [string, unknown])[]];
 
 export type MicroFrontendGlobalContext = {
   readonly __INSTANCES__: unknown[];
@@ -58,7 +55,7 @@ export function getMicroFrontendGlobalContext(globalObject: object = globalThis)
   const canonicalContext = parseCanonicalContext(canonicalValue);
   const compatibilityContext = parseCompatibilityContext(compatibilityValue);
   const canonicalNeedsReplacement =
-    isLegacyGlobalContext(canonicalContext) && !hasKeysInOrder(canonicalContext, [INSTANCES_KEY, SHARED_KEY]);
+    isLegacyGlobalContext(canonicalContext) && !hasKeysInOrder(canonicalContext, ['__INSTANCES__', '__SHARED__']);
   validateGlobalSlots(globalObject, canonicalValue, canonicalNeedsReplacement);
 
   const adoptedContext = canonicalContext ?? createCanonicalContext(compatibilityContext);
@@ -69,8 +66,10 @@ export function getMicroFrontendGlobalContext(globalObject: object = globalThis)
 
   const context = completeCanonicalContext(adoptedContext, canonicalContainers);
   installCanonicalOwner(globalObject, canonicalValue, context);
-  applyPendingEntries(context.__SHARED__, pendingSharedEntries);
-  applyPendingEntries(context.__CONTAINERS__, pendingContainerEntries);
+  applyPendingEntries([
+    [context.__SHARED__, pendingSharedEntries],
+    [context.__CONTAINERS__, pendingContainerEntries],
+  ]);
   installCompatibilityAdapter(globalObject, adapter);
   installedContexts.set(adapter, context);
 
@@ -135,10 +134,7 @@ function selectCompatibilityAdapter(
   ) {
     return compatibilityContext;
   }
-  return {
-    containers,
-    sharedModules,
-  };
+  return { containers, sharedModules };
 }
 
 function getPendingEntries(target: Registry, source: Registry | undefined): readonly (readonly [string, unknown])[] {
@@ -162,9 +158,20 @@ function getPendingEntries(target: Registry, source: Registry | undefined): read
   return pendingEntries;
 }
 
-function applyPendingEntries(target: Registry, entries: readonly (readonly [string, unknown])[]): void {
-  for (const [key, value] of entries) {
-    Reflect.set(target, key, value);
+function applyPendingEntries(adoptions: readonly RegistryAdoption[]): void {
+  const attemptedEntries: Array<readonly [Registry, string]> = [];
+  try {
+    for (const [target, entries] of adoptions) {
+      for (const [key, value] of entries) {
+        attemptedEntries.push([target, key]);
+        if (!Reflect.set(target, key, value)) {
+          throw new MicroFrontendGlobalContextCompatibilityError('registry-is-not-extensible');
+        }
+      }
+    }
+  } catch (error) {
+    attemptedEntries.reverse().forEach(([target, key]) => Reflect.deleteProperty(target, key));
+    throw error;
   }
 }
 
@@ -201,7 +208,7 @@ function defineCanonicalContainers(context: LegacyGlobalContext, containers: Reg
   if (!Reflect.isExtensible(context)) {
     throw new MicroFrontendGlobalContextCompatibilityError('canonical-global-is-not-adoptable');
   }
-  Reflect.defineProperty(context, CONTAINERS_KEY, {
+  Reflect.defineProperty(context, '__CONTAINERS__', {
     configurable: true,
     enumerable: true,
     value: containers,
@@ -220,7 +227,7 @@ function completeCanonicalContext(
   if (isMicroFrontendGlobalContext(context)) {
     return context;
   }
-  if (hasKeysInOrder(context, [INSTANCES_KEY, SHARED_KEY])) {
+  if (hasKeysInOrder(context, ['__INSTANCES__', '__SHARED__'])) {
     return defineCanonicalContainers(context, containers);
   }
   return {
@@ -233,19 +240,19 @@ function completeCanonicalContext(
 function isMicroFrontendGlobalContext(value: unknown): value is MicroFrontendGlobalContext {
   return (
     isObjectRecord(value) &&
-    hasKeysInOrder(value, [INSTANCES_KEY, SHARED_KEY, CONTAINERS_KEY]) &&
-    Array.isArray(Reflect.get(value, INSTANCES_KEY)) &&
-    isObjectRecord(Reflect.get(value, SHARED_KEY)) &&
-    isObjectRecord(Reflect.get(value, CONTAINERS_KEY))
+    hasKeysInOrder(value, ['__INSTANCES__', '__SHARED__', '__CONTAINERS__']) &&
+    Array.isArray(Reflect.get(value, '__INSTANCES__')) &&
+    isObjectRecord(Reflect.get(value, '__SHARED__')) &&
+    isObjectRecord(Reflect.get(value, '__CONTAINERS__'))
   );
 }
 
 function isLegacyGlobalContext(value: unknown): value is LegacyGlobalContext {
   return (
     isObjectRecord(value) &&
-    hasExactKeySet(value, [INSTANCES_KEY, SHARED_KEY]) &&
-    Array.isArray(Reflect.get(value, INSTANCES_KEY)) &&
-    isObjectRecord(Reflect.get(value, SHARED_KEY))
+    hasExactKeySet(value, ['__INSTANCES__', '__SHARED__']) &&
+    Array.isArray(Reflect.get(value, '__INSTANCES__')) &&
+    isObjectRecord(Reflect.get(value, '__SHARED__'))
   );
 }
 

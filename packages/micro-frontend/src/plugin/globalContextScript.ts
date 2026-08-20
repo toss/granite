@@ -68,6 +68,25 @@ export const globalContextScript = String.raw`
     return entries;
   }
 
+  function applyPendingEntries(adoptions) {
+    var attemptedEntries = [];
+    try {
+      adoptions.forEach(function (adoption) {
+        adoption[1].forEach(function (entry) {
+          attemptedEntries.push([adoption[0], entry[0]]);
+          if (!Reflect.set(adoption[0], entry[0], entry[1])) {
+            throw failure('registry-is-not-extensible');
+          }
+        });
+      });
+    } catch (error) {
+      attemptedEntries.reverse().forEach(function (entry) {
+        Reflect.deleteProperty(entry[0], entry[1]);
+      });
+      throw error;
+    }
+  }
+
   var canonicalValue = globalObject[canonicalKey];
   var compatibilityValue = globalObject[compatibilityKey];
   if (canonicalValue != null && !isCanonicalContext(canonicalValue) && !isLegacyContext(canonicalValue)) {
@@ -142,8 +161,10 @@ export const globalContextScript = String.raw`
       writable: true,
     });
   }
-  sharedEntries.forEach(function (entry) { context[sharedKey][entry[0]] = entry[1]; });
-  containerEntries.forEach(function (entry) { context[containersKey][entry[0]] = entry[1]; });
+  applyPendingEntries([
+    [context[sharedKey], sharedEntries],
+    [context[containersKey], containerEntries],
+  ]);
   Object.defineProperty(globalObject, compatibilityKey, {
     configurable: true,
     enumerable: true,
