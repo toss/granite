@@ -11,9 +11,11 @@ import {
   rememberLegacyAdapterPair,
   type LegacyAppContainer,
 } from './containerPairing';
-import { AppContainerAlreadyRegisteredError, ExposedModuleAlreadyRegisteredError } from './errors';
+import { AppContainerAlreadyRegisteredError } from './errors';
 import { getMicroFrontendGlobalContext, MicroFrontendGlobalContextCompatibilityError } from './globalContext';
 import type { AppContainer, AppContainerConfig } from './registry';
+
+export { exposeContainerModule as exposeModule } from './containerModuleExposure';
 
 export function createContainer(appName: string, config: AppContainerConfig = {}): AppContainer {
   const context = getMicroFrontendGlobalContext();
@@ -56,25 +58,6 @@ export function createContainer(appName: string, config: AppContainerConfig = {}
 
   rememberContainerPair(modernContainer, legacyContainer);
   return modernContainer;
-}
-
-export function exposeModule(container: AppContainer, exposedModule: string, module: unknown): void {
-  const normalizedModule = normalizeExposedModule(exposedModule);
-  const legacyContainer = getLegacyContainerPair(container);
-  const legacyModuleName = normalizeLegacyModule(exposedModule);
-  if (
-    Reflect.has(container.exposedModules, normalizedModule) ||
-    (legacyContainer != null && Reflect.has(legacyContainer.exposeMap, legacyModuleName))
-  ) {
-    throw new ExposedModuleAlreadyRegisteredError(container.appName, normalizedModule);
-  }
-
-  if (Object.is(Reflect.get(getMicroFrontendGlobalContext().__CONTAINERS__, container.appName), container)) {
-    Reflect.set(container.exposedModules, normalizedModule, module);
-  }
-  if (legacyContainer != null) {
-    defineLegacyModule(legacyContainer.exposeMap, legacyModuleName, module);
-  }
 }
 
 export function getContainer(appName: string): AppContainer | null {
@@ -207,28 +190,6 @@ function createLegacyInstancesWithout(instances: unknown[], removed: LegacyAppCo
     });
   }
   return nextInstances;
-}
-
-function defineLegacyModule(exposeMap: Record<string, unknown>, moduleName: string, module: unknown): void {
-  Reflect.defineProperty(exposeMap, moduleName, {
-    configurable: true,
-    enumerable: true,
-    get: () => toLegacyEsm(module),
-  });
-}
-
-function toLegacyEsm(module: unknown): unknown {
-  if ((typeof module !== 'object' || module == null) && typeof module !== 'function') {
-    return module;
-  }
-  if (Reflect.get(module, '__esModule') === true) {
-    return module;
-  }
-  const descriptors: PropertyDescriptorMap = { __esModule: { value: true } };
-  if (Reflect.get(module, 'default') == null) {
-    descriptors.default = { enumerable: true, value: module };
-  }
-  return Object.defineProperties(module, descriptors);
 }
 
 function clearRegistry(registry: Record<string, unknown>): void {

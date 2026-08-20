@@ -22,6 +22,17 @@ type Implementation = {
   readonly execute: (globalObject: GlobalFixture, moduleValue: object, sharedValue: object) => ParityObservation;
 };
 
+type AtomicExposure = {
+  readonly expose: () => void;
+  readonly legacyModules: object;
+  readonly modernModules: object;
+};
+
+type AtomicExposureImplementation = {
+  readonly name: string;
+  readonly setup: (globalObject: GlobalFixture, moduleValue: object) => AtomicExposure;
+};
+
 const scenarios: readonly Scenario[] = [
   { name: 'empty', createGlobal: () => ({}) },
   {
@@ -94,6 +105,60 @@ const implementations: readonly Implementation[] = [
   },
 ];
 
+const atomicExposureImplementations: readonly AtomicExposureImplementation[] = [
+  {
+    name: 'runtime',
+    setup(globalObject, moduleValue) {
+      Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
+      Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
+      for (const key of Reflect.ownKeys(globalObject)) {
+        Reflect.set(globalThis, key, Reflect.get(globalObject, key));
+      }
+      const container = createContainer('atomic-parity-app');
+      const context = requireObject(Reflect.get(globalThis, '__MICRO_FRONTEND__'));
+      const instances = requireObject(Reflect.get(context, '__INSTANCES__'));
+      const legacyContainer = requireObject(Reflect.get(instances, Reflect.get(instances, 'atomic-parity-app')));
+      const legacyModules = requireObject(Reflect.get(legacyContainer, 'exposeMap'));
+      Object.preventExtensions(legacyModules);
+      return {
+        expose: () => exposeModule(container, './App', moduleValue),
+        legacyModules,
+        modernModules: container.exposedModules,
+      };
+    },
+  },
+  {
+    name: 'generated string',
+    setup(globalObject, moduleValue) {
+      const config = getPreludeConfig({}, 'atomic-parity-app');
+      vm.runInNewContext(
+        [
+          config.banner,
+          config.preludeScript,
+          'const __legacy = global.__MICRO_FRONTEND__.__INSTANCES__[0];',
+          'Object.preventExtensions(__legacy.exposeMap);',
+          'global.__exposeAtomicParity = function () { exposeModule(__container, "./App", moduleValue); };',
+        ].join('\n'),
+        { global: globalObject, moduleValue }
+      );
+      const context = requireObject(Reflect.get(globalObject, '__MICRO_FRONTEND__'));
+      const instances = requireObject(Reflect.get(context, '__INSTANCES__'));
+      const containers = requireObject(Reflect.get(context, '__CONTAINERS__'));
+      const expose: unknown = Reflect.get(globalObject, '__exposeAtomicParity');
+      if (typeof expose !== 'function') {
+        throw new Error('Expected generated exposure function');
+      }
+      return {
+        expose: () => Reflect.apply(expose, globalObject, []),
+        legacyModules: requireObject(Reflect.get(requireObject(Reflect.get(instances, 0)), 'exposeMap')),
+        modernModules: requireObject(
+          Reflect.get(requireObject(Reflect.get(containers, 'atomic-parity-app')), 'exposedModules')
+        ),
+      };
+    },
+  },
+];
+
 afterEach(() => {
   Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
   Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
@@ -113,6 +178,18 @@ describe.each(implementations)('$name generated-prelude parity', ({ execute }) =
     expect(result.modernImported).toBe(moduleValue);
     expect(result.legacyImported).toBe(moduleValue);
     expect(result.sharedImported).toBe(sharedValue);
+  });
+});
+
+describe.each(atomicExposureImplementations)('$name atomic-exposure parity', ({ setup }) => {
+  it('rolls back both registry views when the legacy expose map rejects the definition', () => {
+    // Given
+    const exposure = setup({}, { route: 'atomic parity' });
+
+    // When / Then
+    expect(exposure.expose).toThrow();
+    expect(Reflect.has(exposure.modernModules, './App')).toBe(false);
+    expect(Reflect.has(exposure.legacyModules, 'App')).toBe(false);
   });
 });
 
