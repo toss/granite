@@ -1,8 +1,9 @@
-import { useLayoutEffect, useReducer } from 'react';
+import { useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import {
   installPendingHostComponentBridge,
   resetPendingHostComponent,
 } from '../host/pendingHostComponentStore';
+import { disposeAppResources } from '../runtime/registry';
 import type {
   MicroFrontendRuntimeApi,
   MicroFrontendSessionEvent,
@@ -56,6 +57,26 @@ export function useMicroFrontendSessions(
     reduceMicroFrontendSessions,
     INITIAL_SESSIONS
   );
+  const previousSessionsRef = useRef(sessions);
+
+  useEffect(() => {
+    const previousSessions = previousSessionsRef.current;
+    previousSessionsRef.current = sessions;
+    const activeSessionIds = new Set(sessions.map(({ sessionId }) => sessionId));
+    const activeAppNames = new Set(sessions.map(({ appName }) => appName));
+    const inactiveAppNames = new Set(
+      previousSessions
+        .filter(({ sessionId }) => !activeSessionIds.has(sessionId))
+        .map(({ appName }) => appName)
+        .filter((appName) => !activeAppNames.has(appName))
+    );
+
+    inactiveAppNames.forEach((appName) => {
+      void disposeAppResources(appName).catch((error) => {
+        console.error(`Failed to dispose micro-frontend app resources for '${appName}'`, error);
+      });
+    });
+  }, [sessions]);
 
   useLayoutEffect(() => {
     installPendingHostComponentBridge();

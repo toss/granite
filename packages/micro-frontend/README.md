@@ -62,6 +62,10 @@ Fabric components.
 The app name comes from `granite.config.ts`. Hosts do not maintain a separate
 remote-app list.
 
+The generated runtime prelude uses a package-specific file name so this plugin
+can coexist with the legacy `@granite-js/plugin-micro-frontend` plugin during a
+gradual migration. This preserves both plugins' shared-module registrations.
+
 ```ts
 // Remote app
 import { microFrontend } from '@granite-js/micro-frontend/plugin';
@@ -136,8 +140,10 @@ adapter.loadBundle({ appName: 'cart' })
 ```
 
 Concurrent preload/import calls for one app share an evaluation. A successful
-evaluation remains cached until its last native session closes. Failed
-evaluation removes the partial container so a later request can retry.
+evaluation remains cached for the lifetime of the JavaScript runtime. Closing
+the app's last session runs its registered dispose callbacks without removing
+the evaluated container or exposed modules. Failed evaluation removes the
+partial container so a later request can retry.
 Native `preloadApp` events invoke `preloadApp()` inside the runtime and are not
 forwarded to session listeners. `onPreloadError` is optional and lets the host
 route best-effort native preload failures to its observability provider.
@@ -150,6 +156,24 @@ The public runtime API is:
 | `importApp(request)` | Ensure the app is evaluated and import `appName/exposedModule`. |
 | `evaluateScript(filePath)` | Evaluate an already-local bundle in the retained runtime. |
 | `onEvent(listener)` | Subscribe to native open, close, and visibility events. |
+
+Remote code can register an idempotent callback for resources that should be
+reset whenever the app has no remaining sessions:
+
+```ts
+if (globalThis._graniteMicroFrontend != null) {
+  globalThis._graniteMicroFrontend.dispose(() => {
+    queryClient.clear();
+  });
+}
+```
+
+The micro-frontend plugin assigns the remote app name at build time through
+Granite's common `transformer.transformSync` source path, which is used by both
+Metro and Mpack. The callback remains registered after it runs so a cached app
+can enter and leave again without re-evaluating its bundle. Session disposal
+does not remove the app container, exposed modules, or pending host-component
+routes.
 
 ## Session rendering
 
@@ -246,7 +270,7 @@ Native emits the following events:
 | `preloadApp` | `appName` | Warm an app. |
 | `openApp` | `sessionId`, `appName`, `scheme` | Create the session's React tree. |
 | `sessionVisibilityChanged` | `sessionId`, `isVisible` | Update presentation visibility from native lifecycle. |
-| `closeApp` | `sessionId` | Unmount the tree and release the app when its last session closes. |
+| `closeApp` | `sessionId` | Unmount the tree and run the app's dispose callbacks when its last session closes. The evaluated app remains cached. |
 
 Events emitted before JavaScript subscribes are queued. Event delivery starts
 after the runtime installs its first listener.

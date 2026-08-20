@@ -24,6 +24,13 @@ export interface AppContainer {
   readonly exposedModules: Record<string, unknown>;
 }
 
+export type AppDisposeCallback = () => void | Promise<void>;
+
+export interface RegisterAppDispose {
+  (callback: AppDisposeCallback): () => void;
+  (appName: string, callback: AppDisposeCallback): () => void;
+}
+
 interface SharedModule {
   readonly get: () => unknown;
   readonly loaded: boolean;
@@ -31,6 +38,8 @@ interface SharedModule {
 
 export interface MicroFrontendRuntimeContext {
   readonly containers: Record<string, AppContainer>;
+  readonly dispose: RegisterAppDispose;
+  readonly disposeCallbacksByApp: Record<string, Set<AppDisposeCallback>>;
   readonly sharedModules: Record<string, SharedModule>;
 }
 
@@ -41,11 +50,14 @@ declare global {
 export function getMicroFrontendRuntimeContext(): MicroFrontendRuntimeContext {
   const existingContext = globalThis._graniteMicroFrontend;
   if (existingContext != null) {
+    ensureLifecycleContext(existingContext);
     return existingContext;
   }
 
   const context: MicroFrontendRuntimeContext = {
     containers: {},
+    dispose: createRegisterAppDispose(),
+    disposeCallbacksByApp: {},
     sharedModules: {},
   };
   globalThis._graniteMicroFrontend = context;
@@ -107,6 +119,15 @@ export function removeContainer(appName: string): void {
   Reflect.deleteProperty(containers, appName);
 }
 
+export async function disposeAppResources(appName: string): Promise<void> {
+  const disposeCallbacks = globalThis._graniteMicroFrontend?.disposeCallbacksByApp?.[appName];
+  if (disposeCallbacks == null) {
+    return;
+  }
+
+  await runAppDisposeCallbacks(disposeCallbacks);
+}
+
 export function hasContainer(appName: string): boolean {
   return getContainer(appName) != null;
 }
@@ -122,6 +143,75 @@ export function importModule<TModule>(request: AppRequest): TModule {
 
 function normalizeExposedModule(exposedModule: string): string {
   return exposedModule.startsWith('./') ? exposedModule : `./${exposedModule}`;
+}
+
+function ensureLifecycleContext(context: MicroFrontendRuntimeContext): void {
+  const mutableContext = context as unknown as {
+    dispose?: RegisterAppDispose;
+    disposeCallbacksByApp?: Record<string, Set<AppDisposeCallback>>;
+  };
+  mutableContext.disposeCallbacksByApp ??= {};
+  mutableContext.dispose ??= createRegisterAppDispose();
+}
+
+function createRegisterAppDispose(): RegisterAppDispose {
+  function dispose(callback: AppDisposeCallback): () => void;
+  function dispose(appName: string, callback: AppDisposeCallback): () => void;
+  function dispose(appNameOrCallback: string | AppDisposeCallback, callback?: AppDisposeCallback): () => void {
+    if (typeof appNameOrCallback !== 'string' || callback == null) {
+      throw new Error('dispose() must be compiled with the microFrontend plugin');
+    }
+    return registerAppDisposeCallback(
+      getMicroFrontendRuntimeContext(),
+      appNameOrCallback,
+      callback
+    );
+  }
+
+  return dispose;
+}
+
+function registerAppDisposeCallback(
+  context: MicroFrontendRuntimeContext,
+  appName: string,
+  callback: AppDisposeCallback
+): () => void {
+  if (typeof appName !== 'string' || typeof callback !== 'function') {
+    throw new Error('dispose() must be compiled with the microFrontend plugin');
+  }
+
+  const disposeCallbacks = (context.disposeCallbacksByApp[appName] ??= new Set());
+  disposeCallbacks.add(callback);
+  let isRegistered = true;
+
+  return () => {
+    if (!isRegistered) {
+      return;
+    }
+    isRegistered = false;
+    disposeCallbacks.delete(callback);
+  };
+}
+
+async function runAppDisposeCallbacks(disposeCallbacks: Set<AppDisposeCallback>): Promise<void> {
+  const callbacks = Array.from(disposeCallbacks).reverse();
+  let firstDisposeError: unknown;
+  let didDisposeFail = false;
+
+  for (const dispose of callbacks) {
+    try {
+      await dispose();
+    } catch (error) {
+      if (!didDisposeFail) {
+        firstDisposeError = error;
+        didDisposeFail = true;
+      }
+    }
+  }
+
+  if (didDisposeFail) {
+    throw firstDisposeError;
+  }
 }
 
 export const microFrontendModuleRegistry: MicroFrontendModuleRegistry = {

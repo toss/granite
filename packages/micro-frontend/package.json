@@ -55,6 +55,7 @@
     "directory": "packages/micro-frontend"
   },
   "dependencies": {
+    "@babel/core": "7.28.5",
     "@granite-js/utils": "workspace:*",
     "@standard-schema/spec": "^1.0.0"
   },
@@ -70,8 +71,10 @@
     }
   },
   "devDependencies": {
+    "@babel/types": "7.28.5",
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/react-native": "workspace:*",
+    "@types/babel__core": "^7.20.5",
     "@types/node": "catalog:tools",
     "@types/react": "catalog:react-native",
     "@types/react-test-renderer": "^19",
