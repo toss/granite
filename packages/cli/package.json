@@ -29,7 +29,6 @@
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "find-deadcode": "ts-prune",
     "build": "tsup"
   },
   "files": [
@@ -49,7 +48,6 @@
     "@vitest/coverage-v8": "^4.0.12",
     "esbuild": "0.25.8",
     "eslint": "^9.7.0",
-    "ts-prune": "^0.10.3",
     "tsup": "^8.5.0",
     "typescript": "catalog:tools",
     "vitest": "^4.0.12"
