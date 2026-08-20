@@ -170,10 +170,16 @@ if (globalThis._graniteMicroFrontend != null) {
 
 The micro-frontend plugin assigns the remote app name at build time through
 Granite's common `transformer.transformSync` source path, which is used by both
-Metro and Mpack. The callback remains registered after it runs so a cached app
-can enter and leave again without re-evaluating its bundle. Session disposal
-does not remove the app container, exposed modules, or pending host-component
-routes.
+Metro and Mpack. When `closeApp(sessionId)` removes an app's last live session,
+the session owner invokes all callbacks registered for that app. Callbacks stay
+registered, so a reopened app invokes them again on its next last close.
+The `disposeAppResources` helper that runs those callbacks is internal lifecycle
+machinery and is not part of this package's public exports. Closing a session
+releases only its React state and native binding: the successful evaluation,
+paired container, exposed modules, shared modules, and pending app routes remain
+cached for the lifetime of the JavaScript runtime, so reopening the app does not
+load or evaluate its bundle again. Failed evaluation still removes its partial
+registration so a later request can retry.
 
 ## Session rendering
 
