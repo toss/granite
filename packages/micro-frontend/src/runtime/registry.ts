@@ -1,13 +1,17 @@
 import type { AppRequest } from '../types';
-import type { MicroFrontendModuleRegistry } from './createMicroFrontendRuntime';
 import {
-  AppContainerAlreadyRegisteredError,
-  ExposedModuleAlreadyRegisteredError,
-  ExposedModuleNotFoundError,
-  SharedModuleAlreadyRegisteredError,
-} from './errors';
+  createContainer,
+  exposeModule,
+  getContainer,
+  getExposedModule,
+  hasContainer,
+  removeContainer,
+} from './containerRegistry';
+import type { MicroFrontendModuleRegistry } from './createMicroFrontendRuntime';
+import { ExposedModuleNotFoundError, SharedModuleAlreadyRegisteredError } from './errors';
 import { getMicroFrontendGlobalContext } from './globalContext';
 import { parseAppRequest } from './parseAppRequest';
+export { createContainer, exposeModule, getContainer, hasContainer, removeContainer };
 
 export interface SharedModuleConfig {
   readonly eager?: boolean;
@@ -66,29 +70,6 @@ export function getMicroFrontendRuntimeContext(): MicroFrontendRuntimeContext {
   return context;
 }
 
-export function createContainer(appName: string, config: AppContainerConfig = {}): AppContainer {
-  const containers = getMicroFrontendRuntimeContext().containers;
-  if (containers[appName] != null) {
-    throw new AppContainerAlreadyRegisteredError(appName);
-  }
-
-  const container: AppContainer = {
-    appName,
-    config,
-    exposedModules: {},
-  };
-  containers[appName] = container;
-  return container;
-}
-
-export function exposeModule(container: AppContainer, exposedModule: string, module: unknown): void {
-  const normalizedModule = normalizeExposedModule(exposedModule);
-  if (container.exposedModules[normalizedModule] != null) {
-    throw new ExposedModuleAlreadyRegisteredError(container.appName, normalizedModule);
-  }
-  container.exposedModules[normalizedModule] = module;
-}
-
 export function registerShared(moduleName: string, module: unknown): void {
   const sharedModules = getMicroFrontendGlobalContext().__SHARED__;
   const existingModule = sharedModules[moduleName];
@@ -113,23 +94,6 @@ function isSharedModule(value: unknown): value is SharedModule {
   );
 }
 
-export function getContainer(appName: string): AppContainer | null {
-  return getMicroFrontendRuntimeContext().containers[appName] ?? null;
-}
-
-export function removeContainer(appName: string): void {
-  const containers = getMicroFrontendRuntimeContext().containers;
-  const container = containers[appName];
-  if (container == null) {
-    return;
-  }
-
-  for (const exposedModule of Object.keys(container.exposedModules)) {
-    Reflect.deleteProperty(container.exposedModules, exposedModule);
-  }
-  Reflect.deleteProperty(containers, appName);
-}
-
 export async function disposeAppResources(appName: string): Promise<void> {
   const disposeCallbacks = globalThis._graniteMicroFrontend?.disposeCallbacksByApp?.[appName];
   if (disposeCallbacks == null) {
@@ -139,21 +103,14 @@ export async function disposeAppResources(appName: string): Promise<void> {
   await runAppDisposeCallbacks(disposeCallbacks);
 }
 
-export function hasContainer(appName: string): boolean {
-  return getContainer(appName) != null;
-}
-
 export function importModule<TModule>(request: AppRequest): TModule {
   const { appName, exposedModule } = parseAppRequest(request);
-  const module = getContainer(appName)?.exposedModules[exposedModule];
+  const container = getContainer(appName);
+  const module = container == null ? null : getExposedModule(container, exposedModule);
   if (module == null) {
     throw new ExposedModuleNotFoundError(appName, exposedModule);
   }
   return module as TModule;
-}
-
-function normalizeExposedModule(exposedModule: string): string {
-  return exposedModule.startsWith('./') ? exposedModule : `./${exposedModule}`;
 }
 
 function ensureLifecycleContext(context: MicroFrontendRuntimeContext): void {
