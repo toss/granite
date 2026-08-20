@@ -117,27 +117,58 @@ describe.each(implementations)('$name immutable legacy ESM parity', ({ expose, p
     expect(exposure.legacy).toBe(moduleValue);
   });
 
-  it('keeps a frozen namespace immutable while forwarding named exports live', () => {
+  it.each([undefined, null])(
+    'preserves frozen namespace descriptors and an own %s default while forwarding exports live',
+    (ownDefault) => {
+      // Given
+      const symbolExport = Symbol('symbolExport');
+      let namedExport = 'before';
+      let hiddenExport = 'hidden-before';
+      let symbolValue = 'symbol-before';
+      const moduleValue = Object.freeze(
+        Object.defineProperties(
+          {},
+          {
+            default: { enumerable: true, value: ownDefault },
+            hiddenExport: { enumerable: false, get: () => hiddenExport },
+            namedExport: { enumerable: true, get: () => namedExport },
+            [symbolExport]: { enumerable: false, get: () => symbolValue },
+          }
+        )
+      );
+      const originalDescriptors = Object.getOwnPropertyDescriptors(moduleValue);
+
+      // When
+      const exposure = expose(moduleValue);
+      namedExport = 'after';
+      hiddenExport = 'hidden-after';
+      symbolValue = 'symbol-after';
+      const legacyModule = requireObject(exposure.legacy);
+
+      // Then
+      expect(exposure.modern).toBe(moduleValue);
+      expect(legacyModule).not.toBe(moduleValue);
+      expect(Reflect.get(legacyModule, '__esModule')).toBe(true);
+      expect(Reflect.get(legacyModule, 'default')).toBe(ownDefault);
+      expect(Reflect.get(legacyModule, 'namedExport')).toBe('after');
+      expect(Reflect.get(legacyModule, 'hiddenExport')).toBe('hidden-after');
+      expect(Reflect.get(legacyModule, symbolExport)).toBe('symbol-after');
+      expect(Object.getOwnPropertyDescriptor(legacyModule, 'hiddenExport')?.enumerable).toBe(false);
+      expect(Object.getOwnPropertyDescriptor(legacyModule, symbolExport)?.enumerable).toBe(false);
+      expect(Object.getOwnPropertyDescriptors(moduleValue)).toEqual(originalDescriptors);
+      expect(Object.isFrozen(moduleValue)).toBe(true);
+    }
+  );
+
+  it('falls back to the original namespace only when the default export is absent', () => {
     // Given
-    let namedExport = 'before';
-    const moduleValue = Object.freeze(
-      Object.defineProperty({}, 'namedExport', { enumerable: true, get: () => namedExport })
-    );
-    const originalDescriptors = Object.getOwnPropertyDescriptors(moduleValue);
+    const moduleValue = Object.freeze({ namedExport: 'value' });
 
     // When
     const exposure = expose(moduleValue);
-    namedExport = 'after';
-    const legacyModule = requireObject(exposure.legacy);
 
     // Then
-    expect(exposure.modern).toBe(moduleValue);
-    expect(legacyModule).not.toBe(moduleValue);
-    expect(Reflect.get(legacyModule, '__esModule')).toBe(true);
-    expect(Reflect.get(legacyModule, 'default')).toBe(moduleValue);
-    expect(Reflect.get(legacyModule, 'namedExport')).toBe('after');
-    expect(Object.getOwnPropertyDescriptors(moduleValue)).toEqual(originalDescriptors);
-    expect(Object.isFrozen(moduleValue)).toBe(true);
+    expect(Reflect.get(requireObject(exposure.legacy), 'default')).toBe(moduleValue);
   });
 
   it('keeps a frozen callable callable with its receiver and arguments', () => {
@@ -167,6 +198,9 @@ describe.each(implementations)('$name immutable legacy ESM parity', ({ expose, p
     expect(Reflect.apply(exposure.legacy, { prefix: 'receiver:' }, ['argument'])).toBe('receiver:argument');
     expect(Reflect.get(exposure.legacy, 'namedExport')).toBe('after');
     expect(Reflect.get(exposure.legacy, 'default')).toBe(moduleValue);
+    expect(Reflect.get(exposure.legacy, 'name')).toBe(Reflect.get(moduleValue, 'name'));
+    expect(Reflect.get(exposure.legacy, 'length')).toBe(Reflect.get(moduleValue, 'length'));
+    expect(Object.getOwnPropertyDescriptor(exposure.legacy, 'prototype')?.configurable).toBe(false);
     expect(Object.getOwnPropertyDescriptors(moduleValue)).toEqual(originalDescriptors);
     expect(Object.isFrozen(moduleValue)).toBe(true);
   });

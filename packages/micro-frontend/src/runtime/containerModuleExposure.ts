@@ -57,16 +57,22 @@ function toLegacyEsm(module: unknown): unknown {
           return Reflect.apply(module, this, args);
         }
       : {};
-  for (const exportName of Object.keys(module)) {
+  for (const exportName of Reflect.ownKeys(module)) {
     if (exportName === '__esModule' || exportName === 'default') {
       continue;
     }
-    Object.defineProperty(legacyModule, exportName, {
-      enumerable: true,
+    const sourceDescriptor = Reflect.getOwnPropertyDescriptor(module, exportName);
+    const facadeDescriptor = Reflect.getOwnPropertyDescriptor(legacyModule, exportName);
+    if (sourceDescriptor == null || facadeDescriptor?.configurable === false) {
+      // Callable facades keep intrinsic non-configurable slots such as prototype.
+      continue;
+    }
+    Reflect.defineProperty(legacyModule, exportName, {
+      enumerable: sourceDescriptor.enumerable,
       get: () => Reflect.get(module, exportName),
     });
   }
-  const hasDefaultExport = Reflect.get(module, 'default') != null;
+  const hasDefaultExport = Reflect.getOwnPropertyDescriptor(module, 'default') != null;
   Object.defineProperties(legacyModule, {
     __esModule: { value: true },
     default: {
