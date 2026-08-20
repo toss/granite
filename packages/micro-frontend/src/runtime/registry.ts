@@ -6,6 +6,7 @@ import {
   ExposedModuleNotFoundError,
   SharedModuleAlreadyRegisteredError,
 } from './errors';
+import { getMicroFrontendGlobalContext } from './globalContext';
 import { parseAppRequest } from './parseAppRequest';
 
 export interface SharedModuleConfig {
@@ -48,6 +49,7 @@ declare global {
 }
 
 export function getMicroFrontendRuntimeContext(): MicroFrontendRuntimeContext {
+  getMicroFrontendGlobalContext();
   const existingContext = globalThis._graniteMicroFrontend;
   if (existingContext != null) {
     ensureLifecycleContext(existingContext);
@@ -88,10 +90,10 @@ export function exposeModule(container: AppContainer, exposedModule: string, mod
 }
 
 export function registerShared(moduleName: string, module: unknown): void {
-  const sharedModules = getMicroFrontendRuntimeContext().sharedModules;
+  const sharedModules = getMicroFrontendGlobalContext().__SHARED__;
   const existingModule = sharedModules[moduleName];
   if (existingModule != null) {
-    if (Object.is(existingModule.get(), module)) {
+    if (isSharedModule(existingModule) && Object.is(existingModule.get(), module)) {
       return;
     }
     throw new SharedModuleAlreadyRegisteredError(moduleName);
@@ -100,6 +102,15 @@ export function registerShared(moduleName: string, module: unknown): void {
     get: () => module,
     loaded: true,
   };
+}
+
+function isSharedModule(value: unknown): value is SharedModule {
+  return (
+    typeof value === 'object' &&
+    value != null &&
+    typeof Reflect.get(value, 'get') === 'function' &&
+    typeof Reflect.get(value, 'loaded') === 'boolean'
+  );
 }
 
 export function getContainer(appName: string): AppContainer | null {
@@ -161,11 +172,7 @@ function createRegisterAppDispose(): RegisterAppDispose {
     if (typeof appNameOrCallback !== 'string' || callback == null) {
       throw new Error('dispose() must be compiled with the microFrontend plugin');
     }
-    return registerAppDisposeCallback(
-      getMicroFrontendRuntimeContext(),
-      appNameOrCallback,
-      callback
-    );
+    return registerAppDisposeCallback(getMicroFrontendRuntimeContext(), appNameOrCallback, callback);
   }
 
   return dispose;

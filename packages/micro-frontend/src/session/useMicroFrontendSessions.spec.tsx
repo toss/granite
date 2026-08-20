@@ -1,18 +1,9 @@
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  type MicroFrontendSessionState,
-  useMicroFrontendSessions,
-} from './useMicroFrontendSessions';
-import {
-  getIsPendingHostComponentHidden,
-  hidePendingHostComponent,
-} from '../host/pendingHostComponentStore';
+import { type MicroFrontendSessionState, useMicroFrontendSessions } from './useMicroFrontendSessions';
+import { getIsPendingHostComponentHidden, hidePendingHostComponent } from '../host/pendingHostComponentStore';
 import { getMicroFrontendRuntimeContext } from '../runtime/registry';
-import type {
-  MicroFrontendRuntimeApi,
-  MicroFrontendSessionEvent,
-} from '../types';
+import type { MicroFrontendRuntimeApi, MicroFrontendSessionEvent } from '../types';
 
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
 
@@ -61,6 +52,7 @@ function renderSessions(runtime: Pick<MicroFrontendRuntimeApi, 'onEvent'>) {
 describe('useMicroFrontendSessions', () => {
   beforeEach(() => {
     Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
+    Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
   });
 
   it('adds an opened native session to React state', () => {
