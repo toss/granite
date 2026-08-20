@@ -82,7 +82,9 @@ describe('getPreludeConfig', () => {
     expect(Reflect.get(modernContainer, 'appName')).toBe('remote-app');
     expect(Reflect.get(Reflect.get(modernContainer, 'exposedModules'), './App')).toBe(exposedValue);
     expect(Reflect.get(legacyContainer, 'name')).toBe('remote-app');
-    expect(Reflect.get(Reflect.get(legacyContainer, 'exposeMap'), 'App')).toBe(exposedValue);
+    const legacyModule = Reflect.get(Reflect.get(legacyContainer, 'exposeMap'), 'App');
+    expect(Reflect.get(legacyModule, '__esModule')).toBe(true);
+    expect(Reflect.get(legacyModule, 'default')).toBe('remote app');
     expect(Reflect.get(Reflect.get(context, '__SHARED__'), 'react')).toMatchObject({ loaded: true });
   });
 

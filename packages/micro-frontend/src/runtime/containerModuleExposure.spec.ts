@@ -45,7 +45,7 @@ describe('container module exposure', () => {
       "Exposed module './App' is already registered in app container 'duplicate-module-app'"
     );
     expect(container.exposedModules['./App']).toBe(originalModule);
-    expect(Reflect.get(getLegacyExposeMap('duplicate-module-app'), 'App')).toBe(originalModule);
+    expect(Reflect.get(Reflect.get(getLegacyExposeMap('duplicate-module-app'), 'App'), 'default')).toBe(originalModule);
   });
 
   it('rolls back the modern exposure when the legacy expose map is non-extensible', () => {
@@ -90,5 +90,84 @@ describe('container module exposure', () => {
     expect(expose).toThrow('legacy exposure interrupted');
     expect(Reflect.has(container.exposedModules, './App')).toBe(false);
     expect(Reflect.has(legacyExposeTarget, 'App')).toBe(false);
+  });
+
+  it('exposes a frozen namespace through an immutable legacy ESM facade', () => {
+    // Given
+    let route = 'initial';
+    const module = Object.freeze(
+      Object.defineProperty({}, 'route', {
+        enumerable: true,
+        get: () => route,
+      })
+    );
+    const originalDescriptors = Object.getOwnPropertyDescriptors(module);
+    const container = createContainer('frozen-namespace-app');
+
+    // When
+    exposeModule(container, './App', module);
+    const legacyModule = Reflect.get(getLegacyExposeMap('frozen-namespace-app'), 'App');
+    route = 'updated';
+
+    // Then
+    expect(container.exposedModules['./App']).toBe(module);
+    expect(legacyModule).not.toBe(module);
+    expect(Reflect.get(legacyModule, '__esModule')).toBe(true);
+    expect(Reflect.get(legacyModule, 'default')).toBe(module);
+    expect(Reflect.get(legacyModule, 'route')).toBe('updated');
+    expect(Object.getOwnPropertyDescriptors(module)).toEqual(originalDescriptors);
+    expect(Object.isFrozen(module)).toBe(true);
+  });
+
+  it('keeps a frozen callable callable through the immutable legacy ESM facade', () => {
+    // Given
+    let version = '1';
+    const module = Object.freeze(
+      Object.defineProperty(
+        function (this: { readonly prefix: string }, value: string): string {
+          return `${this.prefix}${value}`;
+        },
+        'version',
+        { enumerable: true, get: () => version }
+      )
+    );
+    const originalDescriptors = Object.getOwnPropertyDescriptors(module);
+    const container = createContainer('frozen-callable-app');
+
+    // When
+    exposeModule(container, './App', module);
+    const legacyModule = Reflect.get(getLegacyExposeMap('frozen-callable-app'), 'App');
+    version = '2';
+
+    // Then
+    expect(container.exposedModules['./App']).toBe(module);
+    expect(typeof legacyModule).toBe('function');
+    expect(Reflect.apply(legacyModule, { prefix: 'legacy:' }, ['value'])).toBe('legacy:value');
+    expect(Reflect.get(legacyModule, 'version')).toBe('2');
+    expect(Reflect.get(legacyModule, 'default')).toBe(module);
+    expect(Object.getOwnPropertyDescriptors(module)).toEqual(originalDescriptors);
+    expect(Object.isFrozen(module)).toBe(true);
+  });
+
+  it('publishes neither registry entry when immutable facade construction fails', () => {
+    // Given
+    const container = createContainer('failed-facade-app');
+    const legacyExposeMap = getLegacyExposeMap('failed-facade-app');
+    const module = new Proxy(
+      {},
+      {
+        ownKeys() {
+          throw new Error('legacy facade construction failed');
+        },
+      }
+    );
+
+    // When
+    const expose = () => exposeModule(container, './App', module);
+
+    // Then
+    expect(expose).toThrow('legacy facade construction failed');
+    expect(Reflect.has(container.exposedModules, './App')).toBe(false);
+    expect(Reflect.has(legacyExposeMap, 'App')).toBe(false);
   });
 });

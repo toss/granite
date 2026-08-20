@@ -64,9 +64,10 @@ describe('container registry', () => {
 
     // Then
     expect(legacyContainer?.name).toBe('modern-app');
-    expect(imported).toBe(exposedValue);
+    expect(imported).not.toBe(exposedValue);
     expect(Reflect.get(imported, '__esModule')).toBe(true);
     expect(Reflect.get(imported, 'default')).toBe(exposedValue);
+    expect(Reflect.get(imported, 'route')).toBe('modern');
   });
 
   it('imports a legacy-only container through the modern runtime with normalized module names', () => {

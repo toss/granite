@@ -168,15 +168,21 @@ describe.each(implementations)('$name generated-prelude parity', ({ execute }) =
   it.each(scenarios)('supports canonical and unchanged legacy imports when $name', ({ createGlobal }) => {
     // Given
     const moduleValue = { route: 'parity' };
+    const originalDescriptors = Object.getOwnPropertyDescriptors(moduleValue);
     const sharedValue = { version: '19' };
 
     // When
     const result = execute(createGlobal(), moduleValue, sharedValue);
+    const legacyImported = requireObject(result.legacyImported);
 
     // Then
     expect(result.canonicalKeys).toEqual(['__INSTANCES__', '__SHARED__', '__CONTAINERS__']);
     expect(result.modernImported).toBe(moduleValue);
-    expect(result.legacyImported).toBe(moduleValue);
+    expect(legacyImported).not.toBe(moduleValue);
+    expect(Reflect.get(legacyImported, '__esModule')).toBe(true);
+    expect(Reflect.get(legacyImported, 'default')).toBe(moduleValue);
+    expect(Reflect.get(legacyImported, 'route')).toBe('parity');
+    expect(Object.getOwnPropertyDescriptors(moduleValue)).toEqual(originalDescriptors);
     expect(result.sharedImported).toBe(sharedValue);
   });
 });

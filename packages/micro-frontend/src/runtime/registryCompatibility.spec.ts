@@ -193,14 +193,15 @@ describe('cross-version registry compatibility matrix', () => {
     const compatibleShared = importCompatibleShared();
 
     // Then
-    expect(hostApp).toBe(moduleValue);
+    expect(Reflect.get(hostApp, 'default') ?? hostApp).toBe(moduleValue);
     expect(hostShared).toBe(sharedValue);
     expect(compatibleApp).toBe(moduleValue);
     expect(compatibleShared).toBe(sharedValue);
     if (cell.legacyAppIsUnsupported) {
       expect(() => importLegacyModule(`${cell.appName}/App`)).toThrow(`${cell.appName} container not found`);
     } else {
-      expect(importLegacyModule(`${cell.appName}/App`)).toBe(moduleValue);
+      const legacyApp = importLegacyModule(`${cell.appName}/App`);
+      expect(Reflect.get(legacyApp, 'default') ?? legacyApp).toBe(moduleValue);
     }
     expect(await importLegacyShared()).toBe(sharedValue);
     record(cell.name, 'both host registries observe the remote-owned app and shared module at one name');
@@ -219,9 +220,9 @@ describe('cross-version registry compatibility matrix', () => {
     executeCompatibleRemote('owned-remote', replacementModule, sharedValue);
 
     // Then
-    expect(legacyContainer).toBe(firstModule);
+    expect(Reflect.get(legacyContainer, 'default')).toBe(firstModule);
     expect(importModule('owned-remote/App')).toBe(replacementModule);
-    expect(importLegacyModule('owned-remote/App')).toBe(replacementModule);
+    expect(Reflect.get(importLegacyModule('owned-remote/App'), 'default')).toBe(replacementModule);
     expect(importCompatibleShared()).toBe(sharedValue);
     record(
       'compatible-owned removal',
