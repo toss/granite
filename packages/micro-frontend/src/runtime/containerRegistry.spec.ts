@@ -202,6 +202,40 @@ describe('container registry', () => {
     expect(Reflect.has(getMicroFrontendRuntimeContext().containers, 'throwing-name-app')).toBe(false);
   });
 
+  it('rejects a false legacy name definition without returning a partial container, then retries', () => {
+    // Given
+    const context = globalThis.__MICRO_FRONTEND__;
+    const instancesTarget: unknown[] = [];
+    let rejectName = true;
+    const instances = new Proxy(instancesTarget, {
+      defineProperty(target, property, descriptor) {
+        return property === 'false-name-app' && rejectName
+          ? false
+          : Reflect.defineProperty(target, property, descriptor);
+      },
+    });
+    Reflect.set(context, '__INSTANCES__', instances);
+
+    // When
+    const registerContainer = () => createContainer('false-name-app');
+
+    // Then
+    expect(registerContainer).toThrow('Cannot establish the micro-frontend global context: registry-is-not-extensible');
+    expect(Reflect.has(instancesTarget, 'false-name-app')).toBe(false);
+    expect(instancesTarget).toHaveLength(0);
+    expect(Reflect.has(getMicroFrontendRuntimeContext().containers, 'false-name-app')).toBe(false);
+
+    // When
+    rejectName = false;
+    const container = registerContainer();
+
+    // Then
+    expect(container.appName).toBe('false-name-app');
+    expect(Reflect.get(instancesTarget, 'false-name-app')).toBe(0);
+    expect(instancesTarget).toHaveLength(1);
+    expect(Reflect.get(getMicroFrontendRuntimeContext().containers, 'false-name-app')).toBe(container);
+  });
+
   it('removes a middle modern container and rebuilds remaining mixed legacy indices', () => {
     // Given
     const first = createLegacyContainer('first-app', {});

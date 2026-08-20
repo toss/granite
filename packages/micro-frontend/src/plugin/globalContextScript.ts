@@ -85,6 +85,22 @@ export const globalContextScript = String.raw`
       });
       throw error;
     }
+    return attemptedEntries;
+  }
+
+  function restoreProperty(target, key, descriptor) {
+    var current = Object.getOwnPropertyDescriptor(target, key) || {};
+    var previous = descriptor || {};
+    var currentKeys = Object.keys(current);
+    var descriptorsMatch = currentKeys.length === Object.keys(previous).length && currentKeys.every(function (property) {
+      return Object.is(Reflect.get(current, property), Reflect.get(previous, property));
+    });
+    if (descriptorsMatch) {
+      return;
+    }
+    if (!(descriptor == null ? Reflect.deleteProperty(target, key) : Reflect.defineProperty(target, key, descriptor))) {
+      throw failure('canonical-global-is-not-adoptable');
+    }
   }
 
   var canonicalValue = globalObject[canonicalKey];
@@ -126,54 +142,72 @@ export const globalContextScript = String.raw`
     canonicalContainers,
     compatibilityValue == null ? undefined : compatibilityValue.containers
   );
+  var canonicalDescriptorBefore = Object.getOwnPropertyDescriptor(globalObject, canonicalKey);
+  var compatibilityDescriptorBefore = Object.getOwnPropertyDescriptor(globalObject, compatibilityKey);
+  var containersDescriptorBefore = Object.getOwnPropertyDescriptor(adoptedContext, containersKey);
+  var adoptedEntries = [];
   var context;
-  if (isCanonicalContext(adoptedContext)) {
-    context = adoptedContext;
-  } else if (hasKeysInOrder(adoptedContext, [instancesKey, sharedKey])) {
-    if (!Object.isExtensible(adoptedContext)) {
+  try {
+    if (isCanonicalContext(adoptedContext)) {
+      context = adoptedContext;
+    } else if (hasKeysInOrder(adoptedContext, [instancesKey, sharedKey])) {
+      if (!Object.isExtensible(adoptedContext)) {
+        throw failure('canonical-global-is-not-adoptable');
+      }
+      if (!Reflect.defineProperty(adoptedContext, containersKey, {
+        configurable: true,
+        enumerable: true,
+        value: canonicalContainers,
+        writable: true,
+      })) {
+        throw failure('canonical-global-is-not-adoptable');
+      }
+      context = adoptedContext;
+    } else {
+      context = {
+        __INSTANCES__: adoptedContext[instancesKey],
+        __SHARED__: adoptedContext[sharedKey],
+        __CONTAINERS__: canonicalContainers,
+      };
+    }
+
+    var adapter = compatibilityValue != null &&
+      Object.is(compatibilityValue.containers, context[containersKey]) &&
+      Object.is(compatibilityValue.sharedModules, context[sharedKey])
+        ? compatibilityValue
+        : { containers: context[containersKey], sharedModules: context[sharedKey] };
+    if (!Object.is(canonicalValue, context) && !Reflect.defineProperty(globalObject, canonicalKey, {
+        configurable: true,
+        enumerable: true,
+        value: context,
+        writable: true,
+      })) {
       throw failure('canonical-global-is-not-adoptable');
     }
-    Object.defineProperty(adoptedContext, containersKey, {
+    adoptedEntries = applyPendingEntries([
+      [context[sharedKey], sharedEntries],
+      [context[containersKey], containerEntries],
+    ]);
+    if (!Reflect.defineProperty(globalObject, compatibilityKey, {
       configurable: true,
       enumerable: true,
-      value: canonicalContainers,
-      writable: true,
+      get: function () { return adapter; },
+      set: function (nextValue) {
+        if (!Object.is(nextValue, adapter)) {
+          throw failure('compatibility-global-is-not-adoptable');
+        }
+      },
+    })) {
+      throw failure('compatibility-global-is-not-adoptable');
+    }
+  } catch (error) {
+    adoptedEntries.reverse().forEach(function (entry) {
+      Reflect.deleteProperty(entry[0], entry[1]);
     });
-    context = adoptedContext;
-  } else {
-    context = {
-      __INSTANCES__: adoptedContext[instancesKey],
-      __SHARED__: adoptedContext[sharedKey],
-      __CONTAINERS__: canonicalContainers,
-    };
+    restoreProperty(globalObject, compatibilityKey, compatibilityDescriptorBefore);
+    restoreProperty(globalObject, canonicalKey, canonicalDescriptorBefore);
+    restoreProperty(adoptedContext, containersKey, containersDescriptorBefore);
+    throw error;
   }
-
-  var adapter = compatibilityValue != null &&
-    Object.is(compatibilityValue.containers, context[containersKey]) &&
-    Object.is(compatibilityValue.sharedModules, context[sharedKey])
-      ? compatibilityValue
-      : { containers: context[containersKey], sharedModules: context[sharedKey] };
-  if (!Object.is(canonicalValue, context)) {
-    Object.defineProperty(globalObject, canonicalKey, {
-      configurable: true,
-      enumerable: true,
-      value: context,
-      writable: true,
-    });
-  }
-  applyPendingEntries([
-    [context[sharedKey], sharedEntries],
-    [context[containersKey], containerEntries],
-  ]);
-  Object.defineProperty(globalObject, compatibilityKey, {
-    configurable: true,
-    enumerable: true,
-    get: function () { return adapter; },
-    set: function (nextValue) {
-      if (!Object.is(nextValue, adapter)) {
-        throw failure('compatibility-global-is-not-adoptable');
-      }
-    },
-  });
 })(global);
 `;

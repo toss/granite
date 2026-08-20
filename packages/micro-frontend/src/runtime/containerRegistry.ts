@@ -33,12 +33,16 @@ export function createContainer(appName: string, config: AppContainerConfig = {}
   const containerIndex = context.__INSTANCES__.length;
 
   try {
-    Reflect.defineProperty(context.__INSTANCES__, appName, {
-      configurable: true,
-      enumerable: false,
-      value: containerIndex,
-      writable: false,
-    });
+    if (
+      !Reflect.defineProperty(context.__INSTANCES__, appName, {
+        configurable: true,
+        enumerable: false,
+        value: containerIndex,
+        writable: false,
+      })
+    ) {
+      throw new MicroFrontendGlobalContextCompatibilityError('registry-is-not-extensible');
+    }
     context.__INSTANCES__.push(legacyContainer);
     if (
       !Reflect.set(context.__CONTAINERS__, appName, modernContainer) ||
@@ -182,12 +186,16 @@ function createLegacyInstancesWithout(instances: unknown[], removed: LegacyAppCo
       throw new AppContainerAlreadyRegisteredError(entry.name);
     }
     registeredNames.add(entry.name);
-    Reflect.defineProperty(nextInstances, entry.name, {
-      configurable: true,
-      enumerable: false,
-      value: index,
-      writable: false,
-    });
+    if (
+      !Reflect.defineProperty(nextInstances, entry.name, {
+        configurable: true,
+        enumerable: false,
+        value: index,
+        writable: false,
+      })
+    ) {
+      throw new MicroFrontendGlobalContextCompatibilityError('registry-is-not-extensible');
+    }
   }
   return nextInstances;
 }

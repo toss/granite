@@ -121,6 +121,106 @@ describe.each(implementations)('$name global-context bootstrap', ({ bootstrap })
     expect(Reflect.has(globalObject, '_graniteMicroFrontend')).toBe(false);
   });
 
+  it('rejects a false canonical descriptor installation without leaving globals, then retries', () => {
+    // Given
+    const globalTarget: GlobalFixture = {};
+    let rejectCanonical = true;
+    const globalObject = new Proxy(globalTarget, {
+      defineProperty(target, property, descriptor) {
+        return property === '__MICRO_FRONTEND__' && rejectCanonical
+          ? false
+          : Reflect.defineProperty(target, property, descriptor);
+      },
+    });
+
+    // When
+    const initialize = () => bootstrap(globalObject);
+
+    // Then
+    expect(initialize).toThrow('Cannot establish the micro-frontend global context: canonical-global-is-not-adoptable');
+    expect(Reflect.has(globalTarget, '__MICRO_FRONTEND__')).toBe(false);
+    expect(Reflect.has(globalTarget, '_graniteMicroFrontend')).toBe(false);
+
+    // When
+    rejectCanonical = false;
+    const context = initialize();
+
+    // Then
+    expect(Reflect.get(globalTarget, '__MICRO_FRONTEND__')).toBe(context);
+    expect(Reflect.has(globalTarget, '_graniteMicroFrontend')).toBe(true);
+  });
+
+  it('restores preexisting globals when adapter descriptor installation returns false, then retries', () => {
+    // Given
+    const instances: unknown[] = [];
+    const shared = {};
+    const canonicalContext = { __SHARED__: shared, __INSTANCES__: instances };
+    const compatibilityContext = { containers: {}, sharedModules: shared };
+    const globalTarget: GlobalFixture = {
+      __MICRO_FRONTEND__: canonicalContext,
+      _graniteMicroFrontend: compatibilityContext,
+    };
+    let rejectAdapter = true;
+    const globalObject = new Proxy(globalTarget, {
+      defineProperty(target, property, descriptor) {
+        return property === '_graniteMicroFrontend' && rejectAdapter
+          ? false
+          : Reflect.defineProperty(target, property, descriptor);
+      },
+    });
+
+    // When
+    const initialize = () => bootstrap(globalObject);
+
+    // Then
+    expect(initialize).toThrow(
+      'Cannot establish the micro-frontend global context: compatibility-global-is-not-adoptable'
+    );
+    expect(Reflect.get(globalTarget, '__MICRO_FRONTEND__')).toBe(canonicalContext);
+    expect(Reflect.get(globalTarget, '_graniteMicroFrontend')).toBe(compatibilityContext);
+    expect(Object.keys(canonicalContext)).toEqual(['__SHARED__', '__INSTANCES__']);
+    expect(instances).toHaveLength(0);
+
+    // When
+    rejectAdapter = false;
+    const context = initialize();
+
+    // Then
+    expect(Reflect.get(globalTarget, '__MICRO_FRONTEND__')).toBe(context);
+    expect(Reflect.get(globalTarget, '_graniteMicroFrontend')).not.toBe(compatibilityContext);
+  });
+
+  it('restores preexisting globals when adapter definition throws after writing', () => {
+    // Given
+    const canonicalContext = { __SHARED__: {}, __INSTANCES__: [] };
+    const compatibilityContext = { containers: {}, sharedModules: { adopted: {} } };
+    const globalTarget: GlobalFixture = {
+      __MICRO_FRONTEND__: canonicalContext,
+      _graniteMicroFrontend: compatibilityContext,
+    };
+    let interruptAdapter = true;
+    const globalObject = new Proxy(globalTarget, {
+      defineProperty(target, property, descriptor) {
+        const result = Reflect.defineProperty(target, property, descriptor);
+        if (property === '_graniteMicroFrontend' && interruptAdapter) {
+          interruptAdapter = false;
+          throw new Error('adapter definition interrupted');
+        }
+        return result;
+      },
+    });
+
+    // When
+    const initialize = () => bootstrap(globalObject);
+
+    // Then
+    expect(initialize).toThrow('adapter definition interrupted');
+    expect(Reflect.get(globalTarget, '__MICRO_FRONTEND__')).toBe(canonicalContext);
+    expect(Reflect.get(globalTarget, '_graniteMicroFrontend')).toBe(compatibilityContext);
+    expect(canonicalContext.__SHARED__).toEqual({});
+    expect(Object.keys(canonicalContext)).toEqual(['__SHARED__', '__INSTANCES__']);
+  });
+
   it.each(writeInterruptions)(
     'rolls back multiple pending entries when the second compatibility write $name, then retries',
     ({ interrupt }) => {

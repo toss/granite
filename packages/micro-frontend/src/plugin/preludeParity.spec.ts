@@ -226,6 +226,41 @@ describe.each(atomicExposureImplementations)('$name atomic-exposure parity', ({ 
 });
 
 describe.each(atomicRegistrationImplementations)('$name atomic-registration parity', ({ register }) => {
+  it('rejects a false legacy name definition without partial state, then retries', () => {
+    // Given
+    const instancesTarget: unknown[] = [];
+    let rejectName = true;
+    const instances = new Proxy(instancesTarget, {
+      defineProperty(target, property, descriptor) {
+        return property === 'atomic-registration-app' && rejectName
+          ? false
+          : Reflect.defineProperty(target, property, descriptor);
+      },
+    });
+    const containers = {};
+    const globalObject: GlobalFixture = {
+      __MICRO_FRONTEND__: { __INSTANCES__: instances, __SHARED__: {}, __CONTAINERS__: containers },
+    };
+
+    // When
+    const initialize = () => register(globalObject);
+
+    // Then
+    expect(initialize).toThrow('Cannot establish the micro-frontend global context: registry-is-not-extensible');
+    expect(Reflect.has(instancesTarget, 'atomic-registration-app')).toBe(false);
+    expect(instancesTarget).toHaveLength(0);
+    expect(Reflect.has(containers, 'atomic-registration-app')).toBe(false);
+
+    // When
+    rejectName = false;
+    initialize();
+
+    // Then
+    expect(Reflect.get(instancesTarget, 'atomic-registration-app')).toBe(0);
+    expect(instancesTarget).toHaveLength(1);
+    expect(Reflect.has(containers, 'atomic-registration-app')).toBe(true);
+  });
+
   it('rolls back the legacy name when its definition throws after writing', () => {
     // Given
     const instancesTarget: unknown[] = [];
