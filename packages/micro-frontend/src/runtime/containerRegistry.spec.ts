@@ -131,6 +131,20 @@ describe('container registry', () => {
     expect(registerOverMalformed).toThrow("App container 'malformed-app' is already registered");
   });
 
+  it('rolls back the legacy name index when the indexed array cannot grow', () => {
+    // Given
+    const context = globalThis.__MICRO_FRONTEND__;
+    Reflect.defineProperty(context.__INSTANCES__, 'length', { writable: false });
+
+    // When
+    const registerContainer = () => createContainer('locked-length-app');
+
+    // Then
+    expect(registerContainer).toThrow();
+    expect(Reflect.has(context.__INSTANCES__, 'locked-length-app')).toBe(false);
+    expect(Reflect.has(getMicroFrontendRuntimeContext().containers, 'locked-length-app')).toBe(false);
+  });
+
   it('removes a middle modern container and rebuilds remaining mixed legacy indices', () => {
     // Given
     const first = createLegacyContainer('first-app', {});
@@ -172,10 +186,12 @@ describe('container registry', () => {
     expect(getLegacyContainer('reused-app')?.name).toBe('reused-app');
   });
 
-  it('removes a legacy-only container with non-configurable getters and re-registers its name', () => {
+  it('drops runtime ownership of a legacy-only container with externally captured non-configurable getters', () => {
     // Given
     const legacyContainer = createLegacyContainer('legacy-reused-app', {});
     exposeLegacyModule(legacyContainer, './App', { default: 'legacy value' });
+    const originalExposeMap = legacyContainer.exposeMap;
+    const originalDescriptor = Object.getOwnPropertyDescriptor(originalExposeMap, 'App');
     const modernView = getContainer('legacy-reused-app');
 
     // When
@@ -185,6 +201,10 @@ describe('container registry', () => {
     // Then
     expect(legacyContainer.exposeMap).toEqual({});
     expect(modernView?.exposedModules).toEqual({});
+    expect(originalDescriptor?.configurable).toBe(false);
+    expect(originalExposeMap['App']).toEqual({ default: 'legacy value' });
+    expect(() => importModule('legacy-reused-app/App')).toThrow();
+    expect(() => importLegacyModule('legacy-reused-app/App')).toThrow();
     expect(replacement.appName).toBe('legacy-reused-app');
     expect(getLegacyContainer('legacy-reused-app')?.name).toBe('legacy-reused-app');
   });

@@ -32,7 +32,12 @@ export function createContainer(appName: string, config: AppContainerConfig = {}
     value: containerIndex,
     writable: false,
   });
-  context.__INSTANCES__.push(legacyContainer);
+  try {
+    context.__INSTANCES__.push(legacyContainer);
+  } catch (error) {
+    Reflect.deleteProperty(context.__INSTANCES__, appName);
+    throw error;
+  }
   if (!Reflect.set(context.__CONTAINERS__, appName, modernContainer)) {
     context.__INSTANCES__.pop();
     Reflect.deleteProperty(context.__INSTANCES__, appName);
@@ -91,10 +96,6 @@ export function getExposedModule(container: AppContainer, exposedModule: string)
     module ??
     (legacyContainer == null ? undefined : Reflect.get(legacyContainer.exposeMap, normalizeLegacyModule(exposedModule)))
   );
-}
-
-export function hasContainer(appName: string): boolean {
-  return getContainer(appName) != null;
 }
 
 export function removeContainer(appName: string): void {
@@ -157,8 +158,6 @@ function createNormalizedExposedModules(container: LegacyAppContainer): Record<s
           typeof property === 'string' ? normalizeLegacyModule(property) : property,
           receiver
         ),
-      has: (_target, property) =>
-        Reflect.has(container.exposeMap, typeof property === 'string' ? normalizeLegacyModule(property) : property),
       ownKeys: () =>
         Reflect.ownKeys(container.exposeMap).map((key) =>
           typeof key === 'string' ? normalizeExposedModule(key) : key

@@ -1,17 +1,10 @@
 import type { AppRequest } from '../types';
-import {
-  createContainer,
-  exposeModule,
-  getContainer,
-  getExposedModule,
-  hasContainer,
-  removeContainer,
-} from './containerRegistry';
+import { createContainer, exposeModule, getContainer, getExposedModule, removeContainer } from './containerRegistry';
 import type { MicroFrontendModuleRegistry } from './createMicroFrontendRuntime';
 import { ExposedModuleNotFoundError, SharedModuleAlreadyRegisteredError } from './errors';
 import { getMicroFrontendGlobalContext } from './globalContext';
 import { parseAppRequest } from './parseAppRequest';
-export { createContainer, exposeModule, getContainer, hasContainer, removeContainer };
+export { createContainer, exposeModule, getContainer, removeContainer };
 
 export interface SharedModuleConfig {
   readonly eager?: boolean;
@@ -101,6 +94,10 @@ export async function disposeAppResources(appName: string): Promise<void> {
   }
 
   await runAppDisposeCallbacks(disposeCallbacks);
+}
+
+export function hasContainer(appName: string): boolean {
+  return getContainer(appName) != null;
 }
 
 export function importModule<TModule>(request: AppRequest): TModule {
