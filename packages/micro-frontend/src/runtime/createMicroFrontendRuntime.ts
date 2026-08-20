@@ -6,6 +6,7 @@ import type {
   MicroFrontendRuntimeEventSubscription,
 } from '../types';
 import { AppContainerNotFoundError, InvalidAppNameError } from './errors';
+import { getMicroFrontendGlobalContext } from './globalContext';
 import { parseAppRequest } from './parseAppRequest';
 
 export interface NativeMicroFrontendRuntimeEvent {
@@ -68,10 +69,15 @@ export function createMicroFrontendRuntimeWithDependencies(
     return evaluation;
   }
 
+  function evaluateScript(filePath: string): Promise<void> {
+    getMicroFrontendGlobalContext();
+    return dependencies.nativeRuntime.evaluateScript({ filePath });
+  }
+
   async function evaluateApp(appName: string): Promise<void> {
     try {
       const { filePath } = await dependencies.adapter.loadBundle({ appName });
-      await dependencies.nativeRuntime.evaluateScript({ filePath });
+      await evaluateScript(filePath);
 
       if (!dependencies.registry.hasContainer(appName)) {
         throw new AppContainerNotFoundError(appName);
@@ -83,7 +89,7 @@ export function createMicroFrontendRuntimeWithDependencies(
   }
 
   return {
-    evaluateScript: (filePath) => dependencies.nativeRuntime.evaluateScript({ filePath }),
+    evaluateScript,
     preloadApp,
     async importApp<TModule>(request: AppRequest): Promise<TModule> {
       const { appName } = parseAppRequest(request);
