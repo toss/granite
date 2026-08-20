@@ -2,6 +2,13 @@ import vm from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { getPreludeConfig } from './prelude';
 
+function requireObject(value: unknown): object {
+  if (typeof value !== 'object' || value == null) {
+    throw new Error('Expected generated container object');
+  }
+  return value;
+}
+
 describe('getPreludeConfig', () => {
   it('registers the Granite app container and exposed modules directly in the prelude', () => {
     // Given
@@ -139,6 +146,60 @@ describe('getPreludeConfig', () => {
     expect(instances).toHaveLength(0);
     expect(Reflect.has(instances, 'throwing-set-app')).toBe(false);
     expect(Reflect.has(containerTarget, 'throwing-set-app')).toBe(false);
+  });
+
+  it('rolls back both pair markers when the second marker definition is interrupted', () => {
+    // Given
+    let modernValue: unknown;
+    let legacyValue: unknown;
+    let pairDefinitions = 0;
+    const containers = new Proxy(
+      {},
+      {
+        set(target, property, value) {
+          modernValue = value;
+          return Reflect.set(target, property, value);
+        },
+      }
+    );
+    const instances = new Proxy<unknown[]>([], {
+      set(target, property, value) {
+        if (property === '0') {
+          legacyValue = value;
+        }
+        return Reflect.set(target, property, value);
+      },
+    });
+    const interruptedReflect = {
+      defineProperty(target: object, property: PropertyKey, descriptor: PropertyDescriptor) {
+        const result = Reflect.defineProperty(target, property, descriptor);
+        if (typeof property === 'symbol' && ++pairDefinitions === 2) {
+          throw new Error('pair definition interrupted');
+        }
+        return result;
+      },
+      deleteProperty: Reflect.deleteProperty,
+      has: Reflect.has,
+      set: Reflect.set,
+    };
+    const globalObject = {
+      __MICRO_FRONTEND__: { __INSTANCES__: instances, __SHARED__: {}, __CONTAINERS__: containers },
+    };
+    const config = getPreludeConfig({}, 'interrupted-pair-app');
+
+    // When
+    const evaluate = () =>
+      vm.runInNewContext(config.banner + '\n' + config.preludeScript, {
+        global: globalObject,
+        Reflect: interruptedReflect,
+      });
+
+    // Then
+    expect(evaluate).toThrow('pair definition interrupted');
+    expect(Object.getOwnPropertySymbols(requireObject(modernValue))).toEqual([]);
+    expect(Object.getOwnPropertySymbols(requireObject(legacyValue))).toEqual([]);
+    expect(instances).toHaveLength(0);
+    expect(Reflect.has(containers, 'interrupted-pair-app')).toBe(false);
   });
 
   it('rolls back the modern exposure when the legacy expose map is non-extensible', () => {

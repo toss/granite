@@ -1,6 +1,7 @@
 import path from 'path';
 import { globalContextScript } from './globalContextScript';
 import type { MicroFrontendPluginOptions } from './types';
+import { CONTAINER_PAIRING_KEY } from '../runtime/containerPairing';
 
 export interface MicroFrontendPreludeConfig {
   readonly banner: string;
@@ -47,6 +48,7 @@ export function getPreludeConfig(options: MicroFrontendPluginOptions, appName?: 
       '};',
     ].join('\n'),
     preludeScript: [
+      `const __containerPairSymbol = Symbol.for(${JSON.stringify(CONTAINER_PAIRING_KEY)});`,
       'const __legacyContainers = new WeakMap();',
       'function createContainer(appName, config) {',
       '  const context = global.__MICRO_FRONTEND__;',
@@ -68,12 +70,21 @@ export function getPreludeConfig(options: MicroFrontendPluginOptions, appName?: 
       '    if (!Reflect.set(containers, appName, modernContainer)) {',
       '      throw new Error("Cannot establish the micro-frontend global context: registry-is-not-extensible");',
       '    }',
+      '    if (!Reflect.defineProperty(modernContainer, __containerPairSymbol, {',
+      '      configurable: true, enumerable: false, value: legacyContainer, writable: false,',
+      '    }) || !Reflect.defineProperty(legacyContainer, __containerPairSymbol, {',
+      '      configurable: true, enumerable: false, value: modernContainer, writable: false,',
+      '    })) {',
+      '      throw new Error("Cannot establish the micro-frontend global context: registry-is-not-extensible");',
+      '    }',
       '  } catch (error) {',
       '    if (Object.is(instances[instances.length - 1], legacyContainer)) {',
       '      instances.pop();',
       '    }',
       '    Reflect.deleteProperty(instances, appName);',
       '    Reflect.deleteProperty(containers, appName);',
+      '    Reflect.deleteProperty(modernContainer, __containerPairSymbol);',
+      '    Reflect.deleteProperty(legacyContainer, __containerPairSymbol);',
       '    throw error;',
       '  }',
       '  __legacyContainers.set(modernContainer, legacyContainer);',

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { getMicroFrontendGlobalContext } from './globalContext';
 import {
   createContainer,
   exposeModule,
@@ -115,6 +116,39 @@ describe('container registry', () => {
 
     // Then
     expect(resolveConflict).toThrow("App container 'conflicting-app' is already registered");
+  });
+
+  it.each([
+    ['unilateral', false],
+    ['counterfeit', true],
+  ])('rejects independent containers with a %s pair marker', (_name, markLegacy) => {
+    // Given
+    const appName = `${_name}-marker-app`;
+    const pairSymbol = Symbol.for('granite.micro-frontend.container-pair');
+    const modernContainer = { appName, config: {}, exposedModules: {} };
+    const legacyContainer = { name: appName, config: {}, exposeMap: {} };
+    const context = getMicroFrontendGlobalContext();
+    Reflect.set(context.__CONTAINERS__, appName, modernContainer);
+    context.__INSTANCES__.push(legacyContainer);
+    Reflect.defineProperty(context.__INSTANCES__, appName, { configurable: true, value: 0 });
+    Reflect.defineProperty(modernContainer, pairSymbol, {
+      configurable: true,
+      value: legacyContainer,
+      writable: false,
+    });
+    if (markLegacy) {
+      Reflect.defineProperty(legacyContainer, pairSymbol, {
+        configurable: true,
+        value: { appName },
+        writable: false,
+      });
+    }
+
+    // When
+    const resolveConflict = () => getContainer(appName);
+
+    // Then
+    expect(resolveConflict).toThrow(`App container '${appName}' is already registered`);
   });
 
   it('does not overwrite a malformed legacy name index', () => {

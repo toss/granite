@@ -1,7 +1,7 @@
 import vm from 'node:vm';
 import { afterEach, describe, expect, it } from 'vitest';
 import { getPreludeConfig } from './prelude';
-import { createContainer, exposeModule, registerShared } from '../runtime/registry';
+import { createContainer, exposeModule, importModule, registerShared, removeContainer } from '../runtime/registry';
 
 type GlobalFixture = Record<string, unknown>;
 
@@ -113,5 +113,78 @@ describe.each(implementations)('$name generated-prelude parity', ({ execute }) =
     expect(result.modernImported).toBe(moduleValue);
     expect(result.legacyImported).toBe(moduleValue);
     expect(result.sharedImported).toBe(sharedValue);
+  });
+});
+
+describe('generated-prelude runtime ownership', () => {
+  it('imports a generated container through a separately bundled runtime', () => {
+    // Given
+    const moduleValue = { route: 'generated' };
+    const config = getPreludeConfig({}, 'generated-app');
+    vm.runInNewContext(
+      [config.banner, config.preludeScript, 'exposeModule(__container, "./App", moduleValue);'].join('\n'),
+      { global: globalThis, moduleValue }
+    );
+
+    // When
+    const imported = importModule<typeof moduleValue>('generated-app/App');
+
+    // Then
+    expect(imported).toBe(moduleValue);
+  });
+
+  it('removes both generated registry paths before same-name registration', () => {
+    // Given
+    const config = getPreludeConfig({}, 'generated-reused-app');
+    vm.runInNewContext(config.banner + '\n' + config.preludeScript, { global: globalThis });
+    const originalContext = requireObject(Reflect.get(globalThis, '__MICRO_FRONTEND__'));
+    const originalInstances = requireObject(Reflect.get(originalContext, '__INSTANCES__'));
+    const originalContainers = requireObject(Reflect.get(originalContext, '__CONTAINERS__'));
+    const originalModern = requireObject(Reflect.get(originalContainers, 'generated-reused-app'));
+    const originalLegacy = requireObject(
+      Reflect.get(originalInstances, Reflect.get(originalInstances, 'generated-reused-app'))
+    );
+
+    // When
+    removeContainer('generated-reused-app');
+    const replacement = createContainer('generated-reused-app');
+    const context = requireObject(Reflect.get(globalThis, '__MICRO_FRONTEND__'));
+    const instances = requireObject(Reflect.get(context, '__INSTANCES__'));
+    const containers = requireObject(Reflect.get(context, '__CONTAINERS__'));
+
+    // Then
+    expect(replacement.appName).toBe('generated-reused-app');
+    expect(Reflect.get(instances, 'length')).toBe(1);
+    expect(Reflect.get(containers, 'generated-reused-app')).toBe(replacement);
+    expect(Object.getOwnPropertySymbols(originalModern)).toEqual([]);
+    expect(Object.getOwnPropertySymbols(originalLegacy)).toEqual([]);
+  });
+
+  it('keeps generated pairing metadata out of public enumerable shapes', () => {
+    // Given
+    const config = getPreludeConfig({}, 'generated-shaped-app');
+    vm.runInNewContext(config.banner + '\n' + config.preludeScript, { global: globalThis });
+    const context = requireObject(Reflect.get(globalThis, '__MICRO_FRONTEND__'));
+    const instances = requireObject(Reflect.get(context, '__INSTANCES__'));
+    const legacyIndex = Reflect.get(instances, 'generated-shaped-app');
+    const containers = requireObject(Reflect.get(context, '__CONTAINERS__'));
+    const modernContainer = Reflect.get(containers, 'generated-shaped-app');
+    const legacyContainer = Reflect.get(instances, legacyIndex);
+
+    // When
+    const shapes = {
+      modernJson: JSON.stringify(modernContainer),
+      modernKeys: Object.keys(modernContainer),
+      legacyJson: JSON.stringify(legacyContainer),
+      legacyKeys: Object.keys(legacyContainer),
+    };
+
+    // Then
+    expect(shapes).toEqual({
+      modernJson: '{"appName":"generated-shaped-app","config":{},"exposedModules":{}}',
+      modernKeys: ['appName', 'config', 'exposedModules'],
+      legacyJson: '{"name":"generated-shaped-app","config":{},"exposeMap":{}}',
+      legacyKeys: ['name', 'config', 'exposeMap'],
+    });
   });
 });

@@ -1,15 +1,19 @@
+import {
+  clearContainerPair,
+  defineContainerPair,
+  forgetContainerPair,
+  getLegacyContainerPair,
+  getModernContainerPair,
+  isLegacyAppContainer,
+  isContainerPair,
+  isObjectRecord,
+  rememberContainerPair,
+  rememberLegacyAdapterPair,
+  type LegacyAppContainer,
+} from './containerPairing';
 import { AppContainerAlreadyRegisteredError, ExposedModuleAlreadyRegisteredError } from './errors';
 import { getMicroFrontendGlobalContext, MicroFrontendGlobalContextCompatibilityError } from './globalContext';
 import type { AppContainer, AppContainerConfig } from './registry';
-
-interface LegacyAppContainer {
-  readonly name: string;
-  readonly config: unknown;
-  readonly exposeMap: Record<string, unknown>;
-}
-
-const pairedLegacyByModern = new WeakMap<AppContainer, LegacyAppContainer>();
-const pairedModernByLegacy = new WeakMap<LegacyAppContainer, AppContainer>();
 
 export function createContainer(appName: string, config: AppContainerConfig = {}): AppContainer {
   const context = getMicroFrontendGlobalContext();
@@ -34,24 +38,29 @@ export function createContainer(appName: string, config: AppContainerConfig = {}
   });
   try {
     context.__INSTANCES__.push(legacyContainer);
+    if (
+      !Reflect.set(context.__CONTAINERS__, appName, modernContainer) ||
+      !defineContainerPair(modernContainer, legacyContainer)
+    ) {
+      throw new MicroFrontendGlobalContextCompatibilityError('registry-is-not-extensible');
+    }
   } catch (error) {
+    if (Object.is(context.__INSTANCES__[context.__INSTANCES__.length - 1], legacyContainer)) {
+      context.__INSTANCES__.pop();
+    }
     Reflect.deleteProperty(context.__INSTANCES__, appName);
+    Reflect.deleteProperty(context.__CONTAINERS__, appName);
+    clearContainerPair(modernContainer, legacyContainer);
     throw error;
   }
-  if (!Reflect.set(context.__CONTAINERS__, appName, modernContainer)) {
-    context.__INSTANCES__.pop();
-    Reflect.deleteProperty(context.__INSTANCES__, appName);
-    throw new MicroFrontendGlobalContextCompatibilityError('registry-is-not-extensible');
-  }
 
-  pairedLegacyByModern.set(modernContainer, legacyContainer);
-  pairedModernByLegacy.set(legacyContainer, modernContainer);
+  rememberContainerPair(modernContainer, legacyContainer);
   return modernContainer;
 }
 
 export function exposeModule(container: AppContainer, exposedModule: string, module: unknown): void {
   const normalizedModule = normalizeExposedModule(exposedModule);
-  const legacyContainer = pairedLegacyByModern.get(container);
+  const legacyContainer = getLegacyContainerPair(container);
   const legacyModuleName = normalizeLegacyModule(exposedModule);
   if (
     Reflect.has(container.exposedModules, normalizedModule) ||
@@ -75,7 +84,7 @@ export function getContainer(appName: string): AppContainer | null {
   const legacyContainer = getLegacyContainer(context.__INSTANCES__, appName);
 
   if (modernContainer != null && legacyContainer != null) {
-    if (!Object.is(pairedLegacyByModern.get(modernContainer), legacyContainer)) {
+    if (!isContainerPair(modernContainer, legacyContainer)) {
       throw new AppContainerAlreadyRegisteredError(appName);
     }
     return modernContainer;
@@ -91,7 +100,7 @@ export function getContainer(appName: string): AppContainer | null {
 
 export function getExposedModule(container: AppContainer, exposedModule: string): unknown {
   const module: unknown = Reflect.get(container.exposedModules, normalizeExposedModule(exposedModule));
-  const legacyContainer = pairedLegacyByModern.get(container);
+  const legacyContainer = getLegacyContainerPair(container);
   return (
     module ??
     (legacyContainer == null ? undefined : Reflect.get(legacyContainer.exposeMap, normalizeLegacyModule(exposedModule)))
@@ -104,11 +113,7 @@ export function removeContainer(appName: string): void {
   const modernContainer = isAppContainer(canonicalValue) ? canonicalValue : null;
   const legacyContainer = getLegacyContainer(context.__INSTANCES__, appName);
 
-  if (
-    modernContainer != null &&
-    legacyContainer != null &&
-    !Object.is(pairedLegacyByModern.get(modernContainer), legacyContainer)
-  ) {
+  if (modernContainer != null && legacyContainer != null && !isContainerPair(modernContainer, legacyContainer)) {
     throw new AppContainerAlreadyRegisteredError(appName);
   }
   if (modernContainer == null && legacyContainer == null) {
@@ -126,15 +131,17 @@ export function removeContainer(appName: string): void {
   }
   if (legacyContainer != null) {
     clearLegacyModules(legacyContainer);
-    pairedModernByLegacy.delete(legacyContainer);
   }
   if (modernContainer != null) {
-    pairedLegacyByModern.delete(modernContainer);
+    if (legacyContainer != null) {
+      clearContainerPair(modernContainer, legacyContainer);
+    }
   }
+  forgetContainerPair(modernContainer, legacyContainer);
 }
 
 function getLegacyAdapter(legacyContainer: LegacyAppContainer): AppContainer {
-  const existingAdapter = pairedModernByLegacy.get(legacyContainer);
+  const existingAdapter = getModernContainerPair(legacyContainer);
   if (existingAdapter != null) {
     return existingAdapter;
   }
@@ -143,8 +150,7 @@ function getLegacyAdapter(legacyContainer: LegacyAppContainer): AppContainer {
     config: isAppContainerConfig(legacyContainer.config) ? legacyContainer.config : {},
     exposedModules: createNormalizedExposedModules(legacyContainer),
   };
-  pairedLegacyByModern.set(adapter, legacyContainer);
-  pairedModernByLegacy.set(legacyContainer, adapter);
+  rememberLegacyAdapterPair(adapter, legacyContainer);
   return adapter;
 }
 
@@ -255,23 +261,10 @@ function isAppContainer(value: unknown): value is AppContainer {
   );
 }
 
-function isLegacyAppContainer(value: unknown): value is LegacyAppContainer {
-  return (
-    isObjectRecord(value) &&
-    typeof Reflect.get(value, 'name') === 'string' &&
-    isObjectRecord(Reflect.get(value, 'config')) &&
-    isObjectRecord(Reflect.get(value, 'exposeMap'))
-  );
-}
-
 function isAppContainerConfig(value: unknown): value is AppContainerConfig {
   if (!isObjectRecord(value)) {
     return false;
   }
   const shared: unknown = Reflect.get(value, 'shared');
   return shared == null || isObjectRecord(shared);
-}
-
-function isObjectRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value != null && !Array.isArray(value);
 }
