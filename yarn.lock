@@ -5464,7 +5464,7 @@ __metadata:
     react-native-builder-bob: "catalog:tools"
     typescript: "catalog:tools"
   peerDependencies:
-    "@granite-js/native": "workspace:*"
+    "@granite-js/native": "*"
     "@types/react": "*"
     react: "*"
     react-native: "*"
@@ -5612,7 +5612,7 @@ __metadata:
     tsup: "npm:^8.5.0"
     typescript: "catalog:tools"
   peerDependencies:
-    "@granite-js/native": "workspace:*"
+    "@granite-js/native": "*"
     react: "*"
     react-native: "*"
   languageName: unknown
@@ -6042,7 +6042,7 @@ __metadata:
     vitest: "npm:^4.0.12"
     zod: "npm:^4.1.12"
   peerDependencies:
-    "@granite-js/native": "workspace:*"
+    "@granite-js/native": "*"
     "@types/react": "*"
     brick-module: "*"
     react: "*"

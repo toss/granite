@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/blur-view",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "type": "module",
   "license": "Apache-2.0",
   "main": "./dist/module/index.js",
@@ -38,7 +38,7 @@
     "typescript": "catalog:tools"
   },
   "peerDependencies": {
-    "@granite-js/native": "workspace:*",
+    "@granite-js/native": "*",
     "@types/react": "*",
     "react": "*",
     "react-native": "*"
