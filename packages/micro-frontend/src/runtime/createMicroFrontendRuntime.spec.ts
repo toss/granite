@@ -60,7 +60,7 @@ function createRuntimeFixture() {
 
 describe('createMicroFrontendRuntimeWithDependencies', () => {
   beforeEach(() => {
-    Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
+    Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
     resetPendingHostComponentStoreForTest();
   });
 
@@ -246,5 +246,4 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     await expect(fixture.runtime.importApp<AppModule>('cart/App')).resolves.toBe(appModule);
     expect(fixture.adapter.loadBundle).toHaveBeenCalledOnce();
   });
-
 });

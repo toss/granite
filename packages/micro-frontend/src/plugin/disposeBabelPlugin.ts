@@ -32,15 +32,15 @@ function getRuntimeIdentifier(
   callee: BabelTypes.Expression | BabelTypes.V8IntrinsicIdentifier,
   babelTypes: typeof BabelTypes
 ): string | null {
-  // - `global._graniteMicroFrontend.dispose()`
-  // - `globalThis._graniteMicroFrontend.dispose()`
+  // - `global.__MICRO_FRONTEND__.dispose()`
+  // - `globalThis.__MICRO_FRONTEND__.dispose()`
   if (
     !babelTypes.isMemberExpression(callee) ||
     callee.computed ||
     !babelTypes.isIdentifier(callee.property, { name: 'dispose' }) ||
     !babelTypes.isMemberExpression(callee.object) ||
     callee.object.computed ||
-    !babelTypes.isIdentifier(callee.object.property, { name: '_graniteMicroFrontend' }) ||
+    !babelTypes.isIdentifier(callee.object.property, { name: '__MICRO_FRONTEND__' }) ||
     (!babelTypes.isIdentifier(callee.object.object, { name: 'global' }) &&
       !babelTypes.isIdentifier(callee.object.object, { name: 'globalThis' }))
   ) {

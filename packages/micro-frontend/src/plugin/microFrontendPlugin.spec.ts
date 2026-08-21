@@ -32,11 +32,11 @@ describe('microFrontend plugin', () => {
       );
     }
     const config = typeof plugin.config === 'function' ? await plugin.config({ command: 'build' }) : plugin.config;
-    const source = 'globalThis._graniteMicroFrontend.dispose(() => clear());';
+    const source = 'globalThis.__MICRO_FRONTEND__.dispose(() => clear());';
 
     expect(config?.babel).toBeUndefined();
     expect(config?.transformer?.transformSync?.('/project/src/App.tsx', source)).toContain(
-      'globalThis._graniteMicroFrontend.dispose("app-1", () => clear());'
+      'globalThis.__MICRO_FRONTEND__.dispose("app-1", () => clear());'
     );
     expect(config?.esbuild?.prelude).toEqual([
       path.join(temporaryDirectory, '.granite', 'granite-micro-frontend-runtime.js'),

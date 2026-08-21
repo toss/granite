@@ -24,7 +24,7 @@ export function createSharedResolverConfig(
                 return {
                   loader: 'js',
                   contents: [
-                    `var sharedModule = global._graniteMicroFrontend.sharedModules[${moduleName}];`,
+                    `var sharedModule = global.__MICRO_FRONTEND__.__SHARED__[${moduleName}];`,
                     'if (sharedModule == null) {',
                     `  throw new Error('Shared module ' + ${moduleName} + ' is not registered');`,
                     '}',
