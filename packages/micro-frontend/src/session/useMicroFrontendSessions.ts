@@ -1,13 +1,7 @@
 import { useEffect, useLayoutEffect, useReducer, useRef } from 'react';
-import {
-  installPendingHostComponentBridge,
-  resetPendingHostComponent,
-} from '../host/pendingHostComponentStore';
+import { installPendingHostComponentBridge, resetPendingHostComponent } from '../host/pendingHostComponentStore';
 import { disposeAppResources } from '../runtime/registry';
-import type {
-  MicroFrontendRuntimeApi,
-  MicroFrontendSessionEvent,
-} from '../types';
+import type { MicroFrontendRuntimeApi, MicroFrontendSessionEvent } from '../types';
 
 export interface MicroFrontendSessionState {
   readonly appName: string;
@@ -39,9 +33,7 @@ function reduceMicroFrontendSessions(
       return sessions.filter(({ sessionId }) => sessionId !== event.params.sessionId);
     case 'sessionVisibilityChanged':
       return sessions.map((session) =>
-        session.sessionId === event.params.sessionId
-          ? { ...session, isVisible: event.params.isVisible }
-          : session
+        session.sessionId === event.params.sessionId ? { ...session, isVisible: event.params.isVisible } : session
       );
     default: {
       const exhaustiveEvent: never = event;
@@ -53,10 +45,7 @@ function reduceMicroFrontendSessions(
 export function useMicroFrontendSessions(
   runtime: Pick<MicroFrontendRuntimeApi, 'onEvent'>
 ): readonly MicroFrontendSessionState[] {
-  const [sessions, dispatch] = useReducer(
-    reduceMicroFrontendSessions,
-    INITIAL_SESSIONS
-  );
+  const [sessions, dispatch] = useReducer(reduceMicroFrontendSessions, INITIAL_SESSIONS);
   const previousSessionsRef = useRef(sessions);
 
   useEffect(() => {

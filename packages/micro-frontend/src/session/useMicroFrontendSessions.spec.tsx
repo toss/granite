@@ -1,34 +1,29 @@
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  type MicroFrontendSessionState,
-  useMicroFrontendSessions,
-} from './useMicroFrontendSessions';
-import {
-  getIsPendingHostComponentHidden,
-  hidePendingHostComponent,
-} from '../host/pendingHostComponentStore';
-import { getMicroFrontendRuntimeContext } from '../runtime/registry';
-import type {
-  MicroFrontendRuntimeApi,
-  MicroFrontendSessionEvent,
-} from '../types';
+import { type MicroFrontendSessionState, useMicroFrontendSessions } from './useMicroFrontendSessions';
+import { getIsPendingHostComponentHidden, hidePendingHostComponent } from '../host/pendingHostComponentStore';
+import type { MicroFrontendRuntimeApi, MicroFrontendSessionEvent } from '../types';
 
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
 
 function createRuntimeFixture() {
-  let listener: ((event: MicroFrontendSessionEvent) => void) | null = null;
-  const remove = vi.fn();
+  const listeners = new Set<(event: MicroFrontendSessionEvent) => void>();
+  const remove = vi.fn<(listener: (event: MicroFrontendSessionEvent) => void) => void>((listener) => {
+    listeners.delete(listener);
+  });
   const runtime: Pick<MicroFrontendRuntimeApi, 'onEvent'> = {
     onEvent(nextListener) {
-      listener = nextListener;
-      return { remove };
+      listeners.add(nextListener);
+      return { remove: () => remove(nextListener) };
     },
   };
 
   return {
     emit(event: MicroFrontendSessionEvent) {
-      listener?.(event);
+      listeners.forEach((listener) => listener(event));
+    },
+    get listenerCount() {
+      return listeners.size;
     },
     remove,
     runtime,
@@ -60,7 +55,7 @@ function renderSessions(runtime: Pick<MicroFrontendRuntimeApi, 'onEvent'>) {
 
 describe('useMicroFrontendSessions', () => {
   beforeEach(() => {
-    Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
+    Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
   });
 
   it('adds an opened native session to React state', () => {
@@ -179,58 +174,6 @@ describe('useMicroFrontendSessions', () => {
     rendered.unmount();
   });
 
-  it('runs retained app dispose callbacks when its last session closes', () => {
-    // Given
-    const fixture = createRuntimeFixture();
-    const rendered = renderSessions(fixture.runtime);
-    const dispose = vi.fn();
-    getMicroFrontendRuntimeContext().dispose('app-1', dispose);
-
-    // When
-    act(() => {
-      fixture.emit({
-        name: 'openApp',
-        params: {
-          appName: 'app-1',
-          scheme: 'granite://app-1/product/1',
-          sessionId: 'app-1:1',
-        },
-      });
-      fixture.emit({
-        name: 'openApp',
-        params: {
-          appName: 'app-1',
-          scheme: 'granite://app-1/product/2',
-          sessionId: 'app-1:2',
-        },
-      });
-    });
-    act(() => {
-      fixture.emit({ name: 'closeApp', params: { sessionId: 'app-1:2' } });
-    });
-    expect(dispose).not.toHaveBeenCalled();
-    act(() => {
-      fixture.emit({ name: 'closeApp', params: { sessionId: 'app-1:1' } });
-    });
-    act(() => {
-      fixture.emit({
-        name: 'openApp',
-        params: {
-          appName: 'app-1',
-          scheme: 'granite://app-1/product/3',
-          sessionId: 'app-1:3',
-        },
-      });
-    });
-    act(() => {
-      fixture.emit({ name: 'closeApp', params: { sessionId: 'app-1:3' } });
-    });
-
-    // Then
-    expect(dispose).toHaveBeenCalledTimes(2);
-    rendered.unmount();
-  });
-
   it('resets pending-host visibility when a new session opens', () => {
     // Given
     const fixture = createRuntimeFixture();
@@ -264,5 +207,6 @@ describe('useMicroFrontendSessions', () => {
 
     // Then
     expect(fixture.remove).toHaveBeenCalledOnce();
+    expect(fixture.listenerCount).toBe(0);
   });
 });

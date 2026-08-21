@@ -105,6 +105,57 @@ export default defineConfig({
 When evaluated, a remote bundle registers its `appName` container and exposed
 modules in the shared runtime registry.
 
+## Registry migration contract
+
+### As-is
+
+Older bundles use `global.__MICRO_FRONTEND__` with `__INSTANCES__` and
+`__SHARED__`. A compatible bundle adds `__CONTAINERS__` to the same canonical
+context. Neither shape is a product router: an `appName` is the identity of one
+remote registration.
+
+### To-be
+
+The durable owner is `global.__MICRO_FRONTEND__` with exactly this shape:
+
+```ts
+{
+  __INSTANCES__,
+  __SHARED__,
+  __CONTAINERS__,
+}
+```
+
+- `__INSTANCES__` preserves the legacy container view; `__SHARED__` is the
+  shared-module registry; `__CONTAINERS__` is the current container registry.
+- A current container registration creates paired legacy/current views for the
+  same app name. The pair is transparent across separately evaluated bundles:
+  it is one remote-owned registration, not two independently owned copies.
+- The dispose callback registry and registrar live on the same canonical
+  context as non-enumerable properties. They are reused across separately
+  evaluated bundles without changing the three-key enumerable registry shape.
+
+Bootstrap the canonical context before a compatible host evaluates a remote.
+A compatible remote also installs the canonical bootstrap in its generated
+prelude, so either compatible side can establish the three-store context before
+the bundle registers its container.
+
+The executable compatibility matrix is:
+
+| Host       | Remote     | Required order | Status    |
+| ---------- | ---------- | -------------- | --------- |
+| Legacy     | Legacy     | Remote first   | Supported |
+| Compatible | Compatible | Host first     | Supported |
+| Compatible | Legacy     | Host first     | Supported |
+| Legacy     | Compatible | Remote first   | Supported |
+
+Registration is duplicate-safe, not aliasing: an occupied app name, duplicate
+exposed module, or incompatible duplicate shared module is rejected. Removal
+clears both paired container views as a unit, after which a fresh same-name
+remote may register. Missing exposes, malformed occupied names, and
+product-specific app-name remapping are unsupported; resolve the requested
+app name exactly rather than routing it to another remote.
+
 ## JavaScript runtime
 
 The adapter owns bundle selection, download, integrity verification, and
@@ -140,40 +191,42 @@ adapter.loadBundle({ appName: 'cart' })
 ```
 
 Concurrent preload/import calls for one app share an evaluation. A successful
-evaluation remains cached for the lifetime of the JavaScript runtime. Closing
-the app's last session runs its registered dispose callbacks without removing
-the evaluated container or exposed modules. Failed evaluation removes the
-partial container so a later request can retry.
+evaluation remains cached for the lifetime of the JavaScript runtime. Failed
+evaluation removes the partial container so a later request can retry.
 Native `preloadApp` events invoke `preloadApp()` inside the runtime and are not
 forwarded to session listeners. `onPreloadError` is optional and lets the host
 route best-effort native preload failures to its observability provider.
 
 The public runtime API is:
 
-| API | Responsibility |
-| --- | --- |
-| `preloadApp(appName)` | Load and evaluate one app without importing an exposed module. |
-| `importApp(request)` | Ensure the app is evaluated and import `appName/exposedModule`. |
-| `evaluateScript(filePath)` | Evaluate an already-local bundle in the retained runtime. |
-| `onEvent(listener)` | Subscribe to native open, close, and visibility events. |
+| API                        | Responsibility                                                  |
+| -------------------------- | --------------------------------------------------------------- |
+| `preloadApp(appName)`      | Load and evaluate one app without importing an exposed module.  |
+| `importApp(request)`       | Ensure the app is evaluated and import `appName/exposedModule`. |
+| `evaluateScript(filePath)` | Evaluate an already-local bundle in the retained runtime.       |
+| `onEvent(listener)`        | Subscribe to native open, close, and visibility events.         |
 
-Remote code can register an idempotent callback for resources that should be
-reset whenever the app has no remaining sessions:
+Remote code can register an idempotent callback for explicit app-level resource
+cleanup:
 
 ```ts
-if (globalThis._graniteMicroFrontend != null) {
-  globalThis._graniteMicroFrontend.dispose(() => {
-    queryClient.clear();
-  });
-}
+globalThis.__MICRO_FRONTEND__.dispose(() => {
+  queryClient.clear();
+});
 ```
 
 The micro-frontend plugin assigns the remote app name at build time through
 Granite's common `transformer.transformSync` source path, which is used by both
-Metro and Mpack. The callback remains registered after it runs so a cached app
-can enter and leave again without re-evaluating its bundle. Session disposal
-does not remove the app container, exposed modules, or pending host-component
-routes.
+Metro and Mpack. When `closeApp(sessionId)` removes an app's last live session,
+the session owner invokes all callbacks registered for that app. Callbacks stay
+registered, so a reopened app invokes them again on its next last close.
+The `disposeAppResources` helper that runs those callbacks is internal lifecycle
+machinery and is not part of this package's public exports. Closing a session
+releases only its React state and native binding: the successful evaluation,
+paired container, exposed modules, shared modules, and pending app routes remain
+cached for the lifetime of the JavaScript runtime, so reopening the app does not
+load or evaluate its bundle again. Failed evaluation still removes its partial
+registration so a later request can retry.
 
 ## Session rendering
 
@@ -185,17 +238,11 @@ joins Granite's existing visibility context.
 const sessions = useMicroFrontendSessions(runtime);
 
 function SessionRoot({ session }: { readonly session: MicroFrontendSessionState }) {
-  const App = useMemo(
-    () => lazy(() => runtime.importApp(`${session.appName}/App`)),
-    [session.appName]
-  );
+  const App = useMemo(() => lazy(() => runtime.importApp(`${session.appName}/App`)), [session.appName]);
 
   return (
     <Portal hostName={session.sessionId}>
-      <MicroFrontendSessionProvider
-        sessionId={session.sessionId}
-        presentationVisibility={session.isVisible}
-      >
+      <MicroFrontendSessionProvider sessionId={session.sessionId} presentationVisibility={session.isVisible}>
         <App scheme={session.scheme} />
       </MicroFrontendSessionProvider>
     </Portal>
@@ -228,9 +275,7 @@ import { useEffect } from 'react';
 export const Route = createRoute('/products/:productId', {
   component: ProductPage,
   validateParams: parseProductParams,
-  hostPendingComponent: ({ thumbnailUrl }) => (
-    <ProductPendingComponent thumbnailUrl={thumbnailUrl} />
-  ),
+  hostPendingComponent: ({ thumbnailUrl }) => <ProductPendingComponent thumbnailUrl={thumbnailUrl} />,
 });
 
 function ProductPage() {
@@ -265,12 +310,12 @@ is internal runtime plumbing.
 
 Native emits the following events:
 
-| Event | Required params | Meaning |
-| --- | --- | --- |
-| `preloadApp` | `appName` | Warm an app. |
-| `openApp` | `sessionId`, `appName`, `scheme` | Create the session's React tree. |
-| `sessionVisibilityChanged` | `sessionId`, `isVisible` | Update presentation visibility from native lifecycle. |
-| `closeApp` | `sessionId` | Unmount the tree and run the app's dispose callbacks when its last session closes. The evaluated app remains cached. |
+| Event                      | Required params                  | Meaning                                                                                                                                                                                                         |
+| -------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `preloadApp`               | `appName`                        | Warm an app.                                                                                                                                                                                                    |
+| `openApp`                  | `sessionId`, `appName`, `scheme` | Create the session's React tree.                                                                                                                                                                                |
+| `sessionVisibilityChanged` | `sessionId`, `isVisible`         | Update presentation visibility from native lifecycle.                                                                                                                                                           |
+| `closeApp`                 | `sessionId`                      | Remove the session tree and binding. If this was the app's last live session, run its registered dispose callbacks while retaining the evaluated app, registry entries, shared modules, and pending app routes. |
 
 Events emitted before JavaScript subscribes are queued. Event delivery starts
 after the runtime installs its first listener.
@@ -304,22 +349,22 @@ destination views in `com.teleport.host`.
 
 ### Session APIs
 
-| API | Lifetime / behavior |
-| --- | --- |
+| API                                                                 | Lifetime / behavior                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ActivitySessionBinding.bind(activity, sessionId, appName, scheme)` | Convenience binding for an `Activity`. Emits open, derives visibility from start/stop, and emits close on destroy. Bindings are keyed by `sessionId`, so a destroy caused by a configuration change keeps the session open and the next `bind()` with the same id rebinds the recreated instance instead of opening a second session. Use a `sessionId` that identifies the destination, not the Activity instance. Retain it for the Activity lifetime. |
-| `GraniteMicroFrontendRuntimeHost.registerSession(sessionId)` | Register a custom native container and return a `GraniteMicroFrontendSessionRegistration`. `sessionId` must be unique for every live destination; reuse only after the previous registration is closed/invalidated. |
-| `GraniteMicroFrontendSessionRegistration.openApp(appName, scheme)` | Emit `openApp` once. |
-| `GraniteMicroFrontendSessionRegistration.setVisible(isVisible)` | Emit a visibility event only when the value changes. |
-| `GraniteMicroFrontendSessionRegistration.closeApp()` | Emit `closeApp` once after open. |
-| `GraniteMicroFrontendSessionRegistration.close()` | Unregister the native session. Call after `closeApp()`. |
-| `GraniteMicroFrontendRuntimeHost.emitPreloadApp(appName)` | Fire-and-forget preload. |
+| `GraniteMicroFrontendRuntimeHost.registerSession(sessionId)`        | Register a custom native container and return a `GraniteMicroFrontendSessionRegistration`. `sessionId` must be unique for every live destination; reuse only after the previous registration is closed/invalidated.                                                                                                                                                                                                                                      |
+| `GraniteMicroFrontendSessionRegistration.openApp(appName, scheme)`  | Emit `openApp` once.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `GraniteMicroFrontendSessionRegistration.setVisible(isVisible)`     | Emit a visibility event only when the value changes.                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `GraniteMicroFrontendSessionRegistration.closeApp()`                | Emit `closeApp` once after open.                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `GraniteMicroFrontendSessionRegistration.close()`                   | Unregister the native session. Call after `closeApp()`.                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `GraniteMicroFrontendRuntimeHost.emitPreloadApp(appName)`           | Fire-and-forget preload.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ### Portal destination APIs
 
-| API | Lifetime / behavior |
-| --- | --- |
-| `PortalHostView.setName(name)` | Register/unregister the destination name. Use `sessionId`. |
-| `PortalHostView.cleanup()` | Permanently unregister the destination during teardown. |
+| API                                                              | Lifetime / behavior                                                                                                                     |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `PortalHostView.setName(name)`                                   | Register/unregister the destination name. Use `sessionId`.                                                                              |
+| `PortalHostView.cleanup()`                                       | Permanently unregister the destination during teardown.                                                                                 |
 | `PortalReactRootView(context, reactHost, surfaceId, moduleName)` | Detached Fabric root that forwards touch/pointer events through the retained `ReactHost`; it does not start another runtime or surface. |
 
 `PortalHostView` also re-registers on window attachment and temporarily
@@ -435,29 +480,29 @@ Import public APIs from `GraniteMicroFrontendRuntime`.
 
 ### Session APIs
 
-| API | Lifetime / behavior |
-| --- | --- |
+| API                                                                                                | Lifetime / behavior                                                                                                                                                                                                                                             |
+| -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `+[GraniteMicroFrontendViewControllerSessionBinding bindViewController:sessionId:appName:scheme:]` | Convenience binding for a `UIViewController`. Emits open and derives visibility from `viewWillAppear` / `viewWillDisappear` combined with app foreground and background transitions. Returns `nil` if `sessionId` is already registered. Retain until teardown. |
-| `-[GraniteMicroFrontendViewControllerSessionBinding invalidate]` | Emit close and detach lifecycle observation. |
-| `+[GraniteMicroFrontendRuntimeHost registerSession:]` | Register a custom container and return a session registration, or `nil` if `sessionId` is already registered. Use a unique id per destination and call `invalidate` before reuse. |
-| `-[GraniteMicroFrontendSessionRegistration openAppWithAppName:scheme:]` | Emit `openApp` once. |
-| `-[GraniteMicroFrontendSessionRegistration setVisible:]` | Emit visibility only when it changes. |
-| `-[GraniteMicroFrontendSessionRegistration closeApp]` | Emit `closeApp` once after open. |
-| `-[GraniteMicroFrontendSessionRegistration invalidate]` | Unregister the session. Call after `closeApp`. |
-| `+[GraniteMicroFrontendRuntimeHost emitPreloadApp:]` | Fire-and-forget preload. |
+| `-[GraniteMicroFrontendViewControllerSessionBinding invalidate]`                                   | Emit close and detach lifecycle observation.                                                                                                                                                                                                                    |
+| `+[GraniteMicroFrontendRuntimeHost registerSession:]`                                              | Register a custom container and return a session registration, or `nil` if `sessionId` is already registered. Use a unique id per destination and call `invalidate` before reuse.                                                                               |
+| `-[GraniteMicroFrontendSessionRegistration openAppWithAppName:scheme:]`                            | Emit `openApp` once.                                                                                                                                                                                                                                            |
+| `-[GraniteMicroFrontendSessionRegistration setVisible:]`                                           | Emit visibility only when it changes.                                                                                                                                                                                                                           |
+| `-[GraniteMicroFrontendSessionRegistration closeApp]`                                              | Emit `closeApp` once after open.                                                                                                                                                                                                                                |
+| `-[GraniteMicroFrontendSessionRegistration invalidate]`                                            | Unregister the session. Call after `closeApp`.                                                                                                                                                                                                                  |
+| `+[GraniteMicroFrontendRuntimeHost emitPreloadApp:]`                                               | Fire-and-forget preload.                                                                                                                                                                                                                                        |
 
 ### Portal destination APIs
 
-| API | Lifetime / behavior |
-| --- | --- |
-| `-initWithFrame:` | Create and immediately activate a UIKit-owned Portal destination after React has booted. |
-| `-initWithFrame:deferredActivation:` | Create before React boot without reading React feature flags. |
-| `-setName:` | Register/unregister the destination name. Use `sessionId`. |
-| `-activateIfNeeded` | Create the Fabric host, attach its touch handler, and apply the pending name. Main thread only, after React boot. |
-| `isActivated` | Whether the underlying Fabric host exists. |
-| `hasAttachedContent` | Whether teleported content is currently attached. This is readiness, not presentation visibility. |
-| `onContentDidAttach` / `onContentDidDetach` | Main-thread readiness callbacks for the first attach and last detach. |
-| `-invalidate` | Unregister the host and clear callbacks during teardown. |
+| API                                         | Lifetime / behavior                                                                                               |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `-initWithFrame:`                           | Create and immediately activate a UIKit-owned Portal destination after React has booted.                          |
+| `-initWithFrame:deferredActivation:`        | Create before React boot without reading React feature flags.                                                     |
+| `-setName:`                                 | Register/unregister the destination name. Use `sessionId`.                                                        |
+| `-activateIfNeeded`                         | Create the Fabric host, attach its touch handler, and apply the pending name. Main thread only, after React boot. |
+| `isActivated`                               | Whether the underlying Fabric host exists.                                                                        |
+| `hasAttachedContent`                        | Whether teleported content is currently attached. This is readiness, not presentation visibility.                 |
+| `onContentDidAttach` / `onContentDidDetach` | Main-thread readiness callbacks for the first attach and last detach.                                             |
+| `-invalidate`                               | Unregister the host and clear callbacks during teardown.                                                          |
 
 ### UIViewController example
 

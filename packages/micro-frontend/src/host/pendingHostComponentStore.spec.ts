@@ -10,6 +10,9 @@ import {
   resetPendingHostComponentStoreForTest,
   resolvePendingHostComponent,
 } from './pendingHostComponentStore';
+import { getMicroFrontendGlobalContext, MicroFrontendGlobalContextCompatibilityError } from '../runtime/globalContext';
+
+const PENDING_STORE_KEY = 'pendingHostComponentStore';
 
 function ProductPendingComponent(): ReactNode {
   return null;
@@ -36,6 +39,84 @@ describe('pending host component registry', () => {
 
   afterEach(() => {
     Reflect.deleteProperty(globalThis, 'hideSharedPendingHostComponent');
+    Reflect.deleteProperty(getMicroFrontendGlobalContext(), PENDING_STORE_KEY);
+  });
+
+  it('stores the registry only on the canonical non-enumerable context field', () => {
+    // Given
+    const context = getMicroFrontendGlobalContext();
+
+    // When
+    registerPendingHostComponentRoute('/product', { component: ProductPendingComponent, app: appOne });
+
+    // Then
+    const store = Reflect.get(context, PENDING_STORE_KEY);
+    expect(store).toBeDefined();
+    expect(Object.keys(context)).toEqual(['__INSTANCES__', '__SHARED__', '__CONTAINERS__']);
+    expect(Reflect.getOwnPropertyDescriptor(context, PENDING_STORE_KEY)).toMatchObject({
+      configurable: true,
+      enumerable: false,
+      value: store,
+      writable: true,
+    });
+  });
+
+  it('reuses the canonical store across separately evaluated package copies', async () => {
+    // Given
+    const context = getMicroFrontendGlobalContext();
+    Reflect.deleteProperty(context, PENDING_STORE_KEY);
+    vi.resetModules();
+    const firstPackageCopy = await import('./pendingHostComponentStore');
+
+    // When
+    firstPackageCopy.registerPendingHostComponentRoute('/product', { component: ProductPendingComponent, app: appOne });
+    const store = Reflect.get(context, PENDING_STORE_KEY);
+    vi.resetModules();
+    const secondPackageCopy = await import('./pendingHostComponentStore');
+
+    // Then
+    expect(store).toBeDefined();
+    expect(secondPackageCopy.resolvePendingHostComponent({ appName: 'app-1', routePath: '/product' })?.component).toBe(
+      ProductPendingComponent
+    );
+    expect(Reflect.get(context, PENDING_STORE_KEY)).toBe(store);
+  });
+
+  it('rejects a malformed canonical pending store', () => {
+    // Given
+    const context = getMicroFrontendGlobalContext();
+    Reflect.defineProperty(context, PENDING_STORE_KEY, {
+      configurable: true,
+      enumerable: false,
+      value: {},
+      writable: true,
+    });
+
+    // When
+    const getHidden = () => getIsPendingHostComponentHidden();
+
+    // Then
+    expect(getHidden).toThrow(MicroFrontendGlobalContextCompatibilityError);
+  });
+
+  it('rejects a false canonical pending store definition without installing a partial store', () => {
+    // Given
+    const context = getMicroFrontendGlobalContext();
+    Reflect.deleteProperty(context, PENDING_STORE_KEY);
+    const rejectingContext = new Proxy(context, {
+      defineProperty(target, property, descriptor) {
+        return property === PENDING_STORE_KEY ? false : Reflect.defineProperty(target, property, descriptor);
+      },
+    });
+    Reflect.set(globalThis, '__MICRO_FRONTEND__', rejectingContext);
+
+    // When
+    const getHidden = () => getIsPendingHostComponentHidden();
+
+    // Then
+    expect(getHidden).toThrow(MicroFrontendGlobalContextCompatibilityError);
+    expect(Reflect.has(context, PENDING_STORE_KEY)).toBe(false);
+    Reflect.set(globalThis, '__MICRO_FRONTEND__', context);
   });
 
   it('resolves an app route and parses query params from its Granite URL', () => {
@@ -64,7 +145,7 @@ describe('pending host component registry', () => {
     registerPendingHostComponentRoute('/product/:id', {
       component: DynamicProductPendingComponent,
       app: appOne,
-      validateParams: params => {
+      validateParams: (params) => {
         const id = params == null || !('id' in params) ? '' : String(params.id);
         const tab = params == null || !('tab' in params) ? 'detail' : String(params.tab);
 
@@ -86,7 +167,9 @@ describe('pending host component registry', () => {
       app: appOne,
     });
 
-    expect(resolvePendingHostComponent({ appName: 'app-1', routePath: '/product' })?.component).toBe(ProductPendingComponent);
+    expect(resolvePendingHostComponent({ appName: 'app-1', routePath: '/product' })?.component).toBe(
+      ProductPendingComponent
+    );
     expect(resolvePendingHostComponent({ appName: 'app-2', routePath: '/product' })).toBeNull();
   });
 
@@ -106,7 +189,9 @@ describe('pending host component registry', () => {
 
     // Then
     expect(resolvePendingHostComponent({ appName: 'app-1', routePath: '/product' })).toBeNull();
-    expect(resolvePendingHostComponent({ appName: 'app-2', routePath: '/coupon' })?.component).toBe(BenefitPendingComponent);
+    expect(resolvePendingHostComponent({ appName: 'app-2', routePath: '/coupon' })?.component).toBe(
+      BenefitPendingComponent
+    );
   });
 
   it('shares visibility state across host and remote package instances', () => {

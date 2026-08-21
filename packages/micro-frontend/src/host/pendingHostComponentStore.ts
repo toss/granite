@@ -14,6 +14,7 @@ import type {
   ResolvedPendingHostComponent,
   ValidateParams,
 } from './types';
+import { getMicroFrontendGlobalContext, MicroFrontendGlobalContextCompatibilityError } from '../runtime/globalContext';
 
 interface PendingHostComponentRouteEntry {
   readonly id: string;
@@ -40,34 +41,54 @@ interface PendingHostComponentStore {
   version: number;
 }
 
-interface GlobalWithPendingHostComponentStore {
-  __graniteMicroFrontendPendingHostComponentStore?: PendingHostComponentStore;
-  hideSharedPendingHostComponent?: () => void;
-}
+const PENDING_STORE_KEY = 'pendingHostComponentStore';
+const HIDE_SHARED_PENDING_HOST_COMPONENT_KEY = 'hideSharedPendingHostComponent';
 
-function getGlobalObject() {
-  return globalThis as typeof globalThis & GlobalWithPendingHostComponentStore;
-}
-
-function getPendingHostComponentStore() {
-  const globalObject = getGlobalObject();
-
-  if (globalObject.__graniteMicroFrontendPendingHostComponentStore == null) {
-    globalObject.__graniteMicroFrontendPendingHostComponentStore = {
-      entries: [],
-      hidden: false,
-      listeners: new Set(),
-      version: 0,
-    };
+function getPendingHostComponentStore(): PendingHostComponentStore {
+  const context = getMicroFrontendGlobalContext();
+  const descriptor = Reflect.getOwnPropertyDescriptor(context, PENDING_STORE_KEY);
+  if (descriptor != null) {
+    if (!isPendingHostComponentStore(descriptor.value)) {
+      throw new MicroFrontendGlobalContextCompatibilityError('canonical-global-is-not-adoptable');
+    }
+    return descriptor.value;
   }
 
-  return globalObject.__graniteMicroFrontendPendingHostComponentStore;
+  const store = createPendingHostComponentStore();
+
+  if (
+    !Reflect.defineProperty(context, PENDING_STORE_KEY, {
+      configurable: true,
+      enumerable: false,
+      value: store,
+      writable: true,
+    })
+  ) {
+    throw new MicroFrontendGlobalContextCompatibilityError('canonical-global-is-not-adoptable');
+  }
+
+  return store;
+}
+
+function createPendingHostComponentStore(): PendingHostComponentStore {
+  return { entries: [], hidden: false, listeners: new Set(), version: 0 };
+}
+
+function isPendingHostComponentStore(value: unknown): value is PendingHostComponentStore {
+  return (
+    typeof value === 'object' &&
+    value != null &&
+    Array.isArray(Reflect.get(value, 'entries')) &&
+    typeof Reflect.get(value, 'hidden') === 'boolean' &&
+    Reflect.get(value, 'listeners') instanceof Set &&
+    typeof Reflect.get(value, 'version') === 'number'
+  );
 }
 
 function emitPendingHostComponentStoreChange() {
   const store = getPendingHostComponentStore();
   store.version += 1;
-  store.listeners.forEach(listener => listener());
+  store.listeners.forEach((listener) => listener());
 }
 
 export function subscribePendingHostComponentStore(listener: () => void) {
@@ -99,8 +120,11 @@ function setPendingHostComponentHidden(hidden: boolean) {
 export function hidePendingHostComponent() {
   setPendingHostComponentHidden(true);
 
-  const hideSharedPendingHostComponent = getGlobalObject().hideSharedPendingHostComponent;
-  if (typeof hideSharedPendingHostComponent === 'function' && hideSharedPendingHostComponent !== hidePendingHostComponent) {
+  const hideSharedPendingHostComponent = Reflect.get(globalThis, HIDE_SHARED_PENDING_HOST_COMPONENT_KEY);
+  if (
+    typeof hideSharedPendingHostComponent === 'function' &&
+    hideSharedPendingHostComponent !== hidePendingHostComponent
+  ) {
     hideSharedPendingHostComponent();
   }
 }
@@ -110,12 +134,13 @@ export function resetPendingHostComponent() {
 }
 
 export function installPendingHostComponentBridge() {
-  getGlobalObject().hideSharedPendingHostComponent = hidePendingHostComponent;
+  Reflect.set(globalThis, HIDE_SHARED_PENDING_HOST_COMPONENT_KEY, hidePendingHostComponent);
 }
 
-export function registerPendingHostComponentRoute<
-  TParams extends Readonly<object> | undefined = undefined,
->(routePath: string, options: RegisterPendingHostComponentRouteOptions<TParams>) {
+export function registerPendingHostComponentRoute<TParams extends Readonly<object> | undefined = undefined>(
+  routePath: string,
+  options: RegisterPendingHostComponentRouteOptions<TParams>
+) {
   const store = getPendingHostComponentStore();
   const normalizedRoutePath = normalizeRoutePath(routePath);
   const appName = normalizePendingHostComponentAppName(options.app.name);
@@ -130,7 +155,7 @@ export function registerPendingHostComponentRoute<
     parserParams: options.parserParams,
     validateParams: options.validateParams,
   };
-  const existingIndex = store.entries.findIndex(item => item.id === id);
+  const existingIndex = store.entries.findIndex((item) => item.id === id);
 
   if (existingIndex >= 0) {
     store.entries[existingIndex] = entry;
@@ -144,7 +169,7 @@ export function registerPendingHostComponentRoute<
 export function removePendingHostComponentRoutes(appName: string) {
   const store = getPendingHostComponentStore();
   const normalizedAppName = normalizePendingHostComponentAppName(appName);
-  const remainingEntries = store.entries.filter(entry => entry.appName !== normalizedAppName);
+  const remainingEntries = store.entries.filter((entry) => entry.appName !== normalizedAppName);
 
   if (remainingEntries.length === store.entries.length) {
     return;
@@ -154,13 +179,17 @@ export function removePendingHostComponentRoutes(appName: string) {
   emitPendingHostComponentStoreChange();
 }
 
-export function resolvePendingHostComponent(request: PendingHostComponentRouteRequest | string): ResolvedPendingHostComponent | null {
+export function resolvePendingHostComponent(
+  request: PendingHostComponentRouteRequest | string
+): ResolvedPendingHostComponent | null {
   const matched = typeof request === 'string' ? findRouteByUrl(request) : findRouteByRequest(request);
 
   return resolveMatchedPendingHostComponent(matched);
 }
 
-function resolveMatchedPendingHostComponent(matched: MatchedPendingHostComponentRoute | null): ResolvedPendingHostComponent | null {
+function resolveMatchedPendingHostComponent(
+  matched: MatchedPendingHostComponentRoute | null
+): ResolvedPendingHostComponent | null {
   if (matched == null) {
     return null;
   }

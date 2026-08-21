@@ -21,7 +21,7 @@ describe('micro-frontend shared resolver', () => {
           "Object.defineProperty(sharedNamespace, 'default', { enumerable: true, get: function () { return 'Default'; } });",
           "Object.defineProperty(sharedNamespace, 'linked', { enumerable: true, get: function () { return 'Linked'; } });",
           "Object.defineProperty(sharedNamespace, 'unlinked', { enumerable: true, get: function () { throw new Error('Unlinked native module was evaluated'); } });",
-          "global._graniteMicroFrontend = { sharedModules: { 'shared-native-module': { get: function () { return sharedNamespace; } } } };",
+          "global.__MICRO_FRONTEND__ = { __INSTANCES__: [], __SHARED__: { 'shared-native-module': { get: function () { return sharedNamespace; } }, }, __CONTAINERS__: {} };",
         ].join('\n'),
       },
       format: 'cjs',
