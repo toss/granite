@@ -1,5 +1,12 @@
 # @granite-js/micro-frontend
 
+## 2.1.1
+
+### Patch Changes
+
+- 4f7aad6: Reuse host native component registrations when remote bundles evaluate matching native wrappers.
+  - @granite-js/utils@2.1.1
+
 ## 2.1.0
 
 ### Minor Changes
