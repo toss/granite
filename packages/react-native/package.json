@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/react-native",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "The Granite Framework",
   "bin": {
     "granite": "./bin/cli.js"
@@ -114,7 +114,7 @@
     "zod": "^4.1.12"
   },
   "peerDependencies": {
-    "@granite-js/native": "workspace:*",
+    "@granite-js/native": "*",
     "@types/react": "*",
     "brick-module": "*",
     "react": "*",
