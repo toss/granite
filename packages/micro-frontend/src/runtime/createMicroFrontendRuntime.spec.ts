@@ -11,8 +11,11 @@ import {
   type NativeMicroFrontendRuntime,
   type NativeMicroFrontendRuntimeEvent,
 } from './createMicroFrontendRuntime';
+import { getMicroFrontendGlobalContext } from './globalContext';
 import { parseNativeRuntimeEvent } from './parseNativeRuntimeEvent';
 import { createContainer, exposeModule, microFrontendModuleRegistry } from './registry';
+
+const NATIVE_COMPONENT_REGISTRY_MODULE = 'react-native/Libraries/NativeComponent/NativeComponentRegistry';
 
 interface AppModule {
   readonly default: () => string;
@@ -88,6 +91,40 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledWith({
       filePath: '/bundles/cart.hbc',
     });
+  });
+
+  it('reuses a native view registered by the host when a remote bundle evaluates its wrapper', async () => {
+    // Given
+    const fixture = createRuntimeFixture();
+    const registeredViews = new Set<string>();
+    const nativeComponentRegistry = {
+      get(name: string) {
+        if (registeredViews.has(name)) {
+          throw new Error(`Tried to register two views with the same name ${name}`);
+        }
+        registeredViews.add(name);
+        return name;
+      },
+    };
+    nativeComponentRegistry.get('TossServiceWebView');
+    getMicroFrontendGlobalContext().__SHARED__[NATIVE_COMPONENT_REGISTRY_MODULE] = {
+      get: () => nativeComponentRegistry,
+      loaded: true,
+    };
+    vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(async () => {
+      const remoteRegistry = getMicroFrontendGlobalContext().__SHARED__[NATIVE_COMPONENT_REGISTRY_MODULE]?.get();
+      const remoteGet =
+        typeof remoteRegistry === 'object' && remoteRegistry != null ? Reflect.get(remoteRegistry, 'get') : undefined;
+      if (typeof remoteGet !== 'function') {
+        throw new Error('NativeComponentRegistry.get is unavailable');
+      }
+      Reflect.apply(remoteGet, remoteRegistry, ['TossServiceWebView', () => ({})]);
+      createContainer('visit-mission');
+    });
+
+    // When / Then
+    await expect(fixture.runtime.preloadApp('visit-mission')).resolves.toBeUndefined();
+    expect(registeredViews).toEqual(new Set(['TossServiceWebView']));
   });
 
   it('removes a failed evaluation so the next preload can retry', async () => {

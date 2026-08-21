@@ -193,6 +193,11 @@ adapter.loadBundle({ appName: 'cart' })
 Concurrent preload/import calls for one app share an evaluation. A successful
 evaluation remains cached for the lifetime of the JavaScript runtime. Failed
 evaluation removes the partial container so a later request can retry.
+Before evaluating a remote, the runtime also adapts the shared React Native
+component registry so a native view wrapper already evaluated by the host can
+be evaluated again by a separate remote bundle. The canonical host registration
+is reused only for React Native's exact duplicate-view invariant; other registry
+errors continue to fail the remote evaluation.
 Native `preloadApp` events invoke `preloadApp()` inside the runtime and are not
 forwarded to session listeners. `onPreloadError` is optional and lets the host
 route best-effort native preload failures to its observability provider.
