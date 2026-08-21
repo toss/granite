@@ -7,6 +7,7 @@ import type {
 } from '../types';
 import { AppContainerNotFoundError, InvalidAppNameError } from './errors';
 import { getMicroFrontendGlobalContext } from './globalContext';
+import { installNativeComponentRegistryCompatibility } from './nativeComponentRegistryCompatibility';
 import { parseAppRequest } from './parseAppRequest';
 
 export interface NativeMicroFrontendRuntimeEvent {
@@ -71,6 +72,7 @@ export function createMicroFrontendRuntimeWithDependencies(
 
   function evaluateScript(filePath: string): Promise<void> {
     getMicroFrontendGlobalContext();
+    installNativeComponentRegistryCompatibility();
     return dependencies.nativeRuntime.evaluateScript({ filePath });
   }
 
