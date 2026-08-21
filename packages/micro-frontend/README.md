@@ -110,9 +110,9 @@ modules in the shared runtime registry.
 ### As-is
 
 Older bundles use `global.__MICRO_FRONTEND__` with `__INSTANCES__` and
-`__SHARED__`. Earlier current bundles use
-`global._graniteMicroFrontend.containers` and `.sharedModules`. Neither shape
-is a product router: an `appName` is the identity of one remote registration.
+`__SHARED__`. A compatible bundle adds `__CONTAINERS__` to the same canonical
+context. Neither shape is a product router: an `appName` is the identity of one
+remote registration.
 
 ### To-be
 
@@ -131,29 +131,23 @@ The durable owner is `global.__MICRO_FRONTEND__` with exactly this shape:
 - A current container registration creates paired legacy/current views for the
   same app name. The pair is transparent across separately evaluated bundles:
   it is one remote-owned registration, not two independently owned copies.
-- `_graniteMicroFrontend` is a temporary compatibility adapter only. Its
-  `containers` and `sharedModules` point at the canonical
-  `__CONTAINERS__` and `__SHARED__` stores; new integrations must not make it
-  their owner.
+- The dispose callback registry and registrar live on the same canonical
+  context as non-enumerable properties. They are reused across separately
+  evaluated bundles without changing the three-key enumerable registry shape.
 
 Bootstrap the canonical context before a compatible host evaluates a remote.
 A compatible remote also installs the canonical bootstrap in its generated
-prelude. This is required to adopt an already-evaluated pre-compat remote that
-writes `_graniteMicroFrontend`. An old host paired with an already-built
-pre-compat remote is unsupported when neither side executes the compatible
-bootstrap: the host reads `__MICRO_FRONTEND__`, while that remote writes only
-`_graniteMicroFrontend`.
+prelude, so either compatible side can establish the three-store context before
+the bundle registers its container.
 
 The executable compatibility matrix is:
 
-| Host       | Remote                                    | Required order                                    | Status                                  |
-| ---------- | ----------------------------------------- | ------------------------------------------------- | --------------------------------------- |
-| Legacy     | Legacy                                    | Remote first                                      | Supported                               |
-| Compatible | Compatible                                | Host first                                        | Supported                               |
-| Compatible | Legacy                                    | Host first                                        | Supported                               |
-| Legacy     | Compatible                                | Remote first                                      | Supported                               |
-| Compatible | Pre-compat `_graniteMicroFrontend` remote | Remote first, then compatible bootstrap adopts it | Supported through the temporary adapter |
-| Legacy     | Pre-compat `_graniteMicroFrontend` remote | No compatible bootstrap                           | Unsupported                             |
+| Host       | Remote     | Required order | Status    |
+| ---------- | ---------- | -------------- | --------- |
+| Legacy     | Legacy     | Remote first   | Supported |
+| Compatible | Compatible | Host first     | Supported |
+| Compatible | Legacy     | Host first     | Supported |
+| Legacy     | Compatible | Remote first   | Supported |
 
 Registration is duplicate-safe, not aliasing: an occupied app name, duplicate
 exposed module, or incompatible duplicate shared module is rejected. Removal
@@ -216,11 +210,9 @@ Remote code can register an idempotent callback for explicit app-level resource
 cleanup:
 
 ```ts
-if (globalThis._graniteMicroFrontend != null) {
-  globalThis._graniteMicroFrontend.dispose(() => {
-    queryClient.clear();
-  });
-}
+globalThis.__MICRO_FRONTEND__.dispose(() => {
+  queryClient.clear();
+});
 ```
 
 The micro-frontend plugin assigns the remote app name at build time through

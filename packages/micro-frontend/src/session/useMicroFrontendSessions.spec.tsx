@@ -55,7 +55,6 @@ function renderSessions(runtime: Pick<MicroFrontendRuntimeApi, 'onEvent'>) {
 
 describe('useMicroFrontendSessions', () => {
   beforeEach(() => {
-    Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
     Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
   });
 

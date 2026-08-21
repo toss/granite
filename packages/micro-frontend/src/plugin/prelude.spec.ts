@@ -30,9 +30,62 @@ describe('getPreludeConfig', () => {
     expect(config.preludeScript).toContain('global.__MICRO_FRONTEND__.__CONTAINERS__');
     expect(config.preludeScript).toContain('createContainer(global.__granite.app.name');
     expect(config.preludeScript).toContain('exposeModule(__container, "./App", __expose0)');
-    expect(config.banner).toContain('global._graniteMicroFrontend');
+    expect(config.banner).not.toContain(['_granite', 'MicroFrontend'].join(''));
+    expect(config.banner).toContain('global.__MICRO_FRONTEND__');
     expect(config.banner).toContain('function dispose(appName, callback)');
     expect(config.banner).toContain('disposeCallbacksByApp');
+  });
+
+  it('shares non-enumerable lifecycle state across independently evaluated bundles', () => {
+    // Given
+    const globalObject = {};
+    const firstConfig = getPreludeConfig({}, 'first-app');
+    const secondConfig = getPreludeConfig({}, 'second-app');
+
+    // When
+    vm.runInNewContext(firstConfig.banner, { global: globalObject });
+    const context = Reflect.get(globalObject, '__MICRO_FRONTEND__');
+    const firstDispose = Reflect.get(context, 'dispose');
+    const firstCallbacks = Reflect.get(context, 'disposeCallbacksByApp');
+    Reflect.apply(firstDispose, undefined, ['first-app', () => undefined]);
+    vm.runInNewContext(secondConfig.banner, { global: globalObject });
+    const secondDispose = Reflect.get(context, 'dispose');
+    Reflect.apply(secondDispose, undefined, ['second-app', () => undefined]);
+
+    // Then
+    expect(Object.keys(context)).toEqual(['__INSTANCES__', '__SHARED__', '__CONTAINERS__']);
+    expect(secondDispose).toBe(firstDispose);
+    expect(Reflect.get(context, 'disposeCallbacksByApp')).toBe(firstCallbacks);
+    expect(Reflect.get(firstCallbacks, 'first-app')).toHaveProperty('size', 1);
+    expect(Reflect.get(firstCallbacks, 'second-app')).toHaveProperty('size', 1);
+    expect(Reflect.getOwnPropertyDescriptor(context, 'dispose')?.enumerable).toBe(false);
+    expect(Reflect.getOwnPropertyDescriptor(context, 'disposeCallbacksByApp')?.enumerable).toBe(false);
+  });
+
+  it('rolls back lifecycle installation when the registrar definition is interrupted', () => {
+    // Given
+    const context = { __INSTANCES__: [], __SHARED__: {}, __CONTAINERS__: {} };
+    const interruptedReflect = new Proxy(Reflect, {
+      get(target, property, receiver) {
+        if (property === 'defineProperty') {
+          return (definitionTarget: object, definitionProperty: PropertyKey, descriptor: PropertyDescriptor) =>
+            definitionProperty === 'dispose'
+              ? false
+              : Reflect.defineProperty(definitionTarget, definitionProperty, descriptor);
+        }
+        return Reflect.get(target, property, receiver);
+      },
+    });
+    const globalObject = { __MICRO_FRONTEND__: context };
+    const config = getPreludeConfig({}, 'locked-app');
+
+    // When
+    const evaluate = () => vm.runInNewContext(config.banner, { global: globalObject, Reflect: interruptedReflect });
+
+    // Then
+    expect(evaluate).toThrow('canonical-context-is-locked');
+    expect(Reflect.has(context, 'disposeCallbacksByApp')).toBe(false);
+    expect(Reflect.has(context, 'dispose')).toBe(false);
   });
 
   it('creates a container without importing a private runtime entry', () => {

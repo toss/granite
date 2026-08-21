@@ -17,7 +17,6 @@ type SharedModuleEntry = {
 };
 
 function clearMicroFrontendGlobals(): void {
-  Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
   Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
 }
 

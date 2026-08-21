@@ -10,6 +10,9 @@ type BootstrapImplementation = {
   readonly bootstrap: (globalObject: GlobalFixture) => unknown;
 };
 
+const CANONICAL_KEY = '__MICRO_FRONTEND__';
+const CANONICAL_KEYS = ['__INSTANCES__', '__SHARED__', '__CONTAINERS__'] as const;
+
 const implementations: readonly BootstrapImplementation[] = [
   {
     name: 'runtime',
@@ -19,24 +22,10 @@ const implementations: readonly BootstrapImplementation[] = [
     name: 'generated script',
     bootstrap(globalObject) {
       vm.runInNewContext(globalContextScript, { global: globalObject });
-      return Reflect.get(globalObject, '__MICRO_FRONTEND__');
+      return Reflect.get(globalObject, CANONICAL_KEY);
     },
   },
 ];
-
-const writeInterruptions = [
-  {
-    name: 'returns false',
-    interrupt: () => false,
-  },
-  {
-    name: 'throws after writing',
-    interrupt(target: Record<PropertyKey, unknown>, property: PropertyKey, value: unknown) {
-      Reflect.set(target, property, value);
-      throw new Error('compatibility adoption interrupted');
-    },
-  },
-] as const;
 
 describe.each(implementations)('$name global-context bootstrap', ({ bootstrap }) => {
   it('creates the exact canonical registry shape from an empty global', () => {
@@ -47,14 +36,9 @@ describe.each(implementations)('$name global-context bootstrap', ({ bootstrap })
     const context = bootstrap(globalObject);
 
     // Then
-    expect(Object.keys(context ?? {})).toEqual(['__INSTANCES__', '__SHARED__', '__CONTAINERS__']);
-    expect(Reflect.get(globalObject, '__MICRO_FRONTEND__')).toBe(context);
-    expect(Reflect.get(Reflect.get(globalObject, '_graniteMicroFrontend') ?? {}, 'sharedModules')).toBe(
-      Reflect.get(context ?? {}, '__SHARED__')
-    );
-    expect(Reflect.get(Reflect.get(globalObject, '_graniteMicroFrontend') ?? {}, 'containers')).toBe(
-      Reflect.get(context ?? {}, '__CONTAINERS__')
-    );
+    expect(Object.keys(context ?? {})).toEqual(CANONICAL_KEYS);
+    expect(Object.keys(globalObject)).toEqual([CANONICAL_KEY]);
+    expect(Reflect.get(globalObject, CANONICAL_KEY)).toBe(context);
   });
 
   it('adopts legacy stores while normalizing the canonical registry key order', () => {
@@ -62,72 +46,95 @@ describe.each(implementations)('$name global-context bootstrap', ({ bootstrap })
     const instances: unknown[] = [];
     const shared = {};
     const legacyContext = { __SHARED__: shared, __INSTANCES__: instances };
-    const globalObject: GlobalFixture = { __MICRO_FRONTEND__: legacyContext };
+    const globalObject: GlobalFixture = { [CANONICAL_KEY]: legacyContext };
 
     // When
     const context = bootstrap(globalObject);
 
     // Then
-    expect(Object.keys(context ?? {})).toEqual(['__INSTANCES__', '__SHARED__', '__CONTAINERS__']);
+    expect(Object.keys(context ?? {})).toEqual(CANONICAL_KEYS);
     expect(Reflect.get(context ?? {}, '__INSTANCES__')).toBe(instances);
     expect(Reflect.get(context ?? {}, '__SHARED__')).toBe(shared);
     expect(Object.keys(legacyContext)).toEqual(['__SHARED__', '__INSTANCES__']);
   });
 
-  it('leaves both globals untouched when duplicate shared entries conflict', () => {
+  it('completes a canonical-order legacy context in place', () => {
     // Given
-    const canonicalContext = { __SHARED__: { react: {} }, __INSTANCES__: [] };
-    const compatibilityContext = { containers: {}, sharedModules: { react: {} } };
-    const globalObject: GlobalFixture = {
-      __MICRO_FRONTEND__: canonicalContext,
-      _graniteMicroFrontend: compatibilityContext,
-    };
+    const legacyContext = { __INSTANCES__: [], __SHARED__: {} };
+    const globalObject: GlobalFixture = { [CANONICAL_KEY]: legacyContext };
 
     // When
-    const initialize = () => bootstrap(globalObject);
+    const context = bootstrap(globalObject);
 
     // Then
-    expect(initialize).toThrow();
-    expect(Reflect.get(globalObject, '__MICRO_FRONTEND__')).toBe(canonicalContext);
-    expect(Reflect.get(globalObject, '_graniteMicroFrontend')).toBe(compatibilityContext);
-    expect(Object.keys(canonicalContext)).toEqual(['__SHARED__', '__INSTANCES__']);
+    expect(context).toBe(legacyContext);
+    expect(Object.keys(context ?? {})).toEqual(CANONICAL_KEYS);
   });
 
-  it('reuses the installed canonical and compatibility identities on repeated bootstrap', () => {
+  it('preserves a complete canonical context across repeated bootstrap', () => {
     // Given
-    const globalObject: GlobalFixture = {};
-    const firstContext = bootstrap(globalObject);
-    const firstAdapter = Reflect.get(globalObject, '_graniteMicroFrontend');
+    const canonicalContext = { __INSTANCES__: [], __SHARED__: {}, __CONTAINERS__: {} };
+    const globalObject: GlobalFixture = { [CANONICAL_KEY]: canonicalContext };
 
     // When
+    const firstContext = bootstrap(globalObject);
     const secondContext = bootstrap(globalObject);
 
     // Then
-    expect(secondContext).toBe(firstContext);
-    expect(Reflect.get(globalObject, '_graniteMicroFrontend')).toBe(firstAdapter);
+    expect(firstContext).toBe(canonicalContext);
+    expect(secondContext).toBe(canonicalContext);
+    expect(Object.keys(globalObject)).toEqual([CANONICAL_KEY]);
   });
 
-  it('rejects a malformed canonical value without installing compatibility state', () => {
+  it('leaves a malformed canonical value untouched and succeeds after repair', () => {
     // Given
     const malformedContext = { __SHARED__: [] };
-    const globalObject: GlobalFixture = { __MICRO_FRONTEND__: malformedContext };
+    const globalObject: GlobalFixture = { [CANONICAL_KEY]: malformedContext };
 
     // When
     const initialize = () => bootstrap(globalObject);
 
     // Then
-    expect(initialize).toThrow();
-    expect(Reflect.get(globalObject, '__MICRO_FRONTEND__')).toBe(malformedContext);
-    expect(Reflect.has(globalObject, '_graniteMicroFrontend')).toBe(false);
+    expect(initialize).toThrow('Cannot establish the micro-frontend global context: canonical-global-is-not-adoptable');
+    expect(Reflect.get(globalObject, CANONICAL_KEY)).toBe(malformedContext);
+
+    // When
+    const repairedContext = { __INSTANCES__: [], __SHARED__: {} };
+    Reflect.set(globalObject, CANONICAL_KEY, repairedContext);
+    const context = initialize();
+
+    // Then
+    expect(context).toBe(repairedContext);
+    expect(Object.keys(context ?? {})).toEqual(CANONICAL_KEYS);
   });
 
-  it('rejects a false canonical descriptor installation without leaving globals, then retries', () => {
+  it('rejects a locked legacy descriptor without mutating it', () => {
+    // Given
+    const legacyContext = { __SHARED__: {}, __INSTANCES__: [] };
+    const globalObject: GlobalFixture = {};
+    Object.defineProperty(globalObject, CANONICAL_KEY, {
+      configurable: false,
+      enumerable: true,
+      value: legacyContext,
+      writable: false,
+    });
+
+    // When
+    const initialize = () => bootstrap(globalObject);
+
+    // Then
+    expect(initialize).toThrow('Cannot establish the micro-frontend global context: canonical-global-is-locked');
+    expect(Reflect.get(globalObject, CANONICAL_KEY)).toBe(legacyContext);
+    expect(Object.keys(legacyContext)).toEqual(['__SHARED__', '__INSTANCES__']);
+  });
+
+  it('rolls back a false canonical descriptor installation and then retries', () => {
     // Given
     const globalTarget: GlobalFixture = {};
     let rejectCanonical = true;
     const globalObject = new Proxy(globalTarget, {
       defineProperty(target, property, descriptor) {
-        return property === '__MICRO_FRONTEND__' && rejectCanonical
+        return property === CANONICAL_KEY && rejectCanonical
           ? false
           : Reflect.defineProperty(target, property, descriptor);
       },
@@ -138,73 +145,27 @@ describe.each(implementations)('$name global-context bootstrap', ({ bootstrap })
 
     // Then
     expect(initialize).toThrow('Cannot establish the micro-frontend global context: canonical-global-is-not-adoptable');
-    expect(Reflect.has(globalTarget, '__MICRO_FRONTEND__')).toBe(false);
-    expect(Reflect.has(globalTarget, '_graniteMicroFrontend')).toBe(false);
+    expect(Object.keys(globalTarget)).toEqual([]);
 
     // When
     rejectCanonical = false;
     const context = initialize();
 
     // Then
-    expect(Reflect.get(globalTarget, '__MICRO_FRONTEND__')).toBe(context);
-    expect(Reflect.has(globalTarget, '_graniteMicroFrontend')).toBe(true);
+    expect(Reflect.get(globalTarget, CANONICAL_KEY)).toBe(context);
+    expect(Object.keys(globalTarget)).toEqual([CANONICAL_KEY]);
   });
 
-  it('restores preexisting globals when adapter descriptor installation returns false, then retries', () => {
+  it('rolls back a canonical descriptor write that throws and then retries', () => {
     // Given
-    const instances: unknown[] = [];
-    const shared = {};
-    const canonicalContext = { __SHARED__: shared, __INSTANCES__: instances };
-    const compatibilityContext = { containers: {}, sharedModules: shared };
-    const globalTarget: GlobalFixture = {
-      __MICRO_FRONTEND__: canonicalContext,
-      _graniteMicroFrontend: compatibilityContext,
-    };
-    let rejectAdapter = true;
-    const globalObject = new Proxy(globalTarget, {
-      defineProperty(target, property, descriptor) {
-        return property === '_graniteMicroFrontend' && rejectAdapter
-          ? false
-          : Reflect.defineProperty(target, property, descriptor);
-      },
-    });
-
-    // When
-    const initialize = () => bootstrap(globalObject);
-
-    // Then
-    expect(initialize).toThrow(
-      'Cannot establish the micro-frontend global context: compatibility-global-is-not-adoptable'
-    );
-    expect(Reflect.get(globalTarget, '__MICRO_FRONTEND__')).toBe(canonicalContext);
-    expect(Reflect.get(globalTarget, '_graniteMicroFrontend')).toBe(compatibilityContext);
-    expect(Object.keys(canonicalContext)).toEqual(['__SHARED__', '__INSTANCES__']);
-    expect(instances).toHaveLength(0);
-
-    // When
-    rejectAdapter = false;
-    const context = initialize();
-
-    // Then
-    expect(Reflect.get(globalTarget, '__MICRO_FRONTEND__')).toBe(context);
-    expect(Reflect.get(globalTarget, '_graniteMicroFrontend')).not.toBe(compatibilityContext);
-  });
-
-  it('restores preexisting globals when adapter definition throws after writing', () => {
-    // Given
-    const canonicalContext = { __SHARED__: {}, __INSTANCES__: [] };
-    const compatibilityContext = { containers: {}, sharedModules: { adopted: {} } };
-    const globalTarget: GlobalFixture = {
-      __MICRO_FRONTEND__: canonicalContext,
-      _graniteMicroFrontend: compatibilityContext,
-    };
-    let interruptAdapter = true;
+    const globalTarget: GlobalFixture = {};
+    let interruptCanonical = true;
     const globalObject = new Proxy(globalTarget, {
       defineProperty(target, property, descriptor) {
         const result = Reflect.defineProperty(target, property, descriptor);
-        if (property === '_graniteMicroFrontend' && interruptAdapter) {
-          interruptAdapter = false;
-          throw new Error('adapter definition interrupted');
+        if (property === CANONICAL_KEY && interruptCanonical) {
+          interruptCanonical = false;
+          throw new Error('canonical definition interrupted');
         }
         return result;
       },
@@ -214,56 +175,14 @@ describe.each(implementations)('$name global-context bootstrap', ({ bootstrap })
     const initialize = () => bootstrap(globalObject);
 
     // Then
-    expect(initialize).toThrow('adapter definition interrupted');
-    expect(Reflect.get(globalTarget, '__MICRO_FRONTEND__')).toBe(canonicalContext);
-    expect(Reflect.get(globalTarget, '_graniteMicroFrontend')).toBe(compatibilityContext);
-    expect(canonicalContext.__SHARED__).toEqual({});
-    expect(Object.keys(canonicalContext)).toEqual(['__SHARED__', '__INSTANCES__']);
+    expect(initialize).toThrow('canonical definition interrupted');
+    expect(Object.keys(globalTarget)).toEqual([]);
+
+    // When
+    const context = initialize();
+
+    // Then
+    expect(Reflect.get(globalTarget, CANONICAL_KEY)).toBe(context);
+    expect(Object.keys(context ?? {})).toEqual(CANONICAL_KEYS);
   });
-
-  it.each(writeInterruptions)(
-    'rolls back multiple pending entries when the second compatibility write $name, then retries',
-    ({ interrupt }) => {
-      // Given
-      const stableValue = {};
-      const sharedTarget = { stable: stableValue };
-      let shouldInterrupt = true;
-      const shared = new Proxy(sharedTarget, {
-        set(target, property, value) {
-          return property === 'second' && shouldInterrupt
-            ? interrupt(target, property, value)
-            : Reflect.set(target, property, value);
-        },
-      });
-      const firstValue = {};
-      const secondValue = {};
-      const compatibilityContext = {
-        containers: {},
-        sharedModules: { first: firstValue, second: secondValue },
-      };
-      const globalObject: GlobalFixture = {
-        __MICRO_FRONTEND__: { __INSTANCES__: [], __SHARED__: shared, __CONTAINERS__: {} },
-        _graniteMicroFrontend: compatibilityContext,
-      };
-
-      // When
-      const initialize = () => bootstrap(globalObject);
-
-      // Then
-      expect(initialize).toThrow();
-      expect(sharedTarget).toEqual({ stable: stableValue });
-      expect(Reflect.get(globalObject, '_graniteMicroFrontend')).toBe(compatibilityContext);
-
-      // When
-      shouldInterrupt = false;
-      const context = initialize();
-
-      // Then
-      expect(sharedTarget).toEqual({ stable: stableValue, first: firstValue, second: secondValue });
-      expect(Reflect.get(globalObject, '_graniteMicroFrontend')).not.toBe(compatibilityContext);
-      expect(Reflect.get(Reflect.get(globalObject, '_graniteMicroFrontend') ?? {}, 'sharedModules')).toBe(
-        Reflect.get(context ?? {}, '__SHARED__')
-      );
-    }
-  );
 });

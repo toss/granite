@@ -3,7 +3,6 @@ import { getMicroFrontendGlobalContext } from './globalContext';
 import { createContainer, exposeModule, getMicroFrontendRuntimeContext } from './registry';
 
 function clearMicroFrontendGlobals(): void {
-  Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
   Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
 }
 

@@ -1,6 +1,4 @@
-import vm from 'node:vm';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { virtualSharedConfig } from '../../../plugin-micro-frontend/src/resolver';
 import {
   registerPendingHostComponentRoute,
   removePendingHostComponentRoutes,
@@ -22,25 +20,6 @@ interface AppModule {
 
 function CartPendingComponent() {
   return null;
-}
-
-async function getLegacySharedResolverContents(moduleName: string): Promise<string> {
-  const config = virtualSharedConfig([[moduleName, {}]]);
-  const load = config.protocols?.['virtual-shared']?.load;
-  if (load == null) {
-    throw new Error('Legacy shared resolver did not provide a loader');
-  }
-  const result = await load({
-    path: moduleName,
-    namespace: 'virtual-shared',
-    suffix: '',
-    pluginData: undefined,
-    with: {},
-  });
-  if (typeof result.contents !== 'string') {
-    throw new Error('Legacy shared resolver did not generate executable JavaScript');
-  }
-  return result.contents;
 }
 
 function createRuntimeFixture() {
@@ -81,7 +60,6 @@ function createRuntimeFixture() {
 
 describe('createMicroFrontendRuntimeWithDependencies', () => {
   beforeEach(() => {
-    Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
     Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
     resetPendingHostComponentStoreForTest();
   });
@@ -110,34 +88,6 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledWith({
       filePath: '/bundles/cart.hbc',
     });
-  });
-
-  it('bootstraps canonical compatibility before evaluateScript runs a legacy shared resolver synchronously', async () => {
-    // Given
-    const sharedValue = { version: '19' };
-    const compatibilityContext = {
-      containers: {},
-      sharedModules: { react: { get: () => sharedValue, loaded: true } },
-    };
-    Reflect.set(globalThis, '_graniteMicroFrontend', compatibilityContext);
-    const resolverContents = await getLegacySharedResolverContents('react');
-    const fixture = createRuntimeFixture();
-    const generatedModule = { exports: undefined };
-    let keysObservedDuringEvaluation: readonly string[] = [];
-    vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(() => {
-      keysObservedDuringEvaluation = Object.keys(globalThis.__MICRO_FRONTEND__ ?? {});
-      vm.runInNewContext(resolverContents, { global: globalThis, module: generatedModule });
-      createContainer('legacy-shared-consumer');
-      return Promise.resolve();
-    });
-
-    // When
-    await fixture.runtime.preloadApp('legacy-shared-consumer');
-
-    // Then
-    expect(keysObservedDuringEvaluation).toEqual(['__INSTANCES__', '__SHARED__', '__CONTAINERS__']);
-    expect(generatedModule.exports).toBe(sharedValue);
-    expect(globalThis.__MICRO_FRONTEND__.__SHARED__).toBe(compatibilityContext.sharedModules);
   });
 
   it('removes a failed evaluation so the next preload can retry', async () => {

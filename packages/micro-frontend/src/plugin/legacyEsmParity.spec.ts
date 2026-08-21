@@ -101,7 +101,6 @@ const implementations: readonly Implementation[] = [
 
 afterEach(() => {
   Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
-  Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
 });
 
 describe.each(implementations)('$name immutable legacy ESM parity', ({ expose, prepare }) => {

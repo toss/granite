@@ -16,7 +16,6 @@ import {
 } from '../../../plugin-micro-frontend/src/runtime/utils';
 
 function clearMicroFrontendGlobals(): void {
-  Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
   Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
 }
 

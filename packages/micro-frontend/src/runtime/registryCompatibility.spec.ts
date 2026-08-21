@@ -2,7 +2,6 @@ import { writeFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { afterAll, afterEach, describe, expect, it } from 'vitest';
 import { getMicroFrontendRuntimeContext, importModule, removeContainer } from './registry';
-import { preCompatibilityRemoteBundle } from './registryCompatibilityFixture';
 import { getPreludeConfig as getLegacyPreludeConfig } from '../../../plugin-micro-frontend/src/prelude';
 import { virtualSharedConfig } from '../../../plugin-micro-frontend/src/resolver';
 import {
@@ -23,7 +22,6 @@ type PositiveCell = {
   readonly name: string;
   readonly appName: string;
   readonly host: 'legacy' | 'compatible';
-  readonly legacyAppIsUnsupported?: true;
   readonly setup: (moduleValue: object, sharedValue: object) => void;
 };
 
@@ -33,7 +31,6 @@ const legacyRuntimeImport =
 
 function clearMicroFrontendGlobals(): void {
   Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
-  Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
 }
 
 function runInVm(source: string, bindings: Readonly<Record<string, unknown>> = {}): void {
@@ -74,18 +71,6 @@ function executeCompatibleRemote(appName: string, moduleValue: object, sharedVal
     [
       config.banner,
       config.preludeScript,
-      'exposeModule(__container, "./App", moduleValue);',
-      'registerShared("shared", sharedValue);',
-    ].join('\n'),
-    { moduleValue, sharedValue }
-  );
-}
-
-function executePreCompatibilityRemote(appName: string, moduleValue: object, sharedValue: object): void {
-  runInVm(
-    [
-      preCompatibilityRemoteBundle,
-      `const __container = createContainer(${JSON.stringify(appName)}, {});`,
       'exposeModule(__container, "./App", moduleValue);',
       'registerShared("shared", sharedValue);',
     ].join('\n'),
@@ -157,16 +142,6 @@ const positiveCells: readonly PositiveCell[] = [
     host: 'legacy',
     setup: (moduleValue, sharedValue) => executeCompatibleRemote('legacy-compatible', moduleValue, sharedValue),
   },
-  {
-    name: 'compatible-host/pre-compat-remote through _granite adapter',
-    appName: 'compatible-pre-compat',
-    host: 'compatible',
-    legacyAppIsUnsupported: true,
-    setup: (moduleValue, sharedValue) => {
-      executePreCompatibilityRemote('compatible-pre-compat', moduleValue, sharedValue);
-      getMicroFrontendRuntimeContext();
-    },
-  },
 ];
 
 afterEach(clearMicroFrontendGlobals);
@@ -197,12 +172,8 @@ describe('cross-version registry compatibility matrix', () => {
     expect(hostShared).toBe(sharedValue);
     expect(compatibleApp).toBe(moduleValue);
     expect(compatibleShared).toBe(sharedValue);
-    if (cell.legacyAppIsUnsupported) {
-      expect(() => importLegacyModule(`${cell.appName}/App`)).toThrow(`${cell.appName} container not found`);
-    } else {
-      const legacyApp = importLegacyModule(`${cell.appName}/App`);
-      expect(Reflect.get(legacyApp, 'default') ?? legacyApp).toBe(moduleValue);
-    }
+    const legacyApp = importLegacyModule(`${cell.appName}/App`);
+    expect(Reflect.get(legacyApp, 'default') ?? legacyApp).toBe(moduleValue);
     expect(await importLegacyShared()).toBe(sharedValue);
     record(cell.name, 'both host registries observe the remote-owned app and shared module at one name');
   });
@@ -227,40 +198,6 @@ describe('cross-version registry compatibility matrix', () => {
     record(
       'compatible-owned removal',
       'removeContainer clears paired container views while preserving process-owned shared state'
-    );
-  });
-
-  it('removes pre-compat remote state after the _granite adapter adopts its owner registry', () => {
-    // Given
-    const moduleValue = { version: 'pre-compat' };
-    executePreCompatibilityRemote('pre-compat-owned', moduleValue, { version: 'shared' });
-    getMicroFrontendRuntimeContext();
-
-    // When
-    removeContainer('pre-compat-owned');
-
-    // Then
-    expect(() => importModule('pre-compat-owned/App')).toThrow(
-      "Could not resolve './App' from app container 'pre-compat-owned'"
-    );
-    expect(Reflect.has(getMicroFrontendRuntimeContext().containers, 'pre-compat-owned')).toBe(false);
-    record('pre-compat removal', '_granite adapter retains ownership of adopted modern container removal');
-  });
-
-  it('rejects an old host and an already-built pre-compat remote without compatibility bootstrap', () => {
-    // Given
-    executeLegacyRemote('legacy-host', { version: 'host' }, { version: 'host-shared' });
-    executePreCompatibilityRemote('pre-compat-remote', { version: 'remote' }, { version: 'remote-shared' });
-
-    // When
-    const importFromLegacyHost = () => importLegacyModule('pre-compat-remote/App');
-
-    // Then
-    expect(importFromLegacyHost).toThrow('pre-compat-remote container not found');
-    expect(Reflect.has(globalThis.__MICRO_FRONTEND__.__INSTANCES__, 'pre-compat-remote')).toBe(false);
-    record(
-      'old-host/pre-compat-remote without bootstrap',
-      'unsupported: the old host reads __MICRO_FRONTEND__, while the remote writes only _graniteMicroFrontend'
     );
   });
 

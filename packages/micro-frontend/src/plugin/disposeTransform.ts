@@ -2,17 +2,10 @@ import * as babel from '@babel/core';
 import { injectDisposeAppName, type DisposeOwnershipPluginOptions } from './disposeBabelPlugin';
 
 export function shouldTransformDispose(code: string): boolean {
-  return (
-    code.includes('globalThis._graniteMicroFrontend.dispose') ||
-    code.includes('global._graniteMicroFrontend.dispose')
-  );
+  return code.includes('globalThis.__MICRO_FRONTEND__.dispose') || code.includes('global.__MICRO_FRONTEND__.dispose');
 }
 
-export function transformDisposeOwnership(
-  id: string,
-  code: string,
-  options: DisposeOwnershipPluginOptions
-): string {
+export function transformDisposeOwnership(id: string, code: string, options: DisposeOwnershipPluginOptions): string {
   if (options.appName == null || !shouldTransformDispose(code)) {
     return code;
   }

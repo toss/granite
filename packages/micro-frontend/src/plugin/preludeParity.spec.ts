@@ -82,7 +82,6 @@ const implementations: readonly Implementation[] = [
     name: 'runtime',
     execute(globalObject, moduleValue, sharedValue) {
       Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
-      Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
       for (const key of Reflect.ownKeys(globalObject)) {
         Reflect.set(globalThis, key, Reflect.get(globalObject, key));
       }
@@ -115,7 +114,6 @@ const atomicExposureImplementations: readonly AtomicExposureImplementation[] = [
     name: 'runtime',
     setup(globalObject, moduleValue) {
       Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
-      Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
       for (const key of Reflect.ownKeys(globalObject)) {
         Reflect.set(globalThis, key, Reflect.get(globalObject, key));
       }
@@ -169,7 +167,6 @@ const atomicRegistrationImplementations: readonly AtomicRegistrationImplementati
     name: 'runtime',
     register(globalObject) {
       Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
-      Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
       for (const key of Reflect.ownKeys(globalObject)) {
         Reflect.set(globalThis, key, Reflect.get(globalObject, key));
       }
@@ -187,7 +184,6 @@ const atomicRegistrationImplementations: readonly AtomicRegistrationImplementati
 
 afterEach(() => {
   Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
-  Reflect.deleteProperty(globalThis, '_graniteMicroFrontend');
 });
 
 describe.each(implementations)('$name generated-prelude parity', ({ execute }) => {
