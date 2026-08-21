@@ -1,5 +1,16 @@
 # @granite-js/micro-frontend
 
+## 2.1.0
+
+### Minor Changes
+
+- 0d72b4d: Run retained remote app dispose callbacks when its last session closes without discarding its evaluated container.
+
+### Patch Changes
+
+- 975c8cf: Document the canonical cross-version micro-frontend registry contract.
+  - @granite-js/utils@2.1.0
+
 ## 2.0.2
 
 ### Patch Changes
