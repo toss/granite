@@ -1,5 +1,15 @@
 # @granite-js/micro-frontend
 
+## 2.2.0
+
+### Minor Changes
+
+- 2513bd8: Allow hosts to observe committed micro-frontend session mount and unmount transitions through an `onLifecycleEvent` runtime option with session metadata and an active-session snapshot.
+
+### Patch Changes
+
+- @granite-js/utils@2.2.0
+
 ## 2.1.1
 
 ### Patch Changes
