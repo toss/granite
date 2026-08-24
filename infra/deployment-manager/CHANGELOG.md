@@ -1,5 +1,7 @@
 # @granite-js/deployment-manager
 
+## 2.2.0
+
 ## 2.1.1
 
 ## 2.1.0
