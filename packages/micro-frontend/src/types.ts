@@ -47,6 +47,20 @@ export interface MicroFrontendRuntimeEventSubscription {
   readonly remove: () => void;
 }
 
+export interface MicroFrontendLifecycleSession {
+  readonly appName: string;
+  readonly id: string;
+}
+
+export interface MicroFrontendLifecycleEvent {
+  readonly phase: 'mounted' | 'unmounted';
+  readonly session: MicroFrontendLifecycleSession;
+  /** Active sessions across every app when the callback is emitted. */
+  readonly activeSessions: readonly MicroFrontendLifecycleSession[];
+}
+
+export type MicroFrontendLifecycleCallback = (event: MicroFrontendLifecycleEvent) => void;
+
 export interface MicroFrontendRuntimeApi {
   readonly evaluateScript: (filePath: string) => Promise<void>;
   readonly preloadApp: (appName: string) => Promise<void>;

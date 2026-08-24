@@ -3,10 +3,11 @@ import { createMicroFrontendRuntimeWithDependencies } from './runtime/createMicr
 import { parseNativeRuntimeEvent } from './runtime/parseNativeRuntimeEvent';
 import { microFrontendModuleRegistry } from './runtime/registry';
 import NativeGraniteMicroFrontendRuntime from './specs/NativeGraniteMicroFrontendRuntime';
-import type { MicroFrontendAdapter, MicroFrontendRuntimeApi } from './types';
+import type { MicroFrontendAdapter, MicroFrontendLifecycleCallback, MicroFrontendRuntimeApi } from './types';
 
 export interface CreateMicroFrontendRuntimeOptions {
   readonly adapter: MicroFrontendAdapter;
+  readonly onLifecycleEvent?: MicroFrontendLifecycleCallback;
   readonly onPreloadError?: (error: unknown) => void;
 }
 
@@ -14,6 +15,7 @@ export function createMicroFrontendRuntime(options: CreateMicroFrontendRuntimeOp
   return createMicroFrontendRuntimeWithDependencies({
     adapter: options.adapter,
     nativeRuntime: NativeGraniteMicroFrontendRuntime,
+    onLifecycleEvent: options.onLifecycleEvent,
     onPreloadError: options.onPreloadError ?? (() => undefined),
     parseEvent: parseNativeRuntimeEvent,
     registry: microFrontendModuleRegistry,

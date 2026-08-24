@@ -1,12 +1,14 @@
 import type {
   AppRequest,
   MicroFrontendAdapter,
+  MicroFrontendLifecycleEvent,
   MicroFrontendRuntimeApi,
   MicroFrontendRuntimeEvent,
   MicroFrontendRuntimeEventSubscription,
 } from '../types';
 import { AppContainerNotFoundError, InvalidAppNameError } from './errors';
 import { getMicroFrontendGlobalContext } from './globalContext';
+import { setMicroFrontendLifecycleCallback } from './lifecycle';
 import { installNativeComponentRegistryCompatibility } from './nativeComponentRegistryCompatibility';
 import { parseAppRequest } from './parseAppRequest';
 
@@ -38,6 +40,7 @@ export interface CreateMicroFrontendRuntimeDependencies {
   readonly adapter: MicroFrontendAdapter;
   readonly nativeRuntime: NativeMicroFrontendRuntime;
   readonly onPreloadError: (error: unknown) => void;
+  readonly onLifecycleEvent?: (event: MicroFrontendLifecycleEvent) => void;
   readonly registry: MicroFrontendModuleRegistry;
   readonly removePendingHostComponentRoutes: (appName: string) => void;
   readonly parseEvent: (event: NativeMicroFrontendRuntimeEvent) => MicroFrontendRuntimeEvent;
@@ -90,7 +93,7 @@ export function createMicroFrontendRuntimeWithDependencies(
     }
   }
 
-  return {
+  const runtime: MicroFrontendRuntimeApi = {
     evaluateScript,
     preloadApp,
     async importApp<TModule>(request: AppRequest): Promise<TModule> {
@@ -120,4 +123,8 @@ export function createMicroFrontendRuntimeWithDependencies(
       return subscription;
     },
   };
+
+  setMicroFrontendLifecycleCallback(runtime, dependencies.onLifecycleEvent);
+
+  return runtime;
 }
