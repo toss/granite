@@ -1,7 +1,13 @@
 import { useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import { installPendingHostComponentBridge, resetPendingHostComponent } from '../host/pendingHostComponentStore';
+import { emitMicroFrontendLifecycleEvent } from '../runtime/lifecycle';
 import { disposeAppResources } from '../runtime/registry';
-import type { MicroFrontendRuntimeApi, MicroFrontendSessionEvent } from '../types';
+import type {
+  MicroFrontendLifecycleEvent,
+  MicroFrontendLifecycleSession,
+  MicroFrontendRuntimeApi,
+  MicroFrontendSessionEvent,
+} from '../types';
 
 export interface MicroFrontendSessionState {
   readonly appName: string;
@@ -53,19 +59,46 @@ export function useMicroFrontendSessions(
     previousSessionsRef.current = sessions;
     const activeSessionIds = new Set(sessions.map(({ sessionId }) => sessionId));
     const activeAppNames = new Set(sessions.map(({ appName }) => appName));
+    const mountedSessions = sessions.filter(
+      ({ sessionId }) => !previousSessions.some((previousSession) => previousSession.sessionId === sessionId)
+    );
+    const inactiveSessions = previousSessions.filter(({ sessionId }) => !activeSessionIds.has(sessionId));
     const inactiveAppNames = new Set(
-      previousSessions
-        .filter(({ sessionId }) => !activeSessionIds.has(sessionId))
-        .map(({ appName }) => appName)
-        .filter((appName) => !activeAppNames.has(appName))
+      inactiveSessions.map(({ appName }) => appName).filter((appName) => !activeAppNames.has(appName))
     );
 
-    inactiveAppNames.forEach((appName) => {
-      void disposeAppResources(appName).catch((error) => {
-        console.error(`Failed to dispose micro-frontend app resources for '${appName}'`, error);
+    mountedSessions.forEach((session) => {
+      emitMicroFrontendLifecycleEvent(runtime, createLifecycleEvent('mounted', session, sessions));
+    });
+
+    const appDisposals = new Map<string, Promise<void>>(
+      Array.from(
+        inactiveAppNames,
+        (appName) =>
+          [
+            appName,
+            disposeAppResources(appName).catch((error) => {
+              console.error(`Failed to dispose micro-frontend app resources for '${appName}'`, error);
+            }),
+          ] as const
+      )
+    );
+
+    inactiveSessions.forEach((session) => {
+      const appDisposal = appDisposals.get(session.appName);
+      if (appDisposal == null) {
+        emitMicroFrontendLifecycleEvent(runtime, createLifecycleEvent('unmounted', session, sessions));
+        return;
+      }
+
+      void appDisposal.then(() => {
+        emitMicroFrontendLifecycleEvent(
+          runtime,
+          createLifecycleEvent('unmounted', session, previousSessionsRef.current)
+        );
       });
     });
-  }, [sessions]);
+  }, [runtime, sessions]);
 
   useLayoutEffect(() => {
     installPendingHostComponentBridge();
@@ -80,4 +113,23 @@ export function useMicroFrontendSessions(
   }, [runtime]);
 
   return sessions;
+}
+
+function createLifecycleEvent(
+  phase: MicroFrontendLifecycleEvent['phase'],
+  session: MicroFrontendSessionState,
+  activeSessions: readonly MicroFrontendSessionState[]
+): MicroFrontendLifecycleEvent {
+  return {
+    phase,
+    session: toLifecycleSession(session),
+    activeSessions: activeSessions.map(toLifecycleSession),
+  };
+}
+
+function toLifecycleSession(session: MicroFrontendSessionState): MicroFrontendLifecycleSession {
+  return {
+    appName: session.appName,
+    id: session.sessionId,
+  };
 }

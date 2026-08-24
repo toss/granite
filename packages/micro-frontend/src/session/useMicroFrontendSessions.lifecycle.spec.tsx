@@ -1,5 +1,6 @@
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { type MicroFrontendSessionState, useMicroFrontendSessions } from './useMicroFrontendSessions';
 import {
   registerPendingHostComponentRoute,
   resetPendingHostComponentStoreForTest,
@@ -20,7 +21,6 @@ import {
   registerShared,
 } from '../runtime/registry';
 import type { MicroFrontendRuntimeApi } from '../types';
-import { type MicroFrontendSessionState, useMicroFrontendSessions } from './useMicroFrontendSessions';
 
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
 
@@ -39,9 +39,11 @@ function createRuntimeFixture() {
       return { remove: () => listeners.delete(listener) };
     },
   };
+  const onLifecycleEvent = vi.fn();
   const runtime = createMicroFrontendRuntimeWithDependencies({
     adapter,
     nativeRuntime,
+    onLifecycleEvent,
     onPreloadError: vi.fn(),
     registry: microFrontendModuleRegistry,
     removePendingHostComponentRoutes: vi.fn(),
@@ -57,6 +59,7 @@ function createRuntimeFixture() {
       return listeners.size;
     },
     nativeRuntime,
+    onLifecycleEvent,
     runtime,
   };
 }
@@ -96,6 +99,73 @@ describe('useMicroFrontendSessions app lifetime', () => {
   beforeEach(() => {
     Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
     resetPendingHostComponentStoreForTest();
+  });
+
+  it('reports committed mounts and dispose-completed unmounts', async () => {
+    // Given
+    const fixture = createRuntimeFixture();
+    const rendered = renderSessions(fixture.runtime);
+    let finishDispose: (() => void) | undefined;
+    getMicroFrontendRuntimeContext().dispose(
+      'app-1',
+      () =>
+        new Promise<void>((resolve) => {
+          finishDispose = resolve;
+        })
+    );
+
+    // When
+    act(() => openSession(fixture, 'app-1', 'app-1:1'));
+    act(() => openSession(fixture, 'app-2', 'app-2:1'));
+    await act(async () => {
+      fixture.emit({ name: 'closeApp', params: { sessionId: 'app-2:1' } });
+    });
+    await act(async () => {
+      fixture.emit({ name: 'closeApp', params: { sessionId: 'app-1:1' } });
+      await Promise.resolve();
+    });
+
+    // Then
+    expect(fixture.onLifecycleEvent).toHaveBeenCalledTimes(3);
+    expect(fixture.onLifecycleEvent).toHaveBeenNthCalledWith(1, {
+      phase: 'mounted',
+      session: {
+        appName: 'app-1',
+        id: 'app-1:1',
+      },
+      activeSessions: [{ appName: 'app-1', id: 'app-1:1' }],
+    });
+    expect(fixture.onLifecycleEvent).toHaveBeenNthCalledWith(2, {
+      phase: 'mounted',
+      session: {
+        appName: 'app-2',
+        id: 'app-2:1',
+      },
+      activeSessions: [
+        { appName: 'app-1', id: 'app-1:1' },
+        { appName: 'app-2', id: 'app-2:1' },
+      ],
+    });
+    expect(fixture.onLifecycleEvent).toHaveBeenNthCalledWith(3, {
+      phase: 'unmounted',
+      session: {
+        appName: 'app-2',
+        id: 'app-2:1',
+      },
+      activeSessions: [{ appName: 'app-1', id: 'app-1:1' }],
+    });
+
+    await act(async () => finishDispose?.());
+    expect(fixture.onLifecycleEvent).toHaveBeenCalledTimes(4);
+    expect(fixture.onLifecycleEvent).toHaveBeenNthCalledWith(4, {
+      phase: 'unmounted',
+      session: {
+        appName: 'app-1',
+        id: 'app-1:1',
+      },
+      activeSessions: [],
+    });
+    rendered.unmount();
   });
 
   it('runs callbacks on each last close while retaining evaluated app resources', async () => {

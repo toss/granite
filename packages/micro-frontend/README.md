@@ -172,6 +172,9 @@ const runtime = createMicroFrontendRuntime({
       return { filePath };
     },
   },
+  onLifecycleEvent(event) {
+    reportMicroFrontendLifecycle(event);
+  },
 });
 
 await runtime.preloadApp('cart');
@@ -210,6 +213,29 @@ The public runtime API is:
 | `importApp(request)`       | Ensure the app is evaluated and import `appName/exposedModule`. |
 | `evaluateScript(filePath)` | Evaluate an already-local bundle in the retained runtime.       |
 | `onEvent(listener)`        | Subscribe to native open, close, and visibility events.         |
+
+The host can provide `onLifecycleEvent` when creating the runtime for logging
+and other observability integrations. Each event contains `session.id`,
+`session.appName`, and the `activeSessions` snapshot when the callback is
+emitted. The callback has the same lifetime as the runtime.
+
+```ts
+const runtime = createMicroFrontendRuntime({
+  adapter,
+  onLifecycleEvent(event) {
+    reportMicroFrontendLifecycle({
+      ...event,
+      activeSessionCount: event.activeSessions.length,
+    });
+  },
+});
+```
+
+`mounted` is emitted after the session is committed to React state. `unmounted`
+is emitted after the session is removed. When the session was the app's last
+active session, Granite waits for the app's registered dispose callbacks before
+emitting `unmounted`. Callback failures are reported without interrupting the
+session lifecycle.
 
 Remote code can register an idempotent callback for explicit app-level resource
 cleanup:
