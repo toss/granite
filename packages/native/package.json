@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/native",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "A native module hub package for Granite",
   "repository": {
     "type": "git",
