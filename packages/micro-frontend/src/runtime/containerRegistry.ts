@@ -14,10 +14,12 @@ import {
 import { AppContainerAlreadyRegisteredError } from './errors';
 import { getMicroFrontendGlobalContext, MicroFrontendGlobalContextCompatibilityError } from './globalContext';
 import type { AppContainer, AppContainerConfig } from './registry';
+import { captureStackFrames, resolveCurrentSourceURL } from './runtimeSourceURL';
 
 export { exposeContainerModule as exposeModule } from './containerModuleExposure';
 
 export function createContainer(appName: string, config: AppContainerConfig = {}): AppContainer {
+  const sourceURL = resolveCurrentSourceURL(captureStackFrames());
   const context = getMicroFrontendGlobalContext();
   const canonicalValue: unknown = Reflect.get(context.__CONTAINERS__, appName);
   const legacyIndex: unknown = Reflect.get(context.__INSTANCES__, appName);
@@ -28,7 +30,12 @@ export function createContainer(appName: string, config: AppContainerConfig = {}
     throw new MicroFrontendGlobalContextCompatibilityError('registry-is-not-extensible');
   }
 
-  const modernContainer: AppContainer = { appName, config, exposedModules: {} };
+  const modernContainer: AppContainer = {
+    appName,
+    config,
+    exposedModules: {},
+    runtime: { sourceURL },
+  };
   const legacyContainer: LegacyAppContainer = { name: appName, config, exposeMap: {} };
   const containerIndex = context.__INSTANCES__.length;
 
@@ -222,11 +229,13 @@ function normalizeLegacyModule(exposedModule: string): string {
 }
 
 function isAppContainer(value: unknown): value is AppContainer {
+  const runtime: unknown = isObjectRecord(value) ? Reflect.get(value, 'runtime') : null;
   return (
     isObjectRecord(value) &&
     typeof Reflect.get(value, 'appName') === 'string' &&
     isAppContainerConfig(Reflect.get(value, 'config')) &&
-    isObjectRecord(Reflect.get(value, 'exposedModules'))
+    isObjectRecord(Reflect.get(value, 'exposedModules')) &&
+    (runtime == null || (isObjectRecord(runtime) && typeof Reflect.get(runtime, 'sourceURL') === 'string'))
   );
 }
 
