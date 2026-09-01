@@ -16,10 +16,15 @@ export interface AppContainerConfig {
   readonly shared?: SharedConfig;
 }
 
+export interface AppContainerRuntime {
+  readonly sourceURL: string;
+}
+
 export interface AppContainer {
   readonly appName: string;
   readonly config: AppContainerConfig;
   readonly exposedModules: Record<string, unknown>;
+  readonly runtime?: AppContainerRuntime;
 }
 
 export type AppDisposeCallback = () => void | Promise<void>;

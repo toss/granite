@@ -122,7 +122,8 @@ describe('getPreludeConfig', () => {
         'exposeModule(__container, "./App", exposedValue);',
         'registerShared("react", sharedValue);',
       ].join('\n'),
-      { exposedValue, global: globalObject, sharedValue: { version: '19' } }
+      { exposedValue, global: globalObject, sharedValue: { version: '19' } },
+      { filename: 'https://cdn.example.com/remote-app.hbc' }
     );
     const context = Reflect.get(globalObject, '__MICRO_FRONTEND__');
     const instances = Reflect.get(context, '__INSTANCES__');
@@ -133,6 +134,9 @@ describe('getPreludeConfig', () => {
     // Then
     expect(Object.keys(context)).toEqual(['__INSTANCES__', '__SHARED__', '__CONTAINERS__']);
     expect(Reflect.get(modernContainer, 'appName')).toBe('remote-app');
+    expect(Reflect.get(Reflect.get(modernContainer, 'runtime'), 'sourceURL')).toBe(
+      'https://cdn.example.com/remote-app.hbc'
+    );
     expect(Reflect.get(Reflect.get(modernContainer, 'exposedModules'), './App')).toBe(exposedValue);
     expect(Reflect.get(legacyContainer, 'name')).toBe('remote-app');
     const legacyModule = Reflect.get(Reflect.get(legacyContainer, 'exposeMap'), 'App');

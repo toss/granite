@@ -323,7 +323,7 @@ describe('generated-prelude runtime ownership', () => {
     expect(Object.getOwnPropertySymbols(originalLegacy)).toEqual([]);
   });
 
-  it('keeps generated pairing metadata out of public enumerable shapes', () => {
+  it('keeps pairing metadata private while exposing the runtime sourceURL', () => {
     // Given
     const config = getPreludeConfig({}, 'generated-shaped-app');
     vm.runInNewContext(config.banner + '\n' + config.preludeScript, { global: globalThis });
@@ -344,8 +344,9 @@ describe('generated-prelude runtime ownership', () => {
 
     // Then
     expect(shapes).toEqual({
-      modernJson: '{"appName":"generated-shaped-app","config":{},"exposedModules":{}}',
-      modernKeys: ['appName', 'config', 'exposedModules'],
+      modernJson:
+        '{"appName":"generated-shaped-app","config":{},"exposedModules":{},"runtime":{"sourceURL":"evalmachine.<anonymous>"}}',
+      modernKeys: ['appName', 'config', 'exposedModules', 'runtime'],
       legacyJson: '{"name":"generated-shaped-app","config":{},"exposeMap":{}}',
       legacyKeys: ['name', 'config', 'exposeMap'],
     });
