@@ -1,5 +1,15 @@
 # @granite-js/micro-frontend
 
+## 2.3.0
+
+### Minor Changes
+
+- 6a8eae2: Expose each evaluated app container's source URL through `AppContainer.runtime.sourceURL`, resolve the current container with `getAppName()`, and exact-match externally captured source URLs with `findAppNameBySourceURL()`.
+
+### Patch Changes
+
+- @granite-js/utils@2.3.0
+
 ## 2.2.0
 
 ### Minor Changes
