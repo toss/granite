@@ -131,6 +131,15 @@ The durable owner is `global.__MICRO_FRONTEND__` with exactly this shape:
 - A current container registration creates paired legacy/current views for the
   same app name. The pair is transparent across separately evaluated bundles:
   it is one remote-owned registration, not two independently owned copies.
+- A current container exposes the evaluated bundle source through
+  `runtime.sourceURL`. The generated prelude captures it from the bundle's
+  evaluation stack once when registering the container. Legacy container
+  adapters omit `runtime` until a compatible bundle is evaluated.
+- `getAppName()` resolves the current bundle's structured source URL against
+  the container registry. A host call returns the host container name, while a
+  remote call returns that remote's name without reading a last-evaluated
+  global value. `findAppNameBySourceURL(sourceURL)` exposes the same exact
+  registry lookup for runtimes that already provide a structured source URL.
 - The dispose callback registry and registrar live on the same canonical
   context as non-enumerable properties. They are reused across separately
   evaluated bundles without changing the three-key enumerable registry shape.

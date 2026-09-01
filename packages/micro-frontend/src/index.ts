@@ -2,6 +2,7 @@ export { createMicroFrontendRuntime } from './createMicroFrontendRuntime';
 export type { CreateMicroFrontendRuntimeOptions } from './createMicroFrontendRuntime';
 export { createRoute } from './createRoute';
 export type { MicroFrontendRouteOptions } from './createRoute';
+export { findAppNameBySourceURL, getAppName } from './runtime/getAppName';
 export type { PendingHostComponentController, PendingHostComponentProps } from './host/PendingHostComponent';
 export {
   PendingHostComponent,
@@ -36,7 +37,12 @@ export {
 export type { MicroFrontendSession, MicroFrontendSessionProviderProps } from './session/MicroFrontendSessionContext';
 export { useMicroFrontendSessions } from './session/useMicroFrontendSessions';
 export type { MicroFrontendSessionState } from './session/useMicroFrontendSessions';
-export type { AppDisposeCallback, MicroFrontendRuntimeContext } from './runtime/registry';
+export type {
+  AppContainer,
+  AppContainerRuntime,
+  AppDisposeCallback,
+  MicroFrontendRuntimeContext,
+} from './runtime/registry';
 export { default as Portal } from './specs/PortalViewNativeComponent';
 export type {
   AppRequest,

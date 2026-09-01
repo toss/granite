@@ -2,6 +2,7 @@ import path from 'path';
 import { globalContextScript } from './globalContextScript';
 import type { MicroFrontendPluginOptions } from './types';
 import { CONTAINER_PAIRING_KEY } from '../runtime/containerPairing';
+import { captureStackFrames, resolveCurrentSourceURL } from '../runtime/runtimeSourceURL';
 
 export interface MicroFrontendPreludeConfig {
   readonly banner: string;
@@ -28,6 +29,8 @@ export function getPreludeConfig(options: MicroFrontendPluginOptions, appName?: 
   });
   const containerConfig = JSON.stringify({ shared: options.shared });
   const containerName = appName == null ? 'global.__granite.app.name' : JSON.stringify(appName);
+  const captureFrames = captureStackFrames.toString();
+  const resolveSourceURL = resolveCurrentSourceURL.toString();
 
   return {
     banner: [
@@ -91,7 +94,9 @@ export function getPreludeConfig(options: MicroFrontendPluginOptions, appName?: 
       '  if (!Object.isExtensible(containers) || !Object.isExtensible(instances)) {',
       '    throw new Error("Cannot establish the micro-frontend global context: registry-is-not-extensible");',
       '  }',
-      '  const modernContainer = { appName, config, exposedModules: {} };',
+      `  const stackFrames = (${captureFrames})();`,
+      `  const sourceURL = (${resolveSourceURL})(stackFrames);`,
+      '  const modernContainer = { appName, config, exposedModules: {}, runtime: { sourceURL } };',
       '  const legacyContainer = { name: appName, config, exposeMap: {} };',
       '  try {',
       '    if (!Reflect.defineProperty(instances, appName, {',
