@@ -1,5 +1,12 @@
 # @granite-js/micro-frontend
 
+## 2.3.1
+
+### Patch Changes
+
+- 56a5ce8: Support evaluating Android bundles packaged under `assets://` locators.
+  - @granite-js/utils@2.3.1
+
 ## 2.3.0
 
 ### Minor Changes

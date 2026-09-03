@@ -1,5 +1,12 @@
 # @granite-js/plugin-rozenite
 
+## 2.3.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.3.1
+- @granite-js/utils@2.3.1
+
 ## 2.3.0
 
 ### Patch Changes
