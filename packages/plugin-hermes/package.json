@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-hermes",
   "type": "module",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Hermes compilation plugin for Granite",
   "scripts": {
     "prepack": "yarn build",

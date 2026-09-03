@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/brownfield-module",
   "type": "module",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Brownfield bridge module for Granite React Native",
   "main": "./dist/module/index.js",
   "types": "./dist/typescript/index.d.ts",
