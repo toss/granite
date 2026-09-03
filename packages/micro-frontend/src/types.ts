@@ -5,6 +5,7 @@ export interface MicroFrontendBundleRequest {
 }
 
 export interface MicroFrontendBundle {
+  /** An absolute local file path, or an Android `assets://` locator for a packaged bundle. */
   readonly filePath: string;
 }
 
