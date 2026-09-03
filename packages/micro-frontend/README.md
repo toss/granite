@@ -168,7 +168,8 @@ app name exactly rather than routing it to another remote.
 ## JavaScript runtime
 
 The adapter owns bundle selection, download, integrity verification, and
-caching. It returns an absolute local bundle path.
+caching. It returns an absolute local bundle path, or an Android `assets://`
+locator for a bundle packaged in the application.
 
 ```ts
 import { createMicroFrontendRuntime } from '@granite-js/micro-frontend';
@@ -220,7 +221,7 @@ The public runtime API is:
 | -------------------------- | --------------------------------------------------------------- |
 | `preloadApp(appName)`      | Load and evaluate one app without importing an exposed module.  |
 | `importApp(request)`       | Ensure the app is evaluated and import `appName/exposedModule`. |
-| `evaluateScript(filePath)` | Evaluate an already-local bundle in the retained runtime.       |
+| `evaluateScript(filePath)` | Evaluate a local file or Android packaged asset in the retained runtime. |
 | `onEvent(listener)`        | Subscribe to native open, close, and visibility events.         |
 
 The host can provide `onLifecycleEvent` when creating the runtime for logging
@@ -371,7 +372,8 @@ The brownfield application must:
    boundary;
 4. bind native screen lifecycle to the session APIs below;
 5. install a Portal destination with the same `sessionId`;
-6. provide `adapter.loadBundle()` and return an absolute verified bundle path;
+6. provide `adapter.loadBundle()` and return an absolute verified bundle path,
+   or an Android `assets://` locator for a verified packaged bundle;
 7. keep the React tree mounted until native teardown emits `closeApp`; and
 8. keep Granite's base brownfield view APIs, such as scheme resolution and
    closing the current Granite view, in the Granite host integration. They are

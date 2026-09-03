@@ -5,6 +5,7 @@
 
 namespace granite::microfrontend {
 
+using facebook::jni::JArrayByte;
 using facebook::jni::JString;
 using facebook::jni::alias_ref;
 using facebook::jsi::Runtime;
@@ -12,7 +13,29 @@ using facebook::jsi::StringBuffer;
 
 void BundleEvaluator::registerNatives() {
   registerHybrid(
-      {makeNativeMethod("evaluateFileSync", BundleEvaluator::evaluateFileSync)});
+      {makeNativeMethod("evaluateFileSync", BundleEvaluator::evaluateFileSync),
+       makeNativeMethod("evaluateScriptSync", BundleEvaluator::evaluateScriptSync)});
+}
+
+void BundleEvaluator::evaluateScriptSync(
+    alias_ref<jhybridobject>,
+    jlong runtimePointer,
+    alias_ref<JArrayByte> scriptData,
+    alias_ref<JString> sourceUrl) {
+  if (runtimePointer == 0) {
+    facebook::jni::throwNewJavaException(
+        "java/lang/IllegalStateException", "JavaScript runtime is unavailable");
+    return;
+  }
+
+  auto pinnedScriptData = scriptData->pin();
+  std::string source{
+      reinterpret_cast<const char *>(pinnedScriptData.get()),
+      pinnedScriptData.size()};
+  auto *runtime = reinterpret_cast<Runtime *>(runtimePointer);
+  runtime->evaluateJavaScript(
+      std::make_shared<StringBuffer>(std::move(source)),
+      sourceUrl->toStdString());
 }
 
 void BundleEvaluator::evaluateFileSync(
