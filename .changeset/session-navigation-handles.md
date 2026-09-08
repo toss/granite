@@ -1,6 +1,6 @@
 ---
-'@granite-js/micro-frontend': minor
-'@granite-js/react-native': minor
+'@granite-js/micro-frontend': patch
+'@granite-js/react-native': patch
 ---
 
 Add `runtime.sessions` for observing existing and future sessions outside React. Each session owns a separate React Navigation ref and exposes lifecycle subscriptions with per-session cleanup. Deprecate `onLifecycleEvent` while preserving its payloads and teardown timing through the new subscription path.
