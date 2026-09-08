@@ -18,10 +18,7 @@ export type {
   RegisterPendingHostComponentRouteOptions,
   ResolvedPendingHostComponent,
 } from './host/types';
-export {
-  createPendingHostComponentRoutePrefix,
-  normalizeRoutePath,
-} from './host/routeMatcher';
+export { createPendingHostComponentRoutePrefix, normalizeRoutePath } from './host/routeMatcher';
 export {
   hidePendingHostComponent,
   installPendingHostComponentBridge,
@@ -37,6 +34,11 @@ export {
 export type { MicroFrontendSession, MicroFrontendSessionProviderProps } from './session/MicroFrontendSessionContext';
 export { useMicroFrontendSessions } from './session/useMicroFrontendSessions';
 export type { MicroFrontendSessionState } from './session/useMicroFrontendSessions';
+export type {
+  MicroFrontendSessionHandle,
+  MicroFrontendSessions,
+  MicroFrontendSessionSubscriber,
+} from './session/sessionTypes';
 export type {
   AppContainer,
   AppContainerRuntime,

@@ -7,6 +7,7 @@ import type { MicroFrontendAdapter, MicroFrontendLifecycleCallback, MicroFronten
 
 export interface CreateMicroFrontendRuntimeOptions {
   readonly adapter: MicroFrontendAdapter;
+  /** @deprecated Subscribe through runtime.sessions and session.addListener('lifecycle', listener). */
   readonly onLifecycleEvent?: MicroFrontendLifecycleCallback;
   readonly onPreloadError?: (error: unknown) => void;
 }

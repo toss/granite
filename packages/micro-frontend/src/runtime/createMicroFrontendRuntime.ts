@@ -8,9 +8,10 @@ import type {
 } from '../types';
 import { AppContainerNotFoundError, InvalidAppNameError } from './errors';
 import { getMicroFrontendGlobalContext } from './globalContext';
-import { setMicroFrontendLifecycleCallback } from './lifecycle';
+import { setMicroFrontendSessionStore } from './lifecycle';
 import { installNativeComponentRegistryCompatibility } from './nativeComponentRegistryCompatibility';
 import { parseAppRequest } from './parseAppRequest';
+import { createSessionStore } from '../session/sessionStore';
 
 export interface NativeMicroFrontendRuntimeEvent {
   readonly name: string;
@@ -51,6 +52,7 @@ export function createMicroFrontendRuntimeWithDependencies(
 ): MicroFrontendRuntimeApi {
   // A fulfilled promise is the evaluated-state cache. Rejected evaluations remove themselves.
   const appEvaluations = new Map<string, Promise<void>>();
+  const sessionStore = createSessionStore();
 
   function resetFailedEvaluation(appName: string) {
     appEvaluations.delete(appName);
@@ -94,6 +96,7 @@ export function createMicroFrontendRuntimeWithDependencies(
   }
 
   const runtime: MicroFrontendRuntimeApi = {
+    sessions: sessionStore.sessions,
     evaluateScript,
     preloadApp,
     async importApp<TModule>(request: AppRequest): Promise<TModule> {
@@ -109,7 +112,13 @@ export function createMicroFrontendRuntimeWithDependencies(
             void preloadApp(parsedEvent.params.appName).catch(dependencies.onPreloadError);
             return;
           case 'openApp':
+            sessionStore.open({ id: parsedEvent.params.sessionId, appName: parsedEvent.params.appName });
+            listener(parsedEvent);
+            return;
           case 'closeApp':
+            sessionStore.close(parsedEvent.params.sessionId);
+            listener(parsedEvent);
+            return;
           case 'sessionVisibilityChanged':
             listener(parsedEvent);
             return;
@@ -124,7 +133,11 @@ export function createMicroFrontendRuntimeWithDependencies(
     },
   };
 
-  setMicroFrontendLifecycleCallback(runtime, dependencies.onLifecycleEvent);
+  setMicroFrontendSessionStore(runtime, sessionStore);
+  const onLifecycleEvent = dependencies.onLifecycleEvent;
+  if (onLifecycleEvent != null) {
+    runtime.sessions.subscribe((session) => session.addListener('lifecycle', onLifecycleEvent));
+  }
 
   return runtime;
 }

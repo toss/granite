@@ -60,6 +60,7 @@
     "@standard-schema/spec": "^1.0.0"
   },
   "peerDependencies": {
+    "@granite-js/native": "*",
     "@granite-js/plugin-core": "*",
     "@granite-js/react-native": "*",
     "react": "*",
@@ -72,6 +73,7 @@
   },
   "devDependencies": {
     "@babel/types": "7.28.5",
+    "@granite-js/native": "workspace:*",
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/react-native": "workspace:*",
     "@types/babel__core": "^7.20.5",

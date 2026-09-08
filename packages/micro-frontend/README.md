@@ -182,9 +182,6 @@ const runtime = createMicroFrontendRuntime({
       return { filePath };
     },
   },
-  onLifecycleEvent(event) {
-    reportMicroFrontendLifecycle(event);
-  },
 });
 
 await runtime.preloadApp('cart');
@@ -217,35 +214,74 @@ route best-effort native preload failures to its observability provider.
 
 The public runtime API is:
 
-| API                        | Responsibility                                                  |
-| -------------------------- | --------------------------------------------------------------- |
-| `preloadApp(appName)`      | Load and evaluate one app without importing an exposed module.  |
-| `importApp(request)`       | Ensure the app is evaluated and import `appName/exposedModule`. |
+| API                        | Responsibility                                                           |
+| -------------------------- | ------------------------------------------------------------------------ |
+| `preloadApp(appName)`      | Load and evaluate one app without importing an exposed module.           |
+| `importApp(request)`       | Ensure the app is evaluated and import `appName/exposedModule`.          |
 | `evaluateScript(filePath)` | Evaluate a local file or Android packaged asset in the retained runtime. |
-| `onEvent(listener)`        | Subscribe to native open, close, and visibility events.         |
+| `onEvent(listener)`        | Subscribe to native open, close, and visibility events.                  |
+| `sessions`                 | Discover session handles and observe their navigation and lifecycle.     |
 
-The host can provide `onLifecycleEvent` when creating the runtime for logging
-and other observability integrations. Each event contains `session.id`,
-`session.appName`, and the `activeSessions` snapshot when the callback is
-emitted. The callback has the same lifetime as the runtime.
+### Session subscriptions
+
+SDKs can subscribe outside React. Each handle belongs to one native session,
+including when multiple sessions load the same app bundle:
 
 ```ts
-const runtime = createMicroFrontendRuntime({
-  adapter,
-  onLifecycleEvent(event) {
-    reportMicroFrontendLifecycle({
-      ...event,
-      activeSessionCount: event.activeSessions.length,
-    });
-  },
+const { sessions } = runtime;
+
+const unsubscribe = sessions.subscribe((session) => {
+  const removeState = session.navigation.addListener('state', (event) => {
+    reportNavigationState(session.id, event);
+  });
+  const removeLifecycle = session.addListener('lifecycle', (event) => {
+    reportSessionLifecycle(event);
+  });
+
+  return () => {
+    removeState();
+    removeLifecycle();
+  };
 });
+
+const session = sessions.get(sessionId);
+const state = session?.navigation.getRootState();
+const activeSessions = sessions.getSnapshot();
 ```
+
+`subscribe` visits existing sessions immediately and future sessions once they
+are admitted by a native `openApp` event. This is discovery, not a replay of
+`mounted` or navigation `ready` events. A handle is available before its React
+tree or navigator is ready; use `navigation.isReady()` and the native navigation
+`ready` event when needed. A late subscriber can read the current state directly.
+
+Each `navigation` is a distinct React Navigation container ref with the original
+`addListener(event, listener)` event types, payloads, and unsubscribe functions.
+It never switches to another session. Connect it to the app instance as shown in
+the host example below. This explicit prop also works across separately
+evaluated host and remote bundles without relying on shared React Context.
+
+`get` and `getSnapshot` exclude sessions once native requests their removal.
+Existing subscribers remain attached until lifecycle teardown finishes. The
+per-session cleanup returned by a subscriber runs once after `unmounted`, or
+when that observer unsubscribes. Unsubscribing does not close a session or emit
+an `unmounted` event. A session opened and closed before React commits only runs
+its subscription cleanup, since it never reached `mounted`.
+
+Lifecycle events keep `phase`, `session.id`, `session.appName`, and the
+`activeSessions` snapshot from the emission time. Consumer callback failures
+are reported without interrupting other observers or teardown.
 
 `mounted` is emitted after the session is committed to React state. `unmounted`
 is emitted after the session is removed. When the session was the app's last
 active session, Granite waits for the app's registered dispose callbacks before
 emitting `unmounted`. Callback failures are reported without interrupting the
 session lifecycle.
+
+The runtime option `onLifecycleEvent` is deprecated. Existing callbacks continue
+to receive the same lifecycle events through the session subscription path.
+Migrate with `sessions.subscribe(session => session.addListener('lifecycle', callback))`
+and keep the returned unsubscribe function for your SDK's lifetime.
 
 Remote code can register an idempotent callback for explicit app-level resource
 cleanup:
@@ -276,7 +312,7 @@ destination with `MicroFrontendSessionProvider` so native presentation state
 joins Granite's existing visibility context.
 
 ```tsx
-const sessions = useMicroFrontendSessions(runtime);
+const sessionStates = useMicroFrontendSessions(runtime);
 
 function SessionRoot({ session }: { readonly session: MicroFrontendSessionState }) {
   const App = useMemo(() => lazy(() => runtime.importApp(`${session.appName}/App`)), [session.appName]);
@@ -284,7 +320,7 @@ function SessionRoot({ session }: { readonly session: MicroFrontendSessionState 
   return (
     <Portal hostName={session.sessionId}>
       <MicroFrontendSessionProvider sessionId={session.sessionId} presentationVisibility={session.isVisible}>
-        <App scheme={session.scheme} />
+        <App scheme={session.scheme} navigationContainerRef={runtime.sessions.get(session.sessionId)?.navigation} />
       </MicroFrontendSessionProvider>
     </Portal>
   );
@@ -299,6 +335,15 @@ The provider exposes the native session identity and combines
 `presentationVisibility` with Granite's existing `VisibilityChangedProvider`.
 Remote apps continue to read the final app, navigation, and native-session
 visibility through `useVisibility()`.
+
+Apps returned by `Granite.registerApp` accept the instance-level
+`navigationContainerRef` prop. It overrides both `router.navigationContainerRef`
+and `router.ref` captured at registration, while leaving other router options
+unchanged. Custom app roots must forward the prop to their own
+`NavigationContainer`. New hosts and remotes need this connection before relying
+on session navigation observation; older remote roots that ignore the prop do
+not expose their navigation through this API. Replace module-level navigation
+getters with an explicit session handle instead of selecting by app name.
 
 Remote apps use Granite's `useVisibility()` for visibility and
 `closeView()` to close the current brownfield view. They do not receive

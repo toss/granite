@@ -5642,6 +5642,7 @@ __metadata:
   dependencies:
     "@babel/core": "npm:7.28.5"
     "@babel/types": "npm:7.28.5"
+    "@granite-js/native": "workspace:*"
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/react-native": "workspace:*"
     "@granite-js/utils": "workspace:*"
@@ -5657,6 +5658,7 @@ __metadata:
     typescript: "catalog:tools"
     vitest: "npm:^4.0.12"
   peerDependencies:
+    "@granite-js/native": "*"
     "@granite-js/plugin-core": "*"
     "@granite-js/react-native": "*"
     react: "*"

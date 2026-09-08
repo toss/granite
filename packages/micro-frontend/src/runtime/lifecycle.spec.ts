@@ -1,13 +1,21 @@
 import { describe, expect, it, vi } from 'vitest';
+import { createSessionStore } from '../session/sessionStore';
 import type { MicroFrontendLifecycleEvent } from '../types';
-import { emitMicroFrontendLifecycleEvent, setMicroFrontendLifecycleCallback } from './lifecycle';
+import { emitMicroFrontendLifecycleEvent, setMicroFrontendSessionStore } from './lifecycle';
+
+function subscribe(runtime: object, callback: (event: MicroFrontendLifecycleEvent) => void) {
+  const store = createSessionStore();
+  setMicroFrontendSessionStore(runtime, store);
+  store.sessions.subscribe((session) => session.addListener('lifecycle', callback));
+  store.open({ id: 'app-1:1', appName: 'app-1' });
+}
 
 describe('micro-frontend lifecycle callbacks', () => {
   it('notifies the callback configured for the runtime', () => {
     // Given
     const runtime = {};
     const callback = vi.fn();
-    setMicroFrontendLifecycleCallback(runtime, callback);
+    subscribe(runtime, callback);
     const event = createLifecycleEvent();
 
     // When
@@ -23,8 +31,8 @@ describe('micro-frontend lifecycle callbacks', () => {
     const secondRuntime = {};
     const firstCallback = vi.fn();
     const secondCallback = vi.fn();
-    setMicroFrontendLifecycleCallback(firstRuntime, firstCallback);
-    setMicroFrontendLifecycleCallback(secondRuntime, secondCallback);
+    subscribe(firstRuntime, firstCallback);
+    subscribe(secondRuntime, secondCallback);
     const event = createLifecycleEvent();
 
     // When
@@ -40,7 +48,7 @@ describe('micro-frontend lifecycle callbacks', () => {
     const runtime = {};
     const error = new Error('logging failed');
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    setMicroFrontendLifecycleCallback(runtime, () => {
+    subscribe(runtime, () => {
       throw error;
     });
     const event = createLifecycleEvent();
@@ -49,7 +57,7 @@ describe('micro-frontend lifecycle callbacks', () => {
     emitMicroFrontendLifecycleEvent(runtime, event);
 
     // Then
-    expect(consoleError).toHaveBeenCalledWith('Failed to run a micro-frontend lifecycle callback', error);
+    expect(consoleError).toHaveBeenCalledWith('Failed to run a micro-frontend session callback', error);
     consoleError.mockRestore();
   });
 });

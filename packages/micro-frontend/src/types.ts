@@ -1,3 +1,6 @@
+import type { GraniteAppRuntimeProps } from '@granite-js/react-native';
+import type { MicroFrontendSessions } from './session/sessionTypes';
+
 export type AppRequest = `${string}/${string}`;
 
 export interface MicroFrontendBundleRequest {
@@ -9,7 +12,7 @@ export interface MicroFrontendBundle {
   readonly filePath: string;
 }
 
-export interface MicroFrontendAppProps {
+export interface MicroFrontendAppProps extends GraniteAppRuntimeProps {
   readonly scheme: string;
 }
 
@@ -63,6 +66,7 @@ export interface MicroFrontendLifecycleEvent {
 export type MicroFrontendLifecycleCallback = (event: MicroFrontendLifecycleEvent) => void;
 
 export interface MicroFrontendRuntimeApi {
+  readonly sessions: MicroFrontendSessions;
   readonly evaluateScript: (filePath: string) => Promise<void>;
   readonly preloadApp: (appName: string) => Promise<void>;
   readonly importApp: <TModule>(request: AppRequest) => Promise<TModule>;

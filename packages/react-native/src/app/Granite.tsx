@@ -9,8 +9,10 @@ import { getSchemeUri } from '../constant-bridges';
 import { setupPolyfills } from '../polyfills';
 import { VisibilityChangedProvider } from '../visibility/useVisibilityChanged';
 
-interface GraniteAppRuntimeProps {
+export interface GraniteAppRuntimeProps {
   readonly presentationVisibility?: boolean;
+  /** A navigation ref owned by this mounted app instance, overriding registration-time router refs. */
+  readonly navigationContainerRef?: RouterProps['navigationContainerRef'];
 }
 
 type RegisteredAppProps = InitialProps & GraniteAppRuntimeProps;
@@ -79,16 +81,25 @@ const createApp = () => {
   }
 
   return {
-    registerApp( 
+    registerApp(
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
-      { appName, context, router, initialScheme, setIosSwipeGestureEnabled, setiOSBackPressHandler, getInitialUrl }: GraniteProps
+      {
+        appName,
+        context,
+        router,
+        initialScheme,
+        setIosSwipeGestureEnabled,
+        setiOSBackPressHandler,
+        getInitialUrl,
+      }: GraniteProps
     ): (initialProps: RegisteredAppProps) => JSX.Element {
       if (appName === ENTRY_BUNDLE_NAME) {
         throw new Error(`Reserved app name 'shared' cannot be used`);
       }
 
-      function Root({ presentationVisibility = true, ...initialProps }: RegisteredAppProps) {
-        const initialSchemeValue = (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ?? getSchemeUri();
+      function Root({ presentationVisibility = true, navigationContainerRef, ...initialProps }: RegisteredAppProps) {
+        const initialSchemeValue =
+          (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ?? getSchemeUri();
 
         return (
           <VisibilityChangedProvider isVisible={presentationVisibility}>
@@ -101,7 +112,11 @@ const createApp = () => {
               getInitialUrl={getInitialUrl}
               appName={appName}
               context={context}
-              router={router}
+              router={
+                navigationContainerRef == null
+                  ? router
+                  : { ...router, navigationContainerRef, ref: navigationContainerRef }
+              }
             />
           </VisibilityChangedProvider>
         );
