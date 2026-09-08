@@ -39,20 +39,27 @@ describe('createRoute', () => {
     Reflect.deleteProperty(globalThis, '__granite');
   });
 
-  it('registers the host pending component once for the native scheme without a cross-app fallback', () => {
-    reactNative.getSchemeUri.mockReturnValue('granite://host/app-1/product/123?tab=review');
+  it.each(['', 'other://host/app-2/product/456', 'granite://host/app-1/product/123?tab=review'])(
+    'registers the host pending component from app configuration when the current URL is %j',
+    (currentURL) => {
+      // Given
+      reactNative.getSchemeUri.mockReturnValue(currentURL);
 
-    createRoute('/product/:productId', {
-      component: ProductPendingComponent,
-      hostPendingComponent: ProductPendingComponent,
-    });
+      // When
+      createRoute('/product/:productId', {
+        component: ProductPendingComponent,
+        hostPendingComponent: ProductPendingComponent,
+      });
 
-    expect(reactNative.getSchemeUri).toHaveBeenCalledOnce();
-    expect(resolvePendingHostComponent('granite://host/app-1/product/123?tab=review')?.component).toBe(
-      ProductPendingComponent
-    );
-    expect(resolvePendingHostComponent({ appName: 'app-2', routePath: '/product/123' })).toBeNull();
-  });
+      // Then
+      expect(reactNative.getSchemeUri).not.toHaveBeenCalled();
+      expect(resolvePendingHostComponent('granite://host/app-1/product/123?tab=review')?.component).toBe(
+        ProductPendingComponent
+      );
+      expect(resolvePendingHostComponent({ appName: 'app-2', routePath: '/product/123' })).toBeNull();
+      expect(resolvePendingHostComponent('other://host/app-1/product/123')).toBeNull();
+    }
+  );
 
   it('still creates the route when the host app configuration is unavailable', () => {
     // Given
