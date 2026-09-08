@@ -1,5 +1,12 @@
 # @granite-js/micro-frontend
 
+## 2.3.2
+
+### Patch Changes
+
+- f92bbc7: Register pending host components with the configured app scheme so route evaluation works before an initial URL is available and does not inherit another app's scheme.
+  - @granite-js/utils@2.3.2
+
 ## 2.3.1
 
 ### Patch Changes

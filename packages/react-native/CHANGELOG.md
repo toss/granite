@@ -1,5 +1,18 @@
 # @granite-js/react-native
 
+## 2.3.2
+
+### Patch Changes
+
+- @granite-js/blur-view@2.3.2
+- @granite-js/brownfield-module@2.3.2
+- @granite-js/cli@2.3.2
+- @granite-js/jest@2.3.2
+- @granite-js/mpack@2.3.2
+- @granite-js/plugin-core@2.3.2
+- @granite-js/style-utils@2.3.2
+- @granite-js/video@2.3.2
+
 ## 2.3.1
 
 ### Patch Changes
