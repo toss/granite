@@ -1,6 +1,5 @@
 import {
   createRoute as createGraniteRoute,
-  getSchemeUri,
   type RegisterScreenInput,
   type RouteOptions,
   useNavigation,
@@ -66,11 +65,10 @@ function getCurrentGraniteApp(): PendingHostComponentAppConfig | null {
 
   const host = granite['app']['host'];
   const name = granite['app']['name'];
-  if (typeof host !== 'string' || typeof name !== 'string') {
+  const scheme = granite['app']['scheme'];
+  if (typeof host !== 'string' || typeof name !== 'string' || typeof scheme !== 'string') {
     return null;
   }
-
-  const scheme = new URL(getSchemeUri()).protocol.replace(/:$/g, '');
 
   return {
     name,
