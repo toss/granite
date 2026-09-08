@@ -13,6 +13,8 @@ export interface SharedModuleConfig {
 export type SharedConfig = Readonly<Record<string, SharedModuleConfig>>;
 
 export interface AppContainerConfig {
+  readonly scheme?: string;
+  readonly host?: string;
   readonly shared?: SharedConfig;
 }
 

@@ -28,7 +28,7 @@ describe('getPreludeConfig', () => {
     // Then
     expect(config.preludeScript).not.toContain('@granite-js/micro-frontend');
     expect(config.preludeScript).toContain('global.__MICRO_FRONTEND__.__CONTAINERS__');
-    expect(config.preludeScript).toContain('createContainer(global.__granite.app.name');
+    expect(config.preludeScript).toContain('const __appName = global.__granite.app.name');
     expect(config.preludeScript).toContain('exposeModule(__container, "./App", __expose0)');
     expect(config.banner).not.toContain(['_granite', 'MicroFrontend'].join(''));
     expect(config.banner).toContain('global.__MICRO_FRONTEND__');
@@ -102,7 +102,7 @@ describe('getPreludeConfig', () => {
     const config = getPreludeConfig({}, 'app-1');
 
     // Then
-    expect(config.preludeScript).toContain('createContainer("app-1"');
+    expect(config.preludeScript).toContain('const __appName = "app-1"');
     expect(config.preludeScript).not.toContain('global.__granite.app.name');
   });
 

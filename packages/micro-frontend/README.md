@@ -332,6 +332,14 @@ The host resolves `PendingHostComponent` from the incoming scheme. The route
 registry and hidden state live on the JavaScript global object, so separately
 bundled host and remote package instances share the same state.
 
+New preludes snapshot the app configuration as optional `config.scheme` and
+`config.host` fields on its container. Route registration uses the same source-URL
+lookup as `getAppName()` to select that container, so delayed registration does not
+inherit another app's globals. When the new route helper is paired with an older
+prelude, it uses the configuration captured when its route module was evaluated.
+The metadata is additive: existing container and native interfaces are unchanged.
+Already-built bundles continue to use their original routing implementation.
+
 ## Native event contract
 
 The Codegen TurboModule is named `GraniteMicroFrontendRuntime`.

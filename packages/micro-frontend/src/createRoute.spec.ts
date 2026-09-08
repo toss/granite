@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createRoute } from './createRoute';
 import { resetPendingHostComponentStoreForTest, resolvePendingHostComponent } from './host/pendingHostComponentStore';
 
 const reactNative = vi.hoisted(() => ({
@@ -23,6 +22,8 @@ function ProductPendingComponent(): ReactNode {
 
 describe('createRoute', () => {
   beforeEach(() => {
+    vi.resetModules();
+    Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
     resetPendingHostComponentStoreForTest();
     reactNative.createRoute.mockClear();
     reactNative.getSchemeUri.mockReset();
@@ -41,9 +42,11 @@ describe('createRoute', () => {
 
   it.each(['', 'other://host/app-2/product/456', 'granite://host/app-1/product/123?tab=review'])(
     'registers the host pending component from app configuration when the current URL is %j',
-    (currentURL) => {
+    async (currentURL) => {
       // Given
       reactNative.getSchemeUri.mockReturnValue(currentURL);
+
+      const { createRoute } = await import('./createRoute');
 
       // When
       createRoute('/product/:productId', {
@@ -61,10 +64,12 @@ describe('createRoute', () => {
     }
   );
 
-  it('still creates the route when the host app configuration is unavailable', () => {
+  it('still creates the route when the host app configuration is unavailable', async () => {
     // Given
     Reflect.deleteProperty(globalThis, '__granite');
     reactNative.getSchemeUri.mockReturnValue('granite://host/app-1/product/123');
+
+    const { createRoute } = await import('./createRoute');
 
     // When
     const route = createRoute('/product/:productId', {

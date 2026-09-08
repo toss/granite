@@ -5,8 +5,9 @@ import {
   useNavigation,
 } from '@granite-js/react-native';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
+import { getRouteAppConfig } from './host/getRouteAppConfig';
 import { registerPendingHostComponentRoute } from './host/pendingHostComponentStore';
-import type { PendingHostComponentAppConfig, PendingHostComponentRenderer } from './host/types';
+import type { PendingHostComponentRenderer } from './host/types';
 
 export type MicroFrontendRouteOptions<TParams extends Readonly<object> | undefined> = RouteOptions<TParams> & {
   readonly hostPendingComponent?: PendingHostComponentRenderer<TParams>;
@@ -43,7 +44,7 @@ export function createRoute<TParams extends Readonly<object> | undefined>(
   const { hostPendingComponent, ...routeOptions } = options;
 
   if (hostPendingComponent != null) {
-    const app = getCurrentGraniteApp();
+    const app = getRouteAppConfig();
     if (app != null) {
       registerPendingHostComponentRoute(String(path), {
         app,
@@ -55,28 +56,4 @@ export function createRoute<TParams extends Readonly<object> | undefined>(
   }
 
   return createGraniteRoute(path, routeOptions);
-}
-
-function getCurrentGraniteApp(): PendingHostComponentAppConfig | null {
-  const granite: unknown = Reflect.get(globalThis, '__granite');
-  if (!isPropertyMap(granite) || !isPropertyMap(granite['app'])) {
-    return null;
-  }
-
-  const host = granite['app']['host'];
-  const name = granite['app']['name'];
-  const scheme = granite['app']['scheme'];
-  if (typeof host !== 'string' || typeof name !== 'string' || typeof scheme !== 'string') {
-    return null;
-  }
-
-  return {
-    name,
-    scheme,
-    host,
-  };
-}
-
-function isPropertyMap(value: unknown): value is Readonly<Record<PropertyKey, unknown>> {
-  return typeof value === 'object' && value !== null;
 }

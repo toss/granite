@@ -35,9 +35,17 @@ export function resolveAppNameFromStackFrames(
   throw new Error('Cannot resolve the current micro-frontend app name');
 }
 
-export function getAppName(): string {
+export function findCurrentAppName(): string | null {
+  const containers = getMicroFrontendRuntimeContext().containers;
+  if (!Object.values(containers).some((container) => container.runtime != null)) {
+    return null;
+  }
   const sourceURL = resolveCurrentSourceURL(captureStackFrames());
-  const appName = findAppNameBySourceURL(sourceURL);
+  return resolveAppNameBySourceURL(sourceURL, containers);
+}
+
+export function getAppName(): string {
+  const appName = findCurrentAppName();
   if (appName != null) {
     return appName;
   }
