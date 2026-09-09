@@ -535,16 +535,33 @@ Import public APIs from `GraniteMicroFrontendRuntime`.
 
 ### Portal destination APIs
 
-| API                                         | Lifetime / behavior                                                                                               |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `-initWithFrame:`                           | Create and immediately activate a UIKit-owned Portal destination after React has booted.                          |
-| `-initWithFrame:deferredActivation:`        | Create before React boot without reading React feature flags.                                                     |
-| `-setName:`                                 | Register/unregister the destination name. Use `sessionId`.                                                        |
-| `-activateIfNeeded`                         | Create the Fabric host, attach its touch handler, and apply the pending name. Main thread only, after React boot. |
-| `isActivated`                               | Whether the underlying Fabric host exists.                                                                        |
-| `hasAttachedContent`                        | Whether teleported content is currently attached. This is readiness, not presentation visibility.                 |
-| `onContentDidAttach` / `onContentDidDetach` | Main-thread readiness callbacks for the first attach and last detach.                                             |
-| `-invalidate`                               | Unregister the host and clear callbacks during teardown.                                                          |
+| API                                         | Lifetime / behavior                                                                                                                                      |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-initWithFrame:`                           | Create and immediately activate a UIKit-owned Portal destination after React has booted.                                                                 |
+| `-initWithFrame:deferredActivation:`        | Create before React boot without reading React feature flags.                                                                                            |
+| `-setName:`                                 | Register/unregister the destination name. Use `sessionId`.                                                                                               |
+| `-activateIfNeeded`                         | Create the Fabric host under an `RCTRootComponentView` anchor, attach the touch handler, and apply the pending name. Main thread only, after React boot. |
+| `isActivated`                               | Whether the underlying Fabric host exists.                                                                                                               |
+| `hasAttachedContent`                        | Whether teleported content is currently attached. This is readiness, not presentation visibility.                                                        |
+| `onContentDidAttach` / `onContentDidDetach` | Main-thread readiness callbacks for the first attach and last detach.                                                                                    |
+| `-invalidate`                               | Unregister the host and clear callbacks during teardown.                                                                                                 |
+
+#### Touch handling under a Portal host
+
+`-activateIfNeeded` mounts the Fabric host under an `RCTRootComponentView`
+anchor:
+
+```text
+PortalHostContainerView       <- RCTSurfaceTouchHandler for all hosted content
+└── RCTRootComponentView      <- anchor, never registered with Fabric
+    └── PortalHostView        <- teleported content attaches here
+```
+
+react-native-screens attaches its own touch handler to any screen without an
+`RCTRootComponentView` above it. Without the anchor every hosted screen would add
+a second handler beneath the container's, and one tap would reach JS twice. The
+anchor keeps a single handler and page coordinates relative to the container,
+like content under a regular React Native root.
 
 ### UIViewController example
 
