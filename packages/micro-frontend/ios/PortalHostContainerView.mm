@@ -3,6 +3,56 @@
 #import <React/RCTSurfaceTouchHandler.h>
 #import "PortalHostView.h"
 
+@interface GranitePortalSurfaceTouchHandler : RCTSurfaceTouchHandler
+@end
+
+static BOOL GraniteIsSurfaceTouchHandler(UIGestureRecognizer *recognizer)
+{
+  return [recognizer isKindOfClass:[RCTSurfaceTouchHandler class]];
+}
+
+static BOOL GraniteIsPortalSurfaceTouchHandler(UIGestureRecognizer *recognizer)
+{
+  return [recognizer isKindOfClass:[GranitePortalSurfaceTouchHandler class]];
+}
+
+static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
+    GranitePortalSurfaceTouchHandler *touchHandler,
+    UITouch *touch)
+{
+  UIView *handlerView = touchHandler.view;
+  UIView *touchView = touch.view;
+  if (handlerView == nil || touchView == nil || ![touchView isDescendantOfView:handlerView]) {
+    return NO;
+  }
+
+  GranitePortalSurfaceTouchHandler *nearestPortalHandler = nil;
+  for (UIView *view = touchView; view != nil; view = view.superview) {
+    for (UIGestureRecognizer *recognizer in view.gestureRecognizers) {
+      if (!recognizer.isEnabled || !GraniteIsSurfaceTouchHandler(recognizer)) {
+        continue;
+      }
+      if (!GraniteIsPortalSurfaceTouchHandler(recognizer)) {
+        return NO;
+      }
+      if (nearestPortalHandler == nil) {
+        nearestPortalHandler = (GranitePortalSurfaceTouchHandler *)recognizer;
+      }
+    }
+  }
+
+  return nearestPortalHandler == nil || nearestPortalHandler == touchHandler;
+}
+
+@implementation GranitePortalSurfaceTouchHandler
+
+- (BOOL)gestureRecognizer:(__unused UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+{
+  return GranitePortalSurfaceTouchHandlerShouldReceiveTouch(self, touch);
+}
+
+@end
+
 @implementation PortalHostContainerView {
   PortalHostView *_portalHostView;
   RCTSurfaceTouchHandler *_touchHandler;
@@ -58,7 +108,7 @@
   };
   [self addSubview:_portalHostView];
 
-  _touchHandler = [RCTSurfaceTouchHandler new];
+  _touchHandler = [GranitePortalSurfaceTouchHandler new];
   [_touchHandler attachToView:self];
 
   if (_pendingName) {
