@@ -413,6 +413,10 @@ destination views in `com.teleport.host`.
 unregisters while detached. `nextInsertionIndexForChildAt()` is renderer
 plumbing, not an application integration API.
 
+Native-created Android hosts can keep an Android view ID for saved state or
+lookup. Background touches use the enclosing React root's Fabric tag; React-managed
+hosts retain their registered tags and existing pointer-event behavior.
+
 #### Props the Portal components do not apply
 
 `Portal` and the Portal host component are renderer plumbing, not styleable

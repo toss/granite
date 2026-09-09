@@ -2,7 +2,6 @@ package teleport.example
 
 import android.graphics.Color
 import android.os.Bundle
-import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -118,7 +117,6 @@ class ReactNativePotalHostActivity :
         )
     val hostView =
         PortalHostView(themedReactContext).apply {
-          id = View.generateViewId()
           setBackgroundColor(Color.BLACK)
           setName(portalHostName)
         }

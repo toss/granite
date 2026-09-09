@@ -19,7 +19,8 @@ class PortalHostViewManager :
 
   override fun getDelegate(): ViewManagerDelegate<ReactViewGroup> = delegate
 
-  override fun createTeleportView(context: ThemedReactContext): ReactViewGroup = PortalHostView(context)
+  override fun createTeleportView(context: ThemedReactContext): ReactViewGroup =
+      PortalHostView(context).also { it.useOwnReactTagForTouchTarget() }
 
   override fun onDropViewInstance(view: ReactViewGroup) {
     super.onDropViewInstance(view)

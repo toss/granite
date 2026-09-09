@@ -3,6 +3,9 @@ package com.teleport.host
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.view.View
+import com.facebook.react.uimanager.ReactCompoundView
+import com.facebook.react.uimanager.ReactRoot
 import com.facebook.react.views.view.ReactViewGroup
 import com.teleport.global.PortalRegistry
 
@@ -14,11 +17,16 @@ import com.teleport.global.PortalRegistry
  */
 class PortalHostView(
   context: Context?,
-) : ReactViewGroup(context) {
+) : ReactViewGroup(context), ReactCompoundView {
   private var name: String? = null
   private var isInBatch = false
   private var batchBaseIndex = 0
   private var hasPendingCleanup = false
+  private var usesOwnReactTagForTouchTarget = false
+
+  internal fun useOwnReactTagForTouchTarget() {
+    usesOwnReactTagForTouchTarget = true
+  }
 
   fun setName(newName: String?) {
     if (name == newName) return
@@ -54,6 +62,16 @@ class PortalHostView(
       Handler(Looper.getMainLooper()).post { isInBatch = false }
     }
     return minOf(batchBaseIndex + childIndex, childCount)
+  }
+
+  // Native Android IDs are retained for view state, but are not Fabric event targets.
+  override fun reactTagForTouch(
+    touchX: Float,
+    touchY: Float,
+  ): Int {
+    if (usesOwnReactTagForTouchTarget) return id
+
+    return findEnclosingRootTag() ?: id
   }
 
   override fun onAttachedToWindow() {
@@ -93,5 +111,14 @@ class PortalHostView(
     isInBatch = false
     batchBaseIndex = 0
     hasPendingCleanup = false
+  }
+
+  private fun findEnclosingRootTag(): Int? {
+    var current = parent as? View
+    while (current != null) {
+      if (current is ReactRoot) return current.getRootViewTag()
+      current = current.parent as? View
+    }
+    return null
   }
 }
