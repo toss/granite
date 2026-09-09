@@ -71,8 +71,21 @@ class PortalHostView(
   ): Int {
     if (usesOwnReactTagForTouchTarget) return id
 
-    return findEnclosingRootTag() ?: id
+    return owningRootTag ?: id
   }
+
+  /**
+   * Fabric tag of the React root that owns touches landing on this host's own background.
+   *
+   * Walks [ancestors] bottom-up and takes the first [ReactRoot] met, which is the nearest
+   * enclosing root — the one hosting this native host. Null when no React root encloses it.
+   */
+  private val owningRootTag: Int?
+    get() = ancestors.filterIsInstance<ReactRoot>().firstOrNull()?.getRootViewTag()
+
+  /** Parent chain from the immediate parent upwards, ending at the first non-[View] parent. */
+  private val ancestors: Sequence<View>
+    get() = generateSequence(parent as? View) { it.parent as? View }
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
@@ -111,14 +124,5 @@ class PortalHostView(
     isInBatch = false
     batchBaseIndex = 0
     hasPendingCleanup = false
-  }
-
-  private fun findEnclosingRootTag(): Int? {
-    var current = parent as? View
-    while (current != null) {
-      if (current is ReactRoot) return current.getRootViewTag()
-      current = current.parent as? View
-    }
-    return null
   }
 }
