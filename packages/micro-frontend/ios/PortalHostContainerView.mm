@@ -108,10 +108,42 @@ static BOOL GranitePortalOwnsTouchPath(
 ///
 /// Takes the handler's own view and the touched view, then hands the actual touch
 /// path — the touched view up through its superviews — to `GranitePortalOwnsTouchPath`.
+/// The handler dispatches only when it is the Portal handler owning that path.
 ///
-/// The handler dispatches only when it is the Portal handler owning that path:
-/// nested Portals resolve to the innermost handler, and plain hosted content, which
-/// installs no touch root of its own, resolves to the container hosting it.
+/// Why this leaves exactly one handler, however many Portals exist:
+///
+/// Sibling Portals never see each other's touches.
+///
+///     screen
+///      ├ portalA  <- handlerA
+///      │   └ leafA
+///      └ portalB  <- handlerB
+///          └ leafB
+///
+/// UIKit only asks `shouldReceiveTouch:` of recognizers on the touched view and its
+/// ancestors, so handlerB is never asked about `leafA`. Even if it were, the
+/// `isDescendantOfView:` guard below rejects a touch outside the handler's own subtree.
+///
+/// Nested Portals are all asked, and all resolve to the same owner.
+///
+///     portalA  <- handlerA
+///      └ portalB  <- handlerB
+///         └ portalC  <- handlerC
+///            └ leaf
+///
+/// A, B and C are all ancestors of `leaf`, so UIKit asks all three. Each one walks
+/// the same path from `leaf` upwards, and the walk direction is fixed, so each one
+/// meets C first. `owningPortalHandler == touchHandler` therefore holds for C alone;
+/// A and B yield. Any nesting depth leaves exactly one handler.
+///
+/// C is also the right owner, not merely the unique one. Portal content is always
+/// mounted inside its own container's subtree, so the first container met is the one
+/// whose surface rendered `leaf`. Fabric resolves the event receiver from the touched
+/// component view regardless of which handler fires, but it computes page coordinates
+/// relative to the firing handler's view — and `leaf` belongs to C's coordinate space.
+///
+/// Plain hosted content installs no touch root of its own and so resolves to the
+/// container hosting it.
 static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
     GranitePortalSurfaceTouchHandler *touchHandler,
     UITouch *touch)
