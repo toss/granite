@@ -217,12 +217,48 @@ route best-effort native preload failures to its observability provider.
 
 The public runtime API is:
 
-| API                        | Responsibility                                                  |
-| -------------------------- | --------------------------------------------------------------- |
-| `preloadApp(appName)`      | Load and evaluate one app without importing an exposed module.  |
-| `importApp(request)`       | Ensure the app is evaluated and import `appName/exposedModule`. |
-| `evaluateScript(filePath)` | Evaluate a local file or Android packaged asset in the retained runtime. |
-| `onEvent(listener)`        | Subscribe to native open, close, and visibility events.         |
+| API                           | Responsibility                                                           |
+| ----------------------------- | ------------------------------------------------------------------------ |
+| `preloadApp(appName)`         | Load and evaluate one app without importing an exposed module.           |
+| `importApp(request)`          | Ensure the app is evaluated and import `appName/exposedModule`.          |
+| `evaluateScript(filePath)`    | Evaluate a local file or Android packaged asset in the retained runtime. |
+| `onEvent(listener)`           | Subscribe to native open, close, and visibility events.                  |
+| `getSessions()`               | Read the current immutable session snapshot.                             |
+| `onSessionsChanged(listener)` | Subscribe to session snapshot changes.                                   |
+
+Session snapshots contain `sessionId`, `appName`, `scheme`, and `isVisible`.
+Sessions remain in opening order, including separate entries when the same app
+has multiple sessions. A newly opened session starts with `isVisible: false`;
+native visibility events update it, and `closeApp` removes it. Preloading an app
+does not create a session.
+
+```ts
+const subscription = runtime.onSessionsChanged((sessions) => {
+  updateSessionStatus(sessions);
+});
+updateSessionStatus(runtime.getSessions());
+
+// Stop observing when the integration is no longer needed.
+subscription.remove();
+```
+
+`getSessions()` only reads state. The first `onEvent` or `onSessionsChanged`
+subscription starts native event delivery after installing the runtime's
+listener. This can synchronously deliver queued events to the new subscriber.
+Subscriptions do not replay the current snapshot; subscribe first, then read
+`getSessions()` to initialize an observer without missing changes.
+
+The runtime retains one native subscription for its lifetime, even while all
+consumer subscriptions are removed. Later observers and React hosts can read
+the current sessions without reconstructing past events. Native session events
+update the snapshot before either kind of observer is notified, independently
+of React commits and app disposal. A failing observer is reported without
+preventing other observers from receiving the event.
+
+Snapshots and their session objects are frozen. A real change creates a new
+array while preserving unchanged session objects. Duplicate opens, unknown
+session IDs, and repeated visibility values retain the same snapshot and do not
+notify `onSessionsChanged` subscribers.
 
 The host can provide `onLifecycleEvent` when creating the runtime for logging
 and other observability integrations. Each event contains `session.id`,
@@ -291,9 +327,11 @@ function SessionRoot({ session }: { readonly session: MicroFrontendSessionState 
 }
 ```
 
-`useMicroFrontendSessions(runtime)` owns the fixed React subscription and folds
-native open, close, and visibility events into session descriptors. The host
-continues to own module selection and the rendered Portal tree.
+`useMicroFrontendSessions(runtime)` subscribes to the runtime's session snapshot
+with `useSyncExternalStore`. It reads the same state as non-React observers,
+including sessions opened before the hook mounted. It continues to report
+committed mount/unmount lifecycle events and run app disposal. The host owns
+module selection and the rendered Portal tree.
 
 The provider exposes the native session identity and combines
 `presentationVisibility` with Granite's existing `VisibilityChangedProvider`.

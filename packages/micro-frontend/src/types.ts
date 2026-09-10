@@ -48,6 +48,13 @@ export interface MicroFrontendRuntimeEventSubscription {
   readonly remove: () => void;
 }
 
+export interface MicroFrontendSessionState {
+  readonly appName: string;
+  readonly sessionId: string;
+  readonly scheme: string;
+  readonly isVisible: boolean;
+}
+
 export interface MicroFrontendLifecycleSession {
   readonly appName: string;
   readonly id: string;
@@ -66,5 +73,11 @@ export interface MicroFrontendRuntimeApi {
   readonly evaluateScript: (filePath: string) => Promise<void>;
   readonly preloadApp: (appName: string) => Promise<void>;
   readonly importApp: <TModule>(request: AppRequest) => Promise<TModule>;
+  /** Read the current snapshot without starting event delivery. */
+  readonly getSessions: () => readonly MicroFrontendSessionState[];
+  /** Subscribe to changes and start native delivery if needed; read getSessions() for the initial snapshot. */
+  readonly onSessionsChanged: (
+    listener: (sessions: readonly MicroFrontendSessionState[]) => void
+  ) => MicroFrontendRuntimeEventSubscription;
   readonly onEvent: (listener: (event: MicroFrontendSessionEvent) => void) => MicroFrontendRuntimeEventSubscription;
 }

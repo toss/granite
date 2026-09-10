@@ -1,36 +1,13 @@
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { type MicroFrontendSessionState, useMicroFrontendSessions } from './useMicroFrontendSessions';
+import { createSessionRuntimeFixture as createRuntimeFixture } from '../../test/sessionRuntimeFixture';
 import { getIsPendingHostComponentHidden, hidePendingHostComponent } from '../host/pendingHostComponentStore';
-import type { MicroFrontendRuntimeApi, MicroFrontendSessionEvent } from '../types';
+import type { MicroFrontendRuntimeApi } from '../types';
 
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
 
-function createRuntimeFixture() {
-  const listeners = new Set<(event: MicroFrontendSessionEvent) => void>();
-  const remove = vi.fn<(listener: (event: MicroFrontendSessionEvent) => void) => void>((listener) => {
-    listeners.delete(listener);
-  });
-  const runtime: Pick<MicroFrontendRuntimeApi, 'onEvent'> = {
-    onEvent(nextListener) {
-      listeners.add(nextListener);
-      return { remove: () => remove(nextListener) };
-    },
-  };
-
-  return {
-    emit(event: MicroFrontendSessionEvent) {
-      listeners.forEach((listener) => listener(event));
-    },
-    get listenerCount() {
-      return listeners.size;
-    },
-    remove,
-    runtime,
-  };
-}
-
-function renderSessions(runtime: Pick<MicroFrontendRuntimeApi, 'onEvent'>) {
+function renderSessions(runtime: MicroFrontendRuntimeApi) {
   let current: readonly MicroFrontendSessionState[] = [];
 
   function Consumer() {
@@ -197,16 +174,46 @@ describe('useMicroFrontendSessions', () => {
     rendered.unmount();
   });
 
-  it('removes the runtime subscription when the host unmounts', () => {
+  it('removes the snapshot observer when the host unmounts while retaining native tracking', () => {
     // Given
     const fixture = createRuntimeFixture();
+    const subscribe = fixture.runtime.onSessionsChanged;
+    const remove = vi.fn();
+    vi.spyOn(fixture.runtime, 'onSessionsChanged').mockImplementation((listener) => {
+      const subscription = subscribe(listener);
+      return {
+        remove() {
+          remove();
+          subscription.remove();
+        },
+      };
+    });
     const rendered = renderSessions(fixture.runtime);
 
     // When
     rendered.unmount();
 
     // Then
-    expect(fixture.remove).toHaveBeenCalledOnce();
-    expect(fixture.listenerCount).toBe(0);
+    expect(remove).toHaveBeenCalledOnce();
+    expect(fixture.listenerCount).toBe(1);
+  });
+
+  it('renders the current snapshot when native sessions opened before the host mounted', () => {
+    // Given
+    const fixture = createRuntimeFixture();
+    fixture.runtime.onEvent(() => undefined).remove();
+    fixture.emit({
+      name: 'openApp',
+      params: { appName: 'catalog', sessionId: 'catalog:1', scheme: 'granite://catalog/products' },
+    });
+    fixture.emit({ name: 'sessionVisibilityChanged', params: { sessionId: 'catalog:1', isVisible: true } });
+
+    // When
+    const rendered = renderSessions(fixture.runtime);
+
+    // Then
+    expect(rendered.current).toBe(fixture.runtime.getSessions());
+    expect(rendered.current[0]?.isVisible).toBe(true);
+    rendered.unmount();
   });
 });

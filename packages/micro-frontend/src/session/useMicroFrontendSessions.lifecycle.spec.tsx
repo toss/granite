@@ -64,7 +64,7 @@ function createRuntimeFixture() {
   };
 }
 
-function renderSessions(runtime: Pick<MicroFrontendRuntimeApi, 'onEvent'>) {
+function renderSessions(runtime: MicroFrontendRuntimeApi) {
   let current: readonly MicroFrontendSessionState[] = [];
   function Consumer() {
     current = useMicroFrontendSessions(runtime);
@@ -154,6 +154,7 @@ describe('useMicroFrontendSessions app lifetime', () => {
       },
       activeSessions: [{ appName: 'app-1', id: 'app-1:1' }],
     });
+    expect(fixture.runtime.getSessions()).toEqual([]);
 
     await act(async () => finishDispose?.());
     expect(fixture.onLifecycleEvent).toHaveBeenCalledTimes(4);
@@ -253,9 +254,10 @@ describe('useMicroFrontendSessions app lifetime', () => {
     listenerCounts.push(fixture.listenerCount);
     const remounted = renderSessions(fixture.runtime);
     listenerCounts.push(fixture.listenerCount);
-    expect(remounted.current).toEqual([]);
+    expect(remounted.current).toBe(fixture.runtime.getSessions());
+    expect(remounted.current.map(({ sessionId }) => sessionId)).toEqual(['app-2:1']);
     remounted.unmount();
     listenerCounts.push(fixture.listenerCount);
-    expect(listenerCounts).toEqual([1, 0, 1, 0]);
+    expect(listenerCounts).toEqual([1, 1, 1, 1]);
   });
 });
