@@ -35,7 +35,6 @@ class PortalReactRootView(
 
   init {
     setIsFabric(true)
-    id = surfaceId
     setRootViewTag(surfaceId)
   }
 

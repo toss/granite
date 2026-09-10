@@ -3,9 +3,6 @@ package com.teleport.host
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.view.View
-import com.facebook.react.uimanager.ReactCompoundView
-import com.facebook.react.uimanager.ReactRoot
 import com.facebook.react.views.view.ReactViewGroup
 import com.teleport.global.PortalRegistry
 
@@ -17,16 +14,11 @@ import com.teleport.global.PortalRegistry
  */
 class PortalHostView(
   context: Context?,
-) : ReactViewGroup(context), ReactCompoundView {
+) : ReactViewGroup(context) {
   private var name: String? = null
   private var isInBatch = false
   private var batchBaseIndex = 0
   private var hasPendingCleanup = false
-  private var usesOwnReactTagForTouchTarget = false
-
-  internal fun useOwnReactTagForTouchTarget() {
-    usesOwnReactTagForTouchTarget = true
-  }
 
   fun setName(newName: String?) {
     if (name == newName) return
@@ -63,29 +55,6 @@ class PortalHostView(
     }
     return minOf(batchBaseIndex + childIndex, childCount)
   }
-
-  // Native Android IDs are retained for view state, but are not Fabric event targets.
-  override fun reactTagForTouch(
-    touchX: Float,
-    touchY: Float,
-  ): Int {
-    if (usesOwnReactTagForTouchTarget) return id
-
-    return owningRootTag ?: id
-  }
-
-  /**
-   * Fabric tag of the React root that owns touches landing on this host's own background.
-   *
-   * Walks [ancestors] bottom-up and takes the first [ReactRoot] met, which is the nearest
-   * enclosing root — the one hosting this native host. Null when no React root encloses it.
-   */
-  private val owningRootTag: Int?
-    get() = ancestors.filterIsInstance<ReactRoot>().firstOrNull()?.getRootViewTag()
-
-  /** Parent chain from the immediate parent upwards, ending at the first non-[View] parent. */
-  private val ancestors: Sequence<View>
-    get() = generateSequence(parent as? View) { it.parent as? View }
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
