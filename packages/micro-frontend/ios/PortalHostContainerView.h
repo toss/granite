@@ -28,9 +28,16 @@ NS_ASSUME_NONNULL_BEGIN
 /// when the host view is created. Pass nil to unregister.
 - (void)setName:(nullable NSString *)name;
 
-/// Creates the underlying Fabric host view, attaches the touch handler, and
-/// applies any pending name. No-op when already activated. Must be called on
-/// the main thread after the React runtime has booted.
+/// Creates the underlying Fabric host view under an `RCTRootComponentView`
+/// anchor, attaches the touch handler, and applies any pending name. No-op when
+/// already activated. Must be called on the main thread after the React runtime
+/// has booted.
+///
+/// The anchor makes hosted screens count as mounted under a React root for
+/// react-native-screens, so they do not attach a second touch handler beneath
+/// the container's. Hosted content therefore gets one handler and page
+/// coordinates relative to this container, like content under a regular React
+/// Native root.
 - (void)activateIfNeeded;
 
 /// Whether the underlying Fabric host view has been created.

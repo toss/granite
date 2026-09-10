@@ -1,9 +1,11 @@
 #import "PortalHostContainerView.h"
 
+#import <React/RCTRootComponentView.h>
 #import <React/RCTSurfaceTouchHandler.h>
 #import "PortalHostView.h"
 
 @implementation PortalHostContainerView {
+  RCTRootComponentView *_reactRootAnchor;
   PortalHostView *_portalHostView;
   RCTSurfaceTouchHandler *_touchHandler;
   NSString *_pendingName;
@@ -49,14 +51,35 @@
     return;
   }
 
-  _portalHostView = [[PortalHostView alloc] initWithFrame:self.bounds];
+  // Hosted content mounts under an RCTRootComponentView anchor so react-native-screens treats
+  // hosted screens as root-mounted. RNSScreenView walks its superview chain for an
+  // RCTRootComponentView (or another RNSScreenView) in -isMountedUnderScreenOrReactRoot and, when
+  // it finds none, attaches its own RCTSurfaceTouchHandler in -didMoveToWindow. Under a Portal
+  // host that second handler would sit beneath this container's handler, every tap would reach JS
+  // twice, and on the second touchStart an ancestor PanResponder could steal the responder from
+  // the tapped Pressable. With the anchor, hosted screens see the same tree shape as content under
+  // a regular RCTSurfaceView: one handler, page coordinates relative to this container.
+  //
+  // The anchor is never registered with Fabric (tag 0, no event emitter, no shadow node); it is
+  // only a superview. The host view joins it through -addSubview:, not
+  // -mountChildComponentView:index:, so the anchor never posts RCTContentDidAppearNotification.
+  // It is created here rather than in -init for the same reason the host view is deferred: an
+  // RCTViewComponentView reads ReactNativeFeatureFlags while it settles into the view hierarchy,
+  // which must not happen before the host's boot-time override (see the header on deferred
+  // activation).
+  _reactRootAnchor = [[RCTRootComponentView alloc] initWithFrame:self.bounds];
+  _reactRootAnchor.autoresizingMask =
+      UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  [self addSubview:_reactRootAnchor];
+
+  _portalHostView = [[PortalHostView alloc] initWithFrame:_reactRootAnchor.bounds];
   _portalHostView.autoresizingMask =
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   __weak PortalHostContainerView *weakSelf = self;
   _portalHostView.onSubviewCountChanged = ^{
     [weakSelf handleSubviewCountChanged];
   };
-  [self addSubview:_portalHostView];
+  [_reactRootAnchor addSubview:_portalHostView];
 
   _touchHandler = [RCTSurfaceTouchHandler new];
   [_touchHandler attachToView:self];
