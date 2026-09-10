@@ -1,5 +1,19 @@
 # @granite-js/micro-frontend
 
+## 2.4.0
+
+### Minor Changes
+
+- d1f3f02: Add `getSessions()` and `onSessionsChanged()` for observing ordered session snapshots outside React. Snapshots include session identity, app name, scheme, and native presentation visibility, and update as native events arrive without waiting for React commits or app disposal.
+
+  Keep session tracking active between consumer subscriptions and let `useMicroFrontendSessions()` read the same runtime-owned state, including sessions opened before it mounts. Existing lifecycle callbacks retain their commit and disposal timing.
+
+### Patch Changes
+
+- 9c09be7: Prevent iOS Portal hosts from dispatching duplicate Fabric touch events when another React Native root owns the touched view. Preserve touch handling for plain hosted content and nested Portal hosts.
+- d0a4bf4: Mount teleported iOS Portal content under an `RCTRootComponentView` anchor so react-native-screens treats hosted screens as root-mounted and stops attaching a second `RCTSurfaceTouchHandler` per screen. Hosted content now gets a single touch handler and container-relative page coordinates, like content under a regular React Native root.
+  - @granite-js/utils@2.4.0
+
 ## 2.3.2
 
 ### Patch Changes
