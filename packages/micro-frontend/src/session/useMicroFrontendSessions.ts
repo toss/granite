@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
 import { installPendingHostComponentBridge, resetPendingHostComponent } from '../host/pendingHostComponentStore';
 import { emitMicroFrontendLifecycleEvent } from '../runtime/lifecycle';
 import { disposeAppResources } from '../runtime/registry';
@@ -6,53 +6,19 @@ import type {
   MicroFrontendLifecycleEvent,
   MicroFrontendLifecycleSession,
   MicroFrontendRuntimeApi,
-  MicroFrontendSessionEvent,
+  MicroFrontendSessionState,
 } from '../types';
 
-export interface MicroFrontendSessionState {
-  readonly appName: string;
-  readonly sessionId: string;
-  readonly scheme: string;
-  readonly isVisible: boolean;
-}
+export type { MicroFrontendSessionState } from '../types';
 
 const INITIAL_SESSIONS: readonly MicroFrontendSessionState[] = [];
 
-function reduceMicroFrontendSessions(
-  sessions: readonly MicroFrontendSessionState[],
-  event: MicroFrontendSessionEvent
-): readonly MicroFrontendSessionState[] {
-  switch (event.name) {
-    case 'openApp':
-      return sessions.some(({ sessionId }) => sessionId === event.params.sessionId)
-        ? sessions
-        : [
-            ...sessions,
-            {
-              appName: event.params.appName,
-              sessionId: event.params.sessionId,
-              scheme: event.params.scheme,
-              isVisible: false,
-            },
-          ];
-    case 'closeApp':
-      return sessions.filter(({ sessionId }) => sessionId !== event.params.sessionId);
-    case 'sessionVisibilityChanged':
-      return sessions.map((session) =>
-        session.sessionId === event.params.sessionId ? { ...session, isVisible: event.params.isVisible } : session
-      );
-    default: {
-      const exhaustiveEvent: never = event;
-      return exhaustiveEvent;
-    }
-  }
-}
-
 export function useMicroFrontendSessions(
-  runtime: Pick<MicroFrontendRuntimeApi, 'onEvent'>
+  runtime: Pick<MicroFrontendRuntimeApi, 'onEvent' | 'getSessions' | 'onSessionsChanged'>
 ): readonly MicroFrontendSessionState[] {
-  const [sessions, dispatch] = useReducer(reduceMicroFrontendSessions, INITIAL_SESSIONS);
-  const previousSessionsRef = useRef(sessions);
+  const subscribe = useCallback((listener: () => void) => runtime.onSessionsChanged(listener).remove, [runtime]);
+  const sessions = useSyncExternalStore(subscribe, runtime.getSessions);
+  const previousSessionsRef = useRef(INITIAL_SESSIONS);
 
   useEffect(() => {
     const previousSessions = previousSessionsRef.current;
@@ -106,7 +72,6 @@ export function useMicroFrontendSessions(
       if (event.name === 'openApp') {
         resetPendingHostComponent();
       }
-      dispatch(event);
     });
 
     return () => subscription.remove();
