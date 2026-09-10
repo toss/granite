@@ -1,11 +1,15 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import <React/RCTRootComponentView.h>
 #import <React/RCTSurfaceTouchHandler.h>
 
 #import "PortalHostContainerView.h"
 #import "PortalHostView.h"
 
 @implementation RCTViewComponentView
+@end
+
+@implementation RCTRootComponentView
 @end
 
 @implementation RCTSurfaceTouchHandler
