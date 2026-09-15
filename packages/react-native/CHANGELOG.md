@@ -1,5 +1,24 @@
 # @granite-js/react-native
 
+## 2.5.0
+
+### Minor Changes
+
+- f9086dc: Add `useVisibilityEffect` to run an effect while a screen is visible and clean it up when visibility is lost, the callback changes, or the component unmounts.
+
+  Deprecate `useVisibilityChange` without changing its behavior. Use `useVisibilityEffect` for effects with cleanup, or `useVisibility` with React's `useEffect` for explicit visibility change handling.
+
+### Patch Changes
+
+- @granite-js/blur-view@2.5.0
+- @granite-js/brownfield-module@2.5.0
+- @granite-js/cli@2.5.0
+- @granite-js/jest@2.5.0
+- @granite-js/mpack@2.5.0
+- @granite-js/plugin-core@2.5.0
+- @granite-js/style-utils@2.5.0
+- @granite-js/video@2.5.0
+
 ## 2.4.0
 
 ### Patch Changes
