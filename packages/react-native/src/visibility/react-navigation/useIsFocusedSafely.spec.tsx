@@ -98,8 +98,8 @@ describe('useIsFocusedSafely', () => {
     expect(store.listenerCount()).toBe(0);
   });
 
-  it('starts a visibility effect after focus changes before subscription', () => {
-    const store = createNavigation(false);
+  it.each([false, true])('uses the latest focus when starting a visibility effect (initially %s)', (initiallyFocused) => {
+    const store = createNavigation(initiallyFocused);
     navigation = store;
     const dispose = vi.fn();
     const effect = vi.fn(() => dispose);
@@ -108,7 +108,7 @@ describe('useIsFocusedSafely', () => {
       return null;
     }
     function CommitChange() {
-      useLayoutEffect(() => store.setFocused(true), []);
+      useLayoutEffect(() => store.setFocused(!initiallyFocused), []);
       return null;
     }
     const { unmount } = render(
@@ -119,8 +119,8 @@ describe('useIsFocusedSafely', () => {
         </VisibilityChangedProvider>
       </AppStateProvider>
     );
-    expect(effect).toHaveBeenCalledTimes(1);
+    expect(effect).toHaveBeenCalledTimes(initiallyFocused ? 0 : 1);
     unmount();
-    expect(dispose).toHaveBeenCalledTimes(1);
+    expect(dispose).toHaveBeenCalledTimes(initiallyFocused ? 0 : 1);
   });
 });
