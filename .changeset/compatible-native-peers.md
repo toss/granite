@@ -4,4 +4,4 @@
 '@granite-js/react-native': patch
 ---
 
-Use same-major workspace ranges for the native peer dependency, allowing compatible minor versions without an unintended major release.
+Use an unrestricted native peer range instead of an exact workspace constraint, preventing compatible updates from causing an unintended major release.

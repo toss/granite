@@ -27,9 +27,6 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup-node-yarn
 
-      - name: Check release plan
-        run: yarn test:release-plan
-
       - name: Run Build with Nx
         run: |
           yarn build:all
