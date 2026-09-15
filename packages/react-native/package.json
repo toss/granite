@@ -114,7 +114,7 @@
     "zod": "^4.1.12"
   },
   "peerDependencies": {
-    "@granite-js/native": "workspace:*",
+    "@granite-js/native": "workspace:^",
     "@types/react": "*",
     "brick-module": "*",
     "react": "*",
