@@ -1,5 +1,5 @@
 ---
-'@granite-js/react-native': minor
+'@granite-js/react-native': patch
 ---
 
 Add `useVisibilityEffect` to run an effect while a screen is visible and clean it up when visibility is lost, the callback changes, or the component unmounts.
