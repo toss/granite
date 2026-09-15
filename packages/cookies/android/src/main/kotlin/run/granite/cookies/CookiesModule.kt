@@ -151,9 +151,12 @@ class CookiesModule(reactContext: ReactContext) : BrickModuleSpec(reactContext),
             builder.append("; domain=$cleanDomain")
         }
         cookie.expires?.let { expires ->
-            parseExpiresDate(expires)?.let { date ->
-                builder.append("; expires=${formatDateRfc1123(date)}")
-            }
+            val date =
+                    parseExpiresDate(expires)
+                            ?: throw IllegalArgumentException(
+                                    String.format(INVALID_EXPIRES_ERROR, expires)
+                            )
+            builder.append("; expires=${formatDateRfc1123(date)}")
         }
         cookie.secure?.let { if (it) builder.append("; secure") }
 
@@ -247,21 +250,30 @@ class CookiesModule(reactContext: ReactContext) : BrickModuleSpec(reactContext),
     }
 
     private fun parseExpiresDate(expires: String): Date? {
-        // Try ISO 8601 format
-        try {
-            val isoFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ", Locale.US)
-            isoFormatter.timeZone = TimeZone.getTimeZone("GMT")
-            return isoFormatter.parse(expires)
-        } catch (_: Exception) {}
+        // The literal-'Z' patterns cover JavaScript's Date.prototype.toISOString output
+        // (always UTC, e.g. "2024-01-01T00:00:00.000Z"), which SimpleDateFormat's
+        // zone letters cannot parse reliably
+        val datePatterns =
+                listOf(
+                        // ISO 8601, UTC ("Z" suffix), with and without milliseconds
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                        "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                        // ISO 8601 with explicit zone offset
+                        "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ",
+                        "yyyy-MM-dd'T'HH:mm:ssZZZZZ",
+                        // RFC 1123
+                        "EEE, dd MMM yyyy HH:mm:ss zzz"
+                )
 
-        // Try RFC 1123 format
-        try {
-            val rfc1123Formatter = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
-            rfc1123Formatter.timeZone = TimeZone.getTimeZone("GMT")
-            return rfc1123Formatter.parse(expires)
-        } catch (_: Exception) {}
+        for (pattern in datePatterns) {
+            try {
+                val formatter = SimpleDateFormat(pattern, Locale.US)
+                formatter.timeZone = TimeZone.getTimeZone("GMT")
+                return formatter.parse(expires) ?: continue
+            } catch (_: Exception) {}
+        }
 
-        // Try as timestamp
+        // Try as Unix timestamp in milliseconds
         try {
             val timestamp = expires.toDouble()
             return Date((timestamp).toLong())
@@ -280,5 +292,7 @@ class CookiesModule(reactContext: ReactContext) : BrickModuleSpec(reactContext),
         private const val INVALID_URL_ERROR = "Invalid URL: %s"
         private const val INVALID_COOKIE_VALUES = "Failed to create cookie from provided data"
         private const val INVALID_DOMAINS = "Cookie URL host %s and domain %s mismatched"
+        private const val INVALID_EXPIRES_ERROR =
+                "Invalid expires date: %s. Supported formats: ISO 8601 (e.g. 2024-01-01T00:00:00.000Z), RFC 1123 (e.g. Mon, 01 Jan 2024 00:00:00 GMT), or Unix timestamp in milliseconds"
     }
 }
