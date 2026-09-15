@@ -4,6 +4,8 @@ sourcePath: packages/react-native/src/visibility/useVisibilityChange.ts
 
 # useVisibilityChange
 
+> **Deprecated.** 화면이 보이는 동안 유지하고 정리할 효과에는 [useVisibilityEffect](./useVisibilityEffect)를 사용하세요. visible/hidden 상태를 직접 처리하려면 [useVisibility](./useVisibility)와 React의 `useEffect`를 사용하세요. 기존 호출의 동작은 유지돼요.
+
 화면의 보이는 상태가 변경될 때 해당 상태를 전달하는 콜백 함수를 호출해요.
 이 콜백 함수에는 [useVisibility](/ko/reference/react-native/screen-control/useVisibility)의 반환값이 전달돼요. 반환값이 `true`이면 `visible`, `false`이면 `hidden` 문자열이 전달돼요.
 
