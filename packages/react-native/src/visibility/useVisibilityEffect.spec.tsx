@@ -5,9 +5,13 @@ import { AppStateProvider } from './useIsAppForeground';
 import { VisibilityChangedProvider } from './useVisibilityChanged';
 import * as visibility from './useVisibilityEffect';
 
-const navigation = vi.hoisted(() => ({ focused: true }));
-vi.mock('./react-navigation/useIsFocusedSafely', () => ({
-  useIsFocusedSafely: () => navigation.focused,
+const navigation = vi.hoisted(() => ({
+  focused: true,
+  isFocused() { return this.focused; },
+  addListener: () => () => {},
+}));
+vi.mock('./react-navigation/useNavigationSafely', () => ({
+  useNavigationSafely: () => navigation,
 }));
 
 function Consumer({ effect }: { readonly effect: EffectCallback }) {
