@@ -114,6 +114,10 @@
                   "link": "/reference/react-native/screen-control/useVisibilityChange"
                 },
                 {
+                  "text": "useVisibilityEffect",
+                  "link": "/reference/react-native/screen-control/useVisibilityEffect"
+                },
+                {
                   "text": "useRouterBackHandler",
                   "link": "/reference/react-native/screen-control/useRouterBackHandler"
                 }
