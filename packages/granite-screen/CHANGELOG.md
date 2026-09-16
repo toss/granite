@@ -1,5 +1,11 @@
 # @granite-js/screen
 
+## 2.5.2
+
+### Patch Changes
+
+- 32ece65: feat(android): allow apps to handle ReactHost instance exceptions
+
 ## 2.5.1
 
 ## 2.5.0
