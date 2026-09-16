@@ -13,7 +13,7 @@ export async function copyToolTemplate(toolTemplateName: ToolTemplateName, templ
   }
 
   const toolTemplatePath = path.resolve(__dirname, '..', 'tool-templates', toolTemplateName);
-  const _appPath = path.join(process.cwd(), templateOptions.appPath);
+  const _appPath = path.resolve(templateOptions.appPath);
 
   // package.json 파일 경로
   const toolTemplatePackageJsonPath = path.join(toolTemplatePath, 'package.json');

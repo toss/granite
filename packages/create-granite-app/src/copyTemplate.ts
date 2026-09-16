@@ -16,7 +16,7 @@ export async function copyTemplate(
   }
 
   const templatePath = path.resolve(__dirname, '..', 'templates', templateName);
-  const _appPath = path.join(process.cwd(), templateOptions.appPath);
+  const _appPath = path.resolve(templateOptions.appPath);
 
   await fs.cp(templatePath, _appPath, { recursive: true });
 
