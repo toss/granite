@@ -28,13 +28,25 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./next": {
+      "import": {
+        "types": "./dist/next.d.ts",
+        "default": "./dist/next.js"
+      },
+      "require": {
+        "types": "./dist/next.d.cts",
+        "default": "./dist/next.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "files": [
     "dist"
   ],
   "devDependencies": {
+    "@types/node": "catalog:tools",
     "@vitest/coverage-v8": "^4.0.12",
+    "rollipop": "1.0.0-alpha.29",
     "tsdown": "catalog:tools",
     "typescript": "catalog:tools",
     "vitest": "^4.0.12"
@@ -45,6 +57,14 @@
     "es-toolkit": "^1.39.8",
     "execa": "^5",
     "source-map": "^0.8.0-beta.0"
+  },
+  "peerDependencies": {
+    "rollipop": "*"
+  },
+  "peerDependenciesMeta": {
+    "rollipop": {
+      "optional": true
+    }
   },
   "sideEffects": false
 }

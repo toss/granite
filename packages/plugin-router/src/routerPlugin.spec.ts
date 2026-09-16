@@ -6,11 +6,11 @@ const mocks = vi.hoisted(() => ({
   watchRouter: vi.fn(),
 }));
 
-vi.mock('./generateRouterFile', () => ({
+vi.mock('./shared/generateRouterFile', () => ({
   generateRouterFile: mocks.generateRouterFile,
 }));
 
-vi.mock('./watchRouter', () => ({
+vi.mock('./shared/watchRouter', () => ({
   watchRouter: mocks.watchRouter,
 }));
 

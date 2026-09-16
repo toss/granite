@@ -1,46 +1,8 @@
-import { env } from '@granite-js/plugin-env';
-import { hermes } from '@granite-js/plugin-hermes';
-import { microFrontend } from '@granite-js/plugin-micro-frontend';
-import { router } from '@granite-js/plugin-router';
 import { defineConfig } from '@granite-js/react-native/config';
+import { rollipop } from '@granite-js/rollipop';
 
 export default defineConfig({
-  /**
-   * granite://counter
-   */
-  scheme: 'granite',
   appName: 'counter',
-  plugins: [
-    router(),
-    env({ MY_ENV: 'test' }),
-    hermes(),
-    microFrontend({
-      name: 'remoteApp',
-      exposes: {
-        './AppContainer': './src/_app.tsx',
-      },
-      shared: [
-        '@react-native-community/blur',
-        '@react-navigation/native',
-        '@react-navigation/native-stack',
-        '@shopify/flash-list',
-        'react-native-safe-area-context',
-        'react-native-screens',
-        'react-native-svg',
-        'react-native-gesture-handler',
-        'react-native',
-        'react',
-        'react-native-webview',
-      ],
-    }),
-    {
-      name: 'test',
-      build: {
-        order: 'post',
-        handler: function () {
-          console.debug('[DEBUG] Plugin meta:', this.meta);
-        },
-      },
-    },
-  ],
+  scheme: 'granite',
+  bundler: rollipop(),
 });

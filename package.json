@@ -30,10 +30,19 @@
     "publish:dev": "sh .scripts/publish-dev.sh"
   },
   "resolutions": {
+    "rollipop": "file:/private/tmp/swc-obfuscation-benchmark/rollipop-empty-hooks.tgz",
+    "@rollipop/dashboard": "file:/private/tmp/granite-dashboard-8fc92bb.tgz",
+    "@rollipop/rolldown": "file:/private/tmp/swc-obfuscation-benchmark/rolldown-code-filter-native.tgz",
     "typescript": "5.8.3",
     "@babel/core": "7.28.5"
   },
   "dependenciesMeta": {
+    "@react-native/debugger-shell": {
+      "unplugged": true
+    },
+    "@rollipop/rolldown": {
+      "unplugged": true
+    },
     "hermes-compiler": {
       "unplugged": true
     },

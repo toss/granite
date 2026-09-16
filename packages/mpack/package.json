@@ -26,7 +26,11 @@
       "types": "./dist/vendors/index.d.ts",
       "default": "./dist/vendors/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "default": "./dist/config.js"
+    }
   },
   "files": [
     "dist",
@@ -40,7 +44,8 @@
     "build": "tsup && tsc -p tsconfig.build.json && node .scripts/copy-vendors-dts.mjs",
     "lint": "eslint .",
     "find-deadcode": "ts-prune",
-    "test:no-parallel": "vitest --no-watch --no-file-parallelism --coverage"
+    "test:no-parallel": "vitest --no-watch --no-file-parallelism --coverage",
+    "test:unit": "vitest run --config vitest.unit.config.mts"
   },
   "devDependencies": {
     "@types/accepts": "^1",
@@ -92,6 +97,7 @@
     "@babel/traverse": "7.28.5",
     "@babel/types": "7.28.5",
     "@fastify/middie": "8.3.0",
+    "@granite-js/config": "workspace:*",
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/utils": "workspace:*",
     "@react-native-community/cli-plugin-metro": "11.3.7",
@@ -111,6 +117,7 @@
     "babel-preset-fbjs": "^3.4.0",
     "browserify-zlib": "0.2.0",
     "buffer": "6.0.3",
+    "c12": "3.3.4",
     "chalk": "^4",
     "ci-info": "^2.0.0",
     "connect": "^3.7.0",

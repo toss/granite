@@ -30,32 +30,8 @@ import { resolvePlugins } from '../utils/resolvePlugins';
  * @param config.metro - Configure Metro bundler settings
  * @param config.devServer - Configure Mpack dev server settings
  * @param config.plugins - Granite plugins to enhance functionality
- * @param config.reactNativePath - Path to `react-native` directory (defaults to project's `react-native` package path)
+ * @param config.reactNativePath - Path to `react-native` directory
  * @returns The processed configuration
- *
- * @example
- * Here's a basic configuration that:
- * - Makes your app accessible via the `granite://` scheme
- * - Names your service "my-app" so it's reachable at `granite://my-app`
- * - Uses the Hermes plugin to optimize JavaScript bundles into bytecode
- *
- * ```ts
- * import { defineConfig } from '@granite-js/react-native/config';
- * import { hermes } from '@granite-js/plugin-hermes';
- *
- * export default defineConfig({
- *   // The name of your microservice
- *   appName: 'my-app',
- *   // (Optional) The host name for your app (e.g. 'scheme://host/app-name')
- *   host: 'super',
- *   // The URL scheme for deep linking
- *   scheme: 'granite',
- *   // Entry file path
- *   entryFile: 'index.ts',
- *   // Array of plugins to use
- *   plugins: [hermes()],
- * });
- * ```
  */
 export const defineConfig = async (config: GraniteConfig): Promise<CompleteGraniteConfig> => {
   const parsed = pluginConfigSchema.parse(config);
@@ -65,13 +41,10 @@ export const defineConfig = async (config: GraniteConfig): Promise<CompleteGrani
   const scheme = parsed.scheme;
   const entryFile = path.resolve(cwd, parsed.entryFile);
   const outdir = path.join(cwd, parsed.outdir);
-  const parsedBuildConfig = parsed.build;
-  const parsedDevServerConfig = parsed.devServer;
-  const parsedMetroConfig = parsed.metro;
   const parsedConfig = {
-    ...parsedBuildConfig,
-    devServer: parsedDevServerConfig,
-    metro: parsedMetroConfig,
+    ...parsed.build,
+    devServer: parsed.devServer,
+    metro: parsed.metro,
   };
 
   const { configs, pluginHooks } = await resolvePlugins(parsed.plugins);

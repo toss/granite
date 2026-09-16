@@ -1,7 +1,6 @@
-import { BuildUtils } from '@granite-js/mpack';
-import { statusPlugin } from '@granite-js/mpack/plugins';
-import { loadConfig } from '@granite-js/plugin-core';
+import { loadConfig, type BundlerBuildOption, type BuildPlatform } from '@granite-js/config';
 import { Command, Option } from 'clipanion';
+import { Semaphore } from 'es-toolkit';
 import { ExitCode } from '../../constants';
 import { errorHandler } from '../../utils/command';
 
@@ -34,15 +33,28 @@ export class BuildCommand extends Command {
     try {
       const { configFile, cache = true, metafile = false, dev = false } = this;
       const config = await loadConfig({ configFile });
-      const options = (['android', 'ios'] as const).map((platform) => ({
-        dev,
-        cache,
-        metafile,
-        platform,
-        outfile: `bundle.${platform}.js`,
-      }));
 
-      await BuildUtils.buildAll(options, { config, plugins: [statusPlugin] });
+      const buildOptions = (['android', 'ios'] satisfies BuildPlatform[]).map(
+        (platform): BundlerBuildOption => ({ platform, cache, metafile, dev })
+      );
+      const semaphore = new Semaphore(buildOptions.length);
+      const results = await Promise.allSettled(
+        buildOptions.map(async (buildOption) => {
+          await semaphore.acquire();
+          try {
+            return await config.bundler.runBuild(buildOption);
+          } finally {
+            semaphore.release();
+          }
+        })
+      );
+      const failures = results.filter((result) => result.status === 'rejected');
+      if (failures.length > 0) {
+        throw new AggregateError(
+          failures.map((failure) => failure.reason),
+          'Granite build failed'
+        );
+      }
 
       return ExitCode.SUCCESS;
     } catch (error: unknown) {

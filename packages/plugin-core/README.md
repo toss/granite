@@ -1,6 +1,6 @@
 # @granite-js/plugin-core
 
-The core plugin module for Granite
+Deprecated Granite plugin APIs, retained for Mpack compatibility.
 
 ## License
 

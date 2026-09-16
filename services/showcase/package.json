@@ -22,11 +22,11 @@
     "@babel/runtime": "7.18.9",
     "@biomejs/biome": "^1.9.4",
     "@granite-js/forge-cli": "workspace:*",
-    "@granite-js/plugin-env": "workspace:*",
+    "@granite-js/micro-frontend": "workspace:*",
     "@granite-js/plugin-hermes": "workspace:*",
-    "@granite-js/plugin-micro-frontend": "workspace:*",
     "@granite-js/plugin-router": "workspace:*",
     "@granite-js/plugin-sentry": "workspace:*",
+    "@granite-js/rollipop": "workspace:*",
     "@granite-js/vitest": "workspace:*",
     "@react-native/babel-preset": "catalog:react-native",
     "@testing-library/react-native": "^12.9.0",
@@ -36,6 +36,7 @@
     "@types/react-test-renderer": "19.1.0",
     "babel-preset-granite": "workspace:*",
     "react-test-renderer": "19.2.3",
+    "rollipop": "1.0.0-alpha.29",
     "typescript": "catalog:tools",
     "vitest": "4.1.3"
   }

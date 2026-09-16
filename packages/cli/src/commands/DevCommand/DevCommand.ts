@@ -1,11 +1,7 @@
-import { runServer, EXPERIMENTAL__server } from '@granite-js/mpack';
-import { loadConfig } from '@granite-js/plugin-core';
+import { loadConfig } from '@granite-js/config';
 import { Command, Option } from 'clipanion';
-import Debug from 'debug';
 import { ExitCode } from '../../constants';
 import { errorHandler } from '../../utils/command';
-
-const debug = Debug('cli');
 
 export class DevCommand extends Command {
   static paths = [[`dev`]];
@@ -22,39 +18,29 @@ export class DevCommand extends Command {
 
   host = Option.String('--host');
   port = Option.String('--port');
-
-  disableEmbeddedReactDevTools = Option.Boolean('--disable-embedded-react-devtools', false);
-
-  // mpack dev-server
-  experimentalMode = Option.Boolean('--experimental-mode');
+  cache = Option.Boolean('--cache', {
+    description: 'Enable cache',
+  });
 
   async execute() {
     try {
-      process.env.MPACK_DEV_SERVER = 'true';
-
       const config = await loadConfig({ configFile: this.configFile });
-      const serverOptions = {
-        host: this.host,
-        port: this.port ? parseInt(this.port, 10) : undefined,
+      const port = this.port ? parseInt(this.port, 10) : undefined;
+
+      const server = await config.bundler.runServer({ port, host: this.host, cache: this.cache ?? false });
+      const close = async () => {
+        process.removeListener('SIGINT', close);
+        process.removeListener('SIGTERM', close);
+        try {
+          await server.close();
+          // Plugins may retain their own watchers after the bundler closes.
+          process.exit(ExitCode.SUCCESS);
+        } catch (error) {
+          process.exit(errorHandler(error));
+        }
       };
-
-      debug('StartCommand', {
-        ...serverOptions,
-        disableEmbeddedReactDevTools: this.disableEmbeddedReactDevTools,
-        experimentalMode: this.experimentalMode,
-      });
-
-      if (this.experimentalMode) {
-        /**
-         * @TODO Invoke pre and post handlers of devServer plugin hooks in experimental mode
-         */
-        await EXPERIMENTAL__server({ config, ...serverOptions });
-      } else {
-        await runServer({
-          config,
-          ...serverOptions,
-        });
-      }
+      process.once('SIGINT', close);
+      process.once('SIGTERM', close);
 
       return ExitCode.SUCCESS;
     } catch (error: unknown) {

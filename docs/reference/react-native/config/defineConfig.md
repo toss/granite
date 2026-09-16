@@ -1,5 +1,5 @@
 ---
-sourcePath: packages/cli/src/config/defineConfig.ts
+sourcePath: packages/config/src/defineConfig.ts
 ---
 
 # defineConfig
@@ -10,77 +10,102 @@ The configuration lets you specify:
 
 - How users will access your app through a URL scheme (e.g. `granite://`)
 - Your app's unique name that appears in the URL (e.g. `granite://my-service`)
-- Build settings for bundlers like ESBuild and Metro
-- Code transformation settings through Babel
-- Additional functionality through Granite plugins
+- The bundler adapter used for builds and the development server
 
-## Signature
+## Basic Configuration
 
-```typescript
-function defineConfig({
-  appName,
-  host,
-  scheme,
-  plugins,
-  outdir,
-  entryFile,
-  cwd,
-  mpack,
-  babel,
-  esbuild,
-  metro,
-}: GraniteConfigInput): Promise<GraniteConfigResponse>;
+```ts
+// granite.config.ts
+import { defineConfig } from '@granite-js/react-native/config';
+import { mpack } from '@granite-js/mpack';
+
+export default defineConfig({
+  appName: 'my-app',
+  scheme: 'granite',
+  host: 'example',
+  bundler: mpack(),
+});
 ```
 
-## Parameters
+With this configuration, the app is accessible at `granite://example/my-app`.
 
-<ul class="post-parameters-ul">
-  <li class="post-parameters-li post-parameters-li-root">
-    <span class="post-parameters--name">config</span><span class="post-parameters--required">required</span> · <span class="post-parameters--type">GraniteConfigInput</span>
-    <br />
-    <p class="post-parameters--description">Configuration options for your Granite application that define key settings like URL scheme, app name, build settings, and plugins.</p>
-  </li>
-</ul>
+## App Settings
 
-The configuration options include:
+- `appName`: Your app's unique name that appears in URLs. Required.
+- `scheme`: The URL scheme for launching your app. Required.
+- `host`: The optional URL scheme host.
+  When specified, the URL takes the form `{scheme}://{host}/{appName}`.
+  This is separate from the development server's listen address.
+- `cwd`: The project directory used for configuration and builds. Defaults to the package root.
 
-- `appName`: Your app's unique identifier that appears in URLs (e.g., 'my-service')
-- `host`: You can configure the `host` part of the URL scheme. This is optional, and the system works even if you don’t set it. If specified, the host is added before the `appName` in the path.  
-  For example, if you set the `host` to `super`, the scheme will be structured as `{scheme}://super/{appName}`.
-- `scheme`: URL scheme for launching your app (e.g., 'granite')
-- `plugins`: Granite plugins to enhance functionality
-- `outdir`: Where to output build files (defaults to 'dist')
-- `entryFile`: Your app's entry point (defaults to './src/\_app.tsx')
-- `cwd`: Working directory for build process (defaults to process.cwd())
-- `mpack`: Fine-tune mpack bundler behavior
-- `babel`: Customize Babel transpilation
-- `esbuild`: Adjust ESBuild bundling
-- `metro`: Configure Metro bundler settings
+## Bundler Settings
 
-## Example
+The required `bundler` option selects an adapter for builds and the development server. Use an adapter returned by `mpack()` or `rollipop()`, rather than a bundler name string.
 
-### Basic Configuration
+Configure entry points, output paths, plugins, and other build options through the adapter or its configuration file.
 
-Here's a basic configuration that:
+### Mpack
 
-- Makes your app accessible via the `granite://` scheme
-- Names your service "my-app" so it's reachable at `granite://my-app`
-- Uses the Hermes plugin to optimize JavaScript bundles into bytecode
+Mpack is deprecated and retained for backward compatibility. Use `mpack()` from `@granite-js/mpack`. It runs Metro for development and Mpack for production builds.
 
-```typescript
-import { defineConfig } from '@granite-js/react-native/config';
+`mpack()` or `mpack({})` loads a configuration file such as `mpack.config.ts` from the project directory.
+Use `mpack({ config: './custom.mpack.ts' })` to select another file.
+
+```ts
+// mpack.config.ts
+import { defineConfig } from '@granite-js/mpack/config';
 import { hermes } from '@granite-js/plugin-hermes';
 
 export default defineConfig({
-  // The name of your microservice
-  appName: 'my-app',
-  // (Optional) The host name for your app (e.g. 'scheme://host/app-name')
-  host: 'super',
-  // The URL scheme for deep linking
-  scheme: 'granite',
-  // Entry file path
-  entryFile: 'index.ts',
-  // Array of plugins to use
+  entryFile: './index.ts',
   plugins: [hermes()],
 });
 ```
+
+Add Granite plugins to `plugins` and low-level Mpack build plugins to `buildPlugins`.
+Use `build`, `metro`, and `devServer` to customize builds and the development server.
+
+Configuration files can also export async factories. They receive `appName`, `host`, `scheme`, `cwd`, `command` (`build` or `serve`), and `mode`.
+
+Alternatively, pass the same `MpackConfig` options directly to `mpack()`. Inline configuration does not load or merge a configuration file for either builds or the development server.
+
+```ts
+// granite.config.ts
+import { defineConfig } from '@granite-js/react-native/config';
+import { mpack, type MpackInlineOptions } from '@granite-js/mpack';
+
+const bundlerConfig = {
+  entryFile: './index.ts',
+  build: { esbuild: { minify: false } },
+} satisfies MpackInlineOptions;
+
+export default defineConfig({
+  appName: 'my-app',
+  scheme: 'granite',
+  bundler: mpack(bundlerConfig),
+});
+```
+
+`MpackConfigFileOptions` and `MpackInlineOptions` are exported from `@granite-js/mpack`. `MpackOptions` is their union, and file selection cannot be combined with inline options. For example, `mpack({ config: './custom.mpack.ts', build: {} })` is rejected by both TypeScript and at runtime. To use inline defaults without loading a file, pass an option such as `mpack({ build: {} })` instead of `mpack({})`.
+
+### Rollipop
+
+Import `rollipop` from `@granite-js/rollipop` and set `bundler: rollipop()`. It uses Rollipop for both the development server and production builds.
+
+Define build settings and plugins in a Rollipop configuration file such as `rollipop.config.ts`. Use `rollipop({ configFile: './custom.rollipop.ts' })` to select another file.
+
+```ts
+// rollipop.config.ts
+import { defineConfig } from 'rollipop';
+
+export default defineConfig({
+  entry: './index.ts',
+  plugins: [],
+});
+```
+
+## Custom Adapters
+
+To implement a bundler integration, use the `BundlerAdapter` interface from `@granite-js/config`. Its `runBuild()` method builds one platform configuration and returns one result. Its `runServer()` method starts a development server and returns a handle with a `close()` method. Callers create platform-specific option arrays and control concurrent builds.
+
+Inside adapter methods, `this.getContext()` provides read-only `appName`, `scheme`, `host`, and `cwd` values. Use method syntax rather than arrow functions to access `this` and incorporate those values into bundler configuration.

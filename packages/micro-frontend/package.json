@@ -15,6 +15,10 @@
       "types": "./dist/typescript/plugin/index.d.ts",
       "default": "./dist/module/plugin/index.js"
     },
+    "./plugin-next": {
+      "types": "./dist/typescript/next/index.d.ts",
+      "default": "./dist/module/next/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -63,10 +67,14 @@
     "@granite-js/plugin-core": "*",
     "@granite-js/react-native": "*",
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "rollipop": "*"
   },
   "peerDependenciesMeta": {
     "@granite-js/plugin-core": {
+      "optional": true
+    },
+    "rollipop": {
       "optional": true
     }
   },
@@ -82,6 +90,7 @@
     "react-native": "catalog:react-native",
     "react-native-builder-bob": "catalog:tools",
     "react-test-renderer": "19.2.3",
+    "rollipop": "1.0.0-alpha.29",
     "typescript": "catalog:tools",
     "vitest": "^4.0.12"
   },

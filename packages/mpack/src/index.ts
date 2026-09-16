@@ -1,4 +1,6 @@
 export { Bundler } from './bundler';
+export { mpack, type MpackOptions, type MpackConfigFileOptions, type MpackInlineOptions } from './adapter';
+export { defineConfig, type MpackConfig, type MpackConfigContext, type MpackUserConfig } from './config';
 export { BuildUtils, runServer } from './operations';
 export { EXPERIMENTAL__server, DevServer } from './experimental';
 export { getMetroConfig, MetroBuildUtils } from './metro';

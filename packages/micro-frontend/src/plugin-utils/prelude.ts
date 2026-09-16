@@ -1,15 +1,20 @@
-import path from 'path';
+import * as path from 'node:path';
 import { globalContextScript } from './globalContextScript';
-import type { MicroFrontendPluginOptions } from './types';
 import { CONTAINER_PAIRING_KEY } from '../runtime/containerPairing';
+import type { SharedConfig } from '../runtime/registry';
 import { captureStackFrames, resolveCurrentSourceURL } from '../runtime/runtimeSourceURL';
+
+interface MicroFrontendPreludeOptions {
+  readonly shared?: SharedConfig | readonly string[];
+  readonly exposes?: Readonly<Record<string, string>>;
+}
 
 export interface MicroFrontendPreludeConfig {
   readonly banner: string;
   readonly preludeScript: string;
 }
 
-export function getPreludeConfig(options: MicroFrontendPluginOptions, appName?: string): MicroFrontendPreludeConfig {
+export function getPreludeConfig(options: MicroFrontendPreludeOptions, appName?: string): MicroFrontendPreludeConfig {
   const eagerSharedModules = Object.entries(options.shared ?? {}).filter(
     ([, config]) => !Array.isArray(options.shared) && config.eager === true
   );
