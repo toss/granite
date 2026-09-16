@@ -1,5 +1,7 @@
 # @granite-js/blur-view
 
+## 1.0.45
+
 ## 1.0.44
 
 ### Patch Changes
