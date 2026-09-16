@@ -43,6 +43,7 @@ interface GraniteReactHost {
         graniteDelegate.setBundleLoaderProvider { createBundleLoader() }
         graniteDelegate.setLoadingViewProvider { activity -> createLoadingView() }
         graniteDelegate.setErrorViewProvider { activity, error -> createErrorView(error) }
+        graniteDelegate.setExceptionHandler { error -> handleInstanceException(error) }
 
         // Initialize
         graniteDelegate.onCreate(this, savedInstanceState, initialProps)
@@ -98,6 +99,18 @@ interface GraniteReactHost {
     fun onReactContextInitialized(context: ReactContext) {
         // Default implementation does nothing
         // Override in your activity to register modules or perform other initialization
+    }
+
+    /**
+     * Called when React Native internals throw an exception. Override this method to add custom
+     * handling such as reporting the exception to your own crash reporting tool. Granite always
+     * logs the exception to logcat before calling this method.
+     *
+     * @param error The exception thrown by React Native internals
+     */
+    fun handleInstanceException(error: Exception) {
+        // Default implementation does nothing
+        // Override in your activity to report the exception or perform other custom handling
     }
 
     // Convenience accessors
