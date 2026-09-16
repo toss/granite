@@ -1,4 +1,4 @@
-import { type EffectCallback, useEffect } from 'react';
+import { type EffectCallback, useEffect, useReducer } from 'react';
 import { useNavigationSafely } from './react-navigation/useNavigationSafely';
 import { useVisibility } from './useVisibility';
 
@@ -36,13 +36,19 @@ import { useVisibility } from './useVisibility';
 export function useVisibilityEffect(effect: EffectCallback): void {
   const isVisible = useVisibility();
   const navigation = useNavigationSafely();
+  const [focusRetry, retryOnFocus] = useReducer((retry: number) => retry + 1, 0);
 
   useEffect(() => {
-    // Focus may change after render, before this effect runs.
-    if (!isVisible || navigation?.isFocused() === false) {
+    if (!isVisible) {
       return;
     }
 
+    // Focus may change after render, before this effect runs. If it returns before
+    // the corrective render, isVisible can stay true, so explicitly retry setup.
+    if (navigation?.isFocused() === false) {
+      return navigation.addListener('focus', retryOnFocus);
+    }
+
     return effect();
-  }, [effect, isVisible, navigation]);
+  }, [effect, isVisible, navigation, focusRetry]);
 }
