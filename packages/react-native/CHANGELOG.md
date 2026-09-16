@@ -1,5 +1,21 @@
 # @granite-js/react-native
 
+## 2.5.1
+
+### Patch Changes
+
+- a686133: Read navigation focus through `useSyncExternalStore` so focus changes between rendering and subscription are not missed by `useIsFocusedSafely`, `useVisibility`, or visibility effects. Preserve the focused fallback when no navigation context is available.
+
+  Visibility effects follow committed visibility snapshots with React's effect setup and cleanup lifecycle.
+  - @granite-js/blur-view@2.5.1
+  - @granite-js/brownfield-module@2.5.1
+  - @granite-js/cli@2.5.1
+  - @granite-js/jest@2.5.1
+  - @granite-js/mpack@2.5.1
+  - @granite-js/plugin-core@2.5.1
+  - @granite-js/style-utils@2.5.1
+  - @granite-js/video@2.5.1
+
 ## 2.5.0
 
 ### Minor Changes
