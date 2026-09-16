@@ -1,5 +1,4 @@
-import { type EffectCallback, useEffect, useReducer } from 'react';
-import { useNavigationSafely } from './react-navigation/useNavigationSafely';
+import { type EffectCallback, useEffect } from 'react';
 import { useVisibility } from './useVisibility';
 
 /**
@@ -11,6 +10,7 @@ import { useVisibility } from './useVisibility';
  * Cleans up when the screen becomes hidden, the effect callback changes, or the component unmounts.
  * Like `useEffect`, setup and cleanup run after a render is committed. The callback must be synchronous
  * and may return a cleanup function. Use `useCallback` to avoid restarting on unrelated renders.
+ * Effects follow the visibility snapshot from the committed render; later focus changes apply on a subsequent commit.
  * Unlike `useVisibilityChange`, a returned cleanup function is registered with React.
  * Effect ordering between different screens is not guaranteed; navigation events do not invoke this callback synchronously.
  *
@@ -35,20 +35,12 @@ import { useVisibility } from './useVisibility';
  */
 export function useVisibilityEffect(effect: EffectCallback): void {
   const isVisible = useVisibility();
-  const navigation = useNavigationSafely();
-  const [focusRetry, retryOnFocus] = useReducer((retry: number) => retry + 1, 0);
 
   useEffect(() => {
     if (!isVisible) {
       return;
     }
 
-    // Focus may change after render, before this effect runs. If it returns before
-    // the corrective render, isVisible can stay true, so explicitly retry setup.
-    if (navigation?.isFocused() === false) {
-      return navigation.addListener('focus', retryOnFocus);
-    }
-
     return effect();
-  }, [effect, isVisible, navigation, focusRetry]);
+  }, [effect, isVisible]);
 }
