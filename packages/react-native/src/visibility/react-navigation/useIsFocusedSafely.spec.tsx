@@ -1,5 +1,5 @@
 import { act, cleanup, render, renderHook } from '@testing-library/react';
-import { type ReactNode, useLayoutEffect } from 'react';
+import { type EffectCallback, type ReactNode, useEffect, useLayoutEffect } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useIsFocusedSafely } from './useIsFocusedSafely';
 import { AppStateProvider } from '../useIsAppForeground';
@@ -122,5 +122,92 @@ describe('useIsFocusedSafely', () => {
     expect(effect).toHaveBeenCalledTimes(initiallyFocused ? 0 : 1);
     unmount();
     expect(dispose).toHaveBeenCalledTimes(initiallyFocused ? 0 : 1);
+    expect(store.listenerCount()).toBe(0);
+  });
+
+  it.each(['mount', 'callback replacement'] as const)(
+    'retries a skipped visibility effect after focus returns during %s',
+    (scenario) => {
+      const store = createNavigation(true);
+      navigation = store;
+      const firstDispose = vi.fn();
+      const firstEffect = vi.fn(() => firstDispose);
+      const dispose = vi.fn();
+      const effect = vi.fn(() => dispose);
+      function Consumer({ callback }: { readonly callback: EffectCallback }) {
+        useVisibilityEffect(callback);
+        return null;
+      }
+      function CommitChange({ changeFocus }: { readonly changeFocus: boolean }) {
+        useLayoutEffect(() => {
+          if (changeFocus) {
+            store.setFocused(false);
+          }
+        }, [changeFocus]);
+        useEffect(() => {
+          if (changeFocus) {
+            expect(effect).not.toHaveBeenCalled();
+            store.setFocused(true);
+            // Navigation events must not run the visibility callback synchronously.
+            expect(effect).not.toHaveBeenCalled();
+          }
+        }, [changeFocus]);
+        return null;
+      }
+      const screen = (changeFocus: boolean) => (
+        <AppStateProvider>
+          <VisibilityChangedProvider isVisible={true}>
+            <Consumer callback={changeFocus ? effect : firstEffect} />
+            <CommitChange changeFocus={changeFocus} />
+          </VisibilityChangedProvider>
+        </AppStateProvider>
+      );
+      const { rerender, unmount } = render(screen(scenario === 'mount'));
+      rerender(screen(true));
+      expect(effect).toHaveBeenCalledTimes(1);
+      expect(firstDispose).toHaveBeenCalledTimes(scenario === 'mount' ? 0 : 1);
+      expect(store.listenerCount()).toBe(2);
+
+      rerender(screen(true));
+      expect(effect).toHaveBeenCalledTimes(1);
+      expect(dispose).not.toHaveBeenCalled();
+
+      unmount();
+      expect(dispose).toHaveBeenCalledTimes(1);
+      expect(store.listenerCount()).toBe(0);
+    }
+  );
+
+  it('starts a skipped visibility effect when focus returns after the hidden render', () => {
+    const store = createNavigation(true);
+    navigation = store;
+    const dispose = vi.fn();
+    const effect = vi.fn(() => dispose);
+    function Consumer() {
+      useVisibilityEffect(effect);
+      return null;
+    }
+    function CommitChange() {
+      useLayoutEffect(() => store.setFocused(false), []);
+      return null;
+    }
+    const { unmount } = render(
+      <AppStateProvider>
+        <VisibilityChangedProvider isVisible={true}>
+          <Consumer />
+          <CommitChange />
+        </VisibilityChangedProvider>
+      </AppStateProvider>
+    );
+    expect(effect).not.toHaveBeenCalled();
+    expect(store.listenerCount()).toBe(2);
+
+    act(() => store.setFocused(true));
+    expect(effect).toHaveBeenCalledTimes(1);
+    act(() => store.setFocused(false));
+    expect(dispose).toHaveBeenCalledTimes(1);
+    unmount();
+    expect(dispose).toHaveBeenCalledTimes(1);
+    expect(store.listenerCount()).toBe(0);
   });
 });
