@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Plugin } from 'esbuild';
+import type { Loader, Plugin } from 'esbuild';
 import { toRequireContextExportScript, getRequireContextScript } from './scripts';
 import { REQUIRE_CONTEXT_PROTOCOL } from '../../../constants';
 import { normalizePath } from '../../../utils/esbuildUtils';
@@ -34,14 +34,14 @@ export function requireContextPlugin(): Plugin {
     name: 'require-context-plugin',
     setup(build) {
       /**
-       * require.context.ts|tsx 파일 중 require.context('./path/to/module') 라고 되어있는 텍스트가 있다면
+       * require.context[.suffix...].(js|jsx|ts|tsx) 파일 중 require.context('./path/to/module') 구문이 있다면
        * "require-context:./path/to/module" 경로를 import & export 하는 코드로 변환합니다.
        */
-      build.onLoad({ filter: /require\.context\.tsx?$/ }, async (args) => {
+      build.onLoad({ filter: /require\.context(?:\.[^./\\]+)*\.[jt]sx?$/ }, async (args) => {
         const content = await fs.promises.readFile(args.path, 'utf8');
 
         return {
-          loader: args.path.endsWith('.tsx') ? 'tsx' : 'ts',
+          loader: path.extname(args.path).slice(1) as Loader,
           contents: toRequireContextExportScript(content),
         };
       });

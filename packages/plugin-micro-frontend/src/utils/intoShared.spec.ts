@@ -5,6 +5,40 @@ describe('intoShared', () => {
   it('basic cases', () => {
     expect(intoShared(undefined)).toBeUndefined();
 
+    const shared = {
+      react: {
+        eager: true,
+      },
+      'react-native': {
+        eager: true,
+      },
+    };
+
+    expect(intoShared(shared)).toEqual({
+      react: { eager: true },
+      'react-native': { eager: true },
+      'react-native/Libraries/BatchedBridge/BatchedBridge': { eager: true },
+      'react-native/Libraries/BatchedBridge/NativeModules': { eager: true },
+      'react-native/Libraries/BatchedBridge/MessageQueue': { eager: true },
+      'react-native/Libraries/NativeComponent/NativeComponentRegistry': { eager: true },
+      'react-native/Libraries/NativeComponent/NativeComponentRegistryUnstable': { eager: true },
+      'react-native/Libraries/NativeComponent/ViewConfigIgnore': { eager: true },
+      'react-native/Libraries/ReactNative/RendererProxy': { eager: true },
+      'react-native/Libraries/StyleSheet/PlatformColorValueTypes': { eager: true },
+      'react-native/Libraries/StyleSheet/normalizeColor': { eager: true },
+      'react-native/Libraries/StyleSheet/processColor': { eager: true },
+      'react-native/Libraries/TurboModule/TurboModuleRegistry': { eager: true },
+      'react-native/Libraries/Utilities/NativePlatformConstantsIOS': { eager: true },
+      'react-native/Libraries/Utilities/Platform': { eager: true },
+      'react-native/Libraries/Utilities/defineLazyObjectProperty': { eager: true },
+      'react/jsx-runtime': { eager: true },
+      'react/jsx-dev-runtime': { eager: true },
+    });
+    expect(shared).toEqual({
+      react: { eager: true },
+      'react-native': { eager: true },
+    });
+
     expect(
       intoShared({
         react: {

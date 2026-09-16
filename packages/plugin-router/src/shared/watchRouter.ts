@@ -14,18 +14,19 @@ export interface WatchRouterOptions {
   immediate?: boolean;
 }
 
-export function watchRouter() {
+export function watchRouter(root = process.cwd()) {
+  const generate = () => generateRouterFile(root);
   const watcher = chokidar.watch('./pages', {
     ignored: (path, stats) => {
       return Boolean(stats?.isFile() && !path.endsWith('.ts') && !path.endsWith('.tsx'));
     },
     ignoreInitial: true,
     persistent: true,
-    cwd: process.cwd(),
+    cwd: root,
   });
 
   const handleAdd = async (path: string) => {
-    const file = join(process.cwd(), path);
+    const file = join(root, path);
     const code = await readFile(file, 'utf8');
 
     if (code !== '') {
@@ -39,7 +40,7 @@ export function watchRouter() {
       switch (filename) {
         case '_layout':
           console.log('👀 Layout file has been added');
-          await writeFile(path, await transformNewLayoutFile(path));
+          await writeFile(file, await transformNewLayoutFile(path));
           return;
         default:
           return;
@@ -55,18 +56,18 @@ export function watchRouter() {
     }
 
     console.log(`👀 File ${path} has been added`);
-    await writeFile(path, await transformNewRouteFile(path));
-    await generateRouterFile();
+    await writeFile(file, await transformNewRouteFile(path));
+    generate();
   };
 
   watcher.on('add', handleAdd);
-  watcher.on('change', generateRouterFile);
-  watcher.on('unlink', generateRouterFile);
+  watcher.on('change', generate);
+  watcher.on('unlink', generate);
 
-  return () => {
+  return async () => {
     watcher.off('add', handleAdd);
-    watcher.off('change', generateRouterFile);
-    watcher.off('unlink', generateRouterFile);
-    watcher.close();
+    watcher.off('change', generate);
+    watcher.off('unlink', generate);
+    await watcher.close();
   };
 }

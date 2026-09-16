@@ -55,8 +55,7 @@
     "vitest": "^4.0.12"
   },
   "dependencies": {
-    "@granite-js/mpack": "workspace:*",
-    "@granite-js/plugin-core": "workspace:*",
+    "@granite-js/config": "workspace:*",
     "@granite-js/utils": "workspace:*",
     "@inquirer/prompts": "^7.2.3",
     "@shopify/semaphore": "^3.1.0",

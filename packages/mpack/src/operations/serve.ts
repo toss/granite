@@ -22,6 +22,7 @@ interface RunServerConfig {
   host?: string;
   port?: number;
   onServerReady?: () => Promise<void> | void;
+  interactive?: boolean;
 }
 
 const { Metro, TerminalReporter } = getModule('metro');
@@ -44,6 +45,7 @@ export async function runServer({
   host = DEV_SERVER_DEFAULT_HOST,
   port = DEV_SERVER_DEFAULT_PORT,
   onServerReady,
+  interactive = true,
 }: RunServerConfig) {
   // Since eventsSocketEndpoint.reportEvent cannot be assigned first due to the control flow,
   // we reference it through an object
@@ -99,7 +101,7 @@ export async function runServer({
         case 'initialize_done':
           await driver.devServer.post({ host, port });
           printServerUrl({ host, port });
-          if (!keyHandlersAttached) {
+          if (interactive && !keyHandlersAttached) {
             keyHandlersAttached = true;
             attachKeyHandlers({
               devServerUrl,
@@ -164,4 +166,5 @@ export async function runServer({
   // For more info: https://github.com/nodejs/node/issues/13391
   //
   serverInstance.keepAliveTimeout = 30000;
+  return serverInstance;
 }

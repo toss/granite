@@ -1,8 +1,8 @@
 import { isBuildSuccess, type GranitePluginCore } from '@granite-js/plugin-core';
-import { compileHbc, type CompileHbcResult } from './compileHbc';
-import { writeComposedSourcemap } from './composeSourcemap';
-import { resolveHermesBinaryPath } from './resolveHermesBinaryPath';
-import type { HermesPluginOptions } from './types';
+import { compileHbc, type CompileHbcResult } from './shared/compileHbc';
+import { writeComposedSourcemap } from './shared/composeSourcemap';
+import { resolveHermesBinaryPath } from './shared/resolveHermesBinaryPath';
+import type { HermesPluginOptions } from './shared/types';
 
 export const hermesPlugin = (options?: HermesPluginOptions): GranitePluginCore => {
   const hermesc = options?.binaryPath ?? resolveHermesBinaryPath();
@@ -37,7 +37,7 @@ export const hermesPlugin = (options?: HermesPluginOptions): GranitePluginCore =
       esbuild: {
         /**
          * Hermes doesn't need minified input.
-         * Hermes sourcemap generation logic is affected by the JS bundle string offset, so minified bundle may cause problems with sourcemaps.
+         * Hermes sourcemap generation depends on JS bundle string offsets, so a minified bundle may produce incorrect sourcemaps.
          *
          * @see {@link https://github.com/facebook/hermes/issues/452#issuecomment-776816638}
          * @see {@link https://github.com/facebook/hermes/issues/945#issuecomment-1975250261}

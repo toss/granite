@@ -3,7 +3,7 @@
   "version": "2.5.0",
   "description": "The Granite Framework",
   "bin": {
-    "granite": "./bin/cli.js"
+    "granite": "./bin/cli.mjs"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -124,9 +124,9 @@
     "@granite-js/blur-view": "workspace:*",
     "@granite-js/brownfield-module": "workspace:*",
     "@granite-js/cli": "workspace:*",
+    "@granite-js/config": "workspace:*",
     "@granite-js/jest": "workspace:*",
     "@granite-js/mpack": "workspace:*",
-    "@granite-js/plugin-core": "workspace:*",
     "@granite-js/style-utils": "workspace:*",
     "@granite-js/video": "workspace:*",
     "@standard-schema/spec": "^1.0.0",

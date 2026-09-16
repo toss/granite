@@ -18,7 +18,8 @@ yarn add @granite-js/plugin-micro-frontend
 ## Usage
 
 ```ts
-import { defineConfig } from '@granite-js/react-native/config';
+// mpack.config.ts
+import { defineConfig } from '@granite-js/mpack/config';
 import { microFrontend } from '@granite-js/plugin-micro-frontend';
 
 // Example 1. Host container
@@ -44,7 +45,8 @@ export default defineConfig({
           /**
            * Whether the module is eager
            *
-           * Specifies whether the module is eager; if true, it's bundled with the host, otherwise loaded from the shared registry
+           * When true, the module is bundled with the host.
+           * Otherwise, it is loaded from the shared registry.
            */
           eager: true,
         },

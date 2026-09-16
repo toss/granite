@@ -1,0 +1,46 @@
+{
+  "name": "@granite-js/config",
+  "version": "2.5.0",
+  "type": "module",
+  "description": "Granite application configuration and bundler adapter contracts",
+  "license": "Apache-2.0",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "prepack": "yarn build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@granite-js/utils": "workspace:*",
+    "c12": "3.3.4",
+    "es-toolkit": "1.39.8",
+    "esbuild": "0.25.8",
+    "zod": "4.0.10"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:tools",
+    "tsdown": "catalog:tools",
+    "typescript": "catalog:tools",
+    "vitest": "^4.0.12"
+  },
+  "sideEffects": false
+}

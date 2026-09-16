@@ -1,6 +1,6 @@
 # @granite-js/mpack
 
-A bundler for Granite apps
+A deprecated bundler for Granite apps, retained for backward compatibility. It supports Granite plugins and Metro development servers.
 
 ## License
 

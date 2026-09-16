@@ -18,7 +18,7 @@ yarn add @granite-js/plugin-sentry
 ## Usage
 
 ```ts
-import { defineConfig } from '@granite-js/react-native/config';
+import { defineConfig } from '@granite-js/mpack/config';
 import { sentry } from '@granite-js/plugin-sentry';
 
 export default defineConfig({
@@ -35,8 +35,18 @@ export default defineConfig({
 });
 ```
 
+## Next Plugin API
+
+The `/next` export provides the Sentry plugin as a `PluginOption`.
+
+```ts
+import { sentry } from '@granite-js/plugin-sentry/next';
+
+const plugins = [sentry()];
+```
+
 > [!IMPORTANT]  
-> If you're using [@granite-js/plugin-hermes](https://github.com/toss/granite/tree/main/packages/plugin-hermes), the Sentry plugin should be configured after the Hermes plugin.
+> When using [@granite-js/plugin-hermes](https://github.com/toss/granite/tree/main/packages/plugin-hermes), configure the Sentry plugin after the Hermes plugin.
 
 ## License
 

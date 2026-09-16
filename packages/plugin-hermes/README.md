@@ -18,7 +18,7 @@ yarn add @granite-js/plugin-hermes
 ## Usage
 
 ```ts
-import { defineConfig } from '@granite-js/react-native/config';
+import { defineConfig } from '@granite-js/mpack/config';
 import { hermes } from '@granite-js/plugin-hermes';
 
 export default defineConfig({
@@ -51,16 +51,21 @@ export default defineConfig({
 });
 ```
 
-```ts
-// In other plugin handlers
-function handler() {
-  const hermesPluginResults = this.meta.hermes ?? [];
+## Next Plugin API
 
-  for (const hermesPluginResult of hermesPluginResults) {
-    console.log(`Hermes bytecode path: ${hermesPluginResult.hbc}`);
-    console.log(`Hermes sourcemap path: ${hermesPluginResult.hbcSourcemap ?? 'N/A'}`);
-  }
-}
+The `/next` export provides the Hermes plugin as a `PluginOption`.
+
+```ts
+import { hermes } from '@granite-js/plugin-hermes/next';
+
+const plugins = [
+  hermes({
+    onBuild(result) {
+      console.log(`Hermes bytecode path: ${result.hbc}`);
+      console.log(`Hermes sourcemap path: ${result.hbcSourcemap ?? 'N/A'}`);
+    },
+  }),
+];
 ```
 
 ## License

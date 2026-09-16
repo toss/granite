@@ -5,6 +5,7 @@ const TARGET_PACKAGE_NAMES = [
   'create-granite-app',
   '@granite-js/react-native',
   '@granite-js/native',
+  '@granite-js/mpack',
   '@granite-js/plugin-router',
   '@granite-js/plugin-hermes',
   'babel-preset-granite',

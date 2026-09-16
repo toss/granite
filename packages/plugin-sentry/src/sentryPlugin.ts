@@ -1,12 +1,12 @@
 import * as fs from 'fs/promises';
 import { isBuildSuccess, type GranitePluginCore } from '@granite-js/plugin-core';
 import { noop } from 'es-toolkit';
-import { extractSentryDebugId } from './extractSentryDebugId';
-import { writeDebugIdInjectedSourcemap } from './injectSentryDebugId';
-import { tryResolveHermesBundle } from './resolveHermesBundle';
-import { createClientActions } from './sentryClientActions';
-import { getSentryDebugIdSnippets } from './snippets';
-import type { SentryPluginOptions, SentryPluginResult } from './types';
+import { extractSentryDebugId } from './shared/extractSentryDebugId';
+import { writeDebugIdInjectedSourcemap } from './shared/injectSentryDebugId';
+import { tryResolveHermesBundle } from './shared/resolveHermesBundle';
+import { createClientActions } from './shared/sentryClientActions';
+import { getSentryDebugIdSnippets } from './shared/snippets';
+import type { SentryPluginOptions, SentryPluginResult } from './shared/types';
 
 const PLUGIN_NAME = 'sentry-plugin';
 const PLUGIN_SHIM: GranitePluginCore = { name: PLUGIN_NAME };
