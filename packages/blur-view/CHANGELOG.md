@@ -1,5 +1,11 @@
 # @granite-js/blur-view
 
+## 1.0.44
+
+### Patch Changes
+
+- e97fe95: Use an unrestricted native peer range instead of an exact workspace constraint, preventing compatible updates from causing an unintended major release.
+
 ## 1.0.43
 
 ### Patch Changes
