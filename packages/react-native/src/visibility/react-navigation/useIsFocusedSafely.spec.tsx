@@ -98,7 +98,7 @@ describe('useIsFocusedSafely', () => {
     expect(store.listenerCount()).toBe(0);
   });
 
-  it.each([false, true])('uses the latest focus when starting a visibility effect (initially %s)', (initiallyFocused) => {
+  it.each([false, true])('follows committed focus snapshots for visibility effects (initially %s)', (initiallyFocused) => {
     const store = createNavigation(initiallyFocused);
     navigation = store;
     const dispose = vi.fn();
@@ -119,14 +119,15 @@ describe('useIsFocusedSafely', () => {
         </VisibilityChangedProvider>
       </AppStateProvider>
     );
-    expect(effect).toHaveBeenCalledTimes(initiallyFocused ? 0 : 1);
+    expect(effect).toHaveBeenCalledTimes(1);
+    expect(dispose).toHaveBeenCalledTimes(initiallyFocused ? 1 : 0);
     unmount();
-    expect(dispose).toHaveBeenCalledTimes(initiallyFocused ? 0 : 1);
+    expect(dispose).toHaveBeenCalledTimes(1);
     expect(store.listenerCount()).toBe(0);
   });
 
   it.each(['mount', 'callback replacement'] as const)(
-    'retries a skipped visibility effect after focus returns during %s',
+    'keeps the committed visibility effect active across rapid refocus during %s',
     (scenario) => {
       const store = createNavigation(true);
       navigation = store;
@@ -146,10 +147,11 @@ describe('useIsFocusedSafely', () => {
         }, [changeFocus]);
         useEffect(() => {
           if (changeFocus) {
-            expect(effect).not.toHaveBeenCalled();
+            expect(effect).toHaveBeenCalledTimes(1);
             store.setFocused(true);
-            // Navigation events must not run the visibility callback synchronously.
-            expect(effect).not.toHaveBeenCalled();
+            // Refocusing must not restart the effect from the visible commit.
+            expect(effect).toHaveBeenCalledTimes(1);
+            expect(dispose).not.toHaveBeenCalled();
           }
         }, [changeFocus]);
         return null;
@@ -178,7 +180,7 @@ describe('useIsFocusedSafely', () => {
     }
   );
 
-  it('starts a skipped visibility effect when focus returns after the hidden render', () => {
+  it('cleans up and restarts visibility effects as focus snapshots are committed', () => {
     const store = createNavigation(true);
     navigation = store;
     const dispose = vi.fn();
@@ -199,15 +201,16 @@ describe('useIsFocusedSafely', () => {
         </VisibilityChangedProvider>
       </AppStateProvider>
     );
-    expect(effect).not.toHaveBeenCalled();
+    expect(effect).toHaveBeenCalledTimes(1);
+    expect(dispose).toHaveBeenCalledTimes(1);
     expect(store.listenerCount()).toBe(2);
 
     act(() => store.setFocused(true));
-    expect(effect).toHaveBeenCalledTimes(1);
+    expect(effect).toHaveBeenCalledTimes(2);
     act(() => store.setFocused(false));
-    expect(dispose).toHaveBeenCalledTimes(1);
+    expect(dispose).toHaveBeenCalledTimes(2);
     unmount();
-    expect(dispose).toHaveBeenCalledTimes(1);
+    expect(dispose).toHaveBeenCalledTimes(2);
     expect(store.listenerCount()).toBe(0);
   });
 });
