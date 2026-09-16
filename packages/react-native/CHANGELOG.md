@@ -1,5 +1,28 @@
 # @granite-js/react-native
 
+## 1.0.44
+
+### Patch Changes
+
+- e97fe95: Use an unrestricted native peer range instead of an exact workspace constraint, preventing compatible updates from causing an unintended major release.
+- 23a710f: Read navigation focus through `useSyncExternalStore` so focus changes between rendering and subscription are not missed by `useIsFocusedSafely`, `useVisibility`, or visibility effects. Preserve the focused fallback when no navigation context is available.
+
+  Visibility effects follow committed visibility snapshots with React's effect setup and cleanup lifecycle.
+
+- 92a23a8: Add `useVisibilityEffect` to run an effect while a screen is visible and clean it up when visibility is lost, the callback changes, or the component unmounts.
+
+  Deprecate `useVisibilityChange` without changing its behavior. Use `useVisibilityEffect` for effects with cleanup, or `useVisibility` with React's `useEffect` for explicit visibility change handling.
+
+- Updated dependencies [e97fe95]
+  - @granite-js/blur-view@1.0.44
+  - @granite-js/jest@1.0.44
+  - @granite-js/brownfield-module@1.0.44
+  - @granite-js/cli@1.0.44
+  - @granite-js/mpack@1.0.44
+  - @granite-js/plugin-core@1.0.44
+  - @granite-js/style-utils@1.0.44
+  - @granite-js/video@1.0.44
+
 ## 1.0.43
 
 ### Patch Changes
