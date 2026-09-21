@@ -494,13 +494,12 @@ class GraniteVideoView @JvmOverloads constructor(
         provider = null
     }
 
+    /**
+     * Must not be called on window detach: a detached view can be attached again,
+     * and the provider is only created in init.
+     */
     fun release() {
         releaseProvider()
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        release()
     }
 }
 
