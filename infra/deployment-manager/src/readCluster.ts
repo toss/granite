@@ -1,5 +1,5 @@
 import { parse } from 'valibot';
-import { S3Client } from './s3/client';
+import type { DeploymentContext } from './channel';
 import { paths } from './s3/paths';
 import { clusterDeploymentInfo } from './types';
 
@@ -8,11 +8,11 @@ export interface ReadClusterConfig {
   clusterId: string;
 }
 
-export async function readCluster({ appName, clusterId }: ReadClusterConfig, context: { s3Client: S3Client }) {
+export async function readCluster({ appName, clusterId }: ReadClusterConfig, context: DeploymentContext) {
   const { s3Client } = context;
 
+  const deploymentInfoPath = paths.clusterDeploymentInfoPath(appName, clusterId, context.channel);
   try {
-    const deploymentInfoPath = paths.clusterDeploymentInfoPath(appName, clusterId);
     const rawData = await s3Client.getObject(deploymentInfoPath);
     const { deploymentId } = parse(clusterDeploymentInfo, JSON.parse(rawData));
 

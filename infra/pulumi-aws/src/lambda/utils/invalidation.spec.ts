@@ -16,6 +16,29 @@ vi.spyOn(classes, 'CreateInvalidationCommand').mockImplementation(noop);
 
 describe('invalidation', () => {
   describe('getPathsToInvalidate', () => {
+    it.each(['deployment_state', 'CURRENT'])('invalidates only the selected channel for %s', (filename) => {
+      expect(getPathsToInvalidate(`channels/preview/deployments/sample-app/${filename}`)).toEqual([
+        '/channels/preview/ios/sample-app/*',
+        '/channels/preview/android/sample-app/*',
+      ]);
+    });
+
+    it('invalidates only the cluster within its channel', () => {
+      expect(getPathsToInvalidate('channels/Preview_2/deployments/sample-app/clusters/testers.deploymentInfo')).toEqual(
+        ['/channels/Preview_2/ios/sample-app/testers/*', '/channels/Preview_2/android/sample-app/testers/*']
+      );
+    });
+
+    it.each([
+      'channels/../deployments/sample-app/deployment_state',
+      'channels//deployments/sample-app/deployment_state',
+      'channels/a%2Fb/deployments/sample-app/deployment_state',
+      'channels/preview/bundles/sample-app/release/bundle.ios.hbc.gz',
+      'channels/preview/deployments/sample-app/DEPLOYMENTS',
+    ])('ignores invalid channels and objects that do not select deployments: %s', (key) => {
+      expect(getPathsToInvalidate(key)).toEqual([]);
+    });
+
     it('returns invalidation paths for deployment_state file', () => {
       const paths = getPathsToInvalidate('deployments/my-app/deployment_state');
       expect(paths).toEqual(['/ios/my-app/*', '/android/my-app/*']);

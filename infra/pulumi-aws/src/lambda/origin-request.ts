@@ -1,7 +1,8 @@
-import { DeployManager, S3Client, InvalidRequest, NotFoundError } from '@granite-js/deployment-manager';
+import { DeployManager, S3Client, InvalidRequest, NotFoundError, NoSuchKey } from '@granite-js/deployment-manager';
 import { CloudFrontRequestEvent, CloudFrontRequestResult } from 'aws-lambda';
 import { RequestHandlerContext } from './context';
 import { parseAppName } from './utils/parseAppName';
+import { parseChannelUri } from './utils/parseChannelUri';
 import { parseGroupId } from './utils/parseGroupId';
 import { parsePlatform } from './utils/parsePlatform';
 import { parseSuffix } from './utils/parseSuffix';
@@ -20,10 +21,11 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
         throw new InvalidRequest('request is null');
       }
 
-      const appName = parseAppName(request.uri);
-      const platform = parsePlatform(request.uri);
-      const groupId = parseGroupId(request.uri);
-      const suffix = parseSuffix(request.uri);
+      const { channel, uri } = parseChannelUri(request.uri);
+      const appName = parseAppName(uri);
+      const platform = parsePlatform(uri);
+      const groupId = parseGroupId(uri);
+      const suffix = parseSuffix(uri);
 
       if (appName == null || platform == null || groupId == null) {
         throw new InvalidRequest('invalid request');
@@ -37,6 +39,7 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
         },
         {
           s3Client,
+          channel,
         }
       );
 
@@ -44,6 +47,7 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
         appName,
         platform,
         deploymentId,
+        channel,
         tag: suffix !== 'bundle' ? suffix : undefined,
       });
 
@@ -57,6 +61,9 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
       ];
       return request;
     } catch (error) {
+      if (error instanceof NoSuchKey) {
+        return { status: '404', statusDescription: 'Deployment not found' };
+      }
       if (error instanceof NotFoundError) {
         return { status: '404', statusDescription: error.message };
       }

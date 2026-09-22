@@ -40,7 +40,8 @@ const utilityMocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@clack/prompts', () => promptMocks);
-vi.mock('@granite-js/deployment-manager', () => ({
+vi.mock('@granite-js/deployment-manager', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@granite-js/deployment-manager')>()),
   ...deploymentMocks,
   DeploymentState: undefined,
 }));
@@ -119,21 +120,46 @@ describe('deploy operation', () => {
     utilityMocks.gzipFile.mockResolvedValue(undefined);
   });
 
+  it('passes one channel context through state lookup, both uploads, history and rollout', async () => {
+    const context = { ...deployContext, channel: 'preview' };
+    deploymentMocks.DeployManager.uploadBundle.mockResolvedValue(undefined);
+    await deploy(deployConfig, context);
+    expect(deploymentMocks.DeployManager.readDeploymentState).toHaveBeenCalledWith(deployConfig.appName, context);
+    expect(deploymentMocks.DeployManager.uploadBundle).toHaveBeenCalledTimes(2);
+    for (const mock of [
+      deploymentMocks.DeployManager.uploadBundle,
+      deploymentMocks.DeployManager.updateBundleList,
+      deploymentMocks.DeployManager.rollout,
+    ]) {
+      for (const call of mock.mock.calls) {
+        expect(call[1]).toBe(context);
+      }
+    }
+  });
+
+  it('rejects invalid channels before compressing or uploading bundles', async () => {
+    vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('exit');
+    });
+    await expect(deploy(deployConfig, { ...deployContext, channel: '../stable' })).rejects.toThrow('exit');
+    expect(utilityMocks.gzipFile).not.toHaveBeenCalled();
+    expect(deploymentMocks.DeployManager.readDeploymentState).not.toHaveBeenCalled();
+    expect(deploymentMocks.DeployManager.uploadBundle).not.toHaveBeenCalled();
+  });
+
   it('does not update bundle list or rollout before both uploads resolve', async () => {
     const androidUpload = createDeferred<void>();
     const iosUpload = createDeferred<void>();
 
-    deploymentMocks.DeployManager.uploadBundle.mockImplementation(
-      ({ platform }: { platform: 'android' | 'ios' }) => {
-        if (platform === 'android') {
-          return androidUpload.promise;
-        }
-        if (platform === 'ios') {
-          return iosUpload.promise;
-        }
-        throw new Error(`Unexpected platform: ${platform}`);
+    deploymentMocks.DeployManager.uploadBundle.mockImplementation(({ platform }: { platform: 'android' | 'ios' }) => {
+      if (platform === 'android') {
+        return androidUpload.promise;
       }
-    );
+      if (platform === 'ios') {
+        return iosUpload.promise;
+      }
+      throw new Error(`Unexpected platform: ${platform}`);
+    });
 
     const deployPromise = deploy(deployConfig, deployContext);
 
@@ -173,17 +199,15 @@ describe('deploy operation', () => {
     const iosUpload = createDeferred<void>();
 
     androidUpload.promise.catch(() => undefined);
-    deploymentMocks.DeployManager.uploadBundle.mockImplementation(
-      ({ platform }: { platform: 'android' | 'ios' }) => {
-        if (platform === 'android') {
-          return androidUpload.promise;
-        }
-        if (platform === 'ios') {
-          return iosUpload.promise;
-        }
-        throw new Error(`Unexpected platform: ${platform}`);
+    deploymentMocks.DeployManager.uploadBundle.mockImplementation(({ platform }: { platform: 'android' | 'ios' }) => {
+      if (platform === 'android') {
+        return androidUpload.promise;
       }
-    );
+      if (platform === 'ios') {
+        return iosUpload.promise;
+      }
+      throw new Error(`Unexpected platform: ${platform}`);
+    });
 
     const deployPromise = deploy(deployConfig, deployContext);
 

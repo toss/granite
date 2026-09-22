@@ -1,5 +1,5 @@
 import * as p from '@clack/prompts';
-import { DeployManager, type S3Client, NoSuchKey } from '@granite-js/deployment-manager';
+import { DeployManager, type DeploymentContext, NoSuchKey, validateChannel } from '@granite-js/deployment-manager';
 import { handlePrompts } from '../utils/handlePrompts';
 
 interface DeployListOptions {
@@ -8,12 +8,15 @@ interface DeployListOptions {
 
 export const deployList = handlePrompts('Deployment list', deployListImpl);
 
-async function deployListImpl({ appName }: DeployListOptions, context: { s3Client: S3Client }) {
-  const { s3Client } = context;
+async function deployListImpl({ appName }: DeployListOptions, context: DeploymentContext) {
+  if (context.channel !== undefined) {
+    validateChannel(context.channel);
+  }
+  p.log.info(`Deployment target: ${appName} (channel: ${context.channel ?? 'legacy / unscoped'})`);
   const spinner = p.spinner();
 
   spinner.start('Fetching deployment list...');
-  const deployments = await DeployManager.readBundleList(appName, { s3Client }).catch(handleReadBundleListError);
+  const deployments = await DeployManager.readBundleList(appName, context).catch(handleReadBundleListError);
   spinner.stop('Successfully fetched deployment list');
 
   deployments.slice(0, 20).forEach((deployment, index) => {

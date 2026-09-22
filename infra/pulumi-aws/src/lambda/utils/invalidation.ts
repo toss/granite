@@ -1,4 +1,5 @@
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
+import { validateChannel } from '@granite-js/deployment-manager';
 import { extractAppName, extractClusterId, isCurrentFile, isClusterDeploymentInfoFile } from './pathParser';
 
 // Initialize CloudFront client
@@ -8,6 +9,17 @@ const cloudFrontClient = new CloudFrontClient({});
  * Determine CloudFront paths to invalidate based on S3 object key
  */
 export function getPathsToInvalidate(key: string): string[] {
+  let prefix = '';
+  if (key.startsWith('channels/')) {
+    const [, channel, ...parts] = key.split('/');
+    try {
+      validateChannel(channel ?? '');
+    } catch {
+      return [];
+    }
+    prefix = `/channels/${channel}`;
+    key = parts.join('/');
+  }
   const appName = extractAppName(key);
 
   if (!appName) {
@@ -16,7 +28,7 @@ export function getPathsToInvalidate(key: string): string[] {
 
   // Rule 1: deployments/<appName>/CURRENT file
   if (isCurrentFile(key)) {
-    return [`/ios/${appName}/*`, `/android/${appName}/*`];
+    return [`${prefix}/ios/${appName}/*`, `${prefix}/android/${appName}/*`];
   }
 
   // Rule 2: deployments/<appName>/clusters/<cluster-id>.deploymentInfo file
@@ -24,7 +36,7 @@ export function getPathsToInvalidate(key: string): string[] {
     const clusterId = extractClusterId(key);
 
     if (clusterId) {
-      return [`/ios/${appName}/${clusterId}/*`, `/android/${appName}/${clusterId}/*`];
+      return [`${prefix}/ios/${appName}/${clusterId}/*`, `${prefix}/android/${appName}/${clusterId}/*`];
     }
   }
 

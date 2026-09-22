@@ -1,13 +1,13 @@
 import { parse, ValiError } from 'valibot';
+import type { DeploymentContext } from './channel';
 import { InternalServerError } from './errors/InternalServerError';
-import { S3Client } from './s3/client';
 import { paths } from './s3/paths';
 import { deploymentState, type DeploymentState } from './types';
 
-export async function readDeploymentState(appName: string, context: { s3Client: S3Client }): Promise<DeploymentState> {
+export async function readDeploymentState(appName: string, context: DeploymentContext): Promise<DeploymentState> {
   const { s3Client } = context;
 
-  const deploymentStatePath = paths.deploymentState(appName);
+  const deploymentStatePath = paths.deploymentState(appName, context.channel);
   try {
     const rawData = await s3Client.getObject(deploymentStatePath);
     const state = parse(deploymentState, JSON.parse(rawData));
