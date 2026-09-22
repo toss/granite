@@ -1,7 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import { validateChannel } from '@granite-js/deployment-manager';
-import { extractAppName, extractClusterId, isCurrentFile, isClusterDeploymentInfoFile } from './pathParser';
+import {
+  extractAppName,
+  extractClusterId,
+  isCurrentFile,
+  isClusterDeploymentInfoFile,
+  isSelectorRegistrationFile,
+} from './pathParser';
 
 // Initialize CloudFront client
 const cloudFrontClient = new CloudFrontClient({});
@@ -25,10 +31,10 @@ export function getPathsToInvalidate(key: string): string[] {
     return [];
   }
 
-  // Rule 1: deployments/<appName>/CURRENT file
+  // Deployment state and selector registrations affect the service's viewer URLs.
   // Channels follow the group segment. CloudFront only
   // supports trailing wildcards, so evict this app's selectors across channels.
-  if (isCurrentFile(key)) {
+  if (isCurrentFile(key) || isSelectorRegistrationFile(key)) {
     return [`/ios/${appName}/*`, `/android/${appName}/*`];
   }
 

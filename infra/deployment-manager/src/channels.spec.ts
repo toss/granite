@@ -2,7 +2,14 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
-import { S3Client as BaseS3Client, GetObjectCommand, PutObjectCommand, NoSuchKey } from '@aws-sdk/client-s3';
+import {
+  S3Client as BaseS3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+  NoSuchKey,
+  ListObjectsV2Command,
+  S3ServiceException,
+} from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DeployManager } from './DeployManager';
@@ -20,7 +27,17 @@ describe('deployment channels', () => {
   beforeEach(async () => {
     directory = await mkdtemp(join(tmpdir(), 'deployment-channels-'));
     objects.clear();
-    mock.on(PutObjectCommand).callsFake(async ({ Key, Body }) => {
+    mock.on(ListObjectsV2Command).callsFake(({ Prefix }) => ({
+      Contents: [...objects.keys()].filter((Key) => Key.startsWith(Prefix)).map((Key) => ({ Key })),
+    }));
+    mock.on(PutObjectCommand).callsFake(async ({ Key, Body, IfNoneMatch }) => {
+      if (IfNoneMatch === '*' && objects.has(Key)) {
+        throw new S3ServiceException({
+          name: 'PreconditionFailed',
+          $fault: 'client',
+          $metadata: { httpStatusCode: 412 },
+        });
+      }
       const data = Body instanceof Readable ? await Body.toArray() : [Body];
       objects.set(Key, data.join(''));
       return {};
@@ -72,7 +89,7 @@ describe('deployment channels', () => {
         expect(objects.get(key)).toBe(channel ?? 'legacy');
       }
     }
-    expect(objects.size).toBe(12);
+    expect(objects.size).toBe(14);
   });
 
   it('keeps canary selection and rollback inside a channel', async () => {
@@ -145,7 +162,7 @@ describe('deployment channels', () => {
     expect(await DeployManager.readCluster({ appName, clusterId: 'testers' }, context)).toBeNull();
   });
 
-  it.each(['', '../stable', 'a/b', 'a%2Fb', '.', 'a.b', 'a b', '*', 'a?b', 'a'.repeat(65)])(
+  it.each(['', 'bundle', '../stable', 'a/b', 'a%2Fb', '.', 'a.b', 'a b', '*', 'a?b', 'a'.repeat(65)])(
     'rejects invalid channel %j before accessing storage',
     async (channel) => {
       expect(() => validateChannel(channel)).toThrow(InvalidRequest);

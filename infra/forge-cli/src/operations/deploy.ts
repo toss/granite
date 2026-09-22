@@ -79,6 +79,10 @@ async function deployImpl({ androidBundle, iosBundle, appName, tag }: DeployConf
     }
   }
 
+  if (context.channel !== undefined) {
+    await DeployManager.registerChannel({ appName, channel: context.channel }, context);
+  }
+
   await p.tasks(
     [
       { bundlePath: gzippedAndroidBundle, platform: 'android' as const },

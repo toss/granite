@@ -1,15 +1,13 @@
 import { DeployManager, S3Client, InvalidRequest, NotFoundError, NoSuchKey } from '@granite-js/deployment-manager';
 import { CloudFrontRequestEvent, CloudFrontRequestResult } from 'aws-lambda';
-import { parsePathChannelRoutes, type PathChannelRoutes } from '../pathChannelRoutes';
 import { RequestHandlerContext } from './context';
 import { parseAppName } from './utils/parseAppName';
 import { parseGroupId } from './utils/parseGroupId';
 import { parsePlatform } from './utils/parsePlatform';
 import { parseSuffix } from './utils/parseSuffix';
 
-// https://cdn.example.com/<ios|android>/<appName>/<groupId>/0_72_6 -> s3://<bucketName>/bundles/<appName>/<deploymentId>/bundle.<ios|android>.0_72_6.hbc.gz
+// Resolve legacy defaults/tags or S3-registered channel selectors to a bundle object key.
 export function createOriginRequestHandler(context: RequestHandlerContext) {
-  const pathChannels = parsePathChannelRoutes(context.pathChannelRoutes);
   const s3Client = new S3Client({
     bucket: context.bucketName,
     region: context.region,
@@ -31,9 +29,8 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
         throw new InvalidRequest('invalid request');
       }
 
-      const isPathChannel = pathChannels.get(appName)?.has(suffix) === true;
-      const channel = isPathChannel ? suffix : undefined;
-      const tag = isPathChannel || suffix === 'bundle' ? undefined : suffix;
+      const channel = await DeployManager.resolveChannel({ appName, selector: suffix }, { s3Client });
+      const tag = channel !== undefined || suffix === 'bundle' ? undefined : suffix;
       if (channel !== undefined) {
         const parts = request.uri.split('/');
         if (
@@ -93,13 +90,11 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
 
 declare const _BUCKET_NAME: string;
 declare const _BUCKET_REGION: string;
-declare const _PATH_CHANNEL_ROUTES: PathChannelRoutes;
 
 const handler = createOriginRequestHandler({
   allowAccessCluster: false,
   bucketName: _BUCKET_NAME,
   region: _BUCKET_REGION,
-  pathChannelRoutes: typeof _PATH_CHANNEL_ROUTES === 'undefined' ? {} : _PATH_CHANNEL_ROUTES,
 });
 
 export { handler };

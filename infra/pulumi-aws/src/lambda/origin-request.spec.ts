@@ -1,11 +1,12 @@
 import { DeployManager, NoSuchKey, S3Client } from '@granite-js/deployment-manager';
 import type { CloudFrontRequestEvent } from 'aws-lambda';
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import type { PathChannelRoutes } from '../pathChannelRoutes';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 let createOriginRequestHandler: typeof import('./origin-request').createOriginRequestHandler;
 let configuredHandler: typeof import('./origin-request').handler;
 const context = { bucketName: 'sample-bucket', region: 'us-east-1', allowAccessCluster: true };
+const objects = new Map<string, string>();
+const reads: string[] = [];
 
 function event(uri: string, querystring = ''): CloudFrontRequestEvent {
   return {
@@ -25,225 +26,190 @@ function event(uri: string, querystring = ''): CloudFrontRequestEvent {
   };
 }
 
+function register(appName: string, selector: string, type = 'CHANNEL') {
+  objects.set(`deployments/${appName}/selectors/${selector}.json`, JSON.stringify({ version: 1, type }));
+}
+
+function state(appName: string, deploymentId: string, channel?: string) {
+  const prefix = channel ? `channels/${channel}/` : '';
+  objects.set(`${prefix}deployments/${appName}/deployment_state`, JSON.stringify({ type: 'STABLE', deploymentId }));
+}
+
 beforeAll(async () => {
   vi.stubGlobal('_BUCKET_NAME', context.bucketName);
   vi.stubGlobal('_BUCKET_REGION', context.region);
-  vi.stubGlobal('_PATH_CHANNEL_ROUTES', { 'sample-app': ['preview'] });
   ({ createOriginRequestHandler, handler: configuredHandler } = await import('./origin-request'));
+});
+beforeEach(() => {
+  objects.clear();
+  reads.length = 0;
+  vi.spyOn(S3Client.prototype, 'getObject').mockImplementation(async (key) => {
+    reads.push(key);
+    const body = objects.get(key);
+    if (body === undefined) {
+      throw new NoSuchKey({ $metadata: {}, message: 'Not found' });
+    }
+    return body;
+  });
 });
 afterEach(() => vi.restoreAllMocks());
 afterAll(() => vi.unstubAllGlobals());
 
-describe('channel bundle routing', () => {
-  const pathContext = { ...context, pathChannelRoutes: { 'sample-app': ['preview'], shared: ['preview'] } };
-
-  it.each(['ios', 'android'])('uses a registered trailing channel on %s', async (platform) => {
-    const getObject = vi
-      .spyOn(S3Client.prototype, 'getObject')
-      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'release' }));
-    const handler = createOriginRequestHandler(pathContext);
+describe('S3-registered channel routing', () => {
+  it.each(['ios', 'android'])('resolves app and shared channels on %s', async (platform) => {
+    const handler = createOriginRequestHandler(context);
     for (const appName of ['sample-app', 'shared']) {
-      expect(await handler(event(`/${platform}/${appName}/1/preview`))).toEqual(
+      register(appName, 'next');
+      state(appName, 'release', 'next');
+      expect(await handler(event(`/${platform}/${appName}/1/next`))).toEqual(
         expect.objectContaining({
-          uri: `/channels/preview/bundles/${appName}/release/bundle.${platform}.hbc.gz`,
+          uri: `/channels/next/bundles/${appName}/release/bundle.${platform}.hbc.gz`,
         })
       );
-      expect(getObject).toHaveBeenLastCalledWith(`channels/preview/deployments/${appName}/deployment_state`);
     }
-  });
-
-  it('wires configured path routes into the exported Lambda handler', async () => {
-    const getObject = vi
-      .spyOn(S3Client.prototype, 'getObject')
-      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'release' }));
-    expect(await configuredHandler(event('/ios/sample-app/1/preview'))).toEqual(
-      expect.objectContaining({
-        uri: '/channels/preview/bundles/sample-app/release/bundle.ios.hbc.gz',
-      })
-    );
-    expect(getObject).toHaveBeenCalledExactlyOnceWith('channels/preview/deployments/sample-app/deployment_state');
-  });
-
-  it('keeps the same suffix as a legacy tag on apps without a registration', async () => {
-    const getObject = vi
-      .spyOn(S3Client.prototype, 'getObject')
-      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'legacy-release' }));
-    expect(await createOriginRequestHandler(pathContext)(event('/ios/another-app/1/preview'))).toEqual(
-      expect.objectContaining({
-        uri: '/bundles/another-app/legacy-release/bundle.ios.preview.hbc.gz',
-      })
-    );
-    expect(getObject).toHaveBeenCalledExactlyOnceWith('deployments/another-app/deployment_state');
-  });
-
-  it('preserves the default bundle and other legacy tags when path routes are enabled', async () => {
-    const getObject = vi
-      .spyOn(S3Client.prototype, 'getObject')
-      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'legacy-release' }));
-    const handler = createOriginRequestHandler(pathContext);
-    for (const [selector, file] of [
-      ['bundle', 'bundle.ios.hbc.gz'],
-      ['custom', 'bundle.ios.custom.hbc.gz'],
-    ]) {
-      expect(await handler(event(`/ios/sample-app/1/${selector}`))).toEqual(
-        expect.objectContaining({
-          uri: `/bundles/sample-app/legacy-release/${file}`,
-        })
-      );
-      expect(getObject).toHaveBeenLastCalledWith('deployments/sample-app/deployment_state');
-    }
-  });
-
-  it('never falls back to legacy state when a registered path channel has no deployment', async () => {
-    const getObject = vi
-      .spyOn(S3Client.prototype, 'getObject')
-      .mockRejectedValue(new NoSuchKey({ $metadata: {}, message: 'Not found' }));
-    expect(await createOriginRequestHandler(pathContext)(event('/ios/sample-app/1/preview'))).toEqual({
-      status: '404',
-      statusDescription: 'Deployment not found',
-    });
-    expect(getObject).toHaveBeenCalledExactlyOnceWith('channels/preview/deployments/sample-app/deployment_state');
-  });
-
-  it.each([
-    ['bundle', 'deployments/sample-app/deployment_state', '/bundles/sample-app/release/bundle.ios.hbc.gz'],
-    [
-      'preview',
-      'channels/preview/deployments/sample-app/deployment_state',
-      '/channels/preview/bundles/sample-app/release/bundle.ios.hbc.gz',
-    ],
-  ])('does not let query parameters select or override the %s route', async (selector, stateKey, bundleUri) => {
-    const getObject = vi
-      .spyOn(S3Client.prototype, 'getObject')
-      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'release' }));
-    const querystring = 'channel=stable&cache=hello%20world';
-    expect(await createOriginRequestHandler(pathContext)(event(`/ios/sample-app/1/${selector}`, querystring))).toEqual(
-      expect.objectContaining({ uri: bundleUri, querystring })
-    );
-    expect(getObject).toHaveBeenCalledExactlyOnceWith(stateKey);
-  });
-
-  it('rejects extra path segments on registered channel routes', async () => {
-    const getObject = vi.spyOn(S3Client.prototype, 'getObject');
-    expect(await createOriginRequestHandler(pathContext)(event('/ios/sample-app/1/preview/extra'))).toEqual(
-      expect.objectContaining({ status: '400' })
-    );
-    expect(getObject).not.toHaveBeenCalled();
-  });
-
-  it.each<PathChannelRoutes>([
-    { 'sample-app': ['bundle'] },
-    { 'sample-app': ['../stable'] },
-    { 'sample-app': ['preview', 'preview'] },
-    { 'invalid/app': ['preview'] },
-  ])('rejects invalid route registrations at handler construction: %j', (pathChannelRoutes) => {
-    expect(() => createOriginRequestHandler({ ...context, pathChannelRoutes })).toThrow();
-  });
-
-  it.each(['custom', 'custom@preview', 'channels', 'preview'])('preserves legacy filename tag %s', async (tag) => {
-    const getObject = vi
-      .spyOn(S3Client.prototype, 'getObject')
-      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'legacy-release' }));
-    expect(await createOriginRequestHandler(context)(event(`/ios/sample-app/1/${tag}`))).toEqual(
-      expect.objectContaining({ uri: `/bundles/sample-app/legacy-release/bundle.ios.${tag}.hbc.gz` })
-    );
-    expect(getObject).toHaveBeenCalledExactlyOnceWith('deployments/sample-app/deployment_state');
-  });
-
-  it('resolves legacy and named-channel requests against independent state and bundle keys', async () => {
-    const getObject = vi.spyOn(S3Client.prototype, 'getObject').mockImplementation(async (key) => {
-      const state: Record<string, string> = {
-        'deployments/sample-app/deployment_state': 'legacy-release',
-        'channels/stable/deployments/sample-app/deployment_state': 'stable-release',
-        'channels/preview/deployments/sample-app/deployment_state': 'preview-release',
-      };
-      if (!state[key]) {
-        throw new NoSuchKey({ $metadata: {}, message: 'Not found' });
-      }
-      return JSON.stringify({ type: 'STABLE', deploymentId: state[key] });
-    });
-    const handler = createOriginRequestHandler({
-      ...context,
-      pathChannelRoutes: { 'sample-app': ['stable', 'preview'] },
-    });
-    for (const channel of [undefined, 'stable', 'preview']) {
-      const prefix = channel ? `/channels/${channel}` : '';
-      const selector = channel ?? 'bundle';
-      const deploymentId = channel ? `${channel}-release` : 'legacy-release';
-      for (const platform of ['ios', 'android']) {
-        const uri = `${prefix}/bundles/sample-app/${deploymentId}/bundle.${platform}.hbc.gz`;
-        expect(await handler(event(`/${platform}/sample-app/1/${selector}`))).toEqual(
-          expect.objectContaining({
-            uri,
-            querystring: '',
-            headers: { 'x-bundle': [{ key: 'X-Bundle', value: uri }] },
-          })
-        );
-      }
-    }
-    expect(getObject).toHaveBeenCalledTimes(6);
-  });
-
-  it('returns 404 for a missing channel, including shared, without reading legacy state', async () => {
-    const getObject = vi
-      .spyOn(S3Client.prototype, 'getObject')
-      .mockRejectedValue(new NoSuchKey({ $metadata: {}, message: 'Not found' }));
-    const handler = createOriginRequestHandler(pathContext);
-    for (const appName of ['sample-app', 'shared']) {
-      expect(await handler(event(`/ios/${appName}/1/preview`))).toEqual({
-        status: '404',
-        statusDescription: 'Deployment not found',
-      });
-    }
-    expect(getObject.mock.calls).toEqual([
-      ['channels/preview/deployments/sample-app/deployment_state'],
-      ['channels/preview/deployments/shared/deployment_state'],
+    expect(reads).toEqual([
+      'deployments/sample-app/selectors/next.json',
+      'channels/next/deployments/sample-app/deployment_state',
+      'deployments/shared/selectors/next.json',
+      'channels/next/deployments/shared/deployment_state',
     ]);
   });
 
-  it('keeps cluster targeting inside the selected channel', async () => {
-    const getObject = vi
-      .spyOn(S3Client.prototype, 'getObject')
-      .mockResolvedValue(JSON.stringify({ deploymentId: 'cluster-release' }));
-    const handler = createOriginRequestHandler({ ...context, pathChannelRoutes: { 'sample-app': ['Preview_2'] } });
-    expect(await handler(event('/android/sample-app/testers/Preview_2'))).toEqual(
-      expect.objectContaining({
-        uri: '/channels/Preview_2/bundles/sample-app/cluster-release/bundle.android.hbc.gz',
-      })
-    );
-    expect(getObject).toHaveBeenCalledExactlyOnceWith(
-      'channels/Preview_2/deployments/sample-app/clusters/testers.deploymentInfo'
-    );
+  it('the same exported Lambda discovers new registrations without configuration changes', async () => {
+    state('sample-app', 'legacy');
+    expect(await configuredHandler(event('/ios/sample-app/1/next'))).toMatchObject({
+      uri: '/bundles/sample-app/legacy/bundle.ios.next.hbc.gz',
+    });
+    register('sample-app', 'next');
+    expect(await configuredHandler(event('/ios/sample-app/1/next'))).toMatchObject({ status: '404' });
+    state('sample-app', 'release', 'next');
+    expect(await configuredHandler(event('/ios/sample-app/1/next'))).toMatchObject({
+      uri: '/channels/next/bundles/sample-app/release/bundle.ios.hbc.gz',
+    });
   });
 
-  it('retains the cluster access restriction for channel routes', async () => {
-    const getObject = vi.spyOn(S3Client.prototype, 'getObject');
-    const handler = createOriginRequestHandler({ ...pathContext, allowAccessCluster: false });
-    expect(await handler(event('/ios/sample-app/testers/preview'))).toEqual(expect.objectContaining({ status: '400' }));
-    expect(getObject).not.toHaveBeenCalled();
+  it('keeps registrations scoped to each app', async () => {
+    register('sample-app', 'next');
+    state('another-app', 'legacy');
+    expect(await createOriginRequestHandler(context)(event('/ios/another-app/1/next'))).toMatchObject({
+      uri: '/bundles/another-app/legacy/bundle.ios.next.hbc.gz',
+    });
+    expect(reads).toEqual(['deployments/another-app/selectors/next.json', 'deployments/another-app/deployment_state']);
   });
 
-  it.each([
-    '/channels/preview/ios/sample-app/1/bundle',
-    '/ios/sample-app/1',
-    '/ios/sample-app/1/preview/extra',
-    '/ios-other/sample-app/1/preview',
-  ])('rejects malformed channel paths: %s', async (uri) => {
+  it.each(['custom-tag', 'custom@tag', 'channels', 'next'])('keeps unregistered legacy tag %s', async (tag) => {
+    state('sample-app', 'legacy');
+    expect(await createOriginRequestHandler(context)(event(`/ios/sample-app/1/${tag}`))).toMatchObject({
+      uri: `/bundles/sample-app/legacy/bundle.ios.${tag}.hbc.gz`,
+    });
+    expect(reads.at(-1)).toBe('deployments/sample-app/deployment_state');
+  });
+
+  it('keeps reserved legacy tag registrations out of channel routing', async () => {
+    register('sample-app', 'custom-tag', 'LEGACY_TAG');
+    state('sample-app', 'legacy');
+    state('sample-app', 'orphaned-channel', 'custom-tag');
+    expect(await createOriginRequestHandler(context)(event('/ios/sample-app/1/custom-tag'))).toMatchObject({
+      uri: '/bundles/sample-app/legacy/bundle.ios.custom-tag.hbc.gz',
+    });
+  });
+
+  it('keeps bundle in the legacy namespace without a registration lookup', async () => {
+    state('sample-app', 'legacy');
+    expect(await configuredHandler(event('/ios/sample-app/1/bundle'))).toMatchObject({
+      uri: '/bundles/sample-app/legacy/bundle.ios.hbc.gz',
+    });
+    expect(reads).toEqual(['deployments/sample-app/deployment_state']);
+  });
+
+  it('selects separate deployment state and artifacts for the same app in two channels', async () => {
+    const handler = createOriginRequestHandler(context);
+    for (const channel of ['next', 'stable']) {
+      register('sample-app', channel);
+      state('sample-app', `${channel}-release`, channel);
+    }
+    for (const channel of ['next', 'stable']) {
+      for (const platform of ['ios', 'android']) {
+        const uri = `/channels/${channel}/bundles/sample-app/${channel}-release/bundle.${platform}.hbc.gz`;
+        expect(await handler(event(`/${platform}/sample-app/1/${channel}`))).toMatchObject({
+          uri,
+          headers: { 'x-bundle': [{ key: 'X-Bundle', value: uri }] },
+        });
+      }
+    }
+  });
+
+  it('never reads legacy state when a registered channel deployment is missing', async () => {
+    register('sample-app', 'next');
+    state('sample-app', 'legacy');
+    expect(await configuredHandler(event('/ios/sample-app/1/next'))).toEqual({
+      status: '404',
+      statusDescription: 'Deployment not found',
+    });
+    expect(reads).toEqual([
+      'deployments/sample-app/selectors/next.json',
+      'channels/next/deployments/sample-app/deployment_state',
+    ]);
+  });
+
+  it.each(['{', '{"version":2,"type":"CHANNEL"}', '{"version":1,"type":"UNKNOWN"}'])(
+    'does not fall back on corrupt metadata: %s',
+    async (body) => {
+      objects.set('deployments/sample-app/selectors/next.json', body);
+      state('sample-app', 'legacy');
+      await expect(configuredHandler(event('/ios/sample-app/1/next'))).rejects.toThrow('Invalid selector registration');
+      expect(reads).toEqual(['deployments/sample-app/selectors/next.json']);
+    }
+  );
+
+  it('does not treat a registry access failure as an unregistered tag', async () => {
+    vi.spyOn(S3Client.prototype, 'getObject').mockRejectedValue(new Error('AccessDenied'));
     const resolve = vi.spyOn(DeployManager, 'resolveDeploymentId');
-    expect(await createOriginRequestHandler(pathContext)(event(uri))).toEqual(
-      expect.objectContaining({ status: '400' })
-    );
+    await expect(configuredHandler(event('/ios/sample-app/1/next'))).rejects.toThrow('AccessDenied');
     expect(resolve).not.toHaveBeenCalled();
   });
 
-  it('keeps existing query strings byte-for-byte without using them for routing', async () => {
-    const getObject = vi
-      .spyOn(S3Client.prototype, 'getObject')
-      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'legacy-release' }));
-    const querystring = 'cache=hello%20world&cache=two';
-    expect(await createOriginRequestHandler(context)(event('/ios/sample-app/1/bundle', querystring))).toEqual(
-      expect.objectContaining({ uri: '/bundles/sample-app/legacy-release/bundle.ios.hbc.gz', querystring })
+  it('keeps cluster selection in the registered channel', async () => {
+    register('sample-app', 'Preview_2');
+    objects.set(
+      'channels/Preview_2/deployments/sample-app/clusters/testers.deploymentInfo',
+      JSON.stringify({ deploymentId: 'cluster-release' })
     );
-    expect(getObject).toHaveBeenCalledExactlyOnceWith('deployments/sample-app/deployment_state');
+    expect(await createOriginRequestHandler(context)(event('/android/sample-app/testers/Preview_2'))).toMatchObject({
+      uri: '/channels/Preview_2/bundles/sample-app/cluster-release/bundle.android.hbc.gz',
+    });
+  });
+
+  it('retains the cluster access restriction in the exported handler', async () => {
+    register('sample-app', 'next');
+    expect(await configuredHandler(event('/ios/sample-app/testers/next'))).toMatchObject({ status: '400' });
+    expect(reads).toEqual(['deployments/sample-app/selectors/next.json']);
+  });
+
+  it.each(['bundle', 'next'])('does not let query parameters override %s', async (selector) => {
+    register('sample-app', 'next');
+    state('sample-app', 'legacy');
+    state('sample-app', 'release', 'next');
+    const querystring = 'channel=another&cache=hello%20world';
+    const uri =
+      selector === 'bundle'
+        ? '/bundles/sample-app/legacy/bundle.ios.hbc.gz'
+        : '/channels/next/bundles/sample-app/release/bundle.ios.hbc.gz';
+    expect(await configuredHandler(event(`/ios/sample-app/1/${selector}`, querystring))).toMatchObject({
+      uri,
+      querystring,
+    });
+  });
+
+  it.each([
+    '/channels/next/ios/sample-app/1/bundle',
+    '/ios/sample-app/1',
+    '/ios/sample-app/1/next/extra',
+    '/ios-other/sample-app/1/next',
+  ])('rejects malformed channel route %s', async (uri) => {
+    register('sample-app', 'next');
+    const resolve = vi.spyOn(DeployManager, 'resolveDeploymentId');
+    expect(await configuredHandler(event(uri))).toMatchObject({ status: '400' });
+    expect(resolve).not.toHaveBeenCalled();
   });
 });

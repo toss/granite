@@ -34,13 +34,23 @@ Omitting `--channel` preserves the existing unscoped namespace. No named channel
 | `preview`          | `channels/preview/deployments/sample-app/deployment_state` | `/ios/sample-app/1/preview` |
 
 Bundle objects, deployment history, stable/canary state and cluster pointers all use the same channel prefix.
-For the short `/<platform>/<app>/<group>/<channel>` URL, register unused channel selectors per app in the
-CDN's `pathChannelRoutes` configuration. For example, with `sample-app: ['next']`, deploy using `--channel next`
-and request `/ios/sample-app/1/next`. `bundle` remains reserved for the legacy default, and unregistered suffixes
-retain their filename-tag meaning. The CLI does not automatically change URL registrations.
+Forge automatically registers the app/channel selector in S3 before uploading bundles. No per-channel Pulumi
+configuration or Lambda redeployment is needed after installing the channel-aware infrastructure once.
+For example, deploying with `--channel next` makes `/ios/sample-app/1/next` select that app's `next` channel.
 
-Channels are selected only by registered path suffixes and serve the channel's default bundle. See the
-[backward-compatibility rules](../pulumi-aws/README.md#backward-compatibility) before reserving a path-channel name.
+A registration lives at `deployments/<app>/selectors/<channel>.json`. On first registration, Forge checks the
+app's retained legacy bundle objects for a matching filename tag. New tag uploads and channel registrations
+conditionally reserve the same selector key, so concurrent writers cannot silently change its meaning.
+An existing tag/channel name collision fails the deployment before bundle uploads or promotion.
+
+The deployment credentials need `s3:GetObject`, `s3:PutObject` and `s3:ListBucket` for these paths; listing is used
+only when creating a new channel registration. Use the updated deployment manager for legacy tagged uploads
+before enabling channel creation, because older tag publishers do not participate in selector reservations.
+
+`bundle` remains reserved for the legacy default. Unregistered suffixes retain their filename-tag meaning.
+A registered channel with no deployment returns 404 and never falls back to a legacy bundle. Registrations are
+kept after failed deployments; retry with the same channel to finish publishing. Channels serve default bundle
+filenames; query parameters do not select channels. See the [CDN contract](../pulumi-aws/README.md#deployment-channels).
 
 ## Native runtime selection
 
@@ -53,8 +63,8 @@ they do not compile bundles, infer runtime compatibility or validate the bytecod
 the native build configuration and `--channel` value aligned.
 
 Install and verify the channel-aware Lambda and S3 notifications before enabling channel URLs in native clients.
-The old Lambda interprets trailing channel names as filename tags. Invalidate affected app selectors after
-registering path channels and wait for invalidation to finish before enabling clients.
+The old Lambda interprets trailing channel names as filename tags. Registration and rollout events invalidate
+the affected app selectors asynchronously; wait for invalidation to finish before enabling new native clients.
 With the updated handler, a missing deployment in a named channel returns 404 without falling back to the legacy
 namespace or another channel. Native clients should handle that failure using their own compatible embedded
 bundle or error handling.

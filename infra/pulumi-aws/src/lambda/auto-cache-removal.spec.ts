@@ -49,6 +49,16 @@ describe('channel cache removal events', () => {
     expect(cloudfront.calls()).toHaveLength(0);
   });
 
+  it('sends a service invalidation for a new selector registration', async () => {
+    const key = 'deployments/sample-app/selectors/next.json';
+    expect(await processRecord(record(key, 'ObjectCreated:Put'), 'sample-distribution')).toMatchObject({
+      key,
+      invalidated: true,
+      paths: ['/ios/sample-app/*', '/android/sample-app/*'],
+    });
+    expect(cloudfront.commandCalls(CreateInvalidationCommand)).toHaveLength(1);
+  });
+
   it('uses distinct caller references for simultaneous invalidations', async () => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));

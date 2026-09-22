@@ -3,6 +3,7 @@ import {
   GetObjectCommand,
   PutObjectCommand,
   HeadObjectCommand,
+  ListObjectsV2Command,
   type PutObjectCommandInput,
   type S3ClientConfig as S3ClientConfigBase,
 } from '@aws-sdk/client-s3';
@@ -55,6 +56,31 @@ export class S3Client {
     const response = await this.s3Client.send(command);
 
     return response;
+  }
+
+  async *listObjectKeys(prefix: string): AsyncGenerator<string> {
+    let continuationToken: string | undefined;
+    for (;;) {
+      const response = await this.s3Client.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          Prefix: prefix,
+          ContinuationToken: continuationToken,
+        })
+      );
+      for (const object of response.Contents ?? []) {
+        if (object.Key !== undefined) {
+          yield object.Key;
+        }
+      }
+      if (!response.IsTruncated) {
+        return;
+      }
+      continuationToken = response.NextContinuationToken;
+      if (!continuationToken) {
+        throw new Error('Truncated S3 listing has no continuation token');
+      }
+    }
   }
 
   destroy() {

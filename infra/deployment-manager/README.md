@@ -38,3 +38,17 @@ starting with a letter or digit. The public `validateChannel` helper can validat
 Cluster rollout writes the `.deploymentInfo` pointer consumed by cluster readers and CDN invalidation.
 Canary selection and rollback use the state loaded from the selected channel; callers must pass the same context
 when writing the resulting state. A channel identifies a delivery namespace, not a bytecode compatibility check.
+
+## Dynamic selector registrations
+
+`DeployManager.registerChannel({ appName, channel }, { s3Client })` claims the app/channel URL selector in S3.
+Forge calls it before uploads; channel uploads, rollouts and cluster rollouts also ensure registration.
+`DeployManager.resolveChannel({ appName, selector }, { s3Client })` resolves a registered channel for the CDN.
+A missing record returns `undefined` for legacy routing, while malformed metadata and storage errors propagate.
+
+Registrations use `deployments/<app>/selectors/<name>.json` and conditional writes. A channel claim scans retained
+legacy bundle keys (all pages, both platforms) to prevent taking over an existing tag. Legacy tagged uploads also
+reserve selector ownership, preventing conflicts between updated concurrent publishers. Upgrade older tagged
+publishers first; direct S3 writes and deleted historical artifacts cannot be covered by these checks.
+Registrations are permanent, including after failed deployments. Deployment state can disappear without turning
+a registered channel back into a legacy tag.

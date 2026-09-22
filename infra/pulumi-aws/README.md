@@ -79,21 +79,15 @@ Review the changes that Pulumi proposes, then confirm deployment. Pulumi will pr
 
 ## Deployment channels
 
-Existing URLs retain their meaning by default. To use a channel as the last path segment, register unused
-selectors for each app in the CDN configuration:
+Deploy the channel-aware infrastructure once. Subsequent channel creation is handled by Forge, without changing
+the Pulumi configuration or redeploying Lambda for each channel:
 
-```ts
-new ReactNativeBundleCDN('cdn', {
-  bucketName: 'sample-bucket',
-  region: 'us-east-1',
-  pathChannelRoutes: {
-    'sample-app': ['next', 'stable'],
-    shared: ['next', 'stable'],
-  },
-});
+```sh
+granite-forge deploy --bucket sample-bucket --channel next
 ```
 
-The native URL keeps the same path structure:
+Forge gets the app name from the Granite config and registers the app/channel pair in S3 before uploading the
+platform bundles. Shared and app bundles are separate deployments and should use the same channel name.
 
 ```text
 /ios/sample-app/1/bundle   -> existing unscoped default bundle
@@ -101,58 +95,79 @@ The native URL keeps the same path structure:
 /android/shared/1/next    -> next channel's shared bundle
 ```
 
-`/ios/sample-app/1/next` reads `channels/next/deployments/sample-app/deployment_state` and serves
-`channels/next/bundles/sample-app/<deploymentId>/bundle.ios.hbc.gz`.
-Use a numeric group from 1 to 1000 for rollout targeting. Named clusters still require `allowAccessCluster`
-in the handler; the component's default handler keeps cluster access disabled.
+### S3 registration and lookup
 
-### Backward compatibility
+The selector record is stored outside the channel's mutable rollout state:
 
-- `pathChannelRoutes` defaults to an empty map. A deployment with `--channel` does not automatically register a URL.
-- `bundle` is reserved for the existing unscoped default bundle and cannot be registered as a path channel.
-- A suffix not registered for that app remains a legacy filename tag. Registering `next` for `sample-app` does
-  not change how another app interprets its `next` tag.
-- Once a suffix is registered, it always selects that channel. A missing channel deployment returns 404 without
-  falling back to a legacy tagged/default bundle.
-- Registration reserves an app/suffix pair. Only register names that the app has not used as legacy filename
-  tags; the same URL cannot express both meanings. If a name is already used, keep its legacy route and choose
-  another path-channel name. No storage-existence heuristic chooses between them.
+```text
+deployments/sample-app/selectors/next.json
+  {"version":1,"type":"CHANNEL"}
 
-Channel names follow the [Forge CLI rules](../forge-cli/README.md#deployment-channels). Invalid names, duplicate
-registrations and `bundle` are rejected when configuring the handler. Register shared and app selectors separately
-with matching channel names. Keep registrations in place while native releases depend on them.
+channels/next/deployments/sample-app/deployment_state
+channels/next/bundles/sample-app/<deploymentId>/bundle.ios.hbc.gz
+```
 
-### Cache behavior
+On a CloudFront cache miss, the origin-request Lambda reads the selector record and then resolves deployment
+state in the selected channel. The URI is rewritten to its S3 bundle key. `bundle` bypasses registration lookup
+and keeps the legacy path. A missing registration keeps the existing filename-tag behavior; a registered channel
+with missing deployment state returns 404, never a legacy bundle. Invalid metadata or storage access errors fail
+instead of being interpreted as an unregistered selector. Lambda does not keep an in-process registration cache.
+Query parameters do not select or override channels.
 
-Deployment channels use distinct path selectors and cache keys. File tags remain part of the unregistered
-legacy URL contract. The S3 notification configuration watches both `deployments/` and `channels/`.
-Because CloudFront supports wildcards only at the end of an invalidation path, invalidation covers the affected
-app (or cluster) across all channels. Updating `channels/next/deployments/sample-app/deployment_state` invalidates:
+Numeric groups from 1 to 1000 retain their rollout meaning within the chosen channel. Named clusters still require
+`allowAccessCluster`; the component's default handler keeps cluster access disabled.
+
+### Backward compatibility and concurrent publishers
+
+`--channel` omission preserves existing S3 keys and URLs. `bundle` is reserved and cannot be a channel name.
+Channel names follow the [Forge CLI rules](../forge-cli/README.md#deployment-channels).
+
+Before creating a channel, the deployment manager lists all pages under `bundles/<app>/` and rejects a matching
+legacy tag on either platform, including retained objects from older deployments. New legacy tagged uploads
+reserve the same selector key with `{"version":1,"type":"LEGACY_TAG"}`. Conditional S3 writes (`If-None-Match: *`)
+ensure one owner when tag and channel registrations race. Repeated registration of the same kind is idempotent;
+it does not overwrite or invalidate an existing registration.
+
+Upgrade legacy tag publishers to the updated deployment manager before enabling channel creation. Older writers
+cannot honor reservations. Checks cover retained visible objects and registration records, so do not reuse known
+legacy names after deleting their artifacts. Keep selector records permanently: failed uploads do not remove a
+channel registration or enable legacy fallback. Retrying the deployment uses the same registration.
+
+Deployment credentials need `s3:ListBucket` for the legacy bundle prefix in addition to object read/write access.
+Lambda only reads registrations and deployment state; it does not scan legacy objects. The extra registration
+read occurs on cache misses for channel-like suffixes, not every cached request.
+
+### Cache invalidation
+
+S3 notifications watch `deployments/` and `channels/`. Selector registrations, deployment-state updates and cluster
+pointer changes reach the cache-removal Lambda. Registration events clear previously cached legacy/missing-selector
+responses, and the final rollout update invalidates again after both platform uploads succeed.
+
+For `deployments/sample-app/selectors/next.json` or `channels/next/deployments/sample-app/deployment_state`, the paths are:
 
 ```text
 /ios/sample-app/*
 /android/sample-app/*
 ```
 
-This covers all path-channel selectors for the service. Other services are unaffected. Other channels of the
-same app may incur a cache miss, but their deployment pointers and bundles stay unchanged. Deployment history
-and immutable bundle uploads do not trigger invalidation. Pointer changes retain asynchronous S3-to-CloudFront
-invalidation. See [AWS invalidation path rules](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/invalidation-specifying-objects.html).
+Invalidation covers the affected service across its channels; other services are unaffected. Another channel may
+incur a cache miss but retains its own deployment state and bundle. Cluster changes narrow this to the affected
+cluster. History and bundle uploads do not invalidate selectors. This remains asynchronous; a successful Forge
+command does not mean CloudFront invalidation has finished. See [AWS invalidation path rules](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/invalidation-specifying-objects.html).
 
 ### Shared bundles and rollout order
 
-The component's prebuilt shared bundle is bootstrapped only into the existing unscoped namespace. It is not
-copied into named channels. Publish compatible shared and app bundles explicitly to each named channel before
-enabling it in a native release. Channels do not validate runtime compatibility or make separate shared/app
-publications atomic.
+The component bootstraps its prebuilt shared bundle only into the existing unscoped namespace. Publish compatible
+shared and app bundles explicitly to each channel. Routing does not validate bytecode/runtime compatibility or
+make separate shared/app publications atomic.
 
-Update and verify the Lambda routing configuration and S3 notifications before enabling channel URLs in clients.
-The old Lambda treats a trailing channel name as a filename tag. When adding or changing
-route registrations, invalidate the affected app selectors and wait for completion before enabling clients, so
-cached legacy responses cannot survive under the newly registered URLs.
+Install and verify the common Lambda code and S3 notifications before enabling channel URLs in clients. The old
+Lambda interprets the last segment as a filename tag. Wait for selector invalidations before enabling new clients,
+including clearing any responses cached before the infrastructure upgrade. After this one-time upgrade, deploying
+a new channel only writes S3 data; it needs no per-channel infrastructure configuration.
 
-Review the complete Pulumi preview: the existing component also manages shared-bundle objects and deployment
-pointers, so applying infrastructure changes can publish or replace the unscoped shared deployment.
+Review the complete Pulumi preview before any future apply: the existing component also manages the legacy
+shared bundle and deployment pointer.
 
 ## Cleaning up
 

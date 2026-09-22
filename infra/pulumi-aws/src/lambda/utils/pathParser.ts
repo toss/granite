@@ -46,6 +46,13 @@ export function isCurrentFile(key: string): boolean {
   );
 }
 
+export function isSelectorRegistrationFile(key: string): boolean {
+  const parts = key.split('/');
+  return (
+    parts.length === 4 && parts[0] === 'deployments' && parts[2] === 'selectors' && Boolean(parts[3]?.endsWith('.json'))
+  );
+}
+
 /**
  * Checks if the S3 object key is a cluster deploymentInfo file
  */

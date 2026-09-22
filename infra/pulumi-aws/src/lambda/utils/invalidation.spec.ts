@@ -16,6 +16,12 @@ vi.spyOn(classes, 'CreateInvalidationCommand').mockImplementation(noop);
 
 describe('invalidation', () => {
   describe('getPathsToInvalidate', () => {
+    it('invalidates cached legacy selectors when a channel is registered', () => {
+      expect(getPathsToInvalidate('deployments/sample-app/selectors/next.json')).toEqual([
+        '/ios/sample-app/*',
+        '/android/sample-app/*',
+      ]);
+    });
     it.each(['deployment_state', 'CURRENT'])('invalidates the app selectors across channels for %s', (filename) => {
       expect(getPathsToInvalidate(`channels/preview/deployments/sample-app/${filename}`)).toEqual([
         '/ios/sample-app/*',

@@ -5,10 +5,7 @@ import * as aws from '@pulumi/aws';
 import * as pulumi from '@pulumi/pulumi';
 import { transform } from 'oxc-transform';
 import { v7 as uuidv7 } from 'uuid';
-import { parsePathChannelRoutes, type PathChannelRoutes } from './pathChannelRoutes';
 import { getTimestampByUUIDv7, toDeployedAtString } from './utils/getTimestampByUUIDv7';
-
-export type { PathChannelRoutes } from './pathChannelRoutes';
 
 /**
  * Arguments for creating a React Native CDN infrastructure
@@ -21,8 +18,6 @@ export interface ReactNativeCdnArgs {
   bucketName: string;
   /** AWS region (e.g. 'ap-northeast-2') */
   region: aws.Region;
-  /** Opt-in channel suffixes per app. Register only names not used by that app's legacy filename tags. */
-  pathChannelRoutes?: PathChannelRoutes;
 }
 
 const createLambdaCode = (
@@ -30,11 +25,9 @@ const createLambdaCode = (
   {
     bucketName,
     region,
-    pathChannelRoutes = {},
   }: {
     bucketName: string;
     region: string;
-    pathChannelRoutes?: PathChannelRoutes;
   }
 ) => {
   const code = fs.readFileSync(path, 'utf8');
@@ -42,7 +35,6 @@ const createLambdaCode = (
     define: {
       _BUCKET_NAME: JSON.stringify(bucketName),
       _BUCKET_REGION: JSON.stringify(region),
-      _PATH_CHANNEL_ROUTES: JSON.stringify(pathChannelRoutes),
     },
   });
   return new pulumi.asset.AssetArchive({
@@ -63,8 +55,7 @@ export class ReactNativeBundleCDN extends pulumi.ComponentResource {
     super('granite:aws:ReactNativeBundleCDN', name, {}, opts);
 
     // Extract args with defaults
-    const { bucketName, region, pathChannelRoutes = {} } = args;
-    parsePathChannelRoutes(pathChannelRoutes);
+    const { bucketName, region } = args;
 
     // Create resource name
     const resourceName = bucketName;
@@ -329,7 +320,6 @@ export class ReactNativeBundleCDN extends pulumi.ComponentResource {
         code: createLambdaCode(originRequestPath, {
           bucketName,
           region,
-          pathChannelRoutes,
         }),
         description: 'Lambda@Edge function for serving React Native bundles from S3',
         name: `fe_edge_origin_request_${resourceName}`,

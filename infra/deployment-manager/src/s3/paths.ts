@@ -14,6 +14,9 @@ interface ClusterPathOptions extends AppPathOptions {
 }
 
 export const paths = {
+  appBundlePrefix: ({ appName, channel }: AppPathOptions) => `${channelPrefix(channel)}bundles/${appName}/` as const,
+  selectorRegistration: ({ appName, selector }: { appName: string; selector: string }) =>
+    `deployments/${appName}/selectors/${encodeURIComponent(selector)}.json` as const,
   bundlePathPrefix: ({ appName, deploymentId, channel }: BundlePathOptions) =>
     `${channelPrefix(channel)}bundles/${appName}/${deploymentId}` as const,
   bundleList: ({ appName, channel }: AppPathOptions) =>
