@@ -105,16 +105,22 @@ describe('channel bundle routing', () => {
     expect(getObject).toHaveBeenCalledExactlyOnceWith('channels/preview/deployments/sample-app/deployment_state');
   });
 
-  it('gives explicit query targeting precedence and preserves the filename tag', async () => {
+  it.each([
+    ['bundle', 'deployments/sample-app/deployment_state', '/bundles/sample-app/release/bundle.ios.hbc.gz'],
+    [
+      'preview',
+      'channels/preview/deployments/sample-app/deployment_state',
+      '/channels/preview/bundles/sample-app/release/bundle.ios.hbc.gz',
+    ],
+  ])('does not let query parameters select or override the %s route', async (selector, stateKey, bundleUri) => {
     const getObject = vi
       .spyOn(S3Client.prototype, 'getObject')
       .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'release' }));
-    expect(await createOriginRequestHandler(pathContext)(event('/ios/sample-app/1/preview', 'channel=stable'))).toEqual(
-      expect.objectContaining({
-        uri: '/channels/stable/bundles/sample-app/release/bundle.ios.preview.hbc.gz',
-      })
+    const querystring = 'channel=stable&cache=hello%20world';
+    expect(await createOriginRequestHandler(pathContext)(event(`/ios/sample-app/1/${selector}`, querystring))).toEqual(
+      expect.objectContaining({ uri: bundleUri, querystring })
     );
-    expect(getObject).toHaveBeenCalledExactlyOnceWith('channels/stable/deployments/sample-app/deployment_state');
+    expect(getObject).toHaveBeenCalledExactlyOnceWith(stateKey);
   });
 
   it('rejects extra path segments on registered channel routes', async () => {
@@ -156,14 +162,17 @@ describe('channel bundle routing', () => {
       }
       return JSON.stringify({ type: 'STABLE', deploymentId: state[key] });
     });
-    const handler = createOriginRequestHandler(context);
+    const handler = createOriginRequestHandler({
+      ...context,
+      pathChannelRoutes: { 'sample-app': ['stable', 'preview'] },
+    });
     for (const channel of [undefined, 'stable', 'preview']) {
       const prefix = channel ? `/channels/${channel}` : '';
-      const querystring = channel ? `channel=${channel}` : '';
+      const selector = channel ?? 'bundle';
       const deploymentId = channel ? `${channel}-release` : 'legacy-release';
       for (const platform of ['ios', 'android']) {
         const uri = `${prefix}/bundles/sample-app/${deploymentId}/bundle.${platform}.hbc.gz`;
-        expect(await handler(event(`/${platform}/sample-app/1/bundle`, querystring))).toEqual(
+        expect(await handler(event(`/${platform}/sample-app/1/${selector}`))).toEqual(
           expect.objectContaining({
             uri,
             querystring: '',
@@ -179,9 +188,9 @@ describe('channel bundle routing', () => {
     const getObject = vi
       .spyOn(S3Client.prototype, 'getObject')
       .mockRejectedValue(new NoSuchKey({ $metadata: {}, message: 'Not found' }));
-    const handler = createOriginRequestHandler(context);
+    const handler = createOriginRequestHandler(pathContext);
     for (const appName of ['sample-app', 'shared']) {
-      expect(await handler(event(`/ios/${appName}/1/bundle`, 'channel=preview'))).toEqual({
+      expect(await handler(event(`/ios/${appName}/1/preview`))).toEqual({
         status: '404',
         statusDescription: 'Deployment not found',
       });
@@ -192,14 +201,14 @@ describe('channel bundle routing', () => {
     ]);
   });
 
-  it('keeps cluster targeting and filename tags inside the selected channel', async () => {
+  it('keeps cluster targeting inside the selected channel', async () => {
     const getObject = vi
       .spyOn(S3Client.prototype, 'getObject')
       .mockResolvedValue(JSON.stringify({ deploymentId: 'cluster-release' }));
-    const handler = createOriginRequestHandler(context);
-    expect(await handler(event('/android/sample-app/testers/custom', 'channel=Preview_2'))).toEqual(
+    const handler = createOriginRequestHandler({ ...context, pathChannelRoutes: { 'sample-app': ['Preview_2'] } });
+    expect(await handler(event('/android/sample-app/testers/Preview_2'))).toEqual(
       expect.objectContaining({
-        uri: '/channels/Preview_2/bundles/sample-app/cluster-release/bundle.android.custom.hbc.gz',
+        uri: '/channels/Preview_2/bundles/sample-app/cluster-release/bundle.android.hbc.gz',
       })
     );
     expect(getObject).toHaveBeenCalledExactlyOnceWith(
@@ -209,59 +218,25 @@ describe('channel bundle routing', () => {
 
   it('retains the cluster access restriction for channel routes', async () => {
     const getObject = vi.spyOn(S3Client.prototype, 'getObject');
-    const handler = createOriginRequestHandler({ ...context, allowAccessCluster: false });
-    expect(await handler(event('/ios/sample-app/testers/bundle', 'channel=preview'))).toEqual(
-      expect.objectContaining({ status: '400' })
-    );
+    const handler = createOriginRequestHandler({ ...pathContext, allowAccessCluster: false });
+    expect(await handler(event('/ios/sample-app/testers/preview'))).toEqual(expect.objectContaining({ status: '400' }));
     expect(getObject).not.toHaveBeenCalled();
-  });
-
-  it.each([
-    'channel=',
-    'channel=../stable',
-    'channel=a%2Fb',
-    'channel=a+b',
-    'channel=preview&channel=stable',
-    'channel=preview&channel=preview',
-    'channel=%ZZ',
-    'channel=preview&%63hannel=stable',
-  ])('rejects invalid channel query before reading state: %s', async (querystring) => {
-    const resolve = vi.spyOn(DeployManager, 'resolveDeploymentId');
-    expect(await createOriginRequestHandler(context)(event('/ios/sample-app/1/bundle', querystring))).toEqual(
-      expect.objectContaining({ status: '400' })
-    );
-    expect(resolve).not.toHaveBeenCalled();
   });
 
   it.each([
     '/channels/preview/ios/sample-app/1/bundle',
     '/ios/sample-app/1',
-    '/ios/sample-app/1/bundle/extra',
-    '/ios-other/sample-app/1/bundle',
-    '/ios//1/bundle',
-  ])('rejects malformed paths with a channel query: %s', async (uri) => {
+    '/ios/sample-app/1/preview/extra',
+    '/ios-other/sample-app/1/preview',
+  ])('rejects malformed channel paths: %s', async (uri) => {
     const resolve = vi.spyOn(DeployManager, 'resolveDeploymentId');
-    expect(await createOriginRequestHandler(context)(event(uri, 'channel=preview'))).toEqual(
+    expect(await createOriginRequestHandler(pathContext)(event(uri))).toEqual(
       expect.objectContaining({ status: '400' })
     );
     expect(resolve).not.toHaveBeenCalled();
   });
 
-  it('preserves unrelated query parameters and removes only the channel before the S3 request', async () => {
-    const getObject = vi
-      .spyOn(S3Client.prototype, 'getObject')
-      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'release' }));
-    const handler = createOriginRequestHandler(context);
-    expect(await handler(event('/ios/sample-app/1/bundle', 'cache=one&channel=preview&cache=two'))).toEqual(
-      expect.objectContaining({
-        uri: '/channels/preview/bundles/sample-app/release/bundle.ios.hbc.gz',
-        querystring: 'cache=one&cache=two',
-      })
-    );
-    expect(getObject).toHaveBeenCalledExactlyOnceWith('channels/preview/deployments/sample-app/deployment_state');
-  });
-
-  it('keeps legacy query strings byte-for-byte when no channel is specified', async () => {
+  it('keeps existing query strings byte-for-byte without using them for routing', async () => {
     const getObject = vi
       .spyOn(S3Client.prototype, 'getObject')
       .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'legacy-release' }));

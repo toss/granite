@@ -116,34 +116,16 @@ in the handler; the component's default handler keeps cluster access disabled.
   falling back to a legacy tagged/default bundle.
 - Registration reserves an app/suffix pair. Only register names that the app has not used as legacy filename
   tags; the same URL cannot express both meanings. If a name is already used, keep its legacy route and choose
-  another path-channel name or use explicit query targeting below. No storage-existence heuristic chooses between them.
+  another path-channel name. No storage-existence heuristic chooses between them.
 
 Channel names follow the [Forge CLI rules](../forge-cli/README.md#deployment-channels). Invalid names, duplicate
 registrations and `bundle` are rejected when configuring the handler. Register shared and app selectors separately
 with matching channel names. Keep registrations in place while native releases depend on them.
 
-### Explicit channel and tag targeting
-
-The query form remains supported for channel-plus-tag requests and for channel names that cannot be registered
-as short path selectors:
-
-```text
-/ios/sample-app/1/bundle?channel=next
-/ios/sample-app/1/custom?channel=next
-```
-
-An explicit query channel takes precedence over a path registration: `/ios/sample-app/1/next?channel=stable`
-selects the `next` filename tag in channel `stable`. The query parameter must appear exactly once when supplied;
-empty, invalid or duplicate values return 400 before storage access.
-
-The origin-request Lambda consumes `channel` to select the S3 namespace and removes that parameter before
-forwarding to S3. Remaining query parameter values are forwarded, with possible encoding normalization.
-Without a query channel, the original query string is forwarded unchanged.
-
 ### Cache behavior
 
-Path selectors have distinct request URIs. The distribution also forwards and caches all query strings, so query
-channels have separate cache keys. The S3 notification configuration watches both `deployments/` and `channels/`.
+Deployment channels use distinct path selectors and cache keys. File tags remain part of the unregistered
+legacy URL contract. The S3 notification configuration watches both `deployments/` and `channels/`.
 Because CloudFront supports wildcards only at the end of an invalidation path, invalidation covers the affected
 app (or cluster) across all channels. Updating `channels/next/deployments/sample-app/deployment_state` invalidates:
 
@@ -152,7 +134,7 @@ app (or cluster) across all channels. Updating `channels/next/deployments/sample
 /android/sample-app/*
 ```
 
-This covers both short path selectors and query variants. Other services are unaffected. Other channels of the
+This covers all path-channel selectors for the service. Other services are unaffected. Other channels of the
 same app may incur a cache miss, but their deployment pointers and bundles stay unchanged. Deployment history
 and immutable bundle uploads do not trigger invalidation. Pointer changes retain asynchronous S3-to-CloudFront
 invalidation. See [AWS invalidation path rules](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/invalidation-specifying-objects.html).
@@ -165,10 +147,9 @@ enabling it in a native release. Channels do not validate runtime compatibility 
 publications atomic.
 
 Update and verify the Lambda routing configuration and S3 notifications before enabling channel URLs in clients.
-The old Lambda treats a trailing channel name as a filename tag and ignores query channels. When adding or changing
+The old Lambda treats a trailing channel name as a filename tag. When adding or changing
 route registrations, invalidate the affected app selectors and wait for completion before enabling clients, so
-cached legacy responses cannot survive under the newly registered URLs. Also clear query variants if they were
-requested before the channel-aware Lambda was installed.
+cached legacy responses cannot survive under the newly registered URLs.
 
 Review the complete Pulumi preview: the existing component also manages shared-bundle objects and deployment
 pointers, so applying infrastructure changes can publish or replace the unscoped shared deployment.

@@ -3,7 +3,6 @@ import { CloudFrontRequestEvent, CloudFrontRequestResult } from 'aws-lambda';
 import { parsePathChannelRoutes, type PathChannelRoutes } from '../pathChannelRoutes';
 import { RequestHandlerContext } from './context';
 import { parseAppName } from './utils/parseAppName';
-import { parseChannelQuery } from './utils/parseChannelQuery';
 import { parseGroupId } from './utils/parseGroupId';
 import { parsePlatform } from './utils/parsePlatform';
 import { parseSuffix } from './utils/parseSuffix';
@@ -23,7 +22,6 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
         throw new InvalidRequest('request is null');
       }
 
-      const { channel: queryChannel, querystring } = parseChannelQuery(request.querystring);
       const appName = parseAppName(request.uri);
       const platform = parsePlatform(request.uri);
       const groupId = parseGroupId(request.uri);
@@ -33,10 +31,8 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
         throw new InvalidRequest('invalid request');
       }
 
-      // Explicit query targeting keeps the original suffix/tag contract, even
-      // when that suffix is also registered as a short path-channel selector.
-      const isPathChannel = queryChannel === undefined && pathChannels.get(appName)?.has(suffix) === true;
-      const channel = isPathChannel ? suffix : queryChannel;
+      const isPathChannel = pathChannels.get(appName)?.has(suffix) === true;
+      const channel = isPathChannel ? suffix : undefined;
       const tag = isPathChannel || suffix === 'bundle' ? undefined : suffix;
       if (channel !== undefined) {
         const parts = request.uri.split('/');
@@ -71,7 +67,6 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
 
       const absolutePath = `/${bundlePath}`;
       request.uri = absolutePath;
-      request.querystring = querystring;
       request.headers['x-bundle'] = [
         {
           key: 'X-Bundle',

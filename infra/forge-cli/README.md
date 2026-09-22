@@ -28,10 +28,10 @@ Include `--session-token "$AWS_SESSION_TOKEN"` when using temporary credentials.
 Omitting `--channel` preserves the existing unscoped namespace. No named channel, including a channel named
 `default`, aliases that namespace. Existing objects are not moved or copied.
 
-| Scope              | Deployment state                                           | Bundle URL                                 |
-| ------------------ | ---------------------------------------------------------- | ------------------------------------------ |
-| Existing, unscoped | `deployments/sample-app/deployment_state`                  | `/ios/sample-app/1/bundle`                 |
-| `preview`          | `channels/preview/deployments/sample-app/deployment_state` | `/ios/sample-app/1/bundle?channel=preview` |
+| Scope              | Deployment state                                           | Bundle URL                  |
+| ------------------ | ---------------------------------------------------------- | --------------------------- |
+| Existing, unscoped | `deployments/sample-app/deployment_state`                  | `/ios/sample-app/1/bundle`  |
+| `preview`          | `channels/preview/deployments/sample-app/deployment_state` | `/ios/sample-app/1/preview` |
 
 Bundle objects, deployment history, stable/canary state and cluster pointers all use the same channel prefix.
 For the short `/<platform>/<app>/<group>/<channel>` URL, register unused channel selectors per app in the
@@ -39,7 +39,7 @@ CDN's `pathChannelRoutes` configuration. For example, with `sample-app: ['next']
 and request `/ios/sample-app/1/next`. `bundle` remains reserved for the legacy default, and unregistered suffixes
 retain their filename-tag meaning. The CLI does not automatically change URL registrations.
 
-The explicit `?channel=<name>` form remains available for channel-plus-tag targeting. See the
+Channels are selected only by registered path suffixes and serve the channel's default bundle. See the
 [backward-compatibility rules](../pulumi-aws/README.md#backward-compatibility) before reserving a path-channel name.
 
 ## Native runtime selection
@@ -53,9 +53,8 @@ they do not compile bundles, infer runtime compatibility or validate the bytecod
 the native build configuration and `--channel` value aligned.
 
 Install and verify the channel-aware Lambda and S3 notifications before enabling channel URLs in native clients.
-The old Lambda interprets trailing channel names as filename tags and ignores query parameters. Invalidate
-affected app selectors after registering path channels, and clear any query-channel responses cached before
-the Lambda upgrade. Wait for invalidation to finish before enabling clients.
+The old Lambda interprets trailing channel names as filename tags. Invalidate affected app selectors after
+registering path channels and wait for invalidation to finish before enabling clients.
 With the updated handler, a missing deployment in a named channel returns 404 without falling back to the legacy
 namespace or another channel. Native clients should handle that failure using their own compatible embedded
 bundle or error handling.
