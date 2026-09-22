@@ -1,7 +1,9 @@
 package com.teleport.portal
 
+import android.graphics.Point
 import android.view.View
 import com.facebook.react.bridge.Arguments
+import com.facebook.react.uimanager.RootViewUtil
 import com.facebook.react.uimanager.StateWrapper
 import com.teleport.extensions.dp
 import com.teleport.extensions.isDetached
@@ -61,22 +63,32 @@ internal class PortalLayoutStateController(
   }
 
   private fun createLayoutState(host: PortalHostView): PortalLayoutState {
-    val hostLocation = host.screenLocation()
-    // A detached controller surface has no Window coordinate space. Its children
-    // are already physically parented by the destination host, so use the host
-    // origin as the logical source origin and avoid applying a screen inset twice.
-    val sourceLocation =
+    // This offset is what `PortalViewShadowNode.getTransform` translates by, and that transform is
+    // what `measureInWindow` reports. Neither what these nodes render nor what they receive touches
+    // on depends on it: the children are physically parented by the host, and `TouchTargetHelper`
+    // walks the real View tree. So it decides only where they say they are.
+    //
+    // A detached controller surface cannot measure itself: `getLocationOnScreen` returns (0, 0) for
+    // a view with no window, so an offset derived from it lands the teleported subtree in a
+    // different space than an ordinary, window-attached surface. React Native puts a surface root
+    // into that space with `RootViewUtil.getViewportOffset`; asking it about the host, which is the
+    // view these children are actually parented by, puts them there too. Delegating rather than
+    // repeating the arithmetic also means the two stay together when React Native changes what
+    // `getViewportOffset` does — 0.86 rewrote it around `WindowInsetsCompat`, for one.
+    val offset =
       if (sourceView.isDetached()) {
-        hostLocation
+        RootViewUtil.getViewportOffset(host)
       } else {
-        sourceView.screenLocation()
+        val hostLocation = host.screenLocation()
+        val sourceLocation = sourceView.screenLocation()
+        Point(hostLocation[0] - sourceLocation[0], hostLocation[1] - sourceLocation[1])
       }
 
     return PortalLayoutState(
       hostWidth = host.width.toFloat().dp,
       hostHeight = host.height.toFloat().dp,
-      offsetX = (hostLocation[0] - sourceLocation[0]).toFloat().dp,
-      offsetY = (hostLocation[1] - sourceLocation[1]).toFloat().dp,
+      offsetX = offset.x.toFloat().dp,
+      offsetY = offset.y.toFloat().dp,
     )
   }
 }
