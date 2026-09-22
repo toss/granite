@@ -26,8 +26,8 @@ export function getPathsToInvalidate(key: string): string[] {
   }
 
   // Rule 1: deployments/<appName>/CURRENT file
-  // Channel selectors are query parameters. CloudFront only supports
-  // trailing wildcards, so evict this app's cached selectors across channels.
+  // Channels follow the group segment or use a query parameter. CloudFront only
+  // supports trailing wildcards, so evict this app's selectors across channels.
   if (isCurrentFile(key)) {
     return [`/ios/${appName}/*`, `/android/${appName}/*`];
   }
