@@ -2,7 +2,7 @@ import { DeployManager, S3Client, InvalidRequest, NotFoundError, NoSuchKey } fro
 import { CloudFrontRequestEvent, CloudFrontRequestResult } from 'aws-lambda';
 import { RequestHandlerContext } from './context';
 import { parseAppName } from './utils/parseAppName';
-import { parseChannelUri } from './utils/parseChannelUri';
+import { parseChannelQuery } from './utils/parseChannelQuery';
 import { parseGroupId } from './utils/parseGroupId';
 import { parsePlatform } from './utils/parsePlatform';
 import { parseSuffix } from './utils/parseSuffix';
@@ -21,11 +21,21 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
         throw new InvalidRequest('request is null');
       }
 
-      const { channel, uri } = parseChannelUri(request.uri);
-      const appName = parseAppName(uri);
-      const platform = parsePlatform(uri);
-      const groupId = parseGroupId(uri);
-      const suffix = parseSuffix(uri);
+      const { channel, querystring } = parseChannelQuery(request.querystring);
+      if (channel !== undefined) {
+        const parts = request.uri.split('/');
+        if (
+          parts.length !== 5 ||
+          !['ios', 'android'].includes(parts[1] ?? '') ||
+          parts.slice(2).some((part) => !part)
+        ) {
+          throw new InvalidRequest('Expected /<platform>/<app>/<group>/<suffix> with a channel query parameter');
+        }
+      }
+      const appName = parseAppName(request.uri);
+      const platform = parsePlatform(request.uri);
+      const groupId = parseGroupId(request.uri);
+      const suffix = parseSuffix(request.uri);
 
       if (appName == null || platform == null || groupId == null) {
         throw new InvalidRequest('invalid request');
@@ -53,6 +63,7 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
 
       const absolutePath = `/${bundlePath}`;
       request.uri = absolutePath;
+      request.querystring = querystring;
       request.headers['x-bundle'] = [
         {
           key: 'X-Bundle',

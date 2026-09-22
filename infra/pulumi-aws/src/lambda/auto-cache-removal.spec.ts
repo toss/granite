@@ -20,7 +20,7 @@ describe('channel cache removal events', () => {
   }
 
   it.each(['ObjectCreated:Put', 'ObjectRemoved:Delete'])(
-    'decodes a channel pointer key and sends only its invalidation paths for %s',
+    'decodes a channel pointer key and invalidates the app selectors for %s',
     async (eventName) => {
       const key = 'channels/preview/deployments/sample-app/deployment_state';
       const result = await processRecord(record(encodeURIComponent(key), eventName), 'sample-distribution');
@@ -32,7 +32,7 @@ describe('channel cache removal events', () => {
         InvalidationBatch: {
           Paths: {
             Quantity: 2,
-            Items: ['/channels/preview/ios/sample-app/*', '/channels/preview/android/sample-app/*'],
+            Items: ['/ios/sample-app/*', '/android/sample-app/*'],
           },
         },
       });

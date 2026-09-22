@@ -9,7 +9,6 @@ const cloudFrontClient = new CloudFrontClient({});
  * Determine CloudFront paths to invalidate based on S3 object key
  */
 export function getPathsToInvalidate(key: string): string[] {
-  let prefix = '';
   if (key.startsWith('channels/')) {
     const [, channel, ...parts] = key.split('/');
     try {
@@ -17,7 +16,6 @@ export function getPathsToInvalidate(key: string): string[] {
     } catch {
       return [];
     }
-    prefix = `/channels/${channel}`;
     key = parts.join('/');
   }
   const appName = extractAppName(key);
@@ -27,8 +25,10 @@ export function getPathsToInvalidate(key: string): string[] {
   }
 
   // Rule 1: deployments/<appName>/CURRENT file
+  // Channel selectors are query parameters. CloudFront only supports
+  // trailing wildcards, so evict this app's cached selectors across channels.
   if (isCurrentFile(key)) {
-    return [`${prefix}/ios/${appName}/*`, `${prefix}/android/${appName}/*`];
+    return [`/ios/${appName}/*`, `/android/${appName}/*`];
   }
 
   // Rule 2: deployments/<appName>/clusters/<cluster-id>.deploymentInfo file
@@ -36,7 +36,7 @@ export function getPathsToInvalidate(key: string): string[] {
     const clusterId = extractClusterId(key);
 
     if (clusterId) {
-      return [`${prefix}/ios/${appName}/${clusterId}/*`, `${prefix}/android/${appName}/${clusterId}/*`];
+      return [`/ios/${appName}/${clusterId}/*`, `/android/${appName}/${clusterId}/*`];
     }
   }
 

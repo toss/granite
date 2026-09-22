@@ -28,13 +28,14 @@ Include `--session-token "$AWS_SESSION_TOKEN"` when using temporary credentials.
 Omitting `--channel` preserves the existing unscoped namespace. No named channel, including a channel named
 `default`, aliases that namespace. Existing objects are not moved or copied.
 
-| Scope              | Deployment state                                           | Bundle URL                                  |
-| ------------------ | ---------------------------------------------------------- | ------------------------------------------- |
-| Existing, unscoped | `deployments/sample-app/deployment_state`                  | `/ios/sample-app/1/bundle`                  |
-| `preview`          | `channels/preview/deployments/sample-app/deployment_state` | `/channels/preview/ios/sample-app/1/bundle` |
+| Scope              | Deployment state                                           | Bundle URL                                 |
+| ------------------ | ---------------------------------------------------------- | ------------------------------------------ |
+| Existing, unscoped | `deployments/sample-app/deployment_state`                  | `/ios/sample-app/1/bundle`                 |
+| `preview`          | `channels/preview/deployments/sample-app/deployment_state` | `/ios/sample-app/1/bundle?channel=preview` |
 
 Bundle objects, deployment history, stable/canary state and cluster pointers all use the same channel prefix.
-Filename tags remain a separate feature; they do not select a channel.
+The CDN keeps the existing `/<platform>/<app>/<group>/<suffix>` path and reads the channel from a single
+`?channel=<name>` query parameter. Filename tags remain a separate feature; they do not select a channel.
 
 ## Native runtime selection
 
@@ -46,9 +47,12 @@ Deploy only bundles compatible with the native runtime assigned to that channel.
 they do not compile bundles, infer runtime compatibility or validate the bytecode ABI. Release tooling must keep
 the native build configuration and `--channel` value aligned.
 
-The CDN's channel-aware Lambda must be installed before clients start using channel URLs. A missing deployment
-in a named channel returns 404; it never falls back to the legacy namespace or another channel. Native clients
-should handle that failure using their own compatible embedded bundle or error handling.
+Install and verify the channel-aware Lambda and S3 notifications before enabling channel URLs in native clients.
+The old Lambda ignores query parameters and would serve the unscoped deployment. Clear pre-existing selector
+caches before enabling clients if channel URLs have already been requested against the old Lambda.
+With the updated handler, a missing deployment in a named channel returns 404 without falling back to the legacy
+namespace or another channel. Native clients should handle that failure using their own compatible embedded
+bundle or error handling.
 
 See [the CDN documentation](../pulumi-aws/README.md#deployment-channels) for URL routing, cache isolation and
 shared-bundle bootstrapping.

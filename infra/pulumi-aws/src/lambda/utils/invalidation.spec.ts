@@ -16,16 +16,16 @@ vi.spyOn(classes, 'CreateInvalidationCommand').mockImplementation(noop);
 
 describe('invalidation', () => {
   describe('getPathsToInvalidate', () => {
-    it.each(['deployment_state', 'CURRENT'])('invalidates only the selected channel for %s', (filename) => {
+    it.each(['deployment_state', 'CURRENT'])('invalidates the app selectors across channels for %s', (filename) => {
       expect(getPathsToInvalidate(`channels/preview/deployments/sample-app/${filename}`)).toEqual([
-        '/channels/preview/ios/sample-app/*',
-        '/channels/preview/android/sample-app/*',
+        '/ios/sample-app/*',
+        '/android/sample-app/*',
       ]);
     });
 
-    it('invalidates only the cluster within its channel', () => {
+    it('limits cluster invalidation to that cluster across channels', () => {
       expect(getPathsToInvalidate('channels/Preview_2/deployments/sample-app/clusters/testers.deploymentInfo')).toEqual(
-        ['/channels/Preview_2/ios/sample-app/testers/*', '/channels/Preview_2/android/sample-app/testers/*']
+        ['/ios/sample-app/testers/*', '/android/sample-app/testers/*']
       );
     });
 
