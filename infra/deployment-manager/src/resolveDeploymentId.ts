@@ -57,7 +57,7 @@ async function resolveDeploymentIdByGroupId(appName: string, numericGroupId: num
 async function resolveDeploymentIdByCluster(appName: string, clusterId: string, context: DeploymentContext) {
   const { s3Client } = context;
 
-  const clusterDeploymentInfoPath = paths.clusterDeploymentInfoPath(appName, clusterId, context.channel);
+  const clusterDeploymentInfoPath = paths.clusterDeploymentInfoPath({ appName, clusterId, channel: context.channel });
   try {
     const rawData = await s3Client.getObject(clusterDeploymentInfoPath);
     const deploymentInfo = parse(clusterDeploymentInfo, JSON.parse(rawData));

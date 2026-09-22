@@ -11,7 +11,7 @@ export interface ReadClusterConfig {
 export async function readCluster({ appName, clusterId }: ReadClusterConfig, context: DeploymentContext) {
   const { s3Client } = context;
 
-  const deploymentInfoPath = paths.clusterDeploymentInfoPath(appName, clusterId, context.channel);
+  const deploymentInfoPath = paths.clusterDeploymentInfoPath({ appName, clusterId, channel: context.channel });
   try {
     const rawData = await s3Client.getObject(deploymentInfoPath);
     const { deploymentId } = parse(clusterDeploymentInfo, JSON.parse(rawData));

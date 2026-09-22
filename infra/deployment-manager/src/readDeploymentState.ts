@@ -7,7 +7,7 @@ import { deploymentState, type DeploymentState } from './types';
 export async function readDeploymentState(appName: string, context: DeploymentContext): Promise<DeploymentState> {
   const { s3Client } = context;
 
-  const deploymentStatePath = paths.deploymentState(appName, context.channel);
+  const deploymentStatePath = paths.deploymentState({ appName, channel: context.channel });
   try {
     const rawData = await s3Client.getObject(deploymentStatePath);
     const state = parse(deploymentState, JSON.parse(rawData));

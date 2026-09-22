@@ -11,3 +11,5 @@ and unregistered filename-tag routes. Channels are selected only by registered p
 App-scoped cache invalidation covers all selectors, and unique caller references prevent simultaneous requests
 from colliding. Missing channel deployments never fall back to another namespace. Correct cluster rollout to
 write the `.deploymentInfo` pointer already used by readers and cache invalidation.
+
+The exported `paths` helpers now take one options object instead of positional arguments.

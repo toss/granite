@@ -160,9 +160,9 @@ describe('deployment channels', () => {
   );
 
   it('preserves legacy paths and treats tags separately from case-sensitive channel names', () => {
-    expect(paths.bundleList(appName)).toBe('deployments/sample-app/DEPLOYMENTS');
-    expect(paths.deploymentState(appName)).toBe('deployments/sample-app/deployment_state');
-    expect(paths.clusterDeploymentInfoPath(appName, 'testers')).toBe(
+    expect(paths.bundleList({ appName })).toBe('deployments/sample-app/DEPLOYMENTS');
+    expect(paths.deploymentState({ appName })).toBe('deployments/sample-app/deployment_state');
+    expect(paths.clusterDeploymentInfoPath({ appName, clusterId: 'testers' })).toBe(
       'deployments/sample-app/clusters/testers.deploymentInfo'
     );
     expect(DeployManager.resolveBundle({ appName, platform: 'ios', deploymentId: 'release', tag: 'custom' })).toBe(

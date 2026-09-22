@@ -1,14 +1,27 @@
 import { channelPrefix } from '../channel';
 
+interface AppPathOptions {
+  appName: string;
+  channel?: string;
+}
+
+interface BundlePathOptions extends AppPathOptions {
+  deploymentId: string;
+}
+
+interface ClusterPathOptions extends AppPathOptions {
+  clusterId: string;
+}
+
 export const paths = {
-  bundlePathPrefix: (appName: string, deploymentId: string, channel?: string) =>
+  bundlePathPrefix: ({ appName, deploymentId, channel }: BundlePathOptions) =>
     `${channelPrefix(channel)}bundles/${appName}/${deploymentId}` as const,
-  bundleList: (appName: string, channel?: string) =>
+  bundleList: ({ appName, channel }: AppPathOptions) =>
     `${channelPrefix(channel)}deployments/${appName}/DEPLOYMENTS` as const,
-  deploymentState: (appName: string, channel?: string) =>
+  deploymentState: ({ appName, channel }: AppPathOptions) =>
     `${channelPrefix(channel)}deployments/${appName}/deployment_state` as const,
-  clusterDeploymentState: (appName: string, clusterId: string, channel?: string) =>
+  clusterDeploymentState: ({ appName, clusterId, channel }: ClusterPathOptions) =>
     `${channelPrefix(channel)}deployments/${appName}/clusters/${clusterId}` as const,
-  clusterDeploymentInfoPath: (appName: string, clusterId: string, channel?: string) =>
+  clusterDeploymentInfoPath: ({ appName, clusterId, channel }: ClusterPathOptions) =>
     `${channelPrefix(channel)}deployments/${appName}/clusters/${clusterId}.deploymentInfo` as const,
 } as const;

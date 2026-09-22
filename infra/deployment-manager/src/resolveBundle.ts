@@ -19,7 +19,7 @@ export interface ResolveBundleOptions {
  * - `bundle.<platform>.<tag>.hbc.gz`
  */
 export function resolveBundle({ appName, platform, deploymentId, tag, channel }: ResolveBundleOptions) {
-  const bundleUrlPrefix = paths.bundlePathPrefix(appName, deploymentId, channel);
+  const bundleUrlPrefix = paths.bundlePathPrefix({ appName, deploymentId, channel });
   const extension = 'hbc.gz';
   const name = [BUNDLE_BASE_NAME, platform, tag, extension].filter(Boolean).join('.');
 

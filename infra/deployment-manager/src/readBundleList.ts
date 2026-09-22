@@ -4,7 +4,7 @@ import type { DeploymentInfo } from './types';
 
 export async function readBundleList(appName: string, context: DeploymentContext): Promise<DeploymentInfo[]> {
   const { s3Client } = context;
-  const data = await s3Client.getObject(paths.bundleList(appName, context.channel));
+  const data = await s3Client.getObject(paths.bundleList({ appName, channel: context.channel }));
 
   return JSON.parse(data);
 }

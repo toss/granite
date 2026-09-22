@@ -6,7 +6,7 @@ import type { DeploymentInfo } from './types';
 export async function writeBundleList(appName: string, deploymentInfo: DeploymentInfo[], context: DeploymentContext) {
   const { s3Client } = context;
 
-  await s3Client.putObject(paths.bundleList(appName, context.channel), {
+  await s3Client.putObject(paths.bundleList({ appName, channel: context.channel }), {
     Body: JSON.stringify(deploymentInfo.slice(0, MAX_HISTORY_COUNT)),
     ContentType: 'application/json',
   });

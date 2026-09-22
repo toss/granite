@@ -26,8 +26,11 @@ const bundleKey = DeployManager.resolveBundle({
 ```
 
 `resolveBundle` is a pure path builder, so its channel is supplied in the options instead of a storage context.
-The exported `paths` helpers accept an optional final channel argument. Omission preserves existing paths;
-an explicit channel prefixes every key with `channels/<channel>/`. Missing data is never read from another scope.
+The exported `paths` helpers each accept one options object containing `appName`, an optional `channel`, and
+`deploymentId` or `clusterId` where needed. For example, use `paths.bundleList({ appName, channel })` and
+`paths.bundlePathPrefix({ appName, deploymentId, channel })` instead of positional arguments. Omitting `channel`
+preserves existing paths; an explicit channel prefixes every key with `channels/<channel>/`. Missing data is
+never read from another scope.
 
 Names are case-sensitive and validated before storage access: 1–64 letters, digits, underscores or hyphens,
 starting with a letter or digit. The public `validateChannel` helper can validate configuration before doing work.

@@ -8,7 +8,7 @@ export async function rollout(
 ): Promise<DeploymentState> {
   const { s3Client } = context;
 
-  await s3Client.putObject(paths.deploymentState(appName, context.channel), {
+  await s3Client.putObject(paths.deploymentState({ appName, channel: context.channel }), {
     Body: JSON.stringify(state),
     ContentType: 'application/json',
   });

@@ -14,7 +14,7 @@ export async function rolloutCluster(
 ) {
   const { s3Client } = context;
 
-  await s3Client.putObject(paths.clusterDeploymentInfoPath(appName, clusterId, context.channel), {
+  await s3Client.putObject(paths.clusterDeploymentInfoPath({ appName, clusterId, channel: context.channel }), {
     Body: JSON.stringify({ deploymentId }),
     ContentType: 'application/json',
   });
