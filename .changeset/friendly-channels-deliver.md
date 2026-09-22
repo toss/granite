@@ -1,7 +1,7 @@
 ---
-'@granite-js/deployment-manager': minor
-'@granite-js/forge-cli': minor
-'@granite-js/pulumi-aws': minor
+'@granite-js/deployment-manager': patch
+'@granite-js/forge-cli': patch
+'@granite-js/pulumi-aws': patch
 ---
 
 Add configurable deployment channels across Forge, deployment storage and the AWS CDN. Forge accepts `--channel`
