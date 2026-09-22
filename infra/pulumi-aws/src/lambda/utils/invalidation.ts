@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import { validateChannel } from '@granite-js/deployment-manager';
 import { extractAppName, extractClusterId, isCurrentFile, isClusterDeploymentInfoFile } from './pathParser';
@@ -48,8 +49,7 @@ export function getPathsToInvalidate(key: string): string[] {
  * Create CloudFront invalidation for specified paths
  */
 export async function createInvalidation(paths: string[], distributionId: string): Promise<string> {
-  const timestamp = new Date().getTime();
-  const callerReference = `s3-triggered-invalidation-${timestamp}`;
+  const callerReference = `s3-triggered-invalidation-${randomUUID()}`;
 
   const params = {
     DistributionId: distributionId,

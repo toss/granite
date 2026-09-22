@@ -1,5 +1,6 @@
 import { DeployManager, S3Client, InvalidRequest, NotFoundError, NoSuchKey } from '@granite-js/deployment-manager';
 import { CloudFrontRequestEvent, CloudFrontRequestResult } from 'aws-lambda';
+import { parsePathChannelRoutes, type PathChannelRoutes } from '../pathChannelRoutes';
 import { RequestHandlerContext } from './context';
 import { parseAppName } from './utils/parseAppName';
 import { parseChannelQuery } from './utils/parseChannelQuery';
@@ -9,6 +10,7 @@ import { parseSuffix } from './utils/parseSuffix';
 
 // https://cdn.example.com/<ios|android>/<appName>/<groupId>/0_72_6 -> s3://<bucketName>/bundles/<appName>/<deploymentId>/bundle.<ios|android>.0_72_6.hbc.gz
 export function createOriginRequestHandler(context: RequestHandlerContext) {
+  const pathChannels = parsePathChannelRoutes(context.pathChannelRoutes);
   const s3Client = new S3Client({
     bucket: context.bucketName,
     region: context.region,
@@ -21,17 +23,7 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
         throw new InvalidRequest('request is null');
       }
 
-      const { channel, querystring } = parseChannelQuery(request.querystring);
-      if (channel !== undefined) {
-        const parts = request.uri.split('/');
-        if (
-          parts.length !== 5 ||
-          !['ios', 'android'].includes(parts[1] ?? '') ||
-          parts.slice(2).some((part) => !part)
-        ) {
-          throw new InvalidRequest('Expected /<platform>/<app>/<group>/<suffix> with a channel query parameter');
-        }
-      }
+      const { channel: queryChannel, querystring } = parseChannelQuery(request.querystring);
       const appName = parseAppName(request.uri);
       const platform = parsePlatform(request.uri);
       const groupId = parseGroupId(request.uri);
@@ -39,6 +31,22 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
 
       if (appName == null || platform == null || groupId == null) {
         throw new InvalidRequest('invalid request');
+      }
+
+      // Explicit query targeting keeps the original suffix/tag contract, even
+      // when that suffix is also registered as a short path-channel selector.
+      const isPathChannel = queryChannel === undefined && pathChannels.get(appName)?.has(suffix) === true;
+      const channel = isPathChannel ? suffix : queryChannel;
+      const tag = isPathChannel || suffix === 'bundle' ? undefined : suffix;
+      if (channel !== undefined) {
+        const parts = request.uri.split('/');
+        if (
+          parts.length !== 5 ||
+          !['ios', 'android'].includes(parts[1] ?? '') ||
+          parts.slice(2).some((part) => !part)
+        ) {
+          throw new InvalidRequest('Expected /<platform>/<app>/<group>/<selector>');
+        }
       }
 
       const deploymentId = await DeployManager.resolveDeploymentId(
@@ -58,7 +66,7 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
         platform,
         deploymentId,
         channel,
-        tag: suffix !== 'bundle' ? suffix : undefined,
+        tag,
       });
 
       const absolutePath = `/${bundlePath}`;
@@ -90,11 +98,13 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
 
 declare const _BUCKET_NAME: string;
 declare const _BUCKET_REGION: string;
+declare const _PATH_CHANNEL_ROUTES: PathChannelRoutes;
 
 const handler = createOriginRequestHandler({
   allowAccessCluster: false,
   bucketName: _BUCKET_NAME,
   region: _BUCKET_REGION,
+  pathChannelRoutes: typeof _PATH_CHANNEL_ROUTES === 'undefined' ? {} : _PATH_CHANNEL_ROUTES,
 });
 
 export { handler };

@@ -1,8 +1,10 @@
 import { DeployManager, NoSuchKey, S3Client } from '@granite-js/deployment-manager';
 import type { CloudFrontRequestEvent } from 'aws-lambda';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import type { PathChannelRoutes } from '../pathChannelRoutes';
 
 let createOriginRequestHandler: typeof import('./origin-request').createOriginRequestHandler;
+let configuredHandler: typeof import('./origin-request').handler;
 const context = { bucketName: 'sample-bucket', region: 'us-east-1', allowAccessCluster: true };
 
 function event(uri: string, querystring = ''): CloudFrontRequestEvent {
@@ -26,13 +28,113 @@ function event(uri: string, querystring = ''): CloudFrontRequestEvent {
 beforeAll(async () => {
   vi.stubGlobal('_BUCKET_NAME', context.bucketName);
   vi.stubGlobal('_BUCKET_REGION', context.region);
-  ({ createOriginRequestHandler } = await import('./origin-request'));
+  vi.stubGlobal('_PATH_CHANNEL_ROUTES', { 'sample-app': ['preview'] });
+  ({ createOriginRequestHandler, handler: configuredHandler } = await import('./origin-request'));
 });
 afterEach(() => vi.restoreAllMocks());
 afterAll(() => vi.unstubAllGlobals());
 
 describe('channel bundle routing', () => {
-  it.each(['custom', 'custom@preview', 'channels'])('preserves legacy filename tag %s', async (tag) => {
+  const pathContext = { ...context, pathChannelRoutes: { 'sample-app': ['preview'], shared: ['preview'] } };
+
+  it.each(['ios', 'android'])('uses a registered trailing channel on %s', async (platform) => {
+    const getObject = vi
+      .spyOn(S3Client.prototype, 'getObject')
+      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'release' }));
+    const handler = createOriginRequestHandler(pathContext);
+    for (const appName of ['sample-app', 'shared']) {
+      expect(await handler(event(`/${platform}/${appName}/1/preview`))).toEqual(
+        expect.objectContaining({
+          uri: `/channels/preview/bundles/${appName}/release/bundle.${platform}.hbc.gz`,
+        })
+      );
+      expect(getObject).toHaveBeenLastCalledWith(`channels/preview/deployments/${appName}/deployment_state`);
+    }
+  });
+
+  it('wires configured path routes into the exported Lambda handler', async () => {
+    const getObject = vi
+      .spyOn(S3Client.prototype, 'getObject')
+      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'release' }));
+    expect(await configuredHandler(event('/ios/sample-app/1/preview'))).toEqual(
+      expect.objectContaining({
+        uri: '/channels/preview/bundles/sample-app/release/bundle.ios.hbc.gz',
+      })
+    );
+    expect(getObject).toHaveBeenCalledExactlyOnceWith('channels/preview/deployments/sample-app/deployment_state');
+  });
+
+  it('keeps the same suffix as a legacy tag on apps without a registration', async () => {
+    const getObject = vi
+      .spyOn(S3Client.prototype, 'getObject')
+      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'legacy-release' }));
+    expect(await createOriginRequestHandler(pathContext)(event('/ios/another-app/1/preview'))).toEqual(
+      expect.objectContaining({
+        uri: '/bundles/another-app/legacy-release/bundle.ios.preview.hbc.gz',
+      })
+    );
+    expect(getObject).toHaveBeenCalledExactlyOnceWith('deployments/another-app/deployment_state');
+  });
+
+  it('preserves the default bundle and other legacy tags when path routes are enabled', async () => {
+    const getObject = vi
+      .spyOn(S3Client.prototype, 'getObject')
+      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'legacy-release' }));
+    const handler = createOriginRequestHandler(pathContext);
+    for (const [selector, file] of [
+      ['bundle', 'bundle.ios.hbc.gz'],
+      ['custom', 'bundle.ios.custom.hbc.gz'],
+    ]) {
+      expect(await handler(event(`/ios/sample-app/1/${selector}`))).toEqual(
+        expect.objectContaining({
+          uri: `/bundles/sample-app/legacy-release/${file}`,
+        })
+      );
+      expect(getObject).toHaveBeenLastCalledWith('deployments/sample-app/deployment_state');
+    }
+  });
+
+  it('never falls back to legacy state when a registered path channel has no deployment', async () => {
+    const getObject = vi
+      .spyOn(S3Client.prototype, 'getObject')
+      .mockRejectedValue(new NoSuchKey({ $metadata: {}, message: 'Not found' }));
+    expect(await createOriginRequestHandler(pathContext)(event('/ios/sample-app/1/preview'))).toEqual({
+      status: '404',
+      statusDescription: 'Deployment not found',
+    });
+    expect(getObject).toHaveBeenCalledExactlyOnceWith('channels/preview/deployments/sample-app/deployment_state');
+  });
+
+  it('gives explicit query targeting precedence and preserves the filename tag', async () => {
+    const getObject = vi
+      .spyOn(S3Client.prototype, 'getObject')
+      .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'release' }));
+    expect(await createOriginRequestHandler(pathContext)(event('/ios/sample-app/1/preview', 'channel=stable'))).toEqual(
+      expect.objectContaining({
+        uri: '/channels/stable/bundles/sample-app/release/bundle.ios.preview.hbc.gz',
+      })
+    );
+    expect(getObject).toHaveBeenCalledExactlyOnceWith('channels/stable/deployments/sample-app/deployment_state');
+  });
+
+  it('rejects extra path segments on registered channel routes', async () => {
+    const getObject = vi.spyOn(S3Client.prototype, 'getObject');
+    expect(await createOriginRequestHandler(pathContext)(event('/ios/sample-app/1/preview/extra'))).toEqual(
+      expect.objectContaining({ status: '400' })
+    );
+    expect(getObject).not.toHaveBeenCalled();
+  });
+
+  it.each<PathChannelRoutes>([
+    { 'sample-app': ['bundle'] },
+    { 'sample-app': ['../stable'] },
+    { 'sample-app': ['preview', 'preview'] },
+    { 'invalid/app': ['preview'] },
+  ])('rejects invalid route registrations at handler construction: %j', (pathChannelRoutes) => {
+    expect(() => createOriginRequestHandler({ ...context, pathChannelRoutes })).toThrow();
+  });
+
+  it.each(['custom', 'custom@preview', 'channels', 'preview'])('preserves legacy filename tag %s', async (tag) => {
     const getObject = vi
       .spyOn(S3Client.prototype, 'getObject')
       .mockResolvedValue(JSON.stringify({ type: 'STABLE', deploymentId: 'legacy-release' }));

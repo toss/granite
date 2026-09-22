@@ -79,70 +79,99 @@ Review the changes that Pulumi proposes, then confirm deployment. Pulumi will pr
 
 ## Deployment channels
 
-The origin-request Lambda supports both URL formats on the same distribution:
+Existing URLs retain their meaning by default. To use a channel as the last path segment, register unused
+selectors for each app in the CDN configuration:
 
-```text
-/<platform>/<app>/<group>/<suffix>
-/<platform>/<app>/<group>/<suffix>?channel=<channel>
+```ts
+new ReactNativeBundleCDN('cdn', {
+  bucketName: 'sample-bucket',
+  region: 'us-east-1',
+  pathChannelRoutes: {
+    'sample-app': ['next', 'stable'],
+    shared: ['next', 'stable'],
+  },
+});
 ```
 
-For example, `/ios/sample-app/1/bundle?channel=preview` reads
-`channels/preview/deployments/sample-app/deployment_state` and serves
-`channels/preview/bundles/sample-app/<deploymentId>/bundle.ios.hbc.gz`.
-Use `android` for Android, a numeric group from 1 to 1000 for rollout targeting, and `bundle` for the default
-filename. Other suffixes select filename tags. Named clusters still require `allowAccessCluster` in the handler;
-the component's default handler keeps cluster access disabled.
+The native URL keeps the same path structure:
 
-Channel names follow the [Forge CLI rules](../forge-cli/README.md#deployment-channels). The channel query parameter
-must appear exactly once when supplied; empty, invalid or duplicate values return 400 before storage access.
-Omitting it preserves the existing path and filename-tag behavior. With the updated handler, a missing deployment
-returns 404 without looking in another channel or the unscoped namespace.
+```text
+/ios/sample-app/1/bundle   -> existing unscoped default bundle
+/ios/sample-app/1/next     -> next channel's default bundle
+/android/shared/1/next    -> next channel's shared bundle
+```
 
-The distribution already forwards and caches all query strings, so different channel values have separate
-CloudFront cache keys. The origin-request Lambda consumes `channel` to select the S3 namespace and removes
-that parameter before forwarding to S3; the remaining query parameters are forwarded. Their values are
-preserved, but encoding may be normalized when a channel is present. Without a channel, the original query
-string is forwarded unchanged.
+`/ios/sample-app/1/next` reads `channels/next/deployments/sample-app/deployment_state` and serves
+`channels/next/bundles/sample-app/<deploymentId>/bundle.ios.hbc.gz`.
+Use a numeric group from 1 to 1000 for rollout targeting. Named clusters still require `allowAccessCluster`
+in the handler; the component's default handler keeps cluster access disabled.
 
-The S3 notification configuration watches both `deployments/` and `channels/`. Because CloudFront supports
-wildcards only at the end of an invalidation path, invalidation covers the affected app (or cluster) across all
-channels. Updating `channels/preview/deployments/sample-app/deployment_state` invalidates:
+### Backward compatibility
+
+- `pathChannelRoutes` defaults to an empty map. A deployment with `--channel` does not automatically register a URL.
+- `bundle` is reserved for the existing unscoped default bundle and cannot be registered as a path channel.
+- A suffix not registered for that app remains a legacy filename tag. Registering `next` for `sample-app` does
+  not change how another app interprets its `next` tag.
+- Once a suffix is registered, it always selects that channel. A missing channel deployment returns 404 without
+  falling back to a legacy tagged/default bundle.
+- Registration reserves an app/suffix pair. Only register names that the app has not used as legacy filename
+  tags; the same URL cannot express both meanings. If a name is already used, keep its legacy route and choose
+  another path-channel name or use explicit query targeting below. No storage-existence heuristic chooses between them.
+
+Channel names follow the [Forge CLI rules](../forge-cli/README.md#deployment-channels). Invalid names, duplicate
+registrations and `bundle` are rejected when configuring the handler. Register shared and app selectors separately
+with matching channel names. Keep registrations in place while native releases depend on them.
+
+### Explicit channel and tag targeting
+
+The query form remains supported for channel-plus-tag requests and for channel names that cannot be registered
+as short path selectors:
+
+```text
+/ios/sample-app/1/bundle?channel=next
+/ios/sample-app/1/custom?channel=next
+```
+
+An explicit query channel takes precedence over a path registration: `/ios/sample-app/1/next?channel=stable`
+selects the `next` filename tag in channel `stable`. The query parameter must appear exactly once when supplied;
+empty, invalid or duplicate values return 400 before storage access.
+
+The origin-request Lambda consumes `channel` to select the S3 namespace and removes that parameter before
+forwarding to S3. Remaining query parameter values are forwarded, with possible encoding normalization.
+Without a query channel, the original query string is forwarded unchanged.
+
+### Cache behavior
+
+Path selectors have distinct request URIs. The distribution also forwards and caches all query strings, so query
+channels have separate cache keys. The S3 notification configuration watches both `deployments/` and `channels/`.
+Because CloudFront supports wildcards only at the end of an invalidation path, invalidation covers the affected
+app (or cluster) across all channels. Updating `channels/next/deployments/sample-app/deployment_state` invalidates:
 
 ```text
 /ios/sample-app/*
 /android/sample-app/*
 ```
 
-Other channels may incur a cache miss, but their deployment pointers and bundles stay unchanged. The updated
-handler resolves each cache miss within the requested channel. Deployment history and immutable bundle uploads
-do not trigger invalidation. Existing unscoped invalidation paths remain unchanged. Pointer changes retain the
-existing asynchronous S3-to-CloudFront invalidation behavior. See [AWS invalidation path rules](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/invalidation-specifying-objects.html).
+This covers both short path selectors and query variants. Other services are unaffected. Other channels of the
+same app may incur a cache miss, but their deployment pointers and bundles stay unchanged. Deployment history
+and immutable bundle uploads do not trigger invalidation. Pointer changes retain asynchronous S3-to-CloudFront
+invalidation. See [AWS invalidation path rules](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/invalidation-specifying-objects.html).
 
 ### Shared bundles and rollout order
 
-The component's prebuilt shared bundle is bootstrapped only into the existing unscoped namespace. It is **not**
-copied into named channels. Publish a compatible shared bundle and app bundles explicitly to each named channel
-before enabling that channel in a native release. Channel isolation does not validate runtime compatibility or
-make separately published shared/app bundles an atomic pair.
+The component's prebuilt shared bundle is bootstrapped only into the existing unscoped namespace. It is not
+copied into named channels. Publish compatible shared and app bundles explicitly to each named channel before
+enabling it in a native release. Channels do not validate runtime compatibility or make separate shared/app
+publications atomic.
 
-Update and verify the infrastructure's Lambda code and S3 notifications before releasing clients that use channel
-URLs. The old Lambda ignores query parameters and would serve the unscoped deployment. If channel URLs have
-already been requested before the upgrade, invalidate the affected app selectors after the Lambda update and
-wait for completion before enabling clients; otherwise old responses can remain cached under those query URLs.
+Update and verify the Lambda routing configuration and S3 notifications before enabling channel URLs in clients.
+The old Lambda treats a trailing channel name as a filename tag and ignores query channels. When adding or changing
+route registrations, invalidate the affected app selectors and wait for completion before enabling clients, so
+cached legacy responses cannot survive under the newly registered URLs. Also clear query variants if they were
+requested before the channel-aware Lambda was installed.
 
 Review the complete Pulumi preview: the existing component also manages shared-bundle objects and deployment
 pointers, so applying infrastructure changes can publish or replace the unscoped shared deployment.
-
-### Why a query parameter?
-
-A query parameter keeps every existing path segment and filename tag unchanged, including tags containing `@`.
-A channel prefix moves the established platform/app/group positions. Reinterpreting the last token or introducing
-an in-token separator conflicts with unrestricted legacy filename tags. Appending path segments preserves tags
-but adds a second path grammar and is also ignored by the old Lambda. Query targeting uses the distribution's
-existing query-string cache configuration and makes the storage namespace explicit.
-
-The tradeoff is app-wide cache eviction and a server-first rollout requirement. Channel isolation applies to
-stored state, bundle keys and cache keys; it does not imply that invalidation leaves every other channel warm.
 
 ## Cleaning up
 

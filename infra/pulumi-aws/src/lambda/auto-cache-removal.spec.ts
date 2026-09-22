@@ -13,6 +13,7 @@ describe('channel cache removal events', () => {
   afterEach(() => {
     cloudfront.reset();
     vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   function record(key: string, eventName: string): S3EventRecord {
@@ -46,5 +47,22 @@ describe('channel cache removal events', () => {
       invalidated: false,
     });
     expect(cloudfront.calls()).toHaveLength(0);
+  });
+
+  it('uses distinct caller references for simultaneous invalidations', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
+    await Promise.all(
+      ['sample-app', 'another-app'].map((appName) =>
+        processRecord(
+          record(`channels/preview/deployments/${appName}/deployment_state`, 'ObjectCreated:Put'),
+          'sample-distribution'
+        )
+      )
+    );
+    const commands = cloudfront.commandCalls(CreateInvalidationCommand);
+    expect(commands).toHaveLength(2);
+    const references = commands.map((call) => call.args[0].input.InvalidationBatch?.CallerReference);
+    expect(new Set(references).size).toBe(2);
   });
 });
