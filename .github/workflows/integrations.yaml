@@ -140,3 +140,22 @@ jobs:
         name: Setup
       - name: Run tests
         run: yarn test:all
+
+  lambda-runtime:
+    name: Lambda Node 22
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: .
+      - uses: ./.github/actions/setup-node-yarn
+        name: Setup
+      - name: Pull official Lambda runtime
+        run: docker pull --platform linux/amd64 public.ecr.aws/lambda/nodejs:22
+      - name: Build deployment manager
+        run: yarn workspace @granite-js/deployment-manager build
+      - name: Test deployment artifacts in Lambda runtime
+        run: yarn workspace @granite-js/pulumi-aws test:lambda:runtime

@@ -3,8 +3,8 @@ import path from 'path';
 import { getPackageRoot, prepareLocalDirectory } from '@granite-js/utils';
 import * as aws from '@pulumi/aws';
 import * as pulumi from '@pulumi/pulumi';
-import { transform } from 'oxc-transform';
 import { v7 as uuidv7 } from 'uuid';
+import { createLambdaSource } from './lambda-code';
 import { getTimestampByUUIDv7, toDeployedAtString } from './utils/getTimestampByUUIDv7';
 
 /**
@@ -30,15 +30,8 @@ const createLambdaCode = (
     region: string;
   }
 ) => {
-  const code = fs.readFileSync(path, 'utf8');
-  const { code: transformedCode } = transform(path, code, {
-    define: {
-      _BUCKET_NAME: JSON.stringify(bucketName),
-      _BUCKET_REGION: JSON.stringify(region),
-    },
-  });
   return new pulumi.asset.AssetArchive({
-    'index.js': new pulumi.asset.StringAsset(transformedCode),
+    'index.js': new pulumi.asset.StringAsset(createLambdaSource({ sourcePath: path, bucketName, region })),
   });
 };
 

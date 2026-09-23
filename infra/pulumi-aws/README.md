@@ -195,9 +195,8 @@ deployment manager, selected through Lambda and decompressed to verify the retur
 | Event processing                        | Mixed, duplicate and reordered events, API failure/retry, missing configuration and malformed keys                   |
 | HTTP contract                           | URI rewrite preserves request properties; response metadata, compression/cache headers and error status are retained |
 
-The cache model completes invalidations explicitly to test requests before and after completion. It does not
-claim to reproduce AWS propagation timing, event delivery, IAM policies, Lambda packaging or native runtime
-compatibility. These remain separate environment checks before enabling production channel URLs.
+The cache model completes invalidations explicitly to test requests before and after completion. This fast suite
+does not reproduce AWS propagation timing, event delivery, IAM policies or the Lambda execution environment.
 
 For registration races, paginated legacy-tag collision checks and the actual Forge upload/promotion barrier, also run:
 
@@ -205,6 +204,37 @@ For registration races, paginated legacy-tag collision checks and the actual For
 yarn workspace @granite-js/deployment-manager test
 yarn workspace @granite-js/forge-cli test
 ```
+
+### AWS Lambda Node.js 22 runtime tests
+
+This separate Vitest suite executes the built deployment artifacts using the official
+`public.ecr.aws/lambda/nodejs:22` image and its Runtime Interface Emulator (RIE):
+
+```sh
+docker pull --platform linux/amd64 public.ecr.aws/lambda/nodejs:22
+yarn workspace @granite-js/deployment-manager build
+yarn workspace @granite-js/pulumi-aws test:lambda:runtime
+```
+
+Docker must be running. The runtime command builds the package first and fails if Docker or the image is missing;
+it never silently substitutes the host Node.js runtime. A dedicated `Lambda Node 22` CI job runs this suite.
+
+| Layer         | Runtime suite                                                                                      |
+| ------------- | -------------------------------------------------------------------------------------------------- |
+| Execution     | AWS Node.js 22 image, Amazon Linux 2023, `linux/amd64`; actual RIE invocations                     |
+| Artifact      | Same `index.js` source generator as the Pulumi archive; copied-file SHA-256 is checked             |
+| Dependencies  | Real bundled AWS SDK, including request serialization and response/error deserialization           |
+| AWS transport | Loopback-only HTTP fixtures for S3 and CloudFront; no real AWS account/resources                   |
+| Isolation     | Docker `--network none`, read-only root, non-root user, no host mounts, explicit dummy credentials |
+| Cleanup       | Every test container and temporary artifact directory is removed after the suite                   |
+
+Coverage includes warm invocations seeing new channel registrations/rollouts, both platforms and shared bundles,
+legacy URLs, canary boundaries and rollback, missing/corrupt/denied state, response headers, and invalidation
+success/failure/retry. The fast suite separately checks all 1,000 rollout groups.
+
+Containers are used only for local/CI validation; Lambda@Edge continues to use the existing archive deployment.
+RIE does not recreate CloudFront edge locations, IAM authorization, resource limits, event delivery, propagation timing or native
+bundle compatibility. Those still require separate environment checks before enabling production channel URLs.
 
 ## Cleaning up
 
