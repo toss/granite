@@ -1,5 +1,11 @@
 import * as p from '@clack/prompts';
-import { DeployManager, DeploymentState, NoSuchKey, type S3Client } from '@granite-js/deployment-manager';
+import {
+  DeployManager,
+  DeploymentState,
+  NoSuchKey,
+  validateChannel,
+  type DeploymentContext,
+} from '@granite-js/deployment-manager';
 import { generateDeploymentId } from '../utils/generateDeploymentId';
 import { gzipFile } from '../utils/gzip';
 import { handlePrompts } from '../utils/handlePrompts';
@@ -14,8 +20,12 @@ interface DeployConfig {
 
 export const deploy = handlePrompts('Start deployment', deployImpl);
 
-async function deployImpl({ androidBundle, iosBundle, appName, tag }: DeployConfig, context: { s3Client: S3Client }) {
-  const { s3Client } = context;
+async function deployImpl({ androidBundle, iosBundle, appName, tag }: DeployConfig, context: DeploymentContext) {
+  if (context.channel !== undefined) {
+    validateChannel(context.channel);
+  }
+  const deploymentTarget = `${appName} (channel: ${context.channel ?? 'legacy / unscoped'})`;
+  p.log.info(`Deployment target: ${deploymentTarget}`);
 
   const gzippedAndroidBundle = `${androidBundle}.gz`;
   const gzippedIosBundle = `${iosBundle}.gz`;
@@ -30,7 +40,7 @@ async function deployImpl({ androidBundle, iosBundle, appName, tag }: DeployConf
   let spinner = p.spinner();
 
   spinner.start('Fetching current deployment state...');
-  const currentDeploymentState = await DeployManager.readDeploymentState(appName, { s3Client }).catch(
+  const currentDeploymentState = await DeployManager.readDeploymentState(appName, context).catch(
     handleReadDeploymentStateError
   );
   spinner.stop('Successfully fetched current deployment state');
@@ -60,13 +70,17 @@ async function deployImpl({ androidBundle, iosBundle, appName, tag }: DeployConf
 
   if (process.stdin.isTTY) {
     const confirmed = await p.confirm({
-      message: `Are you sure you want to deploy ${appName}?`,
+      message: `Are you sure you want to deploy ${deploymentTarget}?`,
     });
 
     if (!confirmed || p.isCancel(confirmed)) {
       p.outro('Deployment cancelled');
       process.exit(0);
     }
+  }
+
+  if (context.channel !== undefined) {
+    await DeployManager.registerChannel({ appName, channel: context.channel }, context);
   }
 
   await p.tasks(
@@ -85,7 +99,7 @@ async function deployImpl({ androidBundle, iosBundle, appName, tag }: DeployConf
             deploymentId,
             deployedAt,
           },
-          { s3Client }
+          context
         );
 
         return 'Bundle uploaded';
@@ -103,13 +117,13 @@ async function deployImpl({ androidBundle, iosBundle, appName, tag }: DeployConf
         deploymentId,
       },
     },
-    { s3Client }
+    context
   );
   spinner.stop('Bundle list updated');
 
   spinner = p.spinner();
   spinner.start(`Deploying ${appName}@${deploymentId}...`);
-  await DeployManager.rollout({ state: newDeploymentState, appName }, { s3Client });
+  await DeployManager.rollout({ state: newDeploymentState, appName }, context);
   spinner.stop(`Deployed successfully! (Deployment ID: ${deploymentId})`);
 
   p.outro('Done');

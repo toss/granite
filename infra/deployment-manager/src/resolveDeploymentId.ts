@@ -1,11 +1,11 @@
 import { NoSuchBucket, NoSuchKey } from '@aws-sdk/client-s3';
 import { parse } from 'valibot';
+import type { DeploymentContext } from './channel';
 import { MAX_GROUP_ID } from './constants';
 import { InternalServerError } from './errors/InternalServerError';
 import { InvalidRequest } from './errors/InvalidRequest';
 import { NotFoundError } from './errors/NotFoundError';
 import { readDeploymentState } from './readDeploymentState';
-import { S3Client } from './s3/client';
 import { paths } from './s3/paths';
 import { clusterDeploymentInfo } from './types';
 
@@ -17,7 +17,7 @@ interface ResolveDeploymentIdConfig {
 
 export function resolveDeploymentId(
   { appName, groupId, allowAccessCluster }: ResolveDeploymentIdConfig,
-  context: { s3Client: S3Client }
+  context: DeploymentContext
 ) {
   const numericGroupId = Number(groupId);
 
@@ -30,7 +30,7 @@ export function resolveDeploymentId(
   throw new InvalidRequest(`invalid groupId: ${groupId}`);
 }
 
-async function resolveDeploymentIdByGroupId(appName: string, numericGroupId: number, context: { s3Client: S3Client }) {
+async function resolveDeploymentIdByGroupId(appName: string, numericGroupId: number, context: DeploymentContext) {
   const currentDeploymentState = await readDeploymentState(appName, context);
 
   switch (currentDeploymentState.type) {
@@ -54,11 +54,11 @@ async function resolveDeploymentIdByGroupId(appName: string, numericGroupId: num
   }
 }
 
-async function resolveDeploymentIdByCluster(appName: string, clusterId: string, context: { s3Client: S3Client }) {
+async function resolveDeploymentIdByCluster(appName: string, clusterId: string, context: DeploymentContext) {
   const { s3Client } = context;
 
+  const clusterDeploymentInfoPath = paths.clusterDeploymentInfoPath({ appName, clusterId, channel: context.channel });
   try {
-    const clusterDeploymentInfoPath = paths.clusterDeploymentInfoPath(appName, clusterId);
     const rawData = await s3Client.getObject(clusterDeploymentInfoPath);
     const deploymentInfo = parse(clusterDeploymentInfo, JSON.parse(rawData));
 

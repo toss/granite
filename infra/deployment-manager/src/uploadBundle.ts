@@ -1,6 +1,7 @@
 import * as fs from 'fs';
+import type { DeploymentContext } from './channel';
 import { resolveBundle } from './resolveBundle';
-import type { S3Client } from './s3';
+import { registerChannel, reserveLegacyTag } from './selectorRegistration';
 import type { DeploymentId, DeploymentInfo } from './types';
 import { toDeployedAtString } from './utils/toDeployedAtString';
 
@@ -15,10 +16,15 @@ interface UploadBundleConfig {
 
 export async function uploadBundle(
   { bundlePath, appName, deploymentId, deployedAt, platform, tag }: UploadBundleConfig,
-  context: { s3Client: S3Client }
+  context: DeploymentContext
 ) {
   const { s3Client } = context;
-  const bundlePathKey = resolveBundle({ appName, platform, deploymentId, tag });
+  const bundlePathKey = resolveBundle({ appName, platform, deploymentId, tag, channel: context.channel });
+  if (context.channel !== undefined) {
+    await registerChannel({ appName, channel: context.channel }, context);
+  } else if (tag) {
+    await reserveLegacyTag({ appName, selector: tag }, context);
+  }
   await s3Client.putObject(bundlePathKey, {
     Body: fs.createReadStream(bundlePath),
     Metadata: {

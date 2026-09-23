@@ -1,5 +1,13 @@
+import { randomUUID } from 'node:crypto';
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
-import { extractAppName, extractClusterId, isCurrentFile, isClusterDeploymentInfoFile } from './pathParser';
+import { validateChannel } from '@granite-js/deployment-manager';
+import {
+  extractAppName,
+  extractClusterId,
+  isCurrentFile,
+  isClusterDeploymentInfoFile,
+  isSelectorRegistrationFile,
+} from './pathParser';
 
 // Initialize CloudFront client
 const cloudFrontClient = new CloudFrontClient({});
@@ -8,14 +16,25 @@ const cloudFrontClient = new CloudFrontClient({});
  * Determine CloudFront paths to invalidate based on S3 object key
  */
 export function getPathsToInvalidate(key: string): string[] {
+  if (key.startsWith('channels/')) {
+    const [, channel, ...parts] = key.split('/');
+    try {
+      validateChannel(channel ?? '');
+    } catch {
+      return [];
+    }
+    key = parts.join('/');
+  }
   const appName = extractAppName(key);
 
   if (!appName) {
     return [];
   }
 
-  // Rule 1: deployments/<appName>/CURRENT file
-  if (isCurrentFile(key)) {
+  // Deployment state and selector registrations affect the service's viewer URLs.
+  // Channels follow the group segment. CloudFront only
+  // supports trailing wildcards, so evict this app's selectors across channels.
+  if (isCurrentFile(key) || isSelectorRegistrationFile(key)) {
     return [`/ios/${appName}/*`, `/android/${appName}/*`];
   }
 
@@ -36,8 +55,7 @@ export function getPathsToInvalidate(key: string): string[] {
  * Create CloudFront invalidation for specified paths
  */
 export async function createInvalidation(paths: string[], distributionId: string): Promise<string> {
-  const timestamp = new Date().getTime();
-  const callerReference = `s3-triggered-invalidation-${timestamp}`;
+  const callerReference = `s3-triggered-invalidation-${randomUUID()}`;
 
   const params = {
     DistributionId: distributionId,
