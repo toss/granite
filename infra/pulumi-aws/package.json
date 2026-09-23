@@ -61,8 +61,7 @@
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
     "test": "vitest --run --coverage",
-    "test:lambda": "vitest --run --coverage src/lambda",
-    "test:lambda:runtime": "yarn build && vitest --run --config vitest.lambda-runtime.config.mts",
+    "test:lambda:http": "yarn build && vitest --run --config vitest.lambda-runtime.config.mts",
     "build": "rm -rf dist && tsup"
   },
   "devDependencies": {

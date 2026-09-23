@@ -169,72 +169,55 @@ a new channel only writes S3 data; it needs no per-channel infrastructure config
 Review the complete Pulumi preview before any future apply: the existing component also manages the legacy
 shared bundle and deployment pointer.
 
-### Offline Lambda simulation
+### HTTP scenarios in AWS Lambda Node.js 22
 
-From the repository root, build the deployment manager and run the Lambda scenarios with Vitest:
-
-```sh
-yarn workspace @granite-js/deployment-manager build
-yarn workspace @granite-js/pulumi-aws test:lambda
-```
-
-The simulation invokes the real origin-request, origin-response and cache-removal handlers, together with the
-deployment manager. S3 operations use in-memory objects and CloudFront commands are intercepted, so no AWS
-credentials, uploads, invalidations or deployments are needed. Gzipped fixture bytes are uploaded through the
-deployment manager, selected through Lambda and decompressed to verify the returned artifact.
-
-| Scenario                                | What is verified                                                                                                     |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Default, named channels, app and shared | Both platforms return their own bytes and metadata, even with identical deployment IDs                               |
-| Registration and publication            | A registered but unpublished channel returns 404; retry succeeds without legacy fallback                             |
-| Upload failure                          | Failure on either platform leaves the previous rollout and history unchanged                                         |
-| Canary and rollback                     | All 1,000 groups on both platforms resolve correctly at 0, 1, 50, 99 and 100 percent                                 |
-| Legacy compatibility                    | Default URLs and tags retain their namespace; tag ownership blocks channel takeover                                  |
-| Read failures                           | Missing state/artifacts, pending state, corrupt metadata and access errors never select another namespace            |
-| Cache removal                           | Registration and rollout events invalidate the app across channels; unrelated apps remain cached                     |
-| Event processing                        | Mixed, duplicate and reordered events, API failure/retry, missing configuration and malformed keys                   |
-| HTTP contract                           | URI rewrite preserves request properties; response metadata, compression/cache headers and error status are retained |
-
-The cache model completes invalidations explicitly to test requests before and after completion. This fast suite
-does not reproduce AWS propagation timing, event delivery, IAM policies or the Lambda execution environment.
-
-For registration races, paginated legacy-tag collision checks and the actual Forge upload/promotion barrier, also run:
-
-```sh
-yarn workspace @granite-js/deployment-manager test
-yarn workspace @granite-js/forge-cli test
-```
-
-### AWS Lambda Node.js 22 runtime tests
-
-This separate Vitest suite executes the built deployment artifacts using the official
-`public.ecr.aws/lambda/nodejs:22` image and its Runtime Interface Emulator (RIE):
+The scenario suite interacts only through HTTP: publish a release, request a client URL, complete pending
+notifications, inject an outage, retry, and verify HTTP status, bundle bytes and response headers.
+Test cases do not import handlers, construct Lambda events, inspect S3 keys or assert mocked SDK calls.
 
 ```sh
 docker pull --platform linux/amd64 public.ecr.aws/lambda/nodejs:22
 yarn workspace @granite-js/deployment-manager build
-yarn workspace @granite-js/pulumi-aws test:lambda:runtime
+yarn workspace @granite-js/pulumi-aws test:lambda:http
 ```
 
-Docker must be running. The runtime command builds the package first and fails if Docker or the image is missing;
-it never silently substitutes the host Node.js runtime. A dedicated `Lambda Node 22` CI job runs this suite.
+Docker must be running. The command builds the package and fails if Docker or the image is missing.
+A dedicated `Lambda HTTP scenarios (Node 22)` CI job runs the same scenarios.
 
-| Layer         | Runtime suite                                                                                      |
-| ------------- | -------------------------------------------------------------------------------------------------- |
-| Execution     | AWS Node.js 22 image, Amazon Linux 2023, `linux/amd64`; actual RIE invocations                     |
-| Artifact      | Same `index.js` source generator as the Pulumi archive; copied-file SHA-256 is checked             |
-| Dependencies  | Real bundled AWS SDK, including request serialization and response/error deserialization           |
-| AWS transport | Loopback-only HTTP fixtures for S3 and CloudFront; no real AWS account/resources                   |
-| Isolation     | Docker `--network none`, read-only root, non-root user, no host mounts, explicit dummy credentials |
-| Cleanup       | Every test container and temporary artifact directory is removed after the suite                   |
+```text
+HTTP publish control -> real Forge deploy operation -> local S3 HTTP service
+Client URL GET -> HTTP gateway -> origin-request Lambda via RIE
+              -> S3 bundle GET -> origin-response Lambda via RIE -> HTTP response
+S3 notifications -> cache-removal Lambda via RIE -> CloudFront HTTP API -> cache invalidation
+```
 
-Coverage includes warm invocations seeing new channel registrations/rollouts, both platforms and shared bundles,
-legacy URLs, canary boundaries and rollback, missing/corrupt/denied state, response headers, and invalidation
-success/failure/retry. The fast suite separately checks all 1,000 rollout groups.
+| Scenario                 | Observable result                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| First publication        | A cached 404 becomes the new channel bundle after successful publication and invalidation                |
+| App/shared and platforms | iOS/Android receive their selected channel's bytes and deployment headers                                |
+| Upgrade                  | Cached old bytes remain until invalidation completes; another app stays cached                           |
+| Upload failure and retry | Either platform failing preserves the previous release; first-publication failure stays unavailable      |
+| Canary and rollback      | Targeted clients receive the new release, baseline clients stay on the old one, and rollback restores it |
+| Legacy compatibility     | Filename-tag URLs survive rejected channel collisions; queries cannot change channels                    |
+| Storage failure          | Missing/corrupt/denied channel state returns an error without serving the legacy bundle                  |
+| Invalidation outage      | Cached bytes persist during failure; a successful retry exposes the new release                          |
 
-Containers are used only for local/CI validation; Lambda@Edge continues to use the existing archive deployment.
-RIE does not recreate CloudFront edge locations, IAM authorization, resource limits, event delivery, propagation timing or native
-bundle compatibility. Those still require separate environment checks before enabling production channel URLs.
+`/__test/*` endpoints are test-only controls for publication, registration, rollout, fault injection and event
+completion. The publication control runs the actual Forge deploy operation in a child process, preserving its
+upload and promotion behavior. The gateway adapts HTTP requests to CloudFront events; channel routing remains
+inside the production Lambda artifacts. S3 and CloudFront are local HTTP services, with the actual bundled AWS
+SDK handling their requests and responses. `x-test-cache` exposes only the local cache model's hit/miss state.
+
+The harness uses the official Node.js 22 image on Amazon Linux 2023 / `linux/amd64`. It shares Pulumi's archive
+source generator and checks each deployed `index.js` hash during setup. Containers use a non-root user,
+read-only root, dummy credentials, no host mounts or published ports, and an internal Docker network without
+external routing. The HTTP client runs inside that network; only HTTP responses return to Vitest. Containers,
+networks, temporary images and files are removed after the suite.
+
+Existing package-level regression tests remain available with `yarn workspace <package> test`. The HTTP gateway
+models event delivery and cache completion; it is not a CloudFront emulator. IAM authorization, real edge/cache
+behavior, delivery timing, resource limits and native bundle compatibility require separate environment checks.
+No Lambda, infrastructure or app bundle deployment is needed for these tests.
 
 ## Cleaning up
 

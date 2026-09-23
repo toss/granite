@@ -142,7 +142,7 @@ jobs:
         run: yarn test:all
 
   lambda-runtime:
-    name: Lambda Node 22
+    name: Lambda HTTP scenarios (Node 22)
     needs: setup
     runs-on: ubuntu-latest
     steps:
@@ -158,4 +158,4 @@ jobs:
       - name: Build deployment manager
         run: yarn workspace @granite-js/deployment-manager build
       - name: Test deployment artifacts in Lambda runtime
-        run: yarn workspace @granite-js/pulumi-aws test:lambda:runtime
+        run: yarn workspace @granite-js/pulumi-aws test:lambda:http
