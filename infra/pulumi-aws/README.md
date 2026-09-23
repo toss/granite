@@ -169,6 +169,56 @@ a new channel only writes S3 data; it needs no per-channel infrastructure config
 Review the complete Pulumi preview before any future apply: the existing component also manages the legacy
 shared bundle and deployment pointer.
 
+### HTTP scenarios in AWS Lambda Node.js 22
+
+The scenario suite interacts only through HTTP: publish a release, request a client URL, complete pending
+notifications, inject an outage, retry, and verify HTTP status, bundle bytes and response headers.
+Test cases do not import handlers, construct Lambda events, inspect S3 keys or assert mocked SDK calls.
+
+```sh
+docker pull --platform linux/amd64 public.ecr.aws/lambda/nodejs:22
+yarn workspace @granite-js/deployment-manager build
+yarn workspace @granite-js/pulumi-aws test:lambda:http
+```
+
+Docker must be running. The command builds the package and fails if Docker or the image is missing.
+A dedicated `Lambda HTTP scenarios (Node 22)` CI job runs the same scenarios.
+
+```text
+HTTP publish control -> real Forge deploy operation -> local S3 HTTP service
+Client URL GET -> HTTP gateway -> origin-request Lambda via RIE
+              -> S3 bundle GET -> origin-response Lambda via RIE -> HTTP response
+S3 notifications -> cache-removal Lambda via RIE -> CloudFront HTTP API -> cache invalidation
+```
+
+| Scenario                 | Observable result                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| First publication        | A cached 404 becomes the new channel bundle after successful publication and invalidation                |
+| App/shared and platforms | iOS/Android receive their selected channel's bytes and deployment headers                                |
+| Upgrade                  | Cached old bytes remain until invalidation completes; another app stays cached                           |
+| Upload failure and retry | Either platform failing preserves the previous release; first-publication failure stays unavailable      |
+| Canary and rollback      | Targeted clients receive the new release, baseline clients stay on the old one, and rollback restores it |
+| Legacy compatibility     | Filename-tag URLs survive rejected channel collisions; queries cannot change channels                    |
+| Storage failure          | Missing/corrupt/denied channel state returns an error without serving the legacy bundle                  |
+| Invalidation outage      | Cached bytes persist during failure; a successful retry exposes the new release                          |
+
+`/__test/*` endpoints are test-only controls for publication, registration, rollout, fault injection and event
+completion. The publication control runs the actual Forge deploy operation in a child process, preserving its
+upload and promotion behavior. The gateway adapts HTTP requests to CloudFront events; channel routing remains
+inside the production Lambda artifacts. S3 and CloudFront are local HTTP services, with the actual bundled AWS
+SDK handling their requests and responses. `x-test-cache` exposes only the local cache model's hit/miss state.
+
+The harness uses the official Node.js 22 image on Amazon Linux 2023 / `linux/amd64`. It shares Pulumi's archive
+source generator and checks each deployed `index.js` hash during setup. Containers use a non-root user,
+read-only root, dummy credentials, no host mounts or published ports, and an internal Docker network without
+external routing. The HTTP client runs inside that network; only HTTP responses return to Vitest. Containers,
+networks, temporary images and files are removed after the suite.
+
+Existing package-level regression tests remain available with `yarn workspace <package> test`. The HTTP gateway
+models event delivery and cache completion; it is not a CloudFront emulator. IAM authorization, real edge/cache
+behavior, delivery timing, resource limits and native bundle compatibility require separate environment checks.
+No Lambda, infrastructure or app bundle deployment is needed for these tests.
+
 ## Cleaning up
 
 To remove the deployed resources, use:
