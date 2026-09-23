@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/micro-frontend",
-  "version": "2.5.3",
+  "version": "2.5.4",
   "description": "Micro-frontend build, runtime, session, and Portal contracts for Granite brownfield applications",
   "main": "./dist/module/index.js",
   "types": "./dist/typescript/index.d.ts",
