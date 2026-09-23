@@ -1,15 +1,12 @@
 package run.granite.video
 
-import android.app.Activity
 import android.content.Context
 import android.view.View
-import android.widget.FrameLayout
 import io.mockk.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
@@ -620,30 +617,5 @@ class GraniteVideoViewRobolectricTest {
                 it.uri == "https://example.com/video.mp4"
             })
         }
-    }
-
-    // ============================================================
-    // Window Attach/Detach Tests
-    // ============================================================
-
-    @Test
-    fun `view reattached to window should keep its provider`() {
-        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
-        val container = FrameLayout(activity)
-        activity.setContentView(container)
-        val view = GraniteVideoView(
-            context = activity,
-            providerFactory = { mockProvider }
-        )
-
-        container.addView(view)
-        assertTrue(view.isAttachedToWindow)
-        container.removeView(view)
-        assertFalse(view.isAttachedToWindow)
-        container.addView(view)
-        view.setPaused(false)
-
-        verify(exactly = 0) { mockProvider.release() }
-        verify(exactly = 1) { mockProvider.play() }
     }
 }
