@@ -169,6 +169,43 @@ a new channel only writes S3 data; it needs no per-channel infrastructure config
 Review the complete Pulumi preview before any future apply: the existing component also manages the legacy
 shared bundle and deployment pointer.
 
+### Offline Lambda simulation
+
+From the repository root, build the deployment manager and run the Lambda scenarios with Vitest:
+
+```sh
+yarn workspace @granite-js/deployment-manager build
+yarn workspace @granite-js/pulumi-aws test:lambda
+```
+
+The simulation invokes the real origin-request, origin-response and cache-removal handlers, together with the
+deployment manager. S3 operations use in-memory objects and CloudFront commands are intercepted, so no AWS
+credentials, uploads, invalidations or deployments are needed. Gzipped fixture bytes are uploaded through the
+deployment manager, selected through Lambda and decompressed to verify the returned artifact.
+
+| Scenario                                | What is verified                                                                                                     |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Default, named channels, app and shared | Both platforms return their own bytes and metadata, even with identical deployment IDs                               |
+| Registration and publication            | A registered but unpublished channel returns 404; retry succeeds without legacy fallback                             |
+| Upload failure                          | Failure on either platform leaves the previous rollout and history unchanged                                         |
+| Canary and rollback                     | All 1,000 groups on both platforms resolve correctly at 0, 1, 50, 99 and 100 percent                                 |
+| Legacy compatibility                    | Default URLs and tags retain their namespace; tag ownership blocks channel takeover                                  |
+| Read failures                           | Missing state/artifacts, pending state, corrupt metadata and access errors never select another namespace            |
+| Cache removal                           | Registration and rollout events invalidate the app across channels; unrelated apps remain cached                     |
+| Event processing                        | Mixed, duplicate and reordered events, API failure/retry, missing configuration and malformed keys                   |
+| HTTP contract                           | URI rewrite preserves request properties; response metadata, compression/cache headers and error status are retained |
+
+The cache model completes invalidations explicitly to test requests before and after completion. It does not
+claim to reproduce AWS propagation timing, event delivery, IAM policies, Lambda packaging or native runtime
+compatibility. These remain separate environment checks before enabling production channel URLs.
+
+For registration races, paginated legacy-tag collision checks and the actual Forge upload/promotion barrier, also run:
+
+```sh
+yarn workspace @granite-js/deployment-manager test
+yarn workspace @granite-js/forge-cli test
+```
+
 ## Cleaning up
 
 To remove the deployed resources, use:

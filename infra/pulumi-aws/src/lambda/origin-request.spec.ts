@@ -186,6 +186,58 @@ describe('S3-registered channel routing', () => {
     expect(reads).toEqual(['deployments/sample-app/selectors/next.json']);
   });
 
+  it('does not use a legacy cluster when the registered channel cluster is missing', async () => {
+    register('sample-app', 'next');
+    objects.set('deployments/sample-app/clusters/testers.deploymentInfo', JSON.stringify({ deploymentId: 'legacy' }));
+    expect(await createOriginRequestHandler(context)(event('/ios/sample-app/testers/next'))).toMatchObject({
+      status: '404',
+    });
+    expect(reads).toEqual([
+      'deployments/sample-app/selectors/next.json',
+      'channels/next/deployments/sample-app/clusters/testers.deploymentInfo',
+    ]);
+  });
+
+  it.each(['0', '1001', '-1', 'not-a-group'])(
+    'rejects an invalid group %s before reading deployment state',
+    async (group) => {
+      register('sample-app', 'next');
+      expect(await configuredHandler(event(`/ios/sample-app/${group}/next`))).toMatchObject({ status: '400' });
+      expect(reads).not.toContain('channels/next/deployments/sample-app/deployment_state');
+    }
+  );
+
+  it('returns 400 for an empty CloudFront event without accessing S3', async () => {
+    expect(await configuredHandler({ Records: [] })).toMatchObject({ status: '400' });
+    expect(reads).toEqual([]);
+  });
+
+  it('preserves the origin, request method and unrelated headers during URI rewriting', async () => {
+    register('sample-app', 'next');
+    state('sample-app', 'release', 'next');
+    const input = event('/ios/sample-app/1/next');
+    Object.assign(input.Records[0]!.cf.request, {
+      method: 'HEAD',
+      headers: { 'if-none-match': [{ key: 'If-None-Match', value: 'sample-etag' }] },
+      origin: {
+        s3: {
+          domainName: 'sample-bucket.s3.amazonaws.com',
+          region: 'us-east-1',
+          authMethod: 'origin-access-identity',
+          path: '',
+          customHeaders: {},
+        },
+      },
+    });
+    const originalOrigin = structuredClone(input.Records[0]!.cf.request.origin);
+    expect(await configuredHandler(input)).toMatchObject({
+      uri: '/channels/next/bundles/sample-app/release/bundle.ios.hbc.gz',
+      method: 'HEAD',
+      headers: { 'if-none-match': [{ key: 'If-None-Match', value: 'sample-etag' }] },
+      origin: originalOrigin,
+    });
+  });
+
   it.each(['bundle', 'next'])('does not let query parameters override %s', async (selector) => {
     register('sample-app', 'next');
     state('sample-app', 'legacy');

@@ -61,6 +61,7 @@
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
     "test": "vitest --run --coverage",
+    "test:lambda": "vitest --run --coverage src/lambda",
     "build": "rm -rf dist && tsup"
   },
   "devDependencies": {

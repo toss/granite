@@ -211,38 +211,47 @@ describe('deploy operation', () => {
     expect(updateOrder!).toBeLessThan(rolloutOrder!);
   });
 
-  it('prevents bundle list update and rollout when an upload rejects', async () => {
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
-      throw new Error(`process.exit:${code}`);
-    });
-    const androidUpload = createDeferred<void>();
-    const iosUpload = createDeferred<void>();
+  it.each(['android', 'ios'])(
+    'prevents bundle list update and rollout when the %s upload rejects',
+    async (failedPlatform) => {
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
+        throw new Error(`process.exit:${code}`);
+      });
+      const androidUpload = createDeferred<void>();
+      const iosUpload = createDeferred<void>();
 
-    androidUpload.promise.catch(() => undefined);
-    deploymentMocks.DeployManager.uploadBundle.mockImplementation(({ platform }: { platform: 'android' | 'ios' }) => {
-      if (platform === 'android') {
-        return androidUpload.promise;
+      androidUpload.promise.catch(() => undefined);
+      iosUpload.promise.catch(() => undefined);
+      deploymentMocks.DeployManager.uploadBundle.mockImplementation(({ platform }: { platform: 'android' | 'ios' }) => {
+        if (platform === 'android') {
+          return androidUpload.promise;
+        }
+        if (platform === 'ios') {
+          return iosUpload.promise;
+        }
+        throw new Error(`Unexpected platform: ${platform}`);
+      });
+
+      const deployPromise = deploy(deployConfig, { ...deployContext, channel: 'next' });
+
+      await waitFor(() => {
+        expect(deploymentMocks.DeployManager.uploadBundle).toHaveBeenCalledTimes(2);
+      });
+
+      if (failedPlatform === 'android') {
+        androidUpload.reject(new Error('upload failed'));
+        iosUpload.resolve();
+      } else {
+        iosUpload.reject(new Error('upload failed'));
+        androidUpload.resolve();
       }
-      if (platform === 'ios') {
-        return iosUpload.promise;
-      }
-      throw new Error(`Unexpected platform: ${platform}`);
-    });
 
-    const deployPromise = deploy(deployConfig, deployContext);
+      await expect(deployPromise).rejects.toThrow('process.exit:1');
 
-    await waitFor(() => {
-      expect(deploymentMocks.DeployManager.uploadBundle).toHaveBeenCalledTimes(2);
-    });
-
-    androidUpload.reject(new Error('upload failed'));
-    iosUpload.resolve();
-
-    await expect(deployPromise).rejects.toThrow('process.exit:1');
-
-    expect(promptMocks.log.error).toHaveBeenCalledWith('upload failed');
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    expect(deploymentMocks.DeployManager.updateBundleList).not.toHaveBeenCalled();
-    expect(deploymentMocks.DeployManager.rollout).not.toHaveBeenCalled();
-  });
+      expect(promptMocks.log.error).toHaveBeenCalledWith('upload failed');
+      expect(exitSpy).toHaveBeenCalledWith(1);
+      expect(deploymentMocks.DeployManager.updateBundleList).not.toHaveBeenCalled();
+      expect(deploymentMocks.DeployManager.rollout).not.toHaveBeenCalled();
+    }
+  );
 });
