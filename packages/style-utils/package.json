@@ -1,6 +1,6 @@
 {
   "name": "@granite-js/style-utils",
-  "version": "2.5.3",
+  "version": "2.5.4",
   "scripts": {
     "prepack": "yarn build",
     "typecheck": "tsc --noEmit",
