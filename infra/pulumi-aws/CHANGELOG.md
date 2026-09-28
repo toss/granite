@@ -1,5 +1,7 @@
 # @granite-js/pulumi-aws
 
+## 2.5.5
+
 ## 2.5.4
 
 ## 2.5.3
