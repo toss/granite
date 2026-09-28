@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 
 android {
     namespace "run.granite"
-    compileSdkVersion 35
+    compileSdkVersion rootProject.ext.has('compileSdkVersion') ? rootProject.ext.get('compileSdkVersion') : 35
 
     sourceSets {
         main {
@@ -54,7 +54,6 @@ android {
 
 dependencies {
     api 'com.facebook.react:react-android:+'
-    implementation 'com.facebook.fbjni:fbjni:+'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
     implementation 'com.google.code.gson:gson:2.8.9'
