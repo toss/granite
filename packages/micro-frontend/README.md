@@ -678,6 +678,10 @@ generic native destination should read the requested name at runtime.
 See [examples/portal/README.md](examples/portal/README.md) for the retained
 Portal-only cross-Activity / UIViewController example.
 
+[`@granite-js/rn-component-view`](../rn-component-view/README.md) builds on the
+Portal to show one component registered with `AppRegistry.registerComponent`
+inside a native view, sized by its content.
+
 ## License and credit
 
 Apache-2.0. The Portal implementation is based on
