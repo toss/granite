@@ -5636,7 +5636,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@granite-js/micro-frontend@workspace:packages/micro-frontend":
+"@granite-js/micro-frontend@workspace:*, @granite-js/micro-frontend@workspace:packages/micro-frontend":
   version: 0.0.0-use.local
   resolution: "@granite-js/micro-frontend@workspace:packages/micro-frontend"
   dependencies:
@@ -6049,6 +6049,27 @@ __metadata:
     react-native: "*"
   bin:
     granite: ./bin/cli.js
+  languageName: unknown
+  linkType: soft
+
+"@granite-js/rn-component-view@workspace:packages/rn-component-view":
+  version: 0.0.0-use.local
+  resolution: "@granite-js/rn-component-view@workspace:packages/rn-component-view"
+  dependencies:
+    "@granite-js/micro-frontend": "workspace:*"
+    "@types/node": "catalog:tools"
+    "@types/react": "catalog:react-native"
+    "@types/react-test-renderer": "npm:^19"
+    react: "catalog:react-native"
+    react-native: "catalog:react-native"
+    react-native-builder-bob: "catalog:tools"
+    react-test-renderer: "npm:19.2.3"
+    typescript: "catalog:tools"
+    vitest: "npm:^4.0.12"
+  peerDependencies:
+    "@granite-js/micro-frontend": "*"
+    react: "*"
+    react-native: "*"
   languageName: unknown
   linkType: soft
 

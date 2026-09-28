@@ -1,0 +1,88 @@
+{
+  "name": "@granite-js/rn-component-view",
+  "version": "2.5.4",
+  "description": "Native iOS and Android views that show React Native components, sized by their content",
+  "main": "./dist/module/index.js",
+  "types": "./dist/typescript/index.d.ts",
+  "react-native": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/typescript/index.d.ts",
+      "react-native": "./src/index.ts",
+      "default": "./dist/module/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "!src/**/*.spec.*",
+    "dist",
+    "android",
+    "ios",
+    "*.podspec",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*"
+  ],
+  "scripts": {
+    "prepack": "yarn build",
+    "build": "bob build && tsc --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/rn-component-view"
+  },
+  "peerDependencies": {
+    "@granite-js/micro-frontend": "*",
+    "react": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "@granite-js/micro-frontend": "workspace:*",
+    "@types/node": "catalog:tools",
+    "@types/react": "catalog:react-native",
+    "@types/react-test-renderer": "^19",
+    "react": "catalog:react-native",
+    "react-native": "catalog:react-native",
+    "react-native-builder-bob": "catalog:tools",
+    "react-test-renderer": "19.2.3",
+    "typescript": "catalog:tools",
+    "vitest": "^4.0.12"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "dist",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ]
+    ],
+    "exclude": "{**/{__tests__,__fixtures__,__mocks__}/**,**/*.spec.*,**/*.test.*}"
+  },
+  "codegenConfig": {
+    "name": "GraniteRNComponentViewSpec",
+    "type": "modules",
+    "jsSrcsDir": "src/specs",
+    "android": {
+      "javaPackageName": "run.granite.rncomponentview"
+    }
+  },
+  "sideEffects": false
+}
