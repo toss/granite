@@ -32,6 +32,11 @@ NS_ASSUME_NONNULL_BEGIN
 /// A `dispatch_async` resets the flag after the commit finishes.
 - (NSInteger)nextInsertionIndexForChildAt:(NSInteger)childIndex;
 
+/// Has the Portals rendering into this host lay their content out at its
+/// current size and position. Laying the host out does this, but moving an
+/// ancestor or scrolling does not lay it out.
+- (void)notifyLayoutChanged;
+
 @end
 
 NS_ASSUME_NONNULL_END

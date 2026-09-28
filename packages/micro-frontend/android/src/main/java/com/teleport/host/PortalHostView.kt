@@ -72,6 +72,14 @@ class PortalHostView(
     bottom: Int,
   ) {
     super.onLayout(changed, left, top, right, bottom)
+    notifyLayoutChanged()
+  }
+
+  /**
+   * Has the Portals rendering into this host lay their content out at its current size and
+   * position. Laying the host out does this, but moving an ancestor or scrolling does not lay it out.
+   */
+  internal fun notifyLayoutChanged() {
     name?.let { PortalRegistry.notifyHostLayoutChanged(it) }
   }
 

@@ -451,6 +451,12 @@ destination views in `com.teleport.host`.
 unregisters while detached. `nextInsertionIndexForChildAt()` is renderer
 plumbing, not an application integration API.
 
+`PortalReactRootView` reports touches in the viewport, where `measure()` reports
+teleported content, so Pressability keeps a press while the finger moves within
+the pressed view. When a gesture starts, it has the Portals of the hosts under
+it lay their content out again, so a host that moved with a scroll reports its
+current position.
+
 #### Props the Portal components do not apply
 
 `Portal` and the Portal host component are renderer plumbing, not styleable
@@ -598,8 +604,13 @@ PortalHostContainerView       <- RCTSurfaceTouchHandler for all hosted content
 react-native-screens attaches its own touch handler to any screen without an
 `RCTRootComponentView` above it. Without the anchor every hosted screen would add
 a second handler beneath the container's, and one tap would reach JS twice. The
-anchor keeps a single handler and page coordinates relative to the container,
-like content under a regular React Native root.
+anchor keeps a single handler.
+
+The handler reports page coordinates on screen, where `measure()` reports
+teleported content, so Pressability keeps a press while the finger moves within
+the pressed view. When a gesture starts, the container has its host's Portals
+lay their content out again, so a host that moved with a scroll or an ancestor
+reports its current position.
 
 ### UIViewController example
 
