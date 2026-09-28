@@ -23,6 +23,7 @@
     "README.md",
     "LICENSE",
     "NOTICE",
+    "!example/**",
     "!ios/build",
     "!android/build",
     "!android/gradle",

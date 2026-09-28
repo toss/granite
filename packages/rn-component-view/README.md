@@ -44,7 +44,7 @@ TurboModule.
 
 `@granite-js/micro-frontend` imports `@granite-js/react-native` for its route
 and session helpers. An app that does not use Granite can resolve that import to
-a stub in Metro.
+a stub in Metro, as the [example](example/README.md) does.
 
 ## Rendering the components
 
@@ -159,7 +159,8 @@ every other import of the entry. That is why the entry in
 `./recordComponentProviders` first.
 
 - Registrations in the entry's own code after the call are recorded, because
-  only imports are hoisted.
+  only imports are hoisted. The example app's `index.js` registers its
+  components this way.
 - Components that a view's bundle registers are recorded. The renderer
   evaluates the bundle when the view opens its session, after the entry has
   run.
@@ -380,6 +381,12 @@ after the session id.
 | `contentSizeHandler`                                                                   | Main-thread callback with the measured content size in points. Not called for `RNComponentViewSizingConstrained`.                               |
 | `-[RNComponentSessionRegistration invalidate]`                                         | Close the component and unregister the session. Releasing the registration does the same.                                                       |
 | `RNComponentSessions.isRendererAttached`                                               | Whether a JavaScript renderer receives component sessions. `RNComponentRendererDidChangeNotification` posts on the main thread when it changes. |
+
+## Example
+
+[`example`](example/README.md) is a React Native 0.81 app whose native screen
+shows the component `ComponentViewDemo` in three `RNComponentView`s, one per
+sizing, on Android and iOS.
 
 ## License
 

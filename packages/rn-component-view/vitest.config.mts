@@ -9,6 +9,7 @@ export default defineConfig({
     },
   },
   test: {
+    // example/ is an app with its own React Native setup, not part of these tests.
     include: ['src/**/*.spec.{ts,tsx}'],
   },
 });
