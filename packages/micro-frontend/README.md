@@ -441,11 +441,12 @@ destination views in `com.teleport.host`.
 
 ### Portal destination APIs
 
-| API                                                              | Lifetime / behavior                                                                                                                     |
-| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `PortalHostView.setName(name)`                                   | Register/unregister the destination name. Use `sessionId`.                                                                              |
-| `PortalHostView.cleanup()`                                       | Permanently unregister the destination during teardown.                                                                                 |
-| `PortalReactRootView(context, reactHost, surfaceId, moduleName)` | Detached Fabric root that forwards touch/pointer events through the retained `ReactHost`; it does not start another runtime or surface. |
+| API                                                                                    | Lifetime / behavior                                                                                                                                                                                                                                                                 |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PortalHostView.setName(name)`                                                         | Register/unregister the destination name. Use `sessionId`.                                                                                                                                                                                                                          |
+| `PortalHostView.onChildCountChanged`                                                   | Main-thread callback when teleported children are added or removed, for a native owner that shows a placeholder until content attaches. Removal notifies on the next main-thread turn, after the count changed.                                                                     |
+| `PortalHostView.cleanup()`                                                             | Permanently unregister the destination during teardown.                                                                                                                                                                                                                             |
+| `PortalReactRootView(context, reactHost, surfaceId, moduleName, updatesSurfaceLayout)` | Detached Fabric root that forwards touch/pointer events through the retained `ReactHost`; it does not start another runtime or surface. Pass `updatesSurfaceLayout = false` for a root embedded in part of a screen, so measuring it leaves the surface's layout constraints alone. |
 
 `PortalHostView` also re-registers on window attachment and temporarily
 unregisters while detached. `nextInsertionIndexForChildAt()` is renderer

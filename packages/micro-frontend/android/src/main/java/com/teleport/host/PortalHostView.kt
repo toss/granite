@@ -3,6 +3,7 @@ package com.teleport.host
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.view.View
 import com.facebook.react.views.view.ReactViewGroup
 import com.teleport.global.PortalRegistry
 
@@ -19,6 +20,14 @@ class PortalHostView(
   private var isInBatch = false
   private var batchBaseIndex = 0
   private var hasPendingCleanup = false
+
+  /**
+   * Called on the main thread whenever teleported children are added or removed. Removal notifies
+   * on the next main-thread turn so observers read the post-removal count. Set by native host
+   * owners, such as `RNComponentView` of `@granite-js/rn-component-view`; stays null for hosts
+   * mounted inside the React tree.
+   */
+  var onChildCountChanged: (() -> Unit)? = null
 
   fun setName(newName: String?) {
     if (name == newName) return
@@ -62,6 +71,18 @@ class PortalHostView(
     // Register again on attach so detached controller surfaces resolve the
     // currently visible Activity host deterministically.
     name?.let { PortalRegistry.registerHost(it, this) }
+  }
+
+  override fun onViewAdded(child: View) {
+    super.onViewAdded(child)
+    onChildCountChanged?.invoke()
+  }
+
+  override fun onViewRemoved(child: View) {
+    super.onViewRemoved(child)
+    if (onChildCountChanged == null) return
+    // Notify on the next main-thread turn so observers read the post-removal count.
+    Handler(Looper.getMainLooper()).post { onChildCountChanged?.invoke() }
   }
 
   override fun onLayout(

@@ -19,12 +19,21 @@ import com.facebook.react.uimanager.events.EventDispatcher
  * Detached Fabric root that forwards touch and pointer events of the surface [surfaceId] through
  * [reactHost]. It does not start another runtime or surface. Touches carry their position in the
  * viewport, where `measure()` reports the teleported content they land on.
+ *
+ * @param updatesSurfaceLayout Whether measuring this root sets the layout constraints of the
+ *   surface. A root that covers the whole destination, like an Activity content view, keeps the
+ *   default. A root embedded in part of a screen passes `false`: the Portal already sizes its
+ *   content from the host, and several embedded roots would overwrite one another's constraints
+ *   and viewport offsets.
  */
-class PortalReactRootView(
+class PortalReactRootView
+@JvmOverloads
+constructor(
   context: ThemedReactContext,
   private val reactHost: ReactHost,
   surfaceId: Int,
   private val moduleName: String,
+  private val updatesSurfaceLayout: Boolean = true,
 ) : ReactRootView(context) {
   private val touchDispatcher = JSTouchDispatcher(this)
   private val pointerDispatcher =
@@ -49,7 +58,15 @@ class PortalReactRootView(
     widthMeasureSpec: Int,
     heightMeasureSpec: Int,
   ) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    if (updatesSurfaceLayout) {
+      super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    } else {
+      // ReactRootView.onMeasure sends the specs to the surface, so size this view without it.
+      setMeasuredDimension(
+        getDefaultSize(suggestedMinimumWidth, widthMeasureSpec),
+        getDefaultSize(suggestedMinimumHeight, heightMeasureSpec),
+      )
+    }
 
     val childWidthSpec = MeasureSpec.makeMeasureSpec(measuredWidth, MeasureSpec.EXACTLY)
     val childHeightSpec = MeasureSpec.makeMeasureSpec(measuredHeight, MeasureSpec.EXACTLY)
