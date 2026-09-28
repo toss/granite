@@ -1,5 +1,19 @@
 # @granite-js/react-native
 
+## 2.5.5
+
+### Patch Changes
+
+- Updated dependencies [6d8b2b2]
+  - @granite-js/video@2.5.5
+  - @granite-js/blur-view@2.5.5
+  - @granite-js/jest@2.5.5
+  - @granite-js/style-utils@2.5.5
+  - @granite-js/brownfield-module@2.5.5
+  - @granite-js/cli@2.5.5
+  - @granite-js/mpack@2.5.5
+  - @granite-js/plugin-core@2.5.5
+
 ## 2.5.4
 
 ### Patch Changes
