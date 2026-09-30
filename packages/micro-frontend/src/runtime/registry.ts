@@ -3,7 +3,9 @@ import { createContainer, exposeModule, getContainer, getExposedModule, removeCo
 import type { MicroFrontendModuleRegistry } from './createMicroFrontendRuntime';
 import { ExposedModuleNotFoundError, SharedModuleAlreadyRegisteredError } from './errors';
 import { getMicroFrontendGlobalContext, type MicroFrontendGlobalContext } from './globalContext';
+import { toLegacyEsm } from './legacyEsm';
 import { parseAppRequest } from './parseAppRequest';
+import { registerSharedValue } from './sharedModule';
 export { createContainer, exposeModule, getContainer, removeContainer };
 
 export interface SharedModuleConfig {
@@ -54,26 +56,9 @@ export function getMicroFrontendRuntimeContext(): MicroFrontendRuntimeContext {
 
 export function registerShared(moduleName: string, module: unknown): void {
   const sharedModules = getMicroFrontendGlobalContext().__SHARED__;
-  const existingModule = sharedModules[moduleName];
-  if (existingModule != null) {
-    if (isSharedModule(existingModule) && Object.is(existingModule.get(), module)) {
-      return;
-    }
+  if (!registerSharedValue(sharedModules, moduleName, module, toLegacyEsm)) {
     throw new SharedModuleAlreadyRegisteredError(moduleName);
   }
-  sharedModules[moduleName] = {
-    get: () => module,
-    loaded: true,
-  };
-}
-
-function isSharedModule(value: unknown): value is SharedModule {
-  return (
-    typeof value === 'object' &&
-    value != null &&
-    typeof Reflect.get(value, 'get') === 'function' &&
-    typeof Reflect.get(value, 'loaded') === 'boolean'
-  );
 }
 
 export async function disposeAppResources(appName: string): Promise<void> {
