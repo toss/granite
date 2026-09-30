@@ -169,12 +169,13 @@ describe('cross-version registry compatibility matrix', () => {
 
     // Then
     expect(Reflect.get(hostApp, 'default') ?? hostApp).toBe(moduleValue);
-    expect(hostShared).toBe(sharedValue);
+    expect(hostShared).toHaveProperty('__esModule', true);
+    expect(hostShared).toHaveProperty('default', sharedValue);
     expect(compatibleApp).toBe(moduleValue);
-    expect(compatibleShared).toBe(sharedValue);
+    expect(compatibleShared).toBe(hostShared);
     const legacyApp = importLegacyModule(`${cell.appName}/App`);
     expect(Reflect.get(legacyApp, 'default') ?? legacyApp).toBe(moduleValue);
-    expect(await importLegacyShared()).toBe(sharedValue);
+    expect(await importLegacyShared()).toBe(hostShared);
     record(cell.name, 'both host registries observe the remote-owned app and shared module at one name');
   });
 
@@ -183,6 +184,7 @@ describe('cross-version registry compatibility matrix', () => {
     const firstModule = { version: 'first' };
     const sharedValue = { version: 'shared' };
     executeCompatibleRemote('owned-remote', firstModule, sharedValue);
+    const sharedNamespace = importCompatibleShared();
     const legacyContainer = importLegacyModule('owned-remote/App');
 
     // When
@@ -194,7 +196,8 @@ describe('cross-version registry compatibility matrix', () => {
     expect(Reflect.get(legacyContainer, 'default')).toBe(firstModule);
     expect(importModule('owned-remote/App')).toBe(replacementModule);
     expect(Reflect.get(importLegacyModule('owned-remote/App'), 'default')).toBe(replacementModule);
-    expect(importCompatibleShared()).toBe(sharedValue);
+    expect(importCompatibleShared()).toBe(sharedNamespace);
+    expect(sharedNamespace).toHaveProperty('default', sharedValue);
     record(
       'compatible-owned removal',
       'removeContainer clears paired container views while preserving process-owned shared state'
