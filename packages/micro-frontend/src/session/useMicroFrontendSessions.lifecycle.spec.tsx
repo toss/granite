@@ -185,6 +185,7 @@ describe('useMicroFrontendSessions app lifetime', () => {
     });
     const sharedModule = { version: '19' };
     registerShared('react', sharedModule);
+    const sharedNamespace = getMicroFrontendRuntimeContext().sharedModules.react?.get();
     const appContainer = createContainer('app-1');
     const appModule = { default: () => 'app-1' };
     exposeModule(appContainer, './App', appModule);
@@ -245,7 +246,8 @@ describe('useMicroFrontendSessions app lifetime', () => {
     expect(canonicalContext.__CONTAINERS__['app-2']).toBe(unrelatedContainer);
     expect(canonicalContext.__INSTANCES__[0]).toBe(appLegacyContainer);
     expect(canonicalContext.__INSTANCES__[1]).toBe(unrelatedLegacyContainer);
-    expect(context.sharedModules.react?.get()).toBe(sharedModule);
+    expect(context.sharedModules.react?.get()).toBe(sharedNamespace);
+    expect(sharedNamespace).toHaveProperty('default', sharedModule);
     expect(appContainer.exposedModules['./App']).toBe(appModule);
     expect(resolvePendingHostComponent('granite://app/app-1/product')?.component).toBe(AppPendingComponent);
     expect(fixture.adapter.loadBundle).toHaveBeenCalledOnce();

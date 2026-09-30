@@ -69,7 +69,9 @@ describe('micro-frontend module registry', () => {
     // Then
     const entry = getMicroFrontendRuntimeContext().sharedModules['shared-module'];
     expect(entry?.loaded).toBe(true);
-    expect(entry?.get()).toBe(sharedModule);
+    expect(entry?.get()).toEqual(sharedModule);
+    expect(entry?.get()).toHaveProperty('__esModule', true);
+    expect(entry?.get()).toBe(entry?.get());
   });
 
   it('rejects a different value registered under an existing shared module name', () => {
@@ -111,7 +113,9 @@ describe('micro-frontend module registry', () => {
     });
 
     // Then
-    expect(legacyModule.exports).toBe(sharedModule);
+    expect(legacyModule.exports).toEqual(sharedModule);
+    expect(legacyModule.exports).toHaveProperty('__esModule', true);
+    expect(legacyModule.exports).toBe(getMicroFrontendRuntimeContext().sharedModules['new-shared-module']?.get());
   });
 
   it('clears exposed modules before removing an app container', () => {

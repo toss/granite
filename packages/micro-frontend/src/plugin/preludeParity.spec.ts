@@ -205,7 +205,10 @@ describe.each(implementations)('$name generated-prelude parity', ({ execute }) =
     expect(Reflect.get(legacyImported, 'default')).toBe(moduleValue);
     expect(Reflect.get(legacyImported, 'route')).toBe('parity');
     expect(Object.getOwnPropertyDescriptors(moduleValue)).toEqual(originalDescriptors);
-    expect(result.sharedImported).toBe(sharedValue);
+    const sharedImported = requireObject(result.sharedImported);
+    expect(Reflect.get(sharedImported, '__esModule')).toBe(true);
+    expect(Reflect.get(sharedImported, 'default')).toBe(sharedValue);
+    expect(Reflect.get(sharedImported, 'version')).toBe(sharedValue.version);
   });
 });
 
