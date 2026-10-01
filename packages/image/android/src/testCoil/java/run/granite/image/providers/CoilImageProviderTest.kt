@@ -21,6 +21,7 @@ import coil.request.Options
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.Collections
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -284,9 +285,15 @@ class CoilImageProviderTest {
 
     @Test fun `provider applies priority to queued HTTP requests`() {
         provider = CoilImageProvider(context, loader, maxConcurrentRequests = 1)
-        server.enqueue(imageResponse().setBodyDelay(300, TimeUnit.MILLISECONDS))
-        server.enqueue(imageResponse())
-        server.enqueue(imageResponse())
+        val release = CountDownLatch(1)
+        server.dispatcher = object : okhttp3.mockwebserver.Dispatcher() {
+            override fun dispatch(request: okhttp3.mockwebserver.RecordedRequest): MockResponse {
+                if (request.path == "/active.png") {
+                    check(release.await(15, TimeUnit.SECONDS)) { "Active request was not released" }
+                }
+                return imageResponse()
+            }
+        }
         var completed = 0
         fun preload(name: String, priority: GraniteImagePriority) {
             provider.loadImage(server.url("/$name.png").toString(), null, "cover", null, priority,
@@ -299,6 +306,8 @@ class CoilImageProviderTest {
         await { server.requestCount == 1 }
         preload("low", GraniteImagePriority.LOW)
         preload("high", GraniteImagePriority.HIGH)
+        shadowOf(Looper.getMainLooper()).idle()
+        release.countDown()
         await { completed == 3 }
         assertEquals(listOf("/active.png", "/high.png", "/low.png"),
             (1..3).map { server.takeRequest(1, TimeUnit.SECONDS)!!.path })
