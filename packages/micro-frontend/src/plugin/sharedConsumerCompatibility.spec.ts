@@ -1,7 +1,7 @@
 import vm from 'node:vm';
 import { afterEach, describe, expect, it } from 'vitest';
-import { getPreludeConfig } from './prelude';
 import { createSharedResolverConfig } from './resolver';
+import { getPreludeConfig } from '../plugin-utils/prelude';
 import { getMicroFrontendRuntimeContext, registerShared } from '../runtime/registry';
 
 function publishGenerated(value: unknown): void {

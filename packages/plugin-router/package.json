@@ -23,6 +23,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./mpack": {
+      "import": {
+        "types": "./dist/mpack.d.ts",
+        "default": "./dist/mpack.js"
+      },
+      "require": {
+        "types": "./dist/mpack.d.cts",
+        "default": "./dist/mpack.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -38,6 +48,7 @@
   "devDependencies": {
     "@types/node": "catalog:tools",
     "@vitest/coverage-v8": "^4.0.12",
+    "rollipop": "catalog:rollipop",
     "tsdown": "catalog:tools",
     "typescript": "catalog:tools",
     "vitest": "^4.0.12"
@@ -47,6 +58,14 @@
     "@swc/core": "catalog:swc",
     "chokidar": "4.0.1",
     "es-toolkit": "^1.39.8"
+  },
+  "peerDependencies": {
+    "rollipop": "*"
+  },
+  "peerDependenciesMeta": {
+    "rollipop": {
+      "optional": true
+    }
   },
   "sideEffects": false
 }

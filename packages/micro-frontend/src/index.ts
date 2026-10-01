@@ -18,10 +18,7 @@ export type {
   RegisterPendingHostComponentRouteOptions,
   ResolvedPendingHostComponent,
 } from './host/types';
-export {
-  createPendingHostComponentRoutePrefix,
-  normalizeRoutePath,
-} from './host/routeMatcher';
+export { createPendingHostComponentRoutePrefix, normalizeRoutePath } from './host/routeMatcher';
 export {
   hidePendingHostComponent,
   installPendingHostComponentBridge,

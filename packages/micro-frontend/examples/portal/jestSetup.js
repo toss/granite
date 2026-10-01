@@ -1,5 +1,5 @@
-jest.mock("@granite-js/micro-frontend", () => {
-  const { useEffect, useState } = require("react");
+jest.mock('@granite-js/micro-frontend', () => {
+  const { useEffect, useState } = require('react');
   const sessionSubscribers = new Set();
 
   // Lets a test stand in for native session events (openApp / sessionVisibilityChanged / closeApp)
@@ -11,7 +11,7 @@ jest.mock("@granite-js/micro-frontend", () => {
   };
 
   return {
-    Portal: "Portal",
+    Portal: 'Portal',
     createMicroFrontendRuntime: () => ({}),
     useMicroFrontendSessions: () => {
       const [sessions, setSessions] = useState([]);

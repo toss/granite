@@ -2,12 +2,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type { GranitePluginCore } from '@granite-js/plugin-core';
 import { prepareLocalDirectory } from '@granite-js/utils';
-import type { DisposeOwnershipPluginOptions } from './disposeBabelPlugin';
-import { transformDisposeOwnership } from './disposeTransform';
-import { intoShared } from './intoShared';
-import { getPreludeConfig } from './prelude';
 import { createSharedResolverConfig } from './resolver';
 import type { MicroFrontendPluginOptions } from './types';
+import type { DisposeOwnershipPluginOptions } from '../plugin-utils/disposeBabelPlugin';
+import { transformDisposeOwnership } from '../plugin-utils/disposeTransform';
+import { intoShared } from '../plugin-utils/intoShared';
+import { getPreludeConfig } from '../plugin-utils/prelude';
 
 export async function microFrontend(options: MicroFrontendPluginOptions = {}): Promise<GranitePluginCore> {
   const shared = intoShared(options.shared);
@@ -18,8 +18,7 @@ export async function microFrontend(options: MicroFrontendPluginOptions = {}): P
   const nonEagerEntries = Object.entries(shared ?? {}).filter(([, config]) => config.eager !== true);
   const localDirectory = prepareLocalDirectory(process.cwd());
   // Keep this path distinct from @granite-js/plugin-micro-frontend's generated prelude.
-  // Both plugins can coexist while consumers migrate, and sharing a path makes the
-  // later plugin overwrite the earlier plugin's runtime registrations.
+  // Sharing a path would let one plugin overwrite the other's runtime registrations.
   const preludePath = path.join(localDirectory, 'granite-micro-frontend-runtime.js');
   const prelude = getPreludeConfig(normalizedOptions);
   const resolver = createSharedResolverConfig(nonEagerEntries);

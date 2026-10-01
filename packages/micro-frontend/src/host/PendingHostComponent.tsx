@@ -21,11 +21,19 @@ export interface PendingHostComponentController {
 }
 
 export function useIsPendingHostComponentHidden() {
-  return useSyncExternalStore(subscribePendingHostComponentStore, getIsPendingHostComponentHidden, getIsPendingHostComponentHidden);
+  return useSyncExternalStore(
+    subscribePendingHostComponentStore,
+    getIsPendingHostComponentHidden,
+    getIsPendingHostComponentHidden
+  );
 }
 
 function usePendingHostComponentStoreVersion() {
-  return useSyncExternalStore(subscribePendingHostComponentStore, getPendingHostComponentStoreVersion, getPendingHostComponentStoreVersion);
+  return useSyncExternalStore(
+    subscribePendingHostComponentStore,
+    getPendingHostComponentStoreVersion,
+    getPendingHostComponentStoreVersion
+  );
 }
 
 export function useResolvedPendingHostComponent(url: string | null | undefined) {

@@ -59,8 +59,10 @@ Fabric components.
 
 ## Build plugin
 
-The app name comes from `granite.config.ts`. Hosts do not maintain a separate
-remote-app list.
+Configure the plugin in `rollipop.config.ts`. The `appName` identifies the
+bundle in the shared runtime registry. See the
+[Rollipop configuration documentation](https://rollipop.dev/docs/get-started/configuration)
+for other build options.
 
 The generated runtime prelude uses a package-specific file name so this plugin
 can coexist with the legacy `@granite-js/plugin-micro-frontend` plugin during a
@@ -69,12 +71,12 @@ gradual migration. This preserves both plugins' shared-module registrations.
 ```ts
 // Remote app
 import { microFrontend } from '@granite-js/micro-frontend/plugin';
-import { defineConfig } from '@granite-js/react-native/config';
+import { defineConfig } from 'rollipop';
 
 export default defineConfig({
-  appName: 'cart',
   plugins: [
     microFrontend({
+      appName: 'cart',
       exposes: {
         './App': './src/_app.tsx',
       },
@@ -87,12 +89,12 @@ export default defineConfig({
 ```ts
 // Host app
 import { microFrontend } from '@granite-js/micro-frontend/plugin';
-import { defineConfig } from '@granite-js/react-native/config';
+import { defineConfig } from 'rollipop';
 
 export default defineConfig({
-  appName: 'shared',
   plugins: [
     microFrontend({
+      appName: 'shared',
       shared: {
         react: { eager: true },
         'react-native': { eager: true },
@@ -104,6 +106,18 @@ export default defineConfig({
 
 When evaluated, a remote bundle registers its `appName` container and exposed
 modules in the shared runtime registry.
+
+### Mpack (deprecated)
+
+```ts
+import { microFrontend } from '@granite-js/micro-frontend/plugin-mpack';
+import { defineConfig } from '@granite-js/react-native/config';
+
+export default defineConfig({
+  appName: 'cart',
+  plugins: [microFrontend({ shared: ['react', 'react-native'] })],
+});
+```
 
 ## Registry migration contract
 

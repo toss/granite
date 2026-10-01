@@ -65,9 +65,7 @@ describe('Granite.registerApp', () => {
     });
 
     // When
-    render(
-      <Root platform="android" initialColorPreference="light" presentationVisibility={false} />
-    );
+    render(<Root platform="android" initialColorPreference="light" presentationVisibility={false} />);
 
     // Then
     expect(visibilityState.value).toBe(false);

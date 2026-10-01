@@ -79,16 +79,25 @@ const createApp = () => {
   }
 
   return {
-    registerApp( 
+    registerApp(
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
-      { appName, context, router, initialScheme, setIosSwipeGestureEnabled, setiOSBackPressHandler, getInitialUrl }: GraniteProps
+      {
+        appName,
+        context,
+        router,
+        initialScheme,
+        setIosSwipeGestureEnabled,
+        setiOSBackPressHandler,
+        getInitialUrl,
+      }: GraniteProps
     ): (initialProps: RegisteredAppProps) => JSX.Element {
       if (appName === ENTRY_BUNDLE_NAME) {
         throw new Error(`Reserved app name 'shared' cannot be used`);
       }
 
       function Root({ presentationVisibility = true, ...initialProps }: RegisteredAppProps) {
-        const initialSchemeValue = (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ?? getSchemeUri();
+        const initialSchemeValue =
+          (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ?? getSchemeUri();
 
         return (
           <VisibilityChangedProvider isVisible={presentationVisibility}>

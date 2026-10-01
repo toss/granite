@@ -3,7 +3,7 @@ import { captureStackFrames, resolveCurrentSourceURL, type RuntimeStackFrame } f
 
 describe('captureStackFrames', () => {
   it('returns structured CallSite file names without parsing stack strings', () => {
-    expect(captureStackFrames().some(frame => frame.sourceURL === __filename)).toBe(true);
+    expect(captureStackFrames().some((frame) => frame.sourceURL === __filename)).toBe(true);
   });
 
   it('restores an existing prepareStackTrace hook', () => {
@@ -24,10 +24,7 @@ describe('captureStackFrames', () => {
   });
 
   it('resolves the first structured caller sourceURL', () => {
-    const frames: RuntimeStackFrame[] = [
-      { sourceURL: null },
-      { sourceURL: 'file:///caller.js' },
-    ];
+    const frames: RuntimeStackFrame[] = [{ sourceURL: null }, { sourceURL: 'file:///caller.js' }];
 
     expect(resolveCurrentSourceURL(frames)).toBe('file:///caller.js');
   });

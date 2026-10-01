@@ -20,23 +20,15 @@ $ yarn add @granite-js/plugin-router --dev
 
 :::
 
-The following is an example of adding the router plugin to the `granite.config.ts` configuration. This plugin automatically creates routes based on the `pages/` folder.
+Add the router plugin to `rollipop.config.ts`. This plugin automatically creates routes based on the `pages/` folder. See the [Rollipop configuration documentation](https://rollipop.dev/docs/get-started/configuration) for other options.
 
 ```ts
-import { env } from '@granite-js/plugin-env';
 import { hermes } from '@granite-js/plugin-hermes';
 import { router } from '@granite-js/plugin-router';
-import { defineConfig } from '@granite-js/react-native/config';
+import { defineConfig } from 'rollipop';
 
 export default defineConfig({
-  /**
-   * granite://example
-   */
-  scheme: 'granite',
-  appName: 'example',
-  plugins: [
-    router(), // [!code highlight]
-  ],
+  plugins: [router(), hermes()], // [!code highlight]
 });
 ```
 

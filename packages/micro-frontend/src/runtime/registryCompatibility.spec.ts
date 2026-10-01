@@ -10,7 +10,7 @@ import {
   registerShared as registerLegacyShared,
 } from '../../../plugin-micro-frontend/src/runtime';
 import { importRemoteModule as importLegacyModule } from '../../../plugin-micro-frontend/src/runtime/utils';
-import { getPreludeConfig as getCompatiblePreludeConfig } from '../plugin/prelude';
+import { getPreludeConfig as getCompatiblePreludeConfig } from '../plugin-utils/prelude';
 
 type MatrixObservation = {
   readonly cell: string;

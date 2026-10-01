@@ -1,21 +1,16 @@
-import {
-  createNavigationContainerRef,
-  NavigationContainer,
-  NavigationIndependentTree,
-} from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
-import { walletStyles } from "./WalletService.styles";
+import { createNavigationContainerRef, NavigationContainer, NavigationIndependentTree } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import { walletStyles } from './WalletService.styles';
 
 type WalletStackParamList = {
   Home: undefined;
   Transfer: undefined;
 };
 
-export const WALLET_HOST_NAME = "cross-activity-secondary" as const;
-export const WALLET_NAVIGATION_REF =
-  createNavigationContainerRef<WalletStackParamList>();
+export const WALLET_HOST_NAME = 'cross-activity-secondary' as const;
+export const WALLET_NAVIGATION_REF = createNavigationContainerRef<WalletStackParamList>();
 
 const WalletStack = createNativeStackNavigator<WalletStackParamList>();
 
@@ -30,18 +25,16 @@ export function WalletService() {
           screenOptions={{
             contentStyle: walletStyles.screen,
             headerStyle: walletStyles.header,
-            headerTintColor: "#F4F8FC",
+            headerTintColor: '#F4F8FC',
             headerTitleStyle: walletStyles.headerTitle,
           }}
         >
-          <WalletStack.Screen name="Home" options={{ title: "Harbor Wallet" }}>
+          <WalletStack.Screen name="Home" options={{ title: 'Harbor Wallet' }}>
             {({ navigation }) => (
               <View style={walletStyles.home} testID="wallet_service_home">
                 <View style={walletStyles.topRow}>
                   <View>
-                    <Text style={walletStyles.serviceLabel}>
-                      SECONDARY SERVICE
-                    </Text>
+                    <Text style={walletStyles.serviceLabel}>SECONDARY SERVICE</Text>
                     <Text style={walletStyles.welcome}>Good afternoon</Text>
                   </View>
                   <View style={walletStyles.status}>
@@ -50,23 +43,14 @@ export function WalletService() {
                 </View>
 
                 <View style={walletStyles.balancePanel}>
-                  <Text style={walletStyles.balanceLabel}>
-                    AVAILABLE BALANCE
-                  </Text>
+                  <Text style={walletStyles.balanceLabel}>AVAILABLE BALANCE</Text>
                   <Text style={walletStyles.balance}>$2,481.73</Text>
-                  <Text style={walletStyles.account}>
-                    Harbor account · 1842
-                  </Text>
+                  <Text style={walletStyles.account}>Harbor account · 1842</Text>
                 </View>
 
                 <View style={walletStyles.activityRow}>
-                  <Text style={walletStyles.activityTitle}>
-                    Transfer activity
-                  </Text>
-                  <Text
-                    style={walletStyles.transferCount}
-                    testID="wallet_transfer_count"
-                  >
+                  <Text style={walletStyles.activityTitle}>Transfer activity</Text>
+                  <Text style={walletStyles.transferCount} testID="wallet_transfer_count">
                     {transferCount} sent
                   </Text>
                 </View>
@@ -74,9 +58,7 @@ export function WalletService() {
                   <View style={walletStyles.transactionMark} />
                   <View style={walletStyles.transactionCopy}>
                     <Text style={walletStyles.transactionName}>Coffee bar</Text>
-                    <Text style={walletStyles.transactionMeta}>
-                      Today · Card payment
-                    </Text>
+                    <Text style={walletStyles.transactionMeta}>Today · Card payment</Text>
                   </View>
                   <Text style={walletStyles.transactionAmount}>-$18.40</Text>
                 </View>
@@ -90,30 +72,23 @@ export function WalletService() {
                   ]}
                   testID="wallet_create_transfer"
                 >
-                  <Text style={walletStyles.primaryActionText}>
-                    Create transfer
-                  </Text>
+                  <Text style={walletStyles.primaryActionText}>Create transfer</Text>
                 </Pressable>
                 <Pressable
                   accessibilityRole="button"
-                  onPress={() => navigation.navigate("Transfer")}
+                  onPress={() => navigation.navigate('Transfer')}
                   style={({ pressed }) => [
                     walletStyles.secondaryAction,
                     pressed ? walletStyles.secondaryActionPressed : null,
                   ]}
                   testID="wallet_open_transfer"
                 >
-                  <Text style={walletStyles.secondaryActionText}>
-                    Review latest transfer
-                  </Text>
+                  <Text style={walletStyles.secondaryActionText}>Review latest transfer</Text>
                 </Pressable>
               </View>
             )}
           </WalletStack.Screen>
-          <WalletStack.Screen
-            name="Transfer"
-            options={{ title: "Transfer activity" }}
-          >
+          <WalletStack.Screen name="Transfer" options={{ title: 'Transfer activity' }}>
             {() => (
               <View style={walletStyles.transferPage} testID="wallet_transfer">
                 <Text style={walletStyles.serviceLabel}>SETTLED TODAY</Text>
@@ -134,7 +109,7 @@ export function WalletService() {
                   <View style={walletStyles.detailRow}>
                     <Text style={walletStyles.detailLabel}>Session total</Text>
                     <Text style={walletStyles.detailValue}>
-                      {transferCount} transfer{transferCount === 1 ? "" : "s"}
+                      {transferCount} transfer{transferCount === 1 ? '' : 's'}
                     </Text>
                   </View>
                 </View>

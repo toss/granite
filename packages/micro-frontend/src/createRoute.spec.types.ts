@@ -18,8 +18,9 @@ type OfficialRouteHasHostPendingComponent = 'hostPendingComponent' extends keyof
   : false;
 type MicroFrontendRouteHasHostPendingComponent =
   'hostPendingComponent' extends keyof MicroFrontendRouteOptions<ProductParams> ? true : false;
-type MicroFrontendRouteHasPendingComponent =
-  'pendingComponent' extends keyof MicroFrontendRouteOptions<ProductParams> ? true : false;
+type MicroFrontendRouteHasPendingComponent = 'pendingComponent' extends keyof MicroFrontendRouteOptions<ProductParams>
+  ? true
+  : false;
 
 expectTypeOf<OfficialRouteHasHostPendingComponent>().toEqualTypeOf<false>();
 expectTypeOf<MicroFrontendRouteHasHostPendingComponent>().toEqualTypeOf<true>();
@@ -47,7 +48,7 @@ const Route = createRoute('/product', {
 
     return thumbnailUrl == null ? { productId } : { productId, thumbnailUrl };
   },
-  hostPendingComponent: params => {
+  hostPendingComponent: (params) => {
     expectTypeOf(params).toEqualTypeOf<ProductParams>();
     return null;
   },
@@ -79,7 +80,7 @@ function createProductSchema(): StandardSchemaV1<ProductSchemaInput, ProductPara
 const SchemaRoute = createRoute('/product', {
   component: ProductPage,
   validateParams: createProductSchema(),
-  hostPendingComponent: params => {
+  hostPendingComponent: (params) => {
     expectTypeOf(params).toEqualTypeOf<ProductParams>();
     return null;
   },

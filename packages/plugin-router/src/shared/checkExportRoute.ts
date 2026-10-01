@@ -19,7 +19,7 @@ export function checkExportRoute(path: string) {
         if (specifier.type !== 'ExportSpecifier') {
           return false;
         }
-        return specifier.orig?.value === 'Route';
+        return specifier.orig?.value === 'Route' || specifier.exported?.value === 'Route';
       });
     });
 

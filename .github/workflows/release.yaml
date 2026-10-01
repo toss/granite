@@ -3,11 +3,11 @@ name: Release
 on:
   push:
     branches:
-      - v2
+      - main
 
 env:
-  BASE_BRANCH: 'v2'
-  NPM_TAG: 'stable-v2'
+  BASE_BRANCH: 'main'
+  NPM_TAG: 'stable-v3'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 

@@ -29,9 +29,7 @@ export function MicroFrontendSessionProvider(props: MicroFrontendSessionProvider
 
   return (
     <MicroFrontendSessionContext.Provider value={value}>
-      <VisibilityChangedProvider isVisible={props.presentationVisibility}>
-        {props.children}
-      </VisibilityChangedProvider>
+      <VisibilityChangedProvider isVisible={props.presentationVisibility}>{props.children}</VisibilityChangedProvider>
     </MicroFrontendSessionContext.Provider>
   );
 }

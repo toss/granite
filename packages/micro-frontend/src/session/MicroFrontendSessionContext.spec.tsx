@@ -7,9 +7,7 @@ import {
   useMicroFrontendSession,
 } from './MicroFrontendSessionContext';
 
-vi.mock('@granite-js/react-native', () =>
-  import('../../../react-native/src/visibility/useVisibilityChanged')
-);
+vi.mock('@granite-js/react-native', () => import('../../../react-native/src/visibility/useVisibilityChanged'));
 
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
 

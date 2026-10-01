@@ -1,4 +1,3 @@
-import type { MicroFrontendPluginOptions } from './types';
 import type { SharedConfig, SharedModuleConfig } from '../runtime/registry';
 
 const SHARED_PRESETS = {
@@ -21,7 +20,7 @@ const SHARED_PRESETS = {
   ],
 } as const;
 
-export function intoShared(shared: MicroFrontendPluginOptions['shared']): SharedConfig | undefined {
+export function intoShared(shared: SharedConfig | readonly string[] | undefined): SharedConfig | undefined {
   if (shared == null) {
     return undefined;
   }

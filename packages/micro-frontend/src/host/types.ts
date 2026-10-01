@@ -20,9 +20,7 @@ export interface PendingHostComponentAppConfig {
   readonly host?: string | null;
 }
 
-export interface RegisterPendingHostComponentRouteOptions<
-  TParams extends Readonly<object> | undefined = undefined,
-> {
+export interface RegisterPendingHostComponentRouteOptions<TParams extends Readonly<object> | undefined = undefined> {
   readonly component: PendingHostComponentRenderer<TParams>;
   readonly parserParams?: ParserParams;
   readonly validateParams?: ValidateParams<TParams>;

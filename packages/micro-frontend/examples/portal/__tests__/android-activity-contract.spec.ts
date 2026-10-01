@@ -1,52 +1,35 @@
-import { readFileSync, readdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync, readdirSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-const androidMainDirectory = resolve(
-  __dirname,
-  "../android/app/src/main/java/teleport/example",
-);
-const manifestPath = resolve(
-  __dirname,
-  "../android/app/src/main/AndroidManifest.xml",
-);
-const portalHostActivityPath = resolve(
-  androidMainDirectory,
-  "ReactNativePotalHostActivity.kt",
-);
+const androidMainDirectory = resolve(__dirname, '../android/app/src/main/java/teleport/example');
+const manifestPath = resolve(__dirname, '../android/app/src/main/AndroidManifest.xml');
+const portalHostActivityPath = resolve(androidMainDirectory, 'ReactNativePotalHostActivity.kt');
 const portalReactRootViewPath = resolve(
   __dirname,
-  "../../../android/src/main/java/com/teleport/host/PortalReactRootView.kt",
+  '../../../android/src/main/java/com/teleport/host/PortalReactRootView.kt'
 );
 
-describe("Android Activity contract", () => {
-  it("keeps exactly one native router and one route-driven React Native host", () => {
+describe('Android Activity contract', () => {
+  it('keeps exactly one native router and one route-driven React Native host', () => {
     const activitySources = readdirSync(androidMainDirectory)
-      .filter((fileName) => fileName.endsWith("Activity.kt"))
+      .filter((fileName) => fileName.endsWith('Activity.kt'))
       .sort();
-    const manifest = readFileSync(manifestPath, "utf8");
+    const manifest = readFileSync(manifestPath, 'utf8');
     const manifestActivities = Array.from(
       manifest.matchAll(/android:name="\.([^"]+Activity)"/g),
-      (match) => match[1],
+      (match) => match[1]
     ).sort();
 
-    expect(activitySources).toEqual([
-      "MainActivity.kt",
-      "ReactNativePotalHostActivity.kt",
-    ]);
-    expect(manifestActivities).toEqual([
-      "MainActivity",
-      "ReactNativePotalHostActivity",
-    ]);
+    expect(activitySources).toEqual(['MainActivity.kt', 'ReactNativePotalHostActivity.kt']);
+    expect(manifestActivities).toEqual(['MainActivity', 'ReactNativePotalHostActivity']);
   });
 
-  it("resolves the portal host name from the incoming URI without service mappings", () => {
-    const portalHostActivity = readFileSync(portalHostActivityPath, "utf8");
+  it('resolves the portal host name from the incoming URI without service mappings', () => {
+    const portalHostActivity = readFileSync(portalHostActivityPath, 'utf8');
 
-    expect(portalHostActivity).toContain("intent.data?.host");
-    expect(portalHostActivity).not.toMatch(
-      /PRIMARY|SECONDARY|primary|secondary/,
-    );
-    expect(portalHostActivity).not.toContain("cross-activity-");
+    expect(portalHostActivity).toContain('intent.data?.host');
+    expect(portalHostActivity).not.toMatch(/PRIMARY|SECONDARY|primary|secondary/);
+    expect(portalHostActivity).not.toContain('cross-activity-');
   });
 
   // What PortalReactRootView promises about itself — Fabric rendering, the host's surface id, the
@@ -61,11 +44,11 @@ describe("Android Activity contract", () => {
   // library, and that path constant is what actually had to change when the package moved from
   // packages/portal to packages/micro-frontend.
   it("wires the library root view and keeps this app's controller name out of the library", () => {
-    const portalHostActivity = readFileSync(portalHostActivityPath, "utf8");
-    const portalReactRootView = readFileSync(portalReactRootViewPath, "utf8");
+    const portalHostActivity = readFileSync(portalHostActivityPath, 'utf8');
+    const portalReactRootView = readFileSync(portalReactRootViewPath, 'utf8');
 
-    expect(portalHostActivity).toContain("PortalReactRootView");
-    expect(portalHostActivity).toContain("CONTROLLER_MODULE_NAME");
-    expect(portalReactRootView).not.toContain("TeleportController");
+    expect(portalHostActivity).toContain('PortalReactRootView');
+    expect(portalHostActivity).toContain('CONTROLLER_MODULE_NAME');
+    expect(portalReactRootView).not.toContain('TeleportController');
   });
 });

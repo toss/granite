@@ -6,8 +6,7 @@ import { getPath } from './getPath';
 import { ROUTER_GEN_TEMPLATE } from './template';
 import { transformTemplate } from './utils/transformTemplate';
 
-export function generateRouterFile() {
-  const cwd = process.cwd();
+export function generateRouterFile(cwd = process.cwd()) {
   function getPageFiles(dir: string, prefix = ''): string[] {
     const files = readdirSync(join(cwd, dir), { withFileTypes: true });
 

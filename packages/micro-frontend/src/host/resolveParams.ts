@@ -27,7 +27,7 @@ export function resolvePendingHostComponentParams(
       if (result.issues != null) {
         return {
           status: 'invalid',
-          cause: new Error(result.issues.map(issue => issue.message).join(', ')),
+          cause: new Error(result.issues.map((issue) => issue.message).join(', ')),
         };
       }
 

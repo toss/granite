@@ -30,10 +30,16 @@
     "publish:dev": "sh .scripts/publish-dev.sh"
   },
   "resolutions": {
-    "typescript": "5.8.3",
+    "@oxc-project/types@npm:=0.152.0": "0.151.0",
     "@babel/core": "7.28.5"
   },
   "dependenciesMeta": {
+    "@react-native/debugger-shell": {
+      "unplugged": true
+    },
+    "@rollipop/rolldown": {
+      "unplugged": true
+    },
     "hermes-compiler": {
       "unplugged": true
     },

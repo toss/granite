@@ -13,11 +13,7 @@ const createRozeniteMiddleware = (
 ): MetroMiddleware => {
   let rozeniteMiddleware: MetroMiddleware | undefined;
 
-  const middleware: MetroMiddleware = (
-    req: IncomingMessage,
-    res: ServerResponse,
-    next: NextHandleFunction
-  ) => {
+  const middleware: MetroMiddleware = (req: IncomingMessage, res: ServerResponse, next: NextHandleFunction) => {
     if (rozeniteMiddleware == null) {
       try {
         const { middleware } = initializeRozenite({

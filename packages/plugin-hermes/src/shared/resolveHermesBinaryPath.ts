@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { getPackageRoot } from '@granite-js/utils';
 
 /**
@@ -68,8 +68,7 @@ function fileExists(file: string): boolean {
   }
 }
 
-export function resolveHermesBinaryPath() {
-  const root = getPackageRoot();
+export function resolveHermesBinaryPath(root = getPackageRoot()) {
   const reactNativePath = getReactNativePackagePath(root);
 
   // 1) RN 0.83+: prefer hermes-compiler package
@@ -105,6 +104,6 @@ export function resolveHermesBinaryPath() {
     }
   }
 
-  // Fallback: return legacy bundled path to keep previous behavior
+  // Return the conventional bundled path so callers receive a deterministic result.
   return path.join(reactNativePath, 'sdks', 'hermesc', getHermesOSBin(), getHermesOSExe());
 }

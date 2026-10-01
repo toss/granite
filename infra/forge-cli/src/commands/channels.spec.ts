@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { deploy } from './deploy';
 import { deployList } from './deployList';
@@ -11,10 +12,12 @@ vi.mock('@granite-js/plugin-core', () => ({ loadConfig: mocks.loadConfig }));
 vi.mock('../operations/deploy', () => ({ deploy: mocks.deploy }));
 vi.mock('../operations/deployList', () => ({ deployList: mocks.deployList }));
 
+const cwd = path.resolve('fixture-app');
+
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.credentials.mockResolvedValue({ accessKeyId: 'test-access-key', secretAccessKey: 'test-secret-key' });
-  mocks.loadConfig.mockResolvedValue({ appName: 'sample-app', outdir: 'dist' });
+  mocks.loadConfig.mockResolvedValue({ appName: 'sample-app', cwd });
 });
 
 describe('channel options', () => {
@@ -35,8 +38,24 @@ describe('channel options', () => {
   it.each([undefined, 'Preview_2'])('passes deploy channel %j to the operation', async (channel) => {
     await deploy().parseAsync([...deployArgs, ...(channel ? ['--channel', channel] : [])], { from: 'user' });
     expect(mocks.deploy).toHaveBeenCalledWith(
-      expect.objectContaining({ appName: 'sample-app' }),
+      {
+        appName: 'sample-app',
+        iosBundle: path.resolve(cwd, 'dist/bundle.ios.hbc'),
+        androidBundle: path.resolve(cwd, 'dist/bundle.android.hbc'),
+      },
       expect.objectContaining({ channel })
+    );
+  });
+
+  it.each(['build', path.resolve('artifacts')])('supports channel and outdir %j together', async (outdir) => {
+    await deploy().parseAsync([...deployArgs, '--channel', 'Preview_2', '--outdir', outdir], { from: 'user' });
+    expect(mocks.deploy).toHaveBeenCalledWith(
+      {
+        appName: 'sample-app',
+        iosBundle: path.resolve(cwd, outdir, 'bundle.ios.hbc'),
+        androidBundle: path.resolve(cwd, outdir, 'bundle.android.hbc'),
+      },
+      expect.objectContaining({ channel: 'Preview_2' })
     );
   });
 

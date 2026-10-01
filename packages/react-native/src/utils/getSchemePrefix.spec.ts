@@ -16,10 +16,10 @@ describe('getSchemePrefix', () => {
     const result = getSchemePrefix({
       scheme: 'myapp',
       appName: 'testapp',
-      host: 'super',
+      host: 'example',
     });
 
-    expect(result).toBe('myapp://super/testapp');
+    expect(result).toBe('myapp://example/testapp');
   });
 
   it('should handle different schemes', () => {
