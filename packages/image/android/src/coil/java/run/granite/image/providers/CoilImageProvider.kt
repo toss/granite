@@ -1,42 +1,84 @@
 package run.granite.image.providers
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
-import android.util.Log
+import android.graphics.drawable.Drawable
+import android.os.Build
 import android.view.View
 import android.widget.ImageView
-import run.granite.image.GraniteImageProvider
-import run.granite.image.GraniteImagePriority
-import run.granite.image.GraniteImageCachePolicy
-import run.granite.image.GraniteImageProgressCallback
-import run.granite.image.GraniteImageCompletionCallback
-import coil.Coil
-import coil.load
+import coil.ImageLoader
+import coil.annotation.ExperimentalCoilApi
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
+import coil.decode.SvgDecoder
+import coil.dispose
 import coil.request.CachePolicy
-import coil.request.ErrorResult
 import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil.size.Scale
+import okhttp3.OkHttpClient
+import run.granite.image.ContextAwareGraniteImageProvider
+import run.granite.image.GraniteImageCachePolicy
+import run.granite.image.GraniteImageCompletionCallback
+import run.granite.image.GraniteImagePriority
+import run.granite.image.GraniteImageProgressCallback
+import run.granite.image.GraniteImageProvider
 
 /**
- * GraniteImageProvider implementation using Coil.
+ * Reuses one loader for display, preload and cache management.
+ * A supplied loader keeps its caches, networking configuration and decoders. Install
+ * [CoilImageProgressInterceptor] on its HTTP client to receive download progress.
  */
-class CoilImageProvider : GraniteImageProvider {
-    override fun loadImage(url: String, into: View, scaleType: ImageView.ScaleType) {
-        loadImage(url, into, scaleType, null, GraniteImagePriority.NORMAL, GraniteImageCachePolicy.DISK, null, null, null)
+class CoilImageProvider @JvmOverloads constructor(
+    context: Context? = null,
+    private val imageLoader: ImageLoader? = null,
+    private val maxConcurrentRequests: Int = 6,
+) : GraniteImageProvider, ContextAwareGraniteImageProvider {
+    @Volatile private var applicationContext: Context? = null
+    @Volatile private var loader: ImageLoader? = null
+
+    init {
+        require(maxConcurrentRequests > 0) { "maxConcurrentRequests must be positive" }
+        context?.let(::initialize)
     }
 
-    private fun isValidImageUrl(url: String): Boolean {
-        return try {
-            val uri = Uri.parse(url)
-            val scheme = uri.scheme?.lowercase()
-            scheme == "http" || scheme == "https" || scheme == "file" || scheme == "content"
-        } catch (e: Exception) {
-            false
+    @Synchronized
+    override fun initialize(context: Context) {
+        if (loader != null) return
+        val appContext = context.applicationContext
+        val scheduler = CoilRequestScheduler(maxConcurrentRequests)
+        val base = imageLoader
+        applicationContext = appContext
+        loader = if (base != null) {
+            base.newBuilder()
+                .components(base.components.newBuilder().add(scheduler).build())
+                .build()
+        } else {
+            ImageLoader.Builder(appContext)
+                .okHttpClient {
+                    OkHttpClient.Builder().addInterceptor(CoilImageProgressInterceptor()).build()
+                }
+                .components {
+                    add(scheduler)
+                    if (Build.VERSION.SDK_INT >= 28) {
+                        add(ImageDecoderDecoder.Factory())
+                    } else {
+                        add(GifDecoder.Factory())
+                    }
+                    add(SvgDecoder.Factory())
+                }
+                .build()
         }
+    }
+
+    override fun createImageView(context: Context): View {
+        initialize(context)
+        return ImageView(context)
+    }
+
+    override fun loadImage(url: String, into: View, scaleType: ImageView.ScaleType) {
+        loadImage(url, into, scaleType, null, GraniteImagePriority.NORMAL, GraniteImageCachePolicy.DISK, null, null, null)
     }
 
     override fun loadImage(
@@ -48,95 +90,44 @@ class CoilImageProvider : GraniteImageProvider {
         cachePolicy: GraniteImageCachePolicy,
         defaultSource: String?,
         progressCallback: GraniteImageProgressCallback?,
-        completionCallback: GraniteImageCompletionCallback?
+        completionCallback: GraniteImageCompletionCallback?,
     ) {
-        val imageView = validateImageView(into, scaleType, completionCallback) ?: return
-
-        if (!isValidImageUrl(url)) {
-            Log.e(TAG, "Invalid URL: $url")
-            completionCallback?.invoke(null, Exception("Invalid URL: $url"), 0, 0)
+        if (into !is ImageView) {
+            completionCallback?.invoke(null, IllegalArgumentException("An ImageView is required"), 0, 0)
             return
         }
-
-        imageView.load(url) {
-            headers?.forEach { (key, value) -> addHeader(key, value) }
-            applyCachePolicy(cachePolicy)
-            applyPlaceholder(imageView.context, defaultSource)
-            listener(
-                onStart = { Log.d(TAG, "Loading started: $url") },
-                onSuccess = { _, result -> handleSuccess(result, url, completionCallback) },
-                onError = { _, result -> handleError(result, completionCallback) }
-            )
-        }
-    }
-
-    private fun validateImageView(
-        into: View?,
-        scaleType: ImageView.ScaleType,
-        completionCallback: GraniteImageCompletionCallback?
-    ): ImageView? {
-        if (into == null) {
-            completionCallback?.invoke(null, Exception("No view provided"), 0, 0)
-            return null
-        }
-        if (into !is ImageView) {
-            Log.e(TAG, "View is not an ImageView")
-            completionCallback?.invoke(null, Exception("View is not an ImageView"), 0, 0)
-            return null
-        }
+        initialize(into.context)
         into.scaleType = scaleType
-        return into
-    }
-
-    private fun ImageRequest.Builder.applyCachePolicy(cachePolicy: GraniteImageCachePolicy) {
-        when (cachePolicy) {
-            GraniteImageCachePolicy.NONE -> {
-                memoryCachePolicy(CachePolicy.DISABLED)
-                diskCachePolicy(CachePolicy.DISABLED)
+        val progress = progressCallback?.let(::CoilImageProgress)
+        val builder = try {
+            request(into.context, url, headers, priority, cachePolicy, progress)
+        } catch (error: Exception) {
+            into.dispose()
+            progress?.cancel()
+            completionCallback?.invoke(null, error, 0, 0)
+            return
+        }
+        val request = builder
+            .target(into)
+            .apply {
+                if (!defaultSource.isNullOrEmpty()) {
+                    val id = into.context.resources.getIdentifier(defaultSource, "drawable", into.context.packageName)
+                    if (id != 0) placeholder(id)
+                }
             }
-            GraniteImageCachePolicy.MEMORY -> {
-                memoryCachePolicy(CachePolicy.ENABLED)
-                diskCachePolicy(CachePolicy.DISABLED)
-            }
-            GraniteImageCachePolicy.DISK -> {
-                memoryCachePolicy(CachePolicy.ENABLED)
-                diskCachePolicy(CachePolicy.ENABLED)
-            }
-        }
-    }
-
-    private fun ImageRequest.Builder.applyPlaceholder(context: Context, defaultSource: String?) {
-        if (!defaultSource.isNullOrEmpty()) {
-            val resourceId = context.resources.getIdentifier(defaultSource, "drawable", context.packageName)
-            if (resourceId != 0) placeholder(resourceId)
-        }
-    }
-
-    private fun handleSuccess(
-        result: SuccessResult,
-        url: String,
-        completionCallback: GraniteImageCompletionCallback?
-    ) {
-        val bitmap = (result.drawable as? BitmapDrawable)?.bitmap
-        Log.d(TAG, "Loaded with Coil: $url")
-        completionCallback?.invoke(bitmap, null, bitmap?.width ?: 0, bitmap?.height ?: 0)
-    }
-
-    private fun handleError(result: ErrorResult, completionCallback: GraniteImageCompletionCallback?) {
-        Log.e(TAG, "Error loading image: ${result.throwable.message}")
-        completionCallback?.invoke(null, result.throwable as? Exception, 0, 0)
-    }
-
-    override fun cancelLoad(view: View) {
-        if (view is ImageView) {
-            view.load(null as String?)
-        }
-    }
-
-    override fun applyTintColor(color: Int, view: View) {
-        if (view is ImageView) {
-            view.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
-        }
+            .listener(
+                onCancel = { progress?.cancel() },
+                onSuccess = { _, result ->
+                    progress?.cancel()
+                    complete(result.drawable, completionCallback)
+                },
+                onError = { _, result ->
+                    progress?.cancel()
+                    completionCallback?.invoke(null, result.throwable.asException(), 0, 0)
+                },
+            )
+            .build()
+        requireNotNull(loader).enqueue(request)
     }
 
     override fun loadImage(
@@ -147,23 +138,92 @@ class CoilImageProvider : GraniteImageProvider {
         priority: GraniteImagePriority,
         cachePolicy: GraniteImageCachePolicy,
         onProgress: GraniteImageProgressCallback?,
-        onCompletion: ((success: Boolean, width: Int, height: Int, error: String?) -> Unit)?
+        onCompletion: ((success: Boolean, width: Int, height: Int, error: String?) -> Unit)?,
     ) {
-        // Coil preload is not directly supported without a context
-        onCompletion?.invoke(false, 0, 0, "Preload not supported without context")
+        val context = applicationContext
+        val currentLoader = loader
+        if (context == null || currentLoader == null) {
+            onCompletion?.invoke(false, 0, 0, "Initialize CoilImageProvider with an application context before preloading")
+            return
+        }
+        val progress = onProgress?.let(::CoilImageProgress)
+        val builder = try {
+            request(context, url, headers, priority, cachePolicy, progress)
+        } catch (error: Exception) {
+            progress?.cancel()
+            onCompletion?.invoke(false, 0, 0, error.message)
+            return
+        }
+        val request = builder
+            // Coil's default display-size resolver bounds decoding when there is no target view.
+            .scale(if (contentMode == "cover") Scale.FILL else Scale.FIT)
+            .listener(
+                onCancel = {
+                    progress?.cancel()
+                    onCompletion?.invoke(false, 0, 0, "Image preload cancelled")
+                },
+                onSuccess = { _, result ->
+                    progress?.cancel()
+                    onCompletion?.invoke(
+                        true,
+                        result.drawable.intrinsicWidth.coerceAtLeast(0),
+                        result.drawable.intrinsicHeight.coerceAtLeast(0),
+                        null,
+                    )
+                },
+                onError = { _, result ->
+                    progress?.cancel()
+                    onCompletion?.invoke(false, 0, 0, result.throwable.message ?: result.throwable.javaClass.simpleName)
+                },
+            )
+            .build()
+        currentLoader.enqueue(request)
+    }
+
+    private fun request(
+        context: Context,
+        url: String,
+        headers: Map<String, String>?,
+        priority: GraniteImagePriority,
+        cachePolicy: GraniteImageCachePolicy,
+        progress: CoilImageProgress?,
+    ): ImageRequest.Builder = ImageRequest.Builder(context)
+        .data(url.takeIf { it.isNotBlank() })
+        .setParameter(CoilRequestScheduler.PRIORITY, priority, memoryCacheKey = null)
+        .apply {
+            headers?.forEach { (name, value) -> addHeader(name, value) }
+            if (progress != null) tag(CoilImageProgress::class.java, progress)
+            memoryCachePolicy(if (cachePolicy == GraniteImageCachePolicy.NONE) CachePolicy.DISABLED else CachePolicy.ENABLED)
+            diskCachePolicy(if (cachePolicy == GraniteImageCachePolicy.DISK) CachePolicy.ENABLED else CachePolicy.DISABLED)
+        }
+
+    private fun complete(drawable: Drawable, callback: GraniteImageCompletionCallback?) {
+        callback?.invoke(
+            (drawable as? BitmapDrawable)?.bitmap,
+            null,
+            drawable.intrinsicWidth.coerceAtLeast(0),
+            drawable.intrinsicHeight.coerceAtLeast(0),
+        )
+    }
+
+    private fun Throwable.asException(): Exception = this as? Exception ?: Exception(message, this)
+
+    override fun cancelLoad(view: View) {
+        if (view is ImageView) view.dispose()
+    }
+
+    override fun applyTintColor(color: Int, view: View) {
+        if (view is ImageView) view.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
     }
 
     override fun clearMemoryCache(context: Context) {
-        Coil.imageLoader(context).memoryCache?.clear()
-        Log.d(TAG, "Memory cache cleared (Coil 2.x)")
+        initialize(context)
+        loader?.memoryCache?.clear()
     }
 
+    @OptIn(ExperimentalCoilApi::class)
     override fun clearDiskCache(context: Context) {
-        // Coil 2.x: no public API for diskCache — no-op
-        Log.d(TAG, "Disk cache clear not supported (Coil 2.x)")
-    }
-
-    companion object {
-        private const val TAG = "CoilImageProvider"
+        initialize(context)
+        loader?.diskCache?.clear()
     }
 }

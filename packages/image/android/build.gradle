@@ -173,6 +173,8 @@ dependencies {
     }
     if (graniteProvider == 'coil') {
       implementation "io.coil-kt:coil:2.5.0"
+      implementation "io.coil-kt:coil-gif:2.5.0"
+      implementation "io.coil-kt:coil-svg:2.5.0"
     }
   }
 }

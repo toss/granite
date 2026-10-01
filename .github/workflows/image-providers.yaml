@@ -1,0 +1,31 @@
+name: Android image providers
+
+on:
+  pull_request:
+    paths:
+      - 'packages/image/**'
+      - '.github/workflows/image-providers.yaml'
+      - 'yarn.lock'
+      - '.yarnrc.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Android image provider tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-yarn
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install Android SDK
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Test Android image providers
+        run: packages/image/android/test-providers.sh --console=plain

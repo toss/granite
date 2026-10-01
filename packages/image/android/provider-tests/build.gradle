@@ -1,0 +1,57 @@
+plugins {
+    id 'com.android.library' version '8.7.2'
+    id 'org.jetbrains.kotlin.android' version '2.1.20'
+}
+
+def imageCodegen = tasks.register('generateImageCodegen', Exec) {
+    workingDir '../..'
+    commandLine 'yarn', 'node', 'android/provider-tests/generate-codegen.cjs'
+    inputs.file '../../src/GraniteImageNativeComponent.ts'
+    inputs.file 'generate-codegen.cjs'
+    outputs.dir layout.buildDirectory.dir('generated/codegen')
+}
+
+android {
+    namespace 'run.granite.image.tests'
+    compileSdk 35
+    defaultConfig { minSdk 24 }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = '17' }
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['../src/main/java', '../src/coil/java', '../src/glide/java', '../src/okhttp/java',
+                            layout.buildDirectory.dir('generated/codegen/java')]
+        }
+        test.java.srcDirs = ['../src/testCoil/java']
+    }
+    testOptions.unitTests.includeAndroidResources = true
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    dependsOn imageCodegen
+}
+
+tasks.withType(JavaCompile).configureEach { dependsOn imageCodegen }
+
+dependencies {
+    implementation 'com.facebook.react:react-android:0.81.5'
+    implementation 'io.coil-kt:coil:2.5.0'
+    implementation 'io.coil-kt:coil-gif:2.5.0'
+    implementation 'io.coil-kt:coil-svg:2.5.0'
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.14.1'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+}
+
+tasks.withType(Test).configureEach {
+    maxHeapSize = '2g'
+    testLogging { events 'failed', 'skipped' }
+}
