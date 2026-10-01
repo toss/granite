@@ -1,5 +1,7 @@
 # @granite-js/video
 
+## 2.5.6
+
 ## 2.5.5
 
 ### Patch Changes
