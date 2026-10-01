@@ -1,5 +1,12 @@
 # @granite-js/forge-cli
 
+## 3.0.0
+
+### Patch Changes
+
+- @granite-js/deployment-manager@3.0.0
+- @granite-js/plugin-core@3.0.0
+
 ## 2.5.5
 
 ### Patch Changes
