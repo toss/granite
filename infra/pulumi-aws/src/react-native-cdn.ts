@@ -478,6 +478,11 @@ export class ReactNativeBundleCDN extends pulumi.ComponentResource {
             events: ['s3:ObjectCreated:*', 's3:ObjectRemoved:*'],
             filterPrefix: 'deployments/', // Only trigger for objects in deployments/ folder
           },
+          {
+            lambdaFunctionArn: cacheInvalidationLambda.arn,
+            events: ['s3:ObjectCreated:*', 's3:ObjectRemoved:*'],
+            filterPrefix: 'channels/',
+          },
         ],
       },
       {

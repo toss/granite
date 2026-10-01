@@ -1,5 +1,134 @@
 # @granite-js/native
 
+## 2.5.5
+
+### Patch Changes
+
+- Updated dependencies [6d8b2b2]
+  - @granite-js/video@2.5.5
+  - @granite-js/image@2.5.5
+  - @granite-js/lottie@2.5.5
+
+## 2.5.4
+
+### Patch Changes
+
+- @granite-js/image@2.5.4
+- @granite-js/lottie@2.5.4
+- @granite-js/video@2.5.4
+
+## 2.5.3
+
+### Patch Changes
+
+- @granite-js/image@2.5.3
+- @granite-js/lottie@2.5.3
+- @granite-js/video@2.5.3
+
+## 2.5.2
+
+### Patch Changes
+
+- @granite-js/image@2.5.2
+- @granite-js/lottie@2.5.2
+- @granite-js/video@2.5.2
+
+## 2.5.1
+
+### Patch Changes
+
+- @granite-js/image@2.5.1
+- @granite-js/lottie@2.5.1
+- @granite-js/video@2.5.1
+
+## 2.5.0
+
+### Patch Changes
+
+- @granite-js/image@2.5.0
+- @granite-js/lottie@2.5.0
+- @granite-js/video@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- @granite-js/image@2.4.0
+- @granite-js/lottie@2.4.0
+- @granite-js/video@2.4.0
+
+## 2.3.2
+
+### Patch Changes
+
+- @granite-js/image@2.3.2
+- @granite-js/lottie@2.3.2
+- @granite-js/video@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @granite-js/image@2.3.1
+- @granite-js/lottie@2.3.1
+- @granite-js/video@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- @granite-js/image@2.3.0
+- @granite-js/lottie@2.3.0
+- @granite-js/video@2.3.0
+
+## 2.2.0
+
+### Patch Changes
+
+- @granite-js/image@2.2.0
+- @granite-js/lottie@2.2.0
+- @granite-js/video@2.2.0
+
+## 2.1.1
+
+### Patch Changes
+
+- @granite-js/image@2.1.1
+- @granite-js/lottie@2.1.1
+- @granite-js/video@2.1.1
+
+## 2.1.0
+
+### Patch Changes
+
+- @granite-js/image@2.1.0
+- @granite-js/lottie@2.1.0
+- @granite-js/video@2.1.0
+
+## 2.0.2
+
+### Patch Changes
+
+- @granite-js/image@2.0.2
+- @granite-js/lottie@2.0.2
+- @granite-js/video@2.0.2
+
+## 2.0.1
+
+### Patch Changes
+
+- @granite-js/image@2.0.1
+- @granite-js/lottie@2.0.1
+- @granite-js/video@2.0.1
+
+## 2.0.0
+
+### Patch Changes
+
+- @granite-js/image@2.0.0
+- @granite-js/lottie@2.0.0
+- @granite-js/video@2.0.0
+
 ## 1.0.45
 
 ### Patch Changes

@@ -42,6 +42,9 @@ module.exports = tseslint.config(
       '.pnp.*',
       '.yarn/',
       '**/.granite/',
+      '**/.vitest/',
+      '**/.rollipop/',
+      '**/coverage/',
     ],
   },
   eslint.configs.recommended,
@@ -61,7 +64,7 @@ module.exports = tseslint.config(
       ],
       curly: ['error', 'all'],
       eqeqeq: ['error', 'always', { null: 'ignore' }],
-      // TypeScript에서 이미 잡고 있는 문제이기 때문에 + location, document 등의 global variable도 잡아서
+      // TypeScript에서 이미 잡는 문제이며 location, document 같은 전역 변수도 잡아서 비활성화합니다.
       'no-undef': 'off',
       'no-empty': ['error', { allowEmptyCatch: true }],
     },

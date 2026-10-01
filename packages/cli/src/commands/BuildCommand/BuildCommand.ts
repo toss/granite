@@ -1,9 +1,9 @@
-import { BuildUtils } from '@granite-js/mpack';
-import { statusPlugin } from '@granite-js/mpack/plugins';
-import { loadConfig } from '@granite-js/plugin-core';
+import { loadConfig, type BundlerBuildOption, type BuildPlatform } from '@granite-js/config';
 import { Command, Option } from 'clipanion';
+import { Semaphore } from 'es-toolkit';
 import { ExitCode } from '../../constants';
 import { errorHandler } from '../../utils/command';
+import { printLogo } from '../../utils/printLogo';
 
 export class BuildCommand extends Command {
   static paths = [[`build`]];
@@ -22,27 +22,44 @@ export class BuildCommand extends Command {
     description: 'Build in development mode',
   });
 
-  metafile = Option.Boolean('--metafile', {
-    description: 'Generate metafile',
-  });
-
-  cache = Option.Boolean('--cache', {
-    description: 'Enable cache',
+  resetCache = Option.Boolean('--reset-cache', false, {
+    description: 'Clear the bundler cache before building',
   });
 
   async execute() {
-    try {
-      const { configFile, cache = true, metafile = false, dev = false } = this;
-      const config = await loadConfig({ configFile });
-      const options = (['android', 'ios'] as const).map((platform) => ({
-        dev,
-        cache,
-        metafile,
-        platform,
-        outfile: `bundle.${platform}.js`,
-      }));
+    printLogo();
 
-      await BuildUtils.buildAll(options, { config, plugins: [statusPlugin] });
+    try {
+      const { configFile, dev = false } = this;
+      const config = await loadConfig({ configFile });
+      if (this.resetCache) {
+        await config.bundler.resetCache();
+        console.log('The transform cache was reset');
+      }
+
+      const buildOptions = (['android', 'ios'] satisfies BuildPlatform[]).map(
+        (platform): BundlerBuildOption => ({ platform, dev })
+      );
+      const semaphore = new Semaphore(buildOptions.length);
+      const results = await Promise.allSettled(
+        buildOptions.map(async (buildOption) => {
+          await semaphore.acquire();
+          try {
+            return await config.bundler.runBuild(buildOption);
+          } catch (error) {
+            throw new Error(`Failed to build for ${buildOption.platform}`, { cause: error });
+          } finally {
+            semaphore.release();
+          }
+        })
+      );
+      const failures = results.filter((result) => result.status === 'rejected');
+      if (failures.length > 0) {
+        throw new AggregateError(
+          failures.map((failure) => failure.reason),
+          'Granite build failed'
+        );
+      }
 
       return ExitCode.SUCCESS;
     } catch (error: unknown) {

@@ -1,5 +1,233 @@
 # @granite-js/react-native
 
+## 2.5.5
+
+### Patch Changes
+
+- Updated dependencies [6d8b2b2]
+  - @granite-js/video@2.5.5
+  - @granite-js/blur-view@2.5.5
+  - @granite-js/jest@2.5.5
+  - @granite-js/style-utils@2.5.5
+  - @granite-js/brownfield-module@2.5.5
+  - @granite-js/cli@2.5.5
+  - @granite-js/mpack@2.5.5
+  - @granite-js/plugin-core@2.5.5
+
+## 2.5.4
+
+### Patch Changes
+
+- @granite-js/blur-view@2.5.4
+- @granite-js/brownfield-module@2.5.4
+- @granite-js/cli@2.5.4
+- @granite-js/jest@2.5.4
+- @granite-js/mpack@2.5.4
+- @granite-js/plugin-core@2.5.4
+- @granite-js/style-utils@2.5.4
+- @granite-js/video@2.5.4
+
+## 2.5.3
+
+### Patch Changes
+
+- @granite-js/blur-view@2.5.3
+- @granite-js/brownfield-module@2.5.3
+- @granite-js/cli@2.5.3
+- @granite-js/jest@2.5.3
+- @granite-js/mpack@2.5.3
+- @granite-js/plugin-core@2.5.3
+- @granite-js/style-utils@2.5.3
+- @granite-js/video@2.5.3
+
+## 2.5.2
+
+### Patch Changes
+
+- @granite-js/blur-view@2.5.2
+- @granite-js/brownfield-module@2.5.2
+- @granite-js/cli@2.5.2
+- @granite-js/jest@2.5.2
+- @granite-js/mpack@2.5.2
+- @granite-js/plugin-core@2.5.2
+- @granite-js/style-utils@2.5.2
+- @granite-js/video@2.5.2
+
+## 2.5.1
+
+### Patch Changes
+
+- a686133: Read navigation focus through `useSyncExternalStore` so focus changes between rendering and subscription are not missed by `useIsFocusedSafely`, `useVisibility`, or visibility effects. Preserve the focused fallback when no navigation context is available.
+
+  Visibility effects follow committed visibility snapshots with React's effect setup and cleanup lifecycle.
+  - @granite-js/blur-view@2.5.1
+  - @granite-js/brownfield-module@2.5.1
+  - @granite-js/cli@2.5.1
+  - @granite-js/jest@2.5.1
+  - @granite-js/mpack@2.5.1
+  - @granite-js/plugin-core@2.5.1
+  - @granite-js/style-utils@2.5.1
+  - @granite-js/video@2.5.1
+
+## 2.5.0
+
+### Minor Changes
+
+- f9086dc: Add `useVisibilityEffect` to run an effect while a screen is visible and clean it up when visibility is lost, the callback changes, or the component unmounts.
+
+  Deprecate `useVisibilityChange` without changing its behavior. Use `useVisibilityEffect` for effects with cleanup, or `useVisibility` with React's `useEffect` for explicit visibility change handling.
+
+### Patch Changes
+
+- @granite-js/blur-view@2.5.0
+- @granite-js/brownfield-module@2.5.0
+- @granite-js/cli@2.5.0
+- @granite-js/jest@2.5.0
+- @granite-js/mpack@2.5.0
+- @granite-js/plugin-core@2.5.0
+- @granite-js/style-utils@2.5.0
+- @granite-js/video@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- @granite-js/blur-view@2.4.0
+- @granite-js/brownfield-module@2.4.0
+- @granite-js/cli@2.4.0
+- @granite-js/jest@2.4.0
+- @granite-js/mpack@2.4.0
+- @granite-js/plugin-core@2.4.0
+- @granite-js/style-utils@2.4.0
+- @granite-js/video@2.4.0
+
+## 2.3.2
+
+### Patch Changes
+
+- @granite-js/blur-view@2.3.2
+- @granite-js/brownfield-module@2.3.2
+- @granite-js/cli@2.3.2
+- @granite-js/jest@2.3.2
+- @granite-js/mpack@2.3.2
+- @granite-js/plugin-core@2.3.2
+- @granite-js/style-utils@2.3.2
+- @granite-js/video@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @granite-js/blur-view@2.3.1
+- @granite-js/brownfield-module@2.3.1
+- @granite-js/cli@2.3.1
+- @granite-js/jest@2.3.1
+- @granite-js/mpack@2.3.1
+- @granite-js/plugin-core@2.3.1
+- @granite-js/style-utils@2.3.1
+- @granite-js/video@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- @granite-js/blur-view@2.3.0
+- @granite-js/brownfield-module@2.3.0
+- @granite-js/cli@2.3.0
+- @granite-js/jest@2.3.0
+- @granite-js/mpack@2.3.0
+- @granite-js/plugin-core@2.3.0
+- @granite-js/style-utils@2.3.0
+- @granite-js/video@2.3.0
+
+## 2.2.0
+
+### Patch Changes
+
+- @granite-js/blur-view@2.2.0
+- @granite-js/brownfield-module@2.2.0
+- @granite-js/cli@2.2.0
+- @granite-js/jest@2.2.0
+- @granite-js/mpack@2.2.0
+- @granite-js/plugin-core@2.2.0
+- @granite-js/style-utils@2.2.0
+- @granite-js/video@2.2.0
+
+## 2.1.1
+
+### Patch Changes
+
+- @granite-js/blur-view@2.1.1
+- @granite-js/brownfield-module@2.1.1
+- @granite-js/cli@2.1.1
+- @granite-js/jest@2.1.1
+- @granite-js/mpack@2.1.1
+- @granite-js/plugin-core@2.1.1
+- @granite-js/style-utils@2.1.1
+- @granite-js/video@2.1.1
+
+## 2.1.0
+
+### Patch Changes
+
+- @granite-js/blur-view@2.1.0
+- @granite-js/brownfield-module@2.1.0
+- @granite-js/cli@2.1.0
+- @granite-js/jest@2.1.0
+- @granite-js/mpack@2.1.0
+- @granite-js/native@2.1.0
+- @granite-js/plugin-core@2.1.0
+- @granite-js/style-utils@2.1.0
+- @granite-js/video@2.1.0
+
+## 2.0.2
+
+### Patch Changes
+
+- @granite-js/blur-view@2.0.2
+- @granite-js/brownfield-module@2.0.2
+- @granite-js/cli@2.0.2
+- @granite-js/jest@2.0.2
+- @granite-js/mpack@2.0.2
+- @granite-js/native@2.0.2
+- @granite-js/plugin-core@2.0.2
+- @granite-js/style-utils@2.0.2
+- @granite-js/video@2.0.2
+
+## 2.0.1
+
+### Patch Changes
+
+- @granite-js/blur-view@2.0.1
+- @granite-js/brownfield-module@2.0.1
+- @granite-js/cli@2.0.1
+- @granite-js/jest@2.0.1
+- @granite-js/mpack@2.0.1
+- @granite-js/native@2.0.1
+- @granite-js/plugin-core@2.0.1
+- @granite-js/style-utils@2.0.1
+- @granite-js/video@2.0.1
+
+## 2.0.0
+
+### Major Changes
+
+- 864fa2a: Start the Granite v2 release line.
+
+### Patch Changes
+
+- 864fa2a: Route session visibility through Granite's existing visibility provider and expose native session lifecycle as React state so remote apps can continue using `useVisibility()`.
+- Updated dependencies [864fa2a]
+  - @granite-js/mpack@2.0.0
+  - @granite-js/cli@2.0.0
+  - @granite-js/blur-view@2.0.0
+  - @granite-js/brownfield-module@2.0.0
+  - @granite-js/jest@2.0.0
+  - @granite-js/native@2.0.0
+  - @granite-js/plugin-core@2.0.0
+  - @granite-js/style-utils@2.0.0
+  - @granite-js/video@2.0.0
+
 ## 1.0.45
 
 ### Patch Changes

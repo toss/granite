@@ -1,5 +1,118 @@
 # @granite-js/mpack
 
+## 2.5.5
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.5
+- @granite-js/utils@2.5.5
+
+## 2.5.4
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.4
+- @granite-js/utils@2.5.4
+
+## 2.5.3
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.3
+- @granite-js/utils@2.5.3
+
+## 2.5.2
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.2
+- @granite-js/utils@2.5.2
+
+## 2.5.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.1
+- @granite-js/utils@2.5.1
+
+## 2.5.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.0
+- @granite-js/utils@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.4.0
+- @granite-js/utils@2.4.0
+
+## 2.3.2
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.3.2
+- @granite-js/utils@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.3.1
+- @granite-js/utils@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.3.0
+- @granite-js/utils@2.3.0
+
+## 2.2.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.2.0
+- @granite-js/utils@2.2.0
+
+## 2.1.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.1.1
+- @granite-js/utils@2.1.1
+
+## 2.1.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.1.0
+- @granite-js/utils@2.1.0
+
+## 2.0.2
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.0.2
+- @granite-js/utils@2.0.2
+
+## 2.0.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.0.1
+- @granite-js/utils@2.0.1
+
+## 2.0.0
+
+### Patch Changes
+
+- 864fa2a: Remove runtime module edges left behind by inline Flow type-only imports.
+  - @granite-js/plugin-core@2.0.0
+  - @granite-js/utils@2.0.0
+
 ## 1.0.45
 
 ### Patch Changes

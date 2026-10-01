@@ -3,11 +3,11 @@ import { VisibilityProvider } from '../../visibility';
 import { Props } from '.';
 
 type IOSInitialProps = Props & {
-  isVisible: boolean;
+  isVisible?: boolean;
 };
 
 export function App({ children, ...props }: IOSInitialProps) {
-  const { isVisible } = useMemo(() => props, [props]);
+  const { isVisible = true } = useMemo(() => props, [props]);
 
   return <VisibilityProvider isVisible={isVisible}>{children}</VisibilityProvider>;
 }

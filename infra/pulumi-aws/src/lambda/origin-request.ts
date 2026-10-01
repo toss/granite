@@ -1,4 +1,4 @@
-import { DeployManager, S3Client, InvalidRequest, NotFoundError } from '@granite-js/deployment-manager';
+import { DeployManager, S3Client, InvalidRequest, NotFoundError, NoSuchKey } from '@granite-js/deployment-manager';
 import { CloudFrontRequestEvent, CloudFrontRequestResult } from 'aws-lambda';
 import { RequestHandlerContext } from './context';
 import { parseAppName } from './utils/parseAppName';
@@ -6,7 +6,7 @@ import { parseGroupId } from './utils/parseGroupId';
 import { parsePlatform } from './utils/parsePlatform';
 import { parseSuffix } from './utils/parseSuffix';
 
-// https://cdn.example.com/<ios|android>/<appName>/<groupId>/0_72_6 -> s3://<bucketName>/bundles/<appName>/<deploymentId>/bundle.<ios|android>.0_72_6.hbc.gz
+// Resolve legacy defaults/tags or S3-registered channel selectors to a bundle object key.
 export function createOriginRequestHandler(context: RequestHandlerContext) {
   const s3Client = new S3Client({
     bucket: context.bucketName,
@@ -29,6 +29,19 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
         throw new InvalidRequest('invalid request');
       }
 
+      const channel = await DeployManager.resolveChannel({ appName, selector: suffix }, { s3Client });
+      const tag = channel !== undefined || suffix === 'bundle' ? undefined : suffix;
+      if (channel !== undefined) {
+        const parts = request.uri.split('/');
+        if (
+          parts.length !== 5 ||
+          !['ios', 'android'].includes(parts[1] ?? '') ||
+          parts.slice(2).some((part) => !part)
+        ) {
+          throw new InvalidRequest('Expected /<platform>/<app>/<group>/<selector>');
+        }
+      }
+
       const deploymentId = await DeployManager.resolveDeploymentId(
         {
           appName,
@@ -37,6 +50,7 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
         },
         {
           s3Client,
+          channel,
         }
       );
 
@@ -44,7 +58,8 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
         appName,
         platform,
         deploymentId,
-        tag: suffix !== 'bundle' ? suffix : undefined,
+        channel,
+        tag,
       });
 
       const absolutePath = `/${bundlePath}`;
@@ -57,6 +72,9 @@ export function createOriginRequestHandler(context: RequestHandlerContext) {
       ];
       return request;
     } catch (error) {
+      if (error instanceof NoSuchKey) {
+        return { status: '404', statusDescription: 'Deployment not found' };
+      }
       if (error instanceof NotFoundError) {
         return { status: '404', statusDescription: error.message };
       }

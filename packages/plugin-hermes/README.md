@@ -15,11 +15,26 @@ pnpm install @granite-js/plugin-hermes
 yarn add @granite-js/plugin-hermes
 ```
 
-## Usage
+## Rollipop
 
 ```ts
-import { defineConfig } from '@granite-js/react-native/config';
 import { hermes } from '@granite-js/plugin-hermes';
+
+const plugins = [
+  hermes({
+    onBuild(result) {
+      console.log(`Hermes bytecode path: ${result.hbc}`);
+      console.log(`Hermes sourcemap path: ${result.hbcSourcemap ?? 'N/A'}`);
+    },
+  }),
+];
+```
+
+## Mpack (deprecated)
+
+```ts
+import { defineConfig } from '@granite-js/mpack/config';
+import { hermes } from '@granite-js/plugin-hermes/mpack';
 
 export default defineConfig({
   plugins: [
@@ -49,18 +64,6 @@ export default defineConfig({
     }),
   ],
 });
-```
-
-```ts
-// In other plugin handlers
-function handler() {
-  const hermesPluginResults = this.meta.hermes ?? [];
-
-  for (const hermesPluginResult of hermesPluginResults) {
-    console.log(`Hermes bytecode path: ${hermesPluginResult.hbc}`);
-    console.log(`Hermes sourcemap path: ${hermesPluginResult.hbcSourcemap ?? 'N/A'}`);
-  }
-}
 ```
 
 ## License

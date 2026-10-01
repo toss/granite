@@ -3,7 +3,7 @@ import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { loadSharedConfigFiles } from '@aws-sdk/shared-ini-file-loader';
 import * as p from '@clack/prompts';
 import { Command } from '@commander-js/extra-typings';
-import { S3Client } from '@granite-js/deployment-manager';
+import { S3Client, validateChannel } from '@granite-js/deployment-manager';
 import { loadConfig } from '@granite-js/plugin-core';
 import * as v from 'valibot';
 import { deploy as deployOperation } from '../operations/deploy';
@@ -21,6 +21,8 @@ export function deploy() {
   return new Command('deploy')
     .description('Deploy a Granite application')
     .requiredOption('--bucket <BUCKET>', 'AWS bucket')
+    .option('--channel <CHANNEL>', 'Deployment channel (omit for the legacy namespace)', validateChannel)
+    .option('--outdir <DIRECTORY>', 'Directory containing built Hermes bundles', 'dist')
     .action(async (options) => {
       const [config, awsCredentials, region] = await Promise.all([loadConfig(), awsCredentialsProvider(), getRegion()]);
 
@@ -47,10 +49,11 @@ export function deploy() {
       await deployOperation(
         {
           appName: config.appName,
-          iosBundle: path.join(config.outdir, `bundle.ios.hbc`),
-          androidBundle: path.join(config.outdir, `bundle.android.hbc`),
+          iosBundle: path.resolve(config.cwd, options.outdir, 'bundle.ios.hbc'),
+          androidBundle: path.resolve(config.cwd, options.outdir, 'bundle.android.hbc'),
         },
         {
+          channel: options.channel,
           s3Client: new S3Client({
             region,
             bucket: options.bucket,

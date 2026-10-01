@@ -1,5 +1,5 @@
 import { Command } from '@commander-js/extra-typings';
-import { S3Client } from '@granite-js/deployment-manager';
+import { S3Client, validateChannel } from '@granite-js/deployment-manager';
 import { withS3Client } from '../helpers/command';
 import { deployList as deployListOperation } from '../operations/deployList';
 
@@ -7,8 +7,10 @@ export function deployList() {
   return withS3Client(new Command('deploy-list'))
     .description('Show the deployment list of a Granite application')
     .requiredOption('-n, --app-name <APP_NAME>', 'Granite application name')
+    .option('--channel <CHANNEL>', 'Deployment channel (omit for the legacy namespace)', validateChannel)
     .action(async (options) => {
       await deployListOperation(options, {
+        channel: options.channel,
         s3Client: new S3Client({
           region: options.region,
           bucket: options.bucket,
