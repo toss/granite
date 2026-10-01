@@ -1,5 +1,19 @@
 # @granite-js/react-native
 
+## 2.5.6
+
+### Patch Changes
+
+- 3bf6898: feat(react-native): export InitialPropsProvider
+  - @granite-js/blur-view@2.5.6
+  - @granite-js/brownfield-module@2.5.6
+  - @granite-js/cli@2.5.6
+  - @granite-js/jest@2.5.6
+  - @granite-js/mpack@2.5.6
+  - @granite-js/plugin-core@2.5.6
+  - @granite-js/style-utils@2.5.6
+  - @granite-js/video@2.5.6
+
 ## 2.5.5
 
 ### Patch Changes
