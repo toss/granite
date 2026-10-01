@@ -51,6 +51,8 @@ static NSString *gRegisteredHostName;
   return childIndex;
 }
 
+- (void)notifyLayoutChanged {}
+
 - (void)didAddSubview:(UIView *)subview
 {
   [super didAddSubview:subview];

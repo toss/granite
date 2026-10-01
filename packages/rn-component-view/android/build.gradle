@@ -1,0 +1,60 @@
+buildscript {
+  ext.safeExtGet = { name, fallback ->
+    rootProject.ext.has(name) ? rootProject.ext.get(name) : fallback
+  }
+
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:8.7.2"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${safeExtGet('kotlinVersion', project.properties['GraniteRNComponentView_kotlinVersion'])}"
+  }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.facebook.react'
+
+def getIntegerProperty(name) {
+  return safeExtGet(name, project.properties["GraniteRNComponentView_${name}"]).toInteger()
+}
+
+android {
+  namespace 'run.granite.rncomponentview'
+  compileSdkVersion getIntegerProperty('compileSdkVersion')
+
+  defaultConfig {
+    minSdkVersion getIntegerProperty('minSdkVersion')
+    targetSdkVersion getIntegerProperty('targetSdkVersion')
+  }
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+
+  kotlinOptions {
+    jvmTarget = '17'
+  }
+
+  testOptions {
+    unitTests.returnDefaultValues = true
+  }
+}
+
+dependencies {
+  implementation 'com.facebook.react:react-android'
+  // RNComponentView hosts its content in the Portal host of the micro-frontend runtime, which React Native
+  // autolinking includes under this name.
+  implementation project(':granite-js_micro-frontend')
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:${safeExtGet('kotlinVersion', project.properties['GraniteRNComponentView_kotlinVersion'])}"
+  testImplementation 'junit:junit:4.13.2'
+  testImplementation 'org.mockito:mockito-core:5.14.2'
+}
