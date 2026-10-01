@@ -24,7 +24,7 @@ public final class CookiesModule: BrickModuleBase, CookiesSpec, @unchecked Senda
             throw BrickModuleError.executionError("Invalid URL: \(url)")
         }
 
-        guard let httpCookie = makeHTTPCookie(from: cookie, url: urlObj) else {
+        guard let httpCookie = try makeHTTPCookie(from: cookie, url: urlObj) else {
             throw BrickModuleError.executionError("Failed to create cookie from provided data")
         }
 
@@ -196,7 +196,7 @@ public final class CookiesModule: BrickModuleBase, CookiesSpec, @unchecked Senda
 
     // MARK: - Helper Methods
 
-    private func makeHTTPCookie(from cookie: CookiesCookie, url: URL) -> HTTPCookie? {
+    private func makeHTTPCookie(from cookie: CookiesCookie, url: URL) throws -> HTTPCookie? {
         var properties: [HTTPCookiePropertyKey: Any] = [
             .name: cookie.name,
             .value: cookie.value,
@@ -214,9 +214,14 @@ public final class CookiesModule: BrickModuleBase, CookiesSpec, @unchecked Senda
 
         // Expiration handling
         if let expires = cookie.expires {
-            if let expiresDate = Self.parseExpiresDate(expires) {
-                properties[.expires] = expiresDate
+            guard let expiresDate = Self.parseExpiresDate(expires) else {
+                throw BrickModuleError.executionError(
+                    "Invalid expires date: \(expires). " +
+                    "Supported formats: ISO 8601 (e.g. 2024-01-01T00:00:00.000Z), " +
+                    "RFC 1123 (e.g. Mon, 01 Jan 2024 00:00:00 GMT), or Unix timestamp in milliseconds"
+                )
             }
+            properties[.expires] = expiresDate
         }
 
         // Secure flag
@@ -233,7 +238,15 @@ public final class CookiesModule: BrickModuleBase, CookiesSpec, @unchecked Senda
     }
 
     private static func parseExpiresDate(_ expires: String) -> Date? {
-        // Try ISO 8601 format first
+        // Try ISO 8601 with fractional seconds first
+        // (JavaScript's Date.prototype.toISOString produces e.g. "2024-01-01T00:00:00.000Z")
+        let isoFractionalFormatter = ISO8601DateFormatter()
+        isoFractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = isoFractionalFormatter.date(from: expires) {
+            return date
+        }
+
+        // Try ISO 8601 without fractional seconds
         let isoFormatter = ISO8601DateFormatter()
         if let date = isoFormatter.date(from: expires) {
             return date
