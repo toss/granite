@@ -1,4 +1,5 @@
 #include "BundleEvaluator.h"
+#include "BundleEvaluation.h"
 #include "FileReader.h"
 #include <fbjni/fbjni.h>
 
@@ -26,7 +27,17 @@ void BundleEvaluator::evaluateJavascriptSync(
     return;
   }
   auto rt = reinterpret_cast<jsi::Runtime *>(jsRuntime);
-  rt->evaluateJavaScript(std::make_unique<jsi::StringBuffer>(std::move(source)), std::move(sourceUrl));
+  granite::WithEvaluationErrorHandler(
+      [&] {
+        rt->evaluateJavaScript(
+            std::make_unique<jsi::StringBuffer>(std::move(source)), sourceUrl);
+      },
+      [&](const char* message) {
+        jni::throwNewJavaException(
+            "java/lang/RuntimeException",
+            "Failed to evaluate JavaScript bundle (%s): %s",
+            sourceUrl.c_str(), message);
+      });
 };
 
 void BundleEvaluator::evaluateFileSync(
@@ -75,7 +86,15 @@ void BundleEvaluator::evaluateFileSync(
   }
 
   auto rt = reinterpret_cast<jsi::Runtime *>(jsRuntime);
-  rt->evaluateJavaScript(
-      std::make_unique<jsi::StringBuffer>(std::move(source)),
-      std::move(sourceUrl));
+  granite::WithEvaluationErrorHandler(
+      [&] {
+        rt->evaluateJavaScript(
+            std::make_unique<jsi::StringBuffer>(std::move(source)), sourceUrl);
+      },
+      [&](const char* message) {
+        jni::throwNewJavaException(
+            "java/lang/RuntimeException",
+            "Failed to evaluate JavaScript bundle (%s): %s",
+            sourceUrl.c_str(), message);
+      });
 }

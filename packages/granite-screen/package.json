@@ -11,6 +11,8 @@
     "gradle-plugin",
     "react-native.config.js",
     "!ios/build",
+    "!android/lifecycle-tests",
+    "!android/src/test",
     "!android/build",
     "!android/gradle",
     "!android/gradlew",
@@ -26,7 +28,9 @@
   "scripts": {
     "build": "cd gradle-plugin && ./gradlew jar",
     "test:gradle-plugin": "cd gradle-plugin && ./gradlew test",
-    "prepack": "cd gradle-plugin && ./gradlew jar"
+    "prepack": "cd gradle-plugin && ./gradlew jar",
+    "test:android": "android/test-lifecycle.sh",
+    "test:cpp": "android/test-cpp.sh"
   },
   "nx": {
     "targets": {

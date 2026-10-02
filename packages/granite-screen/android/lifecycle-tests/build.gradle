@@ -1,0 +1,40 @@
+plugins {
+    id 'com.android.library' version '8.7.2'
+    id 'org.jetbrains.kotlin.android' version '2.2.20'
+}
+
+android {
+    namespace 'run.granite'
+    compileSdk 36
+    defaultConfig { minSdk 24 }
+    buildFeatures { buildConfig true }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = '17' }
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['../src/main/kotlin']
+        }
+        test.java.srcDirs = ['../src/test/kotlin']
+    }
+    testOptions.unitTests.includeAndroidResources = true
+}
+
+dependencies {
+    implementation "com.facebook.react:react-android:${findProperty('reactNativeVersion') ?: '0.86.3'}"
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.4'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.14.1'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+}
+
+tasks.withType(Test).configureEach {
+    maxHeapSize = '2g'
+    testLogging { events 'failed', 'skipped' }
+}
