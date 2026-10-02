@@ -20,6 +20,7 @@ set(MAIN_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../main/cpp")
 add_executable(
     FileReaderTest
     FileReaderTest.cpp
+    BundleEvaluationTest.cpp
     ${MAIN_CPP_DIR}/FileReader.cpp
 )
 

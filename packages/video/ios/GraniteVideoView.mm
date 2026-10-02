@@ -36,6 +36,8 @@ using namespace facebook::react;
     BOOL _muted;
     BOOL _repeat;
     NSString *_resizeMode;
+    BOOL _needsPlaybackPropsReapply;
+    BOOL _needsMixWithOthersReapply;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
@@ -56,6 +58,8 @@ using namespace facebook::react;
         _muted = NO;
         _repeat = NO;
         _resizeMode = @"contain";
+        _needsPlaybackPropsReapply = YES;
+        _needsMixWithOthersReapply = NO;
 
         // Create provider from registry
         _provider = [[GraniteVideoRegistry shared] createProvider];
@@ -94,6 +98,23 @@ using namespace facebook::react;
 {
     const auto &oldViewProps = *std::static_pointer_cast<GraniteVideoViewProps const>(_props);
     const auto &newViewProps = *std::static_pointer_cast<GraniteVideoViewProps const>(props);
+
+    // Apply options before loading: providers may configure audio, observers and playback in loadSource.
+    if (_needsMixWithOthersReapply || newViewProps.mixWithOthers != oldViewProps.mixWithOthers) {
+        [self updateMixWithOthers:[NSString stringWithUTF8String:newViewProps.mixWithOthers.c_str()]];
+    }
+    if (_needsPlaybackPropsReapply || newViewProps.progressUpdateInterval != oldViewProps.progressUpdateInterval) {
+        if ([_provider respondsToSelector:@selector(setProgressUpdateInterval:)]) {
+            [_provider setProgressUpdateInterval:newViewProps.progressUpdateInterval];
+        }
+    }
+    if (_needsPlaybackPropsReapply || newViewProps.automaticallyWaitsToMinimizeStalling != oldViewProps.automaticallyWaitsToMinimizeStalling) {
+        if ([_provider respondsToSelector:@selector(setAutomaticallyWaitsToMinimizeStalling:)]) {
+            [_provider setAutomaticallyWaitsToMinimizeStalling:newViewProps.automaticallyWaitsToMinimizeStalling];
+        }
+    }
+    _needsPlaybackPropsReapply = NO;
+    _needsMixWithOthersReapply = NO;
 
     // Source
     if (newViewProps.source.uri != oldViewProps.source.uri ||
@@ -198,13 +219,6 @@ using namespace facebook::react;
         }
     }
 
-    // Automatically Waits to Minimize Stalling
-    if (newViewProps.automaticallyWaitsToMinimizeStalling != oldViewProps.automaticallyWaitsToMinimizeStalling) {
-        if ([_provider respondsToSelector:@selector(setAutomaticallyWaitsToMinimizeStalling:)]) {
-            [_provider setAutomaticallyWaitsToMinimizeStalling:newViewProps.automaticallyWaitsToMinimizeStalling];
-        }
-    }
-
     // Allows External Playback
     if (newViewProps.allowsExternalPlayback != oldViewProps.allowsExternalPlayback) {
         if ([_provider respondsToSelector:@selector(setAllowsExternalPlayback:)]) {
@@ -278,6 +292,19 @@ using namespace facebook::react;
         }
 
         [_provider setResizeMode:resizeMode];
+    }
+}
+
+- (void)updateMixWithOthers:(NSString *)mode
+{
+    if ([_provider respondsToSelector:@selector(setMixWithOthers:)]) {
+        GraniteVideoMixWithOthers value = GraniteVideoMixWithOthersInherit;
+        if ([mode isEqualToString:@"mix"]) {
+            value = GraniteVideoMixWithOthersMix;
+        } else if ([mode isEqualToString:@"duck"]) {
+            value = GraniteVideoMixWithOthersDuck;
+        }
+        [_provider setMixWithOthers:value];
     }
 }
 
@@ -665,6 +692,9 @@ using namespace facebook::react;
 {
     [super prepareForRecycle];
     [_provider unload];
+    // The provider survives recycling, while Fabric resets the old props to defaults.
+    _needsPlaybackPropsReapply = YES;
+    _needsMixWithOthersReapply = YES;
     _props = std::make_shared<const GraniteVideoViewProps>();
 }
 

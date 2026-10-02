@@ -25,6 +25,9 @@ interface GraniteReactDelegate {
 
     fun onDestroy(activity: AppCompatActivity)
 
+    /** Cancel bundle loading and host creation when a screen leaves before it is ready. */
+    fun cancelPendingHostCreation() {}
+
     // Configuration methods - these should be provided by the activity
     fun setReactPackagesProvider(provider: () -> List<ReactPackage>)
 

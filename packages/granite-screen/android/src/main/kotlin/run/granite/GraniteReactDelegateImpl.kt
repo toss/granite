@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.annotation.VisibleForTesting
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -17,7 +18,16 @@ import com.facebook.react.fabric.ComponentFactory
 import com.facebook.react.interfaces.fabric.ReactSurface
 import com.facebook.react.modules.core.DefaultHardwareBackBtnHandler
 import com.facebook.react.runtime.ReactSurfaceView
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.coroutineContext
 import java.lang.ref.WeakReference
 
 /** Default implementation of GraniteReactDelegate. Manages ReactHost, ReactSurface */
@@ -60,6 +70,10 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
     private var loadingViewConsumer: (() -> Unit)? = null
     private var surfaceViewConsumer: ((ReactSurfaceView) -> Unit)? = null
     private var errorViewConsumer: ((Throwable) -> Unit)? = null
+
+    private var pendingHostCreationJob: Job? = null
+    private var loadScopeForTest: CoroutineScope? = null
+    private var reactHostForTest: ((AppCompatActivity, BundleSource) -> ReactHost)? = null
 
     override fun onCreate(
         activity: AppCompatActivity,
@@ -132,6 +146,7 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
         // Track pending lifecycle state
         pendingLifecycleState = LifecycleState.DESTROYED
         pendingActivityRef = null
+        cancelPendingHostCreation()
 
         // Clean up ReactSurface
         // stop() is async (TaskInterface<Void>), but clear() and detach() can be called concurrently:
@@ -151,12 +166,10 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
         reactInstanceEventListener = null
 
         // Clean up ReactHost
-        // invalidate() internally runs destroy() asynchronously on bgExecutor.
-        // ReactHostImpl instance is kept alive by its own internal threading,
-        // so nulling the delegate's reactHost field won't interrupt the async destroy.
+        // Destroy the runtime without permanently invalidating the host.
         reactHost?.let { host ->
             host.onHostDestroy(activity)
-            host.invalidate()
+            host.destroy(TEARDOWN_REASON, null)
         }
             ?: Log.w(TAG, "ReactHost not ready, skipping onHostDestroy")
         reactHost = null
@@ -177,6 +190,23 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
         loadingViewConsumer = null
         surfaceViewConsumer = null
         errorViewConsumer = null
+    }
+
+    override fun cancelPendingHostCreation() {
+        pendingHostCreationJob?.cancel()
+        pendingHostCreationJob = null
+    }
+
+    /** Override the loading scope for deterministic lifecycle tests. */
+    @VisibleForTesting
+    fun setLoadScopeForTest(scope: CoroutineScope) {
+        loadScopeForTest = scope
+    }
+
+    /** Supply a host without starting a JavaScript runtime in lifecycle tests. */
+    @VisibleForTesting
+    fun setReactHostForTest(factory: (AppCompatActivity, BundleSource) -> ReactHost) {
+        reactHostForTest = factory
     }
 
     override fun setReactPackagesProvider(provider: () -> List<ReactPackage>) {
@@ -349,7 +379,7 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
                         // Activity is being destroyed, clean up immediately
                         surface.stop()
                         pendingActivity?.let { act -> host.onHostDestroy(act) }
-                        host.invalidate()
+                        host.destroy(TEARDOWN_REASON, null)
                         Log.d(TAG, "Activity destroyed, cleaned up ReactHost")
                     }
                     else -> {
@@ -367,7 +397,11 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
         bundleLoader: BundleLoader,
         initialProps: Bundle,
     ) {
-        activity.lifecycleScope.launch {
+        cancelPendingHostCreation()
+        val scope = loadScopeForTest ?: activity.lifecycleScope
+        // Assign before starting so reentrant cancellation during creation reaches this job.
+        val job = scope.launch(start = CoroutineStart.LAZY) {
+            var unattachedHost: ReactHost? = null
             try {
                 Log.d(TAG, "loadBundleWithLoader started")
                 Log.d(
@@ -404,24 +438,26 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
                     }
                 }
 
-                // Create ReactHost with the loaded bundle (safe off main thread)
+                coroutineContext.ensureActive()
                 val factoryResult = createReactHostWithBundle(activity, bundleSource)
+                unattachedHost = factoryResult.reactHost
+                coroutineContext.ensureActive()
 
-                // Assign shared state and setup on UI thread to serialize with onDestroy
-                activity.runOnUiThread {
+                // Await the handoff; a posted Runnable could attach an already-cancelled host.
+                withContext(Dispatchers.Main.immediate) {
                     if (pendingLifecycleState != LifecycleState.DESTROYED) {
                         currentBundleSource = bundleSource
                         reactHost = factoryResult.reactHost
                         componentFactory = factoryResult.componentFactory
+                        unattachedHost = null
                         setupReactHost(activity, initialProps)
-                    } else {
-                        // Activity already destroyed; clean up the host we just created
-                        factoryResult.reactHost.invalidate()
                     }
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 // Show error view on UI thread
-                activity.runOnUiThread {
+                withContext(Dispatchers.Main.immediate) {
                     if (pendingLifecycleState != LifecycleState.DESTROYED) {
                         errorViewConsumer?.invoke(e)
                             ?: run {
@@ -435,14 +471,27 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
                         Log.e(TAG, "Failed to load bundle", e)
                     }
                 }
+            } finally {
+                val host = unattachedHost
+                if (host != null) {
+                    withContext(NonCancellable + Dispatchers.Main.immediate) {
+                        host.destroy(TEARDOWN_REASON, null)
+                    }
+                }
+                if (pendingHostCreationJob === coroutineContext[Job]) {
+                    pendingHostCreationJob = null
+                }
             }
         }
+        pendingHostCreationJob = job
+        job.start()
     }
 
     private fun createReactHostWithBundle(
         activity: AppCompatActivity,
         bundleSource: BundleSource,
     ): ReactHostFactory.Result {
+        reactHostForTest?.let { return ReactHostFactory.Result(it(activity, bundleSource), null) }
         val packages = reactPackagesProvider?.invoke() ?: emptyList()
         return ReactHostFactory.create(
             activity.applicationContext,
@@ -455,5 +504,6 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
     companion object {
         // Note: BuildConfig.DEBUG reflects this library's build variant, not the consuming app's.
         private const val TAG = "GraniteReactDelegate"
+        private const val TEARDOWN_REASON = "GraniteReactDelegate teardown"
     }
 }

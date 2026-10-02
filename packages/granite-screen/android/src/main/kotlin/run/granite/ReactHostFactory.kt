@@ -26,7 +26,7 @@ internal object ReactHostFactory {
 
     data class Result(
         val reactHost: ReactHost,
-        val componentFactory: ComponentFactory,
+        val componentFactory: ComponentFactory?,
     )
 
     fun create(
@@ -79,7 +79,7 @@ internal object ReactHostFactory {
         return Result(reactHostImpl, newComponentFactory)
     }
 
-    private fun createBundleLoaderConfig(
+    internal fun createBundleLoaderConfig(
         context: Context,
         bundleSource: BundleSource,
     ): Pair<JSBundleLoader, Boolean> =
@@ -95,8 +95,11 @@ internal object ReactHostFactory {
                 when (bundleSource.location) {
                     is ProductionLocation.FileSystemBundle -> {
                         val filePath = bundleSource.location.filePath
-                        Log.d(TAG, "Creating file loader with path: $filePath")
-                        JSBundleLoader.createFileLoader(filePath) to false
+                        if (filePath.startsWith("assets://")) {
+                            JSBundleLoader.createAssetLoader(context, filePath, false) to false
+                        } else {
+                            JSBundleLoader.createFileLoader(filePath) to false
+                        }
                     }
                     is ProductionLocation.EmbeddedBundle -> {
                         Log.d(TAG, "Creating asset loader for embedded bundle")
