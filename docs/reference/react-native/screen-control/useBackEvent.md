@@ -4,6 +4,43 @@ sourcePath: packages/react-native/src/use-back-event/useBackEvent.tsx
 
 # useBackEvent
 
+::: warning Deprecated
+`useBackEvent` is deprecated and will be removed in a future release. Use [useBackHandler](./useBackHandler) instead.
+
+Handlers registered through `useBackHandler` receive a `BackEvent` object and can conditionally consume the back action by returning `true`. To keep the behavior of `useBackEvent` — always blocking default back navigation while registered — return `true` from the handler.
+
+```tsx
+// Before
+const backEvent = useBackEvent();
+
+useEffect(() => {
+  const listener = () => {
+    // handle back action
+  };
+
+  backEvent.addEventListener(listener);
+
+  return () => {
+    backEvent.removeEventListener(listener);
+  };
+}, [backEvent]);
+
+// After
+const backHandler = useBackHandler();
+
+useEffect(() => {
+  const subscription = backHandler.addEventListener(() => {
+    // handle back action
+    return true; // block default back navigation
+  });
+
+  return () => {
+    subscription.remove();
+  };
+}, [backHandler]);
+```
+:::
+
 A Hook that returns a controller object for registering and removing back events. Using this Hook, you can handle back events only when a specific component is active.
 Use `addEventListener` to register back events and `removeEventListener` to remove them.
 Registered back events are only active when the user is viewing the screen. The condition for viewing the screen is determined using [useVisibility](./useVisibility).

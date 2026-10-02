@@ -1,6 +1,6 @@
 # @granite-js/mpack
 
-A bundler for Granite apps
+Use `@granite-js/rollipop` for new Granite apps. This package is deprecated.
 
 ## License
 

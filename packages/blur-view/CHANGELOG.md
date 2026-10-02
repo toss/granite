@@ -1,5 +1,129 @@
 # @granite-js/blur-view
 
+## 3.0.0
+
+## 2.5.5
+
+## 2.5.4
+
+## 2.5.3
+
+## 2.5.2
+
+## 2.5.1
+
+## 2.5.0
+
+## 2.4.0
+
+## 2.3.2
+
+## 2.3.1
+
+## 2.3.0
+
+## 2.2.0
+
+## 2.1.1
+
+## 2.1.0
+
+### Patch Changes
+
+- @granite-js/native@2.1.0
+
+## 2.0.2
+
+### Patch Changes
+
+- @granite-js/native@2.0.2
+
+## 2.0.1
+
+### Patch Changes
+
+- @granite-js/native@2.0.1
+
+## 2.0.0
+
+### Patch Changes
+
+- @granite-js/native@2.0.0
+
+## 1.0.45
+
+## 1.0.44
+
+### Patch Changes
+
+- e97fe95: Use an unrestricted native peer range instead of an exact workspace constraint, preventing compatible updates from causing an unintended major release.
+
+## 1.0.43
+
+### Patch Changes
+
+- @granite-js/native@1.0.43
+
+## 1.0.42
+
+### Patch Changes
+
+- @granite-js/native@1.0.42
+
+## 1.0.41
+
+### Patch Changes
+
+- @granite-js/native@1.0.41
+
+## 1.0.40
+
+### Patch Changes
+
+- @granite-js/native@1.0.40
+
+## 1.0.39
+
+### Patch Changes
+
+- @granite-js/native@1.0.39
+
+## 1.0.38
+
+### Patch Changes
+
+- @granite-js/native@1.0.38
+
+## 1.0.37
+
+### Patch Changes
+
+- @granite-js/native@1.0.37
+
+## 1.0.36
+
+### Patch Changes
+
+- @granite-js/native@1.0.36
+
+## 1.0.35
+
+### Patch Changes
+
+- @granite-js/native@1.0.35
+
+## 1.0.34
+
+### Patch Changes
+
+- @granite-js/native@1.0.34
+
+## 1.0.33
+
+### Patch Changes
+
+- @granite-js/native@1.0.33
+
 ## 1.0.32
 
 ### Patch Changes

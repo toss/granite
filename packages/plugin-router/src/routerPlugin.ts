@@ -1,6 +1,6 @@
 import type { GranitePluginCore } from '@granite-js/plugin-core';
-import { generateRouterFile } from './generateRouterFile';
-import { watchRouter } from './watchRouter';
+import { generateRouterFile } from './shared/generateRouterFile';
+import { watchRouter } from './shared/watchRouter';
 
 interface RouterPluginOptions {
   watch?: boolean;

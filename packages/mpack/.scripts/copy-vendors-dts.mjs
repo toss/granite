@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import glob from 'fast-glob';
 
@@ -12,4 +12,10 @@ const files = await glob(`src/vendors/**/*.d.ts`, {
 console.log('👉 Copying vendors `d.ts` files...');
 console.log(files);
 
-await Promise.all(files.map((path) => fs.copyFile(path, path.replace(/^src/, 'dist'))));
+await Promise.all(
+  files.map(async (file) => {
+    const target = file.replace(/^src/, 'dist');
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    await fs.copyFile(file, target);
+  })
+);

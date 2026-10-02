@@ -15,18 +15,23 @@ pnpm add @granite-js/plugin-sentry
 yarn add @granite-js/plugin-sentry
 ```
 
-## Usage
+## Rollipop
 
 ```ts
-import { defineConfig } from '@granite-js/react-native/config';
 import { sentry } from '@granite-js/plugin-sentry';
+
+const plugins = [sentry()];
+```
+
+## Mpack (deprecated)
+
+```ts
+import { defineConfig } from '@granite-js/mpack/config';
+import { sentry } from '@granite-js/plugin-sentry/mpack';
 
 export default defineConfig({
   plugins: [
     sentry({
-      /**
-       * Sentry CLI Options
-       */
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: '<SENTRY_ORG>',
       project: '<SENTRY_PROJECT>',
@@ -36,7 +41,7 @@ export default defineConfig({
 ```
 
 > [!IMPORTANT]  
-> If you're using [@granite-js/plugin-hermes](https://github.com/toss/granite/tree/main/packages/plugin-hermes), the Sentry plugin should be configured after the Hermes plugin.
+> When using [@granite-js/plugin-hermes](https://github.com/toss/granite/tree/main/packages/plugin-hermes), configure the Sentry plugin after the Hermes plugin.
 
 ## License
 

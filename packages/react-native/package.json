@@ -1,9 +1,9 @@
 {
   "name": "@granite-js/react-native",
-  "version": "1.0.32",
+  "version": "3.0.0",
   "description": "The Granite Framework",
   "bin": {
-    "granite": "./bin/cli.js"
+    "granite": "./bin/cli.mjs"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -114,7 +114,7 @@
     "zod": "^4.1.12"
   },
   "peerDependencies": {
-    "@granite-js/native": "workspace:*",
+    "@granite-js/native": "*",
     "@types/react": "*",
     "brick-module": "*",
     "react": "*",
@@ -124,9 +124,9 @@
     "@granite-js/blur-view": "workspace:*",
     "@granite-js/brownfield-module": "workspace:*",
     "@granite-js/cli": "workspace:*",
+    "@granite-js/config": "workspace:*",
     "@granite-js/jest": "workspace:*",
     "@granite-js/mpack": "workspace:*",
-    "@granite-js/plugin-core": "workspace:*",
     "@granite-js/style-utils": "workspace:*",
     "@granite-js/video": "workspace:*",
     "@standard-schema/spec": "^1.0.0",

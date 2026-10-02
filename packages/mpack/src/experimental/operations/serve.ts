@@ -7,7 +7,6 @@ import {
 import { DEV_SERVER_DEFAULT_HOST, DEV_SERVER_DEFAULT_PORT } from '../../constants';
 import attachKeyHandlers from '../../operations/attachKeyHandlers';
 import { keyReporter } from '../../operations/keyReporter';
-import { printLogo } from '../../utils/printLogo';
 import { printServerUrl } from '../../utils/printServerUrl';
 import { DevServer } from '../server/DevServer';
 import type { BroadcastCommand } from '../server/types';
@@ -41,8 +40,6 @@ export async function EXPERIMENTAL__server({
     port,
     rootDir,
   });
-
-  printLogo();
 
   await server.initialize();
   await server.listen();

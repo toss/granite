@@ -2,11 +2,18 @@ import { ComponentType, type JSX, PropsWithChildren } from 'react';
 import { AppRegistry } from 'react-native';
 import { ENTRY_BUNDLE_NAME } from '../constants';
 import type { InitialProps } from '../initial-props';
-import type { RouterProps, RequireContext } from '../router';
+import type { RouterProps, RequireContext, SetIOSBackPressHandler } from '../router';
 import { AppRoot } from './AppRoot';
 import { HostAppRoot } from './HostAppRoot';
 import { getSchemeUri } from '../constant-bridges';
 import { setupPolyfills } from '../polyfills';
+import { VisibilityChangedProvider } from '../visibility/useVisibilityChanged';
+
+interface GraniteAppRuntimeProps {
+  readonly presentationVisibility?: boolean;
+}
+
+type RegisteredAppProps = InitialProps & GraniteAppRuntimeProps;
 
 export interface GraniteProps {
   /**
@@ -42,8 +49,11 @@ export interface GraniteProps {
   /**
    * @description
    * The function to register a handler that runs when the iOS swipe back gesture is detected.
+   * Called with empty params (`{}`, no `handler`) when the handler should be unset — in
+   * that case the implementation must initialize the registered handler to `null`
+   * (e.g. call `unsetBackPressHandler()`), not keep an empty function registered.
    */
-  setiOSBackPressHandler?: ({ handler }: { handler: () => void }) => Promise<void> | void;
+  setiOSBackPressHandler?: SetIOSBackPressHandler;
 
   /**
    * @description
@@ -69,29 +79,40 @@ const createApp = () => {
   }
 
   return {
-    registerApp( 
+    registerApp(
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
-      { appName, context, router, initialScheme, setIosSwipeGestureEnabled, setiOSBackPressHandler, getInitialUrl }: GraniteProps
-    ): (initialProps: InitialProps) => JSX.Element {
+      {
+        appName,
+        context,
+        router,
+        initialScheme,
+        setIosSwipeGestureEnabled,
+        setiOSBackPressHandler,
+        getInitialUrl,
+      }: GraniteProps
+    ): (initialProps: RegisteredAppProps) => JSX.Element {
       if (appName === ENTRY_BUNDLE_NAME) {
         throw new Error(`Reserved app name 'shared' cannot be used`);
       }
 
-      function Root(initialProps: InitialProps) {
-        const initialSchemeValue = (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ?? getSchemeUri();
+      function Root({ presentationVisibility = true, ...initialProps }: RegisteredAppProps) {
+        const initialSchemeValue =
+          (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ?? getSchemeUri();
 
         return (
-          <AppRoot
-            container={AppContainer}
-            initialProps={initialProps}
-            initialScheme={initialSchemeValue}
-            setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
-            setiOSBackPressHandler={setiOSBackPressHandler}
-            getInitialUrl={getInitialUrl}
-            appName={appName}
-            context={context}
-            router={router}
-          />
+          <VisibilityChangedProvider isVisible={presentationVisibility}>
+            <AppRoot
+              container={AppContainer}
+              initialProps={initialProps}
+              initialScheme={initialSchemeValue}
+              setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
+              setiOSBackPressHandler={setiOSBackPressHandler}
+              getInitialUrl={getInitialUrl}
+              appName={appName}
+              context={context}
+              router={router}
+            />
+          </VisibilityChangedProvider>
         );
       }
 

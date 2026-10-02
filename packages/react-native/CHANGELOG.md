@@ -1,5 +1,447 @@
 # @granite-js/react-native
 
+## 3.0.0
+
+### Patch Changes
+
+- 586459d: feat(react-native): export InitialPropsProvider
+  - @granite-js/blur-view@3.0.0
+  - @granite-js/brownfield-module@3.0.0
+  - @granite-js/cli@3.0.0
+  - @granite-js/config@3.0.0
+  - @granite-js/jest@3.0.0
+  - @granite-js/mpack@3.0.0
+  - @granite-js/style-utils@3.0.0
+  - @granite-js/video@3.0.0
+
+## 2.5.5
+
+### Patch Changes
+
+- Updated dependencies [6d8b2b2]
+  - @granite-js/video@2.5.5
+  - @granite-js/blur-view@2.5.5
+  - @granite-js/jest@2.5.5
+  - @granite-js/style-utils@2.5.5
+  - @granite-js/brownfield-module@2.5.5
+  - @granite-js/cli@2.5.5
+  - @granite-js/mpack@2.5.5
+  - @granite-js/plugin-core@2.5.5
+
+## 2.5.4
+
+### Patch Changes
+
+- @granite-js/blur-view@2.5.4
+- @granite-js/brownfield-module@2.5.4
+- @granite-js/cli@2.5.4
+- @granite-js/jest@2.5.4
+- @granite-js/mpack@2.5.4
+- @granite-js/plugin-core@2.5.4
+- @granite-js/style-utils@2.5.4
+- @granite-js/video@2.5.4
+
+## 2.5.3
+
+### Patch Changes
+
+- @granite-js/blur-view@2.5.3
+- @granite-js/brownfield-module@2.5.3
+- @granite-js/cli@2.5.3
+- @granite-js/jest@2.5.3
+- @granite-js/mpack@2.5.3
+- @granite-js/plugin-core@2.5.3
+- @granite-js/style-utils@2.5.3
+- @granite-js/video@2.5.3
+
+## 2.5.2
+
+### Patch Changes
+
+- @granite-js/blur-view@2.5.2
+- @granite-js/brownfield-module@2.5.2
+- @granite-js/cli@2.5.2
+- @granite-js/jest@2.5.2
+- @granite-js/mpack@2.5.2
+- @granite-js/plugin-core@2.5.2
+- @granite-js/style-utils@2.5.2
+- @granite-js/video@2.5.2
+
+## 2.5.1
+
+### Patch Changes
+
+- a686133: Read navigation focus through `useSyncExternalStore` so focus changes between rendering and subscription are not missed by `useIsFocusedSafely`, `useVisibility`, or visibility effects. Preserve the focused fallback when no navigation context is available.
+
+  Visibility effects follow committed visibility snapshots with React's effect setup and cleanup lifecycle.
+  - @granite-js/blur-view@2.5.1
+  - @granite-js/brownfield-module@2.5.1
+  - @granite-js/cli@2.5.1
+  - @granite-js/jest@2.5.1
+  - @granite-js/mpack@2.5.1
+  - @granite-js/plugin-core@2.5.1
+  - @granite-js/style-utils@2.5.1
+  - @granite-js/video@2.5.1
+
+## 2.5.0
+
+### Minor Changes
+
+- f9086dc: Add `useVisibilityEffect` to run an effect while a screen is visible and clean it up when visibility is lost, the callback changes, or the component unmounts.
+
+  Deprecate `useVisibilityChange` without changing its behavior. Use `useVisibilityEffect` for effects with cleanup, or `useVisibility` with React's `useEffect` for explicit visibility change handling.
+
+### Patch Changes
+
+- @granite-js/blur-view@2.5.0
+- @granite-js/brownfield-module@2.5.0
+- @granite-js/cli@2.5.0
+- @granite-js/jest@2.5.0
+- @granite-js/mpack@2.5.0
+- @granite-js/plugin-core@2.5.0
+- @granite-js/style-utils@2.5.0
+- @granite-js/video@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- @granite-js/blur-view@2.4.0
+- @granite-js/brownfield-module@2.4.0
+- @granite-js/cli@2.4.0
+- @granite-js/jest@2.4.0
+- @granite-js/mpack@2.4.0
+- @granite-js/plugin-core@2.4.0
+- @granite-js/style-utils@2.4.0
+- @granite-js/video@2.4.0
+
+## 2.3.2
+
+### Patch Changes
+
+- @granite-js/blur-view@2.3.2
+- @granite-js/brownfield-module@2.3.2
+- @granite-js/cli@2.3.2
+- @granite-js/jest@2.3.2
+- @granite-js/mpack@2.3.2
+- @granite-js/plugin-core@2.3.2
+- @granite-js/style-utils@2.3.2
+- @granite-js/video@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @granite-js/blur-view@2.3.1
+- @granite-js/brownfield-module@2.3.1
+- @granite-js/cli@2.3.1
+- @granite-js/jest@2.3.1
+- @granite-js/mpack@2.3.1
+- @granite-js/plugin-core@2.3.1
+- @granite-js/style-utils@2.3.1
+- @granite-js/video@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- @granite-js/blur-view@2.3.0
+- @granite-js/brownfield-module@2.3.0
+- @granite-js/cli@2.3.0
+- @granite-js/jest@2.3.0
+- @granite-js/mpack@2.3.0
+- @granite-js/plugin-core@2.3.0
+- @granite-js/style-utils@2.3.0
+- @granite-js/video@2.3.0
+
+## 2.2.0
+
+### Patch Changes
+
+- @granite-js/blur-view@2.2.0
+- @granite-js/brownfield-module@2.2.0
+- @granite-js/cli@2.2.0
+- @granite-js/jest@2.2.0
+- @granite-js/mpack@2.2.0
+- @granite-js/plugin-core@2.2.0
+- @granite-js/style-utils@2.2.0
+- @granite-js/video@2.2.0
+
+## 2.1.1
+
+### Patch Changes
+
+- @granite-js/blur-view@2.1.1
+- @granite-js/brownfield-module@2.1.1
+- @granite-js/cli@2.1.1
+- @granite-js/jest@2.1.1
+- @granite-js/mpack@2.1.1
+- @granite-js/plugin-core@2.1.1
+- @granite-js/style-utils@2.1.1
+- @granite-js/video@2.1.1
+
+## 2.1.0
+
+### Patch Changes
+
+- @granite-js/blur-view@2.1.0
+- @granite-js/brownfield-module@2.1.0
+- @granite-js/cli@2.1.0
+- @granite-js/jest@2.1.0
+- @granite-js/mpack@2.1.0
+- @granite-js/native@2.1.0
+- @granite-js/plugin-core@2.1.0
+- @granite-js/style-utils@2.1.0
+- @granite-js/video@2.1.0
+
+## 2.0.2
+
+### Patch Changes
+
+- @granite-js/blur-view@2.0.2
+- @granite-js/brownfield-module@2.0.2
+- @granite-js/cli@2.0.2
+- @granite-js/jest@2.0.2
+- @granite-js/mpack@2.0.2
+- @granite-js/native@2.0.2
+- @granite-js/plugin-core@2.0.2
+- @granite-js/style-utils@2.0.2
+- @granite-js/video@2.0.2
+
+## 2.0.1
+
+### Patch Changes
+
+- @granite-js/blur-view@2.0.1
+- @granite-js/brownfield-module@2.0.1
+- @granite-js/cli@2.0.1
+- @granite-js/jest@2.0.1
+- @granite-js/mpack@2.0.1
+- @granite-js/native@2.0.1
+- @granite-js/plugin-core@2.0.1
+- @granite-js/style-utils@2.0.1
+- @granite-js/video@2.0.1
+
+## 2.0.0
+
+### Major Changes
+
+- 864fa2a: Start the Granite v2 release line.
+
+### Patch Changes
+
+- 864fa2a: Route session visibility through Granite's existing visibility provider and expose native session lifecycle as React state so remote apps can continue using `useVisibility()`.
+- Updated dependencies [864fa2a]
+  - @granite-js/mpack@2.0.0
+  - @granite-js/cli@2.0.0
+  - @granite-js/blur-view@2.0.0
+  - @granite-js/brownfield-module@2.0.0
+  - @granite-js/jest@2.0.0
+  - @granite-js/native@2.0.0
+  - @granite-js/plugin-core@2.0.0
+  - @granite-js/style-utils@2.0.0
+  - @granite-js/video@2.0.0
+
+## 1.0.45
+
+### Patch Changes
+
+- @granite-js/blur-view@1.0.45
+- @granite-js/brownfield-module@1.0.45
+- @granite-js/cli@1.0.45
+- @granite-js/jest@1.0.45
+- @granite-js/mpack@1.0.45
+- @granite-js/plugin-core@1.0.45
+- @granite-js/style-utils@1.0.45
+- @granite-js/video@1.0.45
+
+## 1.0.44
+
+### Patch Changes
+
+- e97fe95: Use an unrestricted native peer range instead of an exact workspace constraint, preventing compatible updates from causing an unintended major release.
+- 23a710f: Read navigation focus through `useSyncExternalStore` so focus changes between rendering and subscription are not missed by `useIsFocusedSafely`, `useVisibility`, or visibility effects. Preserve the focused fallback when no navigation context is available.
+
+  Visibility effects follow committed visibility snapshots with React's effect setup and cleanup lifecycle.
+
+- 92a23a8: Add `useVisibilityEffect` to run an effect while a screen is visible and clean it up when visibility is lost, the callback changes, or the component unmounts.
+
+  Deprecate `useVisibilityChange` without changing its behavior. Use `useVisibilityEffect` for effects with cleanup, or `useVisibility` with React's `useEffect` for explicit visibility change handling.
+
+- Updated dependencies [e97fe95]
+  - @granite-js/blur-view@1.0.44
+  - @granite-js/jest@1.0.44
+  - @granite-js/brownfield-module@1.0.44
+  - @granite-js/cli@1.0.44
+  - @granite-js/mpack@1.0.44
+  - @granite-js/plugin-core@1.0.44
+  - @granite-js/style-utils@1.0.44
+  - @granite-js/video@1.0.44
+
+## 1.0.43
+
+### Patch Changes
+
+- afd4e50: feat(react-native): export InitialPropsProvider
+  - @granite-js/blur-view@1.0.43
+  - @granite-js/brownfield-module@1.0.43
+  - @granite-js/cli@1.0.43
+  - @granite-js/jest@1.0.43
+  - @granite-js/mpack@1.0.43
+  - @granite-js/native@1.0.43
+  - @granite-js/plugin-core@1.0.43
+  - @granite-js/style-utils@1.0.43
+  - @granite-js/video@1.0.43
+
+## 1.0.42
+
+### Patch Changes
+
+- @granite-js/blur-view@1.0.42
+- @granite-js/brownfield-module@1.0.42
+- @granite-js/cli@1.0.42
+- @granite-js/jest@1.0.42
+- @granite-js/mpack@1.0.42
+- @granite-js/native@1.0.42
+- @granite-js/plugin-core@1.0.42
+- @granite-js/style-utils@1.0.42
+- @granite-js/video@1.0.42
+
+## 1.0.41
+
+### Patch Changes
+
+- @granite-js/blur-view@1.0.41
+- @granite-js/brownfield-module@1.0.41
+- @granite-js/cli@1.0.41
+- @granite-js/jest@1.0.41
+- @granite-js/mpack@1.0.41
+- @granite-js/native@1.0.41
+- @granite-js/plugin-core@1.0.41
+- @granite-js/style-utils@1.0.41
+- @granite-js/video@1.0.41
+
+## 1.0.40
+
+### Patch Changes
+
+- c7e7fc9: fix(react-native): unset iOS back press handler on cleanup instead of re-registering
+  - @granite-js/blur-view@1.0.40
+  - @granite-js/brownfield-module@1.0.40
+  - @granite-js/cli@1.0.40
+  - @granite-js/jest@1.0.40
+  - @granite-js/mpack@1.0.40
+  - @granite-js/native@1.0.40
+  - @granite-js/plugin-core@1.0.40
+  - @granite-js/style-utils@1.0.40
+  - @granite-js/video@1.0.40
+
+## 1.0.39
+
+### Patch Changes
+
+- Updated dependencies [c790dbf]
+  - @granite-js/mpack@1.0.39
+  - @granite-js/cli@1.0.39
+  - @granite-js/blur-view@1.0.39
+  - @granite-js/brownfield-module@1.0.39
+  - @granite-js/jest@1.0.39
+  - @granite-js/native@1.0.39
+  - @granite-js/plugin-core@1.0.39
+  - @granite-js/style-utils@1.0.39
+  - @granite-js/video@1.0.39
+
+## 1.0.38
+
+### Patch Changes
+
+- 757fa25: Deprecate `useBackEvent` in favor of `useBackHandler`. Handlers registered through `useBackHandler` receive a `BackEvent` object and can conditionally consume the back action by returning `true`. `useBackEvent` still works, but will be removed in a future release.
+  - @granite-js/blur-view@1.0.38
+  - @granite-js/brownfield-module@1.0.38
+  - @granite-js/cli@1.0.38
+  - @granite-js/jest@1.0.38
+  - @granite-js/mpack@1.0.38
+  - @granite-js/native@1.0.38
+  - @granite-js/plugin-core@1.0.38
+  - @granite-js/style-utils@1.0.38
+  - @granite-js/video@1.0.38
+
+## 1.0.37
+
+### Patch Changes
+
+- e60a630: fix(react-native): stop forwarding InView API props to the host view
+- Updated dependencies [2096242]
+  - @granite-js/mpack@1.0.37
+  - @granite-js/cli@1.0.37
+  - @granite-js/blur-view@1.0.37
+  - @granite-js/brownfield-module@1.0.37
+  - @granite-js/jest@1.0.37
+  - @granite-js/native@1.0.37
+  - @granite-js/plugin-core@1.0.37
+  - @granite-js/style-utils@1.0.37
+  - @granite-js/video@1.0.37
+
+## 1.0.36
+
+### Patch Changes
+
+- 9336784: fix(react-native): correct ImpressionArea/InView visibility in nested scroll views
+  - @granite-js/blur-view@1.0.36
+  - @granite-js/brownfield-module@1.0.36
+  - @granite-js/cli@1.0.36
+  - @granite-js/jest@1.0.36
+  - @granite-js/mpack@1.0.36
+  - @granite-js/native@1.0.36
+  - @granite-js/plugin-core@1.0.36
+  - @granite-js/style-utils@1.0.36
+  - @granite-js/video@1.0.36
+
+## 1.0.35
+
+### Patch Changes
+
+- 7e1fb60: fix: restore `useBackEventContext` root export removed in 1.0.32
+  - @granite-js/blur-view@1.0.35
+  - @granite-js/brownfield-module@1.0.35
+  - @granite-js/cli@1.0.35
+  - @granite-js/jest@1.0.35
+  - @granite-js/mpack@1.0.35
+  - @granite-js/native@1.0.35
+  - @granite-js/plugin-core@1.0.35
+  - @granite-js/style-utils@1.0.35
+  - @granite-js/video@1.0.35
+
+## 1.0.34
+
+### Patch Changes
+
+- 1cf5e91: remove default margin
+  - @granite-js/blur-view@1.0.34
+  - @granite-js/brownfield-module@1.0.34
+  - @granite-js/cli@1.0.34
+  - @granite-js/jest@1.0.34
+  - @granite-js/mpack@1.0.34
+  - @granite-js/native@1.0.34
+  - @granite-js/plugin-core@1.0.34
+  - @granite-js/style-utils@1.0.34
+  - @granite-js/video@1.0.34
+
+## 1.0.33
+
+### Patch Changes
+
+- 39e17bb: Fix horizontal `IntersectionObserver` ratio calculation
+  - @granite-js/blur-view@1.0.33
+  - @granite-js/brownfield-module@1.0.33
+  - @granite-js/cli@1.0.33
+  - @granite-js/jest@1.0.33
+  - @granite-js/mpack@1.0.33
+  - @granite-js/native@1.0.33
+  - @granite-js/plugin-core@1.0.33
+  - @granite-js/style-utils@1.0.33
+  - @granite-js/video@1.0.33
+
 ## 1.0.32
 
 ### Patch Changes

@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 
 android {
     namespace "run.granite.cookies"
-    compileSdkVersion 34
+    compileSdkVersion rootProject.ext.has('compileSdkVersion') ? rootProject.ext.get('compileSdkVersion') : 34
 
     sourceSets {
         main {

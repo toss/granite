@@ -1,5 +1,69 @@
 # @granite-js/video
 
+## 3.0.0
+
+## 2.5.5
+
+### Patch Changes
+
+- 6d8b2b2: Keep the Android video player alive across window detach. `GraniteVideoView.onDetachedFromWindow` released the provider, but a detached view can be attached to a window again — for example when a navigator returns to a screen whose views it had removed — and the provider is only created in `init`. The reattached view was left without a provider, so the video area stayed black and no playback command reached the player. The view now releases only from `GraniteVideoViewManager.onDropViewInstance`, which React Native calls when it actually drops the view.
+
+## 2.5.4
+
+## 2.5.3
+
+## 2.5.2
+
+## 2.5.1
+
+## 2.5.0
+
+## 2.4.0
+
+## 2.3.2
+
+## 2.3.1
+
+## 2.3.0
+
+## 2.2.0
+
+## 2.1.1
+
+## 2.1.0
+
+## 2.0.2
+
+## 2.0.1
+
+## 2.0.0
+
+## 1.0.45
+
+## 1.0.44
+
+## 1.0.43
+
+## 1.0.42
+
+## 1.0.41
+
+## 1.0.40
+
+## 1.0.39
+
+## 1.0.38
+
+## 1.0.37
+
+## 1.0.36
+
+## 1.0.35
+
+## 1.0.34
+
+## 1.0.33
+
 ## 1.0.32
 
 ## 1.0.31

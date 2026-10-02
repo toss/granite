@@ -1,8 +1,8 @@
 import Module from 'module';
 import path from 'path';
 import type { MetroResolutionContext } from '@granite-js/plugin-core';
-import enhancedResolve from 'enhanced-resolve';
-import { RESOLVER_EXPORTS_MAP_CONDITIONS } from '../constants';
+import enhancedResolve, { ResolveOptions } from 'enhanced-resolve';
+import { RESOLVER_ALIAS_FIELDS, RESOLVER_EXPORTS_MAP_CONDITIONS } from '../constants';
 
 const SINGLETON_MODULES = ['@babel/runtime'];
 const NATIVE_MODULES = ['react-native', 'react'];
@@ -22,9 +22,7 @@ const SUPPORTED_BUILTIN_FALLBACKS: Record<string, string> = {
 const builtinModules = new Set(Module.builtinModules);
 const resolvers = new Map();
 
-interface CreateResolverOptions {
-  conditionNames?: string[];
-}
+export type CreateResolverOptions = Omit<ResolveOptions, 'fileSystem' | 'extensions'>;
 
 export function createResolver(rootPath: string, options?: CreateResolverOptions) {
   function createResolverImpl(context: MetroResolutionContext, platform: string | null, rootPath: string) {
@@ -40,8 +38,10 @@ export function createResolver(rootPath: string, options?: CreateResolverOptions
     }
 
     const resolver = enhancedResolve.create.sync({
+      ...options,
       extensions: finalExtensions,
       mainFields: context.mainFields,
+      aliasFields: options?.aliasFields ?? [...RESOLVER_ALIAS_FIELDS],
       conditionNames: options?.conditionNames ?? [...RESOLVER_EXPORTS_MAP_CONDITIONS, 'require', 'node', 'default'],
       mainFiles: ['index'],
       modules: ['node_modules', path.join(rootPath, 'src')],

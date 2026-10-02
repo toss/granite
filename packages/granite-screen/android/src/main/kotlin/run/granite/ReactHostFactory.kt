@@ -33,6 +33,7 @@ internal object ReactHostFactory {
         applicationContext: Context,
         bundleSource: BundleSource,
         packages: List<ReactPackage>,
+        exceptionHandler: ((Exception) -> Unit)? = null,
     ): Result {
         Log.d(TAG, "Creating ReactHost with bundle source: $bundleSource")
 
@@ -42,6 +43,12 @@ internal object ReactHostFactory {
 
         val tmmDelegateBuilder = DefaultTurboModuleManagerDelegate.Builder()
 
+        // Always log the exception, then hand it to the app for custom handling (crash reporting, etc.)
+        val instanceExceptionHandler: (Exception) -> Unit = { ex ->
+            Log.e(TAG, "ReactHost exception", ex)
+            exceptionHandler?.invoke(ex)
+        }
+
         val reactHostDelegate =
             DefaultReactHostDelegate(
                 jsMainModulePath = DEFAULT_JS_MAIN_MODULE,
@@ -50,9 +57,7 @@ internal object ReactHostFactory {
                 jsRuntimeFactory = HermesInstance(),
                 bindingsInstaller = null,
                 turboModuleManagerDelegateBuilder = tmmDelegateBuilder,
-                exceptionHandler = { ex ->
-                    Log.e(TAG, "ReactHost exception", ex)
-                },
+                exceptionHandler = instanceExceptionHandler,
             )
 
         val newComponentFactory = ComponentFactory()

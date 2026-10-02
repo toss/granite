@@ -1,5 +1,215 @@
 # @granite-js/plugin-hermes
 
+## 3.0.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@3.0.0
+- @granite-js/utils@3.0.0
+
+## 2.5.5
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.5
+- @granite-js/utils@2.5.5
+
+## 2.5.4
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.4
+- @granite-js/utils@2.5.4
+
+## 2.5.3
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.3
+- @granite-js/utils@2.5.3
+
+## 2.5.2
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.2
+- @granite-js/utils@2.5.2
+
+## 2.5.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.1
+- @granite-js/utils@2.5.1
+
+## 2.5.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.0
+- @granite-js/utils@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.4.0
+- @granite-js/utils@2.4.0
+
+## 2.3.2
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.3.2
+- @granite-js/utils@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.3.1
+- @granite-js/utils@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.3.0
+- @granite-js/utils@2.3.0
+
+## 2.2.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.2.0
+- @granite-js/utils@2.2.0
+
+## 2.1.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.1.1
+- @granite-js/utils@2.1.1
+
+## 2.1.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.1.0
+- @granite-js/utils@2.1.0
+
+## 2.0.2
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.0.2
+- @granite-js/utils@2.0.2
+
+## 2.0.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.0.1
+- @granite-js/utils@2.0.1
+
+## 2.0.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.0.0
+- @granite-js/utils@2.0.0
+
+## 1.0.45
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.45
+- @granite-js/utils@1.0.45
+
+## 1.0.44
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.44
+- @granite-js/utils@1.0.44
+
+## 1.0.43
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.43
+- @granite-js/utils@1.0.43
+
+## 1.0.42
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.42
+- @granite-js/utils@1.0.42
+
+## 1.0.41
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.41
+- @granite-js/utils@1.0.41
+
+## 1.0.40
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.40
+- @granite-js/utils@1.0.40
+
+## 1.0.39
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.39
+- @granite-js/utils@1.0.39
+
+## 1.0.38
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.38
+- @granite-js/utils@1.0.38
+
+## 1.0.37
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.37
+- @granite-js/utils@1.0.37
+
+## 1.0.36
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.36
+- @granite-js/utils@1.0.36
+
+## 1.0.35
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.35
+- @granite-js/utils@1.0.35
+
+## 1.0.34
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.34
+- @granite-js/utils@1.0.34
+
+## 1.0.33
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.33
+- @granite-js/utils@1.0.33
+
 ## 1.0.32
 
 ### Patch Changes

@@ -1,5 +1,81 @@
 # @granite-js/screen
 
+## 3.0.0
+
+## 2.5.5
+
+## 2.5.4
+
+## 2.5.3
+
+## 2.5.2
+
+### Patch Changes
+
+- 32ece65: feat(android): allow apps to handle ReactHost instance exceptions
+
+## 2.5.1
+
+## 2.5.0
+
+## 2.4.0
+
+## 2.3.2
+
+## 2.3.1
+
+## 2.3.0
+
+## 2.2.0
+
+## 2.1.1
+
+## 2.1.0
+
+## 2.0.2
+
+## 2.0.1
+
+## 2.0.0
+
+## 1.0.45
+
+### Patch Changes
+
+- e43e6f0: feat(android): allow apps to handle ReactHost instance exceptions
+
+## 1.0.44
+
+## 1.0.43
+
+## 1.0.42
+
+### Patch Changes
+
+- 8714f31: fix(screen): drop the stray return type on graniteHostDidStart
+
+## 1.0.41
+
+### Patch Changes
+
+- 2b945a0: feat(screen): add graniteHostDidStart to GraniteReactHost
+
+## 1.0.40
+
+## 1.0.39
+
+## 1.0.38
+
+## 1.0.37
+
+## 1.0.36
+
+## 1.0.35
+
+## 1.0.34
+
+## 1.0.33
+
 ## 1.0.32
 
 ## 1.0.31

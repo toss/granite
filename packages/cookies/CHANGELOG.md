@@ -1,5 +1,73 @@
 # @granite-js/cookies
 
+## 3.0.0
+
+### Patch Changes
+
+- 586459d: Fix `expires` date parsing in the native cookie modules. ISO 8601 strings with milliseconds — the exact output of JavaScript's `Date.prototype.toISOString()` (e.g. `2024-01-01T00:00:00.000Z`) — failed to parse on iOS (`ISO8601DateFormatter` without `.withFractionalSeconds`) and on Android (`SimpleDateFormat` zone letters cannot match the literal `Z` suffix). Worse, both platforms silently dropped the `expires` attribute on parse failure, so the cookie was stored as a session cookie without any error. Now both platforms parse ISO 8601 with and without milliseconds, and `set` rejects an unparseable `expires` value with a descriptive error instead of silently creating a session cookie.
+
+## 2.5.5
+
+## 2.5.4
+
+## 2.5.3
+
+## 2.5.2
+
+## 2.5.1
+
+## 2.5.0
+
+## 2.4.0
+
+## 2.3.2
+
+## 2.3.1
+
+## 2.3.0
+
+## 2.2.0
+
+## 2.1.1
+
+## 2.1.0
+
+## 2.0.2
+
+## 2.0.1
+
+## 2.0.0
+
+## 1.0.45
+
+## 1.0.44
+
+### Patch Changes
+
+- 93732a1: Fix `expires` date parsing in the native cookie modules. ISO 8601 strings with milliseconds — the exact output of JavaScript's `Date.prototype.toISOString()` (e.g. `2024-01-01T00:00:00.000Z`) — failed to parse on iOS (`ISO8601DateFormatter` without `.withFractionalSeconds`) and on Android (`SimpleDateFormat` zone letters cannot match the literal `Z` suffix). Worse, both platforms silently dropped the `expires` attribute on parse failure, so the cookie was stored as a session cookie without any error. Now both platforms parse ISO 8601 with and without milliseconds, and `set` rejects an unparseable `expires` value with a descriptive error instead of silently creating a session cookie.
+
+## 1.0.43
+
+## 1.0.42
+
+## 1.0.41
+
+## 1.0.40
+
+## 1.0.39
+
+## 1.0.38
+
+## 1.0.37
+
+## 1.0.36
+
+## 1.0.35
+
+## 1.0.34
+
+## 1.0.33
+
 ## 1.0.32
 
 ## 1.0.31

@@ -100,7 +100,7 @@ import SDWebImage
         // Build context with headers
         var context: [SDWebImageContextOption: Any]? = nil
         if let headers = headers, !headers.isEmpty {
-            let modifier = SDWebImageDownloadRequestModifier { request in
+            let modifier = SDWebImageDownloaderRequestModifier { request in
                 var mutableRequest = request
                 for (key, value) in headers {
                     mutableRequest.setValue(value, forHTTPHeaderField: key)

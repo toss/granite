@@ -1,77 +1,38 @@
 # @granite-js/plugin-micro-frontend
 
-Plugin for sharing modules
+Legacy Mpack plugin for sharing modules.
 
-## Installation
+## Mpack (deprecated)
 
 ```bash
-# NPM
-npm install @granite-js/plugin-micro-frontend
-
-# pnpm
-pnpm add @granite-js/plugin-micro-frontend
-
-# yarn
 yarn add @granite-js/plugin-micro-frontend
 ```
 
-## Usage
-
 ```ts
-import { defineConfig } from '@granite-js/react-native/config';
+import { defineConfig } from '@granite-js/mpack/config';
 import { microFrontend } from '@granite-js/plugin-micro-frontend';
 
-// Example 1. Host container
 export default defineConfig({
   plugins: [
     microFrontend({
-      /**
-       * Container name
-       */
       name: 'host',
-      /**
-       * Configuration for the remote field to emulate the internal `importLazy` behavior
-       */
       remote: {
         host: 'localhost',
         port: 8082,
       },
-      /**
-       * Shared modules config
-       */
       shared: {
-        react: {
-          /**
-           * Whether the module is eager
-           *
-           * Specifies whether the module is eager; if true, it's bundled with the host, otherwise loaded from the shared registry
-           */
-          eager: true,
-        },
-        'react-native': {
-          eager: true,
-        },
+        react: { eager: true },
+        'react-native': { eager: true },
       },
     }),
   ],
 });
 
-// Example 2. Remote container
 export default defineConfig({
   plugins: [
     microFrontend({
-      /**
-       * Container name
-       */
       name: 'remote',
-      /**
-       * Shared modules config
-       */
-      shared: [
-        // Libraries are loaded from the shared registry
-        'react',
-        'react-native',
-      ],
+      shared: ['react', 'react-native'],
     }),
   ],
 });

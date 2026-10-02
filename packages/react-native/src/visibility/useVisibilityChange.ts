@@ -20,6 +20,7 @@ export type VisibilityCallback = (state: VisibilityState) => void;
  * @public
  * @category Screen Control
  * @name useVisibilityChange
+ * @deprecated Use `useVisibilityEffect` for effects with cleanup, or `useVisibility` with React's `useEffect` to handle visibility changes.
  * @kind function
  * @description
  * Calls a callback function with the visibility state when the screen's visibility changes.
@@ -67,4 +68,3 @@ export function useVisibilityChange(callback: VisibilityCallback) {
     callback(isVisible ? 'visible' : 'hidden');
   }, [callback, isVisible, prevValue]);
 }
-

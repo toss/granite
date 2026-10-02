@@ -20,7 +20,7 @@ import {
 import { InitialProps } from '..';
 import { closeView } from '../native-modules';
 import { BackButton } from './components/BackButton';
-import { CanGoBackGuard } from './components/CanGoBackGuard';
+import { CanGoBackGuard, type SetIOSBackPressHandler } from './components/CanGoBackGuard';
 import { StackNavigator } from './components/StackNavigator';
 import { useInternalRouterBackHandler } from './components/useRouterBackHandler';
 import { useRouterControls, type RouterControlsConfig } from './hooks/useRouterControls';
@@ -65,7 +65,7 @@ export interface InternalRouterProps {
   initialProps: InitialProps;
   initialScheme: string;
   setIosSwipeGestureEnabled?: ({ isEnabled }: { isEnabled: boolean }) => Promise<void> | void;
-  setiOSBackPressHandler?: ({ handler }: { handler: () => void }) => Promise<void> | void;
+  setiOSBackPressHandler?: SetIOSBackPressHandler;
   getInitialUrl?: RouterControlsConfig['getInitialUrl'];
 }
 

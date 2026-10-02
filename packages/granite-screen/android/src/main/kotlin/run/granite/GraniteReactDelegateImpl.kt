@@ -54,6 +54,7 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
     private var loadingViewProvider: ((AppCompatActivity) -> View)? = null
     private var errorViewProvider: ((AppCompatActivity, Throwable) -> View)? = null
     private var reactContainerProvider: ((AppCompatActivity) -> android.view.ViewGroup?)? = null
+    private var exceptionHandler: ((Exception) -> Unit)? = null
 
     // Consumer functions - for advanced view control
     private var loadingViewConsumer: (() -> Unit)? = null
@@ -172,6 +173,7 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
         loadingViewProvider = null
         errorViewProvider = null
         reactContainerProvider = null
+        exceptionHandler = null
         loadingViewConsumer = null
         surfaceViewConsumer = null
         errorViewConsumer = null
@@ -183,6 +185,10 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
 
     override fun setBundleLoaderProvider(provider: () -> BundleLoader) {
         this.bundleLoaderProvider = provider
+    }
+
+    override fun setExceptionHandler(handler: (Exception) -> Unit) {
+        this.exceptionHandler = handler
     }
 
     override fun setLoadingViewProvider(provider: (AppCompatActivity) -> View) {
@@ -438,7 +444,12 @@ class GraniteReactDelegateImpl : GraniteReactDelegate {
         bundleSource: BundleSource,
     ): ReactHostFactory.Result {
         val packages = reactPackagesProvider?.invoke() ?: emptyList()
-        return ReactHostFactory.create(activity.applicationContext, bundleSource, packages)
+        return ReactHostFactory.create(
+            activity.applicationContext,
+            bundleSource,
+            packages,
+            exceptionHandler,
+        )
     }
 
     companion object {

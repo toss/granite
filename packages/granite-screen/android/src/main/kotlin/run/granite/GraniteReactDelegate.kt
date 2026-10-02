@@ -30,6 +30,15 @@ interface GraniteReactDelegate {
 
     fun setBundleLoaderProvider(provider: () -> BundleLoader)
 
+    /**
+     * Set a handler that will be called when React Native internals throw an exception.
+     * Optional - the exception is always logged to logcat first, and this handler runs after that.
+     * Must be set before onCreate(), because the handler is bound when the ReactHost is created.
+     * GraniteReactHost users should override handleInstanceException() instead, because
+     * setupHost() sets this handler.
+     */
+    fun setExceptionHandler(handler: (Exception) -> Unit)
+
     // View creation methods - optional customization
     fun setLoadingViewProvider(provider: (AppCompatActivity) -> View)
 

@@ -1,5 +1,185 @@
 # @granite-js/plugin-router
 
+## 3.0.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@3.0.0
+
+## 2.5.5
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.5
+
+## 2.5.4
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.4
+
+## 2.5.3
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.3
+
+## 2.5.2
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.2
+
+## 2.5.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.1
+
+## 2.5.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.5.0
+
+## 2.4.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.4.0
+
+## 2.3.2
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.3.2
+
+## 2.3.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.3.1
+
+## 2.3.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.3.0
+
+## 2.2.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.2.0
+
+## 2.1.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.1.1
+
+## 2.1.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.1.0
+
+## 2.0.2
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.0.2
+
+## 2.0.1
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.0.1
+
+## 2.0.0
+
+### Patch Changes
+
+- @granite-js/plugin-core@2.0.0
+
+## 1.0.45
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.45
+
+## 1.0.44
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.44
+
+## 1.0.43
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.43
+
+## 1.0.42
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.42
+
+## 1.0.41
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.41
+
+## 1.0.40
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.40
+
+## 1.0.39
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.39
+
+## 1.0.38
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.38
+
+## 1.0.37
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.37
+
+## 1.0.36
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.36
+
+## 1.0.35
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.35
+
+## 1.0.34
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.34
+
+## 1.0.33
+
+### Patch Changes
+
+- @granite-js/plugin-core@1.0.33
+
 ## 1.0.32
 
 ### Patch Changes

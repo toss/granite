@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { GranitePluginCore } from '@granite-js/plugin-core';
+import type { GranitePluginCore } from '@granite-js/plugin-core';
 import { prepareLocalDirectory } from '@granite-js/utils';
 import { getPreludeConfig } from './prelude';
 import { fetchRemoteBundle } from './remote';
@@ -22,7 +22,7 @@ export const microFrontendPlugin = async (options: MicroFrontendPluginOptions): 
   fs.writeFileSync(preludePath, preludeConfig.preludeScript);
 
   /**
-   * @TODO `MPACK_DEV_SERVER` flag should be removed after next version of bundle loader is released and load bundle dynamically at JS runtime.
+   * @TODO Remove `MPACK_DEV_SERVER` after the next bundle loader is released and let the JavaScript runtime load the bundle dynamically.
    */
   if (process.env.MPACK_DEV_SERVER === 'true' && options.remote) {
     await fetchRemoteBundle(options.remote);

@@ -26,7 +26,10 @@ export function VisibilityChangedProvider({
   children,
   isVisible,
 }: PropsWithChildren<{ isVisible: boolean }>): ReactElement {
-  return <VisibilityChangedContext.Provider value={isVisible}>{children}</VisibilityChangedContext.Provider>;
+  const parentVisibility = useContext(VisibilityChangedContext);
+  const visibility = (parentVisibility ?? true) && isVisible;
+
+  return <VisibilityChangedContext.Provider value={visibility}>{children}</VisibilityChangedContext.Provider>;
 }
 
 /**

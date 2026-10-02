@@ -159,15 +159,18 @@ class IntersectionObserver {
           if (horizontal) {
             const visibleTargetMinX = Math.max(contentOffset.x - (rootMargin.left || 0), targetLayout.x);
             const visibleTargetMaxX = Math.min(
-              contentOffsetWithLayout + (rootMargin.left || 0),
+              contentOffsetWithLayout + (rootMargin.right || 0),
               targetLayout.x + targetLayout.width
             );
-            const visibleHeight = Math.max(visibleTargetMaxX - visibleTargetMinX, 0);
+            const visibleWidth = Math.max(visibleTargetMaxX - visibleTargetMinX, 0);
 
-            intersectionRatio = visibleHeight / targetLayout.height;
-            isIntersecting =
-              contentOffsetWithLayout + (rootMargin.right || 0) >= targetLayout.x &&
-              contentOffset.x - (rootMargin.left || 0) <= targetLayout.x + targetLayout.width;
+            intersectionRatio = visibleWidth / targetLayout.width;
+            // Intersecting only when there is a real overlap. A target whose edge
+            // exactly touches the viewport (0px visible) is NOT considered visible,
+            // matching the web IntersectionObserver (a zero-area intersection is not
+            // intersecting). Using `>=` here would fire impressions for elements that
+            // are merely adjacent to the viewport edge.
+            isIntersecting = visibleWidth > 0;
           } else {
             const visibleTargetMinY = Math.max(contentOffset.y - (rootMargin.top || 0), targetLayout.y);
             const visibleTargetMaxY = Math.min(
@@ -177,9 +180,9 @@ class IntersectionObserver {
             const visibleHeight = Math.max(visibleTargetMaxY - visibleTargetMinY, 0);
 
             intersectionRatio = visibleHeight / targetLayout.height;
-            isIntersecting =
-              contentOffsetWithLayout + (rootMargin.bottom || 0) >= targetLayout.y &&
-              contentOffset.y - (rootMargin.top || 0) <= targetLayout.y + targetLayout.height;
+            // See the horizontal branch above: 0px overlap (edge exactly touching the
+            // viewport) is not intersecting.
+            isIntersecting = visibleHeight > 0;
           }
 
           intersectionRatio = Math.floor(intersectionRatio * 100) / 100;

@@ -89,7 +89,7 @@ const BACK_BUTTON_XML = Platform.select<string>({
 });
 
 const BACK_BUTTON_MARGIN = Platform.select<number>({
-  android: -4,
+  android: 0,
   ios: -12,
   default: -12,
 });

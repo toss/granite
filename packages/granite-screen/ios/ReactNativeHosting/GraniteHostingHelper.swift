@@ -40,6 +40,7 @@ public extension GraniteReactHost where Self: UIViewController {
             do {
                 let item = try await convertToGraniteItem(bundleSource: bundle)
                 let delegate = ReactNativeFactoryDelegate(url: item.hostURL)
+                delegate.reactHost = self  // self is GraniteReactHost
                 delegate.dependencyProvider = RCTAppDependencyProvider()
                 // Use GraniteNativeFactoryWrapper to enable module customization
                 let factory = GraniteNativeFactoryImpl(delegate: delegate)

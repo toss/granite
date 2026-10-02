@@ -4,6 +4,8 @@ sourcePath: packages/react-native/src/visibility/useVisibilityChange.ts
 
 # useVisibilityChange
 
+> **Deprecated.** Use [useVisibilityEffect](./useVisibilityEffect) for effects that run while visible and need cleanup. To handle both visible and hidden states explicitly, use [useVisibility](./useVisibility) with React's `useEffect`. Existing calls keep their current behavior.
+
 Calls a callback function with the visibility state when the screen's visibility changes.
 The callback function receives the return value from [useVisibility](./useVisibility). If the return value is `true`, it passes 'visible', and if `false`, it passes 'hidden'.
 

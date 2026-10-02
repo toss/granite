@@ -1,86 +1,62 @@
 ---
-sourcePath: packages/cli/src/config/defineConfig.ts
+sourcePath: packages/config/src/defineConfig.ts
 ---
 
 # defineConfig
 
-Granite 애플리케이션의 주요 설정을 정의해요. `granite.config.ts`에서 사용돼요.
+Granite 애플리케이션의 앱 정보와 번들러를 정의해요.
 
-다음 값들을 설정할 수 있어요.
+## 설정
 
-- 사용자가 앱에 접근할 URL 스킴 (예: `granite://`)
-- URL에 표시될 앱의 고유 이름 (예: `granite://my-service`)
-- ESBuild와 Metro 같은 번들러 설정
-- Babel을 통한 코드 변환 설정
-- Granite 플러그인을 통한 추가 기능
-
-## 시그니처
-
-```typescript
-function defineConfig({
-  appName,
-  host,
-  scheme,
-  plugins,
-  outdir,
-  entryFile,
-  cwd,
-  mpack,
-  babel,
-  esbuild,
-  metro,
-}: GraniteConfigInput): Promise<GraniteConfigResponse>;
-```
-
-## 매개변수
-
-<ul class="post-parameters-ul">
-  <li class="post-parameters-li post-parameters-li-root">
-    <span class="post-parameters--name">config</span><span class="post-parameters--required">필수</span> · <span class="post-parameters--type">GraniteConfigInput</span>
-    <br />
-    <p class="post-parameters--description">URL 스킴, 앱 이름, 빌드 설정, 플러그인과 같은 주요 설정을 정의하는 Granite 애플리케이션 설정 옵션이에요.</p>
-  </li>
-</ul>
-
-설정 옵션에는 다음과 같은 것들이 있어요:
-
-- `appName`: URL에 표시될 앱의 고유 식별자예요 (예: `my-service`)
-- `host`: URL 스킴에서 호스트(`host`) 부분을 설정할 수 있어요. 선택 사항이며, 지정하지 않아도 동작해요. 이 값을 설정하면 `appName` 앞에 호스트가 포함된 경로로 구성돼요.  
-  예를 들어, `host`를 `super`로 설정하면 스킴 구조는 `{scheme}://super/{appName}`이 돼요.
-- `scheme`: 앱을 실행하기 위한 URL 스킴이에요 (예: `granite`)
-- `plugins`: 기능을 확장하기 위한 Granite 플러그인이에요
-- `outdir`: 빌드 파일이 출력될 위치예요 (기본값: `dist`)
-- `entryFile`: 앱의 진입점이에요 (기본값: `./src/_app.tsx`)
-- `cwd`: 빌드 프로세스의 작업 디렉토리예요 (기본값: `process.cwd()`)
-- `mpack`: mpack 번들러 동작을 세밀하게 조정할 수 있어요
-- `babel`: Babel 트랜스파일 설정을 커스터마이즈할 수 있어요
-- `esbuild`: ESBuild 번들링을 조정할 수 있어요
-- `metro`: Metro 번들러 설정을 구성할 수 있어요
-
-## 예시
-
-### 기본 설정
-
-다음은 기본적인 Granite 서비스 설정 예시예요.
-
-- `granite://` 스킴을 통해 앱에 접근할 수 있어요
-- 서비스 이름을 "my-app"으로 설정해서 `granite://my-app`으로 접근할 수 있어요
-- Hermes 플러그인을 사용해서 JavaScript 번들을 바이트코드로 최적화해요
-
-```typescript
+```ts
+// granite.config.ts
 import { defineConfig } from '@granite-js/react-native/config';
-import { hermes } from '@granite-js/plugin-hermes';
+import { rollipop } from '@granite-js/rollipop';
 
 export default defineConfig({
-  // 마이크로서비스의 이름
   appName: 'my-app',
-  // (선택) URL Host 스킴
-  host: 'super',
-  // 딥링크를 위한 URL 스킴
   scheme: 'granite',
-  // 진입점 파일 경로
-  entryFile: 'index.ts',
-  // 사용할 플러그인 배열
-  plugins: [hermes()],
+  host: 'example',
+  bundler: rollipop(),
 });
 ```
+
+## 앱 설정
+
+- `appName`: URL에 표시할 앱 이름이에요. 필수 값이에요.
+- `scheme`: 앱을 실행할 URL 스킴이에요. 필수 값이에요.
+- `host`: URL 스킴의 호스트예요. 지정하면 `{scheme}://{host}/{appName}` 형태가 돼요.
+- `cwd`: 설정과 빌드에 사용할 프로젝트 디렉터리예요. 기본값은 패키지 루트예요.
+
+## 번들러
+
+필수 값인 `bundler`에는 `rollipop()`, `mpack()` 또는 직접 구현한 `BundlerAdapter`를 지정해요.
+
+### Rollipop
+
+새 프로젝트에서는 `rollipop()`을 사용하세요. 개발 서버와 배포용 번들을 모두 Rollipop으로 빌드해요.
+
+`rollipop.config.ts` 옵션은 [Rollipop 설정 문서](https://rollipop.dev/docs/get-started/configuration)를 참고하세요. 다른 설정 파일을 사용하려면 `rollipop({ configFile: './custom.rollipop.ts' })`으로 지정해요.
+
+### Mpack (deprecated)
+
+기존 프로젝트는 `mpack()`을 계속 사용할 수 있어요. 개발 서버는 Metro로 실행하고, 배포용 번들은 Mpack으로 빌드해요.
+
+```ts
+import { defineConfig } from '@granite-js/react-native/config';
+import { mpack } from '@granite-js/mpack';
+
+export default defineConfig({
+  appName: 'my-app',
+  scheme: 'granite',
+  bundler: mpack(),
+});
+```
+
+`mpack()`은 프로젝트 디렉터리의 `mpack.config.ts`를 읽어요. 다른 파일을 사용하려면 `mpack({ config: './custom.mpack.ts' })`으로 지정해요.
+
+## 커스텀 어댑터
+
+다른 번들러를 연동하려면 `@granite-js/config`의 `BundlerAdapter`를 구현해요. `runBuild()`는 단일 플랫폼 설정을 빌드하고, `runServer()`는 개발 서버를 실행한 뒤 `close()`가 있는 핸들을 반환해요. 어댑터 메서드에서는 `this.getContext()`로 앱 설정을 읽을 수 있어요.
+
+`resetCache()`는 빌드나 서버 실행 전에 기존 캐시를 초기화해요. CLI에서 `granite build --reset-cache` 또는 `granite dev --reset-cache`를 실행하면 한 번 호출해요. 초기화 이후에는 캐시를 다시 사용해요.
