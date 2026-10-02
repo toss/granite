@@ -1,5 +1,11 @@
 # @granite-js/screen
 
+## 3.0.2
+
+### Patch Changes
+
+- 0a062dc: Fix Android host creation cancellation, native bundle evaluation errors and asset bundle loading.
+
 ## 3.0.1
 
 ### Patch Changes
