@@ -18,12 +18,43 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class GraniteImageModuleTest {
-    @Test fun `preload rejects failures and initializes a viewless provider`() {
+    @Test fun `preload resolves failures and initializes a viewless provider`() {
         val provider = RecordingProvider(false)
         val promise = mock(Promise::class.java)
         module(provider).preload("""[{"uri":"https://example.com/image.png"}]""", promise)
         assertNotNull(provider.context)
-        verify(promise).reject("PRELOAD_ERROR", "Failed to preload 1 of 1 images")
+        verify(promise).resolve(null)
+        verifyNoMoreInteractions(promise)
+    }
+
+    @Test fun `preload skips missing and empty URIs and still resolves`() {
+        val provider = RecordingProvider(false)
+        val promise = mock(Promise::class.java)
+        module(provider).preload("""[{},{"uri":""},{"uri":"https://example.com/image.png"}]""", promise)
+        assertEquals(1, provider.calls)
+        verify(promise).resolve(null)
+        verifyNoMoreInteractions(promise)
+    }
+
+    @Test fun `mixed asynchronous preload results settle after the last callback`() {
+        val callbacks = mutableListOf<((Boolean, Int, Int, String?) -> Unit)?>()
+        val provider = object : GraniteImageProvider {
+            override fun loadImage(url: String, into: View, scaleType: ImageView.ScaleType) {}
+            override fun cancelLoad(view: View) {}
+            override fun loadImage(url: String, imageView: Nothing?, contentMode: String, headers: Map<String, String>?,
+                priority: GraniteImagePriority, cachePolicy: GraniteImageCachePolicy, onProgress: GraniteImageProgressCallback?,
+                onCompletion: ((Boolean, Int, Int, String?) -> Unit)?) {
+                callbacks.add(onCompletion)
+            }
+        }
+        val promise = mock(Promise::class.java)
+        module(provider).preload("""[{"uri":"https://example.com/one.png"},{"uri":"https://example.com/two.png"}]""", promise)
+        verifyNoInteractions(promise)
+        callbacks[0]?.invoke(false, 0, 0, "failed")
+        callbacks[0]?.invoke(false, 0, 0, "duplicate")
+        verifyNoInteractions(promise)
+        callbacks[1]?.invoke(true, 12, 8, null)
+        verify(promise).resolve(null)
         verifyNoMoreInteractions(promise)
     }
 

@@ -21,12 +21,14 @@ supported.
 - `cachePolicy="none"` disables Coil memory and disk caching.
 - `cachePolicy="memory"` enables only Coil memory caching.
 - `cachePolicy="disk"` enables both. HTTP cache headers still apply.
-- `priority` orders queued requests (`high`, `normal`, `low`), with FIFO ordering within
-  a priority. The default limit is six active requests; running requests are not preempted.
+- `priority` orders queued memory-cache misses (`high`, `normal`, `low`), with FIFO ordering
+  within a priority. Memory-cache hits bypass the queue. The default limit is six active
+  fetch/decode requests; running requests are not preempted.
 - `onProgress` reports HTTP response-body bytes, throttled to approximately 64 KiB
   increments plus completion. An unknown total is `-1` until the response ends.
   Cache hits do not emit download progress.
-- `preload()` rejects if any image fails. `clearDiskCache()` resolves after the
+- `preload()` resolves after all requests complete, including individual image failures,
+  preserving its best-effort contract on both platforms. `clearDiskCache()` resolves after the
   background cache clear finishes.
 
 ### Reusing an application's image loader

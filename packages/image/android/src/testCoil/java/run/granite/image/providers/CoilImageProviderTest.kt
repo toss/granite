@@ -18,10 +18,14 @@ import coil.fetch.Fetcher
 import coil.memory.MemoryCache
 import coil.request.ImageRequest
 import coil.request.Options
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.Collections
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -283,8 +287,13 @@ class CoilImageProviderTest {
         await { done }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test fun `provider applies priority to queued HTTP requests`() {
-        provider = CoilImageProvider(context, loader, maxConcurrentRequests = 1)
+        val scheduler = TestCoroutineScheduler()
+        val fetchExecutor = Executors.newSingleThreadExecutor()
+        fun runFetches() = fetchExecutor.submit { scheduler.runCurrent() }.get(5, TimeUnit.SECONDS)
+        val scheduledLoader = loader.newBuilder().fetcherDispatcher(StandardTestDispatcher(scheduler)).build()
+        provider = CoilImageProvider(context, scheduledLoader, maxConcurrentRequests = 1)
         val release = CountDownLatch(1)
         server.dispatcher = object : okhttp3.mockwebserver.Dispatcher() {
             override fun dispatch(request: okhttp3.mockwebserver.RecordedRequest): MockResponse {
@@ -302,15 +311,88 @@ class CoilImageProviderTest {
                 completed++
             }
         }
-        preload("active", GraniteImagePriority.NORMAL)
-        await { server.requestCount == 1 }
-        preload("low", GraniteImagePriority.LOW)
-        preload("high", GraniteImagePriority.HIGH)
-        shadowOf(Looper.getMainLooper()).idle()
-        release.countDown()
-        await { completed == 3 }
-        assertEquals(listOf("/active.png", "/high.png", "/low.png"),
-            (1..3).map { server.takeRequest(1, TimeUnit.SECONDS)!!.path })
+        try {
+            preload("active", GraniteImagePriority.NORMAL)
+            await { runFetches(); server.requestCount == 1 }
+            preload("low", GraniteImagePriority.LOW)
+            preload("high", GraniteImagePriority.HIGH)
+            shadowOf(Looper.getMainLooper()).idle()
+            // Drive both cache misses into the queue before releasing the active download.
+            // Run off the main thread, matching Coil's real fetch dispatcher.
+            runFetches()
+            release.countDown()
+            await { runFetches(); completed == 3 }
+            assertEquals(listOf("/active.png", "/high.png", "/low.png"),
+                (1..3).map { server.takeRequest(1, TimeUnit.SECONDS)!!.path })
+        } finally {
+            release.countDown()
+            scheduledLoader.shutdown()
+            fetchExecutor.shutdownNow()
+        }
+    }
+
+    @Test fun `scheduling preserves request fetcher fallback without invoking it twice`() {
+        var customFetches = 0
+        val customLoader = loader.newBuilder().components {
+            add(object : coil.intercept.Interceptor {
+                override suspend fun intercept(chain: coil.intercept.Interceptor.Chain): coil.request.ImageResult =
+                    chain.proceed(chain.request.newBuilder().fetcherFactory<Uri> { _, _, _ ->
+                        Fetcher { customFetches++; null }
+                    }.build())
+            })
+        }.build()
+        provider = CoilImageProvider(context, customLoader)
+        server.enqueue(imageResponse())
+        var done = false
+        load(server.url("/fallback.png").toString(), newView()) { _, error, _, _ ->
+            assertNull(error)
+            done = true
+        }
+        await { done }
+        assertEquals(1, customFetches)
+        assertEquals(1, server.requestCount)
+        customLoader.shutdown()
+    }
+
+    @Test fun `memory cache hits bypass saturated request scheduling`() {
+        provider = CoilImageProvider(context, loader, maxConcurrentRequests = 1)
+        val cachedUrl = server.url("/cached.png").toString()
+        server.enqueue(imageResponse())
+        var primed = false
+        provider.loadImage(cachedUrl, null, "cover", null, GraniteImagePriority.NORMAL,
+            GraniteImageCachePolicy.MEMORY, null) { success, _, _, error ->
+            assertTrue(error, success)
+            primed = true
+        }
+        await { primed }
+        assertEquals(1, server.requestCount)
+        assertTrue(loader.memoryCache!!.size > 0)
+
+        val release = CountDownLatch(1)
+        server.dispatcher = object : okhttp3.mockwebserver.Dispatcher() {
+            override fun dispatch(request: okhttp3.mockwebserver.RecordedRequest): MockResponse {
+                check(release.await(15, TimeUnit.SECONDS)) { "Blocked request was not released" }
+                return imageResponse()
+            }
+        }
+        var blockedCompleted = false
+        provider.loadImage(server.url("/blocked.png").toString(), null, "cover", null, GraniteImagePriority.HIGH,
+            GraniteImageCachePolicy.NONE, null) { _, _, _, _ -> blockedCompleted = true }
+        await { server.requestCount == 2 }
+        try {
+            var cachedCompleted = false
+            provider.loadImage(cachedUrl, null, "cover", null, GraniteImagePriority.LOW,
+                GraniteImageCachePolicy.MEMORY, null) { success, _, _, error ->
+                assertTrue(error, success)
+                cachedCompleted = true
+            }
+            await(timeoutSeconds = 3) { cachedCompleted }
+            assertFalse(blockedCompleted)
+            assertEquals(2, server.requestCount)
+        } finally {
+            release.countDown()
+            await { blockedCompleted }
+        }
     }
 
     @Test fun `download progress counts bytes including chunked responses`() {
@@ -369,8 +451,8 @@ class CoilImageProviderTest {
     private fun imageResponse() = MockResponse().setHeader("Content-Type", "image/png")
         .setHeader("Cache-Control", "max-age=3600").setBody(Buffer().write(png))
 
-    private fun await(condition: () -> Boolean) {
-        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15)
+    private fun await(timeoutSeconds: Long = 15, condition: () -> Boolean) {
+        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds)
         while (!condition() && System.nanoTime() < deadline) {
             shadowOf(Looper.getMainLooper()).idle()
             Thread.sleep(10)

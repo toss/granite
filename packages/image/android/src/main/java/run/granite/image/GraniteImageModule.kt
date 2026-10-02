@@ -76,7 +76,6 @@ class GraniteImageModule(
         promise: Promise
     ) {
         if (source.uri.isEmpty()) {
-            failCount.incrementAndGet()
             checkPreloadCompletion(completedCount, successCount, failCount, totalCount, promise)
             return
         }
@@ -113,11 +112,8 @@ class GraniteImageModule(
     ) {
         if (completedCount.incrementAndGet() == totalCount) {
             Log.d(TAG, "Preload completed: ${successCount.get()} succeeded, ${failCount.get()} failed")
-            if (failCount.get() > 0) {
-                promise.reject("PRELOAD_ERROR", "Failed to preload ${failCount.get()} of $totalCount images")
-            } else {
-                promise.resolve(null)
-            }
+            // Preload is best-effort on both platforms; individual failures do not reject the batch.
+            promise.resolve(null)
         }
     }
 
