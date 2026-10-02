@@ -134,3 +134,8 @@ interface GraniteImageProvider {
         // default: no-op
     }
 }
+
+/** Optional initialization for providers that support requests without a target view. */
+interface ContextAwareGraniteImageProvider {
+    fun initialize(context: Context)
+}

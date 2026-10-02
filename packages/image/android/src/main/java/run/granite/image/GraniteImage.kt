@@ -34,6 +34,7 @@ class GraniteImage(context: Context) : FrameLayout(context) {
     private var currentTintColor: Int? = null
     private var currentDefaultSource: String? = null
     private var currentFallbackSource: String? = null
+    private var requestDirty = false
 
     init {
         Log.d(TAG, "GraniteImage initialized")
@@ -62,12 +63,12 @@ class GraniteImage(context: Context) : FrameLayout(context) {
     fun setUri(uri: String?) {
         if (uri != currentUri) {
             currentUri = uri
-            loadImageIfReady()
+            requestDirty = true
         }
     }
 
     fun setHeaders(headersJson: String?) {
-        currentHeaders = headersJson?.let {
+        val headers = headersJson?.let {
             try {
                 val json = JSONObject(it)
                 val map = mutableMapOf<String, String>()
@@ -79,6 +80,10 @@ class GraniteImage(context: Context) : FrameLayout(context) {
                 Log.e(TAG, "Failed to parse headers JSON: $e")
                 null
             }
+        }
+        if (headers != currentHeaders) {
+            currentHeaders = headers
+            requestDirty = true
         }
     }
 
@@ -99,15 +104,23 @@ class GraniteImage(context: Context) : FrameLayout(context) {
     }
 
     fun setPriority(priority: String?) {
-        currentPriority = GraniteImagePriority.fromString(priority)
+        val value = GraniteImagePriority.fromString(priority)
+        if (value != currentPriority) {
+            currentPriority = value
+            requestDirty = true
+        }
     }
 
     fun setCachePolicy(cachePolicy: String?) {
         // View-side API uses canonical names: "memory", "none", "disk" (default)
-        currentCachePolicy = when (cachePolicy) {
+        val value = when (cachePolicy) {
             "memory" -> GraniteImageCachePolicy.MEMORY
             "none" -> GraniteImageCachePolicy.NONE
             else -> GraniteImageCachePolicy.DISK
+        }
+        if (value != currentCachePolicy) {
+            currentCachePolicy = value
+            requestDirty = true
         }
     }
 
@@ -122,11 +135,21 @@ class GraniteImage(context: Context) : FrameLayout(context) {
     }
 
     fun setDefaultSource(source: String?) {
-        currentDefaultSource = source
+        if (source != currentDefaultSource) {
+            currentDefaultSource = source
+            requestDirty = true
+        }
     }
 
     fun setFallbackSource(source: String?) {
         currentFallbackSource = source
+    }
+
+    internal fun commitUpdates() {
+        if (requestDirty) {
+            requestDirty = false
+            loadImageIfReady()
+        }
     }
 
     private fun loadImageIfReady() {
@@ -164,12 +187,14 @@ class GraniteImage(context: Context) : FrameLayout(context) {
             defaultSource = currentDefaultSource,
             progressCallback = { loaded, total ->
                 post {
-                    emitProgress(loaded.toInt(), total.toInt())
+                    if (containerView === imageView) emitProgress(loaded.toInt(), total.toInt())
                 }
             },
             completionCallback = { bitmap, error, width, height ->
                 post {
-                    handleLoadCompletion(bitmap, error, width, height, imageView, provider)
+                    if (containerView === imageView) {
+                        handleLoadCompletion(bitmap, error, width, height, imageView, provider)
+                    }
                 }
             }
         )
@@ -187,6 +212,7 @@ class GraniteImage(context: Context) : FrameLayout(context) {
 
     private fun clearContainerView() {
         containerView?.let {
+            providerResolver()?.cancelLoad(it)
             removeView(it)
             containerView = null
         }
@@ -277,12 +303,9 @@ class GraniteImage(context: Context) : FrameLayout(context) {
     }
 
     fun cleanup() {
-        val provider = providerResolver()
-        containerView?.let {
-            provider?.cancelLoad(it)
-        }
         clearContainerView()
         currentUri = null
+        requestDirty = false
     }
 
     companion object {

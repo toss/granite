@@ -35,7 +35,6 @@ class GraniteImageManager : SimpleViewManager<GraniteImage>(), GraniteImageManag
 
     @ReactProp(name = "headers")
     override fun setHeaders(view: GraniteImage, headers: String?) {
-        Log.d(TAG, "setHeaders: $headers")
         view.setHeaders(headers)
     }
 
@@ -79,6 +78,11 @@ class GraniteImageManager : SimpleViewManager<GraniteImage>(), GraniteImageManag
         Log.d(TAG, "onDropViewInstance called")
         view.cleanup()
         super.onDropViewInstance(view)
+    }
+
+    override fun onAfterUpdateTransaction(view: GraniteImage) {
+        super.onAfterUpdateTransaction(view)
+        view.commitUpdates()
     }
 
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {

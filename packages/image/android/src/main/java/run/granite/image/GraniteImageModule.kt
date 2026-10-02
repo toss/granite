@@ -11,6 +11,7 @@ import org.json.JSONObject
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicBoolean
 
 @ReactModule(name = GraniteImageModule.NAME)
 class GraniteImageModule(
@@ -30,8 +31,6 @@ class GraniteImageModule(
 
     @ReactMethod
     fun preload(sourcesJson: String, promise: Promise) {
-        Log.d(TAG, "preload called with: $sourcesJson")
-
         val provider = providerResolver()
         if (provider == null) {
             Log.w(TAG, "No provider registered, cannot preload")
@@ -41,8 +40,11 @@ class GraniteImageModule(
 
         executor.execute {
             try {
-                val sources = JSONArray(sourcesJson)
-                val totalCount = sources.length()
+                (provider as? ContextAwareGraniteImageProvider)?.initialize(reactApplicationContext.applicationContext)
+                val json = JSONArray(sourcesJson)
+                // Parse before starting requests so malformed input cannot settle the promise twice.
+                val sources = (0 until json.length()).map { parsePreloadSource(json.getJSONObject(it)) }
+                val totalCount = sources.size
 
                 if (totalCount == 0) {
                     promise.resolve(null)
@@ -54,7 +56,7 @@ class GraniteImageModule(
                 val failCount = AtomicInteger(0)
 
                 for (i in 0 until totalCount) {
-                    val preloadSource = parsePreloadSource(sources.getJSONObject(i))
+                    val preloadSource = sources[i]
                     preloadSingle(provider, preloadSource, completedCount, successCount, failCount, totalCount, promise)
                 }
             } catch (e: Exception) {
@@ -78,26 +80,27 @@ class GraniteImageModule(
             return
         }
 
-        Log.d(TAG, "Preloading: ${source.uri}")
-        provider.loadImage(
-            url = source.uri,
-            imageView = null,
-            contentMode = "cover",
-            headers = source.headers,
-            priority = source.priority,
-            cachePolicy = source.cachePolicy,
-            onProgress = null,
-            onCompletion = { success, width, height, error ->
-                if (success) {
-                    Log.d(TAG, "Preloaded successfully: ${source.uri} (${width}x${height})")
-                    successCount.incrementAndGet()
-                } else {
-                    Log.d(TAG, "Preload failed for ${source.uri}: $error")
-                    failCount.incrementAndGet()
-                }
+        val completed = AtomicBoolean(false)
+        val onComplete: (Boolean) -> Unit = { success ->
+            if (completed.compareAndSet(false, true)) {
+                if (success) successCount.incrementAndGet() else failCount.incrementAndGet()
                 checkPreloadCompletion(completedCount, successCount, failCount, totalCount, promise)
             }
-        )
+        }
+        try {
+            provider.loadImage(
+                url = source.uri,
+                imageView = null,
+                contentMode = "cover",
+                headers = source.headers,
+                priority = source.priority,
+                cachePolicy = source.cachePolicy,
+                onProgress = null,
+                onCompletion = { success, _, _, _ -> onComplete(success) }
+            )
+        } catch (e: Exception) {
+            onComplete(false)
+        }
     }
 
     private fun checkPreloadCompletion(
@@ -109,6 +112,7 @@ class GraniteImageModule(
     ) {
         if (completedCount.incrementAndGet() == totalCount) {
             Log.d(TAG, "Preload completed: ${successCount.get()} succeeded, ${failCount.get()} failed")
+            // Preload is best-effort on both platforms; individual failures do not reject the batch.
             promise.resolve(null)
         }
     }
@@ -148,24 +152,30 @@ class GraniteImageModule(
 
     @ReactMethod
     fun clearMemoryCache(promise: Promise) {
-        Log.d(TAG, "clearMemoryCache called")
-        val provider = providerResolver()
-        val context = reactApplicationContext
-        if (provider != null) {
-            provider.clearMemoryCache(context)
+        try {
+            providerResolver()?.clearMemoryCache(reactApplicationContext)
+            promise.resolve(null)
+        } catch (e: Exception) {
+            promise.reject("CACHE_ERROR", "Failed to clear image memory cache", e)
         }
-        promise.resolve(null)
     }
 
     @ReactMethod
     fun clearDiskCache(promise: Promise) {
-        Log.d(TAG, "clearDiskCache called")
         val provider = providerResolver()
-        val context = reactApplicationContext
-        if (provider != null) {
-            provider.clearDiskCache(context)
+        executor.execute {
+            try {
+                provider?.clearDiskCache(reactApplicationContext)
+                promise.resolve(null)
+            } catch (e: Exception) {
+                promise.reject("CACHE_ERROR", "Failed to clear image disk cache", e)
+            }
         }
-        promise.resolve(null)
+    }
+
+    override fun invalidate() {
+        executor.shutdownNow()
+        super.invalidate()
     }
 
     companion object {
