@@ -34,7 +34,6 @@ private class AVPlayerContainerView: UIView {
     private var playerView: AVPlayerContainerView?
     private var playerItem: AVPlayerItem?
     private var timeObserver: Any?
-    private var progressInterval: Double = 0.25
     private var pipController: AVPictureInPictureController?
 
     private var shouldRepeat: Bool = false
@@ -243,7 +242,11 @@ private class AVPlayerContainerView: UIView {
             player.seek(to: seekTime)
         }
 
-        updateProgressObserver()
+        // Add time observer for progress
+        let interval = CMTime(seconds: 0.25, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
+            self?.handleProgressUpdate()
+        }
 
         // Apply settings
         player.isMuted = isMuted
@@ -372,11 +375,6 @@ private class AVPlayerContainerView: UIView {
         playerItem?.preferredForwardBufferDuration = duration
     }
 
-    @objc public func setProgressUpdateInterval(_ interval: Double) {
-        progressInterval = interval.isFinite && interval > 0 ? interval / 1000.0 : 0.25
-        updateProgressObserver()
-    }
-
     @objc public func setAutomaticallyWaitsToMinimizeStalling(_ waits: Bool) {
         automaticallyWaits = waits
         player.automaticallyWaitsToMinimizeStalling = waits
@@ -401,17 +399,6 @@ private class AVPlayerContainerView: UIView {
     }
 
     // MARK: - Private Methods
-
-    private func updateProgressObserver() {
-        guard playerItem != nil else { return }
-        if let observer = timeObserver {
-            player.removeTimeObserver(observer)
-        }
-        let interval = CMTime(seconds: progressInterval, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
-            self?.handleProgressUpdate()
-        }
-    }
 
     private func unloadPlayerItem() {
         if let observer = timeObserver {

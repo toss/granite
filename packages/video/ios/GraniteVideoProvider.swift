@@ -176,10 +176,6 @@ import AVFoundation
     @objc var duration: Double { get }
     @objc var isPlaying: Bool { get }
 
-    // Optional - Progress
-    /// Progress callback interval in milliseconds. Non-positive values use the provider default.
-    @objc optional func setProgressUpdateInterval(_ interval: Double)
-
     // Optional - Volume
     @objc optional func setVolume(_ volume: Float)
     @objc optional func setMuted(_ muted: Bool)

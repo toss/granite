@@ -67,16 +67,6 @@ Pod::Spec.new do |s|
 
   s.frameworks = ["AVFoundation", "AVKit", "CoreMedia"]
 
-  s.test_spec 'ProviderTests' do |test_spec|
-    test_spec.source_files = 'native-tests/ios/**/*.{m,mm,swift}'
-    test_spec.requires_app_host = true
-    test_spec.frameworks = ['XCTest']
-    test_spec.pod_target_xcconfig = {
-      'HEADER_SEARCH_PATHS' => '$(inherited) "$(PODS_CONFIGURATION_BUILD_DIR)/ReactCodegen/ReactCodegen.framework/Headers"',
-      'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => use_default_provider ? '$(inherited) GRANITE_VIDEO_DEFAULT_PROVIDER' : '$(inherited)'
-    }
-  end
-
   # React Native modules dependencies (Fabric/TurboModule)
   install_modules_dependencies(s)
 end

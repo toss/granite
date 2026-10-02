@@ -19,7 +19,6 @@
     "dist",
     "android",
     "ios",
-    "native-tests/ios",
     "*.podspec",
     "react-native.config.js",
     "!example/**",
