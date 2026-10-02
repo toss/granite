@@ -1,5 +1,14 @@
 # @granite-js/mpack
 
+## 3.0.1
+
+### Patch Changes
+
+- a4b20b4: Remove obsolete dead-code pruning scripts and development dependencies.
+  - @granite-js/config@3.0.1
+  - @granite-js/plugin-core@3.0.1
+  - @granite-js/utils@3.0.1
+
 ## 3.0.0
 
 ### Patch Changes
