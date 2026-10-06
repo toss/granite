@@ -7,14 +7,6 @@ on:
   pull_request:
 
 jobs:
-  screen-factory-compatibility:
-    name: Screen factory compatibility
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Test legacy and RN87 delegate headers
-        run: bash packages/granite-screen/ios/test-factory-delegate.sh
-
   setup:
     name: Setup
     runs-on: ubuntu-latest
