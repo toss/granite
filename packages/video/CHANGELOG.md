@@ -1,5 +1,11 @@
 # @granite-js/video
 
+## 3.0.2
+
+### Patch Changes
+
+- f7bd69b: Forward iOS video playback options before source loading and restore them when Fabric reuses a view. The default iOS video provider now honors the progress update interval.
+
 ## 3.0.1
 
 ## 3.0.0

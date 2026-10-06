@@ -1,5 +1,12 @@
 # @granite-js/screen
 
+## 3.0.2
+
+### Patch Changes
+
+- adf1840: Support React Native 0.87 factory delegate headers while preserving the explicit bridgeless opt-in on older versions. Use the supported default Proguard configuration with Android Gradle Plugin 9.
+- 0a062dc: Fix Android host creation cancellation, native bundle evaluation errors and asset bundle loading.
+
 ## 3.0.1
 
 ### Patch Changes
