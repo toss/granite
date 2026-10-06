@@ -1,5 +1,12 @@
 # @granite-js/micro-frontend
 
+## 2.5.6
+
+### Patch Changes
+
+- 42e4458: Fix shared module compatibility with legacy consumers.
+  - @granite-js/utils@2.5.6
+
 ## 2.5.5
 
 ### Patch Changes

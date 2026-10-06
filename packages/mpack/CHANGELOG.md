@@ -1,5 +1,13 @@
 # @granite-js/mpack
 
+## 2.5.6
+
+### Patch Changes
+
+- 0c7ea11: Fix Metro hot reloads for Yarn PnP workspace packages by forwarding physical file changes to their virtual module paths without losing peer dependency resolution.
+  - @granite-js/plugin-core@2.5.6
+  - @granite-js/utils@2.5.6
+
 ## 2.5.5
 
 ### Patch Changes
