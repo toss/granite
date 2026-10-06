@@ -26,10 +26,6 @@ public class ReactNativeFactoryDelegate: GraniteNativeFactoryDelegate {
         return bundleURL()
     }
 
-    public override func bridgelessEnabled() -> Bool {
-        return true
-    }
-
     public override func graniteHostDidStart() {
         reactHost?.graniteHostDidStart()
     }

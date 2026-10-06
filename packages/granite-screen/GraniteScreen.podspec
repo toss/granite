@@ -11,6 +11,7 @@ Pod::Spec.new do |s|
   s.source       = { :path => "." }
 
   s.source_files = "ios/**/*.{h,m,mm,swift}"
+  s.exclude_files = "ios/**/__tests__/**/*"
   s.public_header_files = "ios/**/*.h"
   s.private_header_files = "ios/**/*+*.h"
 
