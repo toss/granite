@@ -1,5 +1,12 @@
 # @granite-js/plugin-router
 
+## 3.0.3
+
+### Patch Changes
+
+- 8214426: Keep the router plugin focused on route generation and watching. Remove automatic `require.context` replacement with `import.meta.glob`; applications should manage page imports explicitly.
+  - @granite-js/plugin-core@3.0.3
+
 ## 3.0.2
 
 ### Patch Changes
