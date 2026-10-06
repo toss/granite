@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The default RNComponentView placeholder color. Matches iOS secondarySystemBackground in light mode. -->
+    <color name="granite_rn_component_view_placeholder">#F2F2F7</color>
+</resources>

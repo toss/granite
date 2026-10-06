@@ -2,9 +2,14 @@
 
 #import <React/RCTRootComponentView.h>
 #import <React/RCTSurfaceTouchHandler.h>
+#import <UIKit/UIGestureRecognizerSubclass.h>
 #import "PortalHostView.h"
 
 @interface GranitePortalSurfaceTouchHandler : RCTSurfaceTouchHandler
+
+/// The host whose Portals lay their content out again when a gesture starts.
+@property (nonatomic, weak, nullable) PortalHostView *portalHostView;
+
 @end
 
 static BOOL GraniteIsSurfaceTouchHandler(UIGestureRecognizer *recognizer)
@@ -174,12 +179,56 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
   return GranitePortalSurfaceTouchHandlerShouldReceiveTouch(self, touch);
 }
 
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  // Pressability measures the pressed view when a gesture starts. A host that moved with an
+  // ancestor or a scroll since it was last laid out has content that `measure()` still reports
+  // where it was, so bring it up to date before JS sees the touch.
+  [self.portalHostView notifyLayoutChanged];
+  [self updateViewOriginOffset];
+  [super touchesBegan:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  [self updateViewOriginOffset];
+  [super touchesMoved:touches withEvent:event];
+}
+
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  [self updateViewOriginOffset];
+  [super touchesEnded:touches withEvent:event];
+}
+
+- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+  [self updateViewOriginOffset];
+  [super touchesCancelled:touches withEvent:event];
+}
+
+/// `measure()` reports teleported content where the Portal transform puts it: at its host's
+/// position relative to the root of the controller surface, which fills its window from the screen
+/// origin (see `-[PortalView updatePortalLayoutStateIfNeeded]`). Touches have to be reported in the
+/// same place, because Pressability cancels a press once a moving touch leaves the region
+/// `measure()` reported. A container away from the screen origin, like one embedded in part of a
+/// screen, would otherwise report them off by its own position.
+- (void)updateViewOriginOffset
+{
+  UIView *view = self.view;
+  UIWindow *window = view.window;
+  if (window == nil) {
+    return;
+  }
+  self.viewOriginOffset = [view convertPoint:CGPointZero toCoordinateSpace:window.screen.coordinateSpace];
+}
+
 @end
 
 @implementation PortalHostContainerView {
   RCTRootComponentView *_reactRootAnchor;
   PortalHostView *_portalHostView;
-  RCTSurfaceTouchHandler *_touchHandler;
+  GranitePortalSurfaceTouchHandler *_touchHandler;
   NSString *_pendingName;
   BOOL _hasAttachedContent;
 }
@@ -254,6 +303,7 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
   [_reactRootAnchor addSubview:_portalHostView];
 
   _touchHandler = [GranitePortalSurfaceTouchHandler new];
+  _touchHandler.portalHostView = _portalHostView;
   [_touchHandler attachToView:self];
 
   if (_pendingName) {

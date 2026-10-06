@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Match the iOS example's systemBackground, label and secondaryLabel in light mode. -->
+    <color name="example_background">#FFFFFF</color>
+    <color name="example_label">#000000</color>
+    <color name="example_secondary_label">#993C3C43</color>
+</resources>
