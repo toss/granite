@@ -58,6 +58,8 @@ class DependencyGraph extends EventEmitter {
   _moduleResolver;
   _resolutionCache;
   _readyPromise;
+  // MARK: - GRANITE: Keep each PnP peer instance while tracking its physical file.
+  _virtualPathsByRealPath = new Map();
 
   constructor(config, options) {
     super();
@@ -126,6 +128,12 @@ class DependencyGraph extends EventEmitter {
   /* $FlowFixMe[missing-local-annot] The type annotation(s) required by Flow's
    * LTI update could not be added via codemod */
   _onHasteChange({ eventsQueue, hasteFS, moduleMap }) {
+    // MARK: - GRANITE: Expand events before Metro's other listeners match virtual graph paths.
+    eventsQueue.forEach((event) => {
+      this._virtualPathsByRealPath.get(event.filePath)?.forEach((filePath) => {
+        eventsQueue.push({ ...event, filePath });
+      });
+    });
     this._hasteFS = hasteFS;
     this._resolutionCache = new Map();
     this._moduleMap = moduleMap;
@@ -202,6 +210,15 @@ class DependencyGraph extends EventEmitter {
       );
     }
 
+    if (pnpapi && filename !== resolvedPath) {
+      let virtualPaths = this._virtualPathsByRealPath.get(resolvedPath);
+      if (!virtualPaths) {
+        virtualPaths = new Set();
+        this._virtualPathsByRealPath.set(resolvedPath, virtualPaths);
+      }
+      virtualPaths.add(filename);
+    }
+
     return sha1;
   }
 
@@ -211,6 +228,7 @@ class DependencyGraph extends EventEmitter {
 
   end() {
     this._haste.end();
+    this._virtualPathsByRealPath.clear();
   }
 
   /** Given a search context, return a list of file paths matching the query. */
