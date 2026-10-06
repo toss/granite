@@ -18,6 +18,12 @@
 
 @implementation GraniteNativeFactoryDelegate
 
+// Keep the explicit opt-in for older RN versions. RN87 no longer exposes this
+// selector to Swift, so implementing it here avoids a version-dependent override.
+- (BOOL)bridgelessEnabled {
+  return YES;
+}
+
 - (void)hostDidStart:(RCTHost *)host {
   [super hostDidStart:host];
   [self graniteHostDidStart];

@@ -1,0 +1,4 @@
+module React_RCTAppDelegate {
+  header "RCTDefaultReactNativeFactoryDelegate.h"
+  export *
+}

@@ -30,7 +30,8 @@
     "test:gradle-plugin": "cd gradle-plugin && ./gradlew test",
     "prepack": "cd gradle-plugin && ./gradlew jar",
     "test:android": "android/test-lifecycle.sh",
-    "test:cpp": "android/test-cpp.sh"
+    "test:cpp": "android/test-cpp.sh",
+    "test:ios": "ios/test-factory-delegate.sh"
   },
   "nx": {
     "targets": {
