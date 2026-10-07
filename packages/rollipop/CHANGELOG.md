@@ -1,5 +1,11 @@
 # @granite-js/rollipop
 
+## 3.0.3
+
+### Patch Changes
+
+- @granite-js/config@3.0.3
+
 ## 3.0.2
 
 ### Patch Changes
