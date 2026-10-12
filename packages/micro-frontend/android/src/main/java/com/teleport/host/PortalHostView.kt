@@ -20,6 +20,12 @@ class PortalHostView(
   private var batchBaseIndex = 0
   private var hasPendingCleanup = false
 
+  fun observeContentLayout(
+    requestKey: String,
+    revision: Int,
+    onReady: () -> Unit,
+  ): AutoCloseable = PortalContentLayoutObservation(this, requestKey, revision, onReady)
+
   fun setName(newName: String?) {
     if (name == newName) return
 
