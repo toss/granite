@@ -1,12 +1,12 @@
-import { act, create, type ReactTestRenderer } from 'react-test-renderer';
+import type { ReactElement } from 'react';
 import { View } from 'react-native';
+import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { describe, expect, it } from 'vitest';
-
 import { getPortalInitialContentProps } from './getPortalInitialContentProps';
 
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
 
-function render(element: React.ReactElement) {
+function render(element: ReactElement) {
   let renderer: ReactTestRenderer | undefined;
 
   act(() => {
@@ -21,19 +21,22 @@ function render(element: React.ReactElement) {
 
 describe('getPortalInitialContentProps', () => {
   it('marks an existing native View when the caller spreads the helper last', () => {
+    const consumerProps = {
+      collapsable: true,
+      nativeID: 'consumer-marker',
+    };
     const renderer = render(
       <View
         accessibilityLabel="initial content"
-        collapsable
-        nativeID="consumer-marker"
+        {...consumerProps}
         {...getPortalInitialContentProps({ ready: true, requestKey: 'store/home', revision: 7 })}
       >
-        Store content
+        <View style={{ backgroundColor: 'blue', height: 24 }} />
       </View>
     );
 
     expect(renderer.toJSON()).toMatchObject({
-      children: ['Store content'],
+      children: [{ props: { style: { backgroundColor: 'blue', height: 24 } }, type: 'View' }],
       props: {
         accessibilityLabel: 'initial content',
         collapsable: false,
@@ -46,14 +49,14 @@ describe('getPortalInitialContentProps', () => {
   it('removes the marker when ready changes from true to false', () => {
     const renderer = render(
       <View {...getPortalInitialContentProps({ ready: true, requestKey: 'store/home', revision: 7 })}>
-        Store content
+        <View style={{ backgroundColor: 'blue', height: 24 }} />
       </View>
     );
 
     act(() => {
       renderer.update(
         <View {...getPortalInitialContentProps({ ready: false, requestKey: 'store/home', revision: 7 })}>
-          Store content
+          <View style={{ backgroundColor: 'blue', height: 24 }} />
         </View>
       );
     });
@@ -84,15 +87,11 @@ describe('getPortalInitialContentProps', () => {
     expect(() => getPortalInitialContentProps({ ready: true, requestKey: '', revision: 0 })).toThrow(
       'getPortalInitialContentProps requires a nonempty requestKey'
     );
-    expect(() => getPortalInitialContentProps({ ready: true, requestKey: 'store/home', revision: 1.5 })).toThrow(
-      'getPortalInitialContentProps requires revision to be an integer between 0 and 2147483647'
-    );
-    expect(() => getPortalInitialContentProps({ ready: true, requestKey: 'store/home', revision: Number.NaN })).toThrow(
-      'getPortalInitialContentProps requires revision to be an integer between 0 and 2147483647'
-    );
-    expect(() =>
-      getPortalInitialContentProps({ ready: true, requestKey: 'store/home', revision: 2147483648 })
-    ).toThrow('getPortalInitialContentProps requires revision to be an integer between 0 and 2147483647');
+    for (const revision of [-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, 2147483648]) {
+      expect(() => getPortalInitialContentProps({ ready: true, requestKey: 'store/home', revision })).toThrow(
+        'getPortalInitialContentProps requires revision to be an integer between 0 and 2147483647'
+      );
+    }
     expect(() =>
       getPortalInitialContentProps({ ready: {} as boolean, requestKey: 'store/home', revision: 0 })
     ).toThrow('getPortalInitialContentProps requires ready to be a boolean');

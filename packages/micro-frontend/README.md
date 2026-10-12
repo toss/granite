@@ -480,6 +480,74 @@ and the `nextFocus*` family.
 
 Wrap the Portal in your own `<View>` when you need any of these.
 
+### Observing initial content layout on Android
+
+`getPortalInitialContentProps` lets the UI owner explicitly mark an existing
+React Native `View` containing the initial screen or a usable loading state.
+It adds no wrapper and does not change `Portal` or infer readiness from a session
+opening or a wrapper mounting.
+
+```tsx
+import { getPortalInitialContentProps } from '@granite-js/micro-frontend';
+import { View } from 'react-native';
+
+// In the screen's own renderer, on its existing root View inside the Portal.
+<View
+  style={{ flex: 1 }}
+  {...getPortalInitialContentProps({
+    requestKey: sessionId,
+    revision: contentRevision,
+    ready: hasInitialUI,
+  })}
+>
+  {initialUI}
+</View>;
+```
+
+Mark the actual content View where the initial UI is known to exist. Marking an
+empty outer wrapper does not make it meaningful content. `requestKey` must be
+nonempty, `ready` must be boolean, and `revision` must be an integer from `0` to `2147483647`.
+Use the same pair on both sides; change it when a new request must not accept an
+older screen's marker. While `ready` is false, no readiness marker is emitted.
+Spread these props last onto a native `View`; a custom component must forward
+them unchanged. The helper reserves `nativeID` and `collapsable`, so do not apply
+it to a View that needs a different `nativeID`. Overriding or dropping these props
+can prevent delivery; it does not establish readiness through another signal.
+
+An Android destination can observe that exact marker:
+
+```kotlin
+hostView.setName(sessionId)
+val observation = hostView.observeContentLayout(
+  requestKey = sessionId,
+  revision = contentRevision,
+) {
+  // The native owner can now update its loading or transition policy.
+}
+
+// Cancel if the owner no longer needs the result.
+observation.close()
+```
+
+Register and close the observation on the Android UI thread. Registration before
+the host's first Window attachment is supported. The callback runs at most once,
+on a pre-draw where a unique matching marked View is physically under this host,
+attached to the same Window, and has nonzero bounds without pending layout.
+The observer always permits drawing; it never delays a frame or starts an animation.
+
+Closing, renaming, detaching, or cleaning up the host cancels pending observations.
+A size change after the host has established nonzero bounds also cancels them;
+the initial zero-size-to-laid-out transition does not. Register a new observation
+for a new attachment or layout request, and advance the content revision when
+the initial UI depends on the new destination size.
+
+The signal acknowledges the declared View's native attachment and current
+layout. It is not an acknowledgement of every descendant's latest Fabric update,
+image decoding, WebView loading, network completion, or pixels being presented.
+Native layout observation is Android-only; the returned props are ordinary View
+props on other React Native platforms. Host applications retain responsibility for
+timeouts and any policy that postpones their own first draw.
+
 ### Activity example
 
 ```kotlin

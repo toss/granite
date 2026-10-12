@@ -3,6 +3,7 @@ package com.teleport.host
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import com.facebook.react.bridge.UiThreadUtil
 import com.facebook.react.views.view.ReactViewGroup
 import com.teleport.global.PortalRegistry
 
@@ -19,15 +20,45 @@ class PortalHostView(
   private var isInBatch = false
   private var batchBaseIndex = 0
   private var hasPendingCleanup = false
+  private val contentLayoutObservations = mutableSetOf<PortalContentLayoutObservation>()
 
+  /**
+   * Observes an explicit initial-content marker in this host without delaying drawing.
+   *
+   * Call and close on the UI thread. A subscription fires once for one unambiguous matching
+   * native View attached to this Window with positive bounds and no pending layout in its path.
+   * Reparenting can clear `isLaidOut` while preserving RN-managed bounds, so that flag is not used.
+   * This does not acknowledge a Fabric commit or completion of pixels, images, or network loading.
+   *
+   * Subscribe before or after attachment. Detach, rename, cleanup, and a size change after nonzero
+   * bounds cancel pending observations. Subscribe again with a new revision for resized content.
+   */
   fun observeContentLayout(
     requestKey: String,
     revision: Int,
     onReady: () -> Unit,
-  ): AutoCloseable = PortalContentLayoutObservation(this, requestKey, revision, onReady)
+  ): AutoCloseable {
+    UiThreadUtil.assertOnUiThread()
+    require(requestKey.isNotEmpty()) { "requestKey must not be empty" }
+    require(revision >= 0) { "revision must be nonnegative" }
+    return PortalContentLayoutObservation(this, requestKey, revision, onReady).also {
+      contentLayoutObservations.add(it)
+      it.attach()
+    }
+  }
+
+  internal fun removeContentLayoutObservation(observation: PortalContentLayoutObservation) {
+    contentLayoutObservations.remove(observation)
+  }
+
+  private fun cancelContentLayoutObservations() {
+    contentLayoutObservations.toList().forEach { it.close() }
+  }
 
   fun setName(newName: String?) {
     if (name == newName) return
+
+    cancelContentLayoutObservations()
 
     hasPendingCleanup = false
     name?.let { PortalRegistry.unregisterHost(it, this) }
@@ -36,6 +67,7 @@ class PortalHostView(
   }
 
   fun cleanup() {
+    cancelContentLayoutObservations()
     if (isAttachedToWindow) {
       hasPendingCleanup = true
       return
@@ -64,6 +96,7 @@ class PortalHostView(
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
+    contentLayoutObservations.toList().forEach { it.attach() }
     // A host can be named before its Activity installs it into the Window.
     // Register again on attach so detached controller surfaces resolve the
     // currently visible Activity host deterministically.
@@ -81,7 +114,15 @@ class PortalHostView(
     name?.let { PortalRegistry.notifyHostLayoutChanged(it) }
   }
 
+  override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+    super.onSizeChanged(w, h, oldw, oldh)
+    if (oldw > 0 && oldh > 0 && (w != oldw || h != oldh)) {
+      cancelContentLayoutObservations()
+    }
+  }
+
   override fun onDetachedFromWindow() {
+    cancelContentLayoutObservations()
     super.onDetachedFromWindow()
 
     if (hasPendingCleanup) {
