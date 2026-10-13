@@ -176,6 +176,15 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 
 @end
 
+@interface GranitePortalContentLayoutObservation : NSObject <PortalContentLayoutObservation>
+@end
+
+@implementation GranitePortalContentLayoutObservation
+- (void)cancel
+{
+}
+@end
+
 @implementation PortalHostContainerView {
   RCTRootComponentView *_reactRootAnchor;
   PortalHostView *_portalHostView;
@@ -205,6 +214,19 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
     [self activateIfNeeded];
   }
   return self;
+}
+
+- (id<PortalContentLayoutObservation>)observeContentLayoutWithRequestKey:(NSString *)requestKey
+                                                              revision:(NSInteger)revision
+                                                               onReady:(void (^)(void))onReady
+{
+  if (![NSThread isMainThread]) {
+    [NSException raise:NSInternalInconsistencyException format:@"Content layout must be observed on the main thread"];
+  }
+  if (requestKey.length == 0 || revision < 0 || revision > INT32_MAX || onReady == nil) {
+    [NSException raise:NSInvalidArgumentException format:@"A nonempty request key, Int32 revision, and callback are required"];
+  }
+  return [GranitePortalContentLayoutObservation new];
 }
 
 - (BOOL)isActivated
