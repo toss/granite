@@ -1,5 +1,6 @@
 #import "PortalHostContainerView.h"
 
+#import <QuartzCore/QuartzCore.h>
 #import <React/RCTRootComponentView.h>
 #import <React/RCTSurfaceTouchHandler.h>
 #import "PortalHostView.h"
@@ -176,12 +177,140 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 
 @end
 
-@interface GranitePortalContentLayoutObservation : NSObject <PortalContentLayoutObservation>
+@class GranitePortalContentLayoutObservation;
+
+@interface PortalHostContainerView ()
+- (UIView *)portalContentLayoutHost;
+- (void)removeContentLayoutObservation:(GranitePortalContentLayoutObservation *)observation;
 @end
 
-@implementation GranitePortalContentLayoutObservation
+@interface GranitePortalContentLayoutTickTarget : NSObject
+@property (nonatomic, weak) GranitePortalContentLayoutObservation *observation;
+- (void)tick:(CADisplayLink *)link;
+@end
+
+@interface GranitePortalContentLayoutObservation : NSObject <PortalContentLayoutObservation>
+- (instancetype)initWithOwner:(PortalHostContainerView *)owner
+                     nativeId:(NSString *)nativeId
+                      onReady:(void (^)(void))onReady;
+- (void)startIfNeeded;
+- (void)checkContentLayout;
+@end
+
+static UIView *GraniteFindInitialContentMarker(UIView *host, NSString *nativeId)
+{
+  UIView *match = nil;
+  NSMutableArray<UIView *> *pending = [NSMutableArray arrayWithObject:host];
+  while (pending.count > 0) {
+    UIView *parent = pending.lastObject;
+    [pending removeLastObject];
+    for (UIView *child in parent.subviews) {
+      if (child.superview != parent) continue;
+      if ([child isKindOfClass:[RCTViewComponentView class]] &&
+          [((RCTViewComponentView *)child).nativeId isEqualToString:nativeId]) {
+        if (match != nil) return nil;
+        match = child;
+      }
+      [pending addObject:child];
+    }
+  }
+  return match;
+}
+
+static BOOL GraniteHasInitialContentLayout(
+    UIView *marker, UIView *host, PortalHostContainerView *container)
+{
+  UIWindow *window = container.window;
+  if (window == nil || host.bounds.size.width <= 0 || host.bounds.size.height <= 0 ||
+      marker.bounds.size.width <= 0 || marker.bounds.size.height <= 0) {
+    return NO;
+  }
+  for (UIView *view = marker; view != nil; view = view.superview) {
+    if (view.window != window || view.layer.needsLayout) return NO;
+    if (view == container) return YES;
+  }
+  return NO;
+}
+
+@implementation GranitePortalContentLayoutTickTarget
+- (void)tick:(CADisplayLink *)link
+{
+  GranitePortalContentLayoutObservation *observation = self.observation;
+  if (observation != nil) {
+    [observation checkContentLayout];
+  } else {
+    [link invalidate];
+  }
+}
+@end
+
+@implementation GranitePortalContentLayoutObservation {
+  __weak PortalHostContainerView *_owner;
+  NSString *_nativeId;
+  void (^_onReady)(void);
+  CADisplayLink *_displayLink;
+}
+
+- (instancetype)initWithOwner:(PortalHostContainerView *)owner
+                     nativeId:(NSString *)nativeId
+                      onReady:(void (^)(void))onReady
+{
+  if (self = [super init]) {
+    _owner = owner;
+    _nativeId = [nativeId copy];
+    _onReady = [onReady copy];
+  }
+  return self;
+}
+
+- (void)startIfNeeded
+{
+  PortalHostContainerView *owner = _owner;
+  if (_displayLink != nil || _onReady == nil || owner.window == nil ||
+      [owner portalContentLayoutHost] == nil) {
+    return;
+  }
+  // A nativeId-only update does not have to insert a view or request layout.
+  GranitePortalContentLayoutTickTarget *target = [GranitePortalContentLayoutTickTarget new];
+  target.observation = self;
+  _displayLink = [CADisplayLink displayLinkWithTarget:target selector:@selector(tick:)];
+  [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+}
+
+- (void)checkContentLayout
+{
+  PortalHostContainerView *owner = _owner;
+  if (owner == nil || _onReady == nil) {
+    [self cancel];
+    return;
+  }
+  UIView *host = [owner portalContentLayoutHost];
+  if (host == nil || owner.window == nil) return;
+  UIView *marker = GraniteFindInitialContentMarker(host, _nativeId);
+  if (marker != nil && GraniteHasInitialContentLayout(marker, host, owner)) {
+    void (^onReady)(void) = _onReady;
+    [self cancel];
+    onReady();
+  }
+}
+
 - (void)cancel
 {
+  if (![NSThread isMainThread]) {
+    [NSException raise:NSInternalInconsistencyException format:@"Content layout must be cancelled on the main thread"];
+  }
+  PortalHostContainerView *owner = _owner;
+  _owner = nil;
+  _onReady = nil;
+  _nativeId = nil;
+  [_displayLink invalidate];
+  _displayLink = nil;
+  [owner removeContentLayoutObservation:self];
+}
+
+- (void)dealloc
+{
+  [_displayLink invalidate];
 }
 @end
 
@@ -191,6 +320,8 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
   RCTSurfaceTouchHandler *_touchHandler;
   NSString *_pendingName;
   BOOL _hasAttachedContent;
+  NSString *_contentLayoutName;
+  NSMutableSet<GranitePortalContentLayoutObservation *> *_contentLayoutObservations;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -226,7 +357,71 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
   if (requestKey.length == 0 || revision < 0 || revision > INT32_MAX || onReady == nil) {
     [NSException raise:NSInvalidArgumentException format:@"A nonempty request key, Int32 revision, and callback are required"];
   }
-  return [GranitePortalContentLayoutObservation new];
+  NSString *nativeId = [NSString stringWithFormat:@"granite:portal-initial-content:%ld:%@", (long)revision, requestKey];
+  GranitePortalContentLayoutObservation *observation =
+      [[GranitePortalContentLayoutObservation alloc] initWithOwner:self nativeId:nativeId onReady:onReady];
+  if (_contentLayoutObservations == nil) _contentLayoutObservations = [NSMutableSet new];
+  [_contentLayoutObservations addObject:observation];
+  [observation startIfNeeded];
+  return observation;
+}
+
+- (UIView *)portalContentLayoutHost
+{
+  return _portalHostView;
+}
+
+- (void)removeContentLayoutObservation:(GranitePortalContentLayoutObservation *)observation
+{
+  [_contentLayoutObservations removeObject:observation];
+}
+
+- (void)cancelContentLayoutObservations
+{
+  for (GranitePortalContentLayoutObservation *observation in _contentLayoutObservations.allObjects) {
+    [observation cancel];
+  }
+}
+
+- (void)startContentLayoutObservations
+{
+  for (GranitePortalContentLayoutObservation *observation in _contentLayoutObservations.allObjects) {
+    [observation startIfNeeded];
+  }
+}
+
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+  if (self.window != nil && self.window != newWindow) [self cancelContentLayoutObservations];
+  [super willMoveToWindow:newWindow];
+}
+
+- (void)didMoveToWindow
+{
+  [super didMoveToWindow];
+  [self startContentLayoutObservations];
+}
+
+- (void)cancelContentLayoutIfResizedFrom:(CGSize)previousSize
+{
+  if (previousSize.width > 0 && previousSize.height > 0 &&
+      !CGSizeEqualToSize(previousSize, self.bounds.size)) {
+    [self cancelContentLayoutObservations];
+  }
+}
+
+- (void)setFrame:(CGRect)frame
+{
+  CGSize previousSize = self.bounds.size;
+  [super setFrame:frame];
+  [self cancelContentLayoutIfResizedFrom:previousSize];
+}
+
+- (void)setBounds:(CGRect)bounds
+{
+  CGSize previousSize = self.bounds.size;
+  [super setBounds:bounds];
+  [self cancelContentLayoutIfResizedFrom:previousSize];
 }
 
 - (BOOL)isActivated
@@ -282,10 +477,15 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
     [_portalHostView setName:_pendingName];
     _pendingName = nil;
   }
+  [self startContentLayoutObservations];
 }
 
 - (void)setName:(nullable NSString *)name
 {
+  if (_contentLayoutName != name && ![_contentLayoutName isEqualToString:name]) {
+    [self cancelContentLayoutObservations];
+  }
+  _contentLayoutName = [name copy];
   if (_portalHostView) {
     [_portalHostView setName:name];
   } else {
@@ -330,6 +530,8 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 
 - (void)invalidate
 {
+  [self cancelContentLayoutObservations];
+  _contentLayoutName = nil;
   _pendingName = nil;
   _portalHostView.onSubviewCountChanged = nil;
   [_portalHostView setName:nil];
@@ -339,6 +541,8 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 
 - (void)dealloc
 {
+  _portalHostView.onSubviewCountChanged = nil;
+  [self cancelContentLayoutObservations];
   [_portalHostView setName:nil];
   // Do not call -detachFromView: here. RCTSurfaceTouchHandler asserts that
   // the recognizer is still attached to the given view, and during dealloc

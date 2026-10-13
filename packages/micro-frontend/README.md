@@ -480,7 +480,7 @@ and the `nextFocus*` family.
 
 Wrap the Portal in your own `<View>` when you need any of these.
 
-### Observing initial content layout on Android
+### Observing initial content layout
 
 `getPortalInitialContentProps` lets the UI owner explicitly mark an existing
 React Native `View` containing the initial screen or a usable loading state.
@@ -535,8 +535,32 @@ on a pre-draw where a unique matching marked View is physically under this host,
 attached to the same Window, and has nonzero bounds without pending layout.
 The observer always permits drawing; it never delays a frame or starts an animation.
 
-Closing, renaming, detaching, or cleaning up the host cancels pending observations.
-A size change after the host has established nonzero bounds also cancels them;
+An iOS destination observes the same marker through its UIKit-owned container:
+
+```swift
+container.setName(sessionId)
+let observation = container.observeContentLayout(
+  requestKey: sessionId,
+  revision: contentRevision
+) {
+  // The native owner can now update its loading or transition policy.
+}
+
+// Cancel if the owner no longer needs the result.
+observation.cancel()
+```
+
+Register and cancel on the main thread. Registration before activation or Window
+attachment is supported and does not activate a deferred container. While an
+observation is pending on an attached, activated container, a display link checks
+for a unique matching Fabric View in the actual host subtree, the same Window,
+nonzero bounds, and no pending layer layout along its ancestor path. Delivery is
+one-shot and stops observing before calling `onReady`. The observer does
+not force layout, block drawing, or control a transition.
+
+Closing or cancelling, renaming, detaching, or cleaning up the destination cancels
+pending observations. On iOS, `container.invalidate()` also cancels them.
+A size change after the destination has established nonzero bounds also cancels them;
 the initial zero-size-to-laid-out transition does not. Register a new observation
 for a new attachment or layout request, and advance the content revision when
 the initial UI depends on the new destination size.
@@ -544,9 +568,23 @@ the initial UI depends on the new destination size.
 The signal acknowledges the declared View's native attachment and current
 layout. It is not an acknowledgement of every descendant's latest Fabric update,
 image decoding, WebView loading, network completion, or pixels being presented.
-Native layout observation is Android-only; the returned props are ordinary View
-props on other React Native platforms. Host applications retain responsibility for
-timeouts and any policy that postpones their own first draw.
+Native observation is available on Android and iOS. The returned props remain
+ordinary View props on other React Native platforms. Host applications retain
+responsibility for timeouts, cancelling observations they no longer need, and any
+policy that postpones their own first draw. In particular, an iOS observation whose
+marker never becomes eligible keeps its display link active until cancelled or
+its destination is torn down.
+
+The UIKit behavior harness can be built on macOS with Xcode installed:
+
+```sh
+node packages/micro-frontend/test/ios/buildPortalContentLayoutHarnessApp.mjs
+```
+
+Install and launch the emitted Simulator `.app`. It displays a pass/fail result
+and writes `granite-portal-content-layout-results.json` in its temporary directory.
+The harness uses the production container and UIKit with React host/touch stubs;
+it does not validate a complete Fabric mount or displayed content.
 
 ### Activity example
 

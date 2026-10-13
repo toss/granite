@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { arch } from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -8,13 +9,12 @@ const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const packageDirectory = resolve(scriptDirectory, '../..');
 const iosDirectory = resolve(packageDirectory, 'ios');
 const stubIncludeDirectory = resolve(scriptDirectory, 'stubs');
-const buildRoot = '/tmp/granite-portal-content-layout-ios-harness';
+const buildRoot = mkdtempSync(`${tmpdir()}/granite-portal-content-layout-ios-harness-`);
 const appName = 'GranitePortalContentLayoutHarness';
 const bundleId = 'run.granite.microfrontend.content-layout-harness';
 const appPath = `${buildRoot}/${appName}.app`;
 const executablePath = `${appPath}/${appName}`;
 
-rmSync(buildRoot, { recursive: true, force: true });
 mkdirSync(appPath, { recursive: true });
 
 const sdkPath = execFileSync('xcrun', ['--sdk', 'iphonesimulator', '--show-sdk-path'], {

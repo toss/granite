@@ -46,9 +46,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)activateIfNeeded;
 
 /// Observes one exact initial-content marker on a native View in this destination.
-/// The one-shot main-thread callback checks attachment and layout, not presented pixels.
-/// This does not activate a deferred container or delay rendering. Cancel when the caller
-/// stops waiting; rename, detach, resize, and invalidation also cancel pending observations.
+/// Call and cancel on the main thread with a nonempty key and nonnegative Int32 revision.
+/// The one-shot callback requires one matching Fabric nativeId, positive host/marker bounds,
+/// the same Window, and no pending layer layout from the marker through this container.
+/// This does not acknowledge a Fabric commit, image/network completion, or presented pixels.
+///
+/// Observation never activates a deferred container or delays rendering. Its display link
+/// runs only while attached, activated, and pending. Cancel when the caller stops waiting;
+/// rename, detach, a size change after nonzero bounds, and invalidation also cancel it.
+/// Subscribe again with a new revision for resized content.
 - (id<PortalContentLayoutObservation>)observeContentLayoutWithRequestKey:(NSString *)requestKey
                                                               revision:(NSInteger)revision
                                                                onReady:(void (^)(void))onReady
