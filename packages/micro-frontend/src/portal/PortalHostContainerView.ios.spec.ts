@@ -39,6 +39,8 @@ function compileHarness(temporaryDirectory: string, harnessName: string, binaryN
     'Foundation',
     '-framework',
     'CoreGraphics',
+    '-framework',
+    'QuartzCore',
     '-I',
     stubIncludeDirectory,
     '-I',

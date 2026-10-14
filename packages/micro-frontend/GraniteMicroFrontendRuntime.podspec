@@ -12,6 +12,8 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => min_ios_version_supported }
   s.source       = { :git => "https://github.com/toss/granite.git", :tag => "#{s.version}" }
 
+  s.frameworks = "QuartzCore"
+
   s.source_files = "ios/**/*.{h,m,mm,cpp}"
   s.public_header_files = [
     "ios/GraniteMicroFrontendRuntimeHost.h",

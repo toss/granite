@@ -530,8 +530,10 @@ the host's first Window attachment is supported. The callback runs at most once,
 on a pre-draw where the unique matching boundary is physically under this host
 and attached to the same Window. The boundary and its ancestor path must have
 visible, nonzero, settled layout, and the boundary must contain at least one
-physical native descendant with visible, nonzero, settled layout. Empty, detached,
-hidden, or layout-pending content does not complete the observation.
+physical native descendant with visible, nonzero bounds. Empty, detached, or hidden
+content does not complete the observation. Pending layout on the boundary-to-host
+path delays delivery; descendant layout-request flags are ignored because Fabric
+can leave them set after same-size text updates.
 The observer always permits drawing; it never delays a frame or starts an animation.
 
 An iOS destination observes the same marker through its UIKit-owned container:
@@ -559,9 +561,9 @@ layout, block drawing, or control a transition.
 
 Closing or cancelling, renaming, detaching, or cleaning up the destination cancels
 pending observations. On iOS, `container.invalidate()` also cancels them.
-A size change after the destination has established nonzero bounds also cancels them;
-the initial zero-size-to-laid-out transition does not. Register a new observation
-for a new attachment or layout request, using the current session ID and revision `0`.
+Size changes preserve pending observations until the current layout meets the
+conditions. Register a new observation after a new attachment, using the current
+session ID and revision `0`.
 
 The signal acknowledges the marked subtree's structural native layout. It does
 not wait for a completed draw, so a host can receive it before allowing its first

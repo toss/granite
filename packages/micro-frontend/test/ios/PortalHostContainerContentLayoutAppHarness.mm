@@ -471,8 +471,8 @@ typedef void (^Case)(Done done);
       @{@"name" : @"rename cancel", @"kind" : @"rename"},
       @{@"name" : @"invalidate cancel", @"kind" : @"invalidate"},
       @{@"name" : @"detach reattach cancel", @"kind" : @"detach"},
-      @{@"name" : @"frame resize revert cancel", @"kind" : @"frame"},
-      @{@"name" : @"bounds resize revert cancel", @"kind" : @"bounds"},
+      @{@"name" : @"frame resize preserves observation", @"kind" : @"frame"},
+      @{@"name" : @"bounds resize preserves observation", @"kind" : @"bounds"},
       @{@"name" : @"active dealloc cancel", @"kind" : @"activeDealloc"},
     ];
 
@@ -540,7 +540,7 @@ typedef void (^Case)(Done done);
     AfterTicks(3, ^{
       for (NSDictionary *entry in cases) {
         [self expect:counters[entry[@"name"]].value
-              equals:0
+              equals:([entry[@"kind"] isEqualToString:@"frame"] || [entry[@"kind"] isEqualToString:@"bounds"]) ? 1 : 0
                 name:[entry[@"name"] stringByAppendingString:@" callback count"]];
       }
       [self expectNil:weakActiveContainer name:@"active dealloc owner should release"];

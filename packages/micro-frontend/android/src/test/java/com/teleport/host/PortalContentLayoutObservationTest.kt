@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.FrameLayout
 import com.facebook.react.R
 import com.facebook.react.internal.featureflags.ReactNativeFeatureFlags
+import com.facebook.react.views.text.ReactTextView
 import com.facebook.react.views.view.ReactViewGroup
 import com.facebook.react.views.view.ReactViewManager
 import com.teleport.portal.PortalView
@@ -15,6 +16,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -246,21 +248,45 @@ class PortalContentLayoutObservationTest {
   }
 
   @Test
-  fun `host resize cancels pending observation and a new revision can proceed`() {
+  fun `host resize preserves pending observation until content is laid out`() {
     layout(host, 200, 300)
-    var staleCalls = 0
-    host.observeContentLayout("request", 2) { staleCalls++ }
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    layout(host, 0, 0)
+    draw()
+    assertEquals(0, calls)
     layout(host, 300, 400)
     val marker = marker()
     host.addView(marker)
     layout(marker)
     draw()
-    assertEquals(0, staleCalls)
-    marker.setTag(R.id.view_tag_native_id, "granite:portal-initial-content:3:request")
-    var currentCalls = 0
-    host.observeContentLayout("request", 3) { currentCalls++ }
+    assertEquals(1, calls)
+    layout(host, 400, 500)
     draw()
-    assertEquals(1, currentCalls)
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `same size React text update does not block settled React boundary`() {
+    val marker = ReactViewGroup(controller.get())
+    marker.setTag(R.id.view_tag_native_id, "granite:portal-initial-content:2:request")
+    val content = ReactTextView(controller.get())
+    content.text = "before"
+    marker.addView(content)
+    host.addView(marker)
+    layout(host, 200, 300)
+    layout(marker)
+    layout(content)
+    content.text = "after!"
+    assertTrue(content.isLayoutRequested)
+    assertFalse(marker.isLayoutRequested)
+    assertFalse(host.isLayoutRequested)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    draw()
+    assertEquals(1, calls)
+    draw()
+    assertEquals(1, calls)
   }
 
   @Test
@@ -372,7 +398,7 @@ class PortalContentLayoutObservationTest {
   }
 
   @Test
-  fun `zero size content and any visible pending descendant wait for layout`() {
+  fun `zero size content waits for positive bounds`() {
     val marker = addMarker()
     val content = marker.getChildAt(0)
     layout(content, 0, 0)
@@ -381,14 +407,6 @@ class PortalContentLayoutObservationTest {
     draw()
     assertEquals(0, calls)
     layout(content)
-    val pending = View(controller.get())
-    marker.addView(pending, FrameLayout.LayoutParams(100, 100))
-    layout(marker)
-    pending.forceLayout()
-    draw()
-    assertEquals(0, calls)
-    pending.visibility = View.GONE
-    layout(marker)
     draw()
     assertEquals(1, calls)
   }

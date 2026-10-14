@@ -28,13 +28,13 @@ class PortalHostView(
    * Call and close on the UI thread. A subscription fires once for one unambiguous matching
    * native marker and at least one physical native descendant in this Window. The marker's
    * path through this host and the counted descendant must be visible, have nonzero alpha and
-   * positive bounds. Visible descendants must have settled layout; hidden branches are ignored.
+   * positive bounds. The marker-to-host path must have settled layout; hidden branches are ignored.
    * Reparenting can clear `isLaidOut` while preserving RN-managed bounds, so that flag is not used.
    * This does not acknowledge a Fabric commit or completion of pixels, images, or network loading.
    *
-   * Subscribe before or after attachment. Detach, rename, cleanup, and a size change after nonzero
-   * bounds cancel pending observations. After resize, subscribe again for the current session
-   * request. PortalInitialContentView markers use revision 0.
+   * Subscribe before or after attachment. Detach, rename, and cleanup cancel pending observations.
+   * Size changes preserve the observation until the current layout meets the conditions.
+   * PortalInitialContentView markers use revision 0.
    */
   fun observeContentLayout(
     requestKey: String,
@@ -115,13 +115,6 @@ class PortalHostView(
   ) {
     super.onLayout(changed, left, top, right, bottom)
     name?.let { PortalRegistry.notifyHostLayoutChanged(it) }
-  }
-
-  override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-    super.onSizeChanged(w, h, oldw, oldh)
-    if (oldw > 0 && oldh > 0 && (w != oldw || h != oldh)) {
-      cancelContentLayoutObservations()
-    }
   }
 
   override fun onDetachedFromWindow() {

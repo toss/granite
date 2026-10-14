@@ -89,7 +89,9 @@ internal class PortalContentLayoutObservation(
       for (index in 0 until group.childCount) {
         val child = group.getChildAt(index) ?: continue
         if (child.parent !== group || child.visibility != View.VISIBLE || !(child.alpha > 0f)) continue
-        if (!child.isAttachedToWindow || child.windowToken != host.windowToken || child.isLayoutRequested) return false
+        // Fabric may leave a text descendant requesting layout when its bounds are unchanged.
+        // Only the marker-to-host path must have no pending layout request.
+        if (!child.isAttachedToWindow || child.windowToken != host.windowToken) return false
         if (!hasVisibleBounds(child)) continue
         hasContent = true
         if (child is ViewGroup) groups.add(child)

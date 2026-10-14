@@ -421,28 +421,6 @@ static BOOL GraniteHasInitialContentLayout(
   [self startContentLayoutObservations];
 }
 
-- (void)cancelContentLayoutIfResizedFrom:(CGSize)previousSize
-{
-  if (previousSize.width > 0 && previousSize.height > 0 &&
-      !CGSizeEqualToSize(previousSize, self.bounds.size)) {
-    [self cancelContentLayoutObservations];
-  }
-}
-
-- (void)setFrame:(CGRect)frame
-{
-  CGSize previousSize = self.bounds.size;
-  [super setFrame:frame];
-  [self cancelContentLayoutIfResizedFrom:previousSize];
-}
-
-- (void)setBounds:(CGRect)bounds
-{
-  CGSize previousSize = self.bounds.size;
-  [super setBounds:bounds];
-  [self cancelContentLayoutIfResizedFrom:previousSize];
-}
-
 - (BOOL)isActivated
 {
   return _portalHostView != nil;

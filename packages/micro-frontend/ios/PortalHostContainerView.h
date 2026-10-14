@@ -55,8 +55,8 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// Observation never activates a deferred container or delays rendering. Its display link
 /// runs only while attached, activated, and pending. Cancel when the caller stops waiting;
-/// rename, detach, a size change after nonzero bounds, and invalidation also cancel it.
-/// After resize, observe the current session request again. PortalInitialContentView uses revision 0.
+/// rename, detach, and invalidation also cancel it. Size changes preserve the observation
+/// until the current layout meets the conditions. PortalInitialContentView uses revision 0.
 - (id<PortalContentLayoutObservation>)observeContentLayoutWithRequestKey:(NSString *)requestKey
                                                               revision:(NSInteger)revision
                                                                onReady:(void (^)(void))onReady
