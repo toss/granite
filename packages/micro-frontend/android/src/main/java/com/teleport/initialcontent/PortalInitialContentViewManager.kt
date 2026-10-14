@@ -4,17 +4,14 @@ import android.view.View
 import com.facebook.react.R
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.ThemedReactContext
-import com.facebook.react.uimanager.ViewManagerDelegate
-import com.facebook.react.viewmanagers.GranitePortalInitialContentViewManagerDelegate
-import com.facebook.react.viewmanagers.GranitePortalInitialContentViewManagerInterface
 import com.facebook.react.views.view.ReactViewGroup
 import com.facebook.react.views.view.ReactViewManager
 
 @ReactModule(name = PortalInitialContentViewManager.NAME)
-class PortalInitialContentViewManager : ReactViewManager(), GranitePortalInitialContentViewManagerInterface<ReactViewGroup> {
-  private val delegate = GranitePortalInitialContentViewManagerDelegate(this)
+class PortalInitialContentViewManager : ReactViewManager() {
+  // Use the ordinary View property dispatcher: the generated base delegate omits
+  // ReactViewManager props such as pointerEvents, accessible and removeClippedSubviews.
   override fun getName() = NAME
-  override fun getDelegate(): ViewManagerDelegate<ReactViewGroup> = delegate
 
   override fun createViewInstance(context: ThemedReactContext): ReactViewGroup =
     PortalInitialContentView(context)

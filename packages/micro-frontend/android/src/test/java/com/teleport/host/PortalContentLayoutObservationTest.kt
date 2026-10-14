@@ -5,9 +5,12 @@ import android.os.Looper
 import android.view.View
 import android.widget.FrameLayout
 import com.facebook.react.R
+import com.facebook.react.bridge.JavaOnlyMap
 import com.facebook.react.bridge.ReactMarker
 import com.facebook.react.bridge.ReactMarkerConstants
 import com.facebook.react.internal.featureflags.ReactNativeFeatureFlags
+import com.facebook.react.uimanager.PointerEvents
+import com.facebook.react.uimanager.ReactStylesDiffMap
 import com.teleport.initialcontent.PortalInitialContentMounts
 import com.teleport.initialcontent.PortalInitialContentViewManager
 import com.teleport.initialcontent.PortalInitialContentRegistry
@@ -58,6 +61,32 @@ class PortalContentLayoutObservationTest {
     controller.pause().stop().destroy()
     drain()
     assertTrue(PortalInitialContentRegistry.observers.isEmpty())
+  }
+
+  @Test
+  fun `ordinary View props retain ReactViewManager behavior`() {
+    val marker = marker()
+    viewManager.updateProperties(marker, ReactStylesDiffMap(JavaOnlyMap.of(
+      "pointerEvents", "none", "accessible", true,
+    )))
+    assertEquals(PointerEvents.NONE, marker.pointerEvents)
+    assertTrue(marker.isFocusable)
+  }
+
+  @Test
+  fun `clipped sentinel retains logical Fabric membership`() {
+    val marker = marker()
+    viewManager.updateProperties(marker, ReactStylesDiffMap(JavaOnlyMap.of("removeClippedSubviews", true)))
+    assertTrue(marker.removeClippedSubviews)
+    begin()
+    insertSentinel(marker)
+    end()
+    assertEquals(1, viewManager.getChildCount(marker))
+    assertNull(requireNotNull(viewManager.getChildAt(marker, 0)).parent)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    drain()
+    assertEquals(1, calls)
   }
 
   @Test
