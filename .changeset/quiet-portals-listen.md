@@ -2,4 +2,4 @@
 '@granite-js/micro-frontend': minor
 ---
 
-Add a session-scoped initial-content View that coordinates registered pending UI and primary content. Android and iOS Portal hosts can observe the selected subtree's visible native layout without waiting for or blocking drawing.
+Add a session-scoped initial-content View that marks content for native layout observation without observation-specific props. Android and iOS Portal hosts can observe its visible native layout and apply their own first-draw policy.

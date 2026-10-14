@@ -32,11 +32,12 @@ const contentViewProps: PortalInitialContentViewProps = {
   onLayout: () => undefined,
 };
 createElement(PortalInitialContentView, { ...contentViewProps, ref: createRef<View>() });
-createElement(PortalInitialContentView, { url: 'granite://host/example/product', ref: createRef<View>() });
-createElement(PortalInitialContentView, { url: null });
+createElement(PortalInitialContentView);
 
-// @ts-expect-error Route coordination accepts a URL string or null.
-createElement(PortalInitialContentView, { url: 1 });
+// @ts-expect-error Initial content observation does not select routes or pending UI.
+createElement(PortalInitialContentView, { url: 'granite://host/example/product' });
+// @ts-expect-error Readiness is observed from native layout, not a caller-provided flag.
+createElement(PortalInitialContentView, { ready: true });
 
 // @ts-expect-error View identifiers are reserved for the session marker.
 createElement(PortalInitialContentView, { id: 'custom-alias' });
