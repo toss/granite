@@ -32,6 +32,11 @@ const contentViewProps: PortalInitialContentViewProps = {
   onLayout: () => undefined,
 };
 createElement(PortalInitialContentView, { ...contentViewProps, ref: createRef<View>() });
+createElement(PortalInitialContentView, { url: 'granite://host/example/product', ref: createRef<View>() });
+createElement(PortalInitialContentView, { url: null });
+
+// @ts-expect-error Route coordination accepts a URL string or null.
+createElement(PortalInitialContentView, { url: 1 });
 
 // @ts-expect-error View identifiers are reserved for the session marker.
 createElement(PortalInitialContentView, { id: 'custom-alias' });
