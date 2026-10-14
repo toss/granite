@@ -45,20 +45,18 @@ NS_ASSUME_NONNULL_BEGIN
 /// Native root.
 - (void)activateIfNeeded;
 
-/// Observes one exact initial-content marker on a native View in this destination.
+/// Observes Fabric mount completion for one explicit initial-content marker.
 /// Call and cancel on the main thread with a nonempty key and nonnegative Int32 revision.
-/// The one-shot callback requires one matching Fabric nativeId and at least one physical
-/// native descendant in the same Window. The marker's path through this container and the
-/// counted descendant must be visible with nonzero alpha and positive bounds. Visible
-/// descendants need visible bounds; only the marker-to-container path must have settled
-/// layout. Descendant layout-request flags and hidden branches are ignored.
-/// This does not acknowledge a Fabric commit, image/network completion, or presented pixels.
+/// Delivery requires one matching internal marker physically beneath this destination in
+/// the same Window, with a completed mounting transaction for its native instance and identity.
+/// Empty, hidden, or zero-size declared content is valid. No visual readiness is inferred.
+/// A later mount invalidates the previous acknowledgment until its transaction ends.
+/// This does not acknowledge images, network loading, future commits, or presented pixels.
 ///
-/// Observation never activates a deferred container or delays rendering. Its display link
-/// runs only while attached, activated, and pending. Cancel when the caller stops waiting;
-/// rename, detach, and invalidation also cancel it. Size changes preserve the observation
-/// and continue structural checks. Delivery does not guarantee that descendants reflect
-/// the latest host size; they may retain pre-resize bounds. PortalInitialContentView uses revision 0.
+/// Observation never activates a deferred container or delays rendering. Cancel when the
+/// caller stops waiting; rename, detach, and invalidation also cancel it. Resize preserves
+/// observations but does not require a commit for the new host size.
+/// PortalInitialContentView uses revision 0.
 - (id<PortalContentLayoutObservation>)observeContentLayoutWithRequestKey:(NSString *)requestKey
                                                               revision:(NSInteger)revision
                                                                onReady:(void (^)(void))onReady

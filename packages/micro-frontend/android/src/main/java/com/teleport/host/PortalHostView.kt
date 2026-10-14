@@ -23,18 +23,17 @@ class PortalHostView(
   private val contentLayoutObservations = mutableSetOf<PortalContentLayoutObservation>()
 
   /**
-   * Observes an explicit initial-content marker in this host without delaying drawing.
+   * Observes Fabric mount completion for an explicit initial-content marker.
    *
-   * Call and close on the UI thread. A subscription fires once for one unambiguous matching
-   * native marker and at least one physical native descendant in this Window. The marker's
-   * path through this host and the counted descendant must be visible, have nonzero alpha and
-   * positive bounds. The marker-to-host path must have settled layout; hidden branches are ignored.
-   * Reparenting can clear `isLaidOut` while preserving RN-managed bounds, so that flag is not used.
-   * This does not acknowledge a Fabric commit or completion of pixels, images, or network loading.
+   * Call and close on the UI thread. Delivery requires one matching internal marker,
+   * physically beneath this host in the same Window, with its native mount completed.
+   * Completion belongs to the native instance and identity, not inferred visual readiness.
+   * Empty, hidden, or zero-size declared content is valid. Layout requests are not polled.
+   * A later mount invalidates the previous acknowledgment until its mount batch ends.
    *
-   * Subscribe before or after attachment. Detach, rename, and cleanup cancel pending observations.
-   * Size changes preserve the observation and continue structural checks. Delivery does not
-   * guarantee that descendants reflect the latest host size; they may retain pre-resize bounds.
+   * Subscribe before or after attachment. Detach, rename, and cleanup cancel observations.
+   * Resize preserves observations but does not require a commit for the new host size.
+   * This does not acknowledge images, network loading, future commits, or presented pixels.
    * PortalInitialContentView markers use revision 0.
    */
   fun observeContentLayout(

@@ -4,6 +4,7 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PortalInitialContentView } from './PortalInitialContentView';
 import { MicroFrontendSessionProvider, MissingMicroFrontendSessionError } from '../session/MicroFrontendSessionContext';
+import NativeInitialContentView from '../specs/GranitePortalInitialContentViewNativeComponent';
 
 vi.mock('@granite-js/react-native', () => import('../../../react-native/src/visibility/useVisibilityChanged'));
 
@@ -50,7 +51,7 @@ describe('PortalInitialContentView', () => {
     );
 
     expect(renderer.toJSON()).toMatchObject({
-      type: 'View',
+      type: 'GranitePortalInitialContentView',
       props: {
         nativeID: 'granite:portal-initial-content:0:example/home',
         collapsable: false,
@@ -63,7 +64,8 @@ describe('PortalInitialContentView', () => {
       },
       children: [{ type: 'View', props: { testID: 'body' } }],
     });
-    expect(renderer.root.findAllByType(View)).toHaveLength(2);
+    expect(renderer.root.findAllByType(NativeInitialContentView)).toHaveLength(1);
+    expect(renderer.root.findAllByType(View)).toHaveLength(1);
     expect(ref.current).toBe(node);
     act(() => renderer.unmount());
     expect(ref.current).toBeNull();
@@ -79,7 +81,9 @@ describe('PortalInitialContentView', () => {
         <PortalInitialContentView />
       </MicroFrontendSessionProvider>
     );
-    expect(renderer.root.findByType(View).props.nativeID).toBe('granite:portal-initial-content:0:first');
+    expect(renderer.root.findByType(NativeInitialContentView).props.nativeID).toBe(
+      'granite:portal-initial-content:0:first'
+    );
 
     act(() =>
       renderer.update(
@@ -88,7 +92,9 @@ describe('PortalInitialContentView', () => {
         </MicroFrontendSessionProvider>
       )
     );
-    expect(renderer.root.findByType(View).props.nativeID).toBe('granite:portal-initial-content:0:second');
+    expect(renderer.root.findByType(NativeInitialContentView).props.nativeID).toBe(
+      'granite:portal-initial-content:0:second'
+    );
   });
 
   it('uses the closest session without changing a sibling boundary', () => {
@@ -100,7 +106,7 @@ describe('PortalInitialContentView', () => {
         </MicroFrontendSessionProvider>
       </MicroFrontendSessionProvider>
     );
-    expect(renderer.root.findAllByType(View).map((view) => view.props.nativeID)).toEqual([
+    expect(renderer.root.findAllByType(NativeInitialContentView).map((view) => view.props.nativeID)).toEqual([
       'granite:portal-initial-content:0:outer',
       'granite:portal-initial-content:0:inner',
     ]);
@@ -113,10 +119,10 @@ describe('PortalInitialContentView', () => {
         <PortalInitialContentView {...conflictingProps} />
       </MicroFrontendSessionProvider>
     );
-    expect(renderer.root.findByType(View).props).toMatchObject({
+    expect(renderer.root.findByType(NativeInitialContentView).props).toMatchObject({
       nativeID: 'granite:portal-initial-content:0:current',
       collapsable: false,
     });
-    expect(renderer.root.findByType(View).props.id).toBeUndefined();
+    expect(renderer.root.findByType(NativeInitialContentView).props.id).toBeUndefined();
   });
 });

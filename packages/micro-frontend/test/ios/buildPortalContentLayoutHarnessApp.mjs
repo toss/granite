@@ -46,6 +46,7 @@ execFileSync('xcrun', [
   '-I',
   iosDirectory,
   resolve(iosDirectory, 'PortalHostContainerView.mm'),
+  resolve(iosDirectory, 'PortalInitialContentMount.mm'),
   resolve(scriptDirectory, 'PortalHostContainerContentLayoutAppHarness.mm'),
   '-o',
   executablePath,

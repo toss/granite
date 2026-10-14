@@ -1,3 +1,5 @@
+@file:OptIn(com.facebook.react.common.annotations.UnstableReactNativeAPI::class)
+
 package com.teleport.host
 
 import android.app.Activity
@@ -5,28 +7,20 @@ import android.os.Looper
 import android.view.View
 import android.widget.FrameLayout
 import com.facebook.react.R
-import com.facebook.react.internal.featureflags.ReactNativeFeatureFlags
-import com.facebook.react.views.text.ReactTextView
-import com.facebook.react.views.view.ReactViewGroup
-import com.facebook.react.views.view.ReactViewManager
-import com.teleport.portal.PortalView
+import com.facebook.react.bridge.UIManager
+import com.teleport.initialcontent.PortalInitialContentRegistry
+import com.teleport.initialcontent.PortalInitialContentView
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertSame
-import org.junit.Assert.assertThrows
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mockStatic
+import org.mockito.Mockito.*
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.android.controller.ActivityController
 import org.robolectric.annotation.Config
-import java.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], manifest = Config.NONE)
@@ -34,6 +28,8 @@ class PortalContentLayoutObservationTest {
   private lateinit var controller: ActivityController<Activity>
   private lateinit var container: FrameLayout
   private lateinit var host: PortalHostView
+  private lateinit var manager: UIManager
+  private val markers = mutableListOf<PortalInitialContentView>()
 
   @Before
   fun setUp() {
@@ -42,373 +38,258 @@ class PortalContentLayoutObservationTest {
     controller.get().setContentView(container)
     host = PortalHostView(controller.get())
     container.addView(host)
-    shadowOf(Looper.getMainLooper()).idle()
+    manager = mock(UIManager::class.java)
+    drain()
   }
 
   @After
   fun tearDown() {
+    host.cleanup()
+    markers.forEach { it.dispose() }
     controller.pause().stop().destroy()
+    drain()
+    assertTrue(PortalInitialContentRegistry.observers.isEmpty())
   }
 
   @Test
-  fun `matching attached content releases once without blocking drawing`() {
-    addMarker()
-    var calls = 0
-    host.observeContentLayout("request", 2) { calls++ }
-    draw()
-    assertEquals(1, calls)
-    draw()
-    assertEquals(1, calls)
-  }
-
-  @Test
-  fun `late subscription schedules a traversal without another content mutation`() {
-    // Legacy graphics mode otherwise marks shadow Windows hidden and suppresses traversals.
-    val property = "robolectric.areWindowsMarkedVisible"
-    val previousValue = System.setProperty(property, "true")
-    try {
-      controller.pause().stop().destroy()
-      setUp()
-      host.layoutParams = FrameLayout.LayoutParams(200, 300)
-      val marker = addMarker()
-      val looper = shadowOf(Looper.getMainLooper())
-      looper.idleFor(Duration.ofMillis(100))
-      assertEquals(View.VISIBLE, host.windowVisibility)
-      assertEquals(200, host.width)
-      assertEquals(100, marker.width)
-      assertFalse(host.isLayoutRequested)
-      assertFalse(marker.isLayoutRequested)
-      var calls = 0
-      host.observeContentLayout("request", 2) { calls++ }
-      assertEquals(0, calls)
-      looper.idleFor(Duration.ofMillis(100))
-      assertEquals(1, calls)
-      looper.idleFor(Duration.ofMillis(100))
-      assertEquals(1, calls)
-    } finally {
-      if (previousValue == null) System.clearProperty(property) else System.setProperty(property, previousValue)
-    }
-  }
-
-  @Test
-  fun `standard React nativeID property supplies the observed marker`() {
-    val marker = ReactViewGroup(controller.get())
-    marker.addView(View(controller.get()).also { layout(it) })
-    // The manager's recycling flag reads JNI even when no React runtime is started.
-    mockStatic(ReactNativeFeatureFlags::class.java).use { flags ->
-      flags.`when`<Boolean> { ReactNativeFeatureFlags.enableViewRecyclingForView() }.thenReturn(false)
-      ReactViewManager().setNativeId(marker, "granite:portal-initial-content:2:request")
-    }
-    host.addView(marker)
-    layout(host, 200, 300)
-    layout(marker)
-    layout(marker.getChildAt(0))
-    var calls = 0
-    host.observeContentLayout("request", 2) { calls++ }
-    draw()
-    assertEquals(1, calls)
-  }
-
-  @Test
-  fun `subscription before first attach survives initial layout`() {
-    val unattached = PortalHostView(controller.get())
+  fun `layout and pre draw never substitute for mount completion`() {
     val marker = marker()
-    unattached.addView(marker)
+    marker.addView(View(controller.get()))
+    marker.layout(0, 0, 100, 100)
     var calls = 0
-    unattached.observeContentLayout("request", 2) { calls++ }
-    assertFalse(unattached.viewTreeObserver.dispatchOnPreDraw())
+    host.observeContentLayout("request", 2) { calls++ }
+    host.viewTreeObserver.dispatchOnPreDraw()
+    drain()
     assertEquals(0, calls)
-    container.addView(unattached)
-    layout(unattached, 200, 300)
-    layout(marker)
-    assertFalse(unattached.viewTreeObserver.dispatchOnPreDraw())
+    marker.didDispatchMountItems(manager)
+    drain()
+    assertEquals(0, calls)
+    complete(marker)
+    drain()
     assertEquals(1, calls)
   }
 
   @Test
-  fun `request and revision must match exactly`() {
-    val marker = addMarker("other", 2)
+  fun `explicit empty hidden zero size marker completes without visual heuristics`() {
+    val marker = marker()
+    marker.visibility = View.INVISIBLE
+    marker.alpha = 0f
+    marker.forceLayout()
+    assertEquals(0, marker.width)
     var calls = 0
     host.observeContentLayout("request", 2) { calls++ }
-    draw()
-    marker.setTag(R.id.view_tag_native_id, "granite:portal-initial-content:3:request")
-    draw()
+    complete(marker)
+    drain()
+    assertEquals(1, calls)
+    complete(marker)
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `preallocated marker cannot acknowledge an unrelated mount batch`() {
+    val marker = marker(attach = false)
+    complete(marker)
+    assertFalse(marker.hasCompletedMount())
+    host.addView(marker)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    drain()
+    assertEquals(0, calls)
+    complete(marker)
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `late subscriber uses completed native instance without another frame`() {
+    complete(marker())
+    drain()
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    assertEquals(0, calls)
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `mount before destination attachment completes after attachment`() {
+    container.removeView(host)
+    val marker = marker()
+    complete(marker)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    drain()
+    assertEquals(0, calls)
+    container.addView(host)
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `identity update cannot reuse an older completed mount`() {
+    val marker = marker(key = "old")
+    complete(marker)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    marker.setTag(R.id.view_tag_native_id, "granite:portal-initial-content:2:request")
+    drain()
+    assertEquals(0, calls)
+    complete(marker)
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `revision mismatch waits for matching committed identity`() {
+    val marker = marker(revision = 3)
+    complete(marker)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    drain()
     assertEquals(0, calls)
     marker.setTag(R.id.view_tag_native_id, "granite:portal-initial-content:2:request")
-    draw()
+    complete(marker)
+    drain()
     assertEquals(1, calls)
   }
 
   @Test
-  fun `zero bounds and requested layout wait without blocking drawing`() {
-    val marker = addMarker()
-    layout(marker, 0, 100)
-    var calls = 0
-    host.observeContentLayout("request", 2) { calls++ }
-    draw()
-    assertEquals(0, calls)
-    layout(marker)
-    marker.requestLayout()
-    draw()
-    assertEquals(0, calls)
-    layout(marker)
-    draw()
-    assertEquals(1, calls)
-  }
-
-  @Test
-  fun `pending layout in the physical ancestor path prevents readiness`() {
-    val parent = FrameLayout(controller.get())
+  fun `new mount invalidates queued completion until transaction ends`() {
     val marker = marker()
-    host.addView(parent)
-    parent.addView(marker)
-    layout(host, 200, 300)
-    layout(parent)
-    layout(marker)
-    parent.forceLayout()
     var calls = 0
     host.observeContentLayout("request", 2) { calls++ }
-    draw()
+    complete(marker)
+    marker.willMountItems(manager)
+    drain()
     assertEquals(0, calls)
-    layout(parent)
-    layout(marker)
-    draw()
+    marker.didMountItems(manager)
+    drain()
     assertEquals(1, calls)
   }
 
   @Test
-  fun `duplicate matching markers wait until unambiguous`() {
-    addMarker()
-    val duplicate = addMarker()
+  fun `replacement instance cannot reuse removed marker acknowledgment`() {
+    val old = marker()
     var calls = 0
     host.observeContentLayout("request", 2) { calls++ }
-    draw()
+    complete(old)
+    host.removeView(old)
+    old.dispose()
+    val replacement = marker()
+    drain()
+    assertEquals(0, calls)
+    complete(replacement)
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `uncommitted duplicate prevents ambiguous delivery`() {
+    val first = marker()
+    val duplicate = marker()
+    complete(first)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    drain()
     assertEquals(0, calls)
     host.removeView(duplicate)
-    draw()
+    drain()
     assertEquals(1, calls)
   }
 
   @Test
-  fun `close is idempotent and prevents a later callback`() {
-    addMarker()
+  fun `ordinary view with matching nativeID has no Fabric acknowledgment`() {
+    host.addView(View(controller.get()).apply {
+      setTag(R.id.view_tag_native_id, "granite:portal-initial-content:2:request")
+    })
     var calls = 0
-    val subscription = host.observeContentLayout("request", 2) { calls++ }
-    subscription.close()
-    subscription.close()
-    draw()
+    host.observeContentLayout("request", 2) { calls++ }
+    drain()
     assertEquals(0, calls)
   }
 
   @Test
-  fun `cleanup cancels immediately while host remains attached`() {
-    addMarker()
+  fun `close is idempotent and cancels queued delivery`() {
+    val marker = marker()
+    var calls = 0
+    val observation = host.observeContentLayout("request", 2) { calls++ }
+    complete(marker)
+    observation.close()
+    observation.close()
+    drain()
+    assertEquals(0, calls)
+  }
+
+  @Test
+  fun `cleanup rename and detach cancel pending observations`() {
+    val marker = marker()
     var calls = 0
     host.observeContentLayout("request", 2) { calls++ }
     host.cleanup()
-    draw()
-    assertEquals(0, calls)
-  }
-
-  @Test
-  fun `name changes cancel but setting the same name preserves observation`() {
-    host.setName("destination")
-    addMarker()
-    var cancelledCalls = 0
-    host.observeContentLayout("request", 2) { cancelledCalls++ }
-    host.setName("replacement")
-    var currentCalls = 0
-    host.observeContentLayout("request", 2) { currentCalls++ }
-    host.setName("replacement")
-    draw()
-    assertEquals(0, cancelledCalls)
-    assertEquals(1, currentCalls)
-  }
-
-  @Test
-  fun `detach cancels stale observation before a replacement host appears`() {
-    addMarker()
-    var staleCalls = 0
-    host.observeContentLayout("request", 2) { staleCalls++ }
+    host.observeContentLayout("request", 2) { calls++ }
+    host.setName("other")
+    host.observeContentLayout("request", 2) { calls++ }
     container.removeView(host)
     container.addView(host)
-    draw()
-    assertEquals(0, staleCalls)
-    val replacement = PortalHostView(controller.get())
-    container.addView(replacement)
-    val replacementMarker = marker()
-    replacement.addView(replacementMarker)
-    layout(replacement, 200, 300)
-    layout(replacementMarker)
-    var currentCalls = 0
-    replacement.observeContentLayout("request", 2) { currentCalls++ }
-    assertFalse(replacement.viewTreeObserver.dispatchOnPreDraw())
-    assertEquals(0, staleCalls)
-    assertEquals(1, currentCalls)
-  }
-
-  @Test
-  fun `host resize preserves pending observation until content is laid out`() {
-    layout(host, 200, 300)
-    var calls = 0
-    host.observeContentLayout("request", 2) { calls++ }
-    layout(host, 0, 0)
-    draw()
+    complete(marker)
+    drain()
     assertEquals(0, calls)
-    layout(host, 300, 400)
+  }
+
+  @Test
+  fun `resize and unchanged name preserve pending observation`() {
+    host.setName("same")
     val marker = marker()
-    host.addView(marker)
-    layout(marker)
-    draw()
-    assertEquals(1, calls)
-    layout(host, 400, 500)
-    draw()
-    assertEquals(1, calls)
-  }
-
-  @Test
-  fun `same size React text update does not block settled React boundary`() {
-    val marker = ReactViewGroup(controller.get())
-    marker.setTag(R.id.view_tag_native_id, "granite:portal-initial-content:2:request")
-    val content = ReactTextView(controller.get())
-    content.text = "before"
-    marker.addView(content)
-    host.addView(marker)
-    layout(host, 200, 300)
-    layout(marker)
-    layout(content)
-    content.text = "after!"
-    assertTrue(content.isLayoutRequested)
-    assertFalse(marker.isLayoutRequested)
-    assertFalse(host.isLayoutRequested)
     var calls = 0
     host.observeContentLayout("request", 2) { calls++ }
-    draw()
-    assertEquals(1, calls)
-    draw()
+    host.layout(0, 0, 200, 300)
+    host.layout(0, 0, 300, 400)
+    host.setName("same")
+    complete(marker)
+    drain()
     assertEquals(1, calls)
   }
 
   @Test
-  fun `logical portal children in another window cannot satisfy this host`() {
-    val otherActivity = Robolectric.buildActivity(Activity::class.java).setup().visible()
-    val destination = PortalHostView(otherActivity.get())
-    otherActivity.get().setContentView(destination)
-    destination.setName("other-window")
-    val source = PortalView(controller.get())
-    host.addView(source)
+  fun `physical host owns completion after reparenting`() {
     val marker = marker()
-    source.addView(marker)
-    source.setHostName("other-window")
-    layout(host, 200, 300)
-    layout(source)
-    layout(destination, 200, 300)
-    layout(marker)
-    assertSame(marker, source.getChildAt(0))
-    assertSame(destination, marker.parent)
-    assertNotEquals(host.windowToken, marker.windowToken)
-    var calls = 0
-    host.observeContentLayout("request", 2) { calls++ }
-    draw()
-    assertEquals(0, calls)
-    var destinationCalls = 0
-    destination.observeContentLayout("request", 2) { destinationCalls++ }
-    assertFalse(destination.viewTreeObserver.dispatchOnPreDraw())
-    assertEquals(1, destinationCalls)
-    source.cleanup()
-    otherActivity.pause().stop().destroy()
+    val destination = PortalHostView(controller.get())
+    container.addView(destination)
+    var first = 0
+    var second = 0
+    host.observeContentLayout("request", 2) { first++ }
+    destination.observeContentLayout("request", 2) { second++ }
+    complete(marker)
+    host.removeView(marker)
+    destination.addView(marker)
+    drain()
+    assertEquals(0, first)
+    assertEquals(1, second)
+    destination.cleanup()
   }
 
   @Test
-  fun `reparented native content can use preserved bounds without isLaidOut`() {
-    val marker = ReactViewGroup(controller.get()).apply {
-      setTag(R.id.view_tag_native_id, "granite:portal-initial-content:2:request")
-      addView(View(controller.get()).also { layout(it) })
-    }
-    container.addView(marker)
-    layout(marker)
-    container.removeView(marker)
-    host.addView(marker)
-    layout(host, 200, 300)
-    layout(marker.getChildAt(0))
-    assertFalse(marker.isLaidOut)
-    assertFalse(marker.isLayoutRequested)
-    var calls = 0
-    host.observeContentLayout("request", 2) { calls++ }
-    draw()
-    assertEquals(1, calls)
+  fun `completion listener is bound to its UI manager and released on disposal`() {
+    val marker = marker()
+    marker.bind(manager)
+    verify(manager).addUIManagerEventListener(marker)
+    marker.dispose()
+    verify(manager).removeUIManagerEventListener(marker)
+    assertFalse(marker.hasCompletedMount())
+    assertFalse(PortalInitialContentRegistry.markers.contains(marker))
   }
 
   @Test
-  fun `callback can subscribe again without retaining completed observation`() {
-    addMarker()
-    var firstCalls = 0
-    var secondCalls = 0
+  fun `callback may reenter observation safely`() {
+    complete(marker())
+    var calls = 0
     host.observeContentLayout("request", 2) {
-      firstCalls++
-      host.observeContentLayout("request", 2) { secondCalls++ }
+      calls++
+      host.observeContentLayout("request", 2) { calls++ }
     }
-    draw()
-    draw()
-    assertEquals(1, firstCalls)
-    assertEquals(1, secondCalls)
-  }
-
-  @Test
-  fun `empty marker waits for physical native content without blocking drawing`() {
-    val marker = marker(withContent = false)
-    host.addView(marker)
-    layout(host, 200, 300)
-    layout(marker)
-    var calls = 0
-    host.observeContentLayout("request", 2) { calls++ }
-    draw()
-    assertEquals(0, calls)
-    marker.addView(View(controller.get()), FrameLayout.LayoutParams(100, 100))
-    layout(marker)
-    draw()
-    assertEquals(1, calls)
-  }
-
-  @Test
-  fun `hidden or transparent content and ancestry cannot release observation`() {
-    val marker = addMarker()
-    val content = marker.getChildAt(0)
-    var calls = 0
-    content.visibility = View.INVISIBLE
-    host.observeContentLayout("request", 2) { calls++ }
-    draw()
-    assertEquals(0, calls)
-    content.visibility = View.VISIBLE
-    content.alpha = 0f
-    draw()
-    assertEquals(0, calls)
-    content.alpha = 1f
-    marker.visibility = View.INVISIBLE
-    draw()
-    assertEquals(0, calls)
-    marker.visibility = View.VISIBLE
-    host.alpha = 0f
-    draw()
-    assertEquals(0, calls)
-    host.alpha = 1f
-    layout(marker)
-    draw()
-    assertEquals(1, calls)
-  }
-
-  @Test
-  fun `zero size content waits for positive bounds`() {
-    val marker = addMarker()
-    val content = marker.getChildAt(0)
-    layout(content, 0, 0)
-    var calls = 0
-    host.observeContentLayout("request", 2) { calls++ }
-    draw()
-    assertEquals(0, calls)
-    layout(content)
-    draw()
-    assertEquals(1, calls)
+    drain()
+    assertEquals(2, calls)
   }
 
   @Test
@@ -417,24 +298,17 @@ class PortalContentLayoutObservationTest {
     assertThrows(IllegalArgumentException::class.java) { host.observeContentLayout("request", -1) {} }
   }
 
-  private fun marker(key: String = "request", revision: Int = 2, withContent: Boolean = true) =
-    FrameLayout(controller.get()).apply {
-      setTag(R.id.view_tag_native_id, "granite:portal-initial-content:$revision:$key")
-      if (withContent) addView(View(context), FrameLayout.LayoutParams(100, 100))
+  private fun marker(key: String = "request", revision: Int = 2, attach: Boolean = true) =
+    PortalInitialContentView(controller.get()).also {
+      markers.add(it)
+      it.setTag(R.id.view_tag_native_id, "granite:portal-initial-content:$revision:$key")
+      if (attach) host.addView(it)
     }
 
-  private fun addMarker(key: String = "request", revision: Int = 2) = marker(key, revision).also {
-    host.addView(it)
-    layout(host, 200, 300)
-    layout(it)
+  private fun complete(marker: PortalInitialContentView) {
+    marker.willMountItems(manager)
+    marker.didMountItems(manager)
   }
 
-  private fun draw() = assertFalse(host.viewTreeObserver.dispatchOnPreDraw())
-
-  private fun layout(view: View, width: Int = 100, height: Int = 100) {
-    view.measure(exact(width), exact(height))
-    view.layout(0, 0, width, height)
-  }
-
-  private fun exact(size: Int) = View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY)
+  private fun drain() = shadowOf(Looper.getMainLooper()).idle()
 }

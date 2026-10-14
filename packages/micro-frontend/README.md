@@ -482,7 +482,9 @@ Wrap the Portal in your own `<View>` when you need any of these.
 
 ### Observing initial content layout
 
-`PortalInitialContentView` marks initial content for native layout observation.
+`PortalInitialContentView` declares the initial content whose Fabric mount completion
+should release a native host. Its public props and ref remain ordinary View props
+and a View ref; internally it uses a Fabric component that records mount completion.
 It derives the observation key from the current `MicroFrontendSessionProvider`'s
 `sessionId` and uses revision `0`. No observation-specific props are required.
 Rendering it outside a session provider throws `MissingMicroFrontendSessionError`.
@@ -507,8 +509,10 @@ whose native layout should release the host's first-draw guard. Pending screens,
 Suspense fallbacks, and error screens remain the UI owner's responsibility.
 
 The session provider and content View must use the same package instance.
-Render one `PortalInitialContentView` per observation request. A marked boundary
-whose children produce no native views does not complete the observation.
+Render one `PortalInitialContentView` per observation request. Rendering the marker
+is an explicit declaration: empty, hidden, or zero-size content can complete once
+its mount has completed. Granite does not infer readiness from descendant counts,
+bounds, visibility, layout-request flags, timers, or frame polling.
 
 An Android destination observes the session's marker:
 
@@ -526,15 +530,12 @@ observation.close()
 ```
 
 Register and close the observation on the Android UI thread. Registration before
-the host's first Window attachment is supported. The callback runs at most once,
-on a pre-draw where the unique matching boundary is physically under this host
-and attached to the same Window. The boundary and its ancestor path must have
-visible, nonzero, settled layout, and the boundary must contain at least one
-physical native descendant with visible, nonzero bounds. Empty, detached, or hidden
-content does not complete the observation. Pending layout on the boundary-to-host
-path delays delivery; descendant layout-request flags are ignored because Fabric
-can leave them set after same-size text updates.
-The observer always permits drawing; it never delays a frame or starts an animation.
+the host's first Window attachment is supported. The internal marker listens to
+Fabric's `UIManagerListener.didMountItems`, which runs after native mount items
+execute. Android may apply several commits in one batch; the acknowledgment is
+for the marker's mounted generation at the end of that batch, not a JS commit ID.
+Preallocation and per-frame `didDispatchMountItems` callbacks cannot acknowledge
+an unmounted marker.
 
 An iOS destination observes the same marker through its UIKit-owned container:
 
@@ -552,31 +553,32 @@ observation.cancel()
 ```
 
 Register and cancel on the main thread. Registration before activation or Window
-attachment is supported and does not activate a deferred container. While an
-observation is pending on an attached, activated container, a display link checks
-the physical hierarchy, visibility, and nonzero bounds, including a native descendant
-beneath the boundary. As on Android, only the boundary-to-host path must have no
-pending layout request (`layer.needsLayout` on iOS); descendant layout-request
-flags are ignored. The iOS path includes the owning container. Delivery is
-one-shot and stops observing before calling `onReady`. The observer does not force
-layout, block drawing, or control a transition.
+attachment is supported and does not activate a deferred container. The internal
+iOS component implements `RCTMountingTransactionObserving` and records the surface
+and transaction after `mountingTransactionDidMount`, following the last mutation.
+
+On both platforms, delivery requires exactly one matching internal marker physically
+beneath the destination and attached to its Window, with a completed native mount
+for that instance and identity. Starting another mount invalidates the previous
+acknowledgment until mounting finishes. Replacing or recycling a native view cannot
+reuse its predecessor's acknowledgment. Delivery is queued outside Fabric's
+observer iteration, revalidates identity and attachment, and removes the observation
+before calling `onReady`. A late subscriber can consume an existing acknowledgment.
+A plain View with a matching `nativeID` is not a substitute for the internal marker.
 
 Closing or cancelling, renaming, detaching, or cleaning up the destination cancels
-pending observations. On iOS, `container.invalidate()` also cancels them.
-Size changes preserve pending observations and continue these structural checks.
-Delivery does not guarantee that descendants reflect the latest host size: their
-existing bounds may still come from before the resize. Register a new observation
-after a new attachment, using the current session ID and revision `0`.
+pending observations. On iOS, `container.invalidate()` also cancels them. Size changes
+preserve observations; the signal does not wait for a subsequent commit incorporating
+the latest host size. Register again after a new attachment, using the current session
+ID and revision `0`.
 
-The signal acknowledges the marked subtree's structural native layout. It does
-not wait for a completed draw, so a host can receive it before allowing its first
-draw. It does not establish business-data readiness, image decoding, WebView
-loading, every descendant's latest Fabric update, or pixels being presented.
-Native observation is available on Android and iOS. Host applications retain
-responsibility for timeouts, cancelling observations they no longer need, and any
-policy that postpones their own first draw. In particular, an iOS observation whose
-boundary never becomes eligible keeps its display link active until cancelled or
-its destination is torn down.
+The signal acknowledges Fabric's native mount completion, including the layout
+mutations in that mount. It does not establish business-data readiness, image decoding,
+WebView loading, future commits, or pixels being presented. The observer does not
+force layout, delay drawing, or control a transition. Host applications retain
+responsibility for timeouts, cancellation, and any policy postponing their first draw.
+Both the JavaScript package and the native binary must include the internal component;
+there is no fallback to heuristic readiness on older native binaries.
 
 The UIKit behavior harness can be built on macOS with Xcode installed:
 
@@ -586,8 +588,9 @@ node packages/micro-frontend/test/ios/buildPortalContentLayoutHarnessApp.mjs
 
 Install and launch the emitted Simulator `.app`. It displays a pass/fail result
 and writes `granite-portal-content-layout-results.json` in its temporary directory.
-The harness uses the production container and UIKit with React host/touch stubs;
-it does not validate a complete Fabric mount or displayed content.
+The harness uses the production container and mount ledger with UIKit and React
+host/touch stubs. It injects transaction boundaries to verify acknowledgment delivery;
+it does not validate a complete Fabric runtime or displayed content.
 
 ### Activity example
 

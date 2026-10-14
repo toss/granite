@@ -1,6 +1,6 @@
 #import "PortalHostContainerView.h"
 
-#import <QuartzCore/QuartzCore.h>
+#import "PortalInitialContentMount.h"
 #import <React/RCTRootComponentView.h>
 #import <React/RCTSurfaceTouchHandler.h>
 #import "PortalHostView.h"
@@ -184,11 +184,6 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 - (void)removeContentLayoutObservation:(GranitePortalContentLayoutObservation *)observation;
 @end
 
-@interface GranitePortalContentLayoutTickTarget : NSObject
-@property (nonatomic, weak) GranitePortalContentLayoutObservation *observation;
-- (void)tick:(CADisplayLink *)link;
-@end
-
 @interface GranitePortalContentLayoutObservation : NSObject <PortalContentLayoutObservation>
 - (instancetype)initWithOwner:(PortalHostContainerView *)owner
                      nativeId:(NSString *)nativeId
@@ -197,79 +192,12 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 - (void)checkContentLayout;
 @end
 
-static UIView *GraniteFindInitialContentMarker(UIView *host, NSString *nativeId)
-{
-  UIView *match = nil;
-  NSMutableArray<UIView *> *pending = [NSMutableArray arrayWithObject:host];
-  while (pending.count > 0) {
-    UIView *parent = pending.lastObject;
-    [pending removeLastObject];
-    for (UIView *child in parent.subviews) {
-      if (child.superview != parent) continue;
-      if ([child isKindOfClass:[RCTViewComponentView class]] &&
-          [((RCTViewComponentView *)child).nativeId isEqualToString:nativeId]) {
-        if (match != nil) return nil;
-        match = child;
-      }
-      [pending addObject:child];
-    }
-  }
-  return match;
-}
-
-static BOOL GraniteHasNativeInitialContent(UIView *marker, UIWindow *window)
-{
-  BOOL hasContent = NO;
-  NSMutableArray<UIView *> *pending = [NSMutableArray arrayWithObject:marker];
-  while (pending.count > 0) {
-    UIView *parent = pending.lastObject;
-    [pending removeLastObject];
-    for (UIView *child in parent.subviews) {
-      if (child.superview != parent || child.hidden || !(child.alpha > 0)) continue;
-      // Match Android: layout requests gate only the marker-to-host path.
-      // Descendants contribute their existing visible bounds, not update completion.
-      if (child.window != window) return NO;
-      if (child.bounds.size.width <= 0 || child.bounds.size.height <= 0) continue;
-      hasContent = YES;
-      [pending addObject:child];
-    }
-  }
-  return hasContent;
-}
-
-static BOOL GraniteHasInitialContentLayout(
-    UIView *marker, UIView *host, PortalHostContainerView *container)
-{
-  UIWindow *window = container.window;
-  if (window == nil || host.bounds.size.width <= 0 || host.bounds.size.height <= 0 ||
-      marker.bounds.size.width <= 0 || marker.bounds.size.height <= 0) {
-    return NO;
-  }
-  for (UIView *view = marker; view != nil; view = view.superview) {
-    if (view.window != window || view.hidden || !(view.alpha > 0) || view.layer.needsLayout ||
-        view.bounds.size.width <= 0 || view.bounds.size.height <= 0) return NO;
-    if (view == container) return GraniteHasNativeInitialContent(marker, window);
-  }
-  return NO;
-}
-
-@implementation GranitePortalContentLayoutTickTarget
-- (void)tick:(CADisplayLink *)link
-{
-  GranitePortalContentLayoutObservation *observation = self.observation;
-  if (observation != nil) {
-    [observation checkContentLayout];
-  } else {
-    [link invalidate];
-  }
-}
-@end
-
 @implementation GranitePortalContentLayoutObservation {
   __weak PortalHostContainerView *_owner;
   NSString *_nativeId;
   void (^_onReady)(void);
-  CADisplayLink *_displayLink;
+  id _mountObserver;
+  BOOL _checkScheduled;
 }
 
 - (instancetype)initWithOwner:(PortalHostContainerView *)owner
@@ -286,16 +214,23 @@ static BOOL GraniteHasInitialContentLayout(
 
 - (void)startIfNeeded
 {
-  PortalHostContainerView *owner = _owner;
-  if (_displayLink != nil || _onReady == nil || owner.window == nil ||
-      [owner portalContentLayoutHost] == nil) {
-    return;
+  if (_onReady == nil) return;
+  if (_mountObserver == nil) {
+    __weak GranitePortalContentLayoutObservation *weakSelf = self;
+    _mountObserver = [[NSNotificationCenter defaultCenter]
+        addObserverForName:GranitePortalInitialContentMountsDidChange object:nil queue:nil
+        usingBlock:^(__unused NSNotification *notification) { [weakSelf startIfNeeded]; }];
   }
-  // A nativeId-only update does not have to insert a view or request layout.
-  GranitePortalContentLayoutTickTarget *target = [GranitePortalContentLayoutTickTarget new];
-  target.observation = self;
-  _displayLink = [CADisplayLink displayLinkWithTarget:target selector:@selector(tick:)];
-  [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+  if (_checkScheduled) return;
+  _checkScheduled = YES;
+  __weak GranitePortalContentLayoutObservation *weakSelf = self;
+  // Leave Fabric's observer iteration before calling host code. Revalidate at delivery.
+  dispatch_async(dispatch_get_main_queue(), ^{
+    GranitePortalContentLayoutObservation *strongSelf = weakSelf;
+    if (strongSelf == nil) return;
+    strongSelf->_checkScheduled = NO;
+    [strongSelf checkContentLayout];
+  });
 }
 
 - (void)checkContentLayout
@@ -307,8 +242,15 @@ static BOOL GraniteHasInitialContentLayout(
   }
   UIView *host = [owner portalContentLayoutHost];
   if (host == nil || owner.window == nil) return;
-  UIView *marker = GraniteFindInitialContentMarker(host, _nativeId);
-  if (marker != nil && GraniteHasInitialContentLayout(marker, host, owner)) {
+  GranitePortalInitialContentMount *match = nil;
+  for (GranitePortalInitialContentMount *mount in GranitePortalInitialContentMounts()) {
+    RCTViewComponentView *view = mount.view;
+    if (![view.nativeId isEqualToString:_nativeId] || view.window != owner.window ||
+        ![view isDescendantOfView:host]) continue;
+    if (match != nil) return;
+    match = mount;
+  }
+  if ([match matchesCompletedIdentity:_nativeId]) {
     void (^onReady)(void) = _onReady;
     [self cancel];
     onReady();
@@ -324,14 +266,14 @@ static BOOL GraniteHasInitialContentLayout(
   _owner = nil;
   _onReady = nil;
   _nativeId = nil;
-  [_displayLink invalidate];
-  _displayLink = nil;
+  if (_mountObserver != nil) [[NSNotificationCenter defaultCenter] removeObserver:_mountObserver];
+  _mountObserver = nil;
   [owner removeContentLayoutObservation:self];
 }
 
 - (void)dealloc
 {
-  [_displayLink invalidate];
+  if (_mountObserver != nil) [[NSNotificationCenter defaultCenter] removeObserver:_mountObserver];
 }
 @end
 
@@ -494,6 +436,7 @@ static BOOL GraniteHasInitialContentLayout(
 
 - (void)handleSubviewCountChanged
 {
+  [self startContentLayoutObservations];
   NSUInteger count = _portalHostView.subviews.count;
   if (count > 0) {
     if (!_hasAttachedContent) {

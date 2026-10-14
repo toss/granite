@@ -46,6 +46,7 @@ function compileHarness(temporaryDirectory: string, harnessName: string, binaryN
     '-I',
     iosDirectory,
     portalHostContainerPath,
+    resolve(iosDirectory, 'PortalInitialContentMount.mm'),
     resolve(testDirectory, harnessName),
     '-o',
     binaryPath,

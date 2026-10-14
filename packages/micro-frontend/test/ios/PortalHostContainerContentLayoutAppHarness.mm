@@ -5,6 +5,7 @@
 
 #import "PortalHostContainerView.h"
 #import "PortalHostView.h"
+#import "PortalInitialContentMount.h"
 
 @implementation RCTViewComponentView
 @end
@@ -106,9 +107,33 @@ static void AddNativeContent(UIView *view)
   [view addSubview:[[UIView alloc] initWithFrame:CGRectMake(0, 0, 64, 64)]];
 }
 
+// Drive the same ledger used by the Fabric component, with explicit transaction boundaries.
+@interface HarnessMarker : RCTViewComponentView
+@property (nonatomic, strong) GranitePortalInitialContentMount *mount;
+@end
+@implementation HarnessMarker
+- (instancetype)initWithFrame:(CGRect)frame
+{
+  if (self = [super initWithFrame:frame]) {
+    _mount = [[GranitePortalInitialContentMount alloc] initWithView:self];
+  }
+  return self;
+}
+- (void)didMoveToWindow { [super didMoveToWindow]; GranitePortalInitialContentMountsChanged(); }
+- (void)didMoveToSuperview { [super didMoveToSuperview]; GranitePortalInitialContentMountsChanged(); }
+@end
+
+static void CompleteMarker(RCTViewComponentView *view)
+{
+  static NSInteger transaction = 0;
+  GranitePortalInitialContentMount *mount = ((HarnessMarker *)view).mount;
+  [mount willMount];
+  [mount didMountWithSurfaceId:1 transaction:++transaction];
+}
+
 static RCTViewComponentView *Marker(NSString *requestKey, NSInteger revision, CGRect frame)
 {
-  RCTViewComponentView *view = [[RCTViewComponentView alloc] initWithFrame:frame];
+  RCTViewComponentView *view = [[HarnessMarker alloc] initWithFrame:frame];
   view.backgroundColor = UIColor.systemBlueColor;
   view.nativeId = MarkerID(requestKey, revision);
   AddNativeContent(view);
@@ -127,19 +152,6 @@ typedef void (^Case)(Done done);
 @interface Sentinel : NSObject
 @end
 @implementation Sentinel
-@end
-
-@interface PendingLayer : CALayer
-@property (nonatomic) BOOL forceNeedsLayout;
-@end
-@implementation PendingLayer
-- (BOOL)needsLayout { return self.forceNeedsLayout || [super needsLayout]; }
-@end
-
-@interface PendingMarker : RCTViewComponentView
-@end
-@implementation PendingMarker
-+ (Class)layerClass { return PendingLayer.class; }
 @end
 
 @interface Runner : NSObject
@@ -174,11 +186,11 @@ typedef void (^Case)(Done done);
   });
   [self runCases:@[
     @{@"name" : @"exact marker", @"case" : [self exactCase]},
-    @{@"name" : @"native descendants", @"case" : [self descendantsCase]},
+    @{@"name" : @"explicit declaration without visual heuristics", @"case" : [self descendantsCase]},
     @{@"name" : @"nativeId update", @"case" : [self nativeIdUpdateCase]},
     @{@"name" : @"mismatch and duplicate", @"case" : [self mismatchCase]},
     @{@"name" : @"physical subtree", @"case" : [self physicalSubtreeCase]},
-    @{@"name" : @"layout and window gates", @"case" : [self layoutCase]},
+    @{@"name" : @"mount generation and attachment", @"case" : [self layoutCase]},
     @{@"name" : @"lifecycle cancellation", @"case" : [self lifecycleCase]},
     @{@"name" : @"deferred and late", @"case" : [self deferredLateCase]},
     @{@"name" : @"one-shot reentry", @"case" : [self reentryCase]},
@@ -242,7 +254,9 @@ typedef void (^Case)(Done done);
 }
 - (void)addReadyMarkerTo:(PortalHostView *)host
 {
-  [host addSubview:Marker(@"request", 2, CGRectMake(8, 8, 64, 64))];
+  RCTViewComponentView *marker = Marker(@"request", 2, CGRectMake(8, 8, 64, 64));
+  [host addSubview:marker];
+  CompleteMarker(marker);
   [host layoutIfNeeded];
 }
 - (void)close:(PortalHostContainerView *)container
@@ -254,54 +268,18 @@ typedef void (^Case)(Done done);
 - (Case)descendantsCase
 {
   return [^(Done done) {
-    NSArray<NSString *> *kinds = @[@"empty", @"hidden", @"zero", @"pending", @"transparent", @"transparent content"];
-    NSMutableArray<PortalHostContainerView *> *containers = [NSMutableArray new];
-    NSMutableArray<RCTViewComponentView *> *markers = [NSMutableArray new];
-    NSMutableArray<Counter *> *counters = [NSMutableArray new];
-    for (NSString *kind in kinds) {
-      PortalHostContainerView *container = [self container];
-      RCTViewComponentView *marker = Marker(@"request", 2, CGRectMake(8, 8, 64, 64));
-      [[self host:container] addSubview:marker];
-      if ([kind isEqualToString:@"empty"]) [marker.subviews.firstObject removeFromSuperview];
-      if ([kind isEqualToString:@"hidden"]) marker.subviews.firstObject.hidden = YES;
-      if ([kind isEqualToString:@"zero"]) marker.subviews.firstObject.frame = CGRectZero;
-      if ([kind isEqualToString:@"transparent"]) container.alpha = 0;
-      if ([kind isEqualToString:@"transparent content"]) marker.subviews.firstObject.alpha = 0;
-      if ([kind isEqualToString:@"pending"]) {
-        PendingMarker *pending = [[PendingMarker alloc] initWithFrame:CGRectMake(0, 0, 32, 32)];
-        ((PendingLayer *)pending.layer).forceNeedsLayout = YES;
-        [marker addSubview:pending];
-      }
-      [container layoutIfNeeded];
-      Counter *calls = [Counter new];
-      [self observe:container counter:calls];
-      [containers addObject:container];
-      [markers addObject:marker];
-      [counters addObject:calls];
-    }
-    AfterTicks(3, ^{
-      for (NSUInteger index = 0; index < kinds.count; index++) {
-        NSUInteger expected = [kinds[index] isEqualToString:@"pending"] ? 1 : 0;
-        [self expect:counters[index].value equals:expected name:[kinds[index] stringByAppendingString:@" descendant callback count"]];
-        UIView *marker = markers[index];
-        if ([kinds[index] isEqualToString:@"pending"]) {
-          [self expect:marker.subviews.lastObject.layer.needsLayout
-                equals:YES
-                  name:@"pending descendant does not delay delivery"];
-        } else {
-          for (UIView *child in marker.subviews) [child removeFromSuperview];
-          AddNativeContent(marker);
-        }
-        containers[index].alpha = 1;
-        [containers[index] layoutIfNeeded];
-      }
-      AfterTicks(3, ^{
-        for (NSUInteger index = 0; index < kinds.count; index++) {
-          [self expect:counters[index].value equals:1 name:[kinds[index] stringByAppendingString:@" settled content callback count"]];
-          [self close:containers[index]];
-        }
-        done();
-      });
+    PortalHostContainerView *container = [self container];
+    HarnessMarker *marker = [[HarnessMarker alloc] initWithFrame:CGRectZero];
+    marker.nativeId = MarkerID(@"request", 2);
+    marker.hidden = YES;
+    marker.alpha = 0;
+    [[self host:container] addSubview:marker];
+    Counter *calls = [Counter new];
+    [self observe:container counter:calls];
+    CompleteMarker(marker);
+    AfterTicks(2, ^{
+      [self expect:calls.value equals:1 name:@"explicit empty hidden zero-size content acknowledges mount"];
+      [self close:container]; done();
     });
   } copy];
 }
@@ -312,13 +290,19 @@ typedef void (^Case)(Done done);
     PortalHostContainerView *container = [self container];
     Counter *calls = [Counter new];
     [self observe:container counter:calls];
-    [self addReadyMarkerTo:[self host:container]];
-    AfterTicks(3, ^{
-      [self expect:calls.value equals:1 name:@"exact marker callback count"];
+    RCTViewComponentView *marker = Marker(@"request", 2, CGRectMake(8, 8, 64, 64));
+    [[self host:container] addSubview:marker];
+    [container layoutIfNeeded];
+    AfterTicks(2, ^{
+      [self expect:calls.value equals:0 name:@"layout and frames cannot acknowledge mount"];
+      CompleteMarker(marker);
       AfterTicks(2, ^{
-        [self expect:calls.value equals:1 name:@"exact marker should be one-shot"];
-        [self close:container];
-        done();
+        [self expect:calls.value equals:1 name:@"mount completion delivers once"];
+        CompleteMarker(marker);
+        AfterTicks(2, ^{
+          [self expect:calls.value equals:1 name:@"subsequent mount stays one-shot"];
+          [self close:container]; done();
+        });
       });
     });
   } copy];
@@ -328,20 +312,23 @@ typedef void (^Case)(Done done);
 {
   return [^(Done done) {
     PortalHostContainerView *container = [self container];
-    PortalHostView *host = [self host:container];
-    RCTViewComponentView *marker = [[RCTViewComponentView alloc] initWithFrame:CGRectMake(8, 8, 64, 64)];
-    AddNativeContent(marker);
-    [host addSubview:marker];
-    [host layoutIfNeeded];
+    HarnessMarker *marker = (HarnessMarker *)Marker(@"old", 2, CGRectZero);
+    [[self host:container] addSubview:marker];
+    CompleteMarker(marker);
     Counter *calls = [Counter new];
     [self observe:container counter:calls];
+    marker.nativeId = MarkerID(@"request", 2);
     AfterTicks(2, ^{
-      [self expect:calls.value equals:0 name:@"unmarked existing view should stay pending"];
-      marker.nativeId = MarkerID(@"request", 2);
-      AfterTicks(3, ^{
-        [self expect:calls.value equals:1 name:@"nativeId update callback count"];
-        [self close:container];
-        done();
+      [self expect:calls.value equals:0 name:@"new identity cannot reuse old acknowledgment"];
+      CompleteMarker(marker);
+      [marker.mount willMount];
+      AfterTicks(2, ^{
+        [self expect:calls.value equals:0 name:@"new transaction invalidates queued acknowledgment"];
+        CompleteMarker(marker);
+        AfterTicks(2, ^{
+          [self expect:calls.value equals:1 name:@"matching completed generation delivers"];
+          [self close:container]; done();
+        });
       });
     });
   } copy];
@@ -350,26 +337,26 @@ typedef void (^Case)(Done done);
 - (Case)mismatchCase
 {
   return [^(Done done) {
-    PortalHostContainerView *wrong = [self container];
-    PortalHostView *wrongHost = [self host:wrong];
-    [wrongHost addSubview:Marker(@"other", 2, CGRectMake(8, 8, 64, 64))];
-    [wrongHost addSubview:Marker(@"request", 3, CGRectMake(8, 8, 64, 64))];
-    Counter *wrongCalls = [Counter new];
-    [self observe:wrong counter:wrongCalls];
-
-    PortalHostContainerView *duplicate = [self container];
-    PortalHostView *duplicateHost = [self host:duplicate];
-    [duplicateHost addSubview:Marker(@"request", 2, CGRectMake(8, 8, 64, 64))];
-    [duplicateHost addSubview:Marker(@"request", 2, CGRectMake(80, 8, 64, 64))];
-    Counter *duplicateCalls = [Counter new];
-    [self observe:duplicate counter:duplicateCalls];
-
-    AfterTicks(3, ^{
-      [self expect:wrongCalls.value equals:0 name:@"wrong request or revision callback count"];
-      [self expect:duplicateCalls.value equals:0 name:@"duplicate marker callback count"];
-      [self close:wrong];
-      [self close:duplicate];
-      done();
+    PortalHostContainerView *container = [self container];
+    RCTViewComponentView *marker = Marker(@"request", 3, CGRectZero);
+    [[self host:container] addSubview:marker];
+    CompleteMarker(marker);
+    Counter *calls = [Counter new];
+    [self observe:container counter:calls];
+    AfterTicks(2, ^{
+      [self expect:calls.value equals:0 name:@"revision mismatch stays pending"];
+      marker.nativeId = MarkerID(@"request", 2);
+      CompleteMarker(marker);
+      RCTViewComponentView *duplicate = Marker(@"request", 2, CGRectZero);
+      [[self host:container] addSubview:duplicate];
+      AfterTicks(2, ^{
+        [self expect:calls.value equals:0 name:@"uncommitted duplicate prevents ambiguous delivery"];
+        [duplicate removeFromSuperview];
+        AfterTicks(2, ^{
+          [self expect:calls.value equals:1 name:@"unique completed identity delivers"];
+          [self close:container]; done();
+        });
+      });
     });
   } copy];
 }
@@ -408,54 +395,24 @@ typedef void (^Case)(Done done);
 - (Case)layoutCase
 {
   return [^(Done done) {
-    PortalHostContainerView *detached = [[PortalHostContainerView alloc] initWithFrame:CGRectMake(20, 80, 220, 220)];
-    [self addReadyMarkerTo:[self host:detached]];
-    Counter *detachedCalls = [Counter new];
-    [self observe:detached counter:detachedCalls];
+    PortalHostContainerView *container = [[PortalHostContainerView alloc] initWithFrame:CGRectZero];
+    Counter *calls = [Counter new];
+    [self observe:container counter:calls];
+    RCTViewComponentView *old = Marker(@"request", 2, CGRectZero);
+    [[self host:container] addSubview:old];
+    CompleteMarker(old);
     AfterTicks(2, ^{
-      [self expect:detachedCalls.value equals:0 name:@"detached marker callback count"];
-      [self.root.view addSubview:detached];
-      [detached layoutIfNeeded];
-      AfterTicks(3, ^{
-        [self expect:detachedCalls.value equals:1 name:@"attached marker callback count"];
-        [self close:detached];
-
-        PortalHostContainerView *zero = [self container];
-        PortalHostView *zeroHost = [self host:zero];
-        RCTViewComponentView *marker = Marker(@"request", 2, CGRectZero);
-        [zeroHost addSubview:marker];
-        Counter *zeroCalls = [Counter new];
-        [self observe:zero counter:zeroCalls];
+      [self expect:calls.value equals:0 name:@"completed detached content waits for destination"];
+      [old removeFromSuperview];
+      RCTViewComponentView *replacement = Marker(@"request", 2, CGRectZero);
+      [[self host:container] addSubview:replacement];
+      [self.root.view addSubview:container];
+      AfterTicks(2, ^{
+        [self expect:calls.value equals:0 name:@"replacement instance needs its own completed mount"];
+        CompleteMarker(replacement);
         AfterTicks(2, ^{
-          [self expect:zeroCalls.value equals:0 name:@"zero-bounds marker callback count"];
-          marker.frame = CGRectMake(8, 8, 64, 64);
-          [zeroHost layoutIfNeeded];
-          AfterTicks(3, ^{
-            [self expect:zeroCalls.value equals:1 name:@"positive-bounds marker callback count"];
-            [self close:zero];
-
-            PortalHostContainerView *pending = [self container];
-            PortalHostView *pendingHost = [self host:pending];
-            PendingMarker *pendingMarker = [PendingMarker new];
-            pendingMarker.frame = CGRectMake(8, 8, 64, 64);
-            pendingMarker.nativeId = MarkerID(@"request", 2);
-            AddNativeContent(pendingMarker);
-            ((PendingLayer *)pendingMarker.layer).forceNeedsLayout = YES;
-            [pendingHost addSubview:pendingMarker];
-            Counter *pendingCalls = [Counter new];
-            [self observe:pending counter:pendingCalls];
-            AfterTicks(2, ^{
-              [self expect:pendingCalls.value equals:0 name:@"pending marker layer callback count"];
-              ((PendingLayer *)pendingMarker.layer).forceNeedsLayout = NO;
-              [pendingMarker setNeedsLayout];
-              [pendingMarker layoutIfNeeded];
-              AfterTicks(3, ^{
-                [self expect:pendingCalls.value equals:1 name:@"settled marker layer callback count"];
-                [self close:pending];
-                done();
-              });
-            });
-          });
+          [self expect:calls.value equals:1 name:@"attached replacement mount delivers"];
+          [self close:container]; done();
         });
       });
     });
