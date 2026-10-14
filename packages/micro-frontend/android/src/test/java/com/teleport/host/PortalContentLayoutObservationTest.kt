@@ -91,6 +91,7 @@ class PortalContentLayoutObservationTest {
   @Test
   fun `standard React nativeID property supplies the observed marker`() {
     val marker = ReactViewGroup(controller.get())
+    marker.addView(View(controller.get()).also { layout(it) })
     // The manager's recycling flag reads JNI even when no React runtime is started.
     mockStatic(ReactNativeFeatureFlags::class.java).use { flags ->
       flags.`when`<Boolean> { ReactNativeFeatureFlags.enableViewRecyclingForView() }.thenReturn(false)
@@ -99,6 +100,7 @@ class PortalContentLayoutObservationTest {
     host.addView(marker)
     layout(host, 200, 300)
     layout(marker)
+    layout(marker.getChildAt(0))
     var calls = 0
     host.observeContentLayout("request", 2) { calls++ }
     draw()
@@ -295,12 +297,14 @@ class PortalContentLayoutObservationTest {
   fun `reparented native content can use preserved bounds without isLaidOut`() {
     val marker = ReactViewGroup(controller.get()).apply {
       setTag(R.id.view_tag_native_id, "granite:portal-initial-content:2:request")
+      addView(View(controller.get()).also { layout(it) })
     }
     container.addView(marker)
     layout(marker)
     container.removeView(marker)
     host.addView(marker)
     layout(host, 200, 300)
+    layout(marker.getChildAt(0))
     assertFalse(marker.isLaidOut)
     assertFalse(marker.isLayoutRequested)
     var calls = 0
@@ -325,14 +329,81 @@ class PortalContentLayoutObservationTest {
   }
 
   @Test
+  fun `empty marker waits for physical native content without blocking drawing`() {
+    val marker = marker(withContent = false)
+    host.addView(marker)
+    layout(host, 200, 300)
+    layout(marker)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    draw()
+    assertEquals(0, calls)
+    marker.addView(View(controller.get()), FrameLayout.LayoutParams(100, 100))
+    layout(marker)
+    draw()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `hidden or transparent content and ancestry cannot release observation`() {
+    val marker = addMarker()
+    val content = marker.getChildAt(0)
+    var calls = 0
+    content.visibility = View.INVISIBLE
+    host.observeContentLayout("request", 2) { calls++ }
+    draw()
+    assertEquals(0, calls)
+    content.visibility = View.VISIBLE
+    content.alpha = 0f
+    draw()
+    assertEquals(0, calls)
+    content.alpha = 1f
+    marker.visibility = View.INVISIBLE
+    draw()
+    assertEquals(0, calls)
+    marker.visibility = View.VISIBLE
+    host.alpha = 0f
+    draw()
+    assertEquals(0, calls)
+    host.alpha = 1f
+    layout(marker)
+    draw()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `zero size content and any visible pending descendant wait for layout`() {
+    val marker = addMarker()
+    val content = marker.getChildAt(0)
+    layout(content, 0, 0)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    draw()
+    assertEquals(0, calls)
+    layout(content)
+    val pending = View(controller.get())
+    marker.addView(pending, FrameLayout.LayoutParams(100, 100))
+    layout(marker)
+    pending.forceLayout()
+    draw()
+    assertEquals(0, calls)
+    pending.visibility = View.GONE
+    layout(marker)
+    draw()
+    assertEquals(1, calls)
+  }
+
+  @Test
   fun `invalid request identity is rejected`() {
     assertThrows(IllegalArgumentException::class.java) { host.observeContentLayout("", 0) {} }
     assertThrows(IllegalArgumentException::class.java) { host.observeContentLayout("request", -1) {} }
   }
 
-  private fun marker(key: String = "request", revision: Int = 2) = View(controller.get()).apply {
-    setTag(R.id.view_tag_native_id, "granite:portal-initial-content:$revision:$key")
-  }
+  private fun marker(key: String = "request", revision: Int = 2, withContent: Boolean = true) =
+    FrameLayout(controller.get()).apply {
+      setTag(R.id.view_tag_native_id, "granite:portal-initial-content:$revision:$key")
+      if (withContent) addView(View(context), FrameLayout.LayoutParams(100, 100))
+    }
 
   private fun addMarker(key: String = "request", revision: Int = 2) = marker(key, revision).also {
     host.addView(it)

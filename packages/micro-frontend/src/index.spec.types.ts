@@ -1,10 +1,17 @@
+import { createElement, createRef } from 'react';
+import type { View } from 'react-native';
 import { expectTypeOf } from 'vitest';
 import type {
   PendingHostComponent,
   registerPendingHostComponentRoute,
   usePendingHostComponentController,
 } from './host';
-import type { MicroFrontendRuntimeApi, MicroFrontendSessionState } from './index';
+import {
+  PortalInitialContentView,
+  type MicroFrontendRuntimeApi,
+  type MicroFrontendSessionState,
+  type PortalInitialContentViewProps,
+} from './index';
 
 interface PublicHostExports {
   readonly PendingHostComponent: typeof PendingHostComponent;
@@ -17,3 +24,18 @@ expectTypeOf<MicroFrontendRuntimeApi['getSessions']>().returns.toEqualTypeOf<rea
 expectTypeOf<MicroFrontendRuntimeApi['onSessionsChanged']>()
   .parameter(0)
   .toEqualTypeOf<(sessions: readonly MicroFrontendSessionState[]) => void>();
+
+const contentViewProps: PortalInitialContentViewProps = {
+  style: { flex: 1 },
+  accessibilityLabel: 'initial content',
+  pointerEvents: 'none',
+  onLayout: () => undefined,
+};
+createElement(PortalInitialContentView, { ...contentViewProps, ref: createRef<View>() });
+
+// @ts-expect-error View identifiers are reserved for the session marker.
+createElement(PortalInitialContentView, { id: 'custom-alias' });
+// @ts-expect-error The native marker cannot be supplied by the caller.
+createElement(PortalInitialContentView, { nativeID: 'custom-marker' });
+// @ts-expect-error The boundary must remain in the native hierarchy.
+createElement(PortalInitialContentView, { collapsable: true });

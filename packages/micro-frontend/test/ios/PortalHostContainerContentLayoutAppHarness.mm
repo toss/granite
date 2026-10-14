@@ -101,11 +101,17 @@ static void AfterTicks(NSUInteger count, dispatch_block_t block)
   });
 }
 
+static void AddNativeContent(UIView *view)
+{
+  [view addSubview:[[UIView alloc] initWithFrame:CGRectMake(0, 0, 64, 64)]];
+}
+
 static RCTViewComponentView *Marker(NSString *requestKey, NSInteger revision, CGRect frame)
 {
   RCTViewComponentView *view = [[RCTViewComponentView alloc] initWithFrame:frame];
   view.backgroundColor = UIColor.systemBlueColor;
   view.nativeId = MarkerID(requestKey, revision);
+  AddNativeContent(view);
   return view;
 }
 
@@ -168,6 +174,7 @@ typedef void (^Case)(Done done);
   });
   [self runCases:@[
     @{@"name" : @"exact marker", @"case" : [self exactCase]},
+    @{@"name" : @"native descendants", @"case" : [self descendantsCase]},
     @{@"name" : @"nativeId update", @"case" : [self nativeIdUpdateCase]},
     @{@"name" : @"mismatch and duplicate", @"case" : [self mismatchCase]},
     @{@"name" : @"physical subtree", @"case" : [self physicalSubtreeCase]},
@@ -244,6 +251,58 @@ typedef void (^Case)(Done done);
   [container removeFromSuperview];
 }
 
+- (Case)descendantsCase
+{
+  return [^(Done done) {
+    NSArray<NSString *> *kinds = @[@"empty", @"hidden", @"zero", @"pending", @"transparent", @"transparent content"];
+    NSMutableArray<PortalHostContainerView *> *containers = [NSMutableArray new];
+    NSMutableArray<RCTViewComponentView *> *markers = [NSMutableArray new];
+    NSMutableArray<Counter *> *counters = [NSMutableArray new];
+    for (NSString *kind in kinds) {
+      PortalHostContainerView *container = [self container];
+      RCTViewComponentView *marker = Marker(@"request", 2, CGRectMake(8, 8, 64, 64));
+      [[self host:container] addSubview:marker];
+      if ([kind isEqualToString:@"empty"]) [marker.subviews.firstObject removeFromSuperview];
+      if ([kind isEqualToString:@"hidden"]) marker.subviews.firstObject.hidden = YES;
+      if ([kind isEqualToString:@"zero"]) marker.subviews.firstObject.frame = CGRectZero;
+      if ([kind isEqualToString:@"transparent"]) container.alpha = 0;
+      if ([kind isEqualToString:@"transparent content"]) marker.subviews.firstObject.alpha = 0;
+      if ([kind isEqualToString:@"pending"]) {
+        PendingMarker *pending = [[PendingMarker alloc] initWithFrame:CGRectMake(0, 0, 32, 32)];
+        ((PendingLayer *)pending.layer).forceNeedsLayout = YES;
+        [marker addSubview:pending];
+      }
+      [container layoutIfNeeded];
+      Counter *calls = [Counter new];
+      [self observe:container counter:calls];
+      [containers addObject:container];
+      [markers addObject:marker];
+      [counters addObject:calls];
+    }
+    AfterTicks(3, ^{
+      for (NSUInteger index = 0; index < kinds.count; index++) {
+        [self expect:counters[index].value equals:0 name:[kinds[index] stringByAppendingString:@" descendant callback count"]];
+        UIView *marker = markers[index];
+        if ([kinds[index] isEqualToString:@"pending"]) {
+          marker.subviews.lastObject.hidden = YES;
+        } else {
+          for (UIView *child in marker.subviews) [child removeFromSuperview];
+          AddNativeContent(marker);
+        }
+        containers[index].alpha = 1;
+        [containers[index] layoutIfNeeded];
+      }
+      AfterTicks(3, ^{
+        for (NSUInteger index = 0; index < kinds.count; index++) {
+          [self expect:counters[index].value equals:1 name:[kinds[index] stringByAppendingString:@" settled content callback count"]];
+          [self close:containers[index]];
+        }
+        done();
+      });
+    });
+  } copy];
+}
+
 - (Case)exactCase
 {
   return [^(Done done) {
@@ -268,6 +327,7 @@ typedef void (^Case)(Done done);
     PortalHostContainerView *container = [self container];
     PortalHostView *host = [self host:container];
     RCTViewComponentView *marker = [[RCTViewComponentView alloc] initWithFrame:CGRectMake(8, 8, 64, 64)];
+    AddNativeContent(marker);
     [host addSubview:marker];
     [host layoutIfNeeded];
     Counter *calls = [Counter new];
@@ -376,6 +436,7 @@ typedef void (^Case)(Done done);
             PendingMarker *pendingMarker = [PendingMarker new];
             pendingMarker.frame = CGRectMake(8, 8, 64, 64);
             pendingMarker.nativeId = MarkerID(@"request", 2);
+            AddNativeContent(pendingMarker);
             ((PendingLayer *)pendingMarker.layer).forceNeedsLayout = YES;
             [pendingHost addSubview:pendingMarker];
             Counter *pendingCalls = [Counter new];
