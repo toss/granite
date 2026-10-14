@@ -482,37 +482,47 @@ Wrap the Portal in your own `<View>` when you need any of these.
 
 ### Observing initial content layout
 
-`getPortalInitialContentProps` lets the UI owner explicitly mark an existing
-React Native `View` containing the initial screen or a usable loading state.
-It adds no wrapper and does not change `Portal` or infer readiness from a session
-opening or a wrapper mounting.
+`PortalInitialContentView` declares that its own native View contains the initial
+screen or a usable loading state. Replace that existing root View with this
+component; it does not add a native wrapper. It accepts ordinary View props and
+forwards its ref to the native View. `nativeID` and `collapsable` are reserved for
+the observation marker. There are no `ready`, request key, or revision props on
+the content View.
 
 ```tsx
-import { getPortalInitialContentProps } from '@granite-js/micro-frontend';
-import { View } from 'react-native';
+import { PortalInitialContentProvider, PortalInitialContentView } from '@granite-js/micro-frontend';
 
-// In the screen's own renderer, on its existing root View inside the Portal.
-<View
-  style={{ flex: 1 }}
-  {...getPortalInitialContentProps({
-    requestKey: sessionId,
-    revision: contentRevision,
-    ready: hasInitialUI,
-  })}
->
-  {initialUI}
-</View>;
+function InitialScreen() {
+  if (!hasInitialUI) return null;
+
+  return <PortalInitialContentView style={{ flex: 1 }}>{initialUI}</PortalInitialContentView>;
+}
+
+// The integration layer supplies the native destination's observation request.
+<PortalInitialContentProvider request={{ requestKey: sessionId, revision: contentRevision }}>
+  <InitialScreen />
+</PortalInitialContentProvider>;
 ```
 
-Mark the actual content View where the initial UI is known to exist. Marking an
-empty outer wrapper does not make it meaningful content. `requestKey` must be
-nonempty, `ready` must be boolean, and `revision` must be an integer from `0` to `2147483647`.
-Use the same pair on both sides; change it when a new request must not accept an
-older screen's marker. While `ready` is false, no readiness marker is emitted.
-Spread these props last onto a native `View`; a custom component must forward
-them unchanged. The helper reserves `nativeID` and `collapsable`, so do not apply
-it to a View that needs a different `nativeID`. Overriding or dropping these props
-can prevent delivery; it does not establish readiness through another signal.
+Rendering the content View is the UI owner's declaration of readiness. Do not
+render it around an empty shell or a Suspense boundary whose fallback is empty.
+It does not infer readiness from its children, a session opening, network
+completion, or mounting alone. Native hosts still verify attachment and layout.
+
+The Provider creates no native View. Without a request, the content component
+renders an ordinary View without an observation marker or forced non-collapsing
+behavior. An inner Provider with `request={undefined}` masks an outer request;
+this can disable observation for content that is not currently presented.
+
+Provider and content View must use the same package instance. If an application
+is loaded in a separate bundle, pass the request as plain props and create the
+Provider inside that bundle rather than assuming independently bundled Contexts
+are shared. A pending UI rendered outside the application needs its own request
+injection. A fallback already inside a Provider can inherit that request.
+
+The host request key must be nonempty, and its revision must be an integer from
+`0` to `2147483647`. Use the same pair for the Provider and native observer; change
+it when a new request must not accept an older screen's marker.
 
 An Android destination can observe that exact marker:
 
