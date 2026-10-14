@@ -8,9 +8,15 @@ import com.facebook.react.module.model.ReactModuleInfoProvider
 import com.facebook.react.uimanager.ViewManager
 import com.teleport.host.PortalHostViewManager
 import com.teleport.initialcontent.PortalInitialContentViewManager
+import com.teleport.initialcontent.PortalInitialContentMounts
 import com.teleport.portal.PortalViewManager
 
 class GraniteMicroFrontendRuntimePackage : BaseReactPackage() {
+    init {
+        // Install before surfaces start, including before Fabric preallocates any marker.
+        PortalInitialContentMounts.install()
+    }
+
     override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> =
         listOf(PortalHostViewManager(), PortalViewManager(), PortalInitialContentViewManager())
 

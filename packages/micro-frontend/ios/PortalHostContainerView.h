@@ -50,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// Delivery requires one matching internal marker physically beneath this destination in
 /// the same Window, with a completed mounting transaction for its native instance and identity.
 /// Empty, hidden, or zero-size declared content is valid. No visual readiness is inferred.
-/// A later mount invalidates the previous acknowledgment until its transaction ends.
+/// A later marker mutation invalidates the acknowledgment until its matching transaction ends.
 /// This does not acknowledge images, network loading, future commits, or presented pixels.
 ///
 /// Observation never activates a deferred container or delays rendering. Cancel when the

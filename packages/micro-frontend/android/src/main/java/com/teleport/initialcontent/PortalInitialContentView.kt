@@ -1,57 +1,54 @@
-@file:OptIn(com.facebook.react.common.annotations.UnstableReactNativeAPI::class)
-
 package com.teleport.initialcontent
 
 import android.content.Context
 import android.view.View
 import com.facebook.react.R
-import com.facebook.react.bridge.UIManager
-import com.facebook.react.bridge.UIManagerListener
+import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.views.view.ReactViewGroup
+import java.lang.ref.WeakReference
 import java.util.Collections
 import java.util.WeakHashMap
 
-/** Internal Fabric marker. A mount acknowledgment belongs to this native instance and identity. */
-internal class PortalInitialContentView(context: Context) : ReactViewGroup(context), UIManagerListener {
-  private var uiManager: UIManager? = null
+/** Internal Fabric marker. Completion belongs to a native instance, surface, identity and mount. */
+internal class PortalInitialContentView(context: Context) : ReactViewGroup(context) {
+  internal var pendingTransaction: PortalInitialContentMounts.Transaction? = null
+  private var completedTransaction: PortalInitialContentMounts.Transaction? = null
   private var completedIdentity: String? = null
-  private var mountGeneration = 0L
-  private var completedGeneration = -1L
+  private var completedSurfaceId = -1
+  // Fabric child membership survives native clipping; a physical parent check would not.
+  private var sentinel: WeakReference<View>? = null
+
+  fun setMountSentinel(view: View?) {
+    invalidateMount()
+    sentinel = view?.let { WeakReference(it) }
+  }
+
+  fun isMountSentinel(view: View?): Boolean = view != null && sentinel?.get() === view
+
+  private fun hasMountSentinel(): Boolean = sentinel?.get()?.getTag(R.id.view_tag_native_id) == SENTINEL_ID
 
   init {
     PortalInitialContentRegistry.markers.add(this)
   }
 
-  fun bind(manager: UIManager?) {
-    if (uiManager === manager) return
-    uiManager?.removeUIManagerEventListener(this)
-    uiManager = manager
-    manager?.addUIManagerEventListener(this)
-  }
-
   fun invalidateMount() {
-    mountGeneration++
+    pendingTransaction = null
+    completedTransaction = null
     completedIdentity = null
   }
 
-  fun hasCompletedMount(): Boolean = completedIdentity != null &&
-    completedGeneration == mountGeneration && completedIdentity == getTag(R.id.view_tag_native_id)
-
-  override fun willMountItems(uiManager: UIManager) = invalidateMount()
-
-  override fun didMountItems(uiManager: UIManager) {
-    // Preallocated views and deferred surface mount items have no parent yet. They cannot
-    // acknowledge a transaction merely because another surface completed a mount batch.
-    if (parent != null) {
-      completedIdentity = getTag(R.id.view_tag_native_id) as? String
-      completedGeneration = mountGeneration
-      PortalInitialContentRegistry.changed()
-    }
+  fun completeMount(transaction: PortalInitialContentMounts.Transaction) {
+    if (pendingTransaction != transaction || !hasMountSentinel()) return
+    pendingTransaction = null
+    completedTransaction = transaction
+    completedIdentity = getTag(R.id.view_tag_native_id) as? String
+    completedSurfaceId = UIManagerHelper.getSurfaceId(this)
   }
 
-  override fun willDispatchViewUpdates(uiManager: UIManager) = Unit
-  override fun didDispatchMountItems(uiManager: UIManager) = Unit
-  override fun didScheduleMountItems(uiManager: UIManager) = Unit
+  fun hasCompletedMount(): Boolean =
+    !PortalInitialContentMounts.isExecuting && hasMountSentinel() && completedTransaction != null &&
+    completedIdentity != null && completedIdentity == getTag(R.id.view_tag_native_id) &&
+    completedSurfaceId == UIManagerHelper.getSurfaceId(this)
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
@@ -64,10 +61,13 @@ internal class PortalInitialContentView(context: Context) : ReactViewGroup(conte
   }
 
   fun dispose() {
-    bind(null)
-    invalidateMount()
+    setMountSentinel(null)
     PortalInitialContentRegistry.markers.remove(this)
     PortalInitialContentRegistry.changed()
+  }
+
+  companion object {
+    const val SENTINEL_ID = "granite:portal-mount-sentinel"
   }
 }
 

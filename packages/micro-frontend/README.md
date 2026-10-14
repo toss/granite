@@ -501,8 +501,9 @@ import { MicroFrontendSessionProvider, Portal, PortalInitialContentView } from '
 </Portal>;
 ```
 
-The component renders a single native View and forwards ordinary View props and
-its ref. `id`, `nativeID`, and `collapsable` are reserved for the observation marker.
+The component forwards ordinary View props and its ref to an internal native boundary.
+A private, absolute zero-size child identifies its initial Fabric insertion, including
+when the boundary was preallocated. That child has no touch or accessibility content. `id`, `nativeID`, and `collapsable` are reserved for the observation marker.
 It does not select routes, render pending UI, hide content, or add a Suspense boundary.
 The UI owner chooses the content and places this boundary around the initial UI
 whose native layout should release the host's first-draw guard. Pending screens,
@@ -530,12 +531,14 @@ observation.close()
 ```
 
 Register and close the observation on the Android UI thread. Registration before
-the host's first Window attachment is supported. The internal marker listens to
-Fabric's `UIManagerListener.didMountItems`, which runs after native mount items
-execute. Android may apply several commits in one batch; the acknowledgment is
-for the marker's mounted generation at the end of that batch, not a JS commit ID.
-Preallocation and per-frame `didDispatchMountItems` callbacks cannot acknowledge
-an unmounted marker.
+the host's first Window attachment is supported. A context-free listener installed
+with the native package observes `FABRIC_BATCH_EXECUTION_START/END`, emitted inside
+Fabric's actual native mount instruction executor. Only marker ViewManager mutations
+within that execution are associated with its commit number and a unique local epoch.
+The private child's insertion supplies an explicit mutation even for a preallocated
+marker. A matching END acknowledges the mutation; unrelated batches, preallocation,
+and aborted executions without END cannot complete it. The marker's surface and
+identity are revalidated before delivery. This also covers deferred surface mounts.
 
 An iOS destination observes the same marker through its UIKit-owned container:
 
@@ -556,11 +559,14 @@ Register and cancel on the main thread. Registration before activation or Window
 attachment is supported and does not activate a deferred container. The internal
 iOS component implements `RCTMountingTransactionObserving` and records the surface
 and transaction after `mountingTransactionDidMount`, following the last mutation.
+Only transactions whose mutation list contains the marker or its child membership
+can acknowledge it. Removing the private child invalidates completion on both platforms.
 
 On both platforms, delivery requires exactly one matching internal marker physically
 beneath the destination and attached to its Window, with a completed native mount
-for that instance and identity. Starting another mount invalidates the previous
-acknowledgment until mounting finishes. Replacing or recycling a native view cannot
+for that instance and identity. A new marker mutation invalidates the previous
+acknowledgment until its exact mount execution finishes. Unrelated transactions
+and synchronous non-Fabric prop updates do not manufacture a new acknowledgment. Replacing or recycling a native view cannot
 reuse its predecessor's acknowledgment. Delivery is queued outside Fabric's
 observer iteration, revalidates identity and attachment, and removes the observation
 before calling `onReady`. A late subscriber can consume an existing acknowledgment.

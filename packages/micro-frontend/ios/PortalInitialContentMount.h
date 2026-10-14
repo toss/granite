@@ -8,6 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)willMount;
 - (void)didMountWithSurfaceId:(NSInteger)surfaceId transaction:(NSInteger)transaction;
 - (BOOL)matchesCompletedIdentity:(NSString *)nativeId;
+@property (nonatomic, weak, nullable) RCTViewComponentView *sentinel;
 @property (nonatomic, weak, readonly) RCTViewComponentView *view;
 @end
 

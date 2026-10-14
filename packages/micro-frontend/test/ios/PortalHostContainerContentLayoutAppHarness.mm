@@ -116,6 +116,10 @@ static void AddNativeContent(UIView *view)
 {
   if (self = [super initWithFrame:frame]) {
     _mount = [[GranitePortalInitialContentMount alloc] initWithView:self];
+    RCTViewComponentView *sentinel = [[RCTViewComponentView alloc] initWithFrame:CGRectZero];
+    sentinel.nativeId = @"granite:portal-mount-sentinel";
+    [self addSubview:sentinel];
+    _mount.sentinel = sentinel;
   }
   return self;
 }
@@ -194,6 +198,7 @@ typedef void (^Case)(Done done);
     @{@"name" : @"lifecycle cancellation", @"case" : [self lifecycleCase]},
     @{@"name" : @"deferred and late", @"case" : [self deferredLateCase]},
     @{@"name" : @"one-shot reentry", @"case" : [self reentryCase]},
+    @{@"name" : @"sentinel removal", @"case" : [self sentinelRemovalCase]},
   ] index:0];
 }
 
@@ -566,6 +571,32 @@ typedef void (^Case)(Done done);
       [self expect:second equals:1 name:@"reentrant second callback count"];
       [self close:container];
       done();
+    });
+  } copy];
+}
+
+- (Case)sentinelRemovalCase
+{
+  return [^(Done done) {
+    PortalHostContainerView *container = [self container];
+    HarnessMarker *marker = (HarnessMarker *)Marker(@"request", 2, CGRectZero);
+    [[self host:container] addSubview:marker];
+    CompleteMarker(marker);
+    Counter *calls = [Counter new];
+    [self observe:container counter:calls];
+    RCTViewComponentView *sentinel = marker.mount.sentinel;
+    marker.mount.sentinel = nil;
+    [sentinel removeFromSuperview];
+    CompleteMarker(marker);
+    AfterTicks(2, ^{
+      [self expect:calls.value equals:0 name:@"removed sentinel cannot acknowledge mount"];
+      [marker addSubview:sentinel];
+      marker.mount.sentinel = sentinel;
+      CompleteMarker(marker);
+      AfterTicks(2, ^{
+        [self expect:calls.value equals:1 name:@"new sentinel insertion may acknowledge mount"];
+        [self close:container]; done();
+      });
     });
   } copy];
 }

@@ -62,13 +62,44 @@ describe('PortalInitialContentView', () => {
         pointerEvents: 'none',
         onLayout,
       },
-      children: [{ type: 'View', props: { testID: 'body' } }],
+      children: [
+        {
+          type: 'View',
+          props: {
+            nativeID: 'granite:portal-mount-sentinel',
+            collapsable: false,
+            pointerEvents: 'none',
+            accessibilityElementsHidden: true,
+            importantForAccessibility: 'no-hide-descendants',
+            style: { position: 'absolute', width: 0, height: 0 },
+          },
+        },
+        { type: 'View', props: { testID: 'body' } },
+      ],
     });
     expect(renderer.root.findAllByType(NativeInitialContentView)).toHaveLength(1);
-    expect(renderer.root.findAllByType(View)).toHaveLength(1);
+    expect(renderer.root.findAllByType(View)).toHaveLength(2);
     expect(ref.current).toBe(node);
     act(() => renderer.unmount());
     expect(ref.current).toBeNull();
+  });
+
+  it('keeps nested user content after the private sentinel', () => {
+    const renderer = render(
+      <MicroFrontendSessionProvider presentationVisibility={true} sessionId="nested">
+        <PortalInitialContentView>
+          <View testID="outer">
+            <View testID="inner" />
+          </View>
+        </PortalInitialContentView>
+      </MicroFrontendSessionProvider>
+    );
+    expect(renderer.toJSON()).toMatchObject({
+      children: [
+        { props: { nativeID: 'granite:portal-mount-sentinel' } },
+        { props: { testID: 'outer' }, children: [{ props: { testID: 'inner' } }] },
+      ],
+    });
   });
 
   it('requires the existing session provider', () => {

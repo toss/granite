@@ -1,5 +1,3 @@
-@file:OptIn(com.facebook.react.common.annotations.UnstableReactNativeAPI::class)
-
 package com.teleport.host
 
 import android.app.Activity
@@ -7,7 +5,11 @@ import android.os.Looper
 import android.view.View
 import android.widget.FrameLayout
 import com.facebook.react.R
-import com.facebook.react.bridge.UIManager
+import com.facebook.react.bridge.ReactMarker
+import com.facebook.react.bridge.ReactMarkerConstants
+import com.facebook.react.internal.featureflags.ReactNativeFeatureFlags
+import com.teleport.initialcontent.PortalInitialContentMounts
+import com.teleport.initialcontent.PortalInitialContentViewManager
 import com.teleport.initialcontent.PortalInitialContentRegistry
 import com.teleport.initialcontent.PortalInitialContentView
 import org.junit.After
@@ -28,7 +30,8 @@ class PortalContentLayoutObservationTest {
   private lateinit var controller: ActivityController<Activity>
   private lateinit var container: FrameLayout
   private lateinit var host: PortalHostView
-  private lateinit var manager: UIManager
+  private lateinit var viewManager: PortalInitialContentViewManager
+  private var commitNumber = 0
   private val markers = mutableListOf<PortalInitialContentView>()
 
   @Before
@@ -38,7 +41,11 @@ class PortalContentLayoutObservationTest {
     controller.get().setContentView(container)
     host = PortalHostView(controller.get())
     container.addView(host)
-    manager = mock(UIManager::class.java)
+    PortalInitialContentMounts.install()
+    mockStatic(ReactNativeFeatureFlags::class.java).use { flags ->
+      flags.`when`<Boolean> { ReactNativeFeatureFlags.enableViewRecyclingForView() }.thenReturn(false)
+      viewManager = PortalInitialContentViewManager()
+    }
     drain()
   }
 
@@ -46,6 +53,8 @@ class PortalContentLayoutObservationTest {
   fun tearDown() {
     host.cleanup()
     markers.forEach { it.dispose() }
+    begin()
+    end()
     controller.pause().stop().destroy()
     drain()
     assertTrue(PortalInitialContentRegistry.observers.isEmpty())
@@ -61,7 +70,7 @@ class PortalContentLayoutObservationTest {
     host.viewTreeObserver.dispatchOnPreDraw()
     drain()
     assertEquals(0, calls)
-    marker.didDispatchMountItems(manager)
+    ReactMarker.logFabricMarker(ReactMarkerConstants.FABRIC_COMMIT_END, null, 99, 0L)
     drain()
     assertEquals(0, calls)
     complete(marker)
@@ -89,7 +98,8 @@ class PortalContentLayoutObservationTest {
   @Test
   fun `preallocated marker cannot acknowledge an unrelated mount batch`() {
     val marker = marker(attach = false)
-    complete(marker)
+    begin()
+    end()
     assertFalse(marker.hasCompletedMount())
     host.addView(marker)
     var calls = 0
@@ -160,10 +170,11 @@ class PortalContentLayoutObservationTest {
     var calls = 0
     host.observeContentLayout("request", 2) { calls++ }
     complete(marker)
-    marker.willMountItems(manager)
+    begin()
+    PortalInitialContentMounts.recordMutation(marker)
     drain()
     assertEquals(0, calls)
-    marker.didMountItems(manager)
+    end()
     drain()
     assertEquals(1, calls)
   }
@@ -270,14 +281,109 @@ class PortalContentLayoutObservationTest {
   }
 
   @Test
-  fun `completion listener is bound to its UI manager and released on disposal`() {
+  fun `disposal invalidates acknowledgment and removes the native instance`() {
     val marker = marker()
-    marker.bind(manager)
-    verify(manager).addUIManagerEventListener(marker)
+    complete(marker)
     marker.dispose()
-    verify(manager).removeUIManagerEventListener(marker)
     assertFalse(marker.hasCompletedMount())
     assertFalse(PortalInitialContentRegistry.markers.contains(marker))
+  }
+
+  @Test
+  fun `unrelated batch cannot complete a parented marker`() {
+    val first = marker(key = "first")
+    val second = marker()
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    complete(first)
+    drain()
+    assertEquals(0, calls)
+    assertFalse(second.hasCompletedMount())
+    complete(second)
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `aborted batch is not acknowledged by a later unrelated batch`() {
+    val marker = marker()
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    begin()
+    insertSentinel(marker)
+    // Missing END: execution aborted. Another surface may reuse the same commit number.
+    ReactMarker.logFabricMarker(ReactMarkerConstants.FABRIC_BATCH_EXECUTION_START, null, commitNumber, 0L)
+    end()
+    drain()
+    assertEquals(0, calls)
+    assertFalse(marker.hasCompletedMount())
+    complete(marker)
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `unmatched end cannot certify a different transaction`() {
+    val marker = marker()
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    begin()
+    insertSentinel(marker)
+    ReactMarker.logFabricMarker(ReactMarkerConstants.FABRIC_BATCH_EXECUTION_END, null, commitNumber + 1, 0L)
+    drain()
+    assertEquals(0, calls)
+    end()
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `sentinel removal cannot positively acknowledge content`() {
+    val marker = marker()
+    complete(marker)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    begin()
+    viewManager.removeViewAt(marker, 0)
+    end()
+    drain()
+    assertEquals(0, calls)
+    begin()
+    viewManager.addView(marker, View(controller.get()), 0)
+    end()
+    drain()
+    assertEquals(0, calls)
+    begin()
+    insertSentinel(marker)
+    end()
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `sync prop updates outside a mount do not erase an applied acknowledgment`() {
+    val marker = marker()
+    complete(marker)
+    PortalInitialContentMounts.recordMutation(marker)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `completed content moved to a destination later delivers without another Fabric mount`() {
+    val marker = marker(attach = false)
+    container.addView(marker)
+    complete(marker)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    drain()
+    assertEquals(0, calls)
+    container.removeView(marker)
+    host.addView(marker)
+    drain()
+    assertEquals(1, calls)
   }
 
   @Test
@@ -305,9 +411,29 @@ class PortalContentLayoutObservationTest {
       if (attach) host.addView(it)
     }
 
+  private fun begin() {
+    ReactMarker.logFabricMarker(ReactMarkerConstants.FABRIC_BATCH_EXECUTION_START, null, ++commitNumber, 0L)
+  }
+
+  private fun end() {
+    ReactMarker.logFabricMarker(ReactMarkerConstants.FABRIC_BATCH_EXECUTION_END, null, commitNumber, 0L)
+  }
+
+  private fun insertSentinel(marker: PortalInitialContentView) {
+    val sentinel = View(controller.get()).apply {
+      setTag(R.id.view_tag_native_id, PortalInitialContentView.SENTINEL_ID)
+    }
+    viewManager.addView(marker, sentinel, 0)
+  }
+
   private fun complete(marker: PortalInitialContentView) {
-    marker.willMountItems(manager)
-    marker.didMountItems(manager)
+    begin()
+    if (marker.childCount == 0 || !marker.isMountSentinel(marker.getChildAt(0))) {
+      insertSentinel(marker)
+    } else {
+      viewManager.addView(marker, View(controller.get()), marker.childCount)
+    }
+    end()
   }
 
   private fun drain() = shadowOf(Looper.getMainLooper()).idle()

@@ -36,6 +36,12 @@ NSArray<GranitePortalInitialContentMount *> *GranitePortalInitialContentMounts(v
   return self;
 }
 
+- (void)setSentinel:(RCTViewComponentView *)sentinel
+{
+  [self willMount];
+  _sentinel = sentinel;
+}
+
 - (void)willMount
 {
   _completedIdentity = nil;
@@ -44,6 +50,7 @@ NSArray<GranitePortalInitialContentMount *> *GranitePortalInitialContentMounts(v
 
 - (void)didMountWithSurfaceId:(NSInteger)surfaceId transaction:(NSInteger)transaction
 {
+  if (![self.sentinel.nativeId isEqualToString:@"granite:portal-mount-sentinel"]) return;
   _surfaceId = surfaceId;
   _transaction = transaction;
   _completedIdentity = [self.view.nativeId copy];
@@ -52,7 +59,8 @@ NSArray<GranitePortalInitialContentMount *> *GranitePortalInitialContentMounts(v
 
 - (BOOL)matchesCompletedIdentity:(NSString *)nativeId
 {
-  return _transaction >= 0 && [_completedIdentity isEqualToString:nativeId] &&
+  return [self.sentinel.nativeId isEqualToString:@"granite:portal-mount-sentinel"] &&
+      _transaction >= 0 && [_completedIdentity isEqualToString:nativeId] &&
       [self.view.nativeId isEqualToString:nativeId];
 }
 @end

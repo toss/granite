@@ -3,6 +3,7 @@ package com.teleport.host
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.view.View
 import com.facebook.react.bridge.UiThreadUtil
 import com.facebook.react.views.view.ReactViewGroup
 import com.teleport.global.PortalRegistry
@@ -29,7 +30,7 @@ class PortalHostView(
    * physically beneath this host in the same Window, with its native mount completed.
    * Completion belongs to the native instance and identity, not inferred visual readiness.
    * Empty, hidden, or zero-size declared content is valid. Layout requests are not polled.
-   * A later mount invalidates the previous acknowledgment until its mount batch ends.
+   * A later marker mutation invalidates the acknowledgment until its exact mount execution ends.
    *
    * Subscribe before or after attachment. Detach, rename, and cleanup cancel observations.
    * Resize preserves observations but does not require a commit for the new host size.
@@ -95,6 +96,16 @@ class PortalHostView(
       Handler(Looper.getMainLooper()).post { isInBatch = false }
     }
     return minOf(batchBaseIndex + childIndex, childCount)
+  }
+
+  override fun onViewAdded(child: View) {
+    super.onViewAdded(child)
+    contentLayoutObservations.toList().forEach { it.attach() }
+  }
+
+  override fun onViewRemoved(child: View) {
+    super.onViewRemoved(child)
+    contentLayoutObservations.toList().forEach { it.attach() }
   }
 
   override fun onAttachedToWindow() {
