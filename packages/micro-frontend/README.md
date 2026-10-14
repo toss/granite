@@ -482,32 +482,54 @@ Wrap the Portal in your own `<View>` when you need any of these.
 
 ### Observing initial content layout
 
-`PortalInitialContentView` marks an initial UI boundary for the current
+`PortalInitialContentView` coordinates initial UI for the current
 `MicroFrontendSessionProvider`. It derives the observation key from that session's
 `sessionId` and uses revision `0`; callers do not provide a request or a readiness
 flag. Rendering it outside a session provider throws `MissingMicroFrontendSessionError`.
 
-Replace an existing boundary View with this component to keep the same native
-View hierarchy. It accepts ordinary View props and forwards its ref to that View.
-`id`, `nativeID`, and `collapsable` are reserved for the observation marker.
+Pass `url` to render a registered pending component while keeping the primary
+application mounted. Ordinary View props and the ref belong to the outer container.
+That container never carries a readiness marker. `id`, `nativeID`, and `collapsable`
+are reserved, and `url` is consumed by the SDK rather than forwarded to a native View.
 
 ```tsx
 import { MicroFrontendSessionProvider, Portal, PortalInitialContentView } from '@granite-js/micro-frontend';
 
 <Portal hostName={sessionId}>
   <MicroFrontendSessionProvider sessionId={sessionId} presentationVisibility={isVisible}>
-    <PortalInitialContentView style={{ flex: 1 }}>
-      <PendingScreen />
+    <PortalInitialContentView url={initialUrl} style={{ flex: 1 }}>
+      <App />
     </PortalInitialContentView>
   </MicroFrontendSessionProvider>
 </Portal>;
 ```
 
-The session provider and content View must use the same package instance. The
-integration can keep both in its host bundle; no application-specific request
-props or additional Context provider are needed. Render one marked boundary per
-observation request. A boundary whose children produce no native views does not
-complete the observation.
+When the URL resolves to a pending component and the pending store has not hidden
+it, the SDK renders that component with its parsed route params in a marked,
+absolute-fill wrapper. The pending wrapper ignores pointer events and is hidden
+from accessibility, matching `PendingHostComponent`. The primary wrapper stays
+mounted with zero opacity, disabled pointer events, hidden accessibility, and no marker.
+
+When there is no matching pending component, or the application hides it through
+`hidePendingHostComponent()`, the marker moves to the visible primary wrapper
+without remounting the primary. `url={null}` also selects the primary. The primary
+wrapper is inside the SDK's `Suspense` boundary with a `null` fallback; an unresolved
+primary cannot make the outer container report readiness. Pending UI remains
+outside that Suspense boundary. A selected pending component that returns `null`
+has no native output and does not complete the native observation.
+
+Omit `url` when the children are already the explicit initial UI, such as a host
+error screen. In this mode the component renders one marked View directly and
+does not coordinate pending content. Put an error boundary outside the coordinator
+to catch errors from both branches, and render its fallback inside a no-URL
+`PortalInitialContentView` under the same session provider.
+
+The session provider and content View must use the same package instance. Both
+can stay in the host bundle; the application needs no observation-specific props
+or Context. The SDK uses the existing pending component store and its hide signal.
+It does not add a per-session pending store or infer application-data readiness.
+Render one `PortalInitialContentView` per observation request. A marked boundary
+whose children produce no native views does not complete the observation.
 
 An Android destination observes the session's marker:
 
