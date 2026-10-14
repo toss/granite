@@ -2,6 +2,7 @@ package com.teleport.host
 
 import android.os.Handler
 import android.os.Looper
+import android.view.ViewTreeObserver
 import com.facebook.react.R
 import com.facebook.react.bridge.UiThreadUtil
 import com.teleport.initialcontent.PortalInitialContentRegistry
@@ -17,17 +18,48 @@ internal class PortalContentLayoutObservation(
   private val nativeId = "granite:portal-initial-content:$revision:$requestKey"
   private val handler = Handler(Looper.getMainLooper())
   private var scheduled = false
+  private var preDrawObserver: ViewTreeObserver? = null
+  private var dirty = false
   private val check = Runnable {
     scheduled = false
     checkCompletedMount()
   }
-  private val changed: () -> Unit = { scheduleCheck() }
+  private val preDrawListener = ViewTreeObserver.OnPreDrawListener {
+    if (dirty) {
+      dirty = false
+      checkCompletedMount()
+    }
+    true
+  }
+  private val changed: () -> Unit = {
+    dirty = true
+    scheduleCheck()
+  }
 
   init {
     PortalInitialContentRegistry.observers.add(changed)
   }
 
-  fun attach() = scheduleCheck()
+  fun attach() {
+    dirty = true
+    installPreDrawListener()
+    scheduleCheck()
+  }
+
+  private fun installPreDrawListener() {
+    val currentHost = host ?: return
+    if (!currentHost.isAttachedToWindow) return
+    val currentObserver = currentHost.viewTreeObserver
+    if (preDrawObserver === currentObserver) return
+    removePreDrawListener()
+    currentObserver.addOnPreDrawListener(preDrawListener)
+    preDrawObserver = currentObserver
+  }
+
+  private fun removePreDrawListener() {
+    preDrawObserver?.takeIf { it.isAlive }?.removeOnPreDrawListener(preDrawListener)
+    preDrawObserver = null
+  }
 
   private fun scheduleCheck() {
     if (host == null || scheduled) return
@@ -53,6 +85,7 @@ internal class PortalContentLayoutObservation(
     PortalInitialContentRegistry.observers.remove(changed)
     handler.removeCallbacks(check)
     scheduled = false
+    removePreDrawListener()
     onReady = null
     val previousHost = host
     host = null

@@ -26,6 +26,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.android.controller.ActivityController
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.LooperMode
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], manifest = Config.NONE)
@@ -148,6 +149,54 @@ class PortalContentLayoutObservationTest {
     host.observeContentLayout("request", 2) { calls++ }
     assertEquals(0, calls)
     drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  @LooperMode(LooperMode.Mode.PAUSED)
+  fun `pre draw can observe a completed mount in the same dispatch before the handler drains`() {
+    val marker = marker()
+    var calls = 0
+    host.viewTreeObserver.addOnPreDrawListener {
+      complete(marker)
+      true
+    }
+    host.observeContentLayout("request", 2) { calls++ }
+    host.viewTreeObserver.dispatchOnPreDraw()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  @LooperMode(LooperMode.Mode.PAUSED)
+  fun `pre draw waits for the next draw when completion happens after observation`() {
+    val marker = marker()
+    var calls = 0
+    var firstDraw = true
+    host.observeContentLayout("request", 2) { calls++ }
+    host.viewTreeObserver.addOnPreDrawListener {
+      if (firstDraw) {
+        firstDraw = false
+        complete(marker)
+      }
+      true
+    }
+    host.viewTreeObserver.dispatchOnPreDraw()
+    assertEquals(0, calls)
+    host.viewTreeObserver.dispatchOnPreDraw()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  @LooperMode(LooperMode.Mode.PAUSED)
+  fun `pre draw listener follows the active observer after reattach`() {
+    container.removeView(host)
+    val marker = marker(attach = false)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    host.addView(marker)
+    complete(marker)
+    container.addView(host)
+    host.viewTreeObserver.dispatchOnPreDraw()
     assertEquals(1, calls)
   }
 

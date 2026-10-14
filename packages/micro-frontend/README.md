@@ -567,9 +567,11 @@ beneath the destination and attached to its Window, with a completed native moun
 for that instance and identity. A new marker mutation invalidates the previous
 acknowledgment until its exact mount execution finishes. Unrelated transactions
 and synchronous non-Fabric prop updates do not manufacture a new acknowledgment. Replacing or recycling a native view cannot
-reuse its predecessor's acknowledgment. Delivery is queued outside Fabric's
-observer iteration, revalidates identity and attachment, and removes the observation
-before calling `onReady`. A late subscriber can consume an existing acknowledgment.
+reuse its predecessor's acknowledgment. Delivery runs outside Fabric's observer
+iteration, revalidates identity and attachment, and removes the observation before
+calling `onReady`. Android can deliver a completed acknowledgment during pre-draw,
+with queued delivery also available when no traversal occurs. iOS queues delivery.
+A late subscriber can consume an existing acknowledgment.
 A plain View with a matching `nativeID` is not a substitute for the internal marker.
 
 Closing or cancelling, renaming, detaching, or cleaning up the destination cancels
