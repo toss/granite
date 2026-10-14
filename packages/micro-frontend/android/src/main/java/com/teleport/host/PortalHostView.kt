@@ -26,12 +26,15 @@ class PortalHostView(
    * Observes an explicit initial-content marker in this host without delaying drawing.
    *
    * Call and close on the UI thread. A subscription fires once for one unambiguous matching
-   * native View attached to this Window with positive bounds and no pending layout in its path.
+   * native marker and at least one physical native descendant in this Window. The marker's
+   * path through this host and the counted descendant must be visible, have nonzero alpha and
+   * positive bounds. Visible descendants must have settled layout; hidden branches are ignored.
    * Reparenting can clear `isLaidOut` while preserving RN-managed bounds, so that flag is not used.
    * This does not acknowledge a Fabric commit or completion of pixels, images, or network loading.
    *
    * Subscribe before or after attachment. Detach, rename, cleanup, and a size change after nonzero
-   * bounds cancel pending observations. Subscribe again with a new revision for resized content.
+   * bounds cancel pending observations. After resize, subscribe again for the current session
+   * request. PortalInitialContentView markers use revision 0.
    */
   fun observeContentLayout(
     requestKey: String,

@@ -70,12 +70,34 @@ internal class PortalContentLayoutObservation(
 
   private fun hasLayoutInHost(marker: View, host: PortalHostView): Boolean {
     val windowToken = host.windowToken ?: return false
-    if (host.width <= 0 || host.height <= 0 || marker.width <= 0 || marker.height <= 0) return false
     var current: View = marker
     while (true) {
-      if (!current.isAttachedToWindow || current.windowToken != windowToken || current.isLayoutRequested) return false
-      if (current === host) return true
+      if (!hasVisibleBounds(current) || !current.isAttachedToWindow ||
+        current.windowToken != windowToken || current.isLayoutRequested
+      ) return false
+      if (current === host) return hasNativeContent(marker, host)
       current = current.parent as? View ?: return false
     }
   }
+  private fun hasNativeContent(marker: View, host: PortalHostView): Boolean {
+    if (marker !is ViewGroup) return false
+    var hasContent = false
+    val groups = ArrayDeque<ViewGroup>()
+    groups.add(marker)
+    while (groups.isNotEmpty()) {
+      val group = groups.removeLast()
+      for (index in 0 until group.childCount) {
+        val child = group.getChildAt(index) ?: continue
+        if (child.parent !== group || child.visibility != View.VISIBLE || !(child.alpha > 0f)) continue
+        if (!child.isAttachedToWindow || child.windowToken != host.windowToken || child.isLayoutRequested) return false
+        if (!hasVisibleBounds(child)) continue
+        hasContent = true
+        if (child is ViewGroup) groups.add(child)
+      }
+    }
+    return hasContent
+  }
+
+  private fun hasVisibleBounds(view: View): Boolean =
+    view.visibility == View.VISIBLE && view.alpha > 0f && view.width > 0 && view.height > 0
 }

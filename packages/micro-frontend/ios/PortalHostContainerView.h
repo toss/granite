@@ -47,14 +47,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Observes one exact initial-content marker on a native View in this destination.
 /// Call and cancel on the main thread with a nonempty key and nonnegative Int32 revision.
-/// The one-shot callback requires one matching Fabric nativeId, positive host/marker bounds,
-/// the same Window, and no pending layer layout from the marker through this container.
+/// The one-shot callback requires one matching Fabric nativeId and at least one physical
+/// native descendant in the same Window. The marker's path through this container and the
+/// counted descendant must be visible with nonzero alpha and positive bounds. Visible
+/// descendants and the ancestor path must have settled layout; hidden branches are ignored.
 /// This does not acknowledge a Fabric commit, image/network completion, or presented pixels.
 ///
 /// Observation never activates a deferred container or delays rendering. Its display link
 /// runs only while attached, activated, and pending. Cancel when the caller stops waiting;
 /// rename, detach, a size change after nonzero bounds, and invalidation also cancel it.
-/// Subscribe again with a new revision for resized content.
+/// After resize, observe the current session request again. PortalInitialContentView uses revision 0.
 - (id<PortalContentLayoutObservation>)observeContentLayoutWithRequestKey:(NSString *)requestKey
                                                               revision:(NSInteger)revision
                                                                onReady:(void (^)(void))onReady

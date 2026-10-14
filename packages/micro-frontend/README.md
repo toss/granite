@@ -482,55 +482,40 @@ Wrap the Portal in your own `<View>` when you need any of these.
 
 ### Observing initial content layout
 
-`PortalInitialContentView` declares that its own native View contains the initial
-screen or a usable loading state. Replace that existing root View with this
-component; it does not add a native wrapper. It accepts ordinary View props and
-forwards its ref to the native View. `nativeID` and `collapsable` are reserved for
-the observation marker. There are no `ready`, request key, or revision props on
-the content View.
+`PortalInitialContentView` marks an initial UI boundary for the current
+`MicroFrontendSessionProvider`. It derives the observation key from that session's
+`sessionId` and uses revision `0`; callers do not provide a request or a readiness
+flag. Rendering it outside a session provider throws `MissingMicroFrontendSessionError`.
+
+Replace an existing boundary View with this component to keep the same native
+View hierarchy. It accepts ordinary View props and forwards its ref to that View.
+`id`, `nativeID`, and `collapsable` are reserved for the observation marker.
 
 ```tsx
-import { PortalInitialContentProvider, PortalInitialContentView } from '@granite-js/micro-frontend';
+import { MicroFrontendSessionProvider, Portal, PortalInitialContentView } from '@granite-js/micro-frontend';
 
-function InitialScreen() {
-  if (!hasInitialUI) return null;
-
-  return <PortalInitialContentView style={{ flex: 1 }}>{initialUI}</PortalInitialContentView>;
-}
-
-// The integration layer supplies the native destination's observation request.
-<PortalInitialContentProvider request={{ requestKey: sessionId, revision: contentRevision }}>
-  <InitialScreen />
-</PortalInitialContentProvider>;
+<Portal hostName={sessionId}>
+  <MicroFrontendSessionProvider sessionId={sessionId} presentationVisibility={isVisible}>
+    <PortalInitialContentView style={{ flex: 1 }}>
+      <PendingScreen />
+    </PortalInitialContentView>
+  </MicroFrontendSessionProvider>
+</Portal>;
 ```
 
-Rendering the content View is the UI owner's declaration of readiness. Do not
-render it around an empty shell or a Suspense boundary whose fallback is empty.
-It does not infer readiness from its children, a session opening, network
-completion, or mounting alone. Native hosts still verify attachment and layout.
+The session provider and content View must use the same package instance. The
+integration can keep both in its host bundle; no application-specific request
+props or additional Context provider are needed. Render one marked boundary per
+observation request. A boundary whose children produce no native views does not
+complete the observation.
 
-The Provider creates no native View. Without a request, the content component
-renders an ordinary View without an observation marker or forced non-collapsing
-behavior. An inner Provider with `request={undefined}` masks an outer request;
-this can disable observation for content that is not currently presented.
-
-Provider and content View must use the same package instance. If an application
-is loaded in a separate bundle, pass the request as plain props and create the
-Provider inside that bundle rather than assuming independently bundled Contexts
-are shared. A pending UI rendered outside the application needs its own request
-injection. A fallback already inside a Provider can inherit that request.
-
-The host request key must be nonempty, and its revision must be an integer from
-`0` to `2147483647`. Use the same pair for the Provider and native observer; change
-it when a new request must not accept an older screen's marker.
-
-An Android destination can observe that exact marker:
+An Android destination observes the session's marker:
 
 ```kotlin
 hostView.setName(sessionId)
 val observation = hostView.observeContentLayout(
   requestKey = sessionId,
-  revision = contentRevision,
+  revision = 0,
 ) {
   // The native owner can now update its loading or transition policy.
 }
@@ -541,8 +526,11 @@ observation.close()
 
 Register and close the observation on the Android UI thread. Registration before
 the host's first Window attachment is supported. The callback runs at most once,
-on a pre-draw where a unique matching marked View is physically under this host,
-attached to the same Window, and has nonzero bounds without pending layout.
+on a pre-draw where the unique matching boundary is physically under this host
+and attached to the same Window. The boundary and its ancestor path must have
+visible, nonzero, settled layout, and the boundary must contain at least one
+physical native descendant with visible, nonzero, settled layout. Empty, detached,
+hidden, or layout-pending content does not complete the observation.
 The observer always permits drawing; it never delays a frame or starts an animation.
 
 An iOS destination observes the same marker through its UIKit-owned container:
@@ -551,7 +539,7 @@ An iOS destination observes the same marker through its UIKit-owned container:
 container.setName(sessionId)
 let observation = container.observeContentLayout(
   requestKey: sessionId,
-  revision: contentRevision
+  revision: 0
 ) {
   // The native owner can now update its loading or transition policy.
 }
@@ -563,26 +551,25 @@ observation.cancel()
 Register and cancel on the main thread. Registration before activation or Window
 attachment is supported and does not activate a deferred container. While an
 observation is pending on an attached, activated container, a display link checks
-for a unique matching Fabric View in the actual host subtree, the same Window,
-nonzero bounds, and no pending layer layout along its ancestor path. Delivery is
-one-shot and stops observing before calling `onReady`. The observer does
-not force layout, block drawing, or control a transition.
+the same physical hierarchy, visibility, nonzero bounds, and settled-layout
+conditions, including a native descendant beneath the boundary. Delivery is
+one-shot and stops observing before calling `onReady`. The observer does not force
+layout, block drawing, or control a transition.
 
 Closing or cancelling, renaming, detaching, or cleaning up the destination cancels
 pending observations. On iOS, `container.invalidate()` also cancels them.
 A size change after the destination has established nonzero bounds also cancels them;
 the initial zero-size-to-laid-out transition does not. Register a new observation
-for a new attachment or layout request, and advance the content revision when
-the initial UI depends on the new destination size.
+for a new attachment or layout request, using the current session ID and revision `0`.
 
-The signal acknowledges the declared View's native attachment and current
-layout. It is not an acknowledgement of every descendant's latest Fabric update,
-image decoding, WebView loading, network completion, or pixels being presented.
-Native observation is available on Android and iOS. The returned props remain
-ordinary View props on other React Native platforms. Host applications retain
+The signal acknowledges the marked subtree's structural native layout. It does
+not wait for a completed draw, so a host can receive it before allowing its first
+draw. It does not establish business-data readiness, image decoding, WebView
+loading, every descendant's latest Fabric update, or pixels being presented.
+Native observation is available on Android and iOS. Host applications retain
 responsibility for timeouts, cancelling observations they no longer need, and any
 policy that postpones their own first draw. In particular, an iOS observation whose
-marker never becomes eligible keeps its display link active until cancelled or
+boundary never becomes eligible keeps its display link active until cancelled or
 its destination is torn down.
 
 The UIKit behavior harness can be built on macOS with Xcode installed:

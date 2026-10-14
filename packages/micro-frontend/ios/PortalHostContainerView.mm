@@ -217,6 +217,24 @@ static UIView *GraniteFindInitialContentMarker(UIView *host, NSString *nativeId)
   return match;
 }
 
+static BOOL GraniteHasNativeInitialContent(UIView *marker, UIWindow *window)
+{
+  BOOL hasContent = NO;
+  NSMutableArray<UIView *> *pending = [NSMutableArray arrayWithObject:marker];
+  while (pending.count > 0) {
+    UIView *parent = pending.lastObject;
+    [pending removeLastObject];
+    for (UIView *child in parent.subviews) {
+      if (child.superview != parent || child.hidden || !(child.alpha > 0)) continue;
+      if (child.window != window || child.layer.needsLayout) return NO;
+      if (child.bounds.size.width <= 0 || child.bounds.size.height <= 0) continue;
+      hasContent = YES;
+      [pending addObject:child];
+    }
+  }
+  return hasContent;
+}
+
 static BOOL GraniteHasInitialContentLayout(
     UIView *marker, UIView *host, PortalHostContainerView *container)
 {
@@ -226,8 +244,9 @@ static BOOL GraniteHasInitialContentLayout(
     return NO;
   }
   for (UIView *view = marker; view != nil; view = view.superview) {
-    if (view.window != window || view.layer.needsLayout) return NO;
-    if (view == container) return YES;
+    if (view.window != window || view.hidden || !(view.alpha > 0) || view.layer.needsLayout ||
+        view.bounds.size.width <= 0 || view.bounds.size.height <= 0) return NO;
+    if (view == container) return GraniteHasNativeInitialContent(marker, window);
   }
   return NO;
 }
