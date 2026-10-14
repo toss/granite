@@ -800,6 +800,25 @@ generic native destination should read the requested name at runtime.
 See [examples/portal/README.md](examples/portal/README.md) for the retained
 Portal-only cross-Activity / UIViewController example.
 
+### Session-scoped pending completion
+
+For hosts with multiple concurrent sessions, pass `sessionId` to
+`useIsPendingHostComponentHidden(sessionId)` or `<PendingHostComponent url={url} sessionId={sessionId} />`.
+Granite creates pending state when the runtime accepts `openApp` and releases it on `closeApp`.
+Completion survives visibility changes, host remounts, other sessions opening, and legacy global resets.
+Duplicate open events do not reset an existing session. Session IDs must uniquely identify a session lifetime.
+
+Remote components can use `useMicroFrontendSession()` to capture their ID and call
+`hidePendingHostComponent(sessionId)` when ready. Capture the ID before asynchronous work:
+a late completion for a closed session is ignored and cannot complete another session.
+
+For backward compatibility, calls without an ID still update the legacy global flag and complete
+only the most recently opened session that remains open. They cannot identify the origin of late
+asynchronous work; concurrent applications should migrate to explicit IDs. The no-argument
+`resetPendingHostComponent()` resets only the legacy global flag, never session completion.
+Hosts using the legacy single-screen controller can continue using its existing API.
+
+
 ## License and credit
 
 Apache-2.0. The Portal implementation is based on

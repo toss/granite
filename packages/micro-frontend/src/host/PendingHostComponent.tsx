@@ -10,6 +10,7 @@ import {
 
 export interface PendingHostComponentProps {
   readonly url: string | null | undefined;
+  readonly sessionId?: string;
 }
 
 export interface PendingHostComponentController {
@@ -20,12 +21,9 @@ export interface PendingHostComponentController {
   readonly dismiss: () => void;
 }
 
-export function useIsPendingHostComponentHidden() {
-  return useSyncExternalStore(
-    subscribePendingHostComponentStore,
-    getIsPendingHostComponentHidden,
-    getIsPendingHostComponentHidden
-  );
+export function useIsPendingHostComponentHidden(sessionId?: string) {
+  const getSnapshot = useCallback(() => getIsPendingHostComponentHidden(sessionId), [sessionId]);
+  return useSyncExternalStore(subscribePendingHostComponentStore, getSnapshot, getSnapshot);
 }
 
 function usePendingHostComponentStoreVersion() {
@@ -46,9 +44,9 @@ export function useResolvedPendingHostComponent(url: string | null | undefined) 
   return resolvePendingHostComponent(url);
 }
 
-export function PendingHostComponent({ url }: PendingHostComponentProps) {
+export function PendingHostComponent({ url, sessionId }: PendingHostComponentProps) {
   const resolvedPendingHostComponent = useResolvedPendingHostComponent(url);
-  const isHidden = useIsPendingHostComponentHidden();
+  const isHidden = useIsPendingHostComponentHidden(sessionId);
 
   if (resolvedPendingHostComponent == null || isHidden) {
     return null;

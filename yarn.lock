@@ -5781,6 +5781,7 @@ __metadata:
   dependencies:
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/utils": "workspace:*"
+    "@jridgewell/sourcemap-codec": "npm:^1.5.5"
     "@types/node": "catalog:tools"
     "@vitest/coverage-v8": "npm:^4.0.12"
     es-toolkit: "npm:^1.39.8"
