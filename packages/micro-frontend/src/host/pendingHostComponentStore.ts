@@ -37,6 +37,7 @@ interface MatchedPendingHostComponentRoute {
 interface PendingHostComponentStore {
   entries: PendingHostComponentRouteEntry[];
   hidden: boolean;
+  sessionHidden?: Map<string, boolean>;
   readonly listeners: Set<() => void>;
   version: number;
 }
@@ -102,8 +103,29 @@ export function getPendingHostComponentStoreVersion() {
   return getPendingHostComponentStore().version;
 }
 
-export function getIsPendingHostComponentHidden() {
-  return getPendingHostComponentStore().hidden;
+function getSessionHidden() {
+  const store = getPendingHostComponentStore();
+  // Adopt stores created by older package copies without replacing their listeners.
+  return (store.sessionHidden ??= new Map<string, boolean>());
+}
+
+export function getIsPendingHostComponentHidden(sessionId?: string) {
+  return sessionId == null ? getPendingHostComponentStore().hidden : (getSessionHidden().get(sessionId) ?? false);
+}
+
+/** @internal Called once for each accepted native open event, before notifying React. */
+export function openPendingHostComponentSession(sessionId: string) {
+  const sessions = getSessionHidden();
+  if (sessions.has(sessionId)) {return;}
+  sessions.set(sessionId, false);
+  getPendingHostComponentStore().hidden = false;
+  installPendingHostComponentBridge();
+  emitPendingHostComponentStoreChange();
+}
+
+/** @internal Closing a session releases its state; visibility changes do not. */
+export function closePendingHostComponentSession(sessionId: string) {
+  if (getSessionHidden().delete(sessionId)) {emitPendingHostComponentStoreChange();}
 }
 
 function setPendingHostComponentHidden(hidden: boolean) {
@@ -117,7 +139,19 @@ function setPendingHostComponentHidden(hidden: boolean) {
   emitPendingHostComponentStoreChange();
 }
 
-export function hidePendingHostComponent() {
+export function hidePendingHostComponent(sessionId?: string) {
+  const sessions = getSessionHidden();
+  // Unscoped callers retain legacy behavior, targeting the latest open session.
+  // Async work should always pass its originating session ID.
+  const target = sessionId ?? Array.from(sessions.keys()).at(-1);
+  if (target != null) {
+    if (sessions.get(target) === false) {
+      sessions.set(target, true);
+      emitPendingHostComponentStoreChange();
+    }
+    if (sessionId == null) {setPendingHostComponentHidden(true);}
+    return;
+  }
   setPendingHostComponentHidden(true);
 
   const hideSharedPendingHostComponent = Reflect.get(globalThis, HIDE_SHARED_PENDING_HOST_COMPONENT_KEY);
@@ -264,6 +298,7 @@ function findRouteByRequest(request: PendingHostComponentRouteRequest): MatchedP
 export function resetPendingHostComponentStoreForTest() {
   const store = getPendingHostComponentStore();
   store.entries = [];
+  store.sessionHidden?.clear();
   store.hidden = false;
   store.version = 0;
   emitPendingHostComponentStoreChange();

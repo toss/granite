@@ -686,3 +686,21 @@ Apache-2.0. The Portal implementation is based on
 [react-native-teleport](https://github.com/kirillzyusko/react-native-teleport)
 by Kiryl Ziusko; see [NOTICE](NOTICE) and
 [LICENSE.react-native-teleport](LICENSE.react-native-teleport).
+
+### Session-scoped pending completion
+
+For hosts with multiple concurrent sessions, pass `sessionId` to
+`useIsPendingHostComponentHidden(sessionId)` or `<PendingHostComponent url={url} sessionId={sessionId} />`.
+Granite creates pending state when the runtime accepts `openApp` and releases it on `closeApp`.
+Completion survives visibility changes, host remounts, other sessions opening, and legacy global resets.
+Duplicate open events do not reset an existing session. Session IDs must uniquely identify a session lifetime.
+
+Remote components can use `useMicroFrontendSession()` to capture their ID and call
+`hidePendingHostComponent(sessionId)` when ready. Capture the ID before asynchronous work:
+a late completion for a closed session is ignored and cannot complete another session.
+
+For backward compatibility, calls without an ID still update the legacy global flag and complete
+only the most recently opened session that remains open. They cannot identify the origin of late
+asynchronous work; concurrent applications should migrate to explicit IDs. The no-argument
+`resetPendingHostComponent()` resets only the legacy global flag, never session completion.
+Hosts using the legacy single-screen controller can continue using its existing API.
