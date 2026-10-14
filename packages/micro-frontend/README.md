@@ -554,16 +554,19 @@ observation.cancel()
 Register and cancel on the main thread. Registration before activation or Window
 attachment is supported and does not activate a deferred container. While an
 observation is pending on an attached, activated container, a display link checks
-the same physical hierarchy, visibility, nonzero bounds, and settled-layout
-conditions, including a native descendant beneath the boundary. Delivery is
+the physical hierarchy, visibility, and nonzero bounds, including a native descendant
+beneath the boundary. As on Android, only the boundary-to-host path must have no
+pending layout request (`layer.needsLayout` on iOS); descendant layout-request
+flags are ignored. The iOS path includes the owning container. Delivery is
 one-shot and stops observing before calling `onReady`. The observer does not force
 layout, block drawing, or control a transition.
 
 Closing or cancelling, renaming, detaching, or cleaning up the destination cancels
 pending observations. On iOS, `container.invalidate()` also cancels them.
-Size changes preserve pending observations until the current layout meets the
-conditions. Register a new observation after a new attachment, using the current
-session ID and revision `0`.
+Size changes preserve pending observations and continue these structural checks.
+Delivery does not guarantee that descendants reflect the latest host size: their
+existing bounds may still come from before the resize. Register a new observation
+after a new attachment, using the current session ID and revision `0`.
 
 The signal acknowledges the marked subtree's structural native layout. It does
 not wait for a completed draw, so a host can receive it before allowing its first

@@ -50,13 +50,15 @@ NS_ASSUME_NONNULL_BEGIN
 /// The one-shot callback requires one matching Fabric nativeId and at least one physical
 /// native descendant in the same Window. The marker's path through this container and the
 /// counted descendant must be visible with nonzero alpha and positive bounds. Visible
-/// descendants and the ancestor path must have settled layout; hidden branches are ignored.
+/// descendants need visible bounds; only the marker-to-container path must have settled
+/// layout. Descendant layout-request flags and hidden branches are ignored.
 /// This does not acknowledge a Fabric commit, image/network completion, or presented pixels.
 ///
 /// Observation never activates a deferred container or delays rendering. Its display link
 /// runs only while attached, activated, and pending. Cancel when the caller stops waiting;
 /// rename, detach, and invalidation also cancel it. Size changes preserve the observation
-/// until the current layout meets the conditions. PortalInitialContentView uses revision 0.
+/// and continue structural checks. Delivery does not guarantee that descendants reflect
+/// the latest host size; they may retain pre-resize bounds. PortalInitialContentView uses revision 0.
 - (id<PortalContentLayoutObservation>)observeContentLayoutWithRequestKey:(NSString *)requestKey
                                                               revision:(NSInteger)revision
                                                                onReady:(void (^)(void))onReady

@@ -281,10 +281,13 @@ typedef void (^Case)(Done done);
     }
     AfterTicks(3, ^{
       for (NSUInteger index = 0; index < kinds.count; index++) {
-        [self expect:counters[index].value equals:0 name:[kinds[index] stringByAppendingString:@" descendant callback count"]];
+        NSUInteger expected = [kinds[index] isEqualToString:@"pending"] ? 1 : 0;
+        [self expect:counters[index].value equals:expected name:[kinds[index] stringByAppendingString:@" descendant callback count"]];
         UIView *marker = markers[index];
         if ([kinds[index] isEqualToString:@"pending"]) {
-          marker.subviews.lastObject.hidden = YES;
+          [self expect:marker.subviews.lastObject.layer.needsLayout
+                equals:YES
+                  name:@"pending descendant does not delay delivery"];
         } else {
           for (UIView *child in marker.subviews) [child removeFromSuperview];
           AddNativeContent(marker);

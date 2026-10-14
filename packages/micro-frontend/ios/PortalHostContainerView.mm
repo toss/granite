@@ -226,7 +226,9 @@ static BOOL GraniteHasNativeInitialContent(UIView *marker, UIWindow *window)
     [pending removeLastObject];
     for (UIView *child in parent.subviews) {
       if (child.superview != parent || child.hidden || !(child.alpha > 0)) continue;
-      if (child.window != window || child.layer.needsLayout) return NO;
+      // Match Android: layout requests gate only the marker-to-host path.
+      // Descendants contribute their existing visible bounds, not update completion.
+      if (child.window != window) return NO;
       if (child.bounds.size.width <= 0 || child.bounds.size.height <= 0) continue;
       hasContent = YES;
       [pending addObject:child];

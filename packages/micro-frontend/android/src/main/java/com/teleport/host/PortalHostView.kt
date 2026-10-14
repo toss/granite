@@ -33,7 +33,8 @@ class PortalHostView(
    * This does not acknowledge a Fabric commit or completion of pixels, images, or network loading.
    *
    * Subscribe before or after attachment. Detach, rename, and cleanup cancel pending observations.
-   * Size changes preserve the observation until the current layout meets the conditions.
+   * Size changes preserve the observation and continue structural checks. Delivery does not
+   * guarantee that descendants reflect the latest host size; they may retain pre-resize bounds.
    * PortalInitialContentView markers use revision 0.
    */
   fun observeContentLayout(
