@@ -116,7 +116,9 @@ export function getIsPendingHostComponentHidden(sessionId?: string) {
 /** @internal Called once for each accepted native open event, before notifying React. */
 export function openPendingHostComponentSession(sessionId: string) {
   const sessions = getSessionHidden();
-  if (sessions.has(sessionId)) {return;}
+  if (sessions.has(sessionId)) {
+    return;
+  }
   sessions.set(sessionId, false);
   getPendingHostComponentStore().hidden = false;
   installPendingHostComponentBridge();
@@ -125,7 +127,9 @@ export function openPendingHostComponentSession(sessionId: string) {
 
 /** @internal Closing a session releases its state; visibility changes do not. */
 export function closePendingHostComponentSession(sessionId: string) {
-  if (getSessionHidden().delete(sessionId)) {emitPendingHostComponentStoreChange();}
+  if (getSessionHidden().delete(sessionId)) {
+    emitPendingHostComponentStoreChange();
+  }
 }
 
 function setPendingHostComponentHidden(hidden: boolean) {
@@ -149,7 +153,9 @@ export function hidePendingHostComponent(sessionId?: string) {
       sessions.set(target, true);
       emitPendingHostComponentStoreChange();
     }
-    if (sessionId == null) {setPendingHostComponentHidden(true);}
+    if (sessionId == null) {
+      setPendingHostComponentHidden(true);
+    }
     return;
   }
   setPendingHostComponentHidden(true);

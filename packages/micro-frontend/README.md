@@ -680,13 +680,6 @@ generic native destination should read the requested name at runtime.
 See [examples/portal/README.md](examples/portal/README.md) for the retained
 Portal-only cross-Activity / UIViewController example.
 
-## License and credit
-
-Apache-2.0. The Portal implementation is based on
-[react-native-teleport](https://github.com/kirillzyusko/react-native-teleport)
-by Kiryl Ziusko; see [NOTICE](NOTICE) and
-[LICENSE.react-native-teleport](LICENSE.react-native-teleport).
-
 ### Session-scoped pending completion
 
 For hosts with multiple concurrent sessions, pass `sessionId` to
@@ -704,3 +697,11 @@ only the most recently opened session that remains open. They cannot identify th
 asynchronous work; concurrent applications should migrate to explicit IDs. The no-argument
 `resetPendingHostComponent()` resets only the legacy global flag, never session completion.
 Hosts using the legacy single-screen controller can continue using its existing API.
+
+
+## License and credit
+
+Apache-2.0. The Portal implementation is based on
+[react-native-teleport](https://github.com/kirillzyusko/react-native-teleport)
+by Kiryl Ziusko; see [NOTICE](NOTICE) and
+[LICENSE.react-native-teleport](LICENSE.react-native-teleport).

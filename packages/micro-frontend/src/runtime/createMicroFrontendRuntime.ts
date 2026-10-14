@@ -74,8 +74,12 @@ export function createMicroFrontendRuntimeWithDependencies(
         case 'closeApp':
         case 'sessionVisibilityChanged':
           if (sessionStore.applyEvent(parsedEvent)) {
-            if (parsedEvent.name === 'openApp') {openPendingHostComponentSession(parsedEvent.params.sessionId);}
-            if (parsedEvent.name === 'closeApp') {closePendingHostComponentSession(parsedEvent.params.sessionId);}
+            if (parsedEvent.name === 'openApp') {
+              openPendingHostComponentSession(parsedEvent.params.sessionId);
+            }
+            if (parsedEvent.name === 'closeApp') {
+              closePendingHostComponentSession(parsedEvent.params.sessionId);
+            }
             notifyListeners(sessionListeners, sessionStore.getSessions());
           }
           notifyListeners(eventListeners, parsedEvent);
