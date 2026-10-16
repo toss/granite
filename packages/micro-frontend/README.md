@@ -574,8 +574,9 @@ with queued delivery also available when no traversal occurs. iOS queues deliver
 A late subscriber can consume an existing acknowledgment.
 A plain View with a matching `nativeID` is not a substitute for the internal marker.
 
-Closing or cancelling, renaming, detaching, or cleaning up the destination cancels
-pending observations. On iOS, `container.invalidate()` also cancels them. Size changes
+Closing or cancelling, changing or clearing an existing name, detaching, or cleaning up the
+destination cancels pending observations. The first name can be assigned after subscribing.
+On iOS, `container.invalidate()` also cancels observations. Size changes
 preserve observations; the signal does not wait for a subsequent commit incorporating
 the latest host size. Register again after a new attachment, using the current session
 ID and revision `0`.
@@ -811,11 +812,17 @@ Duplicate open events do not reset an existing session. Session IDs must uniquel
 Remote components can use `useMicroFrontendSession()` to capture their ID and call
 `hidePendingHostComponent(sessionId)` when ready. Capture the ID before asynchronous work:
 a late completion for a closed session is ignored and cannot complete another session.
+The provider and hook share their Context across copies of this package in the same JS runtime;
+React must still be shared between host and remote bundles. Update both package copies to a version
+with this shared Context when using the hook across bundles.
 
 For backward compatibility, calls without an ID still update the legacy global flag and complete
 only the most recently opened session that remains open. They cannot identify the origin of late
 asynchronous work; concurrent applications should migrate to explicit IDs. The no-argument
 `resetPendingHostComponent()` resets only the legacy global flag, never session completion.
+Explicit completion of the latest open session also updates the legacy flag, so hosts using the
+no-argument pending APIs still observe that completion. Non-string callback arguments are ignored.
+For callbacks receiving a string, use `() => hidePendingHostComponent()` or capture an explicit session ID.
 Hosts using the legacy single-screen controller can continue using its existing API.
 
 

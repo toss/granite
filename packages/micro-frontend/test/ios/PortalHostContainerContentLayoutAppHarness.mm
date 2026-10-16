@@ -196,6 +196,7 @@ typedef void (^Case)(Done done);
     @{@"name" : @"physical subtree", @"case" : [self physicalSubtreeCase]},
     @{@"name" : @"mount generation and attachment", @"case" : [self layoutCase]},
     @{@"name" : @"lifecycle cancellation", @"case" : [self lifecycleCase]},
+    @{@"name" : @"initial name preserves observation", @"case" : [self initialNameCase]},
     @{@"name" : @"deferred and late", @"case" : [self deferredLateCase]},
     @{@"name" : @"one-shot reentry", @"case" : [self reentryCase]},
     @{@"name" : @"sentinel removal", @"case" : [self sentinelRemovalCase]},
@@ -434,6 +435,8 @@ typedef void (^Case)(Done done);
     NSArray<NSDictionary *> *cases = @[
       @{@"name" : @"explicit cancel", @"kind" : @"cancel"},
       @{@"name" : @"rename cancel", @"kind" : @"rename"},
+      @{@"name" : @"clear name cancel", @"kind" : @"clearName"},
+      @{@"name" : @"unchanged name preserves observation", @"kind" : @"sameName"},
       @{@"name" : @"invalidate cancel", @"kind" : @"invalidate"},
       @{@"name" : @"detach reattach cancel", @"kind" : @"detach"},
       @{@"name" : @"frame resize preserves observation", @"kind" : @"frame"},
@@ -443,6 +446,7 @@ typedef void (^Case)(Done done);
 
     for (NSDictionary *entry in cases) {
       PortalHostContainerView *container = [self container];
+      [container setName:@"initial"];
       [containers addObject:container];
       Counter *calls = [Counter new];
       counters[entry[@"name"]] = calls;
@@ -462,6 +466,11 @@ typedef void (^Case)(Done done);
       }
       if ([kind isEqualToString:@"rename"]) {
         [container setName:@"other"];
+      } else if ([kind isEqualToString:@"clearName"]) {
+        [container setName:nil];
+        [container setName:@"replacement"];
+      } else if ([kind isEqualToString:@"sameName"]) {
+        [container setName:@"initial"];
       } else if ([kind isEqualToString:@"invalidate"]) {
         [container invalidate];
       } else if ([kind isEqualToString:@"detach"]) {
@@ -505,7 +514,8 @@ typedef void (^Case)(Done done);
     AfterTicks(3, ^{
       for (NSDictionary *entry in cases) {
         [self expect:counters[entry[@"name"]].value
-              equals:([entry[@"kind"] isEqualToString:@"frame"] || [entry[@"kind"] isEqualToString:@"bounds"]) ? 1 : 0
+              equals:([entry[@"kind"] isEqualToString:@"frame"] || [entry[@"kind"] isEqualToString:@"bounds"] ||
+                      [entry[@"kind"] isEqualToString:@"sameName"]) ? 1 : 0
                 name:[entry[@"name"] stringByAppendingString:@" callback count"]];
       }
       [self expectNil:weakActiveContainer name:@"active dealloc owner should release"];
@@ -516,6 +526,34 @@ typedef void (^Case)(Done done);
       for (PortalHostContainerView *container in containers) {
         [self close:container];
       }
+      done();
+    });
+  } copy];
+}
+
+- (Case)initialNameCase
+{
+  return [^(Done done) {
+    PortalHostContainerView *deferred =
+        [[PortalHostContainerView alloc] initWithFrame:CGRectMake(20, 80, 220, 220) deferredActivation:YES];
+    Counter *deferredCalls = [Counter new];
+    [self observe:deferred counter:deferredCalls];
+    [deferred setName:@"initial"];
+    [self expectBool:!deferred.isActivated name:@"naming must not activate the container"
+            expected:@NO actual:@(deferred.isActivated)];
+    [self.root.view addSubview:deferred];
+    [self addReadyMarkerTo:[self host:deferred]];
+
+    PortalHostContainerView *attached = [self container];
+    Counter *attachedCalls = [Counter new];
+    [self observe:attached counter:attachedCalls];
+    [self addReadyMarkerTo:[self host:attached]];
+    [attached setName:@"initial"];
+    AfterTicks(3, ^{
+      [self expect:deferredCalls.value equals:1 name:@"name after subscription before activation"];
+      [self expect:attachedCalls.value equals:1 name:@"name after queued completion"];
+      [self close:deferred];
+      [self close:attached];
       done();
     });
   } copy];

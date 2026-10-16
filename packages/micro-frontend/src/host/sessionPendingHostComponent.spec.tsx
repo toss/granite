@@ -75,6 +75,40 @@ describe('session pending completion', () => {
     expect(getIsPendingHostComponentHidden('second')).toBe(true);
   });
 
+  it.each([{}, { nativeEvent: { layout: {} } }, 42, false, null, undefined])(
+    'ignores non-string callback arguments when completing pending UI: %j',
+    async (value) => {
+      const { open } = setup();
+      open('first');
+      open('second');
+      // Legacy callback registrations can pass data even though the original API took no arguments.
+      await Promise.resolve(value).then(hidePendingHostComponent);
+      expect(getIsPendingHostComponentHidden('first')).toBe(false);
+      expect(getIsPendingHostComponentHidden('second')).toBe(true);
+      expect(getIsPendingHostComponentHidden()).toBe(true);
+    }
+  );
+
+  it('keeps legacy hosts in sync with explicit completion of the latest open session', () => {
+    const { open, close } = setup();
+    open('first');
+    open('second');
+    hidePendingHostComponent('first');
+    expect(getIsPendingHostComponentHidden()).toBe(false);
+    hidePendingHostComponent('second');
+    expect(getIsPendingHostComponentHidden()).toBe(true);
+    resetPendingHostComponent();
+    hidePendingHostComponent('second');
+    expect(getIsPendingHostComponentHidden()).toBe(true);
+    close('second');
+    resetPendingHostComponent();
+    hidePendingHostComponent('second');
+    expect(getIsPendingHostComponentHidden()).toBe(false);
+    close('first');
+    hidePendingHostComponent('first');
+    expect(getIsPendingHostComponentHidden()).toBe(false);
+  });
+
   it('adopts older stores and shares session completion across package copies', async () => {
     Reflect.defineProperty(getMicroFrontendGlobalContext(), 'pendingHostComponentStore', {
       configurable: true,

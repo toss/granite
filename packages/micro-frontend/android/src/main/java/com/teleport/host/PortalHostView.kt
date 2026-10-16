@@ -32,7 +32,8 @@ class PortalHostView(
    * Empty, hidden, or zero-size declared content is valid. Layout requests are not polled.
    * A later marker mutation invalidates the acknowledgment until its exact mount execution ends.
    *
-   * Subscribe before or after attachment. Detach, rename, and cleanup cancel observations.
+   * Subscribe before or after naming and attachment. The initial name preserves observations;
+   * changing or clearing an existing name, detach, and cleanup cancel them.
    * Resize preserves observations but does not require a commit for the new host size.
    * This does not acknowledge images, network loading, future commits, or presented pixels.
    * PortalInitialContentView markers use revision 0.
@@ -62,7 +63,9 @@ class PortalHostView(
   fun setName(newName: String?) {
     if (name == newName) return
 
-    cancelContentLayoutObservations()
+    if (name != null) {
+      cancelContentLayoutObservations()
+    }
 
     hasPendingCleanup = false
     name?.let { PortalRegistry.unregisterHost(it, this) }

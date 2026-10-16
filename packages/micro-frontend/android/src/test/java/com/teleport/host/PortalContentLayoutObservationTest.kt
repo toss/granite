@@ -20,6 +20,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.MockedStatic
 import org.mockito.Mockito.*
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
@@ -35,33 +36,38 @@ class PortalContentLayoutObservationTest {
   private lateinit var container: FrameLayout
   private lateinit var host: PortalHostView
   private lateinit var viewManager: PortalInitialContentViewManager
+  private lateinit var featureFlags: MockedStatic<ReactNativeFeatureFlags>
   private var commitNumber = 0
   private val markers = mutableListOf<PortalInitialContentView>()
 
   @Before
   fun setUp() {
+    // Keep all flags mocked through view mutations and teardown, including flags added by newer RN.
+    // Mockito's default false value avoids the JNI-backed accessor without pinning newer symbols.
+    featureFlags = mockStatic(ReactNativeFeatureFlags::class.java)
     controller = Robolectric.buildActivity(Activity::class.java).setup().visible()
     container = FrameLayout(controller.get())
     controller.get().setContentView(container)
     host = PortalHostView(controller.get())
     container.addView(host)
     PortalInitialContentMounts.install()
-    mockStatic(ReactNativeFeatureFlags::class.java).use { flags ->
-      flags.`when`<Boolean> { ReactNativeFeatureFlags.enableViewRecyclingForView() }.thenReturn(false)
-      viewManager = PortalInitialContentViewManager()
-    }
+    viewManager = PortalInitialContentViewManager()
     drain()
   }
 
   @After
   fun tearDown() {
-    host.cleanup()
-    markers.forEach { it.dispose() }
-    begin()
-    end()
-    controller.pause().stop().destroy()
-    drain()
-    assertTrue(PortalInitialContentRegistry.observers.isEmpty())
+    try {
+      host.cleanup()
+      markers.forEach { it.dispose() }
+      begin()
+      end()
+      controller.pause().stop().destroy()
+      drain()
+      assertTrue(PortalInitialContentRegistry.observers.isEmpty())
+    } finally {
+      featureFlags.close()
+    }
   }
 
   @Test
@@ -312,6 +318,7 @@ class PortalContentLayoutObservationTest {
 
   @Test
   fun `cleanup rename and detach cancel pending observations`() {
+    host.setName("initial")
     val marker = marker()
     var calls = 0
     host.observeContentLayout("request", 2) { calls++ }
@@ -338,6 +345,48 @@ class PortalContentLayoutObservationTest {
     complete(marker)
     drain()
     assertEquals(1, calls)
+  }
+
+  @Test
+  fun `first name preserves an observation registered before attachment`() {
+    container.removeView(host)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    host.setName("initial")
+    complete(marker())
+    drain()
+    assertEquals(0, calls)
+    container.addView(host)
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `first name preserves a queued completion on an attached host`() {
+    val marker = marker()
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    complete(marker)
+    host.setName("initial")
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `renaming or clearing an existing name cancels queued completion`() {
+    host.setName("initial")
+    val marker = marker()
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    complete(marker)
+    host.setName("renamed")
+    drain()
+    assertEquals(0, calls)
+    host.observeContentLayout("request", 2) { calls++ }
+    host.setName(null)
+    host.setName("replacement")
+    drain()
+    assertEquals(0, calls)
   }
 
   @Test

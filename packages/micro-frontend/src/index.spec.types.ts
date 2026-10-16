@@ -1,5 +1,5 @@
 import { createElement, createRef } from 'react';
-import type { View } from 'react-native';
+import type { View, ViewProps } from 'react-native';
 import { expectTypeOf } from 'vitest';
 import type {
   PendingHostComponent,
@@ -7,6 +7,7 @@ import type {
   usePendingHostComponentController,
 } from './host';
 import {
+  hidePendingHostComponent,
   PortalInitialContentView,
   type MicroFrontendRuntimeApi,
   type MicroFrontendSessionState,
@@ -33,6 +34,12 @@ const contentViewProps: PortalInitialContentViewProps = {
 };
 createElement(PortalInitialContentView, { ...contentViewProps, ref: createRef<View>() });
 createElement(PortalInitialContentView);
+
+// Preserve callback usages that predate the optional session ID.
+const pendingCallbacks: ViewProps = { onLayout: hidePendingHostComponent };
+createElement(PortalInitialContentView, pendingCallbacks);
+void Promise.resolve({ ready: true }).then(hidePendingHostComponent);
+hidePendingHostComponent('session-1');
 
 // @ts-expect-error Initial content observation does not select routes or pending UI.
 createElement(PortalInitialContentView, { url: 'granite://host/example/product' });

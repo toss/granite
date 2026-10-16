@@ -54,8 +54,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// This does not acknowledge images, network loading, future commits, or presented pixels.
 ///
 /// Observation never activates a deferred container or delays rendering. Cancel when the
-/// caller stops waiting; rename, detach, and invalidation also cancel it. Resize preserves
-/// observations but does not require a commit for the new host size.
+/// caller stops waiting; changing or clearing an existing name, detach, and invalidation also
+/// cancel it. Initial naming and resize preserve observations, without requiring another commit.
 /// PortalInitialContentView uses revision 0.
 - (id<PortalContentLayoutObservation>)observeContentLayoutWithRequestKey:(NSString *)requestKey
                                                               revision:(NSInteger)revision

@@ -143,18 +143,29 @@ function setPendingHostComponentHidden(hidden: boolean) {
   emitPendingHostComponentStoreChange();
 }
 
-export function hidePendingHostComponent(sessionId?: string) {
+// Retain assignability to callbacks that supply an event or a promise result.
+export function hidePendingHostComponent(): void;
+export function hidePendingHostComponent(sessionId?: string): void;
+export function hidePendingHostComponent(sessionId?: unknown) {
   const sessions = getSessionHidden();
+  const latest = Array.from(sessions.keys()).at(-1);
+  const scoped = typeof sessionId === 'string';
   // Unscoped callers retain legacy behavior, targeting the latest open session.
   // Async work should always pass its originating session ID.
-  const target = sessionId ?? Array.from(sessions.keys()).at(-1);
+  const target = scoped ? sessionId : latest;
   if (target != null) {
-    if (sessions.get(target) === false) {
-      sessions.set(target, true);
-      emitPendingHostComponentStoreChange();
+    if (!sessions.has(target)) {
+      return;
     }
-    if (sessionId == null) {
-      setPendingHostComponentHidden(true);
+    const store = getPendingHostComponentStore();
+    const updateLegacy = target === latest && !store.hidden;
+    const updateSession = sessions.get(target) === false;
+    sessions.set(target, true);
+    if (updateLegacy) {
+      store.hidden = true;
+    }
+    if (updateSession || updateLegacy) {
+      emitPendingHostComponentStoreChange();
     }
     return;
   }

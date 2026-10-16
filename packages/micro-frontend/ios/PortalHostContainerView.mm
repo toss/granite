@@ -423,7 +423,7 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 
 - (void)setName:(nullable NSString *)name
 {
-  if (_contentLayoutName != name && ![_contentLayoutName isEqualToString:name]) {
+  if (_contentLayoutName != nil && ![_contentLayoutName isEqualToString:name]) {
     [self cancelContentLayoutObservations];
   }
   _contentLayoutName = [name copy];
