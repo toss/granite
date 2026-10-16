@@ -1,5 +1,13 @@
 # @granite-js/plugin-hermes
 
+## 3.0.4
+
+### Patch Changes
+
+- 5cb1506: handle missing sourcemap locations
+  - @granite-js/plugin-core@3.0.4
+  - @granite-js/utils@3.0.4
+
 ## 3.0.3
 
 ### Patch Changes

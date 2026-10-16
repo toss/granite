@@ -1,5 +1,18 @@
 # @granite-js/micro-frontend
 
+## 3.0.4
+
+### Patch Changes
+
+- e44f98c: Add a session-scoped initial-content View that declares content for Fabric mount-completion observation without observation-specific props. Android and iOS Portal hosts can observe its native mount completion and destination attachment and apply their own first-draw policy.
+
+  Mount acknowledgment requires Bridgeless Fabric, a native rebuild containing the new component, and matching JavaScript. Older binaries without the component render a plain View without acknowledgment; they must not wait for this signal. Bridge-enabled iOS Fabric also uses this render-only fallback because its Paper UIManager cannot discover the Fabric-only component.
+
+- e44f98c: Preserve pending completion per native session and support explicit session IDs when reading or hiding pending UI. Release state when sessions close while retaining legacy single-screen behavior.
+
+  After a native session opens, string arguments to `hidePendingHostComponent` are session IDs; unknown or closed IDs are ignored. Wrap string-valued callbacks with `() => hidePendingHostComponent()` or pass the originating session ID explicitly. Hosts that never track native sessions retain legacy callback behavior, including string results. This pending-state change is JavaScript-only and does not require the new native initial-content component.
+  - @granite-js/utils@3.0.4
+
 ## 3.0.3
 
 ### Patch Changes
