@@ -3,19 +3,17 @@ package com.teleport.host
 import android.os.Handler
 import android.os.Looper
 import android.view.ViewTreeObserver
-import com.facebook.react.R
 import com.facebook.react.bridge.UiThreadUtil
 import com.teleport.initialcontent.PortalInitialContentRegistry
 
 internal class PortalContentLayoutObservation(
   host: PortalHostView,
-  requestKey: String,
-  revision: Int,
+  private val requestKey: String,
+  private val revision: Int,
   onReady: () -> Unit,
 ) : AutoCloseable {
   private var host: PortalHostView? = host
   private var onReady: (() -> Unit)? = onReady
-  private val nativeId = "granite:portal-initial-content:$revision:$requestKey"
   private val handler = Handler(Looper.getMainLooper())
   private var scheduled = false
   private var preDrawObserver: ViewTreeObserver? = null
@@ -71,7 +69,7 @@ internal class PortalContentLayoutObservation(
   private fun checkCompletedMount() {
     val currentHost = host ?: return
     val matches = PortalInitialContentRegistry.markers.filter {
-      it.getTag(R.id.view_tag_native_id) == nativeId && PortalInitialContentRegistry.isInHost(it, currentHost)
+      it.matchesIdentity(requestKey, revision) && PortalInitialContentRegistry.isInHost(it, currentHost)
     }
     val marker = matches.singleOrNull() ?: return
     if (!marker.hasCompletedMount()) return

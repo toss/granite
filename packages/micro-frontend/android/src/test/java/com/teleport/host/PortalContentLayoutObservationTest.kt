@@ -81,6 +81,35 @@ class PortalContentLayoutObservationTest {
   }
 
   @Test
+  fun `internal props select the committed identity independently of nativeID`() {
+    val marker = marker(key = "old", revision = 1)
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    begin()
+    viewManager.updateProperties(marker, ReactStylesDiffMap(JavaOnlyMap.of(
+      "initialContentKey", "request", "initialContentRevision", 2, "nativeID", "external-id",
+    )))
+    insertSentinel(marker)
+    assertFalse(marker.hasCompletedMount())
+    end()
+    drain()
+    assertEquals(1, calls)
+    assertEquals("external-id", marker.getTag(R.id.view_tag_native_id))
+  }
+
+  @Test
+  fun `nativeID alone cannot supply a missing internal identity`() {
+    val marker = PortalInitialContentView(controller.get()).also { markers.add(it); host.addView(it) }
+    marker.setTag(R.id.view_tag_native_id, "granite:portal-initial-content:2:request")
+    var calls = 0
+    host.observeContentLayout("request", 2) { calls++ }
+    complete(marker)
+    drain()
+    assertEquals(0, calls)
+    assertFalse(marker.hasCompletedMount())
+  }
+
+  @Test
   fun `clipped sentinel retains logical Fabric membership`() {
     val marker = marker()
     viewManager.updateProperties(marker, ReactStylesDiffMap(JavaOnlyMap.of("removeClippedSubviews", true)))
@@ -226,7 +255,8 @@ class PortalContentLayoutObservationTest {
     complete(marker)
     var calls = 0
     host.observeContentLayout("request", 2) { calls++ }
-    marker.setTag(R.id.view_tag_native_id, "granite:portal-initial-content:2:request")
+    marker.setInitialContentKey("request")
+    marker.setInitialContentRevision(2)
     drain()
     assertEquals(0, calls)
     complete(marker)
@@ -242,7 +272,8 @@ class PortalContentLayoutObservationTest {
     host.observeContentLayout("request", 2) { calls++ }
     drain()
     assertEquals(0, calls)
-    marker.setTag(R.id.view_tag_native_id, "granite:portal-initial-content:2:request")
+    marker.setInitialContentKey("request")
+    marker.setInitialContentRevision(2)
     complete(marker)
     drain()
     assertEquals(1, calls)
@@ -534,7 +565,8 @@ class PortalContentLayoutObservationTest {
   private fun marker(key: String = "request", revision: Int = 2, attach: Boolean = true) =
     PortalInitialContentView(controller.get()).also {
       markers.add(it)
-      it.setTag(R.id.view_tag_native_id, "granite:portal-initial-content:$revision:$key")
+      it.setInitialContentKey(key)
+      it.setInitialContentRevision(revision)
       if (attach) host.addView(it)
     }
 

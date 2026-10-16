@@ -54,10 +54,6 @@
 
 static NSString *const ResultFileName = @"granite-portal-content-layout-results.json";
 static NSString *ResultsPath(void) { return [NSTemporaryDirectory() stringByAppendingPathComponent:ResultFileName]; }
-static NSString *MarkerID(NSString *requestKey, NSInteger revision)
-{
-  return [NSString stringWithFormat:@"granite:portal-initial-content:%ld:%@", (long)revision, requestKey];
-}
 
 @interface TickWaiter : NSObject
 @property (nonatomic) NSUInteger remaining;
@@ -139,7 +135,8 @@ static RCTViewComponentView *Marker(NSString *requestKey, NSInteger revision, CG
 {
   RCTViewComponentView *view = [[HarnessMarker alloc] initWithFrame:frame];
   view.backgroundColor = UIColor.systemBlueColor;
-  view.nativeId = MarkerID(requestKey, revision);
+  ((HarnessMarker *)view).mount.requestKey = requestKey;
+  ((HarnessMarker *)view).mount.revision = revision;
   AddNativeContent(view);
   return view;
 }
@@ -191,7 +188,8 @@ typedef void (^Case)(Done done);
   [self runCases:@[
     @{@"name" : @"exact marker", @"case" : [self exactCase]},
     @{@"name" : @"explicit declaration without visual heuristics", @"case" : [self descendantsCase]},
-    @{@"name" : @"nativeId update", @"case" : [self nativeIdUpdateCase]},
+    @{@"name" : @"identity update", @"case" : [self identityUpdateCase]},
+    @{@"name" : @"ordinary nativeId is independent", @"case" : [self viewIdentifierCase]},
     @{@"name" : @"mismatch and duplicate", @"case" : [self mismatchCase]},
     @{@"name" : @"physical subtree", @"case" : [self physicalSubtreeCase]},
     @{@"name" : @"mount generation and attachment", @"case" : [self layoutCase]},
@@ -276,7 +274,8 @@ typedef void (^Case)(Done done);
   return [^(Done done) {
     PortalHostContainerView *container = [self container];
     HarnessMarker *marker = [[HarnessMarker alloc] initWithFrame:CGRectZero];
-    marker.nativeId = MarkerID(@"request", 2);
+    ((HarnessMarker *)marker).mount.requestKey = @"request";
+    ((HarnessMarker *)marker).mount.revision = 2;
     marker.hidden = YES;
     marker.alpha = 0;
     [[self host:container] addSubview:marker];
@@ -314,7 +313,31 @@ typedef void (^Case)(Done done);
   } copy];
 }
 
-- (Case)nativeIdUpdateCase
+- (Case)viewIdentifierCase
+{
+  return [^(Done done) {
+    PortalHostContainerView *container = [self container];
+    HarnessMarker *marker = (HarnessMarker *)Marker(@"other", 2, CGRectZero);
+    marker.nativeId = @"granite:portal-initial-content:2:request";
+    [[self host:container] addSubview:marker];
+    CompleteMarker(marker);
+    Counter *calls = [Counter new];
+    [self observe:container counter:calls];
+    AfterTicks(2, ^{
+      [self expect:calls.value equals:0 name:@"nativeId cannot replace the internal identity"];
+      marker.nativeId = @"external-id";
+      marker.mount.requestKey = @"request";
+      CompleteMarker(marker);
+      AfterTicks(2, ^{
+        [self expect:calls.value equals:1 name:@"internal identity completes with an unrelated nativeId"];
+        [self close:container];
+        done();
+      });
+    });
+  } copy];
+}
+
+- (Case)identityUpdateCase
 {
   return [^(Done done) {
     PortalHostContainerView *container = [self container];
@@ -323,7 +346,8 @@ typedef void (^Case)(Done done);
     CompleteMarker(marker);
     Counter *calls = [Counter new];
     [self observe:container counter:calls];
-    marker.nativeId = MarkerID(@"request", 2);
+    ((HarnessMarker *)marker).mount.requestKey = @"request";
+    ((HarnessMarker *)marker).mount.revision = 2;
     AfterTicks(2, ^{
       [self expect:calls.value equals:0 name:@"new identity cannot reuse old acknowledgment"];
       CompleteMarker(marker);
@@ -351,7 +375,8 @@ typedef void (^Case)(Done done);
     [self observe:container counter:calls];
     AfterTicks(2, ^{
       [self expect:calls.value equals:0 name:@"revision mismatch stays pending"];
-      marker.nativeId = MarkerID(@"request", 2);
+      ((HarnessMarker *)marker).mount.requestKey = @"request";
+      ((HarnessMarker *)marker).mount.revision = 2;
       CompleteMarker(marker);
       RCTViewComponentView *duplicate = Marker(@"request", 2, CGRectZero);
       [[self host:container] addSubview:duplicate];

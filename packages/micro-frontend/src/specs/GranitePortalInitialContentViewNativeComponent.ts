@@ -1,7 +1,9 @@
 import { codegenNativeComponent, type ViewProps } from 'react-native';
+import type { Int32, WithDefault } from 'react-native/Libraries/Types/CodegenTypes';
 
-// Fabric codegen requires a locally declared props interface, including for View-only components.
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface NativeProps extends ViewProps {}
+interface NativeProps extends ViewProps {
+  readonly initialContentKey?: string;
+  readonly initialContentRevision?: WithDefault<Int32, 0>;
+}
 
 export default codegenNativeComponent<NativeProps>('GranitePortalInitialContentView');

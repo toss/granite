@@ -21,7 +21,8 @@ NSArray<GranitePortalInitialContentMount *> *GranitePortalInitialContentMounts(v
 }
 
 @implementation GranitePortalInitialContentMount {
-  NSString *_completedIdentity;
+  NSString *_completedRequestKey;
+  NSInteger _completedRevision;
   NSInteger _surfaceId;
   NSInteger _transaction;
 }
@@ -42,25 +43,46 @@ NSArray<GranitePortalInitialContentMount *> *GranitePortalInitialContentMounts(v
   _sentinel = sentinel;
 }
 
+- (void)setRequestKey:(NSString *)requestKey
+{
+  if (_requestKey == requestKey || [_requestKey isEqualToString:requestKey]) return;
+  [self willMount];
+  _requestKey = [requestKey copy];
+}
+
+- (void)setRevision:(NSInteger)revision
+{
+  if (_revision == revision) return;
+  [self willMount];
+  _revision = revision;
+}
+
 - (void)willMount
 {
-  _completedIdentity = nil;
+  _completedRequestKey = nil;
   _transaction = -1;
 }
 
 - (void)didMountWithSurfaceId:(NSInteger)surfaceId transaction:(NSInteger)transaction
 {
   if (![self.sentinel.nativeId isEqualToString:@"granite:portal-mount-sentinel"]) return;
+  if (self.requestKey.length == 0 || self.revision < 0) return;
   _surfaceId = surfaceId;
   _transaction = transaction;
-  _completedIdentity = [self.view.nativeId copy];
+  _completedRequestKey = [self.requestKey copy];
+  _completedRevision = self.revision;
   GranitePortalInitialContentMountsChanged();
 }
 
-- (BOOL)matchesCompletedIdentity:(NSString *)nativeId
+- (BOOL)matchesIdentity:(NSString *)requestKey revision:(NSInteger)revision
+{
+  return [self.requestKey isEqualToString:requestKey] && self.revision == revision;
+}
+
+- (BOOL)matchesCompletedIdentity:(NSString *)requestKey revision:(NSInteger)revision
 {
   return [self.sentinel.nativeId isEqualToString:@"granite:portal-mount-sentinel"] &&
-      _transaction >= 0 && [_completedIdentity isEqualToString:nativeId] &&
-      [self.view.nativeId isEqualToString:nativeId];
+      _transaction >= 0 && [_completedRequestKey isEqualToString:requestKey] &&
+      _completedRevision == revision && [self matchesIdentity:requestKey revision:revision];
 }
 @end

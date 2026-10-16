@@ -4,6 +4,7 @@ import android.view.View
 import com.facebook.react.R
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.ThemedReactContext
+import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.views.view.ReactViewGroup
 import com.facebook.react.views.view.ReactViewManager
 
@@ -15,6 +16,16 @@ class PortalInitialContentViewManager : ReactViewManager() {
 
   override fun createViewInstance(context: ThemedReactContext): ReactViewGroup =
     PortalInitialContentView(context)
+
+  @ReactProp(name = "initialContentKey")
+  fun setInitialContentKey(view: ReactViewGroup, value: String?) {
+    (view as PortalInitialContentView).setInitialContentKey(value)
+  }
+
+  @ReactProp(name = "initialContentRevision", defaultInt = 0)
+  fun setInitialContentRevision(view: ReactViewGroup, value: Int) {
+    (view as PortalInitialContentView).setInitialContentRevision(value)
+  }
 
   override fun onAfterUpdateTransaction(view: ReactViewGroup) {
     super.onAfterUpdateTransaction(view)

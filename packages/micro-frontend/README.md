@@ -487,7 +487,10 @@ should release a native host. Its public props and ref remain ordinary View prop
 and a View ref; internally it uses a Fabric component that records mount completion.
 It derives the observation key from the current `MicroFrontendSessionProvider`'s
 `sessionId` and uses revision `0`. No observation-specific props are required.
-Rendering it outside a session provider throws `MissingMicroFrontendSessionError`.
+On supported native hosts, rendering it outside a session provider throws `MissingMicroFrontendSessionError`.
+On older apps without this native component, it renders an ordinary `View`, preserving props,
+ref, and children without requiring a session provider or emitting a mount acknowledgment.
+Those apps retain their existing rendering behavior and do not implement the new first-draw guard.
 
 ```tsx
 import { MicroFrontendSessionProvider, Portal, PortalInitialContentView } from '@granite-js/micro-frontend';
@@ -503,13 +506,15 @@ import { MicroFrontendSessionProvider, Portal, PortalInitialContentView } from '
 
 The component forwards ordinary View props and its ref to an internal native boundary.
 A private, absolute zero-size child identifies its initial Fabric insertion, including
-when the boundary was preallocated. That child has no touch or accessibility content. `id`, `nativeID`, and `collapsable` are reserved for the observation marker.
+when the boundary was preallocated. That child has no touch or accessibility content.
+Session identity travels through private native props, independently of ordinary `id`/`nativeID`.
+Only `collapsable` is reserved: the boundary always remains in the native hierarchy.
 It does not select routes, render pending UI, hide content, or add a Suspense boundary.
 The UI owner chooses the content and places this boundary around the initial UI
 whose native layout should release the host's first-draw guard. Pending screens,
 Suspense fallbacks, and error screens remain the UI owner's responsibility.
 
-The session provider and content View must use the same package instance.
+The session provider and content View can use separate package copies in the same runtime with shared React.
 Render one `PortalInitialContentView` per observation request. Rendering the marker
 is an explicit declaration: empty, hidden, or zero-size content can complete once
 its mount has completed. Granite does not infer readiness from descendant counts,
@@ -572,7 +577,7 @@ iteration, revalidates identity and attachment, and removes the observation befo
 calling `onReady`. Android can deliver a completed acknowledgment during pre-draw,
 with queued delivery also available when no traversal occurs. iOS queues delivery.
 A late subscriber can consume an existing acknowledgment.
-A plain View with a matching `nativeID` is not a substitute for the internal marker.
+A plain View, including the compatibility fallback, cannot acknowledge a Fabric mount.
 
 Closing or cancelling, changing or clearing an existing name, detaching, or cleaning up the
 destination cancels pending observations. The first name can be assigned after subscribing.

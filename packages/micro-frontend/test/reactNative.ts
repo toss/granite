@@ -13,6 +13,10 @@ export const StyleSheet = {
 
 export const View = 'View';
 
+export const UIManager = {
+  hasViewManagerConfig: () => true,
+};
+
 export const TurboModuleRegistry = {
   getEnforcing: () => ({}),
 };

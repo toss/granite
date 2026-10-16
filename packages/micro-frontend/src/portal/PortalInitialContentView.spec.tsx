@@ -1,5 +1,5 @@
 import { createRef, type ReactElement } from 'react';
-import { View } from 'react-native';
+import { UIManager, View } from 'react-native';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PortalInitialContentView } from './PortalInitialContentView';
@@ -14,6 +14,7 @@ const renderers: ReactTestRenderer[] = [];
 
 afterEach(() => {
   act(() => renderers.splice(0).forEach((renderer) => renderer.unmount()));
+  vi.restoreAllMocks();
 });
 
 function render(element: ReactElement, node?: object) {
@@ -29,6 +30,59 @@ function render(element: ReactElement, node?: object) {
 }
 
 describe('PortalInitialContentView', () => {
+  it('renders a plain View without a session provider when the native component is absent', () => {
+    const available = vi.spyOn(UIManager, 'hasViewManagerConfig').mockReturnValue(false);
+    const ref = createRef<View>();
+    const node = { measure: vi.fn() };
+    const onLayout = vi.fn();
+    const renderer = render(
+      <PortalInitialContentView ref={ref} style={{ flex: 1 }} accessibilityLabel="content" onLayout={onLayout}>
+        <View testID="body" />
+      </PortalInitialContentView>,
+      node
+    );
+    expect(available).toHaveBeenCalledWith('GranitePortalInitialContentView');
+    expect(renderer.toJSON()).toEqual({
+      type: 'View',
+      props: { collapsable: false, style: { flex: 1 }, accessibilityLabel: 'content', onLayout, ref },
+      children: [{ type: 'View', props: { testID: 'body' }, children: null }],
+    });
+    expect(renderer.root.findAllByType(NativeInitialContentView)).toHaveLength(0);
+    expect(ref.current).toBe(node);
+    expect(onLayout).not.toHaveBeenCalled();
+    act(() => renderer.unmount());
+    expect(ref.current).toBeNull();
+  });
+
+  it('keeps fallback content updatable without creating a readiness marker', () => {
+    const available = vi.spyOn(UIManager, 'hasViewManagerConfig').mockReturnValue(false);
+    const renderer = render(
+      <PortalInitialContentView>
+        <View testID="first" />
+      </PortalInitialContentView>
+    );
+    act(() =>
+      renderer.update(
+        <PortalInitialContentView>
+          <View testID="second" />
+        </PortalInitialContentView>
+      )
+    );
+    expect(renderer.toJSON()).toMatchObject({
+      type: 'View',
+      children: [{ props: { testID: 'second' } }],
+    });
+    expect(renderer.root.findAllByType(View).every((view) => view.props.nativeID == null)).toBe(true);
+    expect(available).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves ordinary View identifiers on the fallback without a session identity', () => {
+    vi.spyOn(UIManager, 'hasViewManagerConfig').mockReturnValue(false);
+    const renderer = render(<PortalInitialContentView id="alias" nativeID="other" />);
+    expect(renderer.toJSON()).toMatchObject({ type: 'View', props: { nativeID: 'alias', collapsable: false } });
+    expect(renderer.root.findByType(View).props.initialContentKey).toBeUndefined();
+  });
+
   it('marks its own View for the current session and forwards View props and ref without another wrapper', () => {
     const ref = createRef<View>();
     const node = { measure: vi.fn() };
@@ -53,7 +107,8 @@ describe('PortalInitialContentView', () => {
     expect(renderer.toJSON()).toMatchObject({
       type: 'GranitePortalInitialContentView',
       props: {
-        nativeID: 'granite:portal-initial-content:0:example/home',
+        initialContentKey: 'example/home',
+        initialContentRevision: 0,
         collapsable: false,
         style: { flex: 1 },
         accessibilityLabel: 'initial content',
@@ -112,9 +167,7 @@ describe('PortalInitialContentView', () => {
         <PortalInitialContentView />
       </MicroFrontendSessionProvider>
     );
-    expect(renderer.root.findByType(NativeInitialContentView).props.nativeID).toBe(
-      'granite:portal-initial-content:0:first'
-    );
+    expect(renderer.root.findByType(NativeInitialContentView).props.initialContentKey).toBe('first');
 
     act(() =>
       renderer.update(
@@ -123,9 +176,7 @@ describe('PortalInitialContentView', () => {
         </MicroFrontendSessionProvider>
       )
     );
-    expect(renderer.root.findByType(NativeInitialContentView).props.nativeID).toBe(
-      'granite:portal-initial-content:0:second'
-    );
+    expect(renderer.root.findByType(NativeInitialContentView).props.initialContentKey).toBe('second');
   });
 
   it('uses the closest session without changing a sibling boundary', () => {
@@ -137,21 +188,30 @@ describe('PortalInitialContentView', () => {
         </MicroFrontendSessionProvider>
       </MicroFrontendSessionProvider>
     );
-    expect(renderer.root.findAllByType(NativeInitialContentView).map((view) => view.props.nativeID)).toEqual([
-      'granite:portal-initial-content:0:outer',
-      'granite:portal-initial-content:0:inner',
+    expect(renderer.root.findAllByType(NativeInitialContentView).map((view) => view.props.initialContentKey)).toEqual([
+      'outer',
+      'inner',
     ]);
   });
 
-  it('owns the native marker even when an untyped caller supplies conflicting View identifiers', () => {
-    const conflictingProps = { testID: 'owned-marker', id: 'alias', nativeID: 'other', collapsable: true };
+  it('keeps internal identity separate from ordinary View identifiers and untyped props', () => {
+    const conflictingProps = {
+      testID: 'owned-marker',
+      id: 'alias',
+      nativeID: 'other',
+      collapsable: true,
+      initialContentKey: 'other-session',
+      initialContentRevision: 8,
+    };
     const renderer = render(
       <MicroFrontendSessionProvider presentationVisibility={true} sessionId="current">
         <PortalInitialContentView {...conflictingProps} />
       </MicroFrontendSessionProvider>
     );
     expect(renderer.root.findByType(NativeInitialContentView).props).toMatchObject({
-      nativeID: 'granite:portal-initial-content:0:current',
+      nativeID: 'alias',
+      initialContentKey: 'current',
+      initialContentRevision: 0,
       collapsable: false,
     });
     expect(renderer.root.findByType(NativeInitialContentView).props.id).toBeUndefined();

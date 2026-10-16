@@ -46,9 +46,11 @@ createElement(PortalInitialContentView, { url: 'granite://host/example/product' 
 // @ts-expect-error Readiness is observed from native layout, not a caller-provided flag.
 createElement(PortalInitialContentView, { ready: true });
 
-// @ts-expect-error View identifiers are reserved for the session marker.
 createElement(PortalInitialContentView, { id: 'custom-alias' });
-// @ts-expect-error The native marker cannot be supplied by the caller.
 createElement(PortalInitialContentView, { nativeID: 'custom-marker' });
+// @ts-expect-error Session identity remains internal to the component.
+createElement(PortalInitialContentView, { initialContentKey: 'custom-session' });
+// @ts-expect-error Observation revision remains internal to the component.
+createElement(PortalInitialContentView, { initialContentRevision: 1 });
 // @ts-expect-error The boundary must remain in the native hierarchy.
 createElement(PortalInitialContentView, { collapsable: true });

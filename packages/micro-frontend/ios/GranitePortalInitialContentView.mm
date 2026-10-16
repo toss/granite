@@ -39,6 +39,16 @@ static BOOL GraniteTransactionMutatesMarker(const MountingTransaction &transacti
   if (GraniteTransactionMutatesMarker(transaction, self.tag)) [_mount willMount];
 }
 
+- (void)updateProps:(Props::Shared const &)props oldProps:(Props::Shared const &)oldProps
+{
+  const auto &newProps = *std::static_pointer_cast<const GranitePortalInitialContentViewProps>(props);
+  _mount.requestKey = [[NSString alloc] initWithBytes:newProps.initialContentKey.data()
+                                            length:newProps.initialContentKey.size()
+                                          encoding:NSUTF8StringEncoding];
+  _mount.revision = newProps.initialContentRevision;
+  [super updateProps:props oldProps:oldProps];
+}
+
 - (void)mountingTransactionDidMount:(const MountingTransaction &)transaction
              withSurfaceTelemetry:(const SurfaceTelemetry &)surfaceTelemetry
 {
@@ -77,6 +87,8 @@ static BOOL GraniteTransactionMutatesMarker(const MountingTransaction &transacti
 - (void)prepareForRecycle
 {
   _mount.sentinel = nil;
+  _mount.requestKey = nil;
+  _mount.revision = 0;
   [super prepareForRecycle];
   GranitePortalInitialContentMountsChanged();
 }

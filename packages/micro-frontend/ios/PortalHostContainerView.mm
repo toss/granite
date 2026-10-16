@@ -186,7 +186,8 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 
 @interface GranitePortalContentLayoutObservation : NSObject <PortalContentLayoutObservation>
 - (instancetype)initWithOwner:(PortalHostContainerView *)owner
-                     nativeId:(NSString *)nativeId
+                   requestKey:(NSString *)requestKey
+                     revision:(NSInteger)revision
                       onReady:(void (^)(void))onReady;
 - (void)startIfNeeded;
 - (void)checkContentLayout;
@@ -194,19 +195,22 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 
 @implementation GranitePortalContentLayoutObservation {
   __weak PortalHostContainerView *_owner;
-  NSString *_nativeId;
+  NSString *_requestKey;
+  NSInteger _revision;
   void (^_onReady)(void);
   id _mountObserver;
   BOOL _checkScheduled;
 }
 
 - (instancetype)initWithOwner:(PortalHostContainerView *)owner
-                     nativeId:(NSString *)nativeId
+                   requestKey:(NSString *)requestKey
+                     revision:(NSInteger)revision
                       onReady:(void (^)(void))onReady
 {
   if (self = [super init]) {
     _owner = owner;
-    _nativeId = [nativeId copy];
+    _requestKey = [requestKey copy];
+    _revision = revision;
     _onReady = [onReady copy];
   }
   return self;
@@ -245,12 +249,12 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
   GranitePortalInitialContentMount *match = nil;
   for (GranitePortalInitialContentMount *mount in GranitePortalInitialContentMounts()) {
     RCTViewComponentView *view = mount.view;
-    if (![view.nativeId isEqualToString:_nativeId] || view.window != owner.window ||
+    if (![mount matchesIdentity:_requestKey revision:_revision] || view.window != owner.window ||
         ![view isDescendantOfView:host]) continue;
     if (match != nil) return;
     match = mount;
   }
-  if ([match matchesCompletedIdentity:_nativeId]) {
+  if ([match matchesCompletedIdentity:_requestKey revision:_revision]) {
     void (^onReady)(void) = _onReady;
     [self cancel];
     onReady();
@@ -265,7 +269,7 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
   PortalHostContainerView *owner = _owner;
   _owner = nil;
   _onReady = nil;
-  _nativeId = nil;
+  _requestKey = nil;
   if (_mountObserver != nil) [[NSNotificationCenter defaultCenter] removeObserver:_mountObserver];
   _mountObserver = nil;
   [owner removeContentLayoutObservation:self];
@@ -320,9 +324,8 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
   if (requestKey.length == 0 || revision < 0 || revision > INT32_MAX || onReady == nil) {
     [NSException raise:NSInvalidArgumentException format:@"A nonempty request key, Int32 revision, and callback are required"];
   }
-  NSString *nativeId = [NSString stringWithFormat:@"granite:portal-initial-content:%ld:%@", (long)revision, requestKey];
   GranitePortalContentLayoutObservation *observation =
-      [[GranitePortalContentLayoutObservation alloc] initWithOwner:self nativeId:nativeId onReady:onReady];
+      [[GranitePortalContentLayoutObservation alloc] initWithOwner:self requestKey:requestKey revision:revision onReady:onReady];
   if (_contentLayoutObservations == nil) _contentLayoutObservations = [NSMutableSet new];
   [_contentLayoutObservations addObject:observation];
   [observation startIfNeeded];

@@ -13,10 +13,27 @@ import java.util.WeakHashMap
 internal class PortalInitialContentView(context: Context) : ReactViewGroup(context) {
   internal var pendingTransaction: PortalInitialContentMounts.Transaction? = null
   private var completedTransaction: PortalInitialContentMounts.Transaction? = null
-  private var completedIdentity: String? = null
+  private var requestKey: String? = null
+  private var revision: Int = 0
+  private var completedRequestKey: String? = null
+  private var completedRevision: Int = 0
   private var completedSurfaceId = -1
   // Fabric child membership survives native clipping; a physical parent check would not.
   private var sentinel: WeakReference<View>? = null
+
+  fun setInitialContentKey(value: String?) {
+    if (requestKey == value) return
+    invalidateMount()
+    requestKey = value
+  }
+
+  fun setInitialContentRevision(value: Int) {
+    if (revision == value) return
+    invalidateMount()
+    revision = value
+  }
+
+  fun matchesIdentity(key: String, revision: Int) = requestKey == key && this.revision == revision
 
   fun setMountSentinel(view: View?) {
     invalidateMount()
@@ -34,20 +51,21 @@ internal class PortalInitialContentView(context: Context) : ReactViewGroup(conte
   fun invalidateMount() {
     pendingTransaction = null
     completedTransaction = null
-    completedIdentity = null
+    completedRequestKey = null
   }
 
   fun completeMount(transaction: PortalInitialContentMounts.Transaction) {
-    if (pendingTransaction != transaction || !hasMountSentinel()) return
+    if (pendingTransaction != transaction || !hasMountSentinel() || requestKey.isNullOrEmpty() || revision < 0) return
     pendingTransaction = null
     completedTransaction = transaction
-    completedIdentity = getTag(R.id.view_tag_native_id) as? String
+    completedRequestKey = requestKey
+    completedRevision = revision
     completedSurfaceId = UIManagerHelper.getSurfaceId(this)
   }
 
   fun hasCompletedMount(): Boolean =
     !PortalInitialContentMounts.isExecuting && hasMountSentinel() && completedTransaction != null &&
-    completedIdentity != null && completedIdentity == getTag(R.id.view_tag_native_id) &&
+    completedRequestKey != null && completedRequestKey == requestKey && completedRevision == revision &&
     completedSurfaceId == UIManagerHelper.getSurfaceId(this)
 
   override fun onAttachedToWindow() {
