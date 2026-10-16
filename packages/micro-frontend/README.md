@@ -361,8 +361,11 @@ Remote apps use Granite's `useVisibility()` for visibility and
 Remote apps register a route-level pending component with this package's
 `createRoute` wrapper.
 
+The following example assumes a session-based host with `MicroFrontendSessionProvider`.
+Legacy single-screen hosts without this provider can continue calling `hidePendingHostComponent()` without an ID.
+
 ```tsx
-import { createRoute, hidePendingHostComponent } from '@granite-js/micro-frontend';
+import { createRoute, hidePendingHostComponent, useMicroFrontendSession } from '@granite-js/micro-frontend';
 import { useEffect } from 'react';
 
 export const Route = createRoute('/products/:productId', {
@@ -372,9 +375,11 @@ export const Route = createRoute('/products/:productId', {
 });
 
 function ProductPage() {
+  const { sessionId } = useMicroFrontendSession();
+
   useEffect(() => {
-    hidePendingHostComponent();
-  }, []);
+    hidePendingHostComponent(sessionId);
+  }, [sessionId]);
 
   return <Product />;
 }
@@ -479,6 +484,144 @@ so touches reach the portalled tree), `hitSlop`, `focusable`, `accessible`,
 and the `nextFocus*` family.
 
 Wrap the Portal in your own `<View>` when you need any of these.
+
+### Observing initial content layout
+
+`PortalInitialContentView` declares the initial content whose Fabric mount completion
+should release a native host. Its public props and ref remain ordinary View props
+and a View ref; internally it uses a Fabric component that records mount completion.
+It derives the observation key from the current `MicroFrontendSessionProvider`'s
+`sessionId` and uses revision `0`. No observation-specific props are required.
+On supported native hosts, rendering it outside a session provider throws `MissingMicroFrontendSessionError`.
+On older apps without this native component, it renders an ordinary `View`, preserving props,
+ref, and children without requiring a session provider or emitting a mount acknowledgment.
+Mount acknowledgment through this component is supported on **Bridgeless Fabric** hosts.
+The availability check uses `UIManager.hasViewManagerConfig`, which queries the native component
+registry in Bridgeless mode. With the bridge enabled, it queries Paper view managers instead;
+on iOS it cannot discover this Fabric-only component, so the wrapper renders the plain View fallback.
+The fallback preserves rendering only: hosts must enable an acknowledgment-based first-draw guard
+only with a supported runtime and matching JavaScript and native component. A JavaScript-only update
+does not add this capability to an older binary or require older hosts to implement a guard.
+
+```tsx
+import { MicroFrontendSessionProvider, Portal, PortalInitialContentView } from '@granite-js/micro-frontend';
+
+<Portal hostName={sessionId}>
+  <MicroFrontendSessionProvider sessionId={sessionId} presentationVisibility={isVisible}>
+    <PortalInitialContentView>
+      <InitialContent />
+    </PortalInitialContentView>
+  </MicroFrontendSessionProvider>
+</Portal>;
+```
+
+The component forwards ordinary View props and its ref to an internal native boundary.
+A private, absolute zero-size child identifies its initial Fabric insertion, including
+when the boundary was preallocated. That child has no touch or accessibility content.
+Session identity travels through private native props, independently of ordinary `id`/`nativeID`.
+Only `collapsable` is reserved: the boundary always remains in the native hierarchy.
+It does not select routes, render pending UI, hide content, or add a Suspense boundary.
+The UI owner chooses the content and places this boundary around the initial UI
+whose native layout should release the host's first-draw guard. Pending screens,
+Suspense fallbacks, and error screens remain the UI owner's responsibility.
+
+The session provider and content View can use separate package copies in the same runtime with shared React.
+Render one `PortalInitialContentView` per observation request. Rendering the marker
+is an explicit declaration: empty, hidden, or zero-size content can complete once
+its mount has completed. Granite does not infer readiness from descendant counts,
+bounds, visibility, layout-request flags, timers, or frame polling.
+
+An Android destination observes the session's marker:
+
+```kotlin
+hostView.setName(sessionId)
+val observation = hostView.observeContentLayout(
+  requestKey = sessionId,
+  revision = 0,
+) {
+  // The native owner can now release its first-draw guard.
+}
+
+// Cancel if the owner no longer needs the result.
+observation.close()
+```
+
+Register and close the observation on the Android UI thread. Registration before
+the host's first Window attachment is supported. A context-free listener installed
+with the native package observes `FABRIC_BATCH_EXECUTION_START/END`, emitted inside
+Fabric's actual native mount instruction executor. Only marker ViewManager mutations
+within that execution are associated with its commit number and a unique local epoch.
+The private child's insertion supplies an explicit mutation even for a preallocated
+marker. A matching END acknowledges the mutation; unrelated batches, preallocation,
+and aborted executions without END cannot complete it. The marker's surface and
+identity are revalidated before delivery. This also covers deferred surface mounts.
+
+An iOS destination observes the same marker through its UIKit-owned container:
+
+```swift
+container.setName(sessionId)
+let observation = container.observeContentLayout(
+  requestKey: sessionId,
+  revision: 0
+) {
+  // The native owner can now release its first-draw guard.
+}
+
+// Cancel if the owner no longer needs the result.
+observation.cancel()
+```
+
+Register and cancel on the main thread. Registration before activation or Window
+attachment is supported and does not activate a deferred container. The internal
+iOS component implements `RCTMountingTransactionObserving` and records the surface
+and transaction after `mountingTransactionDidMount`, following the last mutation.
+Only transactions whose mutation list contains the marker or its child membership
+can acknowledge it. Removing the private child invalidates completion on both platforms.
+
+On both platforms, delivery requires exactly one matching internal marker physically
+beneath the destination and attached to its Window, with a completed native mount
+for that instance and identity. A new marker mutation invalidates the previous
+acknowledgment until its exact mount execution finishes. Unrelated transactions
+and synchronous non-Fabric prop updates do not manufacture a new acknowledgment. Replacing or recycling a native view cannot
+reuse its predecessor's acknowledgment. Delivery runs outside Fabric's observer
+iteration, revalidates identity and attachment, and removes the observation before
+calling `onReady`. Android can deliver a completed acknowledgment during pre-draw,
+with queued delivery also available when no traversal occurs. iOS queues delivery.
+A late subscriber can consume an existing acknowledgment.
+A plain View, including the compatibility fallback, cannot acknowledge a Fabric mount.
+
+Closing or cancelling, changing or clearing an existing name, detaching, or cleaning up the
+destination cancels pending observations. The first name can be assigned after subscribing.
+On iOS, `container.invalidate()` also cancels observations. Size changes
+preserve observations; the signal does not wait for a subsequent commit incorporating
+the latest host size. Register again after a new attachment, using the current session
+ID and revision `0`.
+
+The signal acknowledges Fabric's native mount completion, including the layout
+mutations in that mount. It does not establish business-data readiness, image decoding,
+WebView loading, future commits, or pixels being presented. The observer does not
+force layout, delay drawing, or control a transition. Host applications retain
+responsibility for timeouts, cancellation, and any policy postponing their first draw.
+For mount acknowledgment, both the JavaScript package and the native binary must include the internal component;
+there is no fallback to heuristic readiness on older native binaries.
+
+The UIKit behavior harness can be built on macOS with Xcode installed:
+
+```sh
+node packages/micro-frontend/test/ios/buildPortalContentLayoutHarnessApp.mjs
+```
+
+Install and launch the emitted `.app` on an iOS 18 or later Simulator. It displays a pass/fail result
+and writes `granite-portal-content-layout-results.json` in its temporary directory.
+The harness uses the production container and mount ledger with UIKit and React
+host/touch stubs. It injects transaction boundaries to verify acknowledgment delivery;
+it does not validate a complete Fabric runtime or displayed content.
+
+The opt-in iOS specs also compile and execute the production `GranitePortalInitialContentView.mm`
+and mount ledger against small React input stubs. They cover UTF-8 props (including embedded NUL),
+transaction filtering, child mounting, and recycling; Fabric scheduling itself remains outside this harness.
+Run them against a booted Simulator with `GRANITE_IOS_TOUCH_HARNESS_SIMULATOR=<simulator-id>`
+and `yarn workspace @granite-js/micro-frontend test src/portal/PortalHostContainerView.ios.spec.ts`.
 
 ### Activity example
 
@@ -594,8 +737,8 @@ Import public APIs from `GraniteMicroFrontendRuntime`.
 | `-setName:`                                 | Register/unregister the destination name. Use `sessionId`.                                                                                               |
 | `-activateIfNeeded`                         | Create the Fabric host under an `RCTRootComponentView` anchor, attach the touch handler, and apply the pending name. Main thread only, after React boot. |
 | `isActivated`                               | Whether the underlying Fabric host exists.                                                                                                               |
-| `hasAttachedContent`                        | Whether teleported content is currently attached. This is readiness, not presentation visibility.                                                        |
-| `onContentDidAttach` / `onContentDidDetach` | Main-thread readiness callbacks for the first attach and last detach.                                                                                    |
+| `hasAttachedContent`                        | Whether teleported content is attached; this does not acknowledge Fabric mount completion or presentation visibility.                                    |
+| `onContentDidAttach` / `onContentDidDetach` | Main-thread callbacks for the first content attachment and last detachment.                                                                              |
 | `-invalidate`                               | Unregister the host and clear callbacks during teardown.                                                                                                 |
 
 #### Touch handling under a Portal host
@@ -679,6 +822,35 @@ generic native destination should read the requested name at runtime.
 
 See [examples/portal/README.md](examples/portal/README.md) for the retained
 Portal-only cross-Activity / UIViewController example.
+
+### Session-scoped pending completion
+
+For hosts with multiple concurrent sessions, pass `sessionId` to
+`useIsPendingHostComponentHidden(sessionId)` or `<PendingHostComponent url={url} sessionId={sessionId} />`.
+Granite creates pending state when the runtime accepts `openApp` and releases it on `closeApp`.
+Completion survives visibility changes, host remounts, other sessions opening, and legacy global resets.
+Duplicate open events do not reset an existing session. Session IDs must uniquely identify a session lifetime.
+
+Remote components can use `useMicroFrontendSession()` to capture their ID and call
+`hidePendingHostComponent(sessionId)` when ready. Capture the ID before asynchronous work:
+a late completion for a closed session is ignored and cannot complete another session.
+The provider and hook share their Context across copies of this package in the same JS runtime;
+React must still be shared between host and remote bundles. Update both package copies to a version
+with this shared Context when using the hook across bundles.
+
+For backward compatibility, calls without an ID still update the legacy global flag and complete
+only the most recently opened session that remains open. They cannot identify the origin of late
+asynchronous work; concurrent applications should migrate to explicit IDs. The no-argument
+`resetPendingHostComponent()` resets only the legacy global flag, never session completion.
+Explicit completion of the latest open session also updates the legacy flag, so hosts using the
+no-argument pending APIs still observe that completion. Non-string callback arguments are treated like
+an omitted ID: the call still completes the latest open session and updates the legacy flag.
+Hosts that have never accepted a native session retain the legacy behavior for all callback arguments,
+including strings. Once session tracking has started, string arguments are interpreted as session IDs;
+unknown or closed IDs are ignored, including after the last session closes. In those hosts, wrap
+string-valued callbacks with `() => hidePendingHostComponent()` or capture an explicit session ID.
+Hosts using the legacy single-screen controller can continue using its existing API.
+
 
 ## License and credit
 

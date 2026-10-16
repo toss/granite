@@ -2,6 +2,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/// Main-thread cancellation handle for one content-layout observation.
+@protocol PortalContentLayoutObservation <NSObject>
+- (void)cancel;
+@end
+
 /// UIKit-owned container for hosting teleported portal content outside the
 /// React tree. This header intentionally imports UIKit only, so native
 /// integrations can include it in build configurations where the React
@@ -39,6 +44,23 @@ NS_ASSUME_NONNULL_BEGIN
 /// coordinates relative to this container, like content under a regular React
 /// Native root.
 - (void)activateIfNeeded;
+
+/// Observes Fabric mount completion for one explicit initial-content marker.
+/// Call and cancel on the main thread with a nonempty key and nonnegative Int32 revision.
+/// Delivery requires one matching internal marker physically beneath this destination in
+/// the same Window, with a completed mounting transaction for its native instance and identity.
+/// Empty, hidden, or zero-size declared content is valid. No visual readiness is inferred.
+/// A later marker mutation invalidates the acknowledgment until its matching transaction ends.
+/// This does not acknowledge images, network loading, future commits, or presented pixels.
+///
+/// Observation never activates a deferred container or delays rendering. Cancel when the
+/// caller stops waiting; changing or clearing an existing name, detach, and invalidation also
+/// cancel it. Initial naming and resize preserve observations, without requiring another commit.
+/// PortalInitialContentView uses revision 0.
+- (id<PortalContentLayoutObservation>)observeContentLayoutWithRequestKey:(NSString *)requestKey
+                                                              revision:(NSInteger)revision
+                                                               onReady:(void (^)(void))onReady
+    NS_SWIFT_NAME(observeContentLayout(requestKey:revision:onReady:));
 
 /// Whether the underlying Fabric host view has been created.
 @property (nonatomic, readonly) BOOL isActivated;

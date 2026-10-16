@@ -117,7 +117,8 @@
     "ios": {
       "componentProvider": {
         "PortalView": "PortalView",
-        "PortalHostView": "PortalHostView"
+        "PortalHostView": "PortalHostView",
+        "GranitePortalInitialContentView": "GranitePortalInitialContentView"
       }
     }
   },

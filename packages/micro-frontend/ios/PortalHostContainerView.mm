@@ -1,5 +1,6 @@
 #import "PortalHostContainerView.h"
 
+#import "PortalInitialContentMount.h"
 #import <React/RCTRootComponentView.h>
 #import <React/RCTSurfaceTouchHandler.h>
 #import "PortalHostView.h"
@@ -176,12 +177,118 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 
 @end
 
+@class GranitePortalContentLayoutObservation;
+
+@interface PortalHostContainerView ()
+- (UIView *)portalContentLayoutHost;
+- (void)removeContentLayoutObservation:(GranitePortalContentLayoutObservation *)observation;
+@end
+
+@interface GranitePortalContentLayoutObservation : NSObject <PortalContentLayoutObservation>
+- (instancetype)initWithOwner:(PortalHostContainerView *)owner
+                   requestKey:(NSString *)requestKey
+                     revision:(NSInteger)revision
+                      onReady:(void (^)(void))onReady;
+- (void)startIfNeeded;
+- (void)checkContentLayout;
+@end
+
+@implementation GranitePortalContentLayoutObservation {
+  __weak PortalHostContainerView *_owner;
+  NSString *_requestKey;
+  NSInteger _revision;
+  void (^_onReady)(void);
+  id _mountObserver;
+  BOOL _checkScheduled;
+}
+
+- (instancetype)initWithOwner:(PortalHostContainerView *)owner
+                   requestKey:(NSString *)requestKey
+                     revision:(NSInteger)revision
+                      onReady:(void (^)(void))onReady
+{
+  if (self = [super init]) {
+    _owner = owner;
+    _requestKey = [requestKey copy];
+    _revision = revision;
+    _onReady = [onReady copy];
+  }
+  return self;
+}
+
+- (void)startIfNeeded
+{
+  if (_onReady == nil) return;
+  if (_mountObserver == nil) {
+    __weak GranitePortalContentLayoutObservation *weakSelf = self;
+    _mountObserver = [[NSNotificationCenter defaultCenter]
+        addObserverForName:GranitePortalInitialContentMountsDidChange object:nil queue:nil
+        usingBlock:^(__unused NSNotification *notification) { [weakSelf startIfNeeded]; }];
+  }
+  if (_checkScheduled) return;
+  _checkScheduled = YES;
+  __weak GranitePortalContentLayoutObservation *weakSelf = self;
+  // Leave Fabric's observer iteration before calling host code. Revalidate at delivery.
+  dispatch_async(dispatch_get_main_queue(), ^{
+    GranitePortalContentLayoutObservation *strongSelf = weakSelf;
+    if (strongSelf == nil) return;
+    strongSelf->_checkScheduled = NO;
+    [strongSelf checkContentLayout];
+  });
+}
+
+- (void)checkContentLayout
+{
+  PortalHostContainerView *owner = _owner;
+  if (owner == nil || _onReady == nil) {
+    [self cancel];
+    return;
+  }
+  UIView *host = [owner portalContentLayoutHost];
+  if (host == nil || owner.window == nil) return;
+  GranitePortalInitialContentMount *match = nil;
+  for (GranitePortalInitialContentMount *mount in GranitePortalInitialContentMounts()) {
+    RCTViewComponentView *view = mount.view;
+    if (![mount matchesIdentity:_requestKey revision:_revision] || view.window != owner.window ||
+        ![view isDescendantOfView:host]) continue;
+    if (match != nil) return;
+    match = mount;
+  }
+  if ([match matchesCompletedIdentity:_requestKey revision:_revision]) {
+    void (^onReady)(void) = _onReady;
+    [self cancel];
+    onReady();
+  }
+}
+
+- (void)cancel
+{
+  if (![NSThread isMainThread]) {
+    [NSException raise:NSInternalInconsistencyException format:@"Content layout must be cancelled on the main thread"];
+  }
+  PortalHostContainerView *owner = _owner;
+  _owner = nil;
+  _onReady = nil;
+  _requestKey = nil;
+  if (_mountObserver != nil) [[NSNotificationCenter defaultCenter] removeObserver:_mountObserver];
+  _mountObserver = nil;
+  [owner removeContentLayoutObservation:self];
+}
+
+- (void)dealloc
+{
+  if (_mountObserver != nil) [[NSNotificationCenter defaultCenter] removeObserver:_mountObserver];
+}
+@end
+
 @implementation PortalHostContainerView {
   RCTRootComponentView *_reactRootAnchor;
   PortalHostView *_portalHostView;
   RCTSurfaceTouchHandler *_touchHandler;
   NSString *_pendingName;
   BOOL _hasAttachedContent;
+  NSString *_contentLayoutName;
+  NSMutableSet<GranitePortalContentLayoutObservation *> *_contentLayoutObservations;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -205,6 +312,60 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
     [self activateIfNeeded];
   }
   return self;
+}
+
+- (id<PortalContentLayoutObservation>)observeContentLayoutWithRequestKey:(NSString *)requestKey
+                                                              revision:(NSInteger)revision
+                                                               onReady:(void (^)(void))onReady
+{
+  if (![NSThread isMainThread]) {
+    [NSException raise:NSInternalInconsistencyException format:@"Content layout must be observed on the main thread"];
+  }
+  if (requestKey.length == 0 || revision < 0 || revision > INT32_MAX || onReady == nil) {
+    [NSException raise:NSInvalidArgumentException format:@"A nonempty request key, Int32 revision, and callback are required"];
+  }
+  GranitePortalContentLayoutObservation *observation =
+      [[GranitePortalContentLayoutObservation alloc] initWithOwner:self requestKey:requestKey revision:revision onReady:onReady];
+  if (_contentLayoutObservations == nil) _contentLayoutObservations = [NSMutableSet new];
+  [_contentLayoutObservations addObject:observation];
+  [observation startIfNeeded];
+  return observation;
+}
+
+- (UIView *)portalContentLayoutHost
+{
+  return _portalHostView;
+}
+
+- (void)removeContentLayoutObservation:(GranitePortalContentLayoutObservation *)observation
+{
+  [_contentLayoutObservations removeObject:observation];
+}
+
+- (void)cancelContentLayoutObservations
+{
+  for (GranitePortalContentLayoutObservation *observation in _contentLayoutObservations.allObjects) {
+    [observation cancel];
+  }
+}
+
+- (void)startContentLayoutObservations
+{
+  for (GranitePortalContentLayoutObservation *observation in _contentLayoutObservations.allObjects) {
+    [observation startIfNeeded];
+  }
+}
+
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+  if (self.window != nil && self.window != newWindow) [self cancelContentLayoutObservations];
+  [super willMoveToWindow:newWindow];
+}
+
+- (void)didMoveToWindow
+{
+  [super didMoveToWindow];
+  [self startContentLayoutObservations];
 }
 
 - (BOOL)isActivated
@@ -260,10 +421,15 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
     [_portalHostView setName:_pendingName];
     _pendingName = nil;
   }
+  [self startContentLayoutObservations];
 }
 
 - (void)setName:(nullable NSString *)name
 {
+  if (_contentLayoutName != nil && ![_contentLayoutName isEqualToString:name]) {
+    [self cancelContentLayoutObservations];
+  }
+  _contentLayoutName = [name copy];
   if (_portalHostView) {
     [_portalHostView setName:name];
   } else {
@@ -273,6 +439,7 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 
 - (void)handleSubviewCountChanged
 {
+  [self startContentLayoutObservations];
   NSUInteger count = _portalHostView.subviews.count;
   if (count > 0) {
     if (!_hasAttachedContent) {
@@ -308,6 +475,8 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 
 - (void)invalidate
 {
+  [self cancelContentLayoutObservations];
+  _contentLayoutName = nil;
   _pendingName = nil;
   _portalHostView.onSubviewCountChanged = nil;
   [_portalHostView setName:nil];
@@ -317,6 +486,8 @@ static BOOL GranitePortalSurfaceTouchHandlerShouldReceiveTouch(
 
 - (void)dealloc
 {
+  _portalHostView.onSubviewCountChanged = nil;
+  [self cancelContentLayoutObservations];
   [_portalHostView setName:nil];
   // Do not call -detachFromView: here. RCTSurfaceTouchHandler asserts that
   // the recognizer is still attached to the given view, and during dealloc

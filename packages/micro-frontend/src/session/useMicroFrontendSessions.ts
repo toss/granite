@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
-import { installPendingHostComponentBridge, resetPendingHostComponent } from '../host/pendingHostComponentStore';
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import { emitMicroFrontendLifecycleEvent } from '../runtime/lifecycle';
 import { disposeAppResources } from '../runtime/registry';
 import type {
@@ -65,17 +64,6 @@ export function useMicroFrontendSessions(
       });
     });
   }, [runtime, sessions]);
-
-  useLayoutEffect(() => {
-    installPendingHostComponentBridge();
-    const subscription = runtime.onEvent((event) => {
-      if (event.name === 'openApp') {
-        resetPendingHostComponent();
-      }
-    });
-
-    return () => subscription.remove();
-  }, [runtime]);
 
   return sessions;
 }

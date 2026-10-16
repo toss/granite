@@ -218,4 +218,20 @@ describe('pending host component registry', () => {
 
     expect(Reflect.get(globalThis, 'hideSharedPendingHostComponent')).toBe(hidePendingHostComponent);
   });
+
+  it('preserves string-resolving callbacks on a legacy host without session tracking', async () => {
+    const legacyHide = vi.fn();
+    Reflect.set(globalThis, 'hideSharedPendingHostComponent', legacyHide);
+    // Reading an unknown session must not opt a legacy host into session tracking.
+    expect(getIsPendingHostComponentHidden('unknown')).toBe(false);
+    hidePendingHostComponent();
+    resetPendingHostComponent();
+    legacyHide.mockClear();
+
+    await Promise.resolve('stored-value').then(hidePendingHostComponent);
+
+    expect(getIsPendingHostComponentHidden()).toBe(true);
+    expect(legacyHide).toHaveBeenCalledOnce();
+    expect(Reflect.get(getMicroFrontendGlobalContext(), PENDING_STORE_KEY).sessionHidden).toBeUndefined();
+  });
 });

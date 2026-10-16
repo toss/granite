@@ -18,6 +18,8 @@ Pod::Spec.new do |s|
     "ios/PortalHostContainerView.h",
   ]
   s.private_header_files = [
+    "ios/GranitePortalInitialContentView.h",
+    "ios/PortalInitialContentMount.h",
     "ios/GraniteMicroFrontendRuntimeHost+Internal.h",
     "ios/PortalHostView.h",
     "ios/PortalRegistry.h",

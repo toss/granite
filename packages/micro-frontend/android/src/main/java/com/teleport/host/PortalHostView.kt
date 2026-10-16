@@ -3,6 +3,8 @@ package com.teleport.host
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.view.View
+import com.facebook.react.bridge.UiThreadUtil
 import com.facebook.react.views.view.ReactViewGroup
 import com.teleport.global.PortalRegistry
 
@@ -19,9 +21,51 @@ class PortalHostView(
   private var isInBatch = false
   private var batchBaseIndex = 0
   private var hasPendingCleanup = false
+  private val contentLayoutObservations = mutableSetOf<PortalContentLayoutObservation>()
+
+  /**
+   * Observes Fabric mount completion for an explicit initial-content marker.
+   *
+   * Call and close on the UI thread. Delivery requires one matching internal marker,
+   * physically beneath this host in the same Window, with its native mount completed.
+   * Completion belongs to the native instance and identity, not inferred visual readiness.
+   * Empty, hidden, or zero-size declared content is valid. Layout requests are not polled.
+   * A later marker mutation invalidates the acknowledgment until its exact mount execution ends.
+   *
+   * Subscribe before or after naming and attachment. The initial name preserves observations;
+   * changing or clearing an existing name, detach, and cleanup cancel them.
+   * Resize preserves observations but does not require a commit for the new host size.
+   * This does not acknowledge images, network loading, future commits, or presented pixels.
+   * PortalInitialContentView markers use revision 0.
+   */
+  fun observeContentLayout(
+    requestKey: String,
+    revision: Int,
+    onReady: () -> Unit,
+  ): AutoCloseable {
+    UiThreadUtil.assertOnUiThread()
+    require(requestKey.isNotEmpty()) { "requestKey must not be empty" }
+    require(revision >= 0) { "revision must be nonnegative" }
+    return PortalContentLayoutObservation(this, requestKey, revision, onReady).also {
+      contentLayoutObservations.add(it)
+      it.attach()
+    }
+  }
+
+  internal fun removeContentLayoutObservation(observation: PortalContentLayoutObservation) {
+    contentLayoutObservations.remove(observation)
+  }
+
+  private fun cancelContentLayoutObservations() {
+    contentLayoutObservations.toList().forEach { it.close() }
+  }
 
   fun setName(newName: String?) {
     if (name == newName) return
+
+    if (name != null) {
+      cancelContentLayoutObservations()
+    }
 
     hasPendingCleanup = false
     name?.let { PortalRegistry.unregisterHost(it, this) }
@@ -30,6 +74,7 @@ class PortalHostView(
   }
 
   fun cleanup() {
+    cancelContentLayoutObservations()
     if (isAttachedToWindow) {
       hasPendingCleanup = true
       return
@@ -56,8 +101,19 @@ class PortalHostView(
     return minOf(batchBaseIndex + childIndex, childCount)
   }
 
+  override fun onViewAdded(child: View) {
+    super.onViewAdded(child)
+    contentLayoutObservations.toList().forEach { it.attach() }
+  }
+
+  override fun onViewRemoved(child: View) {
+    super.onViewRemoved(child)
+    contentLayoutObservations.toList().forEach { it.attach() }
+  }
+
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
+    contentLayoutObservations.toList().forEach { it.attach() }
     // A host can be named before its Activity installs it into the Window.
     // Register again on attach so detached controller surfaces resolve the
     // currently visible Activity host deterministically.
@@ -76,6 +132,7 @@ class PortalHostView(
   }
 
   override fun onDetachedFromWindow() {
+    cancelContentLayoutObservations()
     super.onDetachedFromWindow()
 
     if (hasPendingCleanup) {

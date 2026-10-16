@@ -41,6 +41,8 @@ export type {
   MicroFrontendRuntimeContext,
 } from './runtime/registry';
 export { default as Portal } from './specs/PortalViewNativeComponent';
+export { PortalInitialContentView } from './portal/PortalInitialContentView';
+export type { PortalInitialContentViewProps } from './portal/PortalInitialContentView';
 export type {
   AppRequest,
   MicroFrontendAppProps,
