@@ -109,6 +109,21 @@ describe('session pending completion', () => {
     expect(getIsPendingHostComponentHidden()).toBe(false);
   });
 
+  it('does not treat closed or unknown IDs as legacy callbacks after the last session closes', async () => {
+    const { open, close } = setup();
+    open('first');
+    close('first');
+    vi.resetModules();
+    const otherCopy = await import('./pendingHostComponentStore');
+
+    await Promise.resolve('first').then(otherCopy.hidePendingHostComponent);
+    await Promise.resolve('unknown').then(otherCopy.hidePendingHostComponent);
+
+    expect(getIsPendingHostComponentHidden()).toBe(false);
+    open('next');
+    expect(getIsPendingHostComponentHidden('next')).toBe(false);
+  });
+
   it('adopts older stores and shares session completion across package copies', async () => {
     Reflect.defineProperty(getMicroFrontendGlobalContext(), 'pendingHostComponentStore', {
       configurable: true,

@@ -15,7 +15,7 @@ const stubIncludeDirectory = resolve(testDirectory, 'stubs');
 const simulatorId = process.env.GRANITE_IOS_TOUCH_HARNESS_SIMULATOR;
 const runWithSimulator = process.platform === 'darwin' && simulatorId != null && simulatorId.length > 0;
 
-function compileHarness(temporaryDirectory: string, harnessName: string, binaryName: string): string {
+function compileHarness(temporaryDirectory: string, harnessName: string, binaryName: string, component = false): string {
   const sdkPath = execFileSync('xcrun', ['--sdk', 'iphonesimulator', '--show-sdk-path'], {
     encoding: 'utf8',
   }).trim();
@@ -27,6 +27,7 @@ function compileHarness(temporaryDirectory: string, harnessName: string, binaryN
     'iphonesimulator',
     'clang++',
     '-ObjC++',
+    '-std=c++17',
     '-fobjc-arc',
     '-fblocks',
     '-target',
@@ -40,10 +41,12 @@ function compileHarness(temporaryDirectory: string, harnessName: string, binaryN
     '-framework',
     'CoreGraphics',
     '-I',
-    stubIncludeDirectory,
+    component ? resolve(testDirectory, 'component-stubs/native') : stubIncludeDirectory,
+    '-I',
+    resolve(testDirectory, 'component-stubs/codegen'),
     '-I',
     iosDirectory,
-    portalHostContainerPath,
+    component ? resolve(iosDirectory, 'GranitePortalInitialContentView.mm') : portalHostContainerPath,
     resolve(iosDirectory, 'PortalInitialContentMount.mm'),
     resolve(testDirectory, harnessName),
     '-o',
@@ -53,10 +56,10 @@ function compileHarness(temporaryDirectory: string, harnessName: string, binaryN
   return binaryPath;
 }
 
-function runHarness(simulator: string, harnessName: string, binaryName: string): void {
+function runHarness(simulator: string, harnessName: string, binaryName: string, component = false): void {
   const temporaryDirectory = mkdtempSync(join(tmpdir(), 'granite-portal-'));
   try {
-    const binaryPath = compileHarness(temporaryDirectory, harnessName, binaryName);
+    const binaryPath = compileHarness(temporaryDirectory, harnessName, binaryName, component);
     execFileSync('xcrun', ['simctl', 'spawn', simulator, binaryPath]);
   } finally {
     rmSync(temporaryDirectory, { recursive: true, force: true });
@@ -69,6 +72,15 @@ describe('PortalHostContainerView touch ownership', () => {
       throw new Error('GRANITE_IOS_TOUCH_HARNESS_SIMULATOR is required');
     }
     runHarness(simulatorId, 'PortalHostContainerTouchOwnershipHarness.mm', 'PortalHostContainerTouchOwnershipHarness');
+  });
+});
+
+describe('GranitePortalInitialContentView native component', () => {
+  it.runIf(runWithSimulator)('converts props and clears mount identity and children across recycling', () => {
+    if (simulatorId == null) {
+      throw new Error('GRANITE_IOS_TOUCH_HARNESS_SIMULATOR is required');
+    }
+    runHarness(simulatorId, 'PortalInitialContentViewHarness.mm', 'PortalInitialContentViewHarness', true);
   });
 });
 

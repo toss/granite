@@ -495,9 +495,13 @@ It derives the observation key from the current `MicroFrontendSessionProvider`'s
 On supported native hosts, rendering it outside a session provider throws `MissingMicroFrontendSessionError`.
 On older apps without this native component, it renders an ordinary `View`, preserving props,
 ref, and children without requiring a session provider or emitting a mount acknowledgment.
-This availability check uses `UIManager.hasViewManagerConfig` to detect native component registration;
-mount acknowledgment still requires a Fabric host. The fallback preserves rendering only:
-native hosts must not wait for its acknowledgment when the component is unavailable.
+Mount acknowledgment through this component is supported on **Bridgeless Fabric** hosts.
+The availability check uses `UIManager.hasViewManagerConfig`, which queries the native component
+registry in Bridgeless mode. With the bridge enabled, it queries Paper view managers instead;
+on iOS it cannot discover this Fabric-only component, so the wrapper renders the plain View fallback.
+The fallback preserves rendering only: hosts must enable an acknowledgment-based first-draw guard
+only with a supported runtime and matching JavaScript and native component. A JavaScript-only update
+does not add this capability to an older binary or require older hosts to implement a guard.
 
 ```tsx
 import { MicroFrontendSessionProvider, Portal, PortalInitialContentView } from '@granite-js/micro-frontend';
@@ -612,6 +616,12 @@ and writes `granite-portal-content-layout-results.json` in its temporary directo
 The harness uses the production container and mount ledger with UIKit and React
 host/touch stubs. It injects transaction boundaries to verify acknowledgment delivery;
 it does not validate a complete Fabric runtime or displayed content.
+
+The opt-in iOS specs also compile and execute the production `GranitePortalInitialContentView.mm`
+and mount ledger against small React input stubs. They cover UTF-8 props (including embedded NUL),
+transaction filtering, child mounting, and recycling; Fabric scheduling itself remains outside this harness.
+Run them against a booted Simulator with `GRANITE_IOS_TOUCH_HARNESS_SIMULATOR=<simulator-id>`
+and `yarn workspace @granite-js/micro-frontend test src/portal/PortalHostContainerView.ios.spec.ts`.
 
 ### Activity example
 
@@ -835,7 +845,10 @@ asynchronous work; concurrent applications should migrate to explicit IDs. The n
 Explicit completion of the latest open session also updates the legacy flag, so hosts using the
 no-argument pending APIs still observe that completion. Non-string callback arguments are treated like
 an omitted ID: the call still completes the latest open session and updates the legacy flag.
-For callbacks receiving a string, use `() => hidePendingHostComponent()` or capture an explicit session ID.
+Hosts that have never accepted a native session retain the legacy behavior for all callback arguments,
+including strings. Once session tracking has started, string arguments are interpreted as session IDs;
+unknown or closed IDs are ignored, including after the last session closes. In those hosts, wrap
+string-valued callbacks with `() => hidePendingHostComponent()` or capture an explicit session ID.
 Hosts using the legacy single-screen controller can continue using its existing API.
 
 

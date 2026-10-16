@@ -103,31 +103,29 @@ export function getPendingHostComponentStoreVersion() {
   return getPendingHostComponentStore().version;
 }
 
-function getSessionHidden() {
-  const store = getPendingHostComponentStore();
-  // Adopt stores created by older package copies without replacing their listeners.
-  return (store.sessionHidden ??= new Map<string, boolean>());
-}
-
 export function getIsPendingHostComponentHidden(sessionId?: string) {
-  return sessionId == null ? getPendingHostComponentStore().hidden : (getSessionHidden().get(sessionId) ?? false);
+  const store = getPendingHostComponentStore();
+  return sessionId == null ? store.hidden : (store.sessionHidden?.get(sessionId) ?? false);
 }
 
 /** @internal Called once for each accepted native open event, before notifying React. */
 export function openPendingHostComponentSession(sessionId: string) {
-  const sessions = getSessionHidden();
+  const store = getPendingHostComponentStore();
+  // Only native opens start session tracking. Retain the map after the last close so
+  // late scoped completions cannot fall back to the legacy global flag.
+  const sessions = (store.sessionHidden ??= new Map<string, boolean>());
   if (sessions.has(sessionId)) {
     return;
   }
   sessions.set(sessionId, false);
-  getPendingHostComponentStore().hidden = false;
+  store.hidden = false;
   installPendingHostComponentBridge();
   emitPendingHostComponentStoreChange();
 }
 
 /** @internal Closing a session releases its state; visibility changes do not. */
 export function closePendingHostComponentSession(sessionId: string) {
-  if (getSessionHidden().delete(sessionId)) {
+  if (getPendingHostComponentStore().sessionHidden?.delete(sessionId)) {
     emitPendingHostComponentStoreChange();
   }
 }
@@ -147,13 +145,15 @@ function setPendingHostComponentHidden(hidden: boolean) {
 export function hidePendingHostComponent(): void;
 export function hidePendingHostComponent(sessionId?: string): void;
 export function hidePendingHostComponent(sessionId?: unknown) {
-  const sessions = getSessionHidden();
-  const latest = Array.from(sessions.keys()).at(-1);
-  const scoped = typeof sessionId === 'string';
+  const sessions = getPendingHostComponentStore().sessionHidden;
+  const latest = sessions == null ? undefined : Array.from(sessions.keys()).at(-1);
+  // Legacy hosts ignore callback payloads, including strings. Once a native session
+  // has opened, strings are IDs even when no sessions remain open.
+  const scoped = sessions != null && typeof sessionId === 'string';
   // Unscoped callers retain legacy behavior, targeting the latest open session.
   // Async work should always pass its originating session ID.
   const target = scoped ? sessionId : latest;
-  if (target != null) {
+  if (sessions != null && target != null) {
     if (!sessions.has(target)) {
       return;
     }
@@ -315,7 +315,7 @@ function findRouteByRequest(request: PendingHostComponentRouteRequest): MatchedP
 export function resetPendingHostComponentStoreForTest() {
   const store = getPendingHostComponentStore();
   store.entries = [];
-  store.sessionHidden?.clear();
+  delete store.sessionHidden;
   store.hidden = false;
   store.version = 0;
   emitPendingHostComponentStoreChange();
