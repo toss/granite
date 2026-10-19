@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -22,6 +25,13 @@ private:
   FileReaderErrorKind kind_;
 };
 
-std::string readFileToMemory(const std::string &path);
+struct FileBytes {
+  std::unique_ptr<uint8_t[]> data;
+  size_t size;
+};
 
-}
+// Owns a snapshot independently of subsequent file mutation, replacement, or
+// deletion.
+FileBytes readFileToMemory(const std::string &path);
+
+} // namespace granite::microfrontend::io

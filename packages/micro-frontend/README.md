@@ -220,6 +220,12 @@ adapter.loadBundle({ appName: 'cart' })
 Concurrent preload/import calls for one app share an evaluation. A successful
 evaluation remains cached for the lifetime of the JavaScript runtime. Failed
 evaluation removes the partial container so a later request can retry.
+Android prepares an owned bundle snapshot on the native-modules queue before
+scheduling evaluation on the JavaScript queue. Once prepared, the snapshot remains
+valid if an update overwrites, truncates, replaces, or removes the original file.
+Preparation and evaluation retain request order, with at most one prepared bundle
+awaiting evaluation. Runtime invalidation cancels queued requests and releases
+their buffers; Hermes retains the bytes needed by code already evaluated.
 Before evaluating a remote, the runtime also adapts the shared React Native
 component registry so a native view wrapper already evaluated by the host can
 be evaluated again by a separate remote bundle. The canonical host registration

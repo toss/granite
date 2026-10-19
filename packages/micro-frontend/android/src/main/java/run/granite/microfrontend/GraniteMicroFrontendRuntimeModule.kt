@@ -9,12 +9,20 @@ import com.facebook.react.module.annotations.ReactModule
 class GraniteMicroFrontendRuntimeModule(
     reactContext: ReactApplicationContext,
 ) : NativeGraniteMicroFrontendRuntimeSpec(reactContext), GraniteMicroFrontendRuntimeEventTarget {
+    private val evaluations = BundleEvaluationQueue(
+        enqueuePreparation = { task -> reactApplicationContext.nativeModulesMessageQueueThread?.runOnQueue(task) == true },
+        prepare = { path -> BundleEvaluator(reactApplicationContext).apply { prepareFile(path) } },
+        enqueueEvaluation = { task -> reactApplicationContext.runOnJSQueueThread(task) },
+        evaluate = { bundle -> bundle.evaluatePrepared() },
+    )
+
     override fun initialize() {
         super.initialize()
         GraniteMicroFrontendRuntimeHost.attach(this)
     }
 
     override fun invalidate() {
+        evaluations.invalidate()
         GraniteMicroFrontendRuntimeHost.detach(this)
         super.invalidate()
     }
@@ -26,17 +34,11 @@ class GraniteMicroFrontendRuntimeModule(
             return
         }
 
-        val enqueued = reactApplicationContext.runOnJSQueueThread {
-            try {
-                BundleEvaluator(reactApplicationContext).evaluateFile(filePath)
-                promise.resolve(null)
-            } catch (error: Exception) {
-                promise.reject(ERROR_EVALUATE_SCRIPT, error.message, error)
-            }
-        }
-        if (!enqueued) {
-            promise.reject(ERROR_EVALUATE_SCRIPT, "Failed to enqueue script evaluation on the JS queue")
-        }
+        evaluations.submit(
+            filePath,
+            onSuccess = { promise.resolve(null) },
+            onError = { error -> promise.reject(ERROR_EVALUATE_SCRIPT, error.message, error) },
+        )
     }
 
     override fun startEventDelivery() {

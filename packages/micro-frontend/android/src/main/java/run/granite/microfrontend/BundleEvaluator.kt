@@ -1,6 +1,9 @@
 package run.granite.microfrontend
 
 import android.content.res.AssetManager
+import android.os.Trace
+import com.facebook.jni.HybridData
+import com.facebook.proguard.annotations.DoNotStrip
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.common.annotations.FrameworkAPI
 import java.io.File
@@ -46,34 +49,62 @@ internal fun resolveBundleSource(assetManager: AssetManager, bundlePath: String)
 @OptIn(FrameworkAPI::class)
 internal class BundleEvaluator(
     private val reactContext: ReactApplicationContext,
-) {
+) : AutoCloseable {
+    @DoNotStrip
+    private var mHybridData: HybridData? = null
+    private var sourceUrl: String? = null
+
+    private external fun prepareFileSync(
+        filePath: String,
+    ): HybridData
+
+    private external fun prepareScriptSync(
+        scriptData: ByteArray,
+    ): HybridData
+
+    private external fun evaluatePreparedSync(
+        runtimePointer: Long,
+        sourceUrl: String,
+    )
+
+    @Throws(FileNotFoundException::class, IOException::class)
+    fun prepareFile(filePath: String) {
+        Trace.beginSection("GraniteBundle.prepare")
+        try {
+            check(mHybridData == null) { "Bundle was already prepared" }
+            val source = resolveBundleSource(reactContext.assets, filePath)
+            mHybridData = when (source) {
+                is ResolvedBundleSource.Asset -> prepareScriptSync(source.scriptData)
+                is ResolvedBundleSource.FilePath -> prepareFileSync(source.filePath)
+            }
+            sourceUrl = source.sourceUrl
+        } finally {
+            Trace.endSection()
+        }
+    }
+
     /**
      * Evaluates a bundle on the JSI runtime reached through `javaScriptContextHolder`. That holder
      * is a framework-internal API, so this path is only verified against the React Native version
      * this package is developed against (`catalog:react-native`, currently 0.84.0).
      * `peerDependencies` declares `*`; a host on another version should re-verify it.
      */
-    private external fun evaluateFileSync(
-        runtimePointer: Long,
-        filePath: String,
-        sourceUrl: String,
-    )
-
-    private external fun evaluateScriptSync(
-        runtimePointer: Long,
-        scriptData: ByteArray,
-        sourceUrl: String,
-    )
-
-    @Throws(FileNotFoundException::class, IOException::class)
-    fun evaluateFile(filePath: String) {
-        val source = resolveBundleSource(reactContext.assets, filePath)
+    fun evaluatePrepared() {
+        reactContext.assertOnJSQueueThread()
+        check(mHybridData?.isValid == true) { "Prepared bundle is unavailable" }
         val runtimePointer = reactContext.javaScriptContextHolder?.get()
             ?: throw IllegalStateException("JavaScript runtime is unavailable")
-        when (source) {
-            is ResolvedBundleSource.Asset -> evaluateScriptSync(runtimePointer, source.scriptData, source.sourceUrl)
-            is ResolvedBundleSource.FilePath -> evaluateFileSync(runtimePointer, source.filePath, source.sourceUrl)
+        Trace.beginSection("GraniteBundle.evaluate")
+        try {
+            evaluatePreparedSync(runtimePointer, checkNotNull(sourceUrl))
+        } finally {
+            Trace.endSection()
         }
+    }
+
+    override fun close() {
+        mHybridData?.resetNative()
+        mHybridData = null
     }
 
     private companion object {

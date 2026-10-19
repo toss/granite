@@ -3,6 +3,7 @@
 #include <cerrno>
 #include <cstring>
 #include <fcntl.h>
+#include <limits>
 #include <new>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -29,7 +30,7 @@ std::string errorMessage(const std::string &message, const std::string &path,
   return message + ": " + path + " (" + std::strerror(errorNumber) + ")";
 }
 
-}
+} // namespace
 
 FileReaderError::FileReaderError(FileReaderErrorKind kind,
                                  const std::string &message)
@@ -37,11 +38,11 @@ FileReaderError::FileReaderError(FileReaderErrorKind kind,
 
 FileReaderErrorKind FileReaderError::kind() const { return kind_; }
 
-std::string readFileToMemory(const std::string &path) {
-  std::string source;
+FileBytes readFileToMemory(const std::string &path) {
+  FileBytes source{nullptr, 0};
 
   {
-    const int fileDescriptor = open(path.c_str(), O_RDONLY);
+    const int fileDescriptor = open(path.c_str(), O_RDONLY | O_CLOEXEC);
     if (fileDescriptor < 0) {
       const int errorNumber = errno;
       throw FileReaderError(
@@ -58,17 +59,31 @@ std::string readFileToMemory(const std::string &path) {
           errorMessage("Bundle file cannot be inspected", path, errorNumber));
     }
 
+    if (!S_ISREG(fileStat.st_mode) || fileStat.st_size < 0) {
+      throw FileReaderError(FileReaderErrorKind::ReadFailed,
+                            "Bundle is not a regular file: " + path);
+    }
+    if (static_cast<uintmax_t>(fileStat.st_size) >
+        std::numeric_limits<size_t>::max()) {
+      throw FileReaderError(FileReaderErrorKind::AllocationFailed,
+                            "Bundle file is too large: " + path);
+    }
+    source.size = static_cast<size_t>(fileStat.st_size);
     try {
-      source.resize(static_cast<size_t>(fileStat.st_size));
+      // read() fills the buffer; value-initializing it would touch every byte
+      // twice.
+      if (source.size != 0) {
+        source.data = std::unique_ptr<uint8_t[]>(new uint8_t[source.size]);
+      }
     } catch (const std::bad_alloc &) {
       throw FileReaderError(FileReaderErrorKind::AllocationFailed,
                             "Bundle file cannot fit in memory: " + path);
     }
 
     size_t offset = 0;
-    while (offset < source.size()) {
+    while (offset < source.size) {
       const ssize_t bytesRead =
-          read(file.get(), source.data() + offset, source.size() - offset);
+          read(file.get(), source.data.get() + offset, source.size - offset);
       if (bytesRead < 0) {
         if (errno == EINTR) {
           continue;
@@ -79,7 +94,7 @@ std::string readFileToMemory(const std::string &path) {
             errorMessage("Bundle file cannot be read", path, errorNumber));
       }
       if (bytesRead == 0) {
-        source.resize(offset);
+        source.size = offset;
         break;
       }
       offset += static_cast<size_t>(bytesRead);
@@ -89,4 +104,4 @@ std::string readFileToMemory(const std::string &path) {
   return source;
 }
 
-}
+} // namespace granite::microfrontend::io
