@@ -42,11 +42,23 @@ class PortalHostView(
     requestKey: String,
     revision: Int,
     onReady: () -> Unit,
+  ): AutoCloseable = observeContentLayout(requestKey, revision, false, onReady)
+
+  /**
+   * Opt-in compatibility for older revision-0 markers that encode identity in nativeID.
+   * Explicit identity props take precedence. Actual Fabric completion and sentinel membership
+   * are still required; ordinary Views and arbitrary nativeIDs cannot acknowledge content.
+   */
+  fun observeContentLayout(
+    requestKey: String,
+    revision: Int,
+    acceptLegacyNativeId: Boolean,
+    onReady: () -> Unit,
   ): AutoCloseable {
     UiThreadUtil.assertOnUiThread()
     require(requestKey.isNotEmpty()) { "requestKey must not be empty" }
     require(revision >= 0) { "revision must be nonnegative" }
-    return PortalContentLayoutObservation(this, requestKey, revision, onReady).also {
+    return PortalContentLayoutObservation(this, requestKey, revision, onReady, acceptLegacyNativeId).also {
       contentLayoutObservations.add(it)
       it.attach()
     }

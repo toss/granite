@@ -11,6 +11,7 @@ import com.facebook.react.bridge.ReactMarkerConstants
 import com.facebook.react.internal.featureflags.ReactNativeFeatureFlags
 import com.facebook.react.uimanager.PointerEvents
 import com.facebook.react.uimanager.ReactStylesDiffMap
+import com.facebook.react.uimanager.UIManagerHelper
 import com.teleport.initialcontent.PortalInitialContentMounts
 import com.teleport.initialcontent.PortalInitialContentViewManager
 import com.teleport.initialcontent.PortalInitialContentRegistry
@@ -107,6 +108,138 @@ class PortalContentLayoutObservationTest {
     drain()
     assertEquals(0, calls)
     assertFalse(marker.hasCompletedMount())
+  }
+
+  @Test
+  fun `legacy revision zero requires explicit opt in and a completed sentinel transaction`() {
+    val marker = legacyMarker()
+    var strictCalls = 0
+    var compatibleCalls = 0
+    host.observeContentLayout("request", 0) { strictCalls++ }
+    host.observeContentLayout("request", 0, acceptLegacyNativeId = true) { compatibleCalls++ }
+    begin()
+    insertSentinel(marker)
+    drain()
+    assertEquals(0, compatibleCalls)
+    end()
+    drain()
+    assertEquals(0, strictCalls)
+    assertEquals(1, compatibleCalls)
+    assertFalse(marker.hasCompletedMount())
+    assertTrue(marker.hasCompletedMount(acceptLegacyNativeId = true))
+  }
+
+  @Test
+  fun `legacy compatibility cannot match a different key or revision`() {
+    val marker = legacyMarker()
+    var calls = 0
+    host.observeContentLayout("other", 0, acceptLegacyNativeId = true) { calls++ }
+    host.observeContentLayout("request", 1, acceptLegacyNativeId = true) { calls++ }
+    complete(marker)
+    drain()
+    assertEquals(0, calls)
+  }
+
+  @Test
+  fun `explicit identity overrides a legacy looking nativeID even with compatibility enabled`() {
+    val marker = marker(key = "current", revision = 2)
+    viewManager.setNativeId(marker, "granite:portal-initial-content:0:request")
+    var legacyCalls = 0
+    var currentCalls = 0
+    host.observeContentLayout("request", 0, acceptLegacyNativeId = true) { legacyCalls++ }
+    host.observeContentLayout("current", 2, acceptLegacyNativeId = true) { currentCalls++ }
+    complete(marker)
+    drain()
+    assertEquals(0, legacyCalls)
+    assertEquals(1, currentCalls)
+  }
+
+  @Test
+  fun `clearing explicit identity cannot fall back to a legacy nativeID`() {
+    val marker = marker()
+    viewManager.setNativeId(marker, "granite:portal-initial-content:0:request")
+    viewManager.setInitialContentKey(marker, null)
+    var calls = 0
+    host.observeContentLayout("request", 0, acceptLegacyNativeId = true) { calls++ }
+    complete(marker)
+    drain()
+    assertEquals(0, calls)
+  }
+
+  @Test
+  fun `an explicit zero revision without a key cannot fall back to legacy identity`() {
+    val marker = legacyMarker()
+    viewManager.setInitialContentRevision(marker, 0)
+    var calls = 0
+    host.observeContentLayout("request", 0, acceptLegacyNativeId = true) { calls++ }
+    complete(marker)
+    drain()
+    assertEquals(0, calls)
+  }
+
+  @Test
+  fun `legacy acknowledgment cannot be reused after the surface changes`() {
+    val marker = legacyMarker()
+    mockStatic(UIManagerHelper::class.java).use { helper ->
+      helper.`when`<Int> { UIManagerHelper.getSurfaceId(marker) }.thenReturn(10)
+      complete(marker)
+      helper.`when`<Int> { UIManagerHelper.getSurfaceId(marker) }.thenReturn(20)
+      var calls = 0
+      host.observeContentLayout("request", 0, acceptLegacyNativeId = true) { calls++ }
+      drain()
+      assertEquals(0, calls)
+      complete(marker)
+      drain()
+      assertEquals(1, calls)
+    }
+  }
+
+  @Test
+  fun `legacy observation requires attachment under the observing host`() {
+    val marker = legacyMarker()
+    host.removeView(marker)
+    complete(marker)
+    var calls = 0
+    host.observeContentLayout("request", 0, acceptLegacyNativeId = true) { calls++ }
+    drain()
+    assertEquals(0, calls)
+    container.addView(marker)
+    drain()
+    assertEquals(0, calls)
+    container.removeView(marker)
+    host.addView(marker)
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `legacy nativeID changes cannot reuse a prior mount even if changed back`() {
+    val marker = legacyMarker()
+    complete(marker)
+    viewManager.setNativeId(marker, "granite:portal-initial-content:0:other")
+    viewManager.setNativeId(marker, "granite:portal-initial-content:0:request")
+    var calls = 0
+    host.observeContentLayout("request", 0, acceptLegacyNativeId = true) { calls++ }
+    drain()
+    assertEquals(0, calls)
+    complete(marker)
+    drain()
+    assertEquals(1, calls)
+  }
+
+  @Test
+  fun `legacy compatibility still rejects ordinary views and markers without a sentinel`() {
+    host.addView(View(controller.get()).apply {
+      setTag(R.id.view_tag_native_id, "granite:portal-initial-content:0:request")
+    })
+    val marker = legacyMarker()
+    var calls = 0
+    host.observeContentLayout("request", 0, acceptLegacyNativeId = true) { calls++ }
+    begin()
+    viewManager.updateProperties(marker, ReactStylesDiffMap(JavaOnlyMap.of("pointerEvents", "none")))
+    end()
+    drain()
+    assertEquals(0, calls)
   }
 
   @Test
@@ -573,6 +706,13 @@ class PortalContentLayoutObservationTest {
   private fun begin() {
     ReactMarker.logFabricMarker(ReactMarkerConstants.FABRIC_BATCH_EXECUTION_START, null, ++commitNumber, 0L)
   }
+
+  private fun legacyMarker(): PortalInitialContentView =
+    PortalInitialContentView(controller.get()).also {
+      markers.add(it)
+      host.addView(it)
+      viewManager.setNativeId(it, "granite:portal-initial-content:0:request")
+    }
 
   private fun end() {
     ReactMarker.logFabricMarker(ReactMarkerConstants.FABRIC_BATCH_EXECUTION_END, null, commitNumber, 0L)

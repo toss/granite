@@ -2,17 +2,22 @@ package com.teleport.host
 
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactRootView
+import com.facebook.react.internal.featureflags.ReactNativeFeatureFlags
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.common.UIManagerType
 import org.junit.Assert.assertEquals
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
+import org.mockito.MockedStatic
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.mockStatic
 import org.mockito.Mockito.verifyNoInteractions
 
 /**
  * Pins what host apps rely on when they attach their own Fabric root: it renders through Fabric, it
  * carries the surface id the host allocated, and it reports the JS module name the host selected.
- * That it stays a [ReactRootView] needs no assertion of its own — `rootViewTag` is the one property
+ * That it stays a [ReactRootView] needs no assertion of its own — `getRootViewTag()` is the one getter
  * read below that `PortalReactRootView` does not declare, so that read does not compile otherwise.
  *
  * The example app used to assert these by matching substrings in `PortalReactRootView.kt`, which
@@ -25,39 +30,45 @@ import org.mockito.Mockito.verifyNoInteractions
  *    constructor calls `View.MeasureSpec.makeMeasureSpec` and `setClipChildren`; without the flag the
  *    first one throws `Method makeMeasureSpec in android.view.View$MeasureSpec not mocked.`
  *    `GraniteMicroFrontendRuntimeEventRouterTest` needs the flag too, for `android.util.Log`.
- * 2. The React Native version, which this module does not pin: `build.gradle` declares
- *    `com.facebook.react:react-android` without one, so today's 0.81.0 comes from the consuming app
- *    (`examples/portal/package.json`). On 0.81 `ReactRootView.init()` is pure JVM; from 0.82 it also
- *    reads `enableFontScaleChangesUpdatingLayout`, whose default accessor reaches
- *    `ReactNativeFeatureFlagsCxxInterop`, whose `<clinit>` loads `react_featureflagsjni` through
- *    SoLoader. Stubbing that accessor and leaving the flag at its default only moves the failure —
- *    `init()` then dereferences `getContext()`, which the mockable `android.jar` returns null for.
- *    This lands in consumer builds as well: the library is autolinked as a Gradle subproject, so a
- *    host app running `./gradlew test` runs these tests against its own React Native.
+ * 2. Native-backed feature flags are mocked to false for these JVM constructor tests. RN 0.82+
+ *    reads a JNI-backed flag in `ReactRootView.init()`; enabling it also initializes display
+ *    metrics through an Android Context. These tests cover Portal's root contract with that
+ *    optional initialization disabled, not React Native's platform initialization.
  * 3. Mockito's inline mock maker, the default in mockito-core 5.x. `ThemedReactContext` is `final`,
  *    so the subclass mock maker cannot stand in for it.
  */
 class PortalReactRootViewContractTest {
     private val context = mock(ThemedReactContext::class.java)
     private val reactHost = mock(ReactHost::class.java)
+    private lateinit var featureFlags: MockedStatic<ReactNativeFeatureFlags>
+
+    @Before
+    fun setUp() {
+        featureFlags = mockStatic(ReactNativeFeatureFlags::class.java)
+    }
+
+    @After
+    fun tearDown() {
+        featureFlags.close()
+    }
 
     private fun createRootView(moduleName: String) =
         PortalReactRootView(context, reactHost, SURFACE_ID, moduleName)
 
     @Test
     fun `renders through Fabric`() {
-        assertEquals(UIManagerType.FABRIC, createRootView("example-controller").uiManagerType)
+        assertEquals(UIManagerType.FABRIC, createRootView("example-controller").getUIManagerType())
     }
 
     @Test
     fun `carries the surface id the host allocated`() {
-        assertEquals(SURFACE_ID, createRootView("example-controller").rootViewTag)
+        assertEquals(SURFACE_ID, createRootView("example-controller").getRootViewTag())
     }
 
     @Test
     fun `reports each host's own JS module name rather than one baked-in name`() {
-        assertEquals("example-controller", createRootView("example-controller").jsModuleName)
-        assertEquals("another-controller", createRootView("another-controller").jsModuleName)
+        assertEquals("example-controller", createRootView("example-controller").getJSModuleName())
+        assertEquals("another-controller", createRootView("another-controller").getJSModuleName())
     }
 
     @Test

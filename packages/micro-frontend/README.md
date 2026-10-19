@@ -552,6 +552,12 @@ val observation = hostView.observeContentLayout(
 observation.close()
 ```
 
+Hosts that still load older revision-zero markers can explicitly pass
+`acceptLegacyNativeId = true` to the Android observation. This accepts their
+`granite:portal-initial-content:0:` identity encoding only on the internal marker
+class. Explicit identity props take precedence; an actual completed Fabric mount
+and the private sentinel remain required. The default observation stays strict.
+
 Register and close the observation on the Android UI thread. Registration before
 the host's first Window attachment is supported. A context-free listener installed
 with the native package observes `FABRIC_BATCH_EXECUTION_START/END`, emitted inside
@@ -856,7 +862,6 @@ including strings. Once session tracking has started, string arguments are inter
 unknown or closed IDs are ignored, including after the last session closes. In those hosts, wrap
 string-valued callbacks with `() => hidePendingHostComponent()` or capture an explicit session ID.
 Hosts using the legacy single-screen controller can continue using its existing API.
-
 
 ## License and credit
 

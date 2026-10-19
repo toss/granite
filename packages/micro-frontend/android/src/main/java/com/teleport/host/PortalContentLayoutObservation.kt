@@ -11,6 +11,7 @@ internal class PortalContentLayoutObservation(
   private val requestKey: String,
   private val revision: Int,
   onReady: () -> Unit,
+  private val acceptLegacyNativeId: Boolean = false,
 ) : AutoCloseable {
   private var host: PortalHostView? = host
   private var onReady: (() -> Unit)? = onReady
@@ -69,10 +70,10 @@ internal class PortalContentLayoutObservation(
   private fun checkCompletedMount() {
     val currentHost = host ?: return
     val matches = PortalInitialContentRegistry.markers.filter {
-      it.matchesIdentity(requestKey, revision) && PortalInitialContentRegistry.isInHost(it, currentHost)
+      it.matchesIdentity(requestKey, revision, acceptLegacyNativeId) && PortalInitialContentRegistry.isInHost(it, currentHost)
     }
     val marker = matches.singleOrNull() ?: return
-    if (!marker.hasCompletedMount()) return
+    if (!marker.hasCompletedMount(acceptLegacyNativeId)) return
     val callback = onReady
     close()
     callback?.invoke()

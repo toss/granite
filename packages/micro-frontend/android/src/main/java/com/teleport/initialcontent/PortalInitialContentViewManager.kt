@@ -17,6 +17,14 @@ class PortalInitialContentViewManager : ReactViewManager() {
   override fun createViewInstance(context: ThemedReactContext): ReactViewGroup =
     PortalInitialContentView(context)
 
+  @ReactProp(name = "nativeID")
+  override fun setNativeId(view: ReactViewGroup, nativeId: String?) {
+    if (view.getTag(R.id.view_tag_native_id) != nativeId) {
+      (view as PortalInitialContentView).invalidateLegacyIdentity()
+    }
+    super.setNativeId(view, nativeId)
+  }
+
   @ReactProp(name = "initialContentKey")
   fun setInitialContentKey(view: ReactViewGroup, value: String?) {
     (view as PortalInitialContentView).setInitialContentKey(value)

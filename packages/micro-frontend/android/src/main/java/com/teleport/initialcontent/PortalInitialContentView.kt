@@ -15,25 +15,40 @@ internal class PortalInitialContentView(context: Context) : ReactViewGroup(conte
   private var completedTransaction: PortalInitialContentMounts.Transaction? = null
   private var requestKey: String? = null
   private var revision: Int = 0
+  private var hasExplicitIdentity = false
   private var completedRequestKey: String? = null
   private var completedRevision: Int = 0
+  private var completedLegacyNativeId: String? = null
   private var completedSurfaceId = -1
   // Fabric child membership survives native clipping; a physical parent check would not.
   private var sentinel: WeakReference<View>? = null
 
   fun setInitialContentKey(value: String?) {
-    if (requestKey == value) return
+    if (hasExplicitIdentity && requestKey == value) return
+    hasExplicitIdentity = true
     invalidateMount()
     requestKey = value
   }
 
   fun setInitialContentRevision(value: Int) {
-    if (revision == value) return
+    if (hasExplicitIdentity && revision == value) return
+    hasExplicitIdentity = true
     invalidateMount()
     revision = value
   }
 
-  fun matchesIdentity(key: String, revision: Int) = requestKey == key && this.revision == revision
+  fun matchesIdentity(key: String, revision: Int, acceptLegacyNativeId: Boolean = false): Boolean =
+    if (hasExplicitIdentity) requestKey == key && this.revision == revision
+    else acceptLegacyNativeId && revision == 0 && legacyNativeId() == LEGACY_MARKER_PREFIX + key
+
+  fun invalidateLegacyIdentity() {
+    if (!hasExplicitIdentity) invalidateMount()
+  }
+
+  private fun legacyNativeId(): String? =
+    (getTag(R.id.view_tag_native_id) as? String)?.takeIf {
+      !hasExplicitIdentity && it.startsWith(LEGACY_MARKER_PREFIX) && it.length > LEGACY_MARKER_PREFIX.length
+    }
 
   fun setMountSentinel(view: View?) {
     invalidateMount()
@@ -52,20 +67,28 @@ internal class PortalInitialContentView(context: Context) : ReactViewGroup(conte
     pendingTransaction = null
     completedTransaction = null
     completedRequestKey = null
+    completedLegacyNativeId = null
   }
 
   fun completeMount(transaction: PortalInitialContentMounts.Transaction) {
-    if (pendingTransaction != transaction || !hasMountSentinel() || requestKey.isNullOrEmpty() || revision < 0) return
+    val legacyId = legacyNativeId()
+    if (pendingTransaction != transaction || !hasMountSentinel()) return
+    if ((requestKey.isNullOrEmpty() || revision < 0) && legacyId == null) return
     pendingTransaction = null
     completedTransaction = transaction
     completedRequestKey = requestKey
     completedRevision = revision
+    completedLegacyNativeId = legacyId
     completedSurfaceId = UIManagerHelper.getSurfaceId(this)
   }
 
-  fun hasCompletedMount(): Boolean =
+  fun hasCompletedMount(acceptLegacyNativeId: Boolean = false): Boolean =
     !PortalInitialContentMounts.isExecuting && hasMountSentinel() && completedTransaction != null &&
-    completedRequestKey != null && completedRequestKey == requestKey && completedRevision == revision &&
+    (if (completedLegacyNativeId != null) {
+      acceptLegacyNativeId && completedLegacyNativeId == legacyNativeId()
+    } else {
+      completedRequestKey != null && completedRequestKey == requestKey && completedRevision == revision
+    }) &&
     completedSurfaceId == UIManagerHelper.getSurfaceId(this)
 
   override fun onAttachedToWindow() {
@@ -86,6 +109,7 @@ internal class PortalInitialContentView(context: Context) : ReactViewGroup(conte
 
   companion object {
     const val SENTINEL_ID = "granite:portal-mount-sentinel"
+    private const val LEGACY_MARKER_PREFIX = "granite:portal-initial-content:0:"
   }
 }
 
