@@ -63,21 +63,12 @@ internal class PortalLayoutStateController(
   }
 
   private fun createLayoutState(host: PortalHostView): PortalLayoutState {
-    // This offset is what `PortalViewShadowNode.getTransform` translates by, and that transform is
-    // what `measureInWindow` reports. Neither what these nodes render nor what they receive touches
-    // on depends on it: the children are physically parented by the host, and `TouchTargetHelper`
-    // walks the real View tree. So it decides only where they say they are.
-    //
-    // A detached controller surface cannot measure itself: `getLocationOnScreen` returns (0, 0) for
-    // a view with no window, so an offset derived from it lands the teleported subtree in a
-    // different space than an ordinary, window-attached surface. React Native puts a surface root
-    // into that space with `RootViewUtil.getViewportOffset`; asking it about the host, which is the
-    // view these children are actually parented by, puts them there too. Delegating rather than
-    // repeating the arithmetic also means the two stay together when React Native changes what
-    // `getViewportOffset` does — 0.86 rewrote it around `WindowInsetsCompat`, for one.
+    // This offset becomes the PortalView transform, which `measure` includes and Pressability compares
+    // with touches in root-view coordinates, so it is the host's position in its React root view.
+    // The window offset belongs to the controller surface's viewport offset, which `measure` excludes.
     val offset =
       if (sourceView.isDetached()) {
-        RootViewUtil.getViewportOffset(host)
+        host.offsetInRootView()
       } else {
         val hostLocation = host.screenLocation()
         val sourceLocation = sourceView.screenLocation()
@@ -90,6 +81,13 @@ internal class PortalLayoutStateController(
       offsetX = offset.x.toFloat().dp,
       offsetY = offset.y.toFloat().dp,
     )
+  }
+
+  private fun View.offsetInRootView(): Point {
+    val root = RootViewUtil.getRootView(this) as? View ?: return Point(0, 0)
+    val location = IntArray(2).also { getLocationInWindow(it) }
+    val rootLocation = IntArray(2).also { root.getLocationInWindow(it) }
+    return Point(location[0] - rootLocation[0], location[1] - rootLocation[1])
   }
 }
 
