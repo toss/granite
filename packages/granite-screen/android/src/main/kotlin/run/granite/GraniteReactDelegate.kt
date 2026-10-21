@@ -37,8 +37,10 @@ interface GraniteReactDelegate {
      * Set a handler that will be called when React Native internals throw an exception.
      * Optional - the exception is always logged to logcat first, and this handler runs after that.
      * Must be set before onCreate(), because the handler is bound when the ReactHost is created.
-     * GraniteReactHost users should override handleInstanceException() instead, because
-     * setupHost() sets this handler.
+     * The ReactHost keeps the handler for as long as it lives, which can outlast onDestroy(), so
+     * the handler must not strongly reference an Activity or Fragment.
+     * GraniteReactHost users should override handleInstanceException() or
+     * createInstanceExceptionHandler() instead, because setupHost() sets this handler.
      */
     fun setExceptionHandler(handler: (Exception) -> Unit)
 
