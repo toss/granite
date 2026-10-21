@@ -1,5 +1,11 @@
 # @granite-js/screen
 
+## 3.0.5
+
+### Patch Changes
+
+- 68b71d9: fix(android): stop the ReactHost instance exception handler from retaining destroyed screens. Override `createInstanceExceptionHandler()` to keep handling exceptions after the screen is collected.
+
 ## 3.0.4
 
 ## 3.0.3
