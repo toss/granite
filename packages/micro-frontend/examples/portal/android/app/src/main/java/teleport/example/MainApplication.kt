@@ -13,7 +13,8 @@ import com.facebook.react.interfaces.fabric.ReactSurface
 
 class MainApplication : Application(), ReactApplication {
 
-  private lateinit var teleportControllerSurface: ReactSurface
+  lateinit var teleportControllerSurface: ReactSurface
+    private set
 
   val teleportControllerSurfaceId: Int
     get() = teleportControllerSurface.surfaceID

@@ -13,11 +13,18 @@ import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.common.UIManagerType
 import com.facebook.react.uimanager.events.EventDispatcher
 
-class PortalReactRootView(
+/**
+ * @property measuresPortalsInRootView When true, portals teleported from a detached controller
+ *   surface into hosts under this root view are positioned relative to it, so their press regions
+ *   stay on the host. The app then gives the controller surface this root view's viewport offset,
+ *   or `measureInWindow()` of those portals misses the window offset.
+ */
+class PortalReactRootView @JvmOverloads constructor(
   context: ThemedReactContext,
   private val reactHost: ReactHost,
   surfaceId: Int,
   private val moduleName: String,
+  val measuresPortalsInRootView: Boolean = false,
 ) : ReactRootView(context) {
   private val touchDispatcher = JSTouchDispatcher(this)
   private val pointerDispatcher =

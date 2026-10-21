@@ -3,12 +3,14 @@ package com.teleport.portal
 import android.graphics.Point
 import android.view.View
 import com.facebook.react.bridge.Arguments
+import com.facebook.react.uimanager.RootView
 import com.facebook.react.uimanager.RootViewUtil
 import com.facebook.react.uimanager.StateWrapper
 import com.teleport.extensions.dp
 import com.teleport.extensions.isDetached
 import com.teleport.extensions.screenLocation
 import com.teleport.host.PortalHostView
+import com.teleport.host.PortalReactRootView
 
 internal class PortalLayoutStateController(
   private val sourceView: View,
@@ -63,21 +65,18 @@ internal class PortalLayoutStateController(
   }
 
   private fun createLayoutState(host: PortalHostView): PortalLayoutState {
-    // This offset is what `PortalViewShadowNode.getTransform` translates by, and that transform is
-    // what `measureInWindow` reports. Neither what these nodes render nor what they receive touches
-    // on depends on it: the children are physically parented by the host, and `TouchTargetHelper`
-    // walks the real View tree. So it decides only where they say they are.
-    //
-    // A detached controller surface cannot measure itself: `getLocationOnScreen` returns (0, 0) for
-    // a view with no window, so an offset derived from it lands the teleported subtree in a
-    // different space than an ordinary, window-attached surface. React Native puts a surface root
-    // into that space with `RootViewUtil.getViewportOffset`; asking it about the host, which is the
-    // view these children are actually parented by, puts them there too. Delegating rather than
-    // repeating the arithmetic also means the two stay together when React Native changes what
-    // `getViewportOffset` does — 0.86 rewrote it around `WindowInsetsCompat`, for one.
+    // This offset becomes the PortalView transform, which both `measure` (Pressability's press region,
+    // compared with touches in root-view coordinates) and `measureInWindow` include. By default it
+    // carries the window offset for `measureInWindow`; an opted-in root leaves that to the controller
+    // surface's viewport offset, which `measure` excludes.
     val offset =
       if (sourceView.isDetached()) {
-        RootViewUtil.getViewportOffset(host)
+        val root = host.nearestRootView()
+        if (root is PortalReactRootView && root.measuresPortalsInRootView) {
+          host.offsetIn(root)
+        } else {
+          RootViewUtil.getViewportOffset(host)
+        }
       } else {
         val hostLocation = host.screenLocation()
         val sourceLocation = sourceView.screenLocation()
@@ -90,6 +89,24 @@ internal class PortalLayoutStateController(
       offsetX = offset.x.toFloat().dp,
       offsetY = offset.y.toFloat().dp,
     )
+  }
+
+  // Unlike `RootViewUtil.getRootView`, returns null instead of throwing for a host outside any root.
+  private fun View.nearestRootView(): RootView? {
+    var current = parent
+    while (current is View) {
+      if (current is RootView) {
+        return current
+      }
+      current = current.parent
+    }
+    return null
+  }
+
+  private fun View.offsetIn(root: View): Point {
+    val location = IntArray(2).also { getLocationInWindow(it) }
+    val rootLocation = IntArray(2).also { root.getLocationInWindow(it) }
+    return Point(location[0] - rootLocation[0], location[1] - rootLocation[1])
   }
 }
 

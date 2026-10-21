@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactInstanceEventListener
@@ -49,6 +50,8 @@ class ReactNativePotalHostActivity :
       }
 
   private var portalHostView: PortalHostView? = null
+  private var portalRootView: PortalReactRootView? = null
+  private var isHostResumed = false
   private lateinit var sessionBinding: ActivitySessionBinding
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,9 +77,12 @@ class ReactNativePotalHostActivity :
   override fun onResume() {
     super.onResume()
     reactHost.onHostResume(this, this)
+    isHostResumed = true
+    syncControllerSurfaceViewport()
   }
 
   override fun onPause() {
+    isHostResumed = false
     reactHost.onHostPause(this)
     super.onPause()
   }
@@ -115,6 +121,7 @@ class ReactNativePotalHostActivity :
             reactHost,
             controllerSurfaceId,
             CONTROLLER_MODULE_NAME,
+            measuresPortalsInRootView = true,
         )
     val hostView =
         PortalHostView(themedReactContext).apply {
@@ -132,6 +139,28 @@ class ReactNativePotalHostActivity :
         ),
     )
     setContentView(activityRootView)
+
+    portalRootView = activityRootView
+    activityRootView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+      syncControllerSurfaceViewport()
+    }
+    ViewCompat.setOnApplyWindowInsetsListener(activityRootView) { view, insets ->
+      // The viewport offset follows the window's visible top, which can change without a new layout.
+      view.post(::syncControllerSurfaceViewport)
+      ViewCompat.onApplyWindowInsets(view, insets)
+    }
+  }
+
+  // Every host Activity shares the one controller surface, so only the resumed one sets its offset.
+  private fun syncControllerSurfaceViewport() {
+    val rootView = portalRootView ?: return
+    if (!isHostResumed || !rootView.measuresPortalsInRootView) {
+      return
+    }
+    ControllerSurfaceViewport.update(
+        (application as MainApplication).teleportControllerSurface,
+        rootView,
+    )
   }
 
   private companion object {
