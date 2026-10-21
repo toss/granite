@@ -1,7 +1,7 @@
 {
   "name": "@granite-js/plugin-rozenite",
   "type": "module",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Rozenite integration plugin for Granite",
   "scripts": {
     "prepack": "yarn build",
