@@ -1,5 +1,7 @@
 # @granite-js/brownfield-module
 
+## 2.5.7
+
 ## 2.5.6
 
 ## 2.5.5

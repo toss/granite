@@ -1,5 +1,7 @@
 # @granite-js/cookies
 
+## 2.5.7
+
 ## 2.5.6
 
 ### Patch Changes
