@@ -460,11 +460,24 @@ destination views in `com.teleport.host`.
 
 ### Portal destination APIs
 
-| API                                                              | Lifetime / behavior                                                                                                                     |
-| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `PortalHostView.setName(name)`                                   | Register/unregister the destination name. Use `sessionId`.                                                                              |
-| `PortalHostView.cleanup()`                                       | Permanently unregister the destination during teardown.                                                                                 |
-| `PortalReactRootView(context, reactHost, surfaceId, moduleName)` | Detached Fabric root that forwards touch/pointer events through the retained `ReactHost`; it does not start another runtime or surface. |
+| API                                                              | Lifetime / behavior                                                                                                                                                                             |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PortalHostView.setName(name)`                                   | Register/unregister the destination name. Use `sessionId`.                                                                                                                                      |
+| `PortalHostView.cleanup()`                                       | Permanently unregister the destination during teardown.                                                                                                                                         |
+| `PortalReactRootView(context, reactHost, surfaceId, moduleName)` | Detached Fabric root that forwards touch/pointer events through the retained `ReactHost`; it does not start another runtime or surface.                                                         |
+| `PortalReactRootView(..., measuresPortalsInRootView = true)`     | Position portals from a detached controller surface relative to this root view, so their press regions stay on the host. The app then owns the controller surface's viewport offset; see below. |
+
+By default a portal from a detached controller surface is positioned with its host's window
+offset, which `measureInWindow()` reports as is. Pressability measures its press region with
+`measure()`, which includes that position too, so the press region sits above the host by the
+window offset (the status bar, or the window position in split screen and freeform) and a release
+near the bottom edge of a pressable cancels the press. With `measuresPortalsInRootView = true` the
+press region matches the host, and `measureInWindow()` takes the window offset from the controller
+surface's viewport offset instead. React Native leaves that at (0, 0) for a surface never attached
+to a window and has no public API to set it on a bridgeless surface; the portal example's
+`ControllerSurfaceViewport` sets it from the resumed host through an internal React Native handle,
+so treat it as app code to recheck on React Native upgrades. Give every root view that hosts one
+controller surface's portals the same value.
 
 `PortalHostView` also re-registers on window attachment and temporarily
 unregisters while detached. `nextInsertionIndexForChildAt()` is renderer

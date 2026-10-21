@@ -3,12 +3,14 @@ package com.teleport.portal
 import android.graphics.Point
 import android.view.View
 import com.facebook.react.bridge.Arguments
+import com.facebook.react.uimanager.RootView
 import com.facebook.react.uimanager.RootViewUtil
 import com.facebook.react.uimanager.StateWrapper
 import com.teleport.extensions.dp
 import com.teleport.extensions.isDetached
 import com.teleport.extensions.screenLocation
 import com.teleport.host.PortalHostView
+import com.teleport.host.PortalReactRootView
 
 internal class PortalLayoutStateController(
   private val sourceView: View,
@@ -63,12 +65,18 @@ internal class PortalLayoutStateController(
   }
 
   private fun createLayoutState(host: PortalHostView): PortalLayoutState {
-    // This offset becomes the PortalView transform, which `measure` includes and Pressability compares
-    // with touches in root-view coordinates, so it is the host's position in its React root view.
-    // The window offset belongs to the controller surface's viewport offset, which `measure` excludes.
+    // This offset becomes the PortalView transform, which both `measure` (Pressability's press region,
+    // compared with touches in root-view coordinates) and `measureInWindow` include. By default it
+    // carries the window offset for `measureInWindow`; an opted-in root leaves that to the controller
+    // surface's viewport offset, which `measure` excludes.
     val offset =
       if (sourceView.isDetached()) {
-        host.offsetInRootView()
+        val root = host.nearestRootView()
+        if (root is PortalReactRootView && root.measuresPortalsInRootView) {
+          host.offsetIn(root)
+        } else {
+          RootViewUtil.getViewportOffset(host)
+        }
       } else {
         val hostLocation = host.screenLocation()
         val sourceLocation = sourceView.screenLocation()
@@ -83,8 +91,19 @@ internal class PortalLayoutStateController(
     )
   }
 
-  private fun View.offsetInRootView(): Point {
-    val root = RootViewUtil.getRootView(this) as? View ?: return Point(0, 0)
+  // Unlike `RootViewUtil.getRootView`, returns null instead of throwing for a host outside any root.
+  private fun View.nearestRootView(): RootView? {
+    var current = parent
+    while (current is View) {
+      if (current is RootView) {
+        return current
+      }
+      current = current.parent
+    }
+    return null
+  }
+
+  private fun View.offsetIn(root: View): Point {
     val location = IntArray(2).also { getLocationInWindow(it) }
     val rootLocation = IntArray(2).also { root.getLocationInWindow(it) }
     return Point(location[0] - rootLocation[0], location[1] - rootLocation[1])

@@ -2,4 +2,4 @@
 '@granite-js/micro-frontend': patch
 ---
 
-Keep a detached portal's press region on its host by measuring the PortalView transform relative to the host's React root view instead of the window. The window offset no longer goes into the transform, so `measureInWindow` stays window-relative only when the host sets the controller surface's viewport offset; React Native has no public API for that on a bridgeless surface (`ReactSurfaceImpl.updateLayoutSpecs` is internal).
+Add `measuresPortalsInRootView` to `PortalReactRootView`, off by default. A portal from a detached controller surface is positioned with its host's window offset, which `measureInWindow` needs but which also moves Pressability's press region above the host, so releases near a pressable's bottom edge are cancelled. When the option is on, such portals are positioned relative to the root view and their press regions stay on the host; the host app then sets the controller surface's viewport offset so `measureInWindow` stays window-relative, as the portal example's `ControllerSurfaceViewport` does. Without the option nothing changes.
