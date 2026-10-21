@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">RNComponentView</string>
+    <string name="component_view_title">React Native components in native views</string>
+    <string name="component_view_description">Each box below is an RNComponentView that shows the React Native component ComponentViewDemo, sized by its content.</string>
+    <string name="component_view_content_height">contentHeight</string>
+    <string name="component_view_content_size">contentSize</string>
+    <string name="component_view_constrained">constrained</string>
+    <string name="component_view_add_item">Add item</string>
+    <string name="component_view_remove_item">Remove item</string>
+    <string name="component_view_toggle_width">Toggle width</string>
+</resources>

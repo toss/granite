@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import <UIKit/UIGestureRecognizerSubclass.h>
 #import <React/RCTRootComponentView.h>
 #import <React/RCTSurfaceTouchHandler.h>
 
@@ -57,12 +58,19 @@
 }
 @end
 
+static NSInteger gLayoutChangeNotificationCount;
+
 @implementation PortalHostView
 @synthesize onSubviewCountChanged;
 - (void)setName:(nullable NSString *)name {}
 - (NSInteger)nextInsertionIndexForChildAt:(NSInteger)childIndex
 {
   return childIndex;
+}
+
+- (void)notifyLayoutChanged
+{
+  gLayoutChangeNotificationCount += 1;
 }
 @end
 
@@ -183,6 +191,28 @@ int main(void)
     Expect(
         !ShouldReceive(PortalHandlerForContainer(descendantPortal), screenLeaf),
         @"relocated screen touch should return to RN owner");
+
+    // measure() reports teleported content from the container's position on screen, so touches are reported
+    // from there too, following the container while it moves.
+    UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 400, 800)];
+    UIView *screenContent = [[UIView alloc] initWithFrame:CGRectMake(0, 100, 400, 700)];
+    PortalHostContainerView *embeddedPortal =
+        [[PortalHostContainerView alloc] initWithFrame:CGRectMake(20, 200, 200, 100)];
+    [window addSubview:screenContent];
+    [screenContent addSubview:embeddedPortal];
+    RCTSurfaceTouchHandler *embeddedHandler = (RCTSurfaceTouchHandler *)PortalHandlerForContainer(embeddedPortal);
+    CGPoint windowOrigin = [window convertPoint:CGPointZero toCoordinateSpace:window.screen.coordinateSpace];
+    gLayoutChangeNotificationCount = 0;
+    [embeddedHandler touchesBegan:[NSSet set] withEvent:[UIEvent new]];
+    Expect(
+        CGPointEqualToPoint(embeddedHandler.viewOriginOffset, CGPointMake(windowOrigin.x + 20, windowOrigin.y + 300)),
+        @"portal handler should report touches from the container's position on screen");
+    Expect(gLayoutChangeNotificationCount == 1, @"portal host should lay its content out again when a gesture starts");
+    screenContent.frame = CGRectOffset(screenContent.frame, 0, -50);
+    [embeddedHandler touchesMoved:[NSSet set] withEvent:[UIEvent new]];
+    Expect(
+        CGPointEqualToPoint(embeddedHandler.viewOriginOffset, CGPointMake(windowOrigin.x + 20, windowOrigin.y + 250)),
+        @"portal handler should follow a container that moved during the gesture");
   }
   return 0;
 }

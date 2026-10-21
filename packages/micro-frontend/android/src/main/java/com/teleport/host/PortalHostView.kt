@@ -3,6 +3,7 @@ package com.teleport.host
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.view.View
 import com.facebook.react.views.view.ReactViewGroup
 import com.teleport.global.PortalRegistry
 
@@ -19,6 +20,14 @@ class PortalHostView(
   private var isInBatch = false
   private var batchBaseIndex = 0
   private var hasPendingCleanup = false
+
+  /**
+   * Called on the main thread whenever teleported children are added or removed. Removal notifies
+   * on the next main-thread turn so observers read the post-removal count. Set by native host
+   * owners, such as `RNComponentView` of `@granite-js/rn-component-view`; stays null for hosts
+   * mounted inside the React tree.
+   */
+  var onChildCountChanged: (() -> Unit)? = null
 
   fun setName(newName: String?) {
     if (name == newName) return
@@ -64,6 +73,18 @@ class PortalHostView(
     name?.let { PortalRegistry.registerHost(it, this) }
   }
 
+  override fun onViewAdded(child: View) {
+    super.onViewAdded(child)
+    onChildCountChanged?.invoke()
+  }
+
+  override fun onViewRemoved(child: View) {
+    super.onViewRemoved(child)
+    if (onChildCountChanged == null) return
+    // Notify on the next main-thread turn so observers read the post-removal count.
+    Handler(Looper.getMainLooper()).post { onChildCountChanged?.invoke() }
+  }
+
   override fun onLayout(
     changed: Boolean,
     left: Int,
@@ -72,6 +93,14 @@ class PortalHostView(
     bottom: Int,
   ) {
     super.onLayout(changed, left, top, right, bottom)
+    notifyLayoutChanged()
+  }
+
+  /**
+   * Has the Portals rendering into this host lay their content out at its current size and
+   * position. Laying the host out does this, but moving an ancestor or scrolling does not lay it out.
+   */
+  internal fun notifyLayoutChanged() {
     name?.let { PortalRegistry.notifyHostLayoutChanged(it) }
   }
 

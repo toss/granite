@@ -1,0 +1,6 @@
+# npm records the registry it installed from, so the example does not pin a lockfile.
+package-lock.json
+
+# Local Xcode and Kotlin state
+xcuserdata/
+.kotlin/

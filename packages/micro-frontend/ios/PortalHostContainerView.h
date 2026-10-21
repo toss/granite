@@ -35,9 +35,11 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// The anchor makes hosted screens count as mounted under a React root for
 /// react-native-screens, so they do not attach a second touch handler beneath
-/// the container's. Hosted content therefore gets one handler and page
-/// coordinates relative to this container, like content under a regular React
-/// Native root.
+/// the container's. Hosted content therefore gets one handler, like content
+/// under a regular React Native root. It reports page coordinates on screen,
+/// where `measure()` reports the hosted content, and lays that content out
+/// again when a gesture starts, in case the container moved without a layout
+/// pass.
 - (void)activateIfNeeded;
 
 /// Whether the underlying Fabric host view has been created.

@@ -66,7 +66,8 @@ internal class PortalLayoutStateController(
     // This offset is what `PortalViewShadowNode.getTransform` translates by, and that transform is
     // what `measureInWindow` reports. Neither what these nodes render nor what they receive touches
     // on depends on it: the children are physically parented by the host, and `TouchTargetHelper`
-    // walks the real View tree. So it decides only where they say they are.
+    // walks the real View tree. So it decides only where they say they are, and
+    // `PortalReactRootView` reports touches in the same place.
     //
     // A detached controller surface cannot measure itself: `getLocationOnScreen` returns (0, 0) for
     // a view with no window, so an offset derived from it lands the teleported subtree in a

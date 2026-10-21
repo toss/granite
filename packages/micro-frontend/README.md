@@ -441,15 +441,22 @@ destination views in `com.teleport.host`.
 
 ### Portal destination APIs
 
-| API                                                              | Lifetime / behavior                                                                                                                     |
-| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `PortalHostView.setName(name)`                                   | Register/unregister the destination name. Use `sessionId`.                                                                              |
-| `PortalHostView.cleanup()`                                       | Permanently unregister the destination during teardown.                                                                                 |
-| `PortalReactRootView(context, reactHost, surfaceId, moduleName)` | Detached Fabric root that forwards touch/pointer events through the retained `ReactHost`; it does not start another runtime or surface. |
+| API                                                                                    | Lifetime / behavior                                                                                                                                                                                                                                                                 |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PortalHostView.setName(name)`                                                         | Register/unregister the destination name. Use `sessionId`.                                                                                                                                                                                                                          |
+| `PortalHostView.onChildCountChanged`                                                   | Main-thread callback when teleported children are added or removed, for a native owner that shows a placeholder until content attaches. Removal notifies on the next main-thread turn, after the count changed.                                                                     |
+| `PortalHostView.cleanup()`                                                             | Permanently unregister the destination during teardown.                                                                                                                                                                                                                             |
+| `PortalReactRootView(context, reactHost, surfaceId, moduleName, updatesSurfaceLayout)` | Detached Fabric root that forwards touch/pointer events through the retained `ReactHost`; it does not start another runtime or surface. Pass `updatesSurfaceLayout = false` for a root embedded in part of a screen, so measuring it leaves the surface's layout constraints alone. |
 
 `PortalHostView` also re-registers on window attachment and temporarily
 unregisters while detached. `nextInsertionIndexForChildAt()` is renderer
 plumbing, not an application integration API.
+
+`PortalReactRootView` reports touches in the viewport, where `measure()` reports
+teleported content, so Pressability keeps a press while the finger moves within
+the pressed view. When a gesture starts, it has the Portals of the hosts under
+it lay their content out again, so a host that moved with a scroll reports its
+current position.
 
 #### Props the Portal components do not apply
 
@@ -598,8 +605,13 @@ PortalHostContainerView       <- RCTSurfaceTouchHandler for all hosted content
 react-native-screens attaches its own touch handler to any screen without an
 `RCTRootComponentView` above it. Without the anchor every hosted screen would add
 a second handler beneath the container's, and one tap would reach JS twice. The
-anchor keeps a single handler and page coordinates relative to the container,
-like content under a regular React Native root.
+anchor keeps a single handler.
+
+The handler reports page coordinates on screen, where `measure()` reports
+teleported content, so Pressability keeps a press while the finger moves within
+the pressed view. When a gesture starts, the container has its host's Portals
+lay their content out again, so a host that moved with a scroll or an ancestor
+reports its current position.
 
 ### UIViewController example
 
@@ -665,6 +677,10 @@ generic native destination should read the requested name at runtime.
 
 See [examples/portal/README.md](examples/portal/README.md) for the retained
 Portal-only cross-Activity / UIViewController example.
+
+[`@granite-js/rn-component-view`](../rn-component-view/README.md) builds on the
+Portal to show one component registered with `AppRegistry.registerComponent`
+inside a native view, sized by its content.
 
 ## License and credit
 
