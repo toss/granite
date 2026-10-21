@@ -19,9 +19,7 @@ import com.facebook.react.uimanager.events.EventDispatcher
  *   stay on the host. The app then gives the controller surface this root view's viewport offset,
  *   or `measureInWindow()` of those portals misses the window offset.
  */
-class PortalReactRootView
-@JvmOverloads
-constructor(
+class PortalReactRootView @JvmOverloads constructor(
   context: ThemedReactContext,
   private val reactHost: ReactHost,
   surfaceId: Int,
