@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.ReactContext
+import java.lang.ref.WeakReference
 
 /**
  * Host interface for integrating React Native into activities. This interface allows you to "host"
@@ -43,7 +44,7 @@ interface GraniteReactHost {
         graniteDelegate.setBundleLoaderProvider { createBundleLoader() }
         graniteDelegate.setLoadingViewProvider { activity -> createLoadingView() }
         graniteDelegate.setErrorViewProvider { activity, error -> createErrorView(error) }
-        graniteDelegate.setExceptionHandler { error -> handleInstanceException(error) }
+        graniteDelegate.setExceptionHandler(createInstanceExceptionHandler())
 
         // Initialize
         graniteDelegate.onCreate(this, savedInstanceState, initialProps)
@@ -104,13 +105,29 @@ interface GraniteReactHost {
     /**
      * Called when React Native internals throw an exception. Override this method to add custom
      * handling such as reporting the exception to your own crash reporting tool. Granite always
-     * logs the exception to logcat before calling this method.
+     * logs the exception to logcat before calling this method. This method is no longer called
+     * once the host has been garbage collected; see createInstanceExceptionHandler().
      *
      * @param error The exception thrown by React Native internals
      */
     fun handleInstanceException(error: Exception) {
         // Default implementation does nothing
         // Override in your activity to report the exception or perform other custom handling
+    }
+
+    /**
+     * Create the handler that receives React Native instance exceptions. setupHost() registers it,
+     * and the ReactHost keeps it for as long as the ReactHost lives, which can be longer than this
+     * host. The default implementation references this host weakly and forwards to
+     * handleInstanceException() while the host is still reachable.
+     *
+     * Override this method to keep handling exceptions after the host is collected. The returned
+     * handler must not strongly reference this host (e.g. an Activity or Fragment), or the host
+     * cannot be collected while the ReactHost is alive.
+     */
+    fun createInstanceExceptionHandler(): (Exception) -> Unit {
+        val hostRef = WeakReference(this)
+        return { error -> hostRef.get()?.handleInstanceException(error) }
     }
 
     // Convenience accessors
