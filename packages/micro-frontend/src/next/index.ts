@@ -1,10 +1,13 @@
 import * as path from 'node:path';
-import type { Plugin, PluginOption } from 'rollipop';
+import { flattenPluginOption, type Plugin, type PluginOption } from 'rollipop';
 import { code, include } from 'rollipop/filter';
 import type { MicroFrontendPluginOptions } from './types';
 import { transformDisposeOwnership } from '../plugin-utils/disposeTransform';
+import { EXECUTION_RUNTIME_ID, executionPrelude, executionRuntimePath } from '../plugin-utils/executionRuntime';
+import { transformExecutionOwnership } from '../plugin-utils/executionTransform';
 import { intoShared } from '../plugin-utils/intoShared';
 import { getPreludeConfig } from '../plugin-utils/prelude';
+import { transformRendererExecution } from '../plugin-utils/rendererExecutionTransform';
 import type { SharedConfig } from '../runtime/registry';
 
 const PRELUDE = '\0granite:micro-frontend';
@@ -17,7 +20,12 @@ export function microFrontend(options: MicroFrontendPluginOptions): PluginOption
       .filter(([, value]) => value.eager !== true)
       .map(([name]) => name)
   );
-  return [prelude(options, shared), external.size > 0 && sharedModules(external), dispose(options.appName)];
+  return [
+    prelude(options, shared),
+    external.size > 0 && sharedModules(external),
+    options.executionOwnership === true && executionOwnership(),
+    dispose(options.appName),
+  ];
 }
 
 function prelude(options: MicroFrontendPluginOptions, shared: SharedConfig | undefined): Plugin {
@@ -31,7 +39,9 @@ function prelude(options: MicroFrontendPluginOptions, shared: SharedConfig | und
         Object.entries(options.exposes ?? {}).map(([name, file]) => [name, path.resolve(root, file)])
       );
       const generated = getPreludeConfig({ ...options, shared, exposes }, options.appName);
-      prelude = generated.preludeScript;
+      prelude =
+        (options.executionOwnership === true ? executionPrelude : '') +
+        generated.preludeScript;
       // Must run before the native-module proxy and before any exposed app module.
       config.polyfills = [
         { type: 'plain', code: `var global = globalThis;\n${generated.banner}` },
@@ -99,6 +109,46 @@ function dispose(appName: string): Plugin {
       handler(source, id) {
         const transformed = transformDisposeOwnership(id, source, { appName });
         return source === transformed ? null : { code: transformed, map: null };
+      },
+    },
+  };
+}
+
+function executionOwnership(): Plugin {
+  const runtimePath = executionRuntimePath();
+  return {
+    name: 'granite:micro-frontend:execution-ownership',
+    resolveId: {
+      filter: { id: /^granite:execution-internal$/ },
+      handler(id) { return id === EXECUTION_RUNTIME_ID ? runtimePath : undefined; },
+    },
+    config: {
+      async rolldownOptions(options) {
+        const plugins = await flattenPluginOption(options.input?.plugins as PluginOption);
+        const ownership = plugins.filter((plugin) => plugin.name === 'granite:micro-frontend:execution-ownership');
+        if (ownership.length !== 1) {
+          throw new Error('Execution ownership requires exactly one compiler integration');
+        }
+        // The native RN transform also runs before ordinary transforms. Ordering its plugin after
+        // this one is necessary; a pre hook alone would still receive lowered async functions.
+        return {
+          ...options,
+          input: {
+            ...options.input,
+            plugins: [...ownership, ...plugins.filter((plugin) => !ownership.includes(plugin))],
+          },
+        };
+      },
+    },
+    transform: {
+      order: 'pre',
+      handler(source, id) {
+        const renderer = transformRendererExecution(id, source);
+        if (renderer?.code != null) {
+          return { code: renderer.code, map: renderer.map };
+        }
+        const transformed = transformExecutionOwnership(id, source);
+        return transformed?.code == null ? null : { code: transformed.code, map: transformed.map };
       },
     },
   };

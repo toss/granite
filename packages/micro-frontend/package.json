@@ -60,8 +60,14 @@
   },
   "dependencies": {
     "@babel/core": "7.28.5",
+    "@babel/plugin-transform-async-generator-functions": "7.28.0",
+    "@babel/plugin-transform-async-to-generator": "7.27.1",
+    "@babel/plugin-transform-flow-strip-types": "7.27.1",
+    "@babel/plugin-transform-optional-chaining": "7.28.5",
+    "@babel/types": "7.28.5",
     "@granite-js/utils": "workspace:*",
-    "@standard-schema/spec": "^1.0.0"
+    "@standard-schema/spec": "^1.0.0",
+    "babel-plugin-syntax-hermes-parser": "0.32.1"
   },
   "peerDependencies": {
     "@granite-js/plugin-core": "*",
@@ -79,7 +85,6 @@
     }
   },
   "devDependencies": {
-    "@babel/types": "7.28.5",
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/react-native": "workspace:*",
     "@types/babel__core": "^7.20.5",

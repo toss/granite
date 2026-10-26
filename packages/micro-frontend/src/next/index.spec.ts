@@ -3,6 +3,28 @@ import { describe, expect, it } from 'vitest';
 import { microFrontend } from './index';
 
 describe('microFrontend plugin', () => {
+  it('enables execution bootstrap and async compilation together', async () => {
+    const plugins = await flattenPluginOption(microFrontend({ appName: 'remote-app', executionOwnership: true }));
+    const prelude = getPlugin(plugins, 'granite:micro-frontend:prelude');
+    const execution = getPlugin(plugins, 'granite:micro-frontend:execution-ownership');
+    if (typeof prelude.config !== 'function' || prelude.load == null || typeof prelude.load === 'function') {
+      throw new Error('Missing prelude hooks');
+    }
+    await prelude.config.call({} as never, { root: '/service', polyfills: [] } as Config);
+    const bootstrap = await prelude.load.handler.call({} as never, '\0granite:micro-frontend');
+    expect(bootstrap).toContain("initializeExecution();");
+    if (execution.transform == null || typeof execution.transform === 'function') {
+      throw new Error('Missing execution transform');
+    }
+    const transformed = await execution.transform.handler.call(
+      {} as never,
+      'async function shared() { await work(); return nativeModule.identify(); }',
+      '/service/shared.js',
+      { moduleType: 'js' }
+    );
+    expect(transformed).toMatchObject({ code: expect.stringContaining('granite:execution-internal') });
+  });
+
   it('composes prelude, shared-module, and dispose responsibilities as separate plugins', async () => {
     const plugins = await flattenPluginOption(
       microFrontend({

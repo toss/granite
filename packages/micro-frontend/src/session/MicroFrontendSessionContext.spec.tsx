@@ -7,12 +7,41 @@ import {
   type MicroFrontendSession,
   useMicroFrontendSession,
 } from './MicroFrontendSessionContext';
+import { getExecutionSessions, SESSION_EXECUTION_TOKEN } from '../execution/sessions';
 
 vi.mock('@granite-js/react-native', () => import('../../../react-native/src/visibility/useVisibilityChanged'));
 
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
 
 describe('MicroFrontendSessionProvider', () => {
+  it('updates private ownership for a replacement Activity without changing Provider props or public session data', async () => {
+    const sessions = getExecutionSessions();
+    const first = sessions.bind('ownership-session', 'ownership:1');
+    let observed: unknown;
+    let publicData: unknown;
+    function Consumer() {
+      const session = useMicroFrontendSession();
+      observed = Reflect.get(session, SESSION_EXECUTION_TOKEN);
+      publicData = JSON.parse(JSON.stringify(session));
+      return null;
+    }
+    let renderer: ReturnType<typeof create> | undefined;
+    try {
+      await act(async () => {
+        renderer = create(<MicroFrontendSessionProvider sessionId="ownership-session" presentationVisibility={true}><Consumer /></MicroFrontendSessionProvider>);
+      });
+      expect(observed).toBe(first);
+      await act(async () => { sessions.bind('ownership-session', 'ownership:2'); });
+      expect(observed).toBe(sessions.get('ownership-session'));
+      expect(observed).not.toBe(first);
+      expect(publicData).toEqual({ sessionId: 'ownership-session' });
+      expect(sessions.release('ownership-session', first.id)).toBe(false);
+    } finally {
+      await act(async () => { renderer?.unmount(); });
+      sessions.release('ownership-session', 'ownership:2');
+    }
+  });
+
   it('provides the native session identity', async () => {
     // Given
     let receivedSession: MicroFrontendSession | null = null;

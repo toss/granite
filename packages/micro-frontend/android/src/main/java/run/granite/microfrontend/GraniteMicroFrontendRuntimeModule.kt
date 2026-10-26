@@ -26,9 +26,14 @@ class GraniteMicroFrontendRuntimeModule(
             return
         }
 
+        val executionId = if (request.hasKey("executionId")) request.getString("executionId") else null
+        if (executionId != null && executionId.isBlank()) {
+            promise.reject(ERROR_INVALID_REQUEST, "evaluateScript executionId must not be blank")
+            return
+        }
         val enqueued = reactApplicationContext.runOnJSQueueThread {
             try {
-                BundleEvaluator(reactApplicationContext).evaluateFile(filePath)
+                BundleEvaluator(reactApplicationContext).evaluateFile(filePath, executionId)
                 promise.resolve(null)
             } catch (error: Exception) {
                 promise.reject(ERROR_EVALUATE_SCRIPT, error.message, error)

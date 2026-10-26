@@ -33,8 +33,15 @@ Pod::Spec.new do |s|
 
   install_modules_dependencies(s)
 
+  s.subspec "execution" do |ss|
+    ss.source_files = "common/cpp/granite/*.h"
+    ss.public_header_files = "common/cpp/granite/*.h"
+    ss.header_dir = "granite"
+  end
+
   s.subspec "common" do |ss|
     ss.source_files         = ["common/cpp/**/*.{cpp,h}"]
+    ss.exclude_files        = "common/cpp/granite/*.h"
     ss.header_dir           = "react/renderer/components/GraniteMicroFrontendRuntimeSpec"
     ss.private_header_files = "common/cpp/**/*.{h}"
     ss.pod_target_xcconfig  = { "HEADER_SEARCH_PATHS" => "\"$(PODS_TARGET_SRCROOT)/common/cpp\"" }
