@@ -6,8 +6,11 @@ import { createSharedResolverConfig } from './resolver';
 import type { MicroFrontendPluginOptions } from './types';
 import type { DisposeOwnershipPluginOptions } from '../plugin-utils/disposeBabelPlugin';
 import { transformDisposeOwnership } from '../plugin-utils/disposeTransform';
+import { executionRuntimeEntries } from '../plugin-utils/executionRuntime';
+import { transformExecutionOwnership } from '../plugin-utils/executionTransform';
 import { intoShared } from '../plugin-utils/intoShared';
 import { getPreludeConfig } from '../plugin-utils/prelude';
+import { transformRendererExecution } from '../plugin-utils/rendererExecutionTransform';
 
 export async function microFrontend(options: MicroFrontendPluginOptions = {}): Promise<GranitePluginCore> {
   const shared = intoShared(options.shared);
@@ -22,12 +25,20 @@ export async function microFrontend(options: MicroFrontendPluginOptions = {}): P
   const preludePath = path.join(localDirectory, 'granite-micro-frontend-runtime.js');
   const prelude = getPreludeConfig(normalizedOptions);
   const resolver = createSharedResolverConfig(nonEagerEntries);
+  if (options.executionOwnership === true) {
+    resolver.alias = [
+      ...Object.entries(executionRuntimeEntries()).map(([from, to]) => ({ exact: true, from, to })),
+      ...resolver.alias ?? [],
+    ];
+  }
   const disposeOwnershipOptions: DisposeOwnershipPluginOptions = {};
 
   function writePrelude(appName?: string) {
     disposeOwnershipOptions.appName = appName;
     const config = getPreludeConfig(normalizedOptions, appName);
-    fs.writeFileSync(preludePath, config.preludeScript, 'utf8');
+    const bootstrap =
+      options.executionOwnership === true ? "import '@granite-js/micro-frontend/execution/bootstrap';\n" : '';
+    fs.writeFileSync(preludePath, bootstrap + config.preludeScript, 'utf8');
   }
 
   writePrelude();
@@ -56,7 +67,10 @@ export async function microFrontend(options: MicroFrontendPluginOptions = {}): P
       resolver,
       transformer: {
         transformSync(id, code) {
-          return transformDisposeOwnership(id, code, disposeOwnershipOptions);
+          const owned = options.executionOwnership === true
+            ? (transformRendererExecution(id, code) ?? transformExecutionOwnership(id, code))?.code ?? code
+            : code;
+          return transformDisposeOwnership(id, owned, disposeOwnershipOptions);
         },
       },
       esbuild: {

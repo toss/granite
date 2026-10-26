@@ -1,4 +1,5 @@
-import { openPendingHostComponentSession, closePendingHostComponentSession } from '../host/pendingHostComponentStore';
+import { getExecutionContext } from '../execution/context';
+import { getExecutionSessions } from '../execution/sessions';
 import type {
   AppRequest,
   MicroFrontendAdapter,
@@ -15,19 +16,21 @@ import { setMicroFrontendLifecycleCallback } from './lifecycle';
 import { installNativeComponentRegistryCompatibility } from './nativeComponentRegistryCompatibility';
 import { parseAppRequest } from './parseAppRequest';
 import { createSessionStore } from './sessionStore';
+import { openPendingHostComponentSession, closePendingHostComponentSession } from '../host/pendingHostComponentStore';
 
 export interface NativeMicroFrontendRuntimeEvent {
   readonly name: string;
   readonly params: {
     readonly appName?: string;
     readonly sessionId?: string;
+    readonly executionId?: string;
     readonly scheme?: string;
     readonly isVisible?: boolean;
   };
 }
 
 export interface NativeMicroFrontendRuntime {
-  readonly evaluateScript: (request: { readonly filePath: string }) => Promise<void>;
+  readonly evaluateScript: (request: { readonly filePath: string; readonly executionId?: string }) => Promise<void>;
   readonly startEventDelivery: () => void;
   readonly onEvent: (
     listener: (event: NativeMicroFrontendRuntimeEvent) => void
@@ -73,6 +76,19 @@ export function createMicroFrontendRuntimeWithDependencies(
         case 'openApp':
         case 'closeApp':
         case 'sessionVisibilityChanged':
+          if (parsedEvent.name === 'openApp' && parsedEvent.params.executionId != null) {
+            getExecutionSessions().bind(parsedEvent.params.sessionId, parsedEvent.params.executionId);
+          }
+          if (parsedEvent.name === 'closeApp') {
+            const executions = getExecutionSessions();
+            const current = executions.get(parsedEvent.params.sessionId);
+            if (parsedEvent.params.executionId != null && current?.id !== parsedEvent.params.executionId) {
+              return;
+            }
+            if (current != null) {
+              executions.release(parsedEvent.params.sessionId, current.id);
+            }
+          }
           if (sessionStore.applyEvent(parsedEvent)) {
             if (parsedEvent.name === 'openApp') {
               openPendingHostComponentSession(parsedEvent.params.sessionId);
@@ -109,7 +125,10 @@ export function createMicroFrontendRuntimeWithDependencies(
       return existingEvaluation;
     }
 
-    const evaluation = evaluateApp(appName);
+    const context = getExecutionContext();
+    const evaluation = context.runtimeToken == null
+      ? evaluateApp(appName)
+      : context.runRuntime(() => evaluateApp(appName));
     appEvaluations.set(appName, evaluation);
     return evaluation;
   }
@@ -117,19 +136,23 @@ export function createMicroFrontendRuntimeWithDependencies(
   function evaluateScript(filePath: string): Promise<void> {
     getMicroFrontendGlobalContext();
     installNativeComponentRegistryCompatibility();
-    return dependencies.nativeRuntime.evaluateScript({ filePath });
+    const executionId = getExecutionContext().capture()?.id;
+    return dependencies.nativeRuntime.evaluateScript(executionId == null ? { filePath } : { filePath, executionId });
   }
 
   async function evaluateApp(appName: string): Promise<void> {
+    const execution = getExecutionContext().snapshot();
     try {
       const { filePath } = await dependencies.adapter.loadBundle({ appName });
-      await evaluateScript(filePath);
+      await execution.run(() => evaluateScript(filePath));
 
-      if (!dependencies.registry.hasContainer(appName)) {
-        throw new AppContainerNotFoundError(appName);
-      }
+      execution.run(() => {
+        if (!dependencies.registry.hasContainer(appName)) {
+          throw new AppContainerNotFoundError(appName);
+        }
+      });
     } catch (error) {
-      resetFailedEvaluation(appName);
+      execution.run(() => resetFailedEvaluation(appName));
       throw error;
     }
   }

@@ -2145,7 +2145,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-async-generator-functions@npm:^7.25.4, @babel/plugin-transform-async-generator-functions@npm:^7.28.0":
+"@babel/plugin-transform-async-generator-functions@npm:7.28.0, @babel/plugin-transform-async-generator-functions@npm:^7.25.4, @babel/plugin-transform-async-generator-functions@npm:^7.28.0":
   version: 7.28.0
   resolution: "@babel/plugin-transform-async-generator-functions@npm:7.28.0"
   dependencies:
@@ -2171,7 +2171,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-async-to-generator@npm:^7.0.0, @babel/plugin-transform-async-to-generator@npm:^7.20.0, @babel/plugin-transform-async-to-generator@npm:^7.24.7, @babel/plugin-transform-async-to-generator@npm:^7.27.1":
+"@babel/plugin-transform-async-to-generator@npm:7.27.1, @babel/plugin-transform-async-to-generator@npm:^7.0.0, @babel/plugin-transform-async-to-generator@npm:^7.20.0, @babel/plugin-transform-async-to-generator@npm:^7.24.7, @babel/plugin-transform-async-to-generator@npm:^7.27.1":
   version: 7.27.1
   resolution: "@babel/plugin-transform-async-to-generator@npm:7.27.1"
   dependencies:
@@ -5513,6 +5513,9 @@ __metadata:
   resolution: "@granite-js/micro-frontend@workspace:packages/micro-frontend"
   dependencies:
     "@babel/core": "npm:7.28.5"
+    "@babel/plugin-transform-async-generator-functions": "npm:7.28.0"
+    "@babel/plugin-transform-async-to-generator": "npm:7.27.1"
+    "@babel/plugin-transform-flow-strip-types": "npm:7.27.1"
     "@babel/types": "npm:7.28.5"
     "@granite-js/plugin-core": "workspace:*"
     "@granite-js/react-native": "workspace:*"
@@ -5522,6 +5525,7 @@ __metadata:
     "@types/node": "catalog:tools"
     "@types/react": "catalog:react-native"
     "@types/react-test-renderer": "npm:^19"
+    babel-plugin-syntax-hermes-parser: "npm:0.32.1"
     react: "catalog:react-native"
     react-native: "catalog:react-native"
     react-native-builder-bob: "catalog:tools"
@@ -13043,6 +13047,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"babel-plugin-syntax-hermes-parser@npm:0.32.1, babel-plugin-syntax-hermes-parser@npm:^0.32.0":
+  version: 0.32.1
+  resolution: "babel-plugin-syntax-hermes-parser@npm:0.32.1"
+  dependencies:
+    hermes-parser: "npm:0.32.1"
+  checksum: 10c0/b254a2a324cf823c9ec749de0019cf787d59102e9bdd79fc687937e631574ba44f7d249954e284997f1ada1a2b9a1ffa87bc10b16f7e81869b767f99a978b2cf
+  languageName: node
+  linkType: hard
+
 "babel-plugin-syntax-hermes-parser@npm:^0.28.0":
   version: 0.28.1
   resolution: "babel-plugin-syntax-hermes-parser@npm:0.28.1"
@@ -13058,15 +13071,6 @@ __metadata:
   dependencies:
     hermes-parser: "npm:0.31.2"
   checksum: 10c0/249f26f3bfdea00ba35d74d0c9ec788cbb6ef4fab5b15e3a7aa4b215645423031309fa2f708f641e35614ec29affe643f0378ab04ce9052cfedf59570c85e67b
-  languageName: node
-  linkType: hard
-
-"babel-plugin-syntax-hermes-parser@npm:^0.32.0":
-  version: 0.32.1
-  resolution: "babel-plugin-syntax-hermes-parser@npm:0.32.1"
-  dependencies:
-    hermes-parser: "npm:0.32.1"
-  checksum: 10c0/b254a2a324cf823c9ec749de0019cf787d59102e9bdd79fc687937e631574ba44f7d249954e284997f1ada1a2b9a1ffa87bc10b16f7e81869b767f99a978b2cf
   languageName: node
   linkType: hard
 

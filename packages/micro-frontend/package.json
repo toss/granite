@@ -19,6 +19,21 @@
       "types": "./dist/typescript/plugin/index.d.ts",
       "default": "./dist/module/plugin/index.js"
     },
+    "./execution": {
+      "types": "./dist/typescript/execution/index.d.ts",
+      "react-native": "./src/execution/index.ts",
+      "default": "./dist/module/execution/index.js"
+    },
+    "./execution/bootstrap": {
+      "types": "./dist/typescript/execution/bootstrap.d.ts",
+      "react-native": "./src/execution/bootstrap.ts",
+      "default": "./dist/module/execution/bootstrap.js"
+    },
+    "./execution/renderer": {
+      "types": "./dist/typescript/execution/renderer.d.ts",
+      "react-native": "./src/execution/renderer.ts",
+      "default": "./dist/module/execution/renderer.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -60,8 +75,13 @@
   },
   "dependencies": {
     "@babel/core": "7.28.5",
+    "@babel/plugin-transform-async-generator-functions": "7.28.0",
+    "@babel/plugin-transform-async-to-generator": "7.27.1",
+    "@babel/plugin-transform-flow-strip-types": "7.27.1",
+    "@babel/types": "7.28.5",
     "@granite-js/utils": "workspace:*",
-    "@standard-schema/spec": "^1.0.0"
+    "@standard-schema/spec": "^1.0.0",
+    "babel-plugin-syntax-hermes-parser": "0.32.1"
   },
   "peerDependencies": {
     "@granite-js/plugin-core": "*",
@@ -79,7 +99,6 @@
     }
   },
   "devDependencies": {
-    "@babel/types": "7.28.5",
     "@granite-js/plugin-core": "workspace:*",
     "@granite-js/react-native": "workspace:*",
     "@types/babel__core": "^7.20.5",
@@ -122,5 +141,8 @@
       }
     }
   },
-  "sideEffects": false
+  "sideEffects": [
+    "./src/execution/bootstrap.ts",
+    "./dist/module/execution/bootstrap.js"
+  ]
 }

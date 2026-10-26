@@ -26,13 +26,14 @@ export type MicroFrontendRuntimeEvent =
       readonly name: 'openApp';
       readonly params: {
         readonly sessionId: string;
+        readonly executionId?: string;
         readonly appName: string;
         readonly scheme: string;
       };
     }
   | {
       readonly name: 'closeApp';
-      readonly params: { readonly sessionId: string };
+      readonly params: { readonly sessionId: string; readonly executionId?: string };
     }
   | {
       readonly name: 'sessionVisibilityChanged';

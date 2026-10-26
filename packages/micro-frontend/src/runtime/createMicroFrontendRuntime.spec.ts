@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getExecutionContext } from '../execution/context';
 import {
   registerPendingHostComponentRoute,
   removePendingHostComponentRoutes,
@@ -65,6 +66,37 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
   beforeEach(() => {
     Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
     resetPendingHostComponentStoreForTest();
+  });
+
+  it('preloads under the runtime owner while preserving the requesting service snapshot', async () => {
+    const fixture = createRuntimeFixture();
+    const context = getExecutionContext();
+    context.bindRuntime({ id: 'runtime:1' });
+    const observed: Array<string | undefined> = [];
+    let finishLoad!: (value: { filePath: string }) => void;
+    fixture.adapter.loadBundle.mockImplementationOnce(() => {
+      observed.push(context.capture()?.id);
+      return new Promise((resolve) => { finishLoad = resolve; });
+    });
+    vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(async () => {
+      observed.push(context.capture()?.id);
+      exposeModule(createContainer('cart'), './App', { default: () => 'cart' });
+    });
+    let continuation!: () => string | undefined;
+    const pending = context.run({ id: 'service:a' }, () => {
+      continuation = context.snapshot().bind(() => context.capture()?.id);
+      const result = fixture.runtime.preloadApp('cart');
+      expect(context.capture()?.id).toBe('service:a');
+      return result;
+    });
+    expect(observed).toEqual(['runtime:1']);
+    context.run({ id: 'service:b' }, () => finishLoad({ filePath: '/cart.hbc' }));
+    await pending;
+    expect(observed).toEqual(['runtime:1', 'runtime:1']);
+    expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledWith({
+      filePath: '/cart.hbc', executionId: 'runtime:1',
+    });
+    expect(context.run({ id: 'service:b' }, continuation)).toBe('service:a');
   });
 
   it('loads and evaluates an app once before importing its exposed module', async () => {
