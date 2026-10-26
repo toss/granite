@@ -3,6 +3,7 @@
 #ifdef __cplusplus
 
 #include <jsi/jsi.h>
+#include "ExecutionScope.h"
 #include <memory>
 #include <functional>
 #include <optional>
@@ -83,6 +84,9 @@ inline Snapshot capture(facebook::jsi::Runtime& runtime) {
 /** Install one immutable runtime identity without changing the current service scope. */
 inline void installRuntimeIdentity(facebook::jsi::Runtime& runtime, const std::string& id) {
   namespace jsi = facebook::jsi;
+  rnexecution::install(runtime);
+  runtime.global().getPropertyAsObject(runtime, rnexecution::kContext)
+      .getPropertyAsFunction(runtime, "bindRoot").call(runtime, jsi::String::createFromUtf8(runtime, id));
   if (id.empty()) { throw jsi::JSError(runtime, "Runtime execution identity cannot be empty"); }
   constexpr auto key = "__GRANITE_EXECUTION_ROOT_ID__";
   auto existing = runtime.global().getProperty(runtime, key);

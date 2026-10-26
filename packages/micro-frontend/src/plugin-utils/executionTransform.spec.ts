@@ -154,3 +154,9 @@ it('emits plain JavaScript from modern Flow sources before downstream compilatio
   });
   expect(await invoke('kept')).toEqual({ value: 'kept' });
 });
+
+it('leaves TypeScript typeof timer queries intact while instrumenting runtime reads', () => {
+  const result = transformExecutionOwnership('timer.ts', 'let handle: ReturnType<typeof setTimeout>; const later = setTimeout;');
+  expect(result?.code).toContain('typeof setTimeout');
+  expect(result?.code).toContain('executionScheduler(setTimeout)');
+});

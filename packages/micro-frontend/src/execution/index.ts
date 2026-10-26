@@ -3,3 +3,5 @@ export type { ExecutionContext, ExecutionSnapshot, ExecutionToken } from './cont
 export { asyncToGenerator } from './asyncToGenerator';
 
 export { AsyncGeneratorYield, wrapAsyncGenerator } from './asyncGenerator';
+
+export { executionScheduler, executionMethod, executionInvoke, executionSchedule, executionGlobals } from './callbackBoundaries';

@@ -26,6 +26,23 @@ export interface ExecutionContext {
 const CONTEXT_KEY = 'microFrontendExecutionContext';
 const NATIVE_RUNTIME_ID = '__GRANITE_EXECUTION_ROOT_ID__';
 
+interface NativeExecutionContext {
+  readonly version: 1;
+  capture(): object;
+  current(): string | null;
+  bindRoot(id: string): void;
+  runToken<T>(id: string | null | undefined, callback: () => T): T;
+  runSnapshot<T>(handle: object, callback: () => T): T;
+}
+function nativeContext(): NativeExecutionContext | undefined {
+  const value = Reflect.get(globalThis, '__RN_EXECUTION_CONTEXT_V1__') as NativeExecutionContext | undefined;
+  if (value != null && (value.version !== 1 || ['capture', 'current', 'bindRoot', 'runToken', 'runSnapshot']
+    .some(name => typeof Reflect.get(value, name) !== 'function'))) {
+    throw new Error('Incompatible native execution context');
+  }
+  return value;
+}
+
 export function createExecutionContext(): ExecutionContext {
   let runtimeToken: ExecutionToken | null = null;
   // undefined is the runtime root, while null explicitly clears ownership.
@@ -35,7 +52,8 @@ export function createExecutionContext(): ExecutionContext {
     const previous = current;
     current = token;
     try {
-      return callback();
+      const native = nativeContext();
+      return native == null ? callback() : native.runToken(token === undefined ? undefined : token?.id ?? null, callback);
     } finally {
       // A returned Promise does not extend this synchronous execution segment.
       current = previous;
@@ -52,21 +70,42 @@ export function createExecutionContext(): ExecutionContext {
       if (runtimeToken != null && runtimeToken.id !== token.id) {
         throw new Error('Runtime execution lifetime cannot be replaced');
       }
+      if (runtimeToken == null && nativeContext() != null && current !== undefined) {
+        throw new Error('Native execution context must be installed at the runtime root');
+      }
       runtimeToken ??= Object.freeze({ id: token.id });
+      nativeContext()?.bindRoot(token.id);
     },
-    capture: () => current === undefined ? runtimeToken : current,
+    capture: () => {
+      const native = nativeContext();
+      if (native == null) return current === undefined ? runtimeToken : current;
+      const id = native.current();
+      if (id == null) return null;
+      return current?.id === id ? current : runtimeToken?.id === id ? runtimeToken : Object.freeze({ id });
+    },
     run,
     runRuntime: <TResult>(callback: () => TResult): TResult => run(undefined, callback),
     snapshot(): ExecutionSnapshot {
       const token = current;
+      const native = nativeContext();
+      const handle = native?.capture();
+      const capturedId = native?.current();
       return Object.freeze({
-        get token() { return token === undefined ? runtimeToken : token; },
+        get token() { return capturedId === undefined ? (token === undefined ? runtimeToken : token) : capturedId === null ? null : { id: capturedId }; },
         run<TResult>(callback: () => TResult): TResult {
-          return run(token, callback);
+          if (native == null || handle == null) return run(token, callback);
+          const previous = current;
+          current = token;
+          try { return native.runSnapshot(handle, callback); }
+          finally { current = previous; }
         },
         bind<TThis, TArgs extends unknown[], TResult>(callback: (this: TThis, ...args: TArgs) => TResult) {
           return function (this: TThis, ...args: TArgs): TResult {
-            return run(token, () => callback.apply(this, args));
+            if (native == null || handle == null) return run(token, () => callback.apply(this, args));
+            const previous = current;
+            current = token;
+            try { return native.runSnapshot(handle, () => callback.apply(this, args)); }
+            finally { current = previous; }
           };
         },
       });
@@ -107,5 +146,5 @@ function bindNativeRuntime(context: ExecutionContext): void {
   if (typeof id !== 'string' || id.length === 0) {
     throw new Error('Invalid native runtime execution identity');
   }
-  context.bindRuntime({ id });
+  if (context.runtimeToken?.id !== id) context.bindRuntime({ id });
 }

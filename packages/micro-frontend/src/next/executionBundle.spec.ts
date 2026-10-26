@@ -36,7 +36,8 @@ it('preserves interleaved owners in the final production bundle after the native
     };
     const resolved = await resolvePluginConfig(base, plugins);
     const result = await runBuild({ ...resolved, plugins }, { platform: 'android', dev: false, cache: false });
-    expect(result.code).toContain('microFrontend.asyncExecution.v1');
+    expect(result.code).not.toContain('microFrontend.asyncExecution.v1');
+    expect(result.code).toContain('__RN_EXECUTION_CONTEXT_V1__');
     expect(result.code).toContain('asyncToGenerator');
     const harness: { context: ExecutionContext; shared(gate: Promise<void>): Promise<string | null> } = runInNewContext(
       `${result.code}\nglobalThis.ownershipHarness;`
