@@ -42,4 +42,16 @@ describe('microFrontend plugin', () => {
       path.join(temporaryDirectory, '.granite', 'granite-micro-frontend-runtime.js'),
     ]);
   });
+
+  it('enables execution bootstrap and async compilation through the existing build interface', async () => {
+    const plugin = await microFrontend({ executionOwnership: true });
+    const config = typeof plugin.config === 'function' ? await plugin.config({ command: 'build' }) : plugin.config;
+    const transformed = config?.transformer?.transformSync?.(
+      '/project/shared.js',
+      'async function shared() { await work(); return nativeModule.identify(); }'
+    );
+    expect(transformed).toContain('@granite-js/micro-frontend/execution');
+    const prelude = fs.readFileSync(path.join(temporaryDirectory, '.granite', 'granite-micro-frontend-runtime.js'), 'utf8');
+    expect(prelude).toMatch(/^import '@granite-js\/micro-frontend\/execution\/bootstrap';/);
+  });
 });

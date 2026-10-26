@@ -26,6 +26,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// Registers a session. Returns `nil` if `sessionId` is already registered.
 /// Callers must use a unique id per destination and invalidate before reuse.
 + (nullable GraniteMicroFrontendSessionRegistration *)registerSession:(NSString *)sessionId;
+/// The host supplies an immutable execution lifetime, independent of visibility.
++ (nullable GraniteMicroFrontendSessionRegistration *)registerSession:(NSString *)sessionId
+                                                         executionId:(nullable NSString *)executionId;
 
 + (void)emitPreloadApp:(NSString *)appName;
 

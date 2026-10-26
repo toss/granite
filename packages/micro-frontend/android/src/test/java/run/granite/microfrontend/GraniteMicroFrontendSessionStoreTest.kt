@@ -12,6 +12,28 @@ import kotlin.concurrent.thread
 
 class GraniteMicroFrontendSessionStoreTest {
     @Test
+    fun `execution ownership is transported unchanged for one registration lifetime`() {
+        val events = mutableListOf<GraniteMicroFrontendEvent>()
+        val store = GraniteMicroFrontendSessionStore(events::add)
+        val first = store.registerSession("owned-session", "activity:1")
+        first.openApp("example", "example://screen")
+        first.closeApp()
+        first.close()
+        val second = store.registerSession("owned-session", "activity:2")
+        second.openApp("example", "example://screen")
+        assertFalse(first.closeApp())
+        assertEquals(
+            listOf(
+                GraniteMicroFrontendEvent.OpenApp("owned-session", "example", "example://screen", "activity:1"),
+                GraniteMicroFrontendEvent.CloseApp("owned-session", "activity:1"),
+                GraniteMicroFrontendEvent.OpenApp("owned-session", "example", "example://screen", "activity:2"),
+            ),
+            events,
+        )
+        second.close()
+    }
+
+    @Test
     fun `session emits open visible close in native lifecycle order`() {
         val events = mutableListOf<GraniteMicroFrontendEvent>()
         val store = GraniteMicroFrontendSessionStore(events::add)

@@ -6,6 +6,7 @@
 #import <React/RCTBridgeProxy+Cxx.h>
 #import <React-callinvoker/ReactCommon/CallInvoker.h>
 #import <jsi/jsi.h>
+#include <granite/ExecutionContext.h>
 
 static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
     @"GraniteMicroFrontendRuntime";
@@ -58,6 +59,7 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
                resolve:(RCTPromiseResolveBlock)resolve
                 reject:(RCTPromiseRejectBlock)reject {
   NSString *filePath = request.filePath();
+  NSString *executionId = request.executionId();
   if (![filePath isAbsolutePath]) {
     reject(@"INVALID_BUNDLE_PATH", @"Bundle path must be absolute", nil);
     return;
@@ -93,6 +95,7 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
     callInvoker->invokeAsync([strongSelf,
                               source = std::move(source),
                               sourceUrl = std::move(sourceUrl),
+                              executionId,
                               resolve,
                               reject]() mutable {
       facebook::jsi::Runtime *runtime = [strongSelf jsRuntimeIfAvailable];
@@ -101,9 +104,30 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
         return;
       }
       try {
-        runtime->evaluateJavaScript(
-            std::make_unique<facebook::jsi::StringBuffer>(std::move(source)),
-            sourceUrl);
+        namespace jsi = facebook::jsi;
+        auto root = runtime->global().getProperty(*runtime, "__MICRO_FRONTEND__");
+        const bool installed = root.isObject() &&
+            root.asObject(*runtime).getProperty(*runtime, "microFrontendExecutionContext").isObject();
+        auto buffer = std::make_shared<jsi::StringBuffer>(std::move(source));
+        if (!installed && executionId == nil) {
+          runtime->evaluateJavaScript(buffer, sourceUrl);
+        } else {
+          granite::execution::capture(*runtime);
+          auto context = root.asObject(*runtime).getPropertyAsObject(*runtime, "microFrontendExecutionContext");
+          jsi::Value token = jsi::Value::null();
+          if (executionId != nil) {
+            jsi::Object value(*runtime);
+            value.setProperty(*runtime, "id", jsi::String::createFromUtf8(*runtime, executionId.UTF8String));
+            token = std::move(value);
+          }
+          auto evaluate = jsi::Function::createFromHostFunction(
+              *runtime, jsi::PropNameID::forAscii(*runtime, "evaluateOwnedBundle"), 0,
+              [buffer, sourceUrl](jsi::Runtime& runtime, const jsi::Value&, const jsi::Value*, size_t) {
+                runtime.evaluateJavaScript(buffer, sourceUrl);
+                return jsi::Value::undefined();
+              });
+          context.getPropertyAsFunction(*runtime, "run").callWithThis(*runtime, context, token, evaluate);
+        }
         resolve(nil);
       } catch (const std::exception &exception) {
         NSString *message = [NSString stringWithUTF8String:exception.what()];
