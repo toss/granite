@@ -6,7 +6,7 @@ import { createSharedResolverConfig } from './resolver';
 import type { MicroFrontendPluginOptions } from './types';
 import type { DisposeOwnershipPluginOptions } from '../plugin-utils/disposeBabelPlugin';
 import { transformDisposeOwnership } from '../plugin-utils/disposeTransform';
-import { executionRuntimeEntries } from '../plugin-utils/executionRuntime';
+import { EXECUTION_RUNTIME_ID, executionPrelude, executionRuntimePath } from '../plugin-utils/executionRuntime';
 import { transformExecutionOwnership } from '../plugin-utils/executionTransform';
 import { intoShared } from '../plugin-utils/intoShared';
 import { getPreludeConfig } from '../plugin-utils/prelude';
@@ -27,7 +27,7 @@ export async function microFrontend(options: MicroFrontendPluginOptions = {}): P
   const resolver = createSharedResolverConfig(nonEagerEntries);
   if (options.executionOwnership === true) {
     resolver.alias = [
-      ...Object.entries(executionRuntimeEntries()).map(([from, to]) => ({ exact: true, from, to })),
+      { exact: true, from: EXECUTION_RUNTIME_ID, to: executionRuntimePath() },
       ...resolver.alias ?? [],
     ];
   }
@@ -37,7 +37,7 @@ export async function microFrontend(options: MicroFrontendPluginOptions = {}): P
     disposeOwnershipOptions.appName = appName;
     const config = getPreludeConfig(normalizedOptions, appName);
     const bootstrap =
-      options.executionOwnership === true ? "import '@granite-js/micro-frontend/execution/bootstrap';\n" : '';
+      options.executionOwnership === true ? executionPrelude : '';
     fs.writeFileSync(preludePath, bootstrap + config.preludeScript, 'utf8');
   }
 

@@ -90,7 +90,7 @@ export function createExecutionContext(): ExecutionContext {
       const native = nativeContext();
       const handle = native?.capture();
       const capturedId = native?.current();
-      return Object.freeze({
+      const snapshot: ExecutionSnapshot = {
         get token() { return capturedId === undefined ? (token === undefined ? runtimeToken : token) : capturedId === null ? null : { id: capturedId }; },
         run<TResult>(callback: () => TResult): TResult {
           if (native == null || handle == null) return run(token, callback);
@@ -101,14 +101,11 @@ export function createExecutionContext(): ExecutionContext {
         },
         bind<TThis, TArgs extends unknown[], TResult>(callback: (this: TThis, ...args: TArgs) => TResult) {
           return function (this: TThis, ...args: TArgs): TResult {
-            if (native == null || handle == null) return run(token, () => callback.apply(this, args));
-            const previous = current;
-            current = token;
-            try { return native.runSnapshot(handle, () => callback.apply(this, args)); }
-            finally { current = previous; }
+            return snapshot.run(() => callback.apply(this, args));
           };
         },
-      });
+      };
+      return Object.freeze(snapshot);
     },
   });
 }

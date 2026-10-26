@@ -75,7 +75,7 @@ export function createFabricExecutionHarness(instrumented = true) {
     require(name: string) {
       if (name === 'react') {return React;}
       if (name === 'scheduler') {return scheduler;}
-      if (name === '@granite-js/micro-frontend/execution/renderer') {return execution;}
+      if (name === 'granite:execution-internal') {return execution;}
       if (name.endsWith('/ReactNativePrivateInitializeCore')) {return {};}
       if (name.endsWith('/ReactNativePrivateInterface')) {return privateInterface;}
       throw new Error(`Unexpected renderer dependency: ${name}`);

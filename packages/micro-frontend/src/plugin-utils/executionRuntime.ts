@@ -1,14 +1,12 @@
 import { existsSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
 
-/** Generated imports must resolve from this plugin, even in dependencies that do not declare it. */
-export function executionRuntimeEntries(): Record<string, string> {
-  return Object.fromEntries([
-    ['@granite-js/micro-frontend/execution', 'index'],
-    ['@granite-js/micro-frontend/execution/bootstrap', 'bootstrap'],
-    ['@granite-js/micro-frontend/execution/renderer', 'renderer'],
-  ].map(([specifier, filename]) => {
-    const compiled = fileURLToPath(new URL(`../execution/${filename}.js`, import.meta.url));
-    return [specifier, existsSync(compiled) ? compiled : compiled.replace(/\.js$/, '.ts')];
-  }));
+// Resolved by the compiler plugins only; this is not a package export.
+export const EXECUTION_RUNTIME_ID = 'granite:execution-internal';
+
+export function executionRuntimePath(): string {
+  const compiled = fileURLToPath(new URL('../execution/index.js', import.meta.url));
+  return existsSync(compiled) ? compiled : compiled.replace(/\.js$/, '.ts');
 }
+
+export const executionPrelude = `import { initializeExecution } from '${EXECUTION_RUNTIME_ID}';\ninitializeExecution();\n`;

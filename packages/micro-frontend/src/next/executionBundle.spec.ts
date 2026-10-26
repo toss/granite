@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
 import { runInNewContext } from 'node:vm';
@@ -14,8 +14,7 @@ it('preserves interleaved owners in the final production bundle after the native
     writeFileSync(path.join(directory, 'package.json'), JSON.stringify({ sideEffects: true }));
     const entry = path.join(directory, 'entry.js');
     writeFileSync(entry, `
-      import { getExecutionContext } from '@granite-js/micro-frontend/execution';
-      const context = getExecutionContext();
+      const context = globalThis.__MICRO_FRONTEND__.microFrontendExecutionContext;
       async function* values(gate) {
         await gate;
         yield context.capture()?.id ?? null;
@@ -39,6 +38,7 @@ it('preserves interleaved owners in the final production bundle after the native
     expect(result.code).not.toContain('microFrontend.asyncExecution.v1');
     expect(result.code).toContain('__RN_EXECUTION_CONTEXT_V1__');
     expect(result.code).toContain('asyncToGenerator');
+    expect(result.code).not.toContain('granite:execution-internal');
     const harness: { context: ExecutionContext; shared(gate: Promise<void>): Promise<string | null> } = runInNewContext(
       `${result.code}\nglobalThis.ownershipHarness;`
     );
@@ -55,3 +55,8 @@ it('preserves interleaved owners in the final production bundle after the native
     rmSync(directory, { recursive: true, force: true });
   }
 }, 30_000);
+
+it('does not publish compiler execution entrypoints as package subpaths', () => {
+  const manifest = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
+  expect(Object.keys(manifest.exports).filter(key => key.startsWith('./execution'))).toEqual([]);
+});

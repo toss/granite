@@ -14,7 +14,7 @@ describe('React Native execution compiler', () => {
       const filename = path.join(root, `Libraries/Renderer/implementations/ReactFabric-${mode}.js`);
       const source = readFileSync(filename, 'utf8');
       const result = transformRendererExecution(filename, source);
-      expect(result?.code).toContain('@granite-js/micro-frontend/execution/renderer');
+      expect(result?.code).toContain('granite:execution-internal');
       expect(result?.map).toBeTruthy();
       expect(() => new Script(result?.code ?? '')).not.toThrow();
     });

@@ -12,7 +12,7 @@ describe('microFrontend plugin', () => {
     }
     await prelude.config.call({} as never, { root: '/service', polyfills: [] } as Config);
     const bootstrap = await prelude.load.handler.call({} as never, '\0granite:micro-frontend');
-    expect(bootstrap).toMatch(/^import '@granite-js\/micro-frontend\/execution\/bootstrap';/);
+    expect(bootstrap).toContain("initializeExecution();");
     if (execution.transform == null || typeof execution.transform === 'function') {
       throw new Error('Missing execution transform');
     }
@@ -22,7 +22,7 @@ describe('microFrontend plugin', () => {
       '/service/shared.js',
       { moduleType: 'js' }
     );
-    expect(transformed).toMatchObject({ code: expect.stringContaining('@granite-js/micro-frontend/execution') });
+    expect(transformed).toMatchObject({ code: expect.stringContaining('granite:execution-internal') });
   });
 
   it('composes prelude, shared-module, and dispose responsibilities as separate plugins', async () => {

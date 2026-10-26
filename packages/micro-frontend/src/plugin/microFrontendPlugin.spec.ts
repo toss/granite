@@ -50,8 +50,8 @@ describe('microFrontend plugin', () => {
       '/project/shared.js',
       'async function shared() { await work(); return nativeModule.identify(); }'
     );
-    expect(transformed).toContain('@granite-js/micro-frontend/execution');
+    expect(transformed).toContain('granite:execution-internal');
     const prelude = fs.readFileSync(path.join(temporaryDirectory, '.granite', 'granite-micro-frontend-runtime.js'), 'utf8');
-    expect(prelude).toMatch(/^import '@granite-js\/micro-frontend\/execution\/bootstrap';/);
+    expect(prelude).toContain("initializeExecution();");
   });
 });

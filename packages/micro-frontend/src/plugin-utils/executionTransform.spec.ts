@@ -21,7 +21,7 @@ describe('execution ownership compiler', () => {
     const context = createExecutionContext();
     const sandbox = {
       require(name: string) {
-        if (name !== '@granite-js/micro-frontend/execution') {throw new Error(`Unexpected dependency: ${name}`);}
+        if (name !== 'granite:execution-internal') {throw new Error(`Unexpected dependency: ${name}`);}
         return { asyncToGenerator: createAsyncToGenerator(context) };
       },
       nativeModule: { identify: () => context.capture() },
@@ -65,7 +65,7 @@ function compileGeneratorFixture(source: string) {
   const result = transformExecutionOwnership('fixture.js', source);
   const sandbox = {
     require(name: string) {
-      if (name !== '@granite-js/micro-frontend/execution') {throw new Error(`Unexpected helper ${name}`);}
+      if (name !== 'granite:execution-internal') {throw new Error(`Unexpected helper ${name}`);}
       return executionHelpers;
     },
     identify() { const owner = context.capture()?.id ?? null; calls.push(owner); return owner; },

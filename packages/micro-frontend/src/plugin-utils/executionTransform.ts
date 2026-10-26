@@ -1,3 +1,4 @@
+import { EXECUTION_RUNTIME_ID } from './executionRuntime';
 import { createRequire } from 'node:module';
 import * as babel from '@babel/core';
 import * as t from '@babel/types';
@@ -85,7 +86,7 @@ export function transformExecutionOwnership(id: string, code: string): babel.Bab
               if (runtime == null) {
                 runtime = t.identifier(file.scope.generateUid('executionHelpers'));
                 program.unshiftContainer('body', t.variableDeclaration('var', [t.variableDeclarator(
-                  runtime, t.callExpression(t.identifier('require'), [t.stringLiteral('@granite-js/micro-frontend/execution')])
+                  runtime, t.callExpression(t.identifier('require'), [t.stringLiteral(EXECUTION_RUNTIME_ID)])
                 )]));
               }
               return t.memberExpression(t.cloneNode(runtime), t.identifier(exported));
@@ -95,7 +96,7 @@ export function transformExecutionOwnership(id: string, code: string): babel.Bab
       },
       ...isTypeScript ? [] : [[flowStripPlugin, { allowDeclareFields: true }]],
       generatorPlugin,
-      [asyncPlugin, { module: '@granite-js/micro-frontend/execution', method: 'asyncToGenerator' }],
+      [asyncPlugin, { module: EXECUTION_RUNTIME_ID, method: 'asyncToGenerator' }],
     ],
   });
 }
@@ -110,7 +111,7 @@ function callbackBoundaryPlugin(): babel.PluginObj {
       if (program == null || !program.isProgram()) throw new Error('Missing execution program');
       runtime = program.scope.generateUidIdentifier('executionBoundaries');
       program.unshiftContainer('body', t.variableDeclaration('var', [t.variableDeclarator(runtime,
-        t.callExpression(t.identifier('require'), [t.stringLiteral('@granite-js/micro-frontend/execution')]))]));
+        t.callExpression(t.identifier('require'), [t.stringLiteral(EXECUTION_RUNTIME_ID)]))]));
     }
     return t.memberExpression(t.cloneNode(runtime), t.identifier(name));
   }

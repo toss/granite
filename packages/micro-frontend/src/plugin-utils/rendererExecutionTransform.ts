@@ -1,3 +1,4 @@
+import { EXECUTION_RUNTIME_ID } from './executionRuntime';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as babel from '@babel/core';
@@ -92,7 +93,7 @@ export function instrumentRenderer(source: string, filename: string): babel.Babe
               program.unshiftContainer('body', [
                 t.variableDeclaration('var', [t.variableDeclarator(
                   t.identifier(runtimeName),
-                  t.callExpression(t.identifier('require'), [t.stringLiteral('@granite-js/micro-frontend/execution/renderer')])
+                  t.callExpression(t.identifier('require'), [t.stringLiteral(EXECUTION_RUNTIME_ID)])
                 )]),
                 t.expressionStatement(t.callExpression(
                   t.memberExpression(t.identifier(runtimeName), t.identifier('registerRenderer')),

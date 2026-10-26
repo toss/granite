@@ -3,7 +3,7 @@ import { flattenPluginOption, type Plugin, type PluginOption } from 'rollipop';
 import { code, include } from 'rollipop/filter';
 import type { MicroFrontendPluginOptions } from './types';
 import { transformDisposeOwnership } from '../plugin-utils/disposeTransform';
-import { executionRuntimeEntries } from '../plugin-utils/executionRuntime';
+import { EXECUTION_RUNTIME_ID, executionPrelude, executionRuntimePath } from '../plugin-utils/executionRuntime';
 import { transformExecutionOwnership } from '../plugin-utils/executionTransform';
 import { intoShared } from '../plugin-utils/intoShared';
 import { getPreludeConfig } from '../plugin-utils/prelude';
@@ -40,7 +40,7 @@ function prelude(options: MicroFrontendPluginOptions, shared: SharedConfig | und
       );
       const generated = getPreludeConfig({ ...options, shared, exposes }, options.appName);
       prelude =
-        (options.executionOwnership === true ? "import '@granite-js/micro-frontend/execution/bootstrap';\n" : '') +
+        (options.executionOwnership === true ? executionPrelude : '') +
         generated.preludeScript;
       // Must run before the native-module proxy and before any exposed app module.
       config.polyfills = [
@@ -115,12 +115,12 @@ function dispose(appName: string): Plugin {
 }
 
 function executionOwnership(): Plugin {
-  const entries = executionRuntimeEntries();
+  const runtimePath = executionRuntimePath();
   return {
     name: 'granite:micro-frontend:execution-ownership',
     resolveId: {
-      filter: { id: /^@granite-js\/micro-frontend\/execution(?:\/(?:bootstrap|renderer))?$/ },
-      handler(id) { return entries[id]; },
+      filter: { id: /^granite:execution-internal$/ },
+      handler(id) { return id === EXECUTION_RUNTIME_ID ? runtimePath : undefined; },
     },
     config: {
       async rolldownOptions(options) {

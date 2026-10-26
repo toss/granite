@@ -19,21 +19,6 @@
       "types": "./dist/typescript/plugin/index.d.ts",
       "default": "./dist/module/plugin/index.js"
     },
-    "./execution": {
-      "types": "./dist/typescript/execution/index.d.ts",
-      "react-native": "./src/execution/index.ts",
-      "default": "./dist/module/execution/index.js"
-    },
-    "./execution/bootstrap": {
-      "types": "./dist/typescript/execution/bootstrap.d.ts",
-      "react-native": "./src/execution/bootstrap.ts",
-      "default": "./dist/module/execution/bootstrap.js"
-    },
-    "./execution/renderer": {
-      "types": "./dist/typescript/execution/renderer.d.ts",
-      "react-native": "./src/execution/renderer.ts",
-      "default": "./dist/module/execution/renderer.js"
-    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -142,8 +127,5 @@
       }
     }
   },
-  "sideEffects": [
-    "./src/execution/bootstrap.ts",
-    "./dist/module/execution/bootstrap.js"
-  ]
+  "sideEffects": false
 }
