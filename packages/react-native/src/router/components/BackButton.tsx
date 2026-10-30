@@ -59,6 +59,7 @@ function NavbarBackButton({ onPress, color }: { onPress?: () => void; color?: st
       accessible={true}
       accessibilityLabel="Go back"
       accessibilityRole="button"
+      {...BACK_BUTTON_NATIVE_PROPS}
     >
       <View style={{ width: 24, height: 24 }}>
         <SvgXml
@@ -88,10 +89,28 @@ const BACK_BUTTON_XML = Platform.select<string>({
   default: IOS_BACK_BUTTON,
 });
 
+/**
+ * Apps built with the iOS 27 SDK, like the Toss app, always draw navigation bars with Liquid Glass on iOS 27 and later.
+ * Liquid Glass places a header item further right than the earlier design.
+ */
+const IS_LIQUID_GLASS_NAVIGATION_BAR = Platform.OS === 'ios' && parseInt(String(Platform.Version), 10) >= 27;
+
+/**
+ * On iOS, puts the arrow tip where the Toss app's native back button draws it.
+ */
 const BACK_BUTTON_MARGIN = Platform.select<number>({
   android: 0,
-  ios: -12,
-  default: -12,
+  ios: IS_LIQUID_GLASS_NAVIGATION_BAR ? -18.33 : -4.33,
+  default: -4.33,
+});
+
+/**
+ * Lets an iOS host find this button among header views, for example to draw a native back button in its place.
+ * Hosts depend on this nativeID, so keep it stable.
+ */
+const BACK_BUTTON_NATIVE_PROPS = Platform.select<{ nativeID?: string }>({
+  ios: { nativeID: 'granite.header.backButton' },
+  default: {},
 });
 
 export { BackButton };
