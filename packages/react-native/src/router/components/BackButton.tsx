@@ -1,5 +1,7 @@
 import { SvgXml } from '@granite-js/native/react-native-svg';
-import { Platform, TouchableOpacity, TouchableOpacityProps, View } from 'react-native';
+import { useState } from 'react';
+import { Platform, TouchableOpacity, TouchableOpacityProps, UIManager, View } from 'react-native';
+import GraniteBackButtonView from './GraniteBackButtonViewNativeComponent';
 
 interface BackButtonProps extends TouchableOpacityProps {
   tintColor?: string;
@@ -51,7 +53,8 @@ function BackButton({ tintColor, onPress }: BackButtonProps) {
 }
 
 function NavbarBackButton({ onPress, color }: { onPress?: () => void; color?: string }) {
-  return (
+  const [hasBackButtonView] = useState(hasGraniteBackButtonView);
+  const button = (
     <TouchableOpacity
       hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
       style={{ width: 24, height: 24 }}
@@ -73,6 +76,8 @@ function NavbarBackButton({ onPress, color }: { onPress?: () => void; color?: st
       </View>
     </TouchableOpacity>
   );
+
+  return hasBackButtonView ? <GraniteBackButtonView>{button}</GraniteBackButtonView> : button;
 }
 
 const ANDROID_BACK_BUTTON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="line-icon">
@@ -112,5 +117,14 @@ const BACK_BUTTON_NATIVE_PROPS = Platform.select<{ nativeID?: string }>({
   ios: { nativeID: 'granite.header.backButton' },
   default: {},
 });
+
+/**
+ * On iOS, the button is wrapped in `GraniteBackButtonView` so a host can find it by its view class.
+ * Hosts register that view through @granite-js/screen. Without it, for example in an app version
+ * from before the view, the button renders as is.
+ */
+function hasGraniteBackButtonView() {
+  return Platform.OS === 'ios' && UIManager.hasViewManagerConfig('GraniteBackButtonView');
+}
 
 export { BackButton };
