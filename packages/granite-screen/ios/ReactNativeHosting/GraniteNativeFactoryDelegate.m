@@ -6,6 +6,7 @@
 //
 
 #import "GraniteNativeFactoryDelegate.h"
+#import "GraniteBackButtonView.h"
 
 @class RCTHost;
 
@@ -17,6 +18,13 @@
 @end
 
 @implementation GraniteNativeFactoryDelegate
+
+- (instancetype)init {
+  // BackButton checks for this view when its module is evaluated. The delegate exists before any host
+  // starts, so registering here runs ahead of every bundle.
+  GraniteRegisterBackButtonView();
+  return [super init];
+}
 
 - (void)hostDidStart:(RCTHost *)host {
   [super hostDidStart:host];
