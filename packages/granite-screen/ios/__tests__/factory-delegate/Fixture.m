@@ -1,5 +1,4 @@
 #import "Fixture.h"
-#import "GraniteBackButtonView.h"
 #import <objc/message.h>
 
 @implementation RCTBridge
@@ -8,10 +7,6 @@
 @end
 
 static NSInteger hostStartCount = 0;
-static NSInteger registrationCount = 0;
-
-// The real registration needs Fabric, so count the calls instead.
-void GraniteRegisterBackButtonView(void) { registrationCount += 1; }
 
 @implementation RCTDefaultReactNativeFactoryDelegate
 - (NSURL *)bundleURL { return nil; }
@@ -29,8 +24,4 @@ BOOL readBridgelessEnabled(id delegate) {
 
 NSInteger baseHostStartCount(void) {
   return hostStartCount;
-}
-
-NSInteger backButtonViewRegistrationCount(void) {
-  return registrationCount;
 }

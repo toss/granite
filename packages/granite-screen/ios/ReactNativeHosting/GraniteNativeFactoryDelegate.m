@@ -6,7 +6,6 @@
 //
 
 #import "GraniteNativeFactoryDelegate.h"
-#import "GraniteBackButtonView.h"
 
 @class RCTHost;
 
@@ -18,13 +17,6 @@
 @end
 
 @implementation GraniteNativeFactoryDelegate
-
-- (instancetype)init {
-  // BackButton renders this view only once it is registered. The delegate exists before any host
-  // starts, so registering here runs ahead of every bundle.
-  GraniteRegisterBackButtonView();
-  return [super init];
-}
 
 // Keep the explicit opt-in for older RN versions. RN87 no longer exposes this
 // selector to Swift, so implementing it here avoids a version-dependent override.

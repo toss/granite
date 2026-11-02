@@ -2,4 +2,3 @@
 
 BOOL readBridgelessEnabled(id _Nonnull delegate);
 NSInteger baseHostStartCount(void);
-NSInteger backButtonViewRegistrationCount(void);
