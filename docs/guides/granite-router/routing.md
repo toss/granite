@@ -452,6 +452,38 @@ navigation.dispatch(
 
 - Use `CommonActions.reset` to keep only a specific screen in the history and delete the rest of the screen history.
 
+## First-screen fallback options
+
+Set `router.initialScreenOptions` in `Granite.registerApp` to provide fallback options for the first route in the current stack. It accepts a native-stack options object or a function receiving `{ route, navigation, onBack }`.
+
+For example, import `Granite` and `BackButton` from `@granite-js/react-native` to customize the entry screen's back button:
+
+```tsx
+Granite.registerApp(App, {
+  appName: 'example',
+  context,
+  router: {
+    initialScreenOptions: ({ onBack }) => ({
+      headerLeft: (props) => <BackButton {...props} onPress={onBack} />,
+    }),
+  },
+});
+```
+
+`onBack` runs registered back handlers before navigating back, or calling `closeView()` when no navigation history remains. This lets an embedded app close its host view without bypassing its existing back handlers.
+
+“First” means the bottom route in the current stack, not a particular page name or the currently focused screen. The fallback follows deep-link entry, restored state, `replace`, and `reset`. Pushing another instance of the same page does not apply it to that new instance.
+
+Options are resolved in this order, with later values taking precedence:
+
+1. Granite defaults
+2. `initialScreenOptions` (first route only)
+3. `defaultScreenOption`
+4. The route's `screenOptions`
+5. `navigation.setOptions`
+
+Explicit overrides such as `headerLeft: undefined` or `headerLeft: () => null` are preserved. Omitting `initialScreenOptions` keeps existing behavior. This option does not change Granite's default back buttons on other screens.
+
 ## References
 
 - [React Navigation Official Documentation](https://reactnavigation.org/)

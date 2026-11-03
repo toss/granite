@@ -6,7 +6,10 @@ import {
   ParamListBase,
   RouteProp,
 } from '@granite-js/native/@react-navigation/native';
-import { NativeStackNavigationOptions } from '@granite-js/native/@react-navigation/native-stack';
+import {
+  NativeStackNavigationOptions,
+  NativeStackNavigationProp,
+} from '@granite-js/native/@react-navigation/native-stack';
 import {
   ComponentProps,
   ComponentType,
@@ -87,6 +90,19 @@ interface StackNavigatorProps {
     | NativeStackNavigationOptions
     | ((props: { route: RouteProp<ParamListBase>; navigation: any }) => NativeStackNavigationOptions);
   /**
+   * Fallback options for the first route in the current stack, including deep-link
+   * entry, replace, and reset. Applied before defaultScreenOption and route options.
+   * The callback receives onBack, which runs registered back handlers before
+   * navigating back or closing the host view when no navigation history remains.
+   */
+  initialScreenOptions?:
+    | NativeStackNavigationOptions
+    | ((props: {
+        route: RouteProp<ParamListBase>;
+        navigation: NativeStackNavigationProp<ParamListBase>;
+        onBack: () => void;
+      }) => NativeStackNavigationOptions);
+  /**
    * @name screenContainer
    * @description
    * Container component that wraps each Screen component.
@@ -145,6 +161,7 @@ export function Router({
   // Public props (NavigationContainer)
   navigationContainerRef,
   defaultScreenOption,
+  initialScreenOptions,
   screenContainer,
   defaultErrorComponent,
   // Public props (StackNavigator)
@@ -175,13 +192,18 @@ export function Router({
   );
 
   const screenOptions = useCallback(
-    (screenProps: any) => ({
+    (screenProps: { route: RouteProp<ParamListBase>; navigation: NativeStackNavigationProp<ParamListBase> }) => ({
       ...BASE_STACK_NAVIGATOR_STYLE,
       gestureEnabled: canGoBack,
       headerLeft,
+      ...(initialScreenOptions != null && screenProps.navigation.getState().routes[0]?.key === screenProps.route.key
+        ? typeof initialScreenOptions === 'function'
+          ? initialScreenOptions({ ...screenProps, onBack: handler })
+          : initialScreenOptions
+        : undefined),
       ...(typeof defaultScreenOption === 'function' ? defaultScreenOption(screenProps) : defaultScreenOption),
     }),
-    [canGoBack, defaultScreenOption, headerLeft]
+    [canGoBack, defaultScreenOption, headerLeft, initialScreenOptions, handler]
   );
 
   const [isInitialScreen, setIsInitialScreen] = useState(true);
