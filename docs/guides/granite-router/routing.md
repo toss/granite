@@ -454,7 +454,7 @@ navigation.dispatch(
 
 ## Screen options by stack position
 
-The function form of `router.defaultScreenOption` receives `{ route, navigation, routeIndex, onBack }`. Use `routeIndex` to configure options according to each route's position in the stack, including the entry screen.
+The function form of `router.defaultScreenOptions` receives `{ route, navigation, routeIndex, onBack }`. Use `routeIndex` to configure options according to each route's position in the stack, including the entry screen.
 
 Import `Granite` and `BackButton` from `@granite-js/react-native`:
 
@@ -463,7 +463,7 @@ Granite.registerApp(App, {
   appName: 'example',
   context,
   router: {
-    defaultScreenOption: ({ routeIndex, onBack }) => ({
+    defaultScreenOptions: ({ routeIndex, onBack }) => ({
       headerTintColor: 'black',
       title: routeIndex === 0 ? 'Welcome' : 'Details',
       ...(routeIndex === 0 && {
@@ -478,7 +478,7 @@ Granite.registerApp(App, {
 
 `onBack` is available for every route. It runs registered back handlers before navigating back, or calling `closeView()` when no navigation history remains. This uses the current navigation state when pressed; it does not remove the route whose options supplied the callback directly.
 
-Existing object options and callbacks using only `route` and `navigation` continue to work. Route-level `screenOptions` and `navigation.setOptions` retain precedence over `defaultScreenOption`, including explicit `headerLeft: undefined` or `headerLeft: () => null` overrides. Granite's default back buttons remain unchanged unless explicitly overridden.
+`defaultScreenOptions` accepts an object or callback. The previous `defaultScreenOption` name remains supported as a deprecated alias with its original `{ route, navigation }` callback arguments. Use only one name; TypeScript rejects configurations that provide both. If untyped JavaScript supplies both, `defaultScreenOptions` takes precedence without merging them. Route-level `screenOptions` and `navigation.setOptions` retain precedence over `defaultScreenOptions`, including explicit `headerLeft: undefined` or `headerLeft: () => null` overrides. Granite's default back buttons remain unchanged unless explicitly overridden.
 
 ## References
 

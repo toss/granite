@@ -454,7 +454,7 @@ navigation.dispatch(
 
 ## 스택 위치에 따라 화면 옵션 설정하기
 
-`router.defaultScreenOption`의 함수형 설정은 `{ route, navigation, routeIndex, onBack }`을 받아요. `routeIndex`로 진입 화면을 포함한 각 route의 스택 위치에 따라 옵션을 설정할 수 있어요.
+`router.defaultScreenOptions`의 함수형 설정은 `{ route, navigation, routeIndex, onBack }`을 받아요. `routeIndex`로 진입 화면을 포함한 각 route의 스택 위치에 따라 옵션을 설정할 수 있어요.
 
 `@granite-js/react-native`에서 `Granite`와 `BackButton`을 가져와 사용해요.
 
@@ -463,7 +463,7 @@ Granite.registerApp(App, {
   appName: 'example',
   context,
   router: {
-    defaultScreenOption: ({ routeIndex, onBack }) => ({
+    defaultScreenOptions: ({ routeIndex, onBack }) => ({
       headerTintColor: 'black',
       title: routeIndex === 0 ? 'Welcome' : 'Details',
       ...(routeIndex === 0 && {
@@ -478,7 +478,7 @@ Granite.registerApp(App, {
 
 `onBack`은 모든 route에 제공돼요. 등록된 뒤로가기 핸들러를 먼저 실행하고, 핸들러가 처리하지 않으면 이전 화면으로 이동해요. 돌아갈 화면이 없으면 `closeView()`를 호출해요. 눌렀을 때의 현재 navigation 상태를 사용하며, callback을 받은 route를 직접 제거하는 동작은 아니에요.
 
-기존 객체형 옵션과 `route`, `navigation`만 사용하는 함수형 설정도 그대로 사용할 수 있어요. route의 `screenOptions`와 `navigation.setOptions`는 `defaultScreenOption`보다 우선하며, `headerLeft: undefined`나 `headerLeft: () => null`처럼 명시한 값도 유지해요. 명시적으로 덮어쓰지 않으면 Granite의 기본 뒤로가기 버튼도 유지돼요.
+`defaultScreenOptions`는 객체나 함수를 받을 수 있어요. 기존 `defaultScreenOption` 이름은 deprecated alias로 유지하고, callback 인자도 기존 `{ route, navigation }`을 유지해요. 두 이름 중 하나만 사용해야 하며, 동시에 지정하면 타입 오류가 발생해요. 타입 검사를 거치지 않는 JavaScript에서 둘 다 지정하면 병합 없이 `defaultScreenOptions`가 우선해요. route의 `screenOptions`와 `navigation.setOptions`는 `defaultScreenOptions`보다 우선하며, `headerLeft: undefined`나 `headerLeft: () => null`처럼 명시한 값도 유지해요. 명시적으로 덮어쓰지 않으면 Granite의 기본 뒤로가기 버튼도 유지돼요.
 
 ## 레퍼런스
 

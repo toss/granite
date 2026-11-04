@@ -77,7 +77,7 @@ function optionsFor(key: string) {
   return observed.descriptors[key].options;
 }
 
-describe('Router defaultScreenOption context', () => {
+describe('Router defaultScreenOptions context', () => {
   it('preserves existing defaults when omitted', async () => {
     const ref = await mountRouter();
     expect(optionsFor(ref.getRootState().routes[0]!.key)).toMatchObject({
@@ -96,9 +96,27 @@ describe('Router defaultScreenOption context', () => {
     expect(optionsFor(otherRef.getRootState().routes[0]!.key).title).toBe('/a');
   });
 
+  it('passes the original arguments to a legacy callback', async () => {
+    const legacy = vi.fn<Extract<RouterProps['defaultScreenOption'], (...args: any[]) => any>>(() => ({}));
+    await mountRouter({ defaultScreenOption: legacy });
+    expect(legacy.mock.calls[0]![0]).not.toHaveProperty('routeIndex');
+    expect(legacy.mock.calls[0]![0]).not.toHaveProperty('onBack');
+  });
+
+  it('uses plural options without merging or evaluating the alias for untyped callers', async () => {
+    const legacy = vi.fn(() => ({ title: 'Legacy', headerShown: false }));
+    const ref = await mountRouter({
+      defaultScreenOptions: { title: 'Current' },
+      defaultScreenOption: legacy,
+    } as unknown as RouterProps);
+    expect(optionsFor(ref.getRootState().routes[0]!.key).title).toBe('Current');
+    expect(optionsFor(ref.getRootState().routes[0]!.key).headerShown).toBeUndefined();
+    expect(legacy).not.toHaveBeenCalled();
+  });
+
   it('reports each route position independently of focus when the same page is pushed and popped', async () => {
     const ref = await mountRouter({
-      defaultScreenOption: ({ routeIndex }) => ({ title: `Route ${routeIndex}`, headerShown: routeIndex !== 0 }),
+      defaultScreenOptions: ({ routeIndex }) => ({ title: `Route ${routeIndex}`, headerShown: routeIndex !== 0 }),
     });
     const firstKey = ref.getRootState().routes[0]!.key;
     act(() => ref.dispatch(StackActions.push('/a')));
@@ -112,7 +130,7 @@ describe('Router defaultScreenOption context', () => {
 
   it('updates route positions after replace and reset', async () => {
     const ref = await mountRouter({
-      defaultScreenOption: ({ routeIndex }) => ({ title: `Route ${routeIndex}`, headerShown: routeIndex !== 0 }),
+      defaultScreenOptions: ({ routeIndex }) => ({ title: `Route ${routeIndex}`, headerShown: routeIndex !== 0 }),
     });
     act(() => ref.dispatch(StackActions.replace('/b')));
     expect(optionsFor(ref.getRootState().routes[0]!.key)).toMatchObject({ headerShown: false, title: 'Page B' });
@@ -125,7 +143,7 @@ describe('Router defaultScreenOption context', () => {
   it('reports index zero for a deep-link entry instead of its registration order', async () => {
     const onStateChange = vi.fn();
     const ref = await mountRouter(
-      { defaultScreenOption: ({ routeIndex }) => ({ headerShown: routeIndex !== 0 }), onStateChange },
+      { defaultScreenOptions: ({ routeIndex }) => ({ headerShown: routeIndex !== 0 }), onStateChange },
       false,
       'example://app/b'
     );
@@ -140,7 +158,7 @@ describe('Router defaultScreenOption context', () => {
   it('reports route positions in restored state even when a later route is focused', async () => {
     const ref = await mountRouter({
       initialState: { index: 1, routes: [{ name: '/b' }, { name: '/a' }] },
-      defaultScreenOption: ({ routeIndex }) => ({ headerShown: routeIndex !== 0 }),
+      defaultScreenOptions: ({ routeIndex }) => ({ headerShown: routeIndex !== 0 }),
     });
     const routes = ref.getRootState().routes;
     expect(optionsFor(routes[0]!.key).headerShown).toBe(false);
@@ -149,7 +167,7 @@ describe('Router defaultScreenOption context', () => {
 
   it.each([undefined, () => null])('preserves explicit common headerLeft overrides (%s)', async (headerLeft) => {
     const ref = await mountRouter({
-      defaultScreenOption: () => ({ title: 'Common', headerLeft }),
+      defaultScreenOptions: () => ({ title: 'Common', headerLeft }),
     });
     expect(optionsFor(ref.getRootState().routes[0]!.key)).toMatchObject({ title: 'Common', headerLeft });
     act(() => ref.dispatch(StackActions.replace('/b')));
@@ -157,10 +175,10 @@ describe('Router defaultScreenOption context', () => {
   });
 
   it('passes route and navigation to the callback and closes the host through onBack', async () => {
-    const defaultScreenOption = vi.fn<Extract<RouterProps['defaultScreenOption'], (...args: any[]) => any>>();
-    defaultScreenOption.mockReturnValue({});
-    const ref = await mountRouter({ defaultScreenOption });
-    const props = defaultScreenOption.mock.calls.at(-1)![0];
+    const defaultScreenOptions = vi.fn<Extract<RouterProps['defaultScreenOptions'], (...args: any[]) => any>>();
+    defaultScreenOptions.mockReturnValue({});
+    const ref = await mountRouter({ defaultScreenOptions });
+    const props = defaultScreenOptions.mock.calls.at(-1)![0];
     expect(props.route.key).toBe(ref.getRootState().routes[0]!.key);
     expect(props.routeIndex).toBe(0);
     expect(props.navigation.getState().routes[0]!.key).toBe(props.route.key);
@@ -171,25 +189,27 @@ describe('Router defaultScreenOption context', () => {
   });
 
   it('does not classify a preloaded screen as the first route', async () => {
-    const defaultScreenOption = vi.fn<Extract<RouterProps['defaultScreenOption'], (...args: any[]) => any>>(
+    const defaultScreenOptions = vi.fn<Extract<RouterProps['defaultScreenOptions'], (...args: any[]) => any>>(
       ({ routeIndex }) => ({ headerShown: routeIndex !== 0 })
     );
-    const ref = await mountRouter({ defaultScreenOption });
+    const ref = await mountRouter({ defaultScreenOptions });
     act(() => ref.dispatch(CommonActions.preload('/b')));
-    const preloaded = defaultScreenOption.mock.calls.findLast(([props]) => props.route.name === '/b')![0];
+    const preloaded = defaultScreenOptions.mock.calls.findLast(([props]) => props.route.name === '/b')![0];
     expect(preloaded.routeIndex).toBe(-1);
     expect(optionsFor(preloaded.route.key).headerShown).toBe(true);
     act(() => ref.dispatch(StackActions.push('/b')));
-    const pushed = defaultScreenOption.mock.calls.findLast(([props]) => props.route.name === '/b')![0];
+    const pushed = defaultScreenOptions.mock.calls.findLast(([props]) => props.route.name === '/b')![0];
     expect(pushed.routeIndex).toBe(1);
   });
 
   it('uses onBack from a pushed screen to pop before closing the host', async () => {
-    const defaultScreenOption = vi.fn<Extract<RouterProps['defaultScreenOption'], (...args: any[]) => any>>(() => ({}));
-    const ref = await mountRouter({ defaultScreenOption });
+    const defaultScreenOptions = vi.fn<Extract<RouterProps['defaultScreenOptions'], (...args: any[]) => any>>(
+      () => ({})
+    );
+    const ref = await mountRouter({ defaultScreenOptions });
     act(() => ref.dispatch(StackActions.push('/a')));
     const currentKey = ref.getRootState().routes[1]!.key;
-    const props = defaultScreenOption.mock.calls.findLast(([props]) => props.route.key === currentKey)![0];
+    const props = defaultScreenOptions.mock.calls.findLast(([props]) => props.route.key === currentKey)![0];
     expect(props.routeIndex).toBe(1);
     act(() => props.onBack());
     expect(ref.getRootState().routes).toHaveLength(1);
@@ -200,7 +220,7 @@ describe('Router defaultScreenOption context', () => {
     let onBack = () => {};
     await mountRouter(
       {
-        defaultScreenOption: (props) => {
+        defaultScreenOptions: (props) => {
           onBack = props.onBack;
           return {};
         },
