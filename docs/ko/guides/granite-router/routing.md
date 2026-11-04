@@ -452,37 +452,33 @@ navigation.dispatch(
 
 - `CommonActions.reset`으로 특정 화면만 기록에 남기고 나머지 화면 기록을 삭제할 수 있어요.
 
-## 첫 화면의 기본 옵션 설정하기
+## 스택 위치에 따라 화면 옵션 설정하기
 
-`Granite.registerApp`의 `router.initialScreenOptions`로 현재 스택의 첫 route에 적용할 기본 옵션을 설정할 수 있어요. native-stack 옵션 객체 또는 `{ route, navigation, onBack }`을 받는 함수를 지정해요.
+`router.defaultScreenOption`의 함수형 설정은 `{ route, navigation, routeIndex, onBack }`을 받아요. `routeIndex`로 진입 화면을 포함한 각 route의 스택 위치에 따라 옵션을 설정할 수 있어요.
 
-예를 들어 `@granite-js/react-native`에서 `Granite`와 `BackButton`을 가져와 진입 화면의 뒤로가기 버튼을 설정할 수 있어요.
+`@granite-js/react-native`에서 `Granite`와 `BackButton`을 가져와 사용해요.
 
 ```tsx
 Granite.registerApp(App, {
   appName: 'example',
   context,
   router: {
-    initialScreenOptions: ({ onBack }) => ({
-      headerLeft: (props) => <BackButton {...props} onPress={onBack} />,
+    defaultScreenOption: ({ routeIndex, onBack }) => ({
+      headerTintColor: 'black',
+      title: routeIndex === 0 ? 'Welcome' : 'Details',
+      ...(routeIndex === 0 && {
+        headerLeft: (props) => <BackButton {...props} onPress={onBack} />,
+      }),
     }),
   },
 });
 ```
 
-`onBack`은 등록된 뒤로가기 핸들러를 먼저 실행해요. 핸들러가 처리하지 않으면 이전 화면으로 이동하고, 돌아갈 화면이 없으면 `closeView()`를 호출해요. 브라운필드 앱에서 기존 뒤로가기 핸들러를 거쳐 호스트 뷰를 닫을 때 사용할 수 있어요.
+`routeIndex`는 옵션을 계산하는 해당 route의 0부터 시작하는 스택 내 위치예요. 현재 활성 화면의 index와는 달라요. 같은 페이지를 다시 push해도 기존 route는 `0`, 새 인스턴스는 `1`이에요. 딥링크 진입, 복원된 상태, `replace`, `reset`에 따라 값이 결정돼요. 미리 로드한 화면처럼 아직 스택에 없는 route는 `-1`이에요.
 
-첫 화면은 특정 페이지 이름이나 현재 활성 화면이 아니라 현재 스택의 맨 아래 route를 의미해요. 딥링크 진입, 복원된 상태, `replace`, `reset`에도 해당 기준으로 적용해요. 같은 페이지를 다시 push해도 새 인스턴스에는 적용하지 않아요.
+`onBack`은 모든 route에 제공돼요. 등록된 뒤로가기 핸들러를 먼저 실행하고, 핸들러가 처리하지 않으면 이전 화면으로 이동해요. 돌아갈 화면이 없으면 `closeView()`를 호출해요. 눌렀을 때의 현재 navigation 상태를 사용하며, callback을 받은 route를 직접 제거하는 동작은 아니에요.
 
-옵션은 다음 순서로 합쳐지고, 뒤의 값이 우선해요.
-
-1. Granite 기본값
-2. `initialScreenOptions` (첫 route만)
-3. `defaultScreenOption`
-4. route의 `screenOptions`
-5. `navigation.setOptions`
-
-`headerLeft: undefined`나 `headerLeft: () => null`처럼 명시한 값도 유지해요. `initialScreenOptions`를 생략하면 기존 동작이 유지되며, 다른 화면의 기본 뒤로가기 버튼은 바뀌지 않아요.
+기존 객체형 옵션과 `route`, `navigation`만 사용하는 함수형 설정도 그대로 사용할 수 있어요. route의 `screenOptions`와 `navigation.setOptions`는 `defaultScreenOption`보다 우선하며, `headerLeft: undefined`나 `headerLeft: () => null`처럼 명시한 값도 유지해요. 명시적으로 덮어쓰지 않으면 Granite의 기본 뒤로가기 버튼도 유지돼요.
 
 ## 레퍼런스
 
