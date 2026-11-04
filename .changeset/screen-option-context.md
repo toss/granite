@@ -2,4 +2,4 @@
 '@granite-js/react-native': minor
 ---
 
-Extend router.defaultScreenOption callbacks with routeIndex and onBack. routeIndex identifies the route's position in the current stack, and onBack preserves registered back handlers before navigating back or closing the host view. Existing object options and callbacks remain supported.
+Add router.defaultScreenOptions with routeIndex and onBack callback arguments. routeIndex identifies each route's position in the stack, and onBack runs registered back handlers before navigating back or closing the host view. Keep defaultScreenOption as a deprecated alias with its original callback signature; TypeScript accepts only one option name at a time.

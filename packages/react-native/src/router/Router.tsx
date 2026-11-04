@@ -72,7 +72,35 @@ export interface InternalRouterProps {
   getInitialUrl?: RouterControlsConfig['getInitialUrl'];
 }
 
-export type RouterProps = StackNavigatorProps & NavigationContainerProps;
+type LegacyScreenOptions =
+  | NativeStackNavigationOptions
+  | ((props: { route: RouteProp<ParamListBase>; navigation: any }) => NativeStackNavigationOptions);
+
+type DefaultScreenOptions =
+  | NativeStackNavigationOptions
+  | ((props: {
+      route: RouteProp<ParamListBase>;
+      navigation: any;
+      /** Zero-based position of this route in the stack, not the focused index. -1 when not in the stack yet. */
+      routeIndex: number;
+      /** Runs registered back handlers before going back or closing the host view if no history remains. */
+      onBack: () => void;
+    }) => NativeStackNavigationOptions);
+
+type ScreenOptionsConfig =
+  | {
+      /** Default options for all screens. The callback can customize options by routeIndex. */
+      defaultScreenOptions?: DefaultScreenOptions;
+      /** @deprecated Use defaultScreenOptions instead. */
+      defaultScreenOption?: never;
+    }
+  | {
+      defaultScreenOptions?: never;
+      /** @deprecated Use defaultScreenOptions instead. Retains the original callback arguments. */
+      defaultScreenOption?: LegacyScreenOptions;
+    };
+
+export type RouterProps = StackNavigatorProps & NavigationContainerProps & ScreenOptionsConfig;
 
 interface StackNavigatorProps {
   /**
@@ -81,21 +109,6 @@ interface StackNavigatorProps {
    * You can create and pass a NavigationContainerRef from @react-navigation/native externally. This allows external control of the router.
    */
   navigationContainerRef?: NavigationContainerRefWithCurrent<never>;
-  /**
-   * @name defaultScreenOption
-   * @description
-   * Default options for screens. You can set options to be applied commonly to screens, such as title or headerStyle.
-   */
-  defaultScreenOption?:
-    | NativeStackNavigationOptions
-    | ((props: {
-        route: RouteProp<ParamListBase>;
-        navigation: any;
-        /** Zero-based position of this route in the stack, not the focused index. -1 when not in the stack yet. */
-        routeIndex: number;
-        /** Runs registered back handlers before going back or closing the host view if no history remains. */
-        onBack: () => void;
-      }) => NativeStackNavigationOptions);
   /**
    * @name screenContainer
    * @description
@@ -127,7 +140,7 @@ type NavigationContainerProps = Pick<
  * @param {string} prefix Prefix to use when the scheme is executed. For example, to enter 'scheme://my-service/intro', you need to set 'scheme://my-service' as the prefix.
  * @param {RequireContext} context Object containing information about screens for file-based routing.
  * @param {NavigationContainerRefWithCurrent<never>} [navigationContainerRef] You can create and pass a NavigationContainerRef from @react-navigation/native externally. This allows external control of the router.
- * @param {NativeStackNavigationOptions | ((props: { route: RouteProp<ParamListBase>; navigation: any; routeIndex: number; onBack: () => void }) => NativeStackNavigationOptions)} [defaultScreenOption] Default options for screens. You can set options to be applied commonly to screens, such as title or headerStyle.
+ * @param {NativeStackNavigationOptions | ((props: { route: RouteProp<ParamListBase>; navigation: any; routeIndex: number; onBack: () => void }) => NativeStackNavigationOptions)} [defaultScreenOptions] Default options for screens. You can set options to be applied commonly to screens, such as title or headerStyle.
  * @param {boolean} [canGoBack=true] Whether navigation back is possible. Default is true, and when set to true, you can use the back gesture or back button from @react-navigation/native.
  * @param {() => void} [onBack] Callback function called when the user presses the back button or uses the back gesture. For example, you can set it to log when the user presses the back button.
  * @param {ComponentType<{ children: ReactNode }>} [container=Fragment] Container component that wraps the Navigator from @react-navigation/native.
@@ -154,6 +167,7 @@ export function Router({
   initialScheme,
   // Public props (NavigationContainer)
   navigationContainerRef,
+  defaultScreenOptions,
   defaultScreenOption,
   screenContainer,
   defaultErrorComponent,
@@ -189,17 +203,21 @@ export function Router({
       ...BASE_STACK_NAVIGATOR_STYLE,
       gestureEnabled: canGoBack,
       headerLeft,
-      ...(typeof defaultScreenOption === 'function'
-        ? defaultScreenOption({
-            ...screenProps,
-            routeIndex: screenProps.navigation
-              .getState()
-              .routes.findIndex((route) => route.key === screenProps.route.key),
-            onBack: handler,
-          })
-        : defaultScreenOption),
+      ...(defaultScreenOptions !== undefined
+        ? typeof defaultScreenOptions === 'function'
+          ? defaultScreenOptions({
+              ...screenProps,
+              routeIndex: screenProps.navigation
+                .getState()
+                .routes.findIndex((route) => route.key === screenProps.route.key),
+              onBack: handler,
+            })
+          : defaultScreenOptions
+        : typeof defaultScreenOption === 'function'
+          ? defaultScreenOption(screenProps)
+          : defaultScreenOption),
     }),
-    [canGoBack, defaultScreenOption, headerLeft, handler]
+    [canGoBack, defaultScreenOptions, defaultScreenOption, headerLeft, handler]
   );
 
   const [isInitialScreen, setIsInitialScreen] = useState(true);
