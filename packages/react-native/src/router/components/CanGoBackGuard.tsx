@@ -90,7 +90,7 @@ export function CanGoBackGuard({
     <View
       style={{ flex: 1 }}
       collapsable={false}
-      onAccessibilityEscape={onBack ? () => onBack({ source: 'accessibilityEscape' }) : undefined}
+      onAccessibilityEscape={hasBackEvent && onBack ? () => onBack({ source: 'accessibilityEscape' }) : undefined}
     >
       {children}
     </View>

@@ -16,15 +16,15 @@ describe('CanGoBackGuard', () => {
     vi.restoreAllMocks();
   });
 
-  it.each([true, false])('passes accessibility escape events to onBack when hasBackEvent is %s', (hasBackEvent) => {
+  it('passes accessibility escape events to onBack while back events exist', () => {
     mockPlatformOS('ios');
 
     const onBack = vi.fn();
     const children = <div />;
     const { result } = renderHook(() =>
       CanGoBackGuard({
-        canGoBack: !hasBackEvent,
-        hasBackEvent,
+        canGoBack: false,
+        hasBackEvent: true,
         isInitialScreen: true,
         onBack,
         children,
@@ -40,13 +40,42 @@ describe('CanGoBackGuard', () => {
     expect(onBack).toHaveBeenCalledExactlyOnceWith({ source: 'accessibilityEscape' });
   });
 
+  it('registers the accessibility escape handler only while back events exist', () => {
+    mockPlatformOS('ios');
+
+    const onBack = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ hasBackEvent }) =>
+        CanGoBackGuard({
+          canGoBack: !hasBackEvent,
+          hasBackEvent,
+          isInitialScreen: true,
+          onBack,
+          children: <div />,
+        }),
+      { initialProps: { hasBackEvent: false } }
+    );
+
+    expect(result.current.props.onAccessibilityEscape).toBeUndefined();
+
+    rerender({ hasBackEvent: true });
+
+    result.current.props.onAccessibilityEscape();
+
+    expect(onBack).toHaveBeenCalledExactlyOnceWith({ source: 'accessibilityEscape' });
+
+    rerender({ hasBackEvent: false });
+
+    expect(result.current.props.onAccessibilityEscape).toBeUndefined();
+  });
+
   it('does not register an accessibility escape handler when onBack is absent', () => {
     mockPlatformOS('ios');
 
     const { result } = renderHook(() =>
       CanGoBackGuard({
-        canGoBack: true,
-        hasBackEvent: false,
+        canGoBack: false,
+        hasBackEvent: true,
         isInitialScreen: true,
         children: <div />,
       })
