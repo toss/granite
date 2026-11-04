@@ -10,7 +10,7 @@ import {
 import { useBackEventActionsContext } from './useBackEventActionsContext';
 import type { BackHandlerCallback } from './useBackHandler';
 
-export type BackEventSource = 'backButton' | 'iosSwipeGesture' | 'androidHardwareBackPress';
+export type BackEventSource = 'backButton' | 'iosSwipeGesture' | 'androidHardwareBackPress' | 'accessibilityEscape';
 
 export interface BackEvent {
   source: BackEventSource;
