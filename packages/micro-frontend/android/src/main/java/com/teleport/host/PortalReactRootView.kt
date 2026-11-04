@@ -2,22 +2,38 @@ package com.teleport.host
 
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactRootView
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.config.ReactFeatureFlags
 import com.facebook.react.uimanager.JSPointerDispatcher
 import com.facebook.react.uimanager.JSTouchDispatcher
+import com.facebook.react.uimanager.RootViewUtil
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.common.UIManagerType
 import com.facebook.react.uimanager.events.EventDispatcher
 
-class PortalReactRootView(
+/**
+ * Detached Fabric root that forwards touch and pointer events of the surface [surfaceId] through
+ * [reactHost]. It does not start another runtime or surface. Touches carry their position in the
+ * viewport, where `measure()` reports the teleported content they land on.
+ *
+ * @param updatesSurfaceLayout Whether measuring this root sets the layout constraints of the
+ *   surface. A root that covers the whole destination, like an Activity content view, keeps the
+ *   default. A root embedded in part of a screen passes `false`: the Portal already sizes its
+ *   content from the host, and several embedded roots would overwrite one another's constraints
+ *   and viewport offsets.
+ */
+class PortalReactRootView
+@JvmOverloads
+constructor(
   context: ThemedReactContext,
   private val reactHost: ReactHost,
   surfaceId: Int,
   private val moduleName: String,
+  private val updatesSurfaceLayout: Boolean = true,
 ) : ReactRootView(context) {
   private val touchDispatcher = JSTouchDispatcher(this)
   private val pointerDispatcher =
@@ -42,7 +58,15 @@ class PortalReactRootView(
     widthMeasureSpec: Int,
     heightMeasureSpec: Int,
   ) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    if (updatesSurfaceLayout) {
+      super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    } else {
+      // ReactRootView.onMeasure sends the specs to the surface, so size this view without it.
+      setMeasuredDimension(
+        getDefaultSize(suggestedMinimumWidth, widthMeasureSpec),
+        getDefaultSize(suggestedMinimumHeight, heightMeasureSpec),
+      )
+    }
 
     val childWidthSpec = MeasureSpec.makeMeasureSpec(measuredWidth, MeasureSpec.EXACTLY)
     val childHeightSpec = MeasureSpec.makeMeasureSpec(measuredHeight, MeasureSpec.EXACTLY)
@@ -68,7 +92,7 @@ class PortalReactRootView(
     ev: MotionEvent,
   ) {
     val dispatcher = eventDispatcher ?: return
-    touchDispatcher.onChildStartedNativeGesture(ev, dispatcher)
+    touchDispatcher.onChildStartedNativeGesture(ev, pageSpaceTouches(dispatcher))
     childView?.let {
       pointerDispatcher?.onChildStartedNativeGesture(it, ev, dispatcher)
     }
@@ -94,7 +118,36 @@ class PortalReactRootView(
 
   override fun dispatchJSTouchEvent(event: MotionEvent) {
     val dispatcher = eventDispatcher ?: return
-    touchDispatcher.handleTouchEvent(event, dispatcher, currentReactContext)
+    if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+      // Pressability measures the pressed view when a gesture starts. A host that moved with an
+      // ancestor or a scroll since it was last laid out has content that `measure()` still reports
+      // where it was, so bring it up to date before JS sees the touch.
+      notifyHostLayoutsChanged(this)
+    }
+    touchDispatcher.handleTouchEvent(event, pageSpaceTouches(dispatcher), currentReactContext)
+  }
+
+  /** Stops at each host: the views inside it are teleported content, not this root's own. */
+  private fun notifyHostLayoutsChanged(parent: ViewGroup) {
+    for (index in 0 until parent.childCount) {
+      when (val child = parent.getChildAt(index)) {
+        is PortalHostView -> child.notifyLayoutChanged()
+        is ViewGroup -> notifyHostLayoutsChanged(child)
+      }
+    }
+  }
+
+  /**
+   * `measure()` reports teleported content at its host's position in the viewport: the Portal
+   * transform puts it there, relative to a controller surface that runs detached or fills its window
+   * (see `PortalLayoutStateController`). Touches have to be reported in the same place, because
+   * Pressability cancels a press once a moving touch leaves the region `measure()` reported. A root
+   * away from the viewport origin, like one embedded in part of a screen, would otherwise report
+   * them off by its own position.
+   */
+  private fun pageSpaceTouches(dispatcher: EventDispatcher): EventDispatcher {
+    val pageOffset = RootViewUtil.getViewportOffset(this)
+    return PageSpaceTouchEventDispatcher(dispatcher, pageOffset.x.toFloat(), pageOffset.y.toFloat())
   }
 
   override fun dispatchJSPointerEvent(

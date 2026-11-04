@@ -109,7 +109,11 @@ using namespace facebook::react;
 - (void)layoutSubviews
 {
   [super layoutSubviews];
+  [self notifyLayoutChanged];
+}
 
+- (void)notifyLayoutChanged
+{
   if (self.registeredName) {
     [[PortalRegistry sharedInstance] notifyHostLayoutChangedWithName:self.registeredName];
   }
