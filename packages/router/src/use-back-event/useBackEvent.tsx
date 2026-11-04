@@ -247,7 +247,7 @@ export function useBackEventState() {
  * ```tsx
  * import { useEffect, useState } from 'react';
  * import { Alert, Button, View } from 'react-native';
- * import { useBackEvent } from '@granite-js/react-native';
+ * import { useBackEvent } from '@granite-js/router';
  *
  * export function UseBackEventExample() {
  *   const backEvent = useBackEvent();

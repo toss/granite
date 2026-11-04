@@ -28,7 +28,7 @@ export interface BackHandlerControls {
  * ```tsx
  * import { useEffect, useState } from 'react';
  * import { Button, View } from 'react-native';
- * import { useBackHandler } from '@granite-js/react-native';
+ * import { useBackHandler } from '@granite-js/router';
  *
  * export function OverlayExample() {
  *   const backHandler = useBackHandler();

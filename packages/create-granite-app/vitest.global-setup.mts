@@ -4,6 +4,7 @@ import { $ } from 'execa';
 const TARGET_PACKAGE_NAMES = [
   'create-granite-app',
   '@granite-js/react-native',
+  '@granite-js/router',
   '@granite-js/native',
   '@granite-js/mpack',
   '@granite-js/plugin-router',

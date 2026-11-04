@@ -454,9 +454,9 @@ navigation.dispatch(
 
 ## Render Router inside your app
 
-`Granite.registerApp` registers your component and supplies native initial props and visibility lifecycle. It does not create a router. Import the standalone `Router` from `@granite-js/react-native/router` and render it where navigation is needed. A routerless app can import registration APIs from `@granite-js/react-native/core` without loading React Navigation.
+`Granite.registerApp` registers your component and supplies native initial props and visibility lifecycle. It does not create a router. The implementation lives in `@granite-js/router`, a dependency of `@granite-js/react-native`. Import the host-aware `Router` adapter from `@granite-js/react-native/router` and render it where navigation is needed. A routerless app can import registration APIs from `@granite-js/react-native/core` without loading React Navigation.
 
-Router owns its NavigationContainer, native stack, safe-area provider, and back-handler scope. Each Router has independent navigation and back-handler state. You do not need to wrap it in a NavigationContainer or register it with Granite.
+Router owns its NavigationContainer, native stack, safe-area provider, and back-handler scope. Each Router has independent navigation and back-handler state. The adapter forwards host activity to the standalone package; the package does not import the registration runtime or host bridges. You do not need to wrap it in a NavigationContainer or register it with Granite.
 
 ```tsx
 import { useColorScheme } from 'react-native';
@@ -513,6 +513,12 @@ This is a breaking registration API change:
 - Move gesture callbacks and `screenContainer` / `defaultErrorComponent` to Router.
 - Move wrappers that use navigation/back hooks into `screenContainer` or page/layout components below Router. Providers used to compute options belong above Router.
 - Replace wrappers that clone the injected Navigator with `defaultScreenOptions` on Router.
+
+### Using the Router package independently
+
+Install `@granite-js/router` with compatible `@granite-js/native`, `react`, and `react-native` peers. Import `Router`, `createRoute`, and the navigation/back hooks directly from `@granite-js/router`; no Granite registration is required. The standalone Router uses AppState by default. Supply `isActive` when a host owns activity state.
+
+The existing root and `/router` exports in `@granite-js/react-native` share route definitions and back-handler contexts with the new package. New generated route types augment `@granite-js/router`; old declarations augmenting `@granite-js/react-native` remain supported. Add `@granite-js/router` as a direct app dependency when using the new generated declarations or direct imports.
 
 React Navigation remains the internal navigation engine. This change separates registration and Router composition; it does not replace the engine or the existing typed-route definition API.
 

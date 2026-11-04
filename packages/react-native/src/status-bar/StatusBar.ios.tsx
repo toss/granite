@@ -1,8 +1,8 @@
+import { useNavigation } from '@granite-js/router';
 import { useLayoutEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import type { StatusBarProps } from './types';
 import { toStatusBarContentStyle } from './utils';
-import { useNavigation } from '../router/createRoute';
 
 export function StatusBar(props: StatusBarProps) {
   useStatusBar(props);

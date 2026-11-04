@@ -1,5 +1,5 @@
 ---
-sourcePath: 'packages/react-native/src/router/components/BackButton.tsx'
+sourcePath: 'packages/router/src/router/components/BackButton.tsx'
 ---
 
 # BackButton

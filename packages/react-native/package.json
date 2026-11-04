@@ -135,9 +135,9 @@
     "@granite-js/config": "workspace:*",
     "@granite-js/jest": "workspace:*",
     "@granite-js/mpack": "workspace:*",
+    "@granite-js/router": "workspace:*",
     "@granite-js/style-utils": "workspace:*",
     "@granite-js/video": "workspace:*",
-    "@standard-schema/spec": "^1.0.0",
     "es-toolkit": "^1.39.8",
     "react-native-url-polyfill": "3.0.0"
   },

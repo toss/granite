@@ -454,9 +454,9 @@ navigation.dispatch(
 
 ## 앱 안에서 Router 렌더링하기
 
-`Granite.registerApp`은 앱 컴포넌트를 등록하고 네이티브 초기 props와 visibility 생명주기를 제공해요. Router는 자동으로 만들지 않아요. `@granite-js/react-native/router`에서 독립된 `Router`를 가져와 필요한 위치에서 렌더링하세요. 라우팅이 없는 앱은 `@granite-js/react-native/core`에서 등록 API를 가져와 React Navigation을 로드하지 않고 사용할 수 있어요.
+`Granite.registerApp`은 앱 컴포넌트를 등록하고 네이티브 초기 props와 visibility 생명주기를 제공해요. Router는 자동으로 만들지 않아요. 구현은 별도 `@granite-js/router` 패키지가 소유하고 `@granite-js/react-native`가 dependency로 가져요. 호스트와 연결된 `Router` adapter를 `@granite-js/react-native/router`에서 가져와 필요한 위치에서 렌더링하세요. 라우팅이 없는 앱은 `@granite-js/react-native/core`에서 등록 API를 가져와 React Navigation을 로드하지 않고 사용할 수 있어요.
 
-Router는 NavigationContainer, native stack, safe-area provider와 뒤로가기 핸들러 범위를 자체적으로 관리해요. 각 Router의 navigation 상태와 뒤로가기 핸들러는 독립적이에요. NavigationContainer로 감싸거나 Granite에 Router를 등록할 필요가 없어요.
+Router는 NavigationContainer, native stack, safe-area provider와 뒤로가기 핸들러 범위를 자체적으로 관리해요. 각 Router의 navigation 상태와 뒤로가기 핸들러는 독립적이에요. adapter가 호스트 activity를 전달하며 Router 패키지는 등록 런타임이나 호스트 bridge를 import하지 않아요. NavigationContainer로 감싸거나 Granite에 Router를 등록할 필요가 없어요.
 
 ```tsx
 import { useColorScheme } from 'react-native';
@@ -513,6 +513,12 @@ Router는 호스트 닫기 bridge를 직접 호출하지 않아요. 필요한 �
 - 제스처 callback, `screenContainer`, `defaultErrorComponent`는 Router에 전달하세요.
 - navigation/back 훅을 쓰는 래퍼는 Router 아래의 `screenContainer` 또는 페이지/레이아웃으로 옮기세요. 옵션 계산에 사용하는 Provider는 Router 위에 둬요.
 - 주입된 Navigator를 clone하는 래퍼는 Router의 `defaultScreenOptions`로 대체하세요.
+
+### Router 패키지만 사용하기
+
+호환되는 `@granite-js/native`, `react`, `react-native` peer와 함께 `@granite-js/router`를 설치하세요. `Router`, `createRoute`, navigation/back 훅을 `@granite-js/router`에서 직접 가져오면 Granite 등록 없이 사용할 수 있어요. 독립 Router는 기본적으로 AppState를 사용하고, 호스트가 activity를 관리한다면 `isActive`를 전달해요.
+
+기존 `@granite-js/react-native`의 루트와 `/router` 경로도 새 패키지와 같은 route 정의와 back-handler context를 공유해요. 새로 생성하는 route 타입은 `@granite-js/router`를 확장하고, 이전 `@granite-js/react-native` 타입 확장도 호환돼요. 새 생성 파일이나 직접 import를 사용한다면 앱 dependencies에 `@granite-js/router`를 추가하세요.
 
 내부 navigation 엔진은 React Navigation을 유지해요. 이번 변경은 앱 등록과 Router 구성을 분리하며, 엔진이나 기존 typed-route 정의 API를 교체하지 않아요.
 

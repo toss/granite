@@ -56,3 +56,8 @@ export function useVisibilityChanged(): boolean {
 
   return isVisible;
 }
+
+/** @internal */
+export function useOptionalVisibilityChanged(): boolean | undefined {
+  return useContext(VisibilityChangedContext);
+}

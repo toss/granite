@@ -1,12 +1,6 @@
 import { assertType, describe, it } from 'vitest';
 import { z } from 'zod';
-import {
-  createRoute,
-  useNavigation,
-  useParams,
-  useReplaceParams,
-  useSetParams,
-} from './createRoute';
+import { createRoute, useNavigation, useParams, useReplaceParams, useSetParams } from './createRoute';
 
 declare module './createRoute' {
   interface RegisterScreenInput {
