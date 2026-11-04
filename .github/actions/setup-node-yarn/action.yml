@@ -9,6 +9,14 @@ runs:
       with:
         node-version-file: .nvmrc
 
+    # `yarn build:all` runs a Gradle 8.14 wrapper, which cannot run on JDK 25
+    # (the default JDK on ubuntu-26.04 runners).
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
+
     - name: Setup Yarn
       run: corepack enable
       shell: bash
