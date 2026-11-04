@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useInitialProps } from './InitialPropsContext';
 import { getSearchParamsFromUrl } from './getSearchParamsFromUrl';
-import { getSchemeUri } from '../../native-modules';
+import { getSchemeUri } from '../../native-modules/natives/getSchemeUri';
 
 /**
  * @public

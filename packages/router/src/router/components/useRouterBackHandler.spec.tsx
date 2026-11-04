@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { useInternalRouterBackHandler } from './useRouterBackHandler';
 import { BackEventProvider, useBackEvent, useBackHandler } from '../../use-back-event';
 
-vi.mock('../../visibility', () => ({
+vi.mock('../../visibility/useVisibility', () => ({
   useVisibility: () => true,
 }));
 

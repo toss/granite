@@ -22,7 +22,7 @@ interface BackButtonProps extends TouchableOpacityProps {
  *
  * ```tsx
  * import { createNavigationContainerRef, useNavigation } from '@granite-js/native/@react-navigation/native';
- * import { BackButton, useRouterBackHandler } from '@granite-js/react-native';
+ * import { BackButton, useRouterBackHandler } from '@granite-js/router';
  * import { useEffect } from 'react';
  *
  * const navigationContainerRef = createNavigationContainerRef();

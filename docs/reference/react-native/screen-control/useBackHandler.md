@@ -1,5 +1,5 @@
 ---
-sourcePath: packages/react-native/src/use-back-event/useBackHandler.tsx
+sourcePath: packages/router/src/use-back-event/useBackHandler.tsx
 ---
 
 # useBackHandler

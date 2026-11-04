@@ -1,5 +1,5 @@
 ---
-sourcePath: 'packages/react-native/src/router/components/useRouterBackHandler.tsx'
+sourcePath: 'packages/router/src/router/components/useRouterBackHandler.tsx'
 ---
 
 # useRouterBackHandler

@@ -3,12 +3,16 @@ import { BackHandler, Platform } from 'react-native';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CanGoBackGuard } from './CanGoBackGuard';
 
+const visibility = vi.hoisted(() => ({ value: true }));
+vi.mock('../../visibility/useVisibility', () => ({ useVisibility: () => visibility.value }));
+
 function mockPlatformOS(os: typeof Platform.OS) {
   vi.spyOn(Platform, 'OS', 'get').mockReturnValue(os);
 }
 
 describe('CanGoBackGuard', () => {
   beforeEach(() => {
+    visibility.value = true;
     vi.mocked(BackHandler.addEventListener).mockClear();
   });
 
@@ -162,5 +166,52 @@ describe('CanGoBackGuard', () => {
     unmount();
 
     expect(setIosSwipeGestureEnabled).toHaveBeenLastCalledWith({ isEnabled: true });
+  });
+  it('handles Android root back through the injected action without a registered blocker', () => {
+    mockPlatformOS('android');
+    const onBack = vi.fn();
+    const view = render(
+      <CanGoBackGuard
+        canGoBack={true}
+        hasBackEvent={false}
+        hasRootBackAction={true}
+        isInitialScreen={true}
+        onBack={onBack}
+      >
+        <div />
+      </CanGoBackGuard>
+    );
+    const listener = vi.mocked(BackHandler.addEventListener).mock.calls.at(-1)![1];
+    expect(listener()).toBe(true);
+    expect(onBack).toHaveBeenCalledWith({ source: 'androidHardwareBackPress' });
+    vi.mocked(BackHandler.addEventListener).mockClear();
+    view.rerender(
+      <CanGoBackGuard
+        canGoBack={true}
+        hasBackEvent={false}
+        hasRootBackAction={true}
+        isInitialScreen={false}
+        onBack={onBack}
+      >
+        <div />
+      </CanGoBackGuard>
+    );
+    expect(BackHandler.addEventListener).not.toHaveBeenCalled();
+  });
+  it('does not intercept Android back for a hidden router', () => {
+    mockPlatformOS('android');
+    visibility.value = false;
+    render(
+      <CanGoBackGuard
+        canGoBack={true}
+        hasBackEvent={false}
+        hasRootBackAction={true}
+        isInitialScreen={true}
+        onBack={vi.fn()}
+      >
+        <div />
+      </CanGoBackGuard>
+    );
+    expect(BackHandler.addEventListener).not.toHaveBeenCalled();
   });
 });

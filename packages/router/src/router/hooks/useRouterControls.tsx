@@ -13,9 +13,9 @@ type NavigationContainerProps = ComponentProps<typeof NavigationContainer>;
 
 export interface RouterControlsConfig {
   prefix: string;
-  initialScheme: string;
+  initialUrl?: string;
   context: RequireContext;
-  getInitialUrl?: (initialScheme: string) => string | undefined | Promise<string | undefined>;
+  getInitialUrl?: (initialUrl?: string) => string | undefined | Promise<string | undefined>;
   screenContainer?: ComponentType<PropsWithChildren<any>>;
   defaultErrorComponent?: ErrorComponent;
 }
@@ -25,7 +25,7 @@ export function useRouterControls({
   context,
   screenContainer: ScreenContainer,
   getInitialUrl = defaultGetInitialUrl,
-  initialScheme,
+  initialUrl,
   defaultErrorComponent,
 }: RouterControlsConfig) {
   const routeScreens = useMemo(() => getRouteScreens(context), [context]);
@@ -77,19 +77,19 @@ export function useRouterControls({
         screens: getScreenPathMapConfig(registerScreens),
       },
       async getInitialURL() {
-        return (getInitialUrl ?? defaultGetInitialUrl)(initialScheme);
+        return (getInitialUrl ?? defaultGetInitialUrl)(initialUrl);
       },
     };
-  }, [initialScheme, prefix, registerScreens, getInitialUrl]);
+  }, [initialUrl, prefix, registerScreens, getInitialUrl]);
 
   return { Screens, linkingOptions };
 }
 
-function defaultGetInitialUrl(initialScheme: string) {
-  if (initialScheme == null) {
+function defaultGetInitialUrl(initialUrl?: string) {
+  if (initialUrl == null) {
     return;
   }
 
   /** @NOTE Korean paths need to be decoded. */
-  return decodeURI(initialScheme);
+  return decodeURI(initialUrl);
 }

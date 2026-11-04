@@ -24,14 +24,29 @@ export * from './keyboard';
 export * from './intersection-observer';
 export * from './impression-area';
 export * from './scroll-view-inertial-background';
-export * from './router/createRoute';
-export * from './router/hooks/useIsInitialScreen';
+export * from '@granite-js/router';
 export * from './event';
 export * from './video';
 export * from './status-bar';
 export * from '@granite-js/blur-view';
 
-export { BackButton, useRouterBackHandler } from './router';
+export { Router, BackButton, useRouterBackHandler } from './router';
 
 export type { InitialProps, ColorPreference } from './initial-props';
 export type { GraniteProps } from './app';
+
+export type { RouterProps } from './router';
+
+// Keep declarations emitted by earlier route generators connected to the owning package.
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface RegisterScreenInput {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface RegisterScreen {}
+type LegacyRegisterScreenInput = RegisterScreenInput;
+type LegacyRegisterScreen = RegisterScreen;
+declare module '@granite-js/router' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  interface RegisterScreenInput extends LegacyRegisterScreenInput {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  interface RegisterScreen extends LegacyRegisterScreen {}
+}

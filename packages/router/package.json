@@ -1,0 +1,58 @@
+{
+  "name": "@granite-js/router",
+  "version": "3.0.6",
+  "description": "Standalone file-based routing for React Native",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toss/granite.git",
+    "directory": "packages/router"
+  },
+  "main": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --no-watch --coverage",
+    "lint": "eslint .",
+    "prepack": "yarn build"
+  },
+  "dependencies": {
+    "@standard-schema/spec": "^1.0.0"
+  },
+  "peerDependencies": {
+    "@granite-js/native": "*",
+    "react": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "@granite-js/native": "workspace:*",
+    "@granite-js/vitest": "workspace:*",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "catalog:tools",
+    "@types/react": "catalog:react-native",
+    "@types/react-dom": "catalog:react-native",
+    "@vitest/coverage-v8": "^4.0.12",
+    "eslint": "^9.7.0",
+    "jsdom": "^25.0.1",
+    "react": "catalog:react-native",
+    "react-dom": "catalog:react-native",
+    "react-native": "catalog:react-native",
+    "typescript": "catalog:tools",
+    "vitest": "^4.0.12",
+    "zod": "^4.1.12"
+  },
+  "sideEffects": false
+}

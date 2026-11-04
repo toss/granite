@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { BackEventProvider, useBackEvent, useBackEventState } from './useBackEvent';
 
-vi.mock('../visibility', () => ({
+vi.mock('../visibility/useVisibility', () => ({
   useVisibility: () => true,
 }));
 

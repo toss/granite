@@ -452,6 +452,76 @@ navigation.dispatch(
 
 - Use `CommonActions.reset` to keep only a specific screen in the history and delete the rest of the screen history.
 
+## Render Router inside your app
+
+`Granite.registerApp` registers your component and supplies native initial props and visibility lifecycle. It does not create a router. The implementation lives in `@granite-js/router`, a dependency of `@granite-js/react-native`. Import the host-aware `Router` adapter from `@granite-js/react-native/router` and render it where navigation is needed. A routerless app can import registration APIs from `@granite-js/react-native/core` without loading React Navigation.
+
+Router owns its NavigationContainer, native stack, safe-area provider, and back-handler scope. Each Router has independent navigation and back-handler state. The adapter forwards host activity to the standalone package; the package does not import the registration runtime or host bridges. You do not need to wrap it in a NavigationContainer or register it with Granite.
+
+```tsx
+import { useColorScheme } from 'react-native';
+import { Granite, type InitialProps } from '@granite-js/react-native/core';
+import { Router, BackButton } from '@granite-js/react-native/router';
+import { closeView, getSchemeUri } from '@granite-js/react-native';
+import { context } from '../require.context';
+
+function App({ scheme }: InitialProps) {
+  const dark = useColorScheme() === 'dark';
+
+  return (
+    <Router
+      context={context}
+      prefix="example://app"
+      initialUrl={scheme}
+      getInitialUrl={(url) => url ?? getSchemeUri()}
+      onRootBack={closeView}
+      defaultScreenOptions={({ routeIndex, onBack }) => ({
+        headerTintColor: dark ? 'white' : 'black',
+        title: routeIndex === 0 ? 'Welcome' : 'Details',
+        ...(routeIndex === 0 && {
+          headerLeft: (props) => <BackButton {...props} onPress={onBack} />,
+        }),
+      })}
+    />
+  );
+}
+
+export default Granite.registerApp(App, { appName: 'example' });
+```
+
+For a custom theme, place a component that calls `useTheme()` below your ThemeProvider and render Router from that component. Call hooks in the parent component, never inside `defaultScreenOptions`. Changing the resulting options updates mounted screens without resetting the stack. Keep Router's React key and route component identities stable.
+
+`defaultScreenOptions` accepts an object or a function receiving the native-stack `route`, `navigation`, and `theme`, plus:
+
+- `routeIndex`: this route's zero-based position, not the currently focused index. Duplicate pushes have distinct positions. A preloaded route not yet in the stack has index `-1`.
+- `onBack`: runs registered back handlers, then goes back in the current navigation state or invokes `onRootBack` when no history remains. It does not directly remove the route that supplied the callback.
+
+Router never calls a host close bridge itself. Supply `onRootBack` to connect one. Without it, root back has no host action and no default root back button is shown. Android hardware back at the root uses the supplied action; host-specific iOS gesture controls can be supplied through `setIosSwipeGestureEnabled` and `setiOSBackPressHandler`.
+
+`initialUrl` and optional `getInitialUrl` resolve the entry URL on mount. Router does not infer them from a global app name or native bridge. Changing initial URL props does not navigate or reset an existing stack. Use navigation actions for subsequent navigation. `prefix` must match the URL scheme/host/path used by the app.
+
+The legacy `defaultScreenOption` spelling is a deprecated Router prop retaining its original callback arguments. TypeScript rejects specifying both names; untyped callers use the plural option without merging. Page `screenOptions` and existing `navigation.setOptions` retain precedence. Existing non-root back-button behavior is retained.
+
+### Migrating from automatic registration
+
+This is a breaking registration API change:
+
+- Move `context` and routing options from `Granite.registerApp` to `<Router>`.
+- Render Router instead of returning the injected `children`; registration no longer inserts a Navigator.
+- Replace registration's `initialScheme` with Router's `initialUrl`. Resolve function-based URLs in your app or `getInitialUrl`.
+- Supply an explicit `prefix`, and `onRootBack` when the host view should close.
+- Move gesture callbacks and `screenContainer` / `defaultErrorComponent` to Router.
+- Move wrappers that use navigation/back hooks into `screenContainer` or page/layout components below Router. Providers used to compute options belong above Router.
+- Replace wrappers that clone the injected Navigator with `defaultScreenOptions` on Router.
+
+### Using the Router package independently
+
+Install `@granite-js/router` with compatible `@granite-js/native`, `react`, and `react-native` peers. Import `Router`, `createRoute`, and the navigation/back hooks directly from `@granite-js/router`; no Granite registration is required. The standalone Router uses AppState by default. Supply `isActive` when a host owns activity state.
+
+The existing root and `/router` exports in `@granite-js/react-native` share route definitions and back-handler contexts with the new package. New generated route types augment `@granite-js/router`; old declarations augmenting `@granite-js/react-native` remain supported. Add `@granite-js/router` as a direct app dependency when using the new generated declarations or direct imports.
+
+React Navigation remains the internal navigation engine. This change separates registration and Router composition; it does not replace the engine or the existing typed-route definition API.
+
 ## References
 
 - [React Navigation Official Documentation](https://reactnavigation.org/)

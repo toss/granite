@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { GraniteEvent, GraniteEventDefinition } from './abstract';
-import { BackEventControls, useBackEvent } from '../use-back-event/useBackEvent';
+import { BackEventControls, useBackEvent } from '../use-back-event';
 
 class BackEvent extends GraniteEventDefinition<void, void> {
   name = 'backEvent' as const;

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useVisibility } from '../visibility';
 import type { BackEvent } from './useBackEvent';
 import { useBackEventContext } from './useBackEventContext';
+import { useVisibility } from '../visibility/useVisibility';
 
 export type BackHandlerCallback = (event: BackEvent) => boolean | void;
 
@@ -28,7 +28,7 @@ export interface BackHandlerControls {
  * ```tsx
  * import { useEffect, useState } from 'react';
  * import { Button, View } from 'react-native';
- * import { useBackHandler } from '@granite-js/react-native';
+ * import { useBackHandler } from '@granite-js/router';
  *
  * export function OverlayExample() {
  *   const backHandler = useBackHandler();

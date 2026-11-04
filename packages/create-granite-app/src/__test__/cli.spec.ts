@@ -40,6 +40,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     createGraniteAppPath,
     graniteReactNativePath,
     graniteNativePath,
+    graniteRouterPath,
     graniteMpackPath,
     granitePluginRouterPath,
     granitePluginHermesPath,
@@ -48,6 +49,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     findWorkspacePath(workspaceInfo, 'create-granite-app'),
     findWorkspacePath(workspaceInfo, '@granite-js/react-native'),
     findWorkspacePath(workspaceInfo, '@granite-js/native'),
+    findWorkspacePath(workspaceInfo, '@granite-js/router'),
     findWorkspacePath(workspaceInfo, '@granite-js/mpack'),
     findWorkspacePath(workspaceInfo, '@granite-js/plugin-router'),
     findWorkspacePath(workspaceInfo, '@granite-js/plugin-hermes'),
@@ -59,6 +61,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
       createGraniteAppPath &&
       graniteReactNativePath &&
       graniteNativePath &&
+      graniteRouterPath &&
       graniteMpackPath &&
       granitePluginRouterPath &&
       granitePluginHermesPath &&
@@ -87,6 +90,7 @@ const runTemplateTest = (toolType: ToolType, toolSpecificFiles: string[], option
     const packageJsonPath = path.join(manager.dir, appName, 'package.json');
     const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
     packageJson.dependencies['@granite-js/react-native'] = path.join(graniteReactNativePath, 'package.tgz');
+    packageJson.dependencies['@granite-js/router'] = path.join(graniteRouterPath, 'package.tgz');
     packageJson.dependencies['@granite-js/native'] = path.join(graniteNativePath, 'package.tgz');
     packageJson.devDependencies['@granite-js/mpack'] = path.join(graniteMpackPath, 'package.tgz');
     packageJson.devDependencies['babel-preset-granite'] = path.join(babelPresetGranitePath, 'package.tgz');

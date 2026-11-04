@@ -14,7 +14,7 @@ import { validateRouteParams } from './validateRouteParams';
  *
  * @example
  * ```tsx
- * import { getRouteScreens } from '@granite-js/react-native';
+ * import { getRouteScreens } from '@granite-js/router';
  *
  * const pageModules = import.meta.glob('./**' + '/*.{js,jsx,ts,tsx}', { base: './pages', eager: true });
  * const context = ((key: string) => pageModules[key]) as Parameters<typeof getRouteScreens>[0];

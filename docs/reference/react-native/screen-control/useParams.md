@@ -1,5 +1,5 @@
 ---
-sourcePath: packages/react-native/src/router/createRoute.ts
+sourcePath: packages/router/src/router/createRoute.ts
 ---
 
 # useParams

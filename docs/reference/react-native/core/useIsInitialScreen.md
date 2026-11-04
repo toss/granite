@@ -1,5 +1,5 @@
 ---
-sourcePath: packages/react-native/src/router/hooks/useIsInitialScreen.ts
+sourcePath: packages/router/src/router/hooks/useIsInitialScreen.ts
 ---
 
 # useIsInitialScreen

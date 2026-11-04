@@ -5,7 +5,7 @@ import { BackEventProvider } from './useBackEvent';
 import { useBackEventContext } from './useBackEventContext';
 import { useBackHandler } from './useBackHandler';
 
-vi.mock('../visibility', () => ({
+vi.mock('../visibility/useVisibility', () => ({
   useVisibility: () => true,
 }));
 

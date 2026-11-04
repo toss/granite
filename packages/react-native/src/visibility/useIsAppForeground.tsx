@@ -71,3 +71,9 @@ export const useIsAppForeground = (): boolean => {
    */
   return appState === 'active' || appState === 'inactive';
 };
+
+/** @internal */
+export function useOptionalIsAppForeground(): boolean | undefined {
+  const state = useContext(AppStateContext);
+  return state == null ? undefined : state === 'active' || state === 'inactive';
+}

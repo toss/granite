@@ -18,6 +18,7 @@ export default defineConfig({
   ],
   test: {
     environment: 'jsdom',
+    server: { deps: { inline: [/@react-navigation\//] } },
     include: ['src/**/*.spec.{ts,tsx}'],
     testTimeout: 600_000,
     hookTimeout: 600_000,

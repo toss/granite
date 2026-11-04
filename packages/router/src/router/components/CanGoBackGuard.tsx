@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from 'react';
 import { BackHandler, Platform } from 'react-native';
 import type { BackEvent } from '../../use-back-event';
+import { useVisibility } from '../../visibility/useVisibility';
 
 type SetIosSwipeGestureEnabled = ({ isEnabled }: { isEnabled: boolean }) => Promise<void> | void;
 
@@ -19,17 +20,21 @@ export function CanGoBackGuard({
   hasBackEvent,
   onBack,
   isInitialScreen,
+  hasRootBackAction = false,
   setIosSwipeGestureEnabled,
   setiOSBackPressHandler,
 }: {
   canGoBack: boolean;
   hasBackEvent: boolean;
   isInitialScreen: boolean;
+  hasRootBackAction?: boolean;
   children: ReactNode;
   onBack?: (event: BackEvent) => void;
   setIosSwipeGestureEnabled?: SetIosSwipeGestureEnabled;
   setiOSBackPressHandler?: SetIOSBackPressHandler;
 }) {
+  const isVisible = useVisibility();
+
   useEffect(() => {
     if (Platform.OS !== 'ios') {
       return;
@@ -47,11 +52,11 @@ export function CanGoBackGuard({
   }, [canGoBack, isInitialScreen, setIosSwipeGestureEnabled]);
 
   useEffect(() => {
-    if (Platform.OS !== 'android') {
+    if (Platform.OS !== 'android' || !isVisible) {
       return;
     }
 
-    if (!hasBackEvent) {
+    if (!hasBackEvent && !(isInitialScreen && hasRootBackAction)) {
       return;
     }
 
@@ -64,7 +69,7 @@ export function CanGoBackGuard({
     return () => {
       subscription.remove();
     };
-  }, [hasBackEvent, onBack]);
+  }, [hasBackEvent, hasRootBackAction, isInitialScreen, isVisible, onBack]);
 
   useEffect(() => {
     if (Platform.OS !== 'ios') {

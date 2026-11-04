@@ -1,9 +1,5 @@
 import { useContext, useMemo } from 'react';
-import {
-  BackEventActionsContext,
-  BackEventStateContext,
-  type PrivateBackEventControls,
-} from './BackEventContext';
+import { BackEventActionsContext, BackEventStateContext, type PrivateBackEventControls } from './BackEventContext';
 
 export function useBackEventContext() {
   const actions = useContext(BackEventActionsContext);

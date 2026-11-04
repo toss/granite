@@ -1,12 +1,18 @@
-import React, { type PropsWithChildren } from 'react';
-import { Granite, type InitialProps } from '@granite-js/react-native';
+import { Granite, type InitialProps } from '@granite-js/react-native/core';
+import { Router } from '@granite-js/react-native/router';
+import { closeView, getSchemeUri } from '@granite-js/react-native';
 import { context } from '../require.context';
 
-function AppContainer({ children }: PropsWithChildren<InitialProps>) {
-  return <>{children}</>;
+function App({ scheme }: InitialProps) {
+  return (
+    <Router
+      context={context}
+      prefix="granite://%%appName%%"
+      initialUrl={scheme}
+      getInitialUrl={(url) => url ?? getSchemeUri()}
+      onRootBack={closeView}
+    />
+  );
 }
 
-export default Granite.registerApp(AppContainer, {
-  appName: '%%appName%%',
-  context,
-});
+export default Granite.registerApp(App, { appName: '%%appName%%' });

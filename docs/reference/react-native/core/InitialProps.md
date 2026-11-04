@@ -46,20 +46,18 @@ type InitialProps = AndroidInitialProps | IOSInitialProps;
 ::: code-group
 
 ```tsx [_app.tsx]
-import { PropsWithChildren } from 'react';
-import { Granite, InitialProps } from '@granite-js/react-native';
-import { context } from '../require.context';
+import { Text } from 'react-native';
+import { Granite, InitialProps } from '@granite-js/react-native/core';
 
 const APP_NAME = 'my-app-name';
 
-function AppContainer({ children, ...initialProps }: PropsWithChildren<InitialProps>) {
+function AppContainer(initialProps: InitialProps) {
   console.log({ initialProps });
-  return <>{children}</>;
+  return <Text>{initialProps.initialColorPreference}</Text>;
 }
 
 export default Granite.registerApp(AppContainer, {
   appName: APP_NAME,
-  context,
 });
 ```
 
