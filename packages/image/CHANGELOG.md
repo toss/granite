@@ -1,5 +1,11 @@
 # @granite-js/image
 
+## 2.5.8
+
+### Patch Changes
+
+- 3b3265a: fix(android): cancel the provider request of an image view when `GraniteImage` replaces or clears it, and ignore progress and completion callbacks from replaced requests. Providers no longer keep replaced image views (and their Activity) after a recycled cell changes its URI, and stale requests no longer emit `onLoad`/`onError`/`onProgress` for the current image.
+
 ## 2.5.7
 
 ## 2.5.6
