@@ -8,6 +8,11 @@ object GraniteMicroFrontendRuntimeHost {
     fun registerSession(sessionId: String): GraniteMicroFrontendSessionRegistration =
         sessionStore.registerSession(sessionId)
 
+    /** The host supplies a fresh execution identity for each Activity binding lifetime. */
+    @JvmStatic
+    fun registerSession(sessionId: String, executionId: String): GraniteMicroFrontendSessionRegistration =
+        sessionStore.registerSession(sessionId, executionId)
+
     @JvmSynthetic
     internal fun emit(event: GraniteMicroFrontendEvent) = eventRouter.emit(event)
 

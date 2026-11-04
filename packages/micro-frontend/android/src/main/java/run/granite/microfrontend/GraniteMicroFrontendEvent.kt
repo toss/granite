@@ -21,6 +21,7 @@ sealed interface GraniteMicroFrontendEvent {
         val sessionId: String,
         val appName: String,
         val scheme: String,
+        val executionId: String? = null,
     ) : GraniteMicroFrontendEvent {
         override fun toWritableMap(): WritableMap = eventMap(
             name = "openApp",
@@ -28,16 +29,21 @@ sealed interface GraniteMicroFrontendEvent {
                 putString("sessionId", sessionId)
                 putString("appName", appName)
                 putString("scheme", scheme)
+                executionId?.let { putString("executionId", it) }
             },
         )
     }
 
     data class CloseApp(
         val sessionId: String,
+        val executionId: String? = null,
     ) : GraniteMicroFrontendEvent {
         override fun toWritableMap(): WritableMap = eventMap(
             name = "closeApp",
-            params = Arguments.createMap().apply { putString("sessionId", sessionId) },
+            params = Arguments.createMap().apply {
+                putString("sessionId", sessionId)
+                executionId?.let { putString("executionId", it) }
+            },
         )
     }
 

@@ -8,12 +8,13 @@ internal class GraniteMicroFrontendSessionStore(
     private val lock = Any()
     private val sessions = mutableMapOf<String, SessionEntry>()
 
-    fun registerSession(sessionId: String): GraniteMicroFrontendSessionRegistration {
+    fun registerSession(sessionId: String, executionId: String? = null): GraniteMicroFrontendSessionRegistration {
         require(sessionId.isNotBlank()) { "sessionId must not be blank" }
+        require(executionId == null || executionId.isNotBlank()) { "executionId must not be blank" }
         val token = java.util.UUID.randomUUID().toString()
         val liveSessions = synchronized(lock) {
             check(sessions[sessionId] == null) { "Session '$sessionId' is already registered" }
-            sessions[sessionId] = SessionEntry(token)
+            sessions[sessionId] = SessionEntry(token, executionId)
             sessions.size
         }
         FLog.d(TAG, "Registered session '%s' (%d live)", sessionId, liveSessions)
@@ -29,7 +30,7 @@ internal class GraniteMicroFrontendSessionStore(
                 return false
             }
             session.opened = true
-            emit(GraniteMicroFrontendEvent.OpenApp(sessionId, appName, scheme))
+            emit(GraniteMicroFrontendEvent.OpenApp(sessionId, appName, scheme, session.executionId))
             true
         }
     }
@@ -53,7 +54,7 @@ internal class GraniteMicroFrontendSessionStore(
                 return false
             }
             session.closed = true
-            emit(GraniteMicroFrontendEvent.CloseApp(sessionId))
+            emit(GraniteMicroFrontendEvent.CloseApp(sessionId, session.executionId))
             true
         }
     }
@@ -89,6 +90,7 @@ internal class GraniteMicroFrontendSessionStore(
 
     private data class SessionEntry(
         val token: String,
+        val executionId: String?,
         var opened: Boolean = false,
         var isVisible: Boolean = false,
         var closed: Boolean = false,

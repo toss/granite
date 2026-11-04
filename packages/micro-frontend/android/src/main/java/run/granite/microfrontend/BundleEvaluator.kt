@@ -57,22 +57,24 @@ internal class BundleEvaluator(
         runtimePointer: Long,
         filePath: String,
         sourceUrl: String,
+        executionId: String?,
     )
 
     private external fun evaluateScriptSync(
         runtimePointer: Long,
         scriptData: ByteArray,
         sourceUrl: String,
+        executionId: String?,
     )
 
     @Throws(FileNotFoundException::class, IOException::class)
-    fun evaluateFile(filePath: String) {
+    fun evaluateFile(filePath: String, executionId: String? = null) {
         val source = resolveBundleSource(reactContext.assets, filePath)
         val runtimePointer = reactContext.javaScriptContextHolder?.get()
             ?: throw IllegalStateException("JavaScript runtime is unavailable")
         when (source) {
-            is ResolvedBundleSource.Asset -> evaluateScriptSync(runtimePointer, source.scriptData, source.sourceUrl)
-            is ResolvedBundleSource.FilePath -> evaluateFileSync(runtimePointer, source.filePath, source.sourceUrl)
+            is ResolvedBundleSource.Asset -> evaluateScriptSync(runtimePointer, source.scriptData, source.sourceUrl, executionId)
+            is ResolvedBundleSource.FilePath -> evaluateFileSync(runtimePointer, source.filePath, source.sourceUrl, executionId)
         }
     }
 

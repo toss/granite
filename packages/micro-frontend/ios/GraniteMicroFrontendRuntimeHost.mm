@@ -37,6 +37,7 @@ static void GraniteMicroFrontendRequireMainThread(void) {
 
 @interface GraniteMicroFrontendSessionRegistration ()
 @property(nonatomic, copy) NSString *sessionId;
+@property(nonatomic, copy, nullable) NSString *executionId;
 @property(nonatomic, copy) NSString *token;
 @property(nonatomic, assign) BOOL invalidated;
 @end
@@ -76,7 +77,7 @@ static void GraniteMicroFrontendRequireMainThread(void) {
     [runtimeLock unlock];
   }
   if (shouldEmit) {
-    [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId appName:appName scheme:scheme];
+    [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId appName:appName scheme:scheme executionId:_executionId];
   }
 }
 
@@ -113,7 +114,7 @@ static void GraniteMicroFrontendRequireMainThread(void) {
     [runtimeLock unlock];
   }
   if (shouldEmit) {
-    [GraniteMicroFrontendRuntimeHost emitCloseApp:_sessionId];
+    [GraniteMicroFrontendRuntimeHost emitCloseApp:_sessionId executionId:_executionId];
   }
   return shouldEmit;
 }
@@ -328,6 +329,12 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 }
 
 + (nullable GraniteMicroFrontendSessionRegistration *)registerSession:(NSString *)sessionId {
+  return [self registerSession:sessionId executionId:nil];
+}
+
++ (nullable GraniteMicroFrontendSessionRegistration *)registerSession:(NSString *)sessionId
+                                                         executionId:(nullable NSString *)executionId {
+  NSParameterAssert(executionId == nil || executionId.length > 0);
   NSParameterAssert(sessionId.length > 0);
 
   NSString *token = NSUUID.UUID.UUIDString;
@@ -349,6 +356,7 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
       [[GraniteMicroFrontendSessionRegistration alloc] init];
   registration.sessionId = sessionId;
   registration.token = token;
+  registration.executionId = executionId;
   return registration;
 }
 
@@ -358,19 +366,21 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 
 + (void)emitOpenApp:(NSString *)sessionId
              appName:(NSString *)appName
-              scheme:(NSString *)scheme {
-  [self emitEvent:@{
-    @"name" : @"openApp",
-    @"params" : @{
-      @"sessionId" : sessionId,
-      @"appName" : appName,
-      @"scheme" : scheme,
-    },
-  }];
+              scheme:(NSString *)scheme
+         executionId:(nullable NSString *)executionId {
+  NSMutableDictionary *params = [@{ @"sessionId": sessionId, @"appName": appName, @"scheme": scheme } mutableCopy];
+  if (executionId != nil) {
+    params[@"executionId"] = executionId;
+  }
+  [self emitEvent:@{ @"name": @"openApp", @"params": params }];
 }
 
-+ (void)emitCloseApp:(NSString *)sessionId {
-  [self emitEvent:@{ @"name" : @"closeApp", @"params" : @{ @"sessionId" : sessionId } }];
++ (void)emitCloseApp:(NSString *)sessionId executionId:(nullable NSString *)executionId {
+  NSMutableDictionary *params = [@{ @"sessionId": sessionId } mutableCopy];
+  if (executionId != nil) {
+    params[@"executionId"] = executionId;
+  }
+  [self emitEvent:@{ @"name": @"closeApp", @"params": params }];
 }
 
 + (void)emitSessionVisibilityChanged:(NSString *)sessionId

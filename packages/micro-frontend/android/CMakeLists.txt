@@ -23,6 +23,7 @@ target_include_directories(
   granite-micro-frontend
   PRIVATE
   src/main/cpp
+  ../common/cpp
 )
 
 target_link_libraries(

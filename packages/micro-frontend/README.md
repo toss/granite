@@ -871,3 +871,13 @@ Apache-2.0. The Portal implementation is based on
 [react-native-teleport](https://github.com/kirillzyusko/react-native-teleport)
 by Kiryl Ziusko; see [NOTICE](NOTICE) and
 [LICENSE.react-native-teleport](LICENSE.react-native-teleport).
+
+## Experimental execution ownership
+
+The `executionOwnership` compiler option preserves opaque execution identities across supported async and callback boundaries. Hosts supply lifetime IDs and map them to native resources; this package does not depend on a registry implementation.
+
+The independent `rnexecution` C++ core is currently shipped with this native package. It owns runtime-local scope state and opaque snapshots, and restores the previous scope on normal and exceptional exits. A scope covers one synchronous execution segment: returning a Promise does not extend it until settlement. The JavaScript facade uses this backend after host installation, with a reference implementation available before installation and for non-native fixtures.
+
+The compiler lowers async functions and instruments supported global scheduler reads and native Promise methods. This feature does not replace global schedulers or `Promise.prototype` methods. Ordinary listener callbacks and user-defined methods are not indiscriminately wrapped. React renderer and native callback entry points use explicit adapters.
+
+The exercised renderer profile is React Native 0.84 Fabric. Top-level await is unsupported. Uninstrumented code, arbitrary dynamic property lookup, custom schedulers, and native event producer isolation require separate integration and validation. This is a bounded execution-context facility, not a complete `AsyncLocalStorage` compatibility implementation. Semantic equivalence and performance outside the tested paths remain under review.

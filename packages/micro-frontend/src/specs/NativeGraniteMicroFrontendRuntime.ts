@@ -3,6 +3,7 @@ import { type CodegenTypes, type TurboModule, TurboModuleRegistry } from 'react-
 export interface NativeMicroFrontendRuntimeEventParams {
   readonly appName?: string;
   readonly sessionId?: string;
+  readonly executionId?: string;
   readonly scheme?: string;
   readonly isVisible?: boolean;
 }
@@ -14,6 +15,7 @@ export interface NativeMicroFrontendRuntimeEvent {
 
 export type EvaluateScriptRequest = Readonly<{
   filePath: string;
+  executionId?: string;
 }>;
 
 export interface Spec extends TurboModule {

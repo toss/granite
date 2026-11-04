@@ -2,7 +2,7 @@ import type { MicroFrontendRuntimeEvent } from '../types';
 import type { NativeMicroFrontendRuntimeEvent } from './createMicroFrontendRuntime';
 import { InvalidNativeRuntimeEventError } from './errors';
 
-function requireString(event: NativeMicroFrontendRuntimeEvent, fieldName: 'appName' | 'scheme' | 'sessionId'): string {
+function requireString(event: NativeMicroFrontendRuntimeEvent, fieldName: 'appName' | 'scheme' | 'sessionId' | 'executionId'): string {
   const value = event.params[fieldName];
   if (typeof value !== 'string' || value.length === 0) {
     throw new InvalidNativeRuntimeEventError(event.name, fieldName);
@@ -25,13 +25,17 @@ export function parseNativeRuntimeEvent(event: NativeMicroFrontendRuntimeEvent):
           appName: requireString(event, 'appName'),
           scheme: requireString(event, 'scheme'),
           sessionId: requireString(event, 'sessionId'),
+          ...(event.params.executionId === undefined ? {} : { executionId: requireString(event, 'executionId') }),
         },
       };
 
     case 'closeApp':
       return {
         name: 'closeApp',
-        params: { sessionId: requireString(event, 'sessionId') },
+        params: {
+          sessionId: requireString(event, 'sessionId'),
+          ...(event.params.executionId === undefined ? {} : { executionId: requireString(event, 'executionId') }),
+        },
       };
 
     case 'sessionVisibilityChanged': {

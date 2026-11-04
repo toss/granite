@@ -1,5 +1,6 @@
 import { VisibilityChangedProvider } from '@granite-js/react-native';
-import { createContext, useContext, useMemo, type Context, type ReactElement, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useSyncExternalStore, type Context, type ReactElement, type ReactNode } from 'react';
+import { getExecutionSessions, SESSION_EXECUTION_TOKEN } from '../execution/sessions';
 import { getMicroFrontendGlobalContext, MicroFrontendGlobalContextCompatibilityError } from '../runtime/globalContext';
 
 export interface MicroFrontendSession {
@@ -41,11 +42,13 @@ export class MissingMicroFrontendSessionError extends Error {
 
 export function MicroFrontendSessionProvider(props: MicroFrontendSessionProviderProps): ReactElement {
   const MicroFrontendSessionContext = getSessionContext();
+  const executions = getExecutionSessions();
+  const subscribe = useCallback((listener: () => void) => executions.subscribe(props.sessionId, listener), [executions, props.sessionId]);
+  const getSnapshot = useCallback(() => executions.get(props.sessionId), [executions, props.sessionId]);
+  const execution = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   const value = useMemo<MicroFrontendSession>(
-    () => ({
-      sessionId: props.sessionId,
-    }),
-    [props.sessionId]
+    () => Object.defineProperty({ sessionId: props.sessionId }, SESSION_EXECUTION_TOKEN, { value: execution }),
+    [props.sessionId, execution]
   );
 
   return (
