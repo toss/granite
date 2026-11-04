@@ -1,5 +1,5 @@
-import { render } from '@testing-library/react';
-import { BackHandler, Platform } from 'react-native';
+import { render, renderHook } from '@testing-library/react';
+import { BackHandler, Platform, View } from 'react-native';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CanGoBackGuard } from './CanGoBackGuard';
 
@@ -14,6 +14,74 @@ describe('CanGoBackGuard', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('passes accessibility escape events to onBack while back events exist', () => {
+    mockPlatformOS('ios');
+
+    const onBack = vi.fn();
+    const children = <div />;
+    const { result } = renderHook(() =>
+      CanGoBackGuard({
+        canGoBack: false,
+        hasBackEvent: true,
+        isInitialScreen: true,
+        onBack,
+        children,
+      })
+    );
+
+    expect(result.current.type).toBe(View);
+    expect(result.current.props.collapsable).toBe(false);
+    expect(result.current.props.children).toBe(children);
+
+    result.current.props.onAccessibilityEscape();
+
+    expect(onBack).toHaveBeenCalledExactlyOnceWith({ source: 'accessibilityEscape' });
+  });
+
+  it('registers the accessibility escape handler only while back events exist', () => {
+    mockPlatformOS('ios');
+
+    const onBack = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ hasBackEvent }) =>
+        CanGoBackGuard({
+          canGoBack: !hasBackEvent,
+          hasBackEvent,
+          isInitialScreen: true,
+          onBack,
+          children: <div />,
+        }),
+      { initialProps: { hasBackEvent: false } }
+    );
+
+    expect(result.current.props.onAccessibilityEscape).toBeUndefined();
+
+    rerender({ hasBackEvent: true });
+
+    result.current.props.onAccessibilityEscape();
+
+    expect(onBack).toHaveBeenCalledExactlyOnceWith({ source: 'accessibilityEscape' });
+
+    rerender({ hasBackEvent: false });
+
+    expect(result.current.props.onAccessibilityEscape).toBeUndefined();
+  });
+
+  it('does not register an accessibility escape handler when onBack is absent', () => {
+    mockPlatformOS('ios');
+
+    const { result } = renderHook(() =>
+      CanGoBackGuard({
+        canGoBack: false,
+        hasBackEvent: true,
+        isInitialScreen: true,
+        children: <div />,
+      })
+    );
+
+    expect(result.current.props.onAccessibilityEscape).toBeUndefined();
   });
 
   it('passes Android hardware back events to onBack and consumes the native event', () => {

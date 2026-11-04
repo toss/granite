@@ -1,5 +1,5 @@
 import { ReactNode, useEffect } from 'react';
-import { BackHandler, Platform } from 'react-native';
+import { BackHandler, Platform, View } from 'react-native';
 import type { BackEvent } from '../../use-back-event';
 
 type SetIosSwipeGestureEnabled = ({ isEnabled }: { isEnabled: boolean }) => Promise<void> | void;
@@ -86,5 +86,13 @@ export function CanGoBackGuard({
     };
   }, [hasBackEvent, onBack, setiOSBackPressHandler]);
 
-  return <>{children}</>;
+  return (
+    <View
+      style={{ flex: 1 }}
+      collapsable={false}
+      onAccessibilityEscape={hasBackEvent && onBack ? () => onBack({ source: 'accessibilityEscape' }) : undefined}
+    >
+      {children}
+    </View>
+  );
 }
