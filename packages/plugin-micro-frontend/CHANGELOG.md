@@ -1,5 +1,12 @@
 # @granite-js/plugin-micro-frontend
 
+## 3.0.7
+
+### Patch Changes
+
+- @granite-js/plugin-core@3.0.7
+- @granite-js/utils@3.0.7
+
 ## 3.0.6
 
 ### Patch Changes
