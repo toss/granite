@@ -164,12 +164,14 @@ class GraniteImage(context: Context) : FrameLayout(context) {
             defaultSource = currentDefaultSource,
             progressCallback = { loaded, total ->
                 post {
-                    emitProgress(loaded.toInt(), total.toInt())
+                    if (containerView === imageView) emitProgress(loaded.toInt(), total.toInt())
                 }
             },
             completionCallback = { bitmap, error, width, height ->
                 post {
-                    handleLoadCompletion(bitmap, error, width, height, imageView, provider)
+                    if (containerView === imageView) {
+                        handleLoadCompletion(bitmap, error, width, height, imageView, provider)
+                    }
                 }
             }
         )
@@ -187,6 +189,7 @@ class GraniteImage(context: Context) : FrameLayout(context) {
 
     private fun clearContainerView() {
         containerView?.let {
+            providerResolver()?.cancelLoad(it)
             removeView(it)
             containerView = null
         }
@@ -277,10 +280,6 @@ class GraniteImage(context: Context) : FrameLayout(context) {
     }
 
     fun cleanup() {
-        val provider = providerResolver()
-        containerView?.let {
-            provider?.cancelLoad(it)
-        }
         clearContainerView()
         currentUri = null
     }
