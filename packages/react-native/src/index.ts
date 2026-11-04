@@ -31,7 +31,9 @@ export * from './video';
 export * from './status-bar';
 export * from '@granite-js/blur-view';
 
-export { BackButton, useRouterBackHandler } from './router';
+export { Router, BackButton, useRouterBackHandler } from './router';
 
 export type { InitialProps, ColorPreference } from './initial-props';
 export type { GraniteProps } from './app';
+
+export type { RouterProps } from './router';

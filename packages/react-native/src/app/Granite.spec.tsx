@@ -1,73 +1,62 @@
-import { render } from '@testing-library/react';
-import type { PropsWithChildren } from 'react';
-import { describe, expect, it, vi } from 'vitest';
-import type { InitialProps } from '../initial-props';
-import type { RequireContext } from '../router';
-import { Granite } from './Granite';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Granite, useInitialProps, type InitialProps } from '../core';
+import { useVisibilityChanged } from '../visibility/useVisibilityChanged';
 
-const visibilityState = vi.hoisted<{ value: boolean | null }>(() => ({ value: null }));
-
-vi.mock('./AppRoot', async () => {
-  const { VisibilityChangedProvider, useVisibilityChanged } = await import('../visibility/useVisibilityChanged');
-
-  function Consumer() {
-    visibilityState.value = useVisibilityChanged();
-    return null;
-  }
-
-  return {
-    AppRoot: () => (
-      <VisibilityChangedProvider isVisible={true}>
-        <Consumer />
-      </VisibilityChangedProvider>
-    ),
-  };
+vi.mock('@granite-js/native/@react-navigation/native', () => {
+  throw new Error('The registration core must not import React Navigation');
 });
-
-vi.mock('./HostAppRoot', () => ({
-  HostAppRoot: () => null,
-}));
-
 vi.mock('@granite-js/brownfield-module', () => ({
   GraniteBrownfieldModule: {
     onVisibilityChanged: () => ({ remove: () => undefined }),
+    getSchemeUri: () => {
+      throw new Error('Registration must not resolve the entry URL');
+    },
   },
 }));
+vi.mock('../polyfills', () => ({ setupPolyfills: () => undefined }));
 
-vi.mock('../constant-bridges', () => ({
-  getSchemeUri: () => 'granite://visibility-runtime-test',
-}));
+afterEach(cleanup);
 
-vi.mock('../polyfills', () => ({
-  setupPolyfills: () => undefined,
-}));
+function Content(props: InitialProps) {
+  const initialProps = useInitialProps();
+  const visible = useVisibilityChanged();
+  return (
+    <div>
+      {props.scheme}:{initialProps.initialColorPreference}:{String(visible)}
+    </div>
+  );
+}
 
-const context: RequireContext = Object.assign(
-  <T,>(id: string): T => {
-    throw new Error(`The route context is not used by this test: ${id}`);
-  },
-  {
-    id: 'visibility-runtime-test',
-    keys: () => [],
-    resolve: (id: string) => id,
-  }
-);
+describe('Granite.registerApp without routing', () => {
+  it('renders the app directly and supplies initial props without a route context or URL lookup', () => {
+    const Root = Granite.registerApp(Content, { appName: 'plain-app' });
+    render(<Root platform="android" initialColorPreference="dark" scheme="example://entry" />);
+    expect(screen.getByText('example://entry:dark:true')).toBeDefined();
+  });
 
-describe('Granite.registerApp', () => {
-  it('installs presentation visibility inside the registered remote app root', () => {
-    // Given
-    function AppContainer({ children }: PropsWithChildren<InitialProps>) {
-      return children;
-    }
-    const Root = Granite.registerApp(AppContainer, {
-      appName: 'visibility-runtime-test',
-      context,
-    });
+  it('preserves presentation visibility inside the registered app', () => {
+    const Root = Granite.registerApp(Content, { appName: 'hidden-app' });
+    const view = render(<Root platform="android" initialColorPreference="light" presentationVisibility={false} />);
+    expect(screen.getByText(':light:false')).toBeDefined();
+    view.rerender(<Root platform="android" initialColorPreference="light" presentationVisibility={true} />);
+    expect(screen.getByText(':light:true')).toBeDefined();
+  });
 
-    // When
-    render(<Root platform="android" initialColorPreference="light" presentationVisibility={false} />);
+  it('keeps initial props and visibility local to each registered app', () => {
+    const First = Granite.registerApp(Content, { appName: 'first-app' });
+    const Second = Granite.registerApp(Content, { appName: 'second-app' });
+    render(
+      <>
+        <First platform="android" initialColorPreference="dark" scheme="first" presentationVisibility={false} />
+        <Second platform="android" initialColorPreference="light" scheme="second" />
+      </>
+    );
+    expect(screen.getByText('first:dark:false')).toBeDefined();
+    expect(screen.getByText('second:light:true')).toBeDefined();
+  });
 
-    // Then
-    expect(visibilityState.value).toBe(false);
+  it('rejects old registration options with migration guidance for untyped callers', () => {
+    expect(() => Granite.registerApp(Content, { appName: 'old-app', router: {} } as any)).toThrow('Render Router');
   });
 });

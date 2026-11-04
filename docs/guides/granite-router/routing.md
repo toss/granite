@@ -452,33 +452,69 @@ navigation.dispatch(
 
 - Use `CommonActions.reset` to keep only a specific screen in the history and delete the rest of the screen history.
 
-## Screen options by stack position
+## Render Router inside your app
 
-The function form of `router.defaultScreenOptions` receives `{ route, navigation, routeIndex, onBack }`. Use `routeIndex` to configure options according to each route's position in the stack, including the entry screen.
+`Granite.registerApp` registers your component and supplies native initial props and visibility lifecycle. It does not create a router. Import the standalone `Router` from `@granite-js/react-native/router` and render it where navigation is needed. A routerless app can import registration APIs from `@granite-js/react-native/core` without loading React Navigation.
 
-Import `Granite` and `BackButton` from `@granite-js/react-native`:
+Router owns its NavigationContainer, native stack, safe-area provider, and back-handler scope. Each Router has independent navigation and back-handler state. You do not need to wrap it in a NavigationContainer or register it with Granite.
 
 ```tsx
-Granite.registerApp(App, {
-  appName: 'example',
-  context,
-  router: {
-    defaultScreenOptions: ({ routeIndex, onBack }) => ({
-      headerTintColor: 'black',
-      title: routeIndex === 0 ? 'Welcome' : 'Details',
-      ...(routeIndex === 0 && {
-        headerLeft: (props) => <BackButton {...props} onPress={onBack} />,
-      }),
-    }),
-  },
-});
+import { useColorScheme } from 'react-native';
+import { Granite, type InitialProps } from '@granite-js/react-native/core';
+import { Router, BackButton } from '@granite-js/react-native/router';
+import { closeView, getSchemeUri } from '@granite-js/react-native';
+import { context } from '../require.context';
+
+function App({ scheme }: InitialProps) {
+  const dark = useColorScheme() === 'dark';
+
+  return (
+    <Router
+      context={context}
+      prefix="example://app"
+      initialUrl={scheme}
+      getInitialUrl={(url) => url ?? getSchemeUri()}
+      onRootBack={closeView}
+      defaultScreenOptions={({ routeIndex, onBack }) => ({
+        headerTintColor: dark ? 'white' : 'black',
+        title: routeIndex === 0 ? 'Welcome' : 'Details',
+        ...(routeIndex === 0 && {
+          headerLeft: (props) => <BackButton {...props} onPress={onBack} />,
+        }),
+      })}
+    />
+  );
+}
+
+export default Granite.registerApp(App, { appName: 'example' });
 ```
 
-`routeIndex` is the zero-based position of the route whose options are being resolved, not the currently focused index. After pushing a second instance of the same page, the original route still has index `0` and the new instance has index `1`. The value follows deep-link entry, restored state, `replace`, and `reset`. A route not yet in the stack, such as a preloaded screen, has index `-1`.
+For a custom theme, place a component that calls `useTheme()` below your ThemeProvider and render Router from that component. Call hooks in the parent component, never inside `defaultScreenOptions`. Changing the resulting options updates mounted screens without resetting the stack. Keep Router's React key and route component identities stable.
 
-`onBack` is available for every route. It runs registered back handlers before navigating back, or calling `closeView()` when no navigation history remains. This uses the current navigation state when pressed; it does not remove the route whose options supplied the callback directly.
+`defaultScreenOptions` accepts an object or a function receiving the native-stack `route`, `navigation`, and `theme`, plus:
 
-`defaultScreenOptions` accepts an object or callback. The previous `defaultScreenOption` name remains supported as a deprecated alias with its original `{ route, navigation }` callback arguments. Use only one name; TypeScript rejects configurations that provide both. If untyped JavaScript supplies both, `defaultScreenOptions` takes precedence without merging them. Route-level `screenOptions` and `navigation.setOptions` retain precedence over `defaultScreenOptions`, including explicit `headerLeft: undefined` or `headerLeft: () => null` overrides. Granite's default back buttons remain unchanged unless explicitly overridden.
+- `routeIndex`: this route's zero-based position, not the currently focused index. Duplicate pushes have distinct positions. A preloaded route not yet in the stack has index `-1`.
+- `onBack`: runs registered back handlers, then goes back in the current navigation state or invokes `onRootBack` when no history remains. It does not directly remove the route that supplied the callback.
+
+Router never calls a host close bridge itself. Supply `onRootBack` to connect one. Without it, root back has no host action and no default root back button is shown. Android hardware back at the root uses the supplied action; host-specific iOS gesture controls can be supplied through `setIosSwipeGestureEnabled` and `setiOSBackPressHandler`.
+
+`initialUrl` and optional `getInitialUrl` resolve the entry URL on mount. Router does not infer them from a global app name or native bridge. Changing initial URL props does not navigate or reset an existing stack. Use navigation actions for subsequent navigation. `prefix` must match the URL scheme/host/path used by the app.
+
+The legacy `defaultScreenOption` spelling is a deprecated Router prop retaining its original callback arguments. TypeScript rejects specifying both names; untyped callers use the plural option without merging. Page `screenOptions` and existing `navigation.setOptions` retain precedence. Existing non-root back-button behavior is retained.
+
+### Migrating from automatic registration
+
+This is a breaking registration API change:
+
+- Move `context` and routing options from `Granite.registerApp` to `<Router>`.
+- Render Router instead of returning the injected `children`; registration no longer inserts a Navigator.
+- Replace registration's `initialScheme` with Router's `initialUrl`. Resolve function-based URLs in your app or `getInitialUrl`.
+- Supply an explicit `prefix`, and `onRootBack` when the host view should close.
+- Move gesture callbacks and `screenContainer` / `defaultErrorComponent` to Router.
+- Move wrappers that use navigation/back hooks into `screenContainer` or page/layout components below Router. Providers used to compute options belong above Router.
+- Replace wrappers that clone the injected Navigator with `defaultScreenOptions` on Router.
+
+React Navigation remains the internal navigation engine. This change separates registration and Router composition; it does not replace the engine or the existing typed-route definition API.
 
 ## References
 

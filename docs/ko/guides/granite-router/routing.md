@@ -452,33 +452,69 @@ navigation.dispatch(
 
 - `CommonActions.reset`으로 특정 화면만 기록에 남기고 나머지 화면 기록을 삭제할 수 있어요.
 
-## 스택 위치에 따라 화면 옵션 설정하기
+## 앱 안에서 Router 렌더링하기
 
-`router.defaultScreenOptions`의 함수형 설정은 `{ route, navigation, routeIndex, onBack }`을 받아요. `routeIndex`로 진입 화면을 포함한 각 route의 스택 위치에 따라 옵션을 설정할 수 있어요.
+`Granite.registerApp`은 앱 컴포넌트를 등록하고 네이티브 초기 props와 visibility 생명주기를 제공해요. Router는 자동으로 만들지 않아요. `@granite-js/react-native/router`에서 독립된 `Router`를 가져와 필요한 위치에서 렌더링하세요. 라우팅이 없는 앱은 `@granite-js/react-native/core`에서 등록 API를 가져와 React Navigation을 로드하지 않고 사용할 수 있어요.
 
-`@granite-js/react-native`에서 `Granite`와 `BackButton`을 가져와 사용해요.
+Router는 NavigationContainer, native stack, safe-area provider와 뒤로가기 핸들러 범위를 자체적으로 관리해요. 각 Router의 navigation 상태와 뒤로가기 핸들러는 독립적이에요. NavigationContainer로 감싸거나 Granite에 Router를 등록할 필요가 없어요.
 
 ```tsx
-Granite.registerApp(App, {
-  appName: 'example',
-  context,
-  router: {
-    defaultScreenOptions: ({ routeIndex, onBack }) => ({
-      headerTintColor: 'black',
-      title: routeIndex === 0 ? 'Welcome' : 'Details',
-      ...(routeIndex === 0 && {
-        headerLeft: (props) => <BackButton {...props} onPress={onBack} />,
-      }),
-    }),
-  },
-});
+import { useColorScheme } from 'react-native';
+import { Granite, type InitialProps } from '@granite-js/react-native/core';
+import { Router, BackButton } from '@granite-js/react-native/router';
+import { closeView, getSchemeUri } from '@granite-js/react-native';
+import { context } from '../require.context';
+
+function App({ scheme }: InitialProps) {
+  const dark = useColorScheme() === 'dark';
+
+  return (
+    <Router
+      context={context}
+      prefix="example://app"
+      initialUrl={scheme}
+      getInitialUrl={(url) => url ?? getSchemeUri()}
+      onRootBack={closeView}
+      defaultScreenOptions={({ routeIndex, onBack }) => ({
+        headerTintColor: dark ? 'white' : 'black',
+        title: routeIndex === 0 ? 'Welcome' : 'Details',
+        ...(routeIndex === 0 && {
+          headerLeft: (props) => <BackButton {...props} onPress={onBack} />,
+        }),
+      })}
+    />
+  );
+}
+
+export default Granite.registerApp(App, { appName: 'example' });
 ```
 
-`routeIndex`는 옵션을 계산하는 해당 route의 0부터 시작하는 스택 내 위치예요. 현재 활성 화면의 index와는 달라요. 같은 페이지를 다시 push해도 기존 route는 `0`, 새 인스턴스는 `1`이에요. 딥링크 진입, 복원된 상태, `replace`, `reset`에 따라 값이 결정돼요. 미리 로드한 화면처럼 아직 스택에 없는 route는 `-1`이에요.
+커스텀 테마를 사용한다면 ThemeProvider 아래의 컴포넌트에서 `useTheme()`을 호출하고, 해당 컴포넌트가 Router를 렌더링하도록 구성하세요. 훅은 부모 컴포넌트에서 호출하고 `defaultScreenOptions` 안에서는 호출하지 않아요. 계산된 옵션이 바뀌면 기존 스택과 화면 상태를 유지하면서 반영해요. Router의 React key와 route 컴포넌트 identity를 유지해야 해요.
 
-`onBack`은 모든 route에 제공돼요. 등록된 뒤로가기 핸들러를 먼저 실행하고, 핸들러가 처리하지 않으면 이전 화면으로 이동해요. 돌아갈 화면이 없으면 `closeView()`를 호출해요. 눌렀을 때의 현재 navigation 상태를 사용하며, callback을 받은 route를 직접 제거하는 동작은 아니에요.
+`defaultScreenOptions`는 객체 또는 함수를 받아요. 함수에는 native-stack의 `route`, `navigation`, `theme`와 다음 값이 전달돼요.
 
-`defaultScreenOptions`는 객체나 함수를 받을 수 있어요. 기존 `defaultScreenOption` 이름은 deprecated alias로 유지하고, callback 인자도 기존 `{ route, navigation }`을 유지해요. 두 이름 중 하나만 사용해야 하며, 동시에 지정하면 타입 오류가 발생해요. 타입 검사를 거치지 않는 JavaScript에서 둘 다 지정하면 병합 없이 `defaultScreenOptions`가 우선해요. route의 `screenOptions`와 `navigation.setOptions`는 `defaultScreenOptions`보다 우선하며, `headerLeft: undefined`나 `headerLeft: () => null`처럼 명시한 값도 유지해요. 명시적으로 덮어쓰지 않으면 Granite의 기본 뒤로가기 버튼도 유지돼요.
+- `routeIndex`: 현재 활성 index가 아닌 해당 route의 0부터 시작하는 스택 위치예요. 같은 페이지를 push해도 서로 다른 위치를 가지며, 아직 스택에 없는 preload route는 `-1`이에요.
+- `onBack`: 등록된 핸들러를 거친 뒤 현재 navigation 상태에서 뒤로 이동하거나, 돌아갈 화면이 없으면 `onRootBack`을 호출해요. callback을 받은 route를 직접 제거하지는 않아요.
+
+Router는 호스트 닫기 bridge를 직접 호출하지 않아요. 필요한 앱에서 `onRootBack`으로 연결하세요. 생략하면 루트에서 호스트 동작을 실행하지 않고 기본 루트 뒤로가기 버튼도 표시하지 않아요. Android hardware back도 루트에서 지정한 동작을 사용해요. 호스트의 iOS 제스처 제어는 `setIosSwipeGestureEnabled`, `setiOSBackPressHandler`로 주입할 수 있어요.
+
+`initialUrl`과 선택적인 `getInitialUrl`은 마운트 시 진입 URL을 결정해요. Router는 전역 앱 이름이나 네이티브 bridge에서 자동으로 읽지 않아요. 초기 URL props가 바뀌어도 기존 스택을 초기화하거나 이동하지 않으며, 이후 이동에는 navigation action을 사용해요. `prefix`는 앱에서 사용하는 URL의 scheme/host/path와 일치해야 해요.
+
+기존 단수형 `defaultScreenOption`은 원래 callback 인자를 유지하는 deprecated Router prop이에요. 두 이름을 함께 지정하면 타입 오류가 나고, 타입 검사 없는 호출에서는 복수형만 사용해요. 페이지 `screenOptions`와 기존 `navigation.setOptions`가 우선하며, 후속 화면의 기본 뒤로가기 버튼 동작은 유지해요.
+
+### 자동 등록 방식에서 마이그레이션하기
+
+앱 등록 API의 호환성이 깨지는 변경이에요.
+
+- `context`와 라우팅 설정을 `Granite.registerApp`에서 `<Router>`로 옮기세요.
+- 주입되던 `children`을 반환하는 대신 Router를 직접 렌더링하세요. 등록 함수가 Navigator를 넣어주지 않아요.
+- 등록 옵션의 `initialScheme`은 Router의 `initialUrl`로 옮기세요. 함수형 URL은 앱이나 `getInitialUrl`에서 계산하세요.
+- `prefix`를 명시하고, 호스트 화면을 닫아야 하면 `onRootBack`을 연결하세요.
+- 제스처 callback, `screenContainer`, `defaultErrorComponent`는 Router에 전달하세요.
+- navigation/back 훅을 쓰는 래퍼는 Router 아래의 `screenContainer` 또는 페이지/레이아웃으로 옮기세요. 옵션 계산에 사용하는 Provider는 Router 위에 둬요.
+- 주입된 Navigator를 clone하는 래퍼는 Router의 `defaultScreenOptions`로 대체하세요.
+
+내부 navigation 엔진은 React Navigation을 유지해요. 이번 변경은 앱 등록과 Router 구성을 분리하며, 엔진이나 기존 typed-route 정의 API를 교체하지 않아요.
 
 ## 레퍼런스
 

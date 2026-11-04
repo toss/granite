@@ -3,9 +3,11 @@ import type { NativeStackNavigationOptions } from '@granite-js/native/@react-nav
 import { assertType, describe, it } from 'vitest';
 import type { RouterProps } from './Router';
 
+type OptionsOnly<T> = T extends unknown ? Omit<T, 'context' | 'prefix'> : never;
+
 describe('Router screen option configuration', () => {
   it('infers routeIndex and onBack for the plural option', () => {
-    assertType<RouterProps>({
+    assertType<OptionsOnly<RouterProps>>({
       defaultScreenOptions: ({ routeIndex, onBack }) => {
         assertType<number>(routeIndex);
         assertType<() => void>(onBack);
@@ -20,11 +22,11 @@ describe('Router screen option configuration', () => {
       | ((props: { route: RouteProp<ParamListBase>; navigation: any }) => NativeStackNavigationOptions);
     const options: RouterProps['defaultScreenOption'] = ({ route }) => ({ title: route.name });
     assertType<LegacyResolver>(options);
-    assertType<RouterProps>({ defaultScreenOption: options });
+    assertType<OptionsOnly<RouterProps>>({ defaultScreenOption: options });
   });
 
   it('rejects specifying both option names', () => {
     // @ts-expect-error Only one option name may be configured.
-    assertType<RouterProps>({ defaultScreenOptions: {}, defaultScreenOption: {} });
+    assertType<OptionsOnly<RouterProps>>({ defaultScreenOptions: {}, defaultScreenOption: {} });
   });
 });

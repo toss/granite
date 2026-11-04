@@ -7,7 +7,7 @@ export const InitialPropsContext = createContext<InitialProps | null>(null);
  * @public
  * @name InitialPropsProvider
  * @category Core
- * @description Provides the initial data passed from the native platform (Android or iOS) to `useInitialProps` and `useInitialSearchParams`. `Granite.registerApp` already renders this provider, so you only need it when you register the root component yourself instead of going through the router.
+ * @description Provides the initial data passed from the native platform (Android or iOS) to `useInitialProps` and `useInitialSearchParams`. `Granite.registerApp` already renders this provider, so you only need it when you register the root component yourself instead of using Granite.registerApp.
  * @param {InitialProps} initialProps - Initial data the native platform passed to the root component.
  * @param {ReactNode | undefined} children - Child components that read the initial data.
  * @returns {ReactElement} A React Provider component.

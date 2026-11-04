@@ -1,5 +1,4 @@
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useVisibility } from '../visibility';
 import {
   BackEventActionsContext,
   BackEventStateContext,
@@ -9,6 +8,7 @@ import {
 } from './BackEventContext';
 import { useBackEventActionsContext } from './useBackEventActionsContext';
 import type { BackHandlerCallback } from './useBackHandler';
+import { useVisibility } from '../visibility/useVisibility';
 
 export type BackEventSource = 'backButton' | 'iosSwipeGesture' | 'androidHardwareBackPress';
 

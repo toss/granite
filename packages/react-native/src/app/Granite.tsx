@@ -2,10 +2,8 @@ import { ComponentType, type JSX, PropsWithChildren } from 'react';
 import { AppRegistry } from 'react-native';
 import { ENTRY_BUNDLE_NAME } from '../constants';
 import type { InitialProps } from '../initial-props';
-import type { RouterProps, RequireContext, SetIOSBackPressHandler } from '../router';
 import { AppRoot } from './AppRoot';
 import { HostAppRoot } from './HostAppRoot';
-import { getSchemeUri } from '../constant-bridges';
 import { setupPolyfills } from '../polyfills';
 import { VisibilityChangedProvider } from '../visibility/useVisibilityChanged';
 
@@ -16,52 +14,8 @@ interface GraniteAppRuntimeProps {
 type RegisteredAppProps = InitialProps & GraniteAppRuntimeProps;
 
 export interface GraniteProps {
-  /**
-   * @description
-   * The name of the app.
-   */
+  /** The name registered with the native app registry. */
   appName: string;
-  /**
-   * @description
-   * The context of the app.
-   *
-   * @TODO Hide context
-   */
-  context: RequireContext;
-  /**
-   * @description
-   * Configuration object to be passed to the router.
-   */
-  router?: RouterProps;
-
-  /**
-   * @description
-   * The initial scheme of the app.
-   */
-  initialScheme?: string | (() => string);
-
-  /**
-   * @description
-   * The function to set the iOS swipe gesture enabled.
-   */
-  setIosSwipeGestureEnabled?: ({ isEnabled }: { isEnabled: boolean }) => void;
-
-  /**
-   * @description
-   * The function to register a handler that runs when the iOS swipe back gesture is detected.
-   * Called with empty params (`{}`, no `handler`) when the handler should be unset — in
-   * that case the implementation must initialize the registered handler to `null`
-   * (e.g. call `unsetBackPressHandler()`), not keep an empty function registered.
-   */
-  setiOSBackPressHandler?: SetIOSBackPressHandler;
-
-  /**
-   * @description
-   * The function to provide the initial URL to router.
-   * @param initialScheme The initial scheme of the app.
-   * @returns
-   */
-  getInitialUrl?: (initialScheme: string) => string | undefined | Promise<string | undefined>;
 }
 
 const createApp = () => {
@@ -81,37 +35,22 @@ const createApp = () => {
   return {
     registerApp(
       AppContainer: ComponentType<PropsWithChildren<InitialProps>>,
-      {
-        appName,
-        context,
-        router,
-        initialScheme,
-        setIosSwipeGestureEnabled,
-        setiOSBackPressHandler,
-        getInitialUrl,
-      }: GraniteProps
+      options: GraniteProps
     ): (initialProps: RegisteredAppProps) => JSX.Element {
+      const { appName } = options;
+      if (Object.keys(options).some((key) => key !== 'appName')) {
+        throw new Error(
+          'Granite.registerApp only accepts appName. Render Router in your app and pass routing options to it.'
+        );
+      }
       if (appName === ENTRY_BUNDLE_NAME) {
         throw new Error(`Reserved app name 'shared' cannot be used`);
       }
 
       function Root({ presentationVisibility = true, ...initialProps }: RegisteredAppProps) {
-        const initialSchemeValue =
-          (typeof initialScheme === 'function' ? initialScheme() : initialScheme) ?? getSchemeUri();
-
         return (
           <VisibilityChangedProvider isVisible={presentationVisibility}>
-            <AppRoot
-              container={AppContainer}
-              initialProps={initialProps}
-              initialScheme={initialSchemeValue}
-              setIosSwipeGestureEnabled={setIosSwipeGestureEnabled}
-              setiOSBackPressHandler={setiOSBackPressHandler}
-              getInitialUrl={getInitialUrl}
-              appName={appName}
-              context={context}
-              router={router}
-            />
+            <AppRoot container={AppContainer} initialProps={initialProps} />
           </VisibilityChangedProvider>
         );
       }
@@ -153,34 +92,17 @@ const createApp = () => {
  * @public
  * @category Core
  * @name Granite
- * @description
- *
- * @property {RegisterService} registerApp - This function sets up the basic environment for your service and helps you start service development quickly without needing complex configuration. By just passing `appName`, you can immediately use various features such as file-based routing, query parameter handling, and back navigation control.
- *
- * The features provided by the `Granite.registerApp` function are as follows:
- * - Routing: URLs are automatically mapped according to file paths. It works similarly to Next.js's file-based routing. For example, the `/my-service/pages/index.ts` file can be accessed at `scheme://my-service`, and the `/my-service/pages/home.ts` file can be accessed at `scheme://my-service/home`.
- * - Query Parameters: You can easily use query parameters received through URL schemes. For example, you can receive a `referrer` parameter and log it.
- * - Back Navigation Control: You can control back navigation events. For example, when a user presses back on a screen, you can show a dialog or close the screen.
- * - Screen Visibility: You can determine whether a screen is visible or hidden from the user. For example, you can use this value to handle specific actions when a user leaves for the home screen.
- *
+ * @description Registers an app with native initial props and visibility lifecycle.
+ * Routing is optional: render Router explicitly inside the app when navigation is needed.
  * @example
- *
- * ### Example of creating with the `Granite` component
- *
  * ```tsx
- * import { PropsWithChildren } from 'react';
- * import { Granite, InitialProps } from '@granite-js/react-native';
- * import { context } from '../require.context';
+ * import { Granite, type InitialProps } from '@granite-js/react-native/core';
  *
- * function AppContainer({ children }: PropsWithChildren<InitialProps>) {
- *  return <>{children}</>;
+ * function App(props: InitialProps) {
+ *   return <MyContent colorPreference={props.initialColorPreference} />;
  * }
  *
- * export default Granite.registerApp(AppContainer, {
- *  appName: 'my-app',
- *  context,
- * });
- *
+ * export default Granite.registerApp(App, { appName: 'my-app' });
  * ```
  */
 export const Granite = createApp();

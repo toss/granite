@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { VisibilityProvider } from '../../visibility';
+import { VisibilityProvider } from '../../visibility/VisibilityProvider';
 import { Props } from '.';
 
 type IOSInitialProps = Props & {
