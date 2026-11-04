@@ -1,5 +1,13 @@
 # @granite-js/native
 
+## 3.0.7
+
+### Patch Changes
+
+- @granite-js/image@3.0.7
+- @granite-js/lottie@3.0.7
+- @granite-js/video@3.0.7
+
 ## 3.0.6
 
 ### Patch Changes
