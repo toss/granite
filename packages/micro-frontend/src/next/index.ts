@@ -61,6 +61,16 @@ function sharedModules(external: ReadonlySet<string>): Plugin {
 
   return {
     name: 'granite:micro-frontend:shared-modules',
+    // Fails the remote bundle before any module runs when the host did not register a shared module
+    // the bundle uses. Without this, the check runs only when a facade is first required, which can
+    // be much later when the bundler defers imports until their first use.
+    intro(chunk) {
+      const names = chunk.moduleIds
+        .filter((id) => id.startsWith(SHARED))
+        .map((id) => id.slice(SHARED.length))
+        .sort();
+      return names.length === 0 ? '' : createSharedModuleCheck(names);
+    },
     resolveId: {
       filter: { id: externalPattern },
       handler(source) {
@@ -89,6 +99,17 @@ function sharedModules(external: ReadonlySet<string>): Plugin {
       },
     },
   };
+}
+
+function createSharedModuleCheck(names: readonly string[]): string {
+  return [
+    '(function (names) {',
+    '  var registry = globalThis.__MICRO_FRONTEND__ && globalThis.__MICRO_FRONTEND__.__SHARED__;',
+    '  for (var i = 0; i < names.length; i++) {',
+    "    if (registry == null || registry[names[i]] == null) throw new Error('Shared module ' + names[i] + ' is not registered');",
+    '  }',
+    `})(${JSON.stringify(names)});`,
+  ].join('\n');
 }
 
 function dispose(appName: string): Plugin {

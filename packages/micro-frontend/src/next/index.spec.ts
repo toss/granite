@@ -26,6 +26,28 @@ describe('microFrontend plugin', () => {
     expect(shared).not.toHaveProperty('transform');
   });
 
+  it('checks the shared modules a remote bundle uses before the bundle runs', async () => {
+    const plugins = await flattenPluginOption(
+      microFrontend({ appName: 'remote-app', shared: { lodash: {}, 'date-fns': {}, unused: {} } })
+    );
+    const shared = getPlugin(plugins, 'granite:micro-frontend:shared-modules');
+    if (typeof shared.intro !== 'function') {
+      throw new Error('Missing intro hook');
+    }
+    const chunk = { moduleIds: ['/app/src/App.tsx', '\0granite:shared:lodash', '\0granite:shared:date-fns'] };
+    const intro = String(await shared.intro.call({} as never, chunk as never));
+    expect(intro).toContain('["date-fns","lodash"]');
+    expect(intro).not.toContain('unused');
+
+    const run = (registry: Record<string, unknown>) =>
+      new Function('globalThis', intro)({ __MICRO_FRONTEND__: { __SHARED__: registry } });
+    expect(() => run({ lodash: {}, 'date-fns': {} })).not.toThrow();
+    expect(() => run({ lodash: {} })).toThrow('Shared module date-fns is not registered');
+
+    const noShared = { moduleIds: ['/app/src/App.tsx'] };
+    expect(await shared.intro.call({} as never, noShared as never)).toBe('');
+  });
+
   it('omits the shared-module plugin when every shared module is eager', async () => {
     const plugins = await flattenPluginOption(
       microFrontend({ appName: 'remote-app', shared: { react: { eager: true } } })
