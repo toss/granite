@@ -12,6 +12,43 @@ import kotlin.concurrent.thread
 
 class GraniteMicroFrontendSessionStoreTest {
     @Test
+    fun `open app carries each session key and the common root key`() {
+        val events = mutableListOf<GraniteMicroFrontendEvent>()
+        val store = GraniteMicroFrontendSessionStore(events::add)
+        val shopping = store.registerSession("shopping-1")
+        val mission = store.registerSession("mission-1")
+
+        assertTrue(shopping.openApp("shopping", "granite://shopping", "key-shopping", "key-root"))
+        assertTrue(mission.openApp("mission", "granite://mission", "key-mission", "key-root"))
+        assertFalse(shopping.openApp("shopping", "granite://shopping", "replacement-key", "replacement-root"))
+
+        assertEquals(
+            listOf(
+                GraniteMicroFrontendEvent.OpenApp("shopping-1", "shopping", "granite://shopping", "key-shopping", "key-root"),
+                GraniteMicroFrontendEvent.OpenApp("mission-1", "mission", "granite://mission", "key-mission", "key-root"),
+            ),
+            events,
+        )
+    }
+
+    @Test
+    fun `stale registration cannot emit keys after the session id is reused`() {
+        val events = mutableListOf<GraniteMicroFrontendEvent>()
+        val store = GraniteMicroFrontendSessionStore(events::add)
+        val previous = store.registerSession("shopping-1")
+        previous.close()
+        val replacement = store.registerSession("shopping-1")
+
+        assertFalse(previous.openApp("shopping", "granite://shopping", "old-key", "key-root"))
+        assertTrue(replacement.openApp("shopping", "granite://shopping", "new-key", "key-root"))
+
+        assertEquals(
+            listOf(GraniteMicroFrontendEvent.OpenApp("shopping-1", "shopping", "granite://shopping", "new-key", "key-root")),
+            events,
+        )
+    }
+
+    @Test
     fun `session emits open visible close in native lifecycle order`() {
         val events = mutableListOf<GraniteMicroFrontendEvent>()
         val store = GraniteMicroFrontendSessionStore(events::add)

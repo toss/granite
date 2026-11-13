@@ -28,6 +28,10 @@ export type MicroFrontendRuntimeEvent =
         readonly sessionId: string;
         readonly appName: string;
         readonly scheme: string;
+        /** Opaque registry binding issued by the native host for this session. */
+        readonly key?: string;
+        /** Default host registry binding for calls outside any service scope. */
+        readonly rootKey?: string;
       };
     }
   | {
@@ -52,6 +56,8 @@ export interface MicroFrontendSessionState {
   readonly appName: string;
   readonly sessionId: string;
   readonly scheme: string;
+  readonly key?: string;
+  readonly rootKey?: string;
   readonly isVisible: boolean;
 }
 

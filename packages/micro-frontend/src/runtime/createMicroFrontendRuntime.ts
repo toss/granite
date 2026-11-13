@@ -22,6 +22,8 @@ export interface NativeMicroFrontendRuntimeEvent {
     readonly appName?: string;
     readonly sessionId?: string;
     readonly scheme?: string;
+    readonly key?: string;
+    readonly rootKey?: string;
     readonly isVisible?: boolean;
   };
 }

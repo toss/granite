@@ -20,7 +20,14 @@ internal class GraniteMicroFrontendSessionStore(
         return GraniteMicroFrontendSessionRegistration(this, sessionId, token)
     }
 
-    fun openApp(sessionId: String, token: String, appName: String, scheme: String): Boolean {
+    fun openApp(
+        sessionId: String,
+        token: String,
+        appName: String,
+        scheme: String,
+        key: String? = null,
+        rootKey: String? = null,
+    ): Boolean {
         require(appName.isNotBlank()) { "appName must not be blank" }
         require(scheme.isNotBlank()) { "scheme must not be blank" }
         return synchronized(lock) {
@@ -29,7 +36,7 @@ internal class GraniteMicroFrontendSessionStore(
                 return false
             }
             session.opened = true
-            emit(GraniteMicroFrontendEvent.OpenApp(sessionId, appName, scheme))
+            emit(GraniteMicroFrontendEvent.OpenApp(sessionId, appName, scheme, key, rootKey))
             true
         }
     }
@@ -104,7 +111,9 @@ class GraniteMicroFrontendSessionRegistration internal constructor(
     private val sessionId: String,
     private val token: String,
 ) : AutoCloseable {
-    fun openApp(appName: String, scheme: String): Boolean = store.openApp(sessionId, token, appName, scheme)
+    @JvmOverloads
+    fun openApp(appName: String, scheme: String, key: String? = null, rootKey: String? = null): Boolean =
+        store.openApp(sessionId, token, appName, scheme, key, rootKey)
 
     fun setVisible(isVisible: Boolean): Boolean = store.setVisible(sessionId, token, isVisible)
 
