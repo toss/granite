@@ -4,7 +4,7 @@ import { CONTAINER_PAIRING_KEY } from '../runtime/containerPairing';
 import { toLegacyEsm } from '../runtime/legacyEsm';
 import type { SharedConfig } from '../runtime/registry';
 import { captureStackFrames, resolveCurrentSourceURL } from '../runtime/runtimeSourceURL';
-import { registerSharedValue } from '../runtime/sharedModule';
+import { registerLazySharedValue, registerSharedValue } from '../runtime/sharedModule';
 
 interface MicroFrontendPreludeOptions {
   readonly shared?: SharedConfig | readonly string[];
@@ -20,7 +20,11 @@ export function getPreludeConfig(options: MicroFrontendPreludeOptions, appName?:
   const eagerSharedModules = Object.entries(options.shared ?? {}).filter(
     ([, config]) => !Array.isArray(options.shared) && config.eager === true
   );
-  const registerStatements = eagerSharedModules.map(([moduleName], index) => {
+  const registerStatements = eagerSharedModules.map(([moduleName, config], index) => {
+    if (config.lazy === true) {
+      // `require` inside the loader defers evaluation to the first get(); an `import *` would run it now.
+      return `registerLazyShared(${JSON.stringify(moduleName)}, function () { return require(${JSON.stringify(moduleName)}); });`;
+    }
     const identifier = `__shared${index}`;
     return [
       `import * as ${identifier} from ${JSON.stringify(moduleName)};`,
@@ -171,9 +175,16 @@ export function getPreludeConfig(options: MicroFrontendPreludeOptions, appName?:
       '}',
       `const toLegacyEsm = ${toLegacyEsm.toString()};`,
       `const registerSharedValue = ${registerSharedValue.toString()};`,
+      `const registerLazySharedValue = ${registerLazySharedValue.toString()};`,
       'function registerShared(moduleName, moduleValue) {',
       '  const sharedModules = global.__MICRO_FRONTEND__.__SHARED__;',
       '  if (!registerSharedValue(sharedModules, moduleName, moduleValue, toLegacyEsm)) {',
+      "    throw new Error(`Shared module '${moduleName}' is already registered`);",
+      '  }',
+      '}',
+      'function registerLazyShared(moduleName, load) {',
+      '  const sharedModules = global.__MICRO_FRONTEND__.__SHARED__;',
+      '  if (!registerLazySharedValue(sharedModules, moduleName, load, toLegacyEsm)) {',
       "    throw new Error(`Shared module '${moduleName}' is already registered`);",
       '  }',
       '}',

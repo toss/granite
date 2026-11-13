@@ -106,6 +106,60 @@ describe('getPreludeConfig', () => {
     expect(config.preludeScript).not.toContain('global.__granite.app.name');
   });
 
+  it('registers a lazy shared module at startup and loads it on the first get', () => {
+    // Given
+    const globalObject = {};
+    const loads: string[] = [];
+    const svg = { __esModule: true, Svg: 'Svg' };
+    const config = getPreludeConfig({ shared: { 'react-native-svg': { eager: true, lazy: true } } }, 'host');
+
+    // When
+    vm.runInNewContext([config.banner, config.preludeScript].join('\n'), {
+      global: globalObject,
+      require: (name: string) => {
+        loads.push(name);
+        return svg;
+      },
+    });
+    const entry = Reflect.get(
+      Reflect.get(Reflect.get(globalObject, '__MICRO_FRONTEND__'), '__SHARED__'),
+      'react-native-svg'
+    );
+
+    // Then
+    expect(config.preludeScript).not.toContain('import * as __shared0');
+    expect(loads).toEqual([]);
+    expect(Reflect.get(entry, 'loaded')).toBe(false);
+    expect(Reflect.apply(Reflect.get(entry, 'get'), entry, [])).toBe(svg);
+    expect(Reflect.apply(Reflect.get(entry, 'get'), entry, [])).toBe(svg);
+    expect(loads).toEqual(['react-native-svg']);
+    expect(Reflect.get(entry, 'loaded')).toBe(true);
+  });
+
+  it('keeps a lazy shared module unloaded when its first load throws', () => {
+    // Given
+    const globalObject = {};
+    let attempts = 0;
+    const config = getPreludeConfig({ shared: { broken: { eager: true, lazy: true } } }, 'host');
+    vm.runInNewContext([config.banner, config.preludeScript].join('\n'), {
+      global: globalObject,
+      require: () => {
+        attempts += 1;
+        throw new Error('boom');
+      },
+    });
+    const entry = Reflect.get(Reflect.get(Reflect.get(globalObject, '__MICRO_FRONTEND__'), '__SHARED__'), 'broken');
+
+    // When
+    const get = () => Reflect.apply(Reflect.get(entry, 'get'), entry, []);
+
+    // Then
+    expect(get).toThrow('boom');
+    expect(get).toThrow('boom');
+    expect(attempts).toBe(2);
+    expect(Reflect.get(entry, 'loaded')).toBe(false);
+  });
+
   it.each([
     ['empty', {}],
     ['legacy-first', { __MICRO_FRONTEND__: { __SHARED__: {}, __INSTANCES__: [] } }],

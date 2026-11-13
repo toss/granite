@@ -5,11 +5,17 @@ import { ExposedModuleNotFoundError, SharedModuleAlreadyRegisteredError } from '
 import { getMicroFrontendGlobalContext, type MicroFrontendGlobalContext } from './globalContext';
 import { toLegacyEsm } from './legacyEsm';
 import { parseAppRequest } from './parseAppRequest';
-import { registerSharedValue } from './sharedModule';
+import { registerLazySharedValue, registerSharedValue } from './sharedModule';
 export { createContainer, exposeModule, getContainer, removeContainer };
 
 export interface SharedModuleConfig {
   readonly eager?: boolean;
+  /**
+   * With `eager: true`, register the module at startup but evaluate it on the first `get()`
+   * (the first consumer that reads it) instead of while the host bundle starts.
+   * Keep modules that must run at startup (polyfills, global setup) without it.
+   */
+  readonly lazy?: boolean;
 }
 
 export type SharedConfig = Readonly<Record<string, SharedModuleConfig>>;
@@ -57,6 +63,13 @@ export function getMicroFrontendRuntimeContext(): MicroFrontendRuntimeContext {
 export function registerShared(moduleName: string, module: unknown): void {
   const sharedModules = getMicroFrontendGlobalContext().__SHARED__;
   if (!registerSharedValue(sharedModules, moduleName, module, toLegacyEsm)) {
+    throw new SharedModuleAlreadyRegisteredError(moduleName);
+  }
+}
+
+export function registerLazyShared(moduleName: string, load: () => unknown): void {
+  const sharedModules = getMicroFrontendGlobalContext().__SHARED__;
+  if (!registerLazySharedValue(sharedModules, moduleName, load, toLegacyEsm)) {
     throw new SharedModuleAlreadyRegisteredError(moduleName);
   }
 }
