@@ -865,6 +865,17 @@ string-valued callbacks with `() => hidePendingHostComponent()` or capture an ex
 Hosts using the legacy single-screen controller can continue using its existing API.
 
 
+## Native registry binding metadata
+
+On iOS, `registration.openApp(withAppName:scheme:key:rootKey:)`
+can attach opaque native registry keys to a session. The existing two-argument
+`openApp` remains supported. The `key` and `rootKey` fields are optional and are preserved in
+`runtime.getSessions()` and `onSessionsChanged()` snapshots.
+
+The host owns registry lifetime and composes its context provider. React callers
+can use the existing `useMicroFrontendSession().sessionId` to look up the matching
+snapshot. Granite does not install AsyncContext hooks or a Brick context provider.
+
 ## License and credit
 
 Apache-2.0. The Portal implementation is based on

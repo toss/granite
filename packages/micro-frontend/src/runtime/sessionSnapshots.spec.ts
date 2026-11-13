@@ -12,6 +12,20 @@ const secondOpen = {
 } as const;
 
 describe('runtime session snapshots', () => {
+  it('retains the native binding through visibility changes and replaces it only after closing', () => {
+    const { runtime, emit } = createSessionRuntimeFixture();
+    runtime.onSessionsChanged(() => undefined);
+    emit({ ...firstOpen, params: { ...firstOpen.params, key: 'native:A', rootKey: 'native:root' } });
+    emit({ name: 'sessionVisibilityChanged', params: { sessionId: firstOpen.params.sessionId, isVisible: true } });
+    emit({ ...firstOpen, params: { ...firstOpen.params, key: 'native:ignored' } });
+    expect(runtime.getSessions()[0]?.key).toBe('native:A');
+    expect(runtime.getSessions()[0]?.rootKey).toBe('native:root');
+    emit({ name: 'closeApp', params: { sessionId: firstOpen.params.sessionId } });
+    emit({ ...firstOpen, params: { ...firstOpen.params, key: 'native:B' } });
+    expect(runtime.getSessions()[0]?.key).toBe('native:B');
+    expect(runtime.getSessions()[0]?.rootKey).toBeUndefined();
+  });
+
   it('reads without starting native delivery and receives queued events on first subscription', () => {
     // Given
     const { runtime, emit, nativeRuntime, listenerCount } = createSessionRuntimeFixture();

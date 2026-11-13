@@ -62,8 +62,17 @@ static void GraniteMicroFrontendRequireMainThread(void) {
 @implementation GraniteMicroFrontendSessionRegistration
 
 - (void)openAppWithAppName:(NSString *)appName scheme:(NSString *)scheme {
+  [self openAppWithAppName:appName scheme:scheme key:nil rootKey:nil];
+}
+
+- (void)openAppWithAppName:(NSString *)appName
+                  scheme:(NSString *)scheme
+                     key:(nullable NSString *)key
+                 rootKey:(nullable NSString *)rootKey {
   NSParameterAssert(appName.length > 0);
   NSParameterAssert(scheme.length > 0);
+  NSParameterAssert(key == nil || key.length > 0);
+  NSParameterAssert(rootKey == nil || rootKey.length > 0);
   BOOL shouldEmit = NO;
   [runtimeLock lock];
   @try {
@@ -76,7 +85,11 @@ static void GraniteMicroFrontendRequireMainThread(void) {
     [runtimeLock unlock];
   }
   if (shouldEmit) {
-    [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId appName:appName scheme:scheme];
+    [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId
+                                       appName:appName
+                                        scheme:scheme
+                                           key:key
+                                       rootKey:rootKey];
   }
 }
 
@@ -359,14 +372,26 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 + (void)emitOpenApp:(NSString *)sessionId
              appName:(NSString *)appName
               scheme:(NSString *)scheme {
-  [self emitEvent:@{
-    @"name" : @"openApp",
-    @"params" : @{
+  [self emitOpenApp:sessionId appName:appName scheme:scheme key:nil rootKey:nil];
+}
+
++ (void)emitOpenApp:(NSString *)sessionId
+           appName:(NSString *)appName
+            scheme:(NSString *)scheme
+               key:(nullable NSString *)key
+           rootKey:(nullable NSString *)rootKey {
+  NSMutableDictionary *params = [@{
       @"sessionId" : sessionId,
       @"appName" : appName,
       @"scheme" : scheme,
-    },
-  }];
+  } mutableCopy];
+  if (key != nil) {
+    params[@"key"] = key;
+  }
+  if (rootKey != nil) {
+    params[@"rootKey"] = rootKey;
+  }
+  [self emitEvent:@{ @"name" : @"openApp", @"params" : params }];
 }
 
 + (void)emitCloseApp:(NSString *)sessionId {
