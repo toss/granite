@@ -16,14 +16,29 @@ export interface MicroFrontendPreludeConfig {
   readonly preludeScript: string;
 }
 
-export function getPreludeConfig(options: MicroFrontendPreludeOptions, appName?: string): MicroFrontendPreludeConfig {
+export interface MicroFrontendPreludeBundlerOptions {
+  /**
+   * Expression that loads a lazy shared module when its first `get()` runs. Defaults to `require(<name>)`.
+   * A bundler that tree-shakes ESM can point this at a module that re-exports the namespace, so the
+   * shared package itself is still imported with `import * as` and keeps the same tree-shaking.
+   */
+  readonly lazySharedLoader?: (moduleName: string) => string;
+}
+
+export function getPreludeConfig(
+  options: MicroFrontendPreludeOptions,
+  appName?: string,
+  bundler: MicroFrontendPreludeBundlerOptions = {}
+): MicroFrontendPreludeConfig {
+  const lazySharedLoader =
+    bundler.lazySharedLoader ?? ((moduleName: string) => `require(${JSON.stringify(moduleName)})`);
   const eagerSharedModules = Object.entries(options.shared ?? {}).filter(
     ([, config]) => !Array.isArray(options.shared) && config.eager === true
   );
   const registerStatements = eagerSharedModules.map(([moduleName, config], index) => {
     if (config.lazy === true) {
-      // `require` inside the loader defers evaluation to the first get(); an `import *` would run it now.
-      return `registerLazyShared(${JSON.stringify(moduleName)}, function () { return require(${JSON.stringify(moduleName)}); });`;
+      // Loading inside the function defers evaluation to the first get(); an `import *` here would run it now.
+      return `registerLazyShared(${JSON.stringify(moduleName)}, function () { return ${lazySharedLoader(moduleName)}; });`;
     }
     const identifier = `__shared${index}`;
     return [

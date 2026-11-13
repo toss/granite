@@ -9,6 +9,10 @@ import type { SharedConfig } from '../runtime/registry';
 
 const PRELUDE = '\0granite:micro-frontend';
 const SHARED = '\0granite:shared:';
+// Re-exports a lazy host shared module's namespace. The prelude requires this module on the first
+// get(), and it imports the shared package with `import * as`, so a `require` boundary never sits
+// on the package itself and its re-exports are tree-shaken like an eager registration.
+const SHARED_NAMESPACE = '\0granite:shared-namespace:';
 
 export function microFrontend(options: MicroFrontendPluginOptions): PluginOption {
   const shared = intoShared(options.shared);
@@ -30,7 +34,9 @@ function prelude(options: MicroFrontendPluginOptions, shared: SharedConfig | und
       const exposes = Object.fromEntries(
         Object.entries(options.exposes ?? {}).map(([name, file]) => [name, path.resolve(root, file)])
       );
-      const generated = getPreludeConfig({ ...options, shared, exposes }, options.appName);
+      const generated = getPreludeConfig({ ...options, shared, exposes }, options.appName, {
+        lazySharedLoader: (moduleName) => `require(${JSON.stringify(SHARED_NAMESPACE + moduleName)}).ns`,
+      });
       prelude = generated.preludeScript;
       // Must run before the native-module proxy and before any exposed app module.
       config.polyfills = [
@@ -40,15 +46,18 @@ function prelude(options: MicroFrontendPluginOptions, shared: SharedConfig | und
       return { prelude: [PRELUDE] };
     },
     resolveId: {
-      filter: { id: /^\0granite:micro-frontend$/ },
-      handler() {
-        return PRELUDE;
+      filter: { id: /^\0granite:(?:micro-frontend$|shared-namespace:)/ },
+      handler(id) {
+        return id === PRELUDE ? PRELUDE : id;
       },
     },
     load: {
-      filter: { id: /^\0granite:micro-frontend$/ },
-      handler() {
-        return prelude;
+      filter: { id: /^\0granite:(?:micro-frontend$|shared-namespace:)/ },
+      handler(id) {
+        if (id === PRELUDE) {
+          return prelude;
+        }
+        return `import * as ns from ${JSON.stringify(id.slice(SHARED_NAMESPACE.length))};\nexport { ns };\n`;
       },
     },
   };
