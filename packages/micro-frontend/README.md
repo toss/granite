@@ -884,7 +884,6 @@ unknown or closed IDs are ignored, including after the last session closes. In t
 string-valued callbacks with `() => hidePendingHostComponent()` or capture an explicit session ID.
 Hosts using the legacy single-screen controller can continue using its existing API.
 
-
 ## License and credit
 
 Apache-2.0. The Portal implementation is based on
