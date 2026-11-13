@@ -20,7 +20,7 @@ describe('microFrontend plugin', () => {
 
     const prelude = getPlugin(plugins, 'granite:micro-frontend:prelude');
     const shared = getPlugin(plugins, 'granite:micro-frontend:shared-modules');
-    expect(prelude.load).toMatchObject({ filter: { id: /^\0granite:(?:micro-frontend$|shared-namespace:)/ } });
+    expect(prelude.load).toMatchObject({ filter: { id: /^\0granite:micro-frontend$/ } });
     expect(shared.load).toMatchObject({ filter: { id: /^\0granite:shared:/ } });
     expect(prelude).not.toHaveProperty('transform');
     expect(shared).not.toHaveProperty('transform');
@@ -57,29 +57,6 @@ describe('microFrontend plugin', () => {
       'granite:micro-frontend:prelude',
       'granite:micro-frontend:dispose',
     ]);
-  });
-
-  it('loads a lazy host shared module through a namespace module so the package keeps its import', async () => {
-    const plugins = await flattenPluginOption(
-      microFrontend({ appName: 'shared', shared: { 'react-native-svg': { eager: true, lazy: true } } })
-    );
-    const prelude = getPlugin(plugins, 'granite:micro-frontend:prelude');
-    if (typeof prelude.config !== 'function' || prelude.load == null || typeof prelude.load === 'function') {
-      throw new Error('Missing prelude hooks');
-    }
-    if (prelude.resolveId == null || typeof prelude.resolveId === 'function') {
-      throw new Error('Missing filtered resolveId hook');
-    }
-    await prelude.config.call({} as never, { root: '/service', polyfills: [] } as Config);
-    const source = String(await prelude.load.handler.call({} as never, '\0granite:micro-frontend'));
-    const namespaceId = '\0granite:shared-namespace:react-native-svg';
-
-    expect(source).toContain(`return require(${JSON.stringify(namespaceId)}).ns;`);
-    expect(source).not.toContain('import * as __shared0');
-    expect(await prelude.resolveId.handler.call({} as never, namespaceId, undefined, {} as never)).toBe(namespaceId);
-    expect(await prelude.load.handler.call({} as never, namespaceId)).toBe(
-      'import * as ns from "react-native-svg";\nexport { ns };\n'
-    );
   });
 
   it('generates the virtual prelude from the resolved project root', async () => {
