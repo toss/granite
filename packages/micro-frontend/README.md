@@ -107,6 +107,26 @@ export default defineConfig({
 When evaluated, a remote bundle registers its `appName` container and exposed
 modules in the shared runtime registry.
 
+A host can also share a module without running it at startup. With
+`{ eager: true, lazy: true }` the host registers the module when it starts but
+evaluates it on the first `get()`, which is usually when a remote first
+requires it. This matches Module Federation's `eager: false` (provided, loaded
+on first use) with a synchronous `get()`. Granite keeps its own `eager` meaning:
+a module without `eager: true` is not provided and is resolved from the shared
+registry, like Module Federation's `import: false`.
+
+```ts
+shared: {
+  react: { eager: true },
+  'react-native': { eager: true },
+  'react-native-svg': { eager: true, lazy: true },
+},
+```
+
+Leave out `lazy` for modules that must run at startup, such as polyfills or
+global setup. A lazy module's evaluation error is thrown from `get()`, and the
+next `get()` tries again.
+
 ### Mpack (deprecated)
 
 ```ts

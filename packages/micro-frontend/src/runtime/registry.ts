@@ -13,6 +13,8 @@ export interface SharedModuleConfig {
   /**
    * With `eager: true`, register the module at startup but evaluate it on the first `get()`
    * (the first consumer that reads it) instead of while the host bundle starts.
+   * This is Module Federation's `eager: false` (provided, loaded on first use) with a
+   * synchronous `get()`; Granite's `eager` keeps meaning "provided by this bundle".
    * Keep modules that must run at startup (polyfills, global setup) without it.
    */
   readonly lazy?: boolean;
