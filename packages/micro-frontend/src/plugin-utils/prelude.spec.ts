@@ -136,6 +136,68 @@ describe('getPreludeConfig', () => {
     expect(Reflect.get(entry, 'loaded')).toBe(true);
   });
 
+  it('registers a lazy shared module with known exports as a facade over named imports', () => {
+    // Given
+    const globalObject = {};
+    const reads: string[] = [];
+    const config = getPreludeConfig({ shared: { pkg: { eager: true, lazy: true } } }, 'host', {
+      lazySharedExports: new Map([['pkg', ['b', 'default', 'a-b', 'a', '__esModule', 'a']]]),
+    });
+    const importLine = config.preludeScript.split('\n').find((line) => line.startsWith('import {'));
+    // A bundler turns the named imports into bindings; this stands in for them and records each read.
+    const bindings = ['a', 'a-b', 'b', 'default']
+      .map(
+        (name, index) =>
+          `Object.defineProperty(this, "__shared0_${index}", { get: function () { reads.push(${JSON.stringify(name)}); return ${JSON.stringify(name + '-value')}; } });`
+      )
+      .join('\n');
+
+    // When
+    vm.runInNewContext([config.banner, bindings, config.preludeScript.replace(importLine ?? '', '')].join('\n'), {
+      global: globalObject,
+      reads,
+    });
+    const entry = Reflect.get(Reflect.get(Reflect.get(globalObject, '__MICRO_FRONTEND__'), '__SHARED__'), 'pkg');
+    const get = () => Reflect.apply(Reflect.get(entry, 'get'), entry, []);
+
+    // Then
+    expect(importLine).toBe(
+      'import { a as __shared0_0, "a-b" as __shared0_1, b as __shared0_2, default as __shared0_3 } from "pkg";'
+    );
+    expect(config.preludeScript).not.toContain('require("pkg")');
+    expect(Reflect.get(entry, 'loaded')).toBe(false);
+    const facade = requireObject(get());
+    expect(get()).toBe(facade);
+    expect(reads).toEqual([]);
+    expect(Object.keys(facade)).toEqual(['a', 'a-b', 'b', 'default']);
+    expect(Reflect.get(facade, '__esModule')).toBe(true);
+    expect(Object.prototype.toString.call(facade)).toBe('[object Module]');
+    expect(Reflect.get(facade, 'b')).toBe('b-value');
+    expect(reads).toEqual(['b']);
+  });
+
+  it('normalizes a lazy facade like an eager namespace when the module has no default export', () => {
+    // Given
+    const globalObject = {};
+    const lazy = getPreludeConfig({ shared: { pkg: { eager: true, lazy: true } } }, 'host', {
+      lazySharedExports: new Map([['pkg', ['x']]]),
+    });
+    const script = lazy.preludeScript
+      .split('\n')
+      .filter((line) => !line.startsWith('import {'))
+      .join('\n');
+
+    // When
+    vm.runInNewContext([lazy.banner, 'var __shared0_0 = "x-value";', script].join('\n'), { global: globalObject });
+    const entry = Reflect.get(Reflect.get(Reflect.get(globalObject, '__MICRO_FRONTEND__'), '__SHARED__'), 'pkg');
+    const value = requireObject(Reflect.apply(Reflect.get(entry, 'get'), entry, []));
+
+    // Then
+    expect(Object.keys(value)).toEqual(['x', 'default']);
+    expect(Reflect.get(value, '__esModule')).toBe(true);
+    expect(Reflect.get(requireObject(Reflect.get(value, 'default')), 'x')).toBe('x-value');
+  });
+
   it('keeps a lazy shared module unloaded when its first load throws', () => {
     // Given
     const globalObject = {};

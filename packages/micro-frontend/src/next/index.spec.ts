@@ -78,6 +78,53 @@ describe('microFrontend plugin', () => {
     expect(source).toContain('createContainer("remote-app"');
     expect(source).toContain('/service/src/App.tsx');
   });
+
+  it('registers a lazy shared ESM package through named imports and getters, following export *', async () => {
+    const modules: Record<string, { code: string; exports: string[]; inputFormat: 'es' | 'cjs'; stars?: string[] }> = {
+      '/pkg/index.js': { code: 'index', exports: ['A', 'default', '*'], inputFormat: 'es', stars: ['./star.js'] },
+      '/pkg/star.js': { code: 'star', exports: ['S', 'default'], inputFormat: 'es' },
+      '/cjs/index.js': { code: 'cjs', exports: [], inputFormat: 'cjs' },
+    };
+    const warnings: string[] = [];
+    const context = {
+      async resolve(source: string) {
+        const id = { pkg: '/pkg/index.js', cjs: '/cjs/index.js', './star.js': '/pkg/star.js' }[source];
+        return id == null ? null : { id, external: false };
+      },
+      async load({ id }: { id: string }) {
+        return modules[id];
+      },
+      parse(code: string) {
+        const stars = Object.values(modules).find((module) => module.code === code)?.stars ?? [];
+        return {
+          body: stars.map((source) => ({ type: 'ExportAllDeclaration', exported: null, source: { value: source } })),
+        };
+      },
+      warn(message: string) {
+        warnings.push(message);
+      },
+    };
+    const plugins = await flattenPluginOption(
+      microFrontend({
+        appName: 'host',
+        shared: { pkg: { eager: true, lazy: true }, cjs: { eager: true, lazy: true } },
+      })
+    );
+    const prelude = getPlugin(plugins, 'granite:micro-frontend:prelude');
+    if (typeof prelude.config !== 'function' || prelude.load == null || typeof prelude.load === 'function') {
+      throw new Error('Missing prelude hooks');
+    }
+    await prelude.config.call({} as never, { root: '/service', polyfills: [] } as Config);
+
+    const source = String(await prelude.load.handler.call(context as never, '\0granite:micro-frontend'));
+
+    expect(source).toContain('import { A as __shared0_0, S as __shared0_1, default as __shared0_2 } from "pkg";');
+    expect(source).not.toContain('require("pkg")');
+    expect(source).toContain('createLazySharedFacade(["A","S","default"]');
+    expect(source).toContain('case 1: return __shared0_1;');
+    expect(source).toContain('registerLazyShared("cjs", function () { return require("cjs"); });');
+    expect(warnings).toEqual([expect.stringContaining("Lazy shared module 'cjs' is loaded with require()")]);
+  });
 });
 
 function getPlugin(plugins: Plugin[], name: string): Plugin {

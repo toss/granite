@@ -124,8 +124,15 @@ shared: {
 ```
 
 Leave out `lazy` for modules that must run at startup, such as polyfills or
-global setup. A lazy module's evaluation error is thrown from `get()`, and the
-next `get()` tries again.
+global setup. A lazy module's evaluation error is thrown where it is first
+evaluated, and the next attempt tries again.
+
+With Rollipop, an ESM package is registered through named imports that getters
+read, so Rolldown tree-shakes it like an eager registration and evaluates the
+modules behind an export when that export is first read. A package whose export
+names cannot be found at build time, such as a CommonJS package, is loaded with
+`require()` on the first `get()` instead, and the build warns because Rolldown
+then keeps the package's re-export modules.
 
 ### Mpack (deprecated)
 

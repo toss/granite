@@ -16,12 +16,30 @@ export interface MicroFrontendPreludeConfig {
   readonly preludeScript: string;
 }
 
-export function getPreludeConfig(options: MicroFrontendPreludeOptions, appName?: string): MicroFrontendPreludeConfig {
+export interface MicroFrontendPreludeBundlerOptions {
+  /**
+   * Export names of lazy shared modules, found by the bundler at build time. A module listed here is
+   * registered through named imports read inside getters instead of `require(name)`. The bundler can
+   * prove each read, so it tree-shakes the package like an `import * as` registration and evaluates
+   * only the modules behind the exports a consumer reads. Modules not listed keep `require(name)`.
+   */
+  readonly lazySharedExports?: ReadonlyMap<string, readonly string[]>;
+}
+
+export function getPreludeConfig(
+  options: MicroFrontendPreludeOptions,
+  appName?: string,
+  bundler: MicroFrontendPreludeBundlerOptions = {}
+): MicroFrontendPreludeConfig {
   const eagerSharedModules = Object.entries(options.shared ?? {}).filter(
     ([, config]) => !Array.isArray(options.shared) && config.eager === true
   );
   const registerStatements = eagerSharedModules.map(([moduleName, config], index) => {
     if (config.lazy === true) {
+      const exportNames = bundler.lazySharedExports?.get(moduleName);
+      if (exportNames != null) {
+        return createLazyFacadeRegistration(moduleName, exportNames, index);
+      }
       // `require` inside the loader defers evaluation to the first get(); an `import *` would run it now.
       return `registerLazyShared(${JSON.stringify(moduleName)}, function () { return require(${JSON.stringify(moduleName)}); });`;
     }
@@ -182,6 +200,17 @@ export function getPreludeConfig(options: MicroFrontendPreludeOptions, appName?:
       "    throw new Error(`Shared module '${moduleName}' is already registered`);",
       '  }',
       '}',
+      'function createLazySharedFacade(names, read) {',
+      '  const facade = {};',
+      '  for (let index = 0; index < names.length; index++) {',
+      '    Object.defineProperty(facade, names[index], { enumerable: true, get: function () { return read(index); } });',
+      '  }',
+      // Like an `import * as` namespace, the facade has no `__esModule`, so registration normalizes it the same way.
+      '  if (typeof Symbol !== "undefined" && Symbol.toStringTag) {',
+      '    Object.defineProperty(facade, Symbol.toStringTag, { value: "Module" });',
+      '  }',
+      '  return facade;',
+      '}',
       'function registerLazyShared(moduleName, load) {',
       '  const sharedModules = global.__MICRO_FRONTEND__.__SHARED__;',
       '  if (!registerLazySharedValue(sharedModules, moduleName, load, toLegacyEsm)) {',
@@ -193,4 +222,25 @@ export function getPreludeConfig(options: MicroFrontendPreludeOptions, appName?:
       ...exposeStatements,
     ].join('\n'),
   };
+}
+
+const IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
+
+// Builds a namespace-like facade whose getters read named imports. Reading an export inside the reader is
+// a read the bundler can prove, so it keeps each re-exported module lazy until that export is read.
+// One reader function per module keeps the bundle small; a function per export costs more bytecode.
+function createLazyFacadeRegistration(moduleName: string, exportNames: readonly string[], index: number): string {
+  const names = [...new Set(exportNames)].filter((name) => name !== '__esModule').sort();
+  const facade = `__sharedFacade${index}`;
+  const locals = names.map((_, exportIndex) => `__shared${index}_${exportIndex}`);
+  const specifiers = names.map(
+    (name, exportIndex) => `${IDENTIFIER.test(name) ? name : JSON.stringify(name)} as ${locals[exportIndex]}`
+  );
+  const cases = locals.map((local, exportIndex) => `case ${exportIndex}: return ${local};`);
+  return [
+    ...(names.length === 0 ? [] : [`import { ${specifiers.join(', ')} } from ${JSON.stringify(moduleName)};`]),
+    `let ${facade};`,
+    // The facade is created once, so every get() and a conflicting registration see the same object.
+    `registerLazyShared(${JSON.stringify(moduleName)}, function () { return ${facade} || (${facade} = createLazySharedFacade(${JSON.stringify(names)}, function (index) { switch (index) { ${cases.join(' ')} } })); });`,
+  ].join('\n');
 }
