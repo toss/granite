@@ -166,9 +166,12 @@ describe('getPreludeConfig', () => {
     );
     expect(config.preludeScript).not.toContain('require("pkg")');
     expect(Reflect.get(entry, 'loaded')).toBe(false);
-    const facade = requireObject(get());
-    expect(get()).toBe(facade);
     expect(reads).toEqual([]);
+    const facade = requireObject(get());
+    // The first get() evaluates the package by reading every export once, like require(name).
+    expect(reads).toEqual(['a', 'a-b', 'b', 'default']);
+    expect(get()).toBe(facade);
+    reads.length = 0;
     expect(Object.keys(facade)).toEqual(['a', 'a-b', 'b', 'default']);
     expect(Reflect.get(facade, '__esModule')).toBe(true);
     expect(Object.prototype.toString.call(facade)).toBe('[object Module]');

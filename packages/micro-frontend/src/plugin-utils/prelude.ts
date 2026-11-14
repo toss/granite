@@ -211,6 +211,12 @@ export function getPreludeConfig(
       '  if (typeof Symbol !== "undefined" && Symbol.toStringTag) {',
       '    Object.defineProperty(facade, Symbol.toStringTag, { value: "Module" });',
       '  }',
+      // Importing a module evaluates its whole graph, including modules a consumer never reads from and
+      // side-effect-only imports such as `import "pkg"`. Read every export once on the first get() so the
+      // package is evaluated then, as require(name) would, while the named imports keep its tree-shaking.
+      '  for (let index = 0; index < names.length; index++) {',
+      '    read(index);',
+      '  }',
       '  return Object.preventExtensions(facade);',
       '}',
       'function registerLazyShared(moduleName, load) {',
@@ -228,8 +234,9 @@ export function getPreludeConfig(
 
 const IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
 
-// Builds a namespace-like facade whose getters read named imports. Reading an export inside the reader is
-// a read the bundler can prove, so it keeps each re-exported module lazy until that export is read.
+// Builds a namespace-like facade whose getters read named imports. Reading the imports only inside the reader
+// is a read the bundler can prove, so it keeps the package lazy until the facade is created on the first get(),
+// which evaluates it by reading every export once.
 // One reader function per module keeps the bundle small; a function per export costs more bytecode.
 function createLazyFacadeRegistration(moduleName: string, exportNames: readonly string[], index: number): string {
   // The bundler passes namespace export names; keep them unique and in code unit order like a namespace.
