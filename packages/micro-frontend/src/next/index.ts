@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import type { Plugin, PluginOption } from 'rollipop';
 import { code, include } from 'rollipop/filter';
+import { getNamespaceExportNames } from './exportNames';
 import type { MicroFrontendPluginOptions } from './types';
 import { transformDisposeOwnership } from '../plugin-utils/disposeTransform';
 import { intoShared } from '../plugin-utils/intoShared';
@@ -21,7 +22,10 @@ export function microFrontend(options: MicroFrontendPluginOptions): PluginOption
 }
 
 function prelude(options: MicroFrontendPluginOptions, shared: SharedConfig | undefined): Plugin {
-  let prelude = '';
+  let preludeOptions: Parameters<typeof getPreludeConfig>[0] = {};
+  const lazyShared = Object.entries(shared ?? {})
+    .filter(([, config]) => config.eager === true && config.lazy === true)
+    .map(([name]) => name);
 
   return {
     name: 'granite:micro-frontend:prelude',
@@ -30,8 +34,8 @@ function prelude(options: MicroFrontendPluginOptions, shared: SharedConfig | und
       const exposes = Object.fromEntries(
         Object.entries(options.exposes ?? {}).map(([name, file]) => [name, path.resolve(root, file)])
       );
-      const generated = getPreludeConfig({ ...options, shared, exposes }, options.appName);
-      prelude = generated.preludeScript;
+      preludeOptions = { ...options, shared, exposes };
+      const generated = getPreludeConfig(preludeOptions, options.appName);
       // Must run before the native-module proxy and before any exposed app module.
       config.polyfills = [
         { type: 'plain', code: `var global = globalThis;\n${generated.banner}` },
@@ -47,8 +51,23 @@ function prelude(options: MicroFrontendPluginOptions, shared: SharedConfig | und
     },
     load: {
       filter: { id: /^\0granite:micro-frontend$/ },
-      handler() {
-        return prelude;
+      async handler() {
+        // Lazy shared modules are registered through named imports, so the export names are needed here.
+        const lazySharedExports = new Map<string, readonly string[]>();
+        for (const name of lazyShared) {
+          const resolved = await this.resolve(name, PRELUDE);
+          const exportNames =
+            resolved == null || resolved.external ? null : await getNamespaceExportNames(this, resolved.id);
+          if (exportNames == null || exportNames.length === 0) {
+            this.warn(
+              `Lazy shared module '${name}' is loaded with require() because its ESM export names are unknown. ` +
+                'The bundler keeps its re-exports, so the bundle can be larger than with an eager registration.'
+            );
+            continue;
+          }
+          lazySharedExports.set(name, exportNames);
+        }
+        return getPreludeConfig(preludeOptions, options.appName, { lazySharedExports }).preludeScript;
       },
     },
   };
@@ -61,6 +80,16 @@ function sharedModules(external: ReadonlySet<string>): Plugin {
 
   return {
     name: 'granite:micro-frontend:shared-modules',
+    // Fails the remote bundle before any module runs when the host did not register a shared module
+    // the bundle uses. Without this, the check runs only when a facade is first required, which can
+    // be much later when the bundler defers imports until their first use.
+    intro(chunk) {
+      const names = chunk.moduleIds
+        .filter((id) => id.startsWith(SHARED))
+        .map((id) => id.slice(SHARED.length))
+        .sort();
+      return names.length === 0 ? '' : createSharedModuleCheck(names);
+    },
     resolveId: {
       filter: { id: externalPattern },
       handler(source) {
@@ -89,6 +118,17 @@ function sharedModules(external: ReadonlySet<string>): Plugin {
       },
     },
   };
+}
+
+function createSharedModuleCheck(names: readonly string[]): string {
+  return [
+    '(function (names) {',
+    '  var registry = globalThis.__MICRO_FRONTEND__ && globalThis.__MICRO_FRONTEND__.__SHARED__;',
+    '  for (var i = 0; i < names.length; i++) {',
+    "    if (registry == null || registry[names[i]] == null) throw new Error('Shared module ' + names[i] + ' is not registered');",
+    '  }',
+    `})(${JSON.stringify(names)});`,
+  ].join('\n');
 }
 
 function dispose(appName: string): Plugin {

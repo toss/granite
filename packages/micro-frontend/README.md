@@ -107,6 +107,34 @@ export default defineConfig({
 When evaluated, a remote bundle registers its `appName` container and exposed
 modules in the shared runtime registry.
 
+A host can also share a module without running it at startup. With
+`{ eager: true, lazy: true }` the host registers the module when it starts but
+evaluates it on the first `get()`, which is usually when a remote first
+requires it. This matches Module Federation's `eager: false` (provided, loaded
+on first use) with a synchronous `get()`. Granite keeps its own `eager` meaning:
+a module without `eager: true` is not provided and is resolved from the shared
+registry, like Module Federation's `import: false`.
+
+```ts
+shared: {
+  react: { eager: true },
+  'react-native': { eager: true },
+  'react-native-svg': { eager: true, lazy: true },
+},
+```
+
+Leave out `lazy` for modules that must run at startup, such as polyfills or
+global setup. A lazy module's evaluation error is thrown where it is first
+evaluated, and the next attempt tries again.
+
+With Rollipop, an ESM package is registered through named imports that getters
+read, so Rolldown tree-shakes it like an eager registration. The first `get()`
+evaluates the package by reading each export once, so side effects such as
+`import 'pkg'` in a remote still run when the remote loads. A package whose export
+names cannot be found at build time, such as a CommonJS package, is loaded with
+`require()` on the first `get()` instead, and the build warns because Rolldown
+then keeps the package's re-export modules.
+
 ### Mpack (deprecated)
 
 ```ts
@@ -863,7 +891,6 @@ including strings. Once session tracking has started, string arguments are inter
 unknown or closed IDs are ignored, including after the last session closes. In those hosts, wrap
 string-valued callbacks with `() => hidePendingHostComponent()` or capture an explicit session ID.
 Hosts using the legacy single-screen controller can continue using its existing API.
-
 
 ## License and credit
 
