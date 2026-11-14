@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import type { Plugin, PluginOption } from 'rollipop';
 import { code, include } from 'rollipop/filter';
+import { getNamespaceExportNames } from './exportNames';
 import type { MicroFrontendPluginOptions } from './types';
 import { transformDisposeOwnership } from '../plugin-utils/disposeTransform';
 import { intoShared } from '../plugin-utils/intoShared';
@@ -56,7 +57,7 @@ function prelude(options: MicroFrontendPluginOptions, shared: SharedConfig | und
         for (const name of lazyShared) {
           const resolved = await this.resolve(name, PRELUDE);
           const exportNames =
-            resolved == null || resolved.external ? null : await collectExportNames(this, resolved.id);
+            resolved == null || resolved.external ? null : await getNamespaceExportNames(this, resolved.id);
           if (exportNames == null || exportNames.length === 0) {
             this.warn(
               `Lazy shared module '${name}' is loaded with require() because its ESM export names are unknown. ` +
@@ -70,69 +71,6 @@ function prelude(options: MicroFrontendPluginOptions, shared: SharedConfig | und
       },
     },
   };
-}
-
-type PluginContext = ThisParameterType<Extract<NonNullable<Plugin['load']>, (...args: never[]) => unknown>>;
-type ExportCollectorContext = Pick<PluginContext, 'load' | 'parse' | 'resolve'>;
-
-/**
- * Returns the names an ESM module exports, following `export * from` into the modules it re-exports.
- * Returns null when a name can come from a CommonJS module or cannot be found statically.
- */
-async function collectExportNames(
-  context: ExportCollectorContext,
-  id: string,
-  visited = new Set<string>()
-): Promise<string[] | null> {
-  if (visited.has(id)) {
-    return [];
-  }
-  visited.add(id);
-  const info = await context.load({ id });
-  if (info.inputFormat !== 'es' || info.code == null) {
-    return null;
-  }
-  const names = new Set(info.exports.filter((name) => name !== '*'));
-  if (!info.exports.includes('*')) {
-    return [...names];
-  }
-  let program: ReturnType<ExportCollectorContext['parse']>;
-  try {
-    program = context.parse(info.code, { lang: parserLanguage(id) });
-  } catch {
-    return null;
-  }
-  for (const node of program.body) {
-    if (node.type !== 'ExportAllDeclaration' || node.exported != null || node.exportKind === 'type') {
-      continue;
-    }
-    const resolved = await context.resolve(String(node.source.value), id);
-    if (resolved == null || resolved.external) {
-      return null;
-    }
-    const reexported = await collectExportNames(context, resolved.id, visited);
-    if (reexported == null) {
-      return null;
-    }
-    // `export *` never re-exports `default`.
-    for (const name of reexported) {
-      if (name !== 'default') {
-        names.add(name);
-      }
-    }
-  }
-  return [...names];
-}
-
-function parserLanguage(id: string): 'js' | 'jsx' | 'ts' | 'tsx' {
-  const extension = path.extname(id.split('?')[0] ?? id);
-  if (extension === '.ts' || extension === '.mts' || extension === '.cts') {
-    return 'ts';
-  }
-  if (extension === '.tsx') {
-    return 'tsx';
-  }
-  return 'jsx';
 }
 
 function sharedModules(external: ReadonlySet<string>): Plugin {

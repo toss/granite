@@ -200,16 +200,18 @@ export function getPreludeConfig(
       "    throw new Error(`Shared module '${moduleName}' is already registered`);",
       '  }',
       '}',
+      // Shaped like a module namespace object: null prototype, sorted read-only live exports, a "Module"
+      // tag, and not extensible. Like an `import * as` namespace it has no `__esModule`, so registration
+      // normalizes it the same way.
       'function createLazySharedFacade(names, read) {',
-      '  const facade = {};',
+      '  const facade = Object.create(null);',
       '  for (let index = 0; index < names.length; index++) {',
       '    Object.defineProperty(facade, names[index], { enumerable: true, get: function () { return read(index); } });',
       '  }',
-      // Like an `import * as` namespace, the facade has no `__esModule`, so registration normalizes it the same way.
       '  if (typeof Symbol !== "undefined" && Symbol.toStringTag) {',
       '    Object.defineProperty(facade, Symbol.toStringTag, { value: "Module" });',
       '  }',
-      '  return facade;',
+      '  return Object.preventExtensions(facade);',
       '}',
       'function registerLazyShared(moduleName, load) {',
       '  const sharedModules = global.__MICRO_FRONTEND__.__SHARED__;',
@@ -230,7 +232,8 @@ const IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
 // a read the bundler can prove, so it keeps each re-exported module lazy until that export is read.
 // One reader function per module keeps the bundle small; a function per export costs more bytecode.
 function createLazyFacadeRegistration(moduleName: string, exportNames: readonly string[], index: number): string {
-  const names = [...new Set(exportNames)].filter((name) => name !== '__esModule').sort();
+  // The bundler passes namespace export names; keep them unique and in code unit order like a namespace.
+  const names = [...new Set(exportNames)].sort();
   const facade = `__sharedFacade${index}`;
   const locals = names.map((_, exportIndex) => `__shared${index}_${exportIndex}`);
   const specifiers = names.map(

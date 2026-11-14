@@ -141,7 +141,7 @@ describe('getPreludeConfig', () => {
     const globalObject = {};
     const reads: string[] = [];
     const config = getPreludeConfig({ shared: { pkg: { eager: true, lazy: true } } }, 'host', {
-      lazySharedExports: new Map([['pkg', ['b', 'default', 'a-b', 'a', '__esModule', 'a']]]),
+      lazySharedExports: new Map([['pkg', ['b', 'default', 'a-b', 'a', 'a']]]),
     });
     const importLine = config.preludeScript.split('\n').find((line) => line.startsWith('import {'));
     // A bundler turns the named imports into bindings; this stands in for them and records each read.
@@ -195,7 +195,15 @@ describe('getPreludeConfig', () => {
     // Then
     expect(Object.keys(value)).toEqual(['x', 'default']);
     expect(Reflect.get(value, '__esModule')).toBe(true);
-    expect(Reflect.get(requireObject(Reflect.get(value, 'default')), 'x')).toBe('x-value');
+    const namespace = requireObject(Reflect.get(value, 'default'));
+    expect(Reflect.get(namespace, 'x')).toBe('x-value');
+    // The facade itself is shaped like a module namespace object.
+    expect(Object.getPrototypeOf(namespace)).toBeNull();
+    expect(Object.isExtensible(namespace)).toBe(false);
+    expect(Object.prototype.toString.call(namespace)).toBe('[object Module]');
+    expect(Object.getOwnPropertyDescriptor(namespace, 'x')).toMatchObject({ enumerable: true, configurable: false });
+    expect(Object.getOwnPropertyDescriptor(namespace, 'x')).not.toHaveProperty('set', expect.any(Function));
+    expect(Reflect.has(namespace, '__esModule')).toBe(false);
   });
 
   it('keeps a lazy shared module unloaded when its first load throws', () => {
