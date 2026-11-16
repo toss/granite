@@ -1,5 +1,15 @@
 # @granite-js/micro-frontend
 
+## 3.0.8
+
+### Patch Changes
+
+- bfeb893: Check the shared modules a remote bundle uses before the bundle runs. The Rollipop plugin now adds an `intro` that throws `Shared module <name> is not registered` when the host has not registered a shared module that the bundle imports. Before, this error was thrown only when the module's facade was first required, so a remote that defers imports until their first use failed partway through rendering instead of while loading.
+- bfeb893: Add `shared[name].lazy` for host shared modules. With `eager: true, lazy: true` the host registers the module at startup but evaluates it on the first `get()`, so packages no remote uses yet don't run while the host bundle starts.
+
+  With Rollipop, a lazy ESM package is registered through named imports read by getters instead of `require()`, so it keeps the same tree-shaking as an eager registration. The package is still evaluated on the first `get()`.
+  - @granite-js/utils@3.0.8
+
 ## 3.0.7
 
 ### Patch Changes
