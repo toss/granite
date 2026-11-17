@@ -26,6 +26,18 @@ describe('runtime session snapshots', () => {
     expect(runtime.getSessions()[0]?.rootKey).toBeUndefined();
   });
 
+  it('replaces a queued old binding when the host closes before reopening the same session', () => {
+    const { runtime, emit } = createSessionRuntimeFixture();
+    // Native delivery may retain an unacknowledged open from the old runtime.
+    // The host's close-before-release sequence must precede the fresh open.
+    emit({ ...firstOpen, params: { ...firstOpen.params, key: 'runtime-A:session' } });
+    emit({ name: 'closeApp', params: { sessionId: firstOpen.params.sessionId } });
+    emit({ ...firstOpen, params: { ...firstOpen.params, key: 'runtime-B:session' } });
+    runtime.onSessionsChanged(() => undefined);
+
+    expect(runtime.getSessions()).toEqual([{ ...firstOpen.params, key: 'runtime-B:session', isVisible: false }]);
+  });
+
   it('reads without starting native delivery and receives queued events on first subscription', () => {
     // Given
     const { runtime, emit, nativeRuntime, listenerCount } = createSessionRuntimeFixture();

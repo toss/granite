@@ -3,6 +3,7 @@ package run.granite.microfrontend
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import java.util.Collections
 import java.util.concurrent.CountDownLatch
@@ -11,6 +12,24 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
 class GraniteMicroFrontendSessionStoreTest {
+    @Test
+    fun `empty binding keys fail before opening or emitting the session`() {
+        val events = mutableListOf<GraniteMicroFrontendEvent>()
+        val store = GraniteMicroFrontendSessionStore(events::add)
+        val registration = store.registerSession("session-1")
+
+        assertThrows(IllegalArgumentException::class.java) {
+            registration.openApp("shopping", "granite://shopping", "", "root")
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            registration.openApp("shopping", "granite://shopping", "session", "")
+        }
+        assertTrue(events.isEmpty())
+        assertFalse(registration.setVisible(true))
+        assertTrue(registration.openApp("shopping", "granite://shopping", "session", "root"))
+        assertEquals(1, events.size)
+    }
+
     @Test
     fun `open app carries each session key and the common root key`() {
         val events = mutableListOf<GraniteMicroFrontendEvent>()

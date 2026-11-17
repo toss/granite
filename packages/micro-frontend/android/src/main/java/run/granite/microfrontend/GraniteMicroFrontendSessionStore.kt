@@ -30,6 +30,8 @@ internal class GraniteMicroFrontendSessionStore(
     ): Boolean {
         require(appName.isNotBlank()) { "appName must not be blank" }
         require(scheme.isNotBlank()) { "scheme must not be blank" }
+        require(key == null || key.isNotEmpty()) { "key must not be empty" }
+        require(rootKey == null || rootKey.isNotEmpty()) { "rootKey must not be empty" }
         return synchronized(lock) {
             val session = sessions[sessionId] ?: return false
             if (session.token != token || session.opened || session.closed) {

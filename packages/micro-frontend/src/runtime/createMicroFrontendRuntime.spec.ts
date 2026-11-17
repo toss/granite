@@ -196,6 +196,26 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
+  it('reports malformed native events without terminating delivery or changing sessions', () => {
+    const fixture = createRuntimeFixture();
+    const listener = vi.fn();
+    const report = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    fixture.runtime.onEvent(listener);
+    const params = { appName: 'cart', scheme: 'granite://cart', sessionId: 'session-1' };
+    try {
+      expect(() => fixture.emit({ name: 'openApp', params: { ...params, key: '' } })).not.toThrow();
+      expect(fixture.runtime.getSessions()).toEqual([]);
+      expect(listener).not.toHaveBeenCalled();
+      expect(report).toHaveBeenCalledOnce();
+
+      fixture.emit({ name: 'openApp', params: { ...params, key: 'native:fresh' } });
+      expect(fixture.runtime.getSessions()).toEqual([{ ...params, key: 'native:fresh', isVisible: false }]);
+      expect(listener).toHaveBeenCalledOnce();
+    } finally {
+      report.mockRestore();
+    }
+  });
+
   it('reports native preload failures without forwarding them to session listeners', async () => {
     // Given
     const fixture = createRuntimeFixture();

@@ -478,9 +478,9 @@ destination views in `com.teleport.host`.
 
 | API                                                                 | Lifetime / behavior                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ActivitySessionBinding.bind(activity, sessionId, appName, scheme)` | Convenience binding for an `Activity`. Emits open, derives visibility from start/stop, and emits close on destroy. Bindings are keyed by `sessionId`, so a destroy caused by a configuration change keeps the session open and the next `bind()` with the same id rebinds the recreated instance instead of opening a second session. Use a `sessionId` that identifies the destination, not the Activity instance. Retain it for the Activity lifetime. |
+| `ActivitySessionBinding.bind(activity, sessionId, appName, scheme, key = null, rootKey = null)` | Convenience binding for an `Activity`. Emits open, derives visibility from start/stop, and emits close on destroy. Bindings are keyed by `sessionId`, so a destroy caused by a configuration change keeps the session open and the next `bind()` with the same id rebinds the recreated instance instead of opening a second session. Use a `sessionId` that identifies the destination, not the Activity instance. Retain it for the Activity lifetime. |
 | `GraniteMicroFrontendRuntimeHost.registerSession(sessionId)`        | Register a custom native container and return a `GraniteMicroFrontendSessionRegistration`. `sessionId` must be unique for every live destination; reuse only after the previous registration is closed/invalidated.                                                                                                                                                                                                                                      |
-| `GraniteMicroFrontendSessionRegistration.openApp(appName, scheme)`  | Emit `openApp` once.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `GraniteMicroFrontendSessionRegistration.openApp(appName, scheme, key = null, rootKey = null)` | Emit `openApp` once with optional binding metadata. Empty keys are rejected before opening.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `GraniteMicroFrontendSessionRegistration.setVisible(isVisible)`     | Emit a visibility event only when the value changes.                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `GraniteMicroFrontendSessionRegistration.closeApp()`                | Emit `closeApp` once after open.                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `GraniteMicroFrontendSessionRegistration.close()`                   | Unregister the native session. Call after `closeApp()`.                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -760,10 +760,10 @@ Import public APIs from `GraniteMicroFrontendRuntime`.
 
 | API                                                                                                | Lifetime / behavior                                                                                                                                                                                                                                             |
 | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `+[GraniteMicroFrontendViewControllerSessionBinding bindViewController:sessionId:appName:scheme:]` | Convenience binding for a `UIViewController`. Emits open and derives visibility from `viewWillAppear` / `viewWillDisappear` combined with app foreground and background transitions. Returns `nil` if `sessionId` is already registered. Retain until teardown. |
+| `+[GraniteMicroFrontendViewControllerSessionBinding bindViewController:sessionId:appName:scheme:]` / `bindViewController:sessionId:appName:scheme:key:rootKey:` | Convenience binding for a `UIViewController`. Emits open and derives visibility from `viewWillAppear` / `viewWillDisappear` combined with app foreground and background transitions. Returns `nil` if `sessionId` is already registered. Retain until teardown. |
 | `-[GraniteMicroFrontendViewControllerSessionBinding invalidate]`                                   | Emit close and detach lifecycle observation.                                                                                                                                                                                                                    |
 | `+[GraniteMicroFrontendRuntimeHost registerSession:]`                                              | Register a custom container and return a session registration, or `nil` if `sessionId` is already registered. Use a unique id per destination and call `invalidate` before reuse.                                                                               |
-| `-[GraniteMicroFrontendSessionRegistration openAppWithAppName:scheme:]`                            | Emit `openApp` once.                                                                                                                                                                                                                                            |
+| `-[GraniteMicroFrontendSessionRegistration openAppWithAppName:scheme:]` / `openAppWithAppName:scheme:key:rootKey:` | Emit `openApp` once with optional binding metadata. Empty keys are rejected before opening.                                                                                                                                                                                                                                            |
 | `-[GraniteMicroFrontendSessionRegistration setVisible:]`                                           | Emit visibility only when it changes.                                                                                                                                                                                                                           |
 | `-[GraniteMicroFrontendSessionRegistration closeApp]`                                              | Emit `closeApp` once after open.                                                                                                                                                                                                                                |
 | `-[GraniteMicroFrontendSessionRegistration invalidate]`                                            | Unregister the session. Call after `closeApp`.                                                                                                                                                                                                                  |
@@ -901,9 +901,63 @@ registry keys to a session. The existing two-argument
 `openApp` remains supported. The `key` and `rootKey` fields are optional and are preserved in
 `runtime.getSessions()` and `onSessionsChanged()` snapshots.
 
+Android's `ActivitySessionBinding.bind(activity, sessionId, appName, scheme, key, rootKey)`
+and iOS's `bindViewController:sessionId:appName:scheme:key:rootKey:` forward the same
+metadata. Existing keyless overloads remain available. An optional key must be
+nonempty; native validation runs before opening the session or attaching a new
+lifecycle binding. Rebinding the same Activity session after a configuration
+change retains its original metadata; it does not create a new registry lifetime.
+
 The host owns registry lifetime and composes its context provider. React callers
 can use the existing `useMicroFrontendSession().sessionId` to look up the matching
 snapshot. Granite does not install AsyncContext hooks or a Brick context provider.
+
+### Root binding ownership
+
+The authoritative root binding belongs to the native host's runtime, not to an
+individual session. The per-session `rootKey` field is deprecated compatibility
+metadata for existing native hosts. Granite does not check that copies agree,
+and reopening a session without that field omits it from the new snapshot.
+Do not derive the provider's default binding from `getSessions()`.
+
+Instead, pass the root binding through your host's bootstrap/native module and
+capture it once when installing the context provider. It is then available even
+with no open sessions, survives individual session closes, and is replaced when
+the native runtime and its registry directory are replaced. For example, the
+host adapter's selection is:
+
+```ts
+// Host bootstrap pseudocode: these values come from your native owner/context library.
+const rootBindingKey = bootstrap.rootRegistryKey;
+const getCurrentRegistryKey = () => currentSession.get()?.key ?? rootBindingKey;
+```
+
+### Runtime replacement
+
+The native event queue is a delivery queue, not a persistent session snapshot.
+An `openApp` already consumed by the native transport is not replayed when a new
+runtime attaches. Transport acceptance is not an acknowledgment that JavaScript
+successfully processed the event. Pending events can be retried; the queue does
+not validate or regenerate opaque registry keys.
+
+On a full runtime replacement, the host must end the old registrations and
+runtime binding directory, register its root/session registries in the new
+runtime's directory, then open each surviving destination again with fresh keys
+and visibility. Whether to retain or recreate the underlying native module state
+is the host's policy. An
+already opened registration cannot be reused to resend `openApp`; close and
+release it before registering the same session ID again: call `closeApp()` and
+then `close()` (Android) or `invalidate()` (iOS). Unregistering alone does not
+emit a JS close event. With queued, unacknowledged opens, this order ensures the
+old open is followed by close before the new open; it does not cancel the old
+transport entry or guarantee that JS never observes it transiently. This differs from an
+Activity configuration change within the same retained runtime.
+
+Automatically replaying old binding keys would be unsafe: Brick bindings belong
+to the directory that issued them. Granite neither recreates native registries
+nor revives expired keys. A malformed event from an older native binary is
+reported and ignored by JS without stopping subsequent delivery; native input
+validation is still required to keep native and JS session state consistent.
 
 ## License and credit
 

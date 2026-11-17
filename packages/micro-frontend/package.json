@@ -40,6 +40,7 @@
     "!android/gradlew",
     "!android/gradlew.bat",
     "!android/local.properties",
+    "!android/session-contract-tests",
     "!examples/**",
     "!**/__tests__",
     "!**/__fixtures__",

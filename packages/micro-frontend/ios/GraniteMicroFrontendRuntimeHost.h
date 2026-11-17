@@ -24,6 +24,13 @@ NS_ASSUME_NONNULL_BEGIN
                                                                         sessionId:(NSString *)sessionId
                                                                           appName:(NSString *)appName
                                                                            scheme:(NSString *)scheme;
+/// Attaches optional registry handles on the first bind. Rebinding retains the existing session.
++ (nullable GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
+                                                                        sessionId:(NSString *)sessionId
+                                                                          appName:(NSString *)appName
+                                                                           scheme:(NSString *)scheme
+                                                                              key:(nullable NSString *)key
+                                                                          rootKey:(nullable NSString *)rootKey;
 - (void)invalidate;
 @end
 

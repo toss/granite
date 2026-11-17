@@ -64,15 +64,24 @@ class ActivitySessionBinding private constructor(
         private val boundBindings = mutableMapOf<String, ActivitySessionBinding>()
 
         @JvmStatic
+        @JvmOverloads
         fun bind(
             activity: Activity,
             sessionId: String,
             appName: String,
             scheme: String,
+            key: String? = null,
+            rootKey: String? = null,
         ): ActivitySessionBinding = synchronized(boundBindings) {
             check(Looper.myLooper() == Looper.getMainLooper()) {
                 "ActivitySessionBinding.bind must be called on the main thread"
             }
+            // Validate before registering the native lifetime or Activity callbacks.
+            require(sessionId.isNotBlank()) { "sessionId must not be blank" }
+            require(appName.isNotBlank()) { "appName must not be blank" }
+            require(scheme.isNotBlank()) { "scheme must not be blank" }
+            require(key == null || key.isNotEmpty()) { "key must not be empty" }
+            require(rootKey == null || rootKey.isNotEmpty()) { "rootKey must not be empty" }
             boundBindings[sessionId]?.also { binding ->
                 binding.activity = activity
                 return@synchronized binding
@@ -80,7 +89,7 @@ class ActivitySessionBinding private constructor(
             val registration = GraniteMicroFrontendRuntimeHost.registerSession(sessionId)
             ActivitySessionBinding(sessionId, activity.application, activity, registration).also { binding ->
                 boundBindings[sessionId] = binding
-                registration.openApp(appName, scheme)
+                registration.openApp(appName, scheme, key, rootKey)
             }
         }
     }
