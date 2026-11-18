@@ -7,8 +7,48 @@
 #import <React-callinvoker/ReactCommon/CallInvoker.h>
 #import <jsi/jsi.h>
 
+#include <atomic>
+#include <chrono>
+#include <string>
+
 static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
     @"GraniteMicroFrontendRuntime";
+
+namespace {
+
+std::string GraniteMintEvalId() {
+  static std::atomic<uint64_t> counter{0};
+  const auto now = std::chrono::steady_clock::now().time_since_epoch().count();
+  return std::to_string(now) + "-" + std::to_string(++counter);
+}
+
+// Deferred evaluation with an evaluation scope argument (same contract as Android's BundleEvaluator).
+// A container bundle hands its body back through `__GRANITE_DEFERRED_EVAL__` instead of running it; the body is
+// then called with `{ evalId, sourceUrl }`. Bundles without the wrapper run during evaluateJavaScript as before.
+void GraniteEvaluateWithScope(facebook::jsi::Runtime &runtime,
+                              std::string source,
+                              const std::string &sourceUrl) {
+  namespace jsi = facebook::jsi;
+  auto global = runtime.global();
+  global.setProperty(runtime, "__GRANITE_DEFERRED_EVAL__", true);
+  try {
+    runtime.evaluateJavaScript(std::make_unique<jsi::StringBuffer>(std::move(source)), sourceUrl);
+  } catch (...) {
+    global.setProperty(runtime, "__GRANITE_DEFERRED_EVAL__", jsi::Value::undefined());
+    throw;
+  }
+  auto slot = global.getProperty(runtime, "__GRANITE_DEFERRED_EVAL__");
+  global.setProperty(runtime, "__GRANITE_DEFERRED_EVAL__", jsi::Value::undefined());
+  if (!slot.isObject() || !slot.getObject(runtime).isFunction(runtime)) {
+    return;  // bundle without the deferred wrapper: it already ran during evaluation
+  }
+  auto scope = jsi::Object(runtime);
+  scope.setProperty(runtime, "evalId", jsi::String::createFromUtf8(runtime, GraniteMintEvalId()));
+  scope.setProperty(runtime, "sourceUrl", jsi::String::createFromUtf8(runtime, sourceUrl));
+  slot.getObject(runtime).getFunction(runtime).call(runtime, scope);
+}
+
+} // namespace
 
 @interface RCTBridge (GraniteMicroFrontendRuntime)
 - (void *)runtime;
@@ -101,9 +141,7 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
         return;
       }
       try {
-        runtime->evaluateJavaScript(
-            std::make_unique<facebook::jsi::StringBuffer>(std::move(source)),
-            sourceUrl);
+        GraniteEvaluateWithScope(*runtime, std::move(source), sourceUrl);
         resolve(nil);
       } catch (const std::exception &exception) {
         NSString *message = [NSString stringWithUTF8String:exception.what()];
