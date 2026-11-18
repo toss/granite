@@ -18,7 +18,14 @@ export function microFrontend(options: MicroFrontendPluginOptions): PluginOption
       .filter(([, value]) => value.eager !== true)
       .map(([name]) => name)
   );
-  return [prelude(options, shared), external.size > 0 && sharedModules(external), dispose(options.appName)];
+  // Remote bundles (they expose modules) initialize as a container by default; the host bundle does not.
+  const isContainer = options.containerInit ?? Object.keys(options.exposes ?? {}).length > 0;
+  return [
+    prelude(options, shared),
+    external.size > 0 && sharedModules(external),
+    dispose(options.appName),
+    isContainer && containerInit(options.appName),
+  ];
 }
 
 function prelude(options: MicroFrontendPluginOptions, shared: SharedConfig | undefined): Plugin {
@@ -147,22 +154,14 @@ function dispose(appName: string): Plugin {
   };
 }
 
-export interface ContainerInitOptions {
-  /** The remote's app name, passed to the host's `beforeInitContainer` hook. */
-  readonly appName: string;
-}
-
 /**
  * Remote bundles: defer evaluation so that the native evaluator can pass this evaluation's identity
  * (`{ evalId, sourceUrl }`) as an argument, then initialize the container through the host runtime's
- * `hooks.beforeInitContainer` before any module runs. Shared modules of the bundle then come from the
- * container's share scope.
- *
- * Compatibility: a native evaluator without deferred evaluation, or a host runtime without the hook,
- * runs the bundle immediately with the host's shared modules, exactly as before.
+ * `hooks.beforeInitContainer` before any module runs. Shared-module stubs then read the container's share scope.
+ * Without native deferred evaluation, or without the host runtime entry, the bundle runs as before.
  */
-export function containerInit(options: ContainerInitOptions): Plugin {
-  const appName = JSON.stringify(options.appName);
+function containerInit(appNameValue: string): Plugin {
+  const appName = JSON.stringify(appNameValue);
   const prefix =
     '(function(__graniteBody){if(globalThis.__GRANITE_DEFERRED_EVAL__===true){globalThis.__GRANITE_DEFERRED_EVAL__=__graniteBody;}else{__graniteBody(undefined);}})(function(__graniteEval){' +
     'var __graniteContext=globalThis.__MICRO_FRONTEND__;' +

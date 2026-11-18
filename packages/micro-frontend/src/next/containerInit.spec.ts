@@ -1,12 +1,17 @@
 import vm from 'node:vm';
 import { flattenPluginOption, type Plugin } from 'rollipop';
 import { describe, expect, it } from 'vitest';
-import { containerInit, microFrontend } from './index';
+import { microFrontend } from './index';
 
 type Context = Record<string, unknown> & { globalThis?: unknown };
 
+async function containerPlugin(options: Parameters<typeof microFrontend>[0]): Promise<Plugin | undefined> {
+  const plugins = await flattenPluginOption(microFrontend(options));
+  return plugins.find((plugin) => plugin.name === 'granite:micro-frontend:container-init');
+}
+
 async function wrap(code: string): Promise<string> {
-  const plugin = containerInit({ appName: 'shopping' });
+  const plugin = (await containerPlugin({ appName: 'shopping', exposes: { './App': './src/App.tsx' } }))!;
   if (typeof plugin.renderChunk !== 'function') throw new Error('Missing renderChunk');
   const result = (await plugin.renderChunk.call({} as never, code, {} as never, {} as never, {} as never)) as {
     code: string;
@@ -27,7 +32,15 @@ function run(code: string, context: Context): Context {
   return context;
 }
 
-describe('containerInit plugin', () => {
+describe('container init (microFrontend plugin)', () => {
+  it('is on for remote bundles, off for the host, and can be turned off', async () => {
+    expect(await containerPlugin({ appName: 'shopping', exposes: { './App': './src/App.tsx' } })).toBeDefined();
+    expect(await containerPlugin({ appName: 'shared', shared: { react: { eager: true } } })).toBeUndefined();
+    expect(
+      await containerPlugin({ appName: 'shopping', exposes: { './App': './src/App.tsx' }, containerInit: false })
+    ).toBeUndefined();
+  });
+
   it('runs the bundle immediately without a deferred native evaluator', async () => {
     const context = run(await wrap('globalThis.ran = __graniteShareScope;'), { __MICRO_FRONTEND__: {} });
     expect(context).toHaveProperty('ran', undefined);
