@@ -33,12 +33,9 @@ function run(code: string, context: Context): Context {
 }
 
 describe('container init (microFrontend plugin)', () => {
-  it('is on for remote bundles, off for the host, and can be turned off', async () => {
+  it('is on for remote bundles and off for the host', async () => {
     expect(await containerPlugin({ appName: 'shopping', exposes: { './App': './src/App.tsx' } })).toBeDefined();
     expect(await containerPlugin({ appName: 'shared', shared: { react: { eager: true } } })).toBeUndefined();
-    expect(
-      await containerPlugin({ appName: 'shopping', exposes: { './App': './src/App.tsx' }, containerInit: false })
-    ).toBeUndefined();
   });
 
   it('runs the bundle immediately without a deferred native evaluator', async () => {

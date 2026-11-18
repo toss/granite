@@ -18,8 +18,9 @@ export function microFrontend(options: MicroFrontendPluginOptions): PluginOption
       .filter(([, value]) => value.eager !== true)
       .map(([name]) => name)
   );
-  // Remote bundles (they expose modules) initialize as a container by default; the host bundle does not.
-  const isContainer = options.containerInit ?? Object.keys(options.exposes ?? {}).length > 0;
+  // Remote bundles (they expose modules) always initialize as a container; the host bundle does not.
+  // Without native deferred evaluation or a host hook, a container runs exactly as before.
+  const isContainer = Object.keys(options.exposes ?? {}).length > 0;
   return [
     prelude(options, shared),
     external.size > 0 && sharedModules(external),
