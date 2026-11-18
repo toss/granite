@@ -1,5 +1,12 @@
 export { createMicroFrontendRuntime } from './createMicroFrontendRuntime';
-export type { CreateMicroFrontendRuntimeOptions } from './createMicroFrontendRuntime';
+export type { CreateMicroFrontendRuntimeOptions, MicroFrontendRuntimeHooks } from './createMicroFrontendRuntime';
+export type {
+  BeforeInitContainerArgs,
+  BeforeInitContainerHook,
+  BeforeInitContainerResult,
+  MicroFrontendContainer,
+  MicroFrontendShareScope,
+} from './runtime/containerInit';
 export { createRoute } from './createRoute';
 export type { MicroFrontendRouteOptions } from './createRoute';
 export { findAppNameBySourceURL, getAppName } from './runtime/getAppName';

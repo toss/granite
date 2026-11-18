@@ -103,7 +103,10 @@ function sharedModules(external: ReadonlySet<string>): Plugin {
         return `
           var shared = globalThis.__MICRO_FRONTEND__.__SHARED__[${name}];
           if (!shared) throw new Error('Shared module ' + ${name} + ' is not registered');
-          var original = shared.get();
+          // Inside a container built with containerInit(), read this container's share scope (host hook).
+          var original = typeof __graniteShareScope !== 'undefined' && __graniteShareScope != null
+            ? __graniteShareScope.get(${name})
+            : shared.get();
           var facade = {};
           if (original != null) for (const key of Reflect.ownKeys(original)) {
             if (key === '__esModule' || !Object.getOwnPropertyDescriptor(original, key)?.enumerable) continue;
@@ -140,6 +143,36 @@ function dispose(appName: string): Plugin {
         const transformed = transformDisposeOwnership(id, source, { appName });
         return source === transformed ? null : { code: transformed, map: null };
       },
+    },
+  };
+}
+
+export interface ContainerInitOptions {
+  /** The remote's app name, passed to the host's `beforeInitContainer` hook. */
+  readonly appName: string;
+}
+
+/**
+ * Remote bundles: defer evaluation so that the native evaluator can pass this evaluation's identity
+ * (`{ evalId, sourceUrl }`) as an argument, then initialize the container through the host runtime's
+ * `hooks.beforeInitContainer` before any module runs. Shared modules of the bundle then come from the
+ * container's share scope.
+ *
+ * Compatibility: a native evaluator without deferred evaluation, or a host runtime without the hook,
+ * runs the bundle immediately with the host's shared modules, exactly as before.
+ */
+export function containerInit(options: ContainerInitOptions): Plugin {
+  const appName = JSON.stringify(options.appName);
+  const prefix =
+    '(function(__graniteBody){if(globalThis.__GRANITE_DEFERRED_EVAL__===true){globalThis.__GRANITE_DEFERRED_EVAL__=__graniteBody;}else{__graniteBody(undefined);}})(function(__graniteEval){' +
+    'var __graniteContext=globalThis.__MICRO_FRONTEND__;' +
+    'var __graniteShareScope=__graniteEval!=null&&__graniteContext!=null&&typeof __graniteContext.initContainer==="function"' +
+    `?__graniteContext.initContainer({evalId:__graniteEval.evalId,sourceUrl:__graniteEval.sourceUrl,appName:${appName}}):undefined;`;
+  return {
+    name: 'granite:micro-frontend:container-init',
+    renderChunk(code) {
+      // Same first line as the original chunk, so source maps stay line-aligned.
+      return { code: `${prefix}${code}\n});\n`, map: null };
     },
   };
 }
