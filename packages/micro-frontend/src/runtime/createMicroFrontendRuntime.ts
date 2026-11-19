@@ -15,6 +15,7 @@ import { setMicroFrontendLifecycleCallback } from './lifecycle';
 import { installNativeComponentRegistryCompatibility } from './nativeComponentRegistryCompatibility';
 import { parseAppRequest } from './parseAppRequest';
 import { createSessionStore } from './sessionStore';
+import { setSessionUnmountHandler } from './sessionUnmount';
 
 export interface NativeMicroFrontendRuntimeEvent {
   readonly name: string;
@@ -29,6 +30,8 @@ export interface NativeMicroFrontendRuntimeEvent {
 export interface NativeMicroFrontendRuntime {
   readonly evaluateScript: (request: { readonly filePath: string }) => Promise<void>;
   readonly startEventDelivery: () => void;
+  /** The closed session's React tree has unmounted. Optional: older native runtimes do not implement it. */
+  readonly sessionDidUnmount?: (sessionId: string) => void;
   readonly onEvent: (
     listener: (event: NativeMicroFrontendRuntimeEvent) => void
   ) => MicroFrontendRuntimeEventSubscription;
@@ -59,6 +62,8 @@ export function createMicroFrontendRuntimeWithDependencies(
   const sessionListeners = new Set<(sessions: readonly MicroFrontendSessionState[]) => void>();
   const eventListeners = new Set<(event: MicroFrontendSessionEvent) => void>();
   let nativeSubscription: MicroFrontendRuntimeEventSubscription | undefined;
+  // Sessions native has closed whose tree has not unmounted yet. Each is reported to native once.
+  const sessionsAwaitingUnmount = new Set<string>();
 
   function startEventDelivery() {
     if (nativeSubscription != null) {
@@ -78,6 +83,7 @@ export function createMicroFrontendRuntimeWithDependencies(
               openPendingHostComponentSession(parsedEvent.params.sessionId);
             }
             if (parsedEvent.name === 'closeApp') {
+              sessionsAwaitingUnmount.add(parsedEvent.params.sessionId);
               closePendingHostComponentSession(parsedEvent.params.sessionId);
             }
             notifyListeners(sessionListeners, sessionStore.getSessions());
@@ -158,6 +164,11 @@ export function createMicroFrontendRuntimeWithDependencies(
   };
 
   setMicroFrontendLifecycleCallback(runtime, dependencies.onLifecycleEvent);
+  setSessionUnmountHandler(runtime, (sessionId) => {
+    if (sessionsAwaitingUnmount.delete(sessionId)) {
+      dependencies.nativeRuntime.sessionDidUnmount?.(sessionId);
+    }
+  });
 
   return runtime;
 }

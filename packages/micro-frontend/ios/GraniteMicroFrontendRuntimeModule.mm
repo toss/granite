@@ -158,6 +158,10 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
   [GraniteMicroFrontendRuntimeHost startEventDeliveryToEventSink:self];
 }
 
+- (void)sessionDidUnmount:(NSString *)sessionId {
+  [GraniteMicroFrontendRuntimeHost sessionDidUnmount:sessionId];
+}
+
 - (BOOL)enqueueRuntimeEvent:(NSDictionary *)event {
   return [self scheduleRuntimeEvent:event];
 }

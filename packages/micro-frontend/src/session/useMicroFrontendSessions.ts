@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import { emitMicroFrontendLifecycleEvent } from '../runtime/lifecycle';
 import { disposeAppResources } from '../runtime/registry';
+import { notifySessionUnmounted } from '../runtime/sessionUnmount';
 import type {
   MicroFrontendLifecycleEvent,
   MicroFrontendLifecycleSession,
@@ -31,6 +32,12 @@ export function useMicroFrontendSessions(
     const inactiveAppNames = new Set(
       inactiveSessions.map(({ appName }) => appName).filter((appName) => !activeAppNames.has(appName))
     );
+
+    // This effect runs after every cleanup of the subtrees this commit removed, so the closed sessions' teardown
+    // is done. Native may now release what those sessions owned.
+    inactiveSessions.forEach((session) => {
+      notifySessionUnmounted(runtime, session.sessionId);
+    });
 
     mountedSessions.forEach((session) => {
       emitMicroFrontendLifecycleEvent(runtime, createLifecycleEvent('mounted', session, sessions));
