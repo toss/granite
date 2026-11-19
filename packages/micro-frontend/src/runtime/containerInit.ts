@@ -64,32 +64,6 @@ function toContainer(value: unknown): MicroFrontendContainer | undefined {
   return Object.freeze({ evalId, appName, sourceUrl: typeof sourceUrl === 'string' ? sourceUrl : undefined });
 }
 
-/** Granite-owned entry (non-enumerable, like `initContainer`) for code that has no import of this package. */
-const GET_EVALUATING_CONTAINER = 'getEvaluatingContainer';
-
-let evaluatingContainer: MicroFrontendContainer | undefined;
-
-/**
- * The container whose bundle is running its top-level code right now, or `undefined` outside a container
- * evaluation (the host bundle, a bundle without `containerInit()`, or any later call).
- *
- * The window is the evaluation's synchronous run: it opens when the bundle initializes its container and closes
- * at the next microtask checkpoint, after the top-level code returns. Code that registers what a container exposes
- * (for example an app's root component) can use it to keep per-runtime registries out of the container path.
- */
-export function getEvaluatingContainer(): MicroFrontendContainer | undefined {
-  return evaluatingContainer;
-}
-
-function enterEvaluation(container: MicroFrontendContainer): void {
-  evaluatingContainer = container;
-  queueMicrotask(() => {
-    if (evaluatingContainer === container) {
-      evaluatingContainer = undefined;
-    }
-  });
-}
-
 /** Installs (or clears) the host's hook. Without a hook every container uses the host's share scope. */
 export function installContainerInit(hook: BeforeInitContainerHook | undefined): void {
   const context = getMicroFrontendGlobalContext();
@@ -98,12 +72,6 @@ export function installContainerInit(hook: BeforeInitContainerHook | undefined):
     enumerable: false,
     writable: false,
     value: (value: unknown): MicroFrontendShareScope | undefined => initContainer(value, hook),
-  });
-  Reflect.defineProperty(context, GET_EVALUATING_CONTAINER, {
-    configurable: true,
-    enumerable: false,
-    writable: false,
-    value: getEvaluatingContainer,
   });
 }
 
@@ -116,7 +84,6 @@ export function initContainer(
     // Not an evaluation argument from a known native evaluator: behave exactly like an unwrapped bundle.
     return undefined;
   }
-  enterEvaluation(container);
   const shareScope = hostShareScope();
   const result = hook?.({ container, shareScope });
   return result?.shareScope ?? shareScope;

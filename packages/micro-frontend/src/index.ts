@@ -7,7 +7,6 @@ export type {
   MicroFrontendContainer,
   MicroFrontendShareScope,
 } from './runtime/containerInit';
-export { getEvaluatingContainer } from './runtime/containerInit';
 export { createRoute } from './createRoute';
 export type { MicroFrontendRouteOptions } from './createRoute';
 export { findAppNameBySourceURL, getAppName } from './runtime/getAppName';
