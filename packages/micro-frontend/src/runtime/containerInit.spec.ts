@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { installContainerInit, type MicroFrontendShareScope } from './containerInit';
+import { getEvaluatingContainer, installContainerInit, type MicroFrontendShareScope } from './containerInit';
 import { getMicroFrontendGlobalContext } from './globalContext';
 
 function initContainer(value: unknown): MicroFrontendShareScope | undefined {
@@ -59,5 +59,30 @@ describe('container init', () => {
     });
     expect(initContainer(undefined)).toBeUndefined();
     expect(initContainer({ evalId: '', appName: 'shopping' })).toBeUndefined();
+  });
+
+  it('reports the container whose top-level code is running, until the evaluation returns', async () => {
+    installContainerInit(undefined);
+    const fromGlobal = Reflect.get(getMicroFrontendGlobalContext(), 'getEvaluatingContainer') as () => unknown;
+    expect(getEvaluatingContainer()).toBeUndefined();
+
+    // The bundle body runs synchronously after initContainer.
+    initContainer({ evalId: 'e1', appName: 'shopping' });
+    expect(getEvaluatingContainer()).toEqual({ evalId: 'e1', appName: 'shopping', sourceUrl: undefined });
+    expect(fromGlobal()).toBe(getEvaluatingContainer());
+
+    await Promise.resolve();
+    expect(getEvaluatingContainer()).toBeUndefined();
+  });
+
+  it('does not report an evaluation without a native evaluation argument', () => {
+    installContainerInit(undefined);
+    initContainer(undefined);
+    expect(getEvaluatingContainer()).toBeUndefined();
+  });
+
+  it('keeps the evaluation-identity global key set unchanged', () => {
+    installContainerInit(undefined);
+    expect(Object.keys(getMicroFrontendGlobalContext())).toEqual(['__INSTANCES__', '__SHARED__', '__CONTAINERS__']);
   });
 });
