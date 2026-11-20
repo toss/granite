@@ -9,7 +9,7 @@ import {
   type NativeMicroFrontendRuntimeEvent,
 } from '../runtime/createMicroFrontendRuntime';
 import { parseNativeRuntimeEvent } from '../runtime/parseNativeRuntimeEvent';
-import { microFrontendModuleRegistry } from '../runtime/registry';
+import { getMicroFrontendRuntimeContext, microFrontendModuleRegistry } from '../runtime/registry';
 import type { MicroFrontendRuntimeApi } from '../types';
 
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true);
@@ -101,7 +101,7 @@ describe('useMicroFrontendSessions session unmount', () => {
     expect(fixture.sessionDidUnmount).toHaveBeenCalledOnce();
   });
 
-  it('reports each closed session once, even when several components read the sessions', () => {
+  it('reports each closed session once, even when several components read the sessions', async () => {
     // Given
     const order: string[] = [];
     const fixture = createFixture(order);
@@ -110,11 +110,29 @@ describe('useMicroFrontendSessions session unmount', () => {
     act(() => fixture.open('app-1', 'app-1:1'));
 
     // When
-    act(() => fixture.close('app-1:1'));
+    await act(async () => fixture.close('app-1:1'));
 
     // Then
     expect(fixture.sessionDidUnmount).toHaveBeenCalledOnce();
     expect(fixture.sessionDidUnmount).toHaveBeenCalledWith('app-1:1');
+  });
+
+  it('reports the last session of an app after the app dispose callbacks have settled', async () => {
+    // Given
+    const order: string[] = [];
+    const fixture = createFixture(order);
+    renderHost(fixture.runtime, order);
+    act(() => fixture.open('app-1', 'app-1:1'));
+    getMicroFrontendRuntimeContext().dispose('app-1', async () => {
+      await Promise.resolve();
+      order.push('dispose:app-1');
+    });
+
+    // When
+    await act(async () => fixture.close('app-1:1'));
+
+    // Then
+    expect(order).toEqual(['cleanup:app-1:1', 'dispose:app-1', 'native:app-1:1']);
   });
 
   it('does not report sessions that native has not closed', () => {
