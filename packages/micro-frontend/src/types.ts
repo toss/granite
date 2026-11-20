@@ -28,6 +28,10 @@ export type MicroFrontendRuntimeEvent =
         readonly sessionId: string;
         readonly appName: string;
         readonly scheme: string;
+        /** Opaque registry binding issued by the native host for this session. */
+        readonly key?: string;
+        /** @deprecated Legacy metadata copy. Configure the root binding once in the host's runtime bootstrap. */
+        readonly rootKey?: string;
       };
     }
   | {
@@ -52,6 +56,9 @@ export interface MicroFrontendSessionState {
   readonly appName: string;
   readonly sessionId: string;
   readonly scheme: string;
+  readonly key?: string;
+  /** @deprecated Legacy metadata copy, not runtime configuration. Use the host's bootstrapped root binding. */
+  readonly rootKey?: string;
   readonly isVisible: boolean;
 }
 

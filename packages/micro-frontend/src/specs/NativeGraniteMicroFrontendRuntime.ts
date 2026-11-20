@@ -4,6 +4,9 @@ export interface NativeMicroFrontendRuntimeEventParams {
   readonly appName?: string;
   readonly sessionId?: string;
   readonly scheme?: string;
+  readonly key?: string;
+  // Legacy wire metadata; retained for compatibility with existing native hosts.
+  readonly rootKey?: string;
   readonly isVisible?: boolean;
 }
 

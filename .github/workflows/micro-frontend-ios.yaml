@@ -1,0 +1,32 @@
+name: Micro-frontend iOS session contracts
+
+on:
+  pull_request:
+    paths:
+      - 'packages/micro-frontend/ios/**'
+      - 'packages/micro-frontend/test/ios/SessionBindingTokenHarness.mm'
+      - '.github/workflows/micro-frontend-ios.yaml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/micro-frontend/ios/**'
+      - 'packages/micro-frontend/test/ios/SessionBindingTokenHarness.mm'
+      - '.github/workflows/micro-frontend-ios.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  session-contracts:
+    runs-on: macos-14
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and run the release-mode native session contract
+        run: |
+          xcrun clang++ -std=c++17 -fobjc-arc -fblocks -DNS_BLOCK_ASSERTIONS=1 \
+            -framework Foundation -I packages/micro-frontend/ios \
+            packages/micro-frontend/ios/GraniteMicroFrontendRuntimeHost.mm \
+            packages/micro-frontend/test/ios/SessionBindingTokenHarness.mm \
+            -o "$RUNNER_TEMP/granite-session-contract"
+          "$RUNNER_TEMP/granite-session-contract"

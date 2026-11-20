@@ -22,6 +22,9 @@ export interface NativeMicroFrontendRuntimeEvent {
     readonly appName?: string;
     readonly sessionId?: string;
     readonly scheme?: string;
+    readonly key?: string;
+    /** Legacy wire metadata; the root binding is owned by the host runtime, not a session. */
+    readonly rootKey?: string;
     readonly isVisible?: boolean;
   };
 }
@@ -65,7 +68,15 @@ export function createMicroFrontendRuntimeWithDependencies(
       return;
     }
     nativeSubscription = dependencies.nativeRuntime.onEvent((event) => {
-      const parsedEvent = dependencies.parseEvent(event);
+      let parsedEvent: MicroFrontendRuntimeEvent;
+      try {
+        parsedEvent = dependencies.parseEvent(event);
+      } catch (error) {
+        // Native hosts must validate before opening a session. Older binaries can
+        // still send malformed payloads; do not let one stop subsequent delivery.
+        console.error('Failed to parse a native micro-frontend runtime event', error);
+        return;
+      }
       switch (parsedEvent.name) {
         case 'preloadApp':
           void preloadApp(parsedEvent.params.appName).catch(dependencies.onPreloadError);

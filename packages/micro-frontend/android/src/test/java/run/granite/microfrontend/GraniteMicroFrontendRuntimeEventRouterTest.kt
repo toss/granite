@@ -191,6 +191,79 @@ class GraniteMicroFrontendRuntimeEventRouterTest {
     }
 
     @Test
+    fun `acknowledged sessions need fresh registration and keys in a replacement runtime`() {
+        val router = GraniteMicroFrontendRuntimeEventRouter()
+        val store = GraniteMicroFrontendSessionStore(router::emit)
+        val firstRuntime = RecordingEventTarget()
+        val replacementRuntime = RecordingEventTarget()
+        router.attach(firstRuntime)
+        router.startEventDelivery(firstRuntime)
+        val previous = store.registerSession("session-1")
+        assertTrue(previous.openApp("shopping", "granite://shopping", "runtime-A:session", "runtime-A:root"))
+        assertTrue(previous.setVisible(true))
+
+        router.detach(firstRuntime)
+        router.attach(replacementRuntime)
+        router.startEventDelivery(replacementRuntime)
+
+        // This queue is a delivery log, not an active-session snapshot. The host
+        // replaces the opened registration and issues keys for the new runtime.
+        assertTrue(replacementRuntime.events.isEmpty())
+        assertFalse(previous.openApp("shopping", "granite://shopping", "runtime-A:session", "runtime-A:root"))
+        previous.close()
+        val current = store.registerSession("session-1")
+        assertTrue(current.openApp("shopping", "granite://shopping", "runtime-B:session", "runtime-B:root"))
+        assertTrue(current.setVisible(true))
+        assertFalse(previous.openApp("shopping", "granite://shopping", "runtime-A:session", "runtime-A:root"))
+
+        assertEquals(
+            listOf(
+                GraniteMicroFrontendEvent.OpenApp(
+                    "session-1", "shopping", "granite://shopping", "runtime-B:session", "runtime-B:root",
+                ),
+                GraniteMicroFrontendEvent.SessionVisibilityChanged("session-1", true),
+            ),
+            replacementRuntime.events,
+        )
+        assertEquals(2, firstRuntime.events.size)
+        current.close()
+    }
+
+    @Test
+    fun `closing a queued session before replacement preserves fresh open ordering`() {
+        val router = GraniteMicroFrontendRuntimeEventRouter()
+        val store = GraniteMicroFrontendSessionStore(router::emit)
+        val unavailable = object : GraniteMicroFrontendRuntimeEventTarget {
+            override fun emit(event: GraniteMicroFrontendEvent, onDelivered: () -> Unit): Boolean = true
+        }
+        router.attach(unavailable)
+        router.startEventDelivery(unavailable)
+        val previous = store.registerSession("session-1")
+        assertTrue(previous.openApp("shopping", "granite://shopping", "runtime-A:session"))
+        router.detach(unavailable)
+
+        // Unregister alone does not remove queued events. Close before releasing
+        // the registration so a pending old open cannot mask the replacement.
+        assertTrue(previous.closeApp())
+        previous.close()
+        val current = store.registerSession("session-1")
+        assertTrue(current.openApp("shopping", "granite://shopping", "runtime-B:session"))
+        val replacement = RecordingEventTarget()
+        router.attach(replacement)
+        router.startEventDelivery(replacement)
+
+        assertEquals(
+            listOf(
+                GraniteMicroFrontendEvent.OpenApp("session-1", "shopping", "granite://shopping", "runtime-A:session"),
+                GraniteMicroFrontendEvent.CloseApp("session-1"),
+                GraniteMicroFrontendEvent.OpenApp("session-1", "shopping", "granite://shopping", "runtime-B:session"),
+            ),
+            replacement.events,
+        )
+        current.close()
+    }
+
+    @Test
     fun `events beyond the pending limit are dropped while no runtime consumes them`() {
         val router = GraniteMicroFrontendRuntimeEventRouter()
         val runtime = RecordingEventTarget()

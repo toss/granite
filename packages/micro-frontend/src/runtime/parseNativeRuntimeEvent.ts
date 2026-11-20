@@ -10,6 +10,21 @@ function requireString(event: NativeMicroFrontendRuntimeEvent, fieldName: 'appNa
   return value;
 }
 
+function parseRegistryKey(
+  event: NativeMicroFrontendRuntimeEvent,
+  field: 'key' | 'rootKey'
+): { key?: string; rootKey?: string } {
+  const key = event.params[field];
+  // Older hosts omit the field; native event serializers may also encode absence as null.
+  if (key == null) {
+    return {};
+  }
+  if (typeof key !== 'string' || key.length === 0) {
+    throw new InvalidNativeRuntimeEventError(event.name, field);
+  }
+  return { [field]: key };
+}
+
 export function parseNativeRuntimeEvent(event: NativeMicroFrontendRuntimeEvent): MicroFrontendRuntimeEvent {
   switch (event.name) {
     case 'preloadApp':
@@ -25,6 +40,8 @@ export function parseNativeRuntimeEvent(event: NativeMicroFrontendRuntimeEvent):
           appName: requireString(event, 'appName'),
           scheme: requireString(event, 'scheme'),
           sessionId: requireString(event, 'sessionId'),
+          ...parseRegistryKey(event, 'key'),
+          ...parseRegistryKey(event, 'rootKey'),
         },
       };
 

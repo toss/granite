@@ -25,6 +25,26 @@ static void GraniteMicroFrontendRequireMainThread(void) {
   }
 }
 
+static void GraniteMicroFrontendValidateOpenApp(NSString *appName,
+                                              NSString *scheme,
+                                              NSString *key,
+                                              NSString *rootKey) {
+  // Validation must remain active when assertions are disabled and precede all
+  // session/lifecycle mutations, otherwise JS rejects an already consumed event.
+  if (appName.length == 0) {
+    [NSException raise:NSInvalidArgumentException format:@"appName must not be empty"];
+  }
+  if (scheme.length == 0) {
+    [NSException raise:NSInvalidArgumentException format:@"scheme must not be empty"];
+  }
+  if (key != nil && key.length == 0) {
+    [NSException raise:NSInvalidArgumentException format:@"key must not be empty"];
+  }
+  if (rootKey != nil && rootKey.length == 0) {
+    [NSException raise:NSInvalidArgumentException format:@"rootKey must not be empty"];
+  }
+}
+
 @interface GraniteMicroFrontendSessionEntry : NSObject
 @property(nonatomic, copy) NSString *token;
 @property(nonatomic, assign) BOOL opened;
@@ -62,8 +82,14 @@ static void GraniteMicroFrontendRequireMainThread(void) {
 @implementation GraniteMicroFrontendSessionRegistration
 
 - (void)openAppWithAppName:(NSString *)appName scheme:(NSString *)scheme {
-  NSParameterAssert(appName.length > 0);
-  NSParameterAssert(scheme.length > 0);
+  [self openAppWithAppName:appName scheme:scheme key:nil rootKey:nil];
+}
+
+- (void)openAppWithAppName:(NSString *)appName
+                  scheme:(NSString *)scheme
+                     key:(nullable NSString *)key
+                 rootKey:(nullable NSString *)rootKey {
+  GraniteMicroFrontendValidateOpenApp(appName, scheme, key, rootKey);
   BOOL shouldEmit = NO;
   [runtimeLock lock];
   @try {
@@ -76,7 +102,11 @@ static void GraniteMicroFrontendRequireMainThread(void) {
     [runtimeLock unlock];
   }
   if (shouldEmit) {
-    [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId appName:appName scheme:scheme];
+    [GraniteMicroFrontendRuntimeHost emitOpenApp:_sessionId
+                                       appName:appName
+                                        scheme:scheme
+                                           key:key
+                                       rootKey:rootKey];
   }
 }
 
@@ -166,11 +196,20 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
                                                                         sessionId:(NSString *)sessionId
                                                                           appName:(NSString *)appName
                                                                            scheme:(NSString *)scheme {
+  return [self bindViewController:viewController sessionId:sessionId appName:appName scheme:scheme key:nil rootKey:nil];
+}
+
++ (nullable GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
+                                                                        sessionId:(NSString *)sessionId
+                                                                          appName:(NSString *)appName
+                                                                           scheme:(NSString *)scheme
+                                                                              key:(nullable NSString *)key
+                                                                          rootKey:(nullable NSString *)rootKey {
   GraniteMicroFrontendRequireMainThread();
-  NSParameterAssert(viewController != nil);
-  NSParameterAssert(sessionId.length > 0);
-  NSParameterAssert(appName.length > 0);
-  NSParameterAssert(scheme.length > 0);
+  if (viewController == nil || sessionId.length == 0) {
+    [NSException raise:NSInvalidArgumentException format:@"viewController and a nonempty sessionId are required"];
+  }
+  GraniteMicroFrontendValidateOpenApp(appName, scheme, key, rootKey);
 
   GraniteMicroFrontendViewControllerSessionBinding *existingBinding =
       objc_getAssociatedObject(viewController, &GraniteMicroFrontendViewControllerSessionBindingKey);
@@ -215,7 +254,7 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
       &GraniteMicroFrontendViewControllerSessionBindingKey,
       binding,
       OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-  [registration openAppWithAppName:appName scheme:scheme];
+  [registration openAppWithAppName:appName scheme:scheme key:key rootKey:rootKey];
   [binding updateVisibility];
   return binding;
 }
@@ -305,6 +344,15 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
                                                                         sessionId:(NSString *)sessionId
                                                                           appName:(NSString *)appName
                                                                            scheme:(NSString *)scheme {
+  return [self bindViewController:viewController sessionId:sessionId appName:appName scheme:scheme key:nil rootKey:nil];
+}
+
++ (nullable GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
+                                                                        sessionId:(NSString *)sessionId
+                                                                          appName:(NSString *)appName
+                                                                           scheme:(NSString *)scheme
+                                                                              key:(nullable NSString *)key
+                                                                          rootKey:(nullable NSString *)rootKey {
   NSParameterAssert(NO);
   return nil;
 }
@@ -359,14 +407,26 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 + (void)emitOpenApp:(NSString *)sessionId
              appName:(NSString *)appName
               scheme:(NSString *)scheme {
-  [self emitEvent:@{
-    @"name" : @"openApp",
-    @"params" : @{
+  [self emitOpenApp:sessionId appName:appName scheme:scheme key:nil rootKey:nil];
+}
+
++ (void)emitOpenApp:(NSString *)sessionId
+           appName:(NSString *)appName
+            scheme:(NSString *)scheme
+               key:(nullable NSString *)key
+           rootKey:(nullable NSString *)rootKey {
+  NSMutableDictionary *params = [@{
       @"sessionId" : sessionId,
       @"appName" : appName,
       @"scheme" : scheme,
-    },
-  }];
+  } mutableCopy];
+  if (key != nil) {
+    params[@"key"] = key;
+  }
+  if (rootKey != nil) {
+    params[@"rootKey"] = rootKey;
+  }
+  [self emitEvent:@{ @"name" : @"openApp", @"params" : params }];
 }
 
 + (void)emitCloseApp:(NSString *)sessionId {

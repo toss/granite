@@ -42,4 +42,26 @@ describe('parseNativeRuntimeEvent', () => {
       })
     ).toThrow(InvalidNativeRuntimeEventError);
   });
+
+  it('preserves a native registry key without requiring it from older hosts', () => {
+    const params = { appName: 'shopping', scheme: 'granite://shopping', sessionId: 'session-1' };
+    expect(parseNativeRuntimeEvent({ name: 'openApp', params: { ...params, key: 'native:opaque' } })).toEqual({
+      name: 'openApp',
+      params: { ...params, key: 'native:opaque' },
+    });
+    expect(
+      parseNativeRuntimeEvent({ name: 'openApp', params: { ...params, rootKey: 'native:root' } })
+    ).toEqual({ name: 'openApp', params: { ...params, rootKey: 'native:root' } });
+    expect(
+      parseNativeRuntimeEvent({ name: 'openApp', params: { ...params, key: null as unknown as string } })
+    ).toEqual({ name: 'openApp', params });
+    for (const key of ['', 42, {}]) {
+      expect(() =>
+        parseNativeRuntimeEvent({ name: 'openApp', params: { ...params, key: key as string } })
+      ).toThrow(InvalidNativeRuntimeEventError);
+      expect(() =>
+        parseNativeRuntimeEvent({ name: 'openApp', params: { ...params, rootKey: key as string } })
+      ).toThrow(InvalidNativeRuntimeEventError);
+    }
+  });
 });
