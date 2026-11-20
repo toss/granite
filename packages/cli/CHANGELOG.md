@@ -1,5 +1,12 @@
 # @granite-js/cli
 
+## 3.0.9
+
+### Patch Changes
+
+- @granite-js/config@3.0.9
+- @granite-js/utils@3.0.9
+
 ## 3.0.8
 
 ### Patch Changes
