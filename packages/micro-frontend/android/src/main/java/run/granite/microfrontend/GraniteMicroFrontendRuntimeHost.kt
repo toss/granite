@@ -33,7 +33,14 @@ object GraniteMicroFrontendRuntimeHost {
         eventRouter.startEventDelivery(module)
 
     @JvmSynthetic
-    internal fun detach(module: GraniteMicroFrontendRuntimeModule) = eventRouter.detach(module)
+    internal fun detach(module: GraniteMicroFrontendRuntimeModule) {
+        if (eventRouter.detach(module)) {
+            sessionStore.releaseAllAwaitingUnmount(GraniteMicroFrontendSessionReleaseReason.RUNTIME_DETACHED)
+        }
+    }
+
+    @JvmSynthetic
+    internal fun sessionDidUnmount(sessionId: String) = sessionStore.sessionDidUnmount(sessionId)
 
     @JvmSynthetic
     internal fun unregisterSession(sessionId: String, token: String) {

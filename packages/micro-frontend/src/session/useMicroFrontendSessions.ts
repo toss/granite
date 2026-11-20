@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import { emitMicroFrontendLifecycleEvent } from '../runtime/lifecycle';
 import { disposeAppResources } from '../runtime/registry';
+import { notifySessionUnmounted } from '../runtime/sessionUnmount';
 import type {
   MicroFrontendLifecycleEvent,
   MicroFrontendLifecycleSession,
@@ -49,14 +50,19 @@ export function useMicroFrontendSessions(
       )
     );
 
+    // This effect runs after every cleanup of the subtrees this commit removed, so the closed sessions' teardown
+    // is done. When the last session of an app closes, the app's dispose callbacks are part of that teardown, so
+    // the session is reported after they settle. Native may then release what the session owned.
     inactiveSessions.forEach((session) => {
       const appDisposal = appDisposals.get(session.appName);
       if (appDisposal == null) {
+        notifySessionUnmounted(runtime, session.sessionId);
         emitMicroFrontendLifecycleEvent(runtime, createLifecycleEvent('unmounted', session, sessions));
         return;
       }
 
       void appDisposal.then(() => {
+        notifySessionUnmounted(runtime, session.sessionId);
         emitMicroFrontendLifecycleEvent(
           runtime,
           createLifecycleEvent('unmounted', session, previousSessionsRef.current)
