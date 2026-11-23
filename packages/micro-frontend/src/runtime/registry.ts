@@ -1,4 +1,5 @@
 import type { AppRequest } from '../types';
+import { instantiateContainer, removeContainerDefinition } from './containerInstances';
 import { createContainer, exposeModule, getContainer, getExposedModule, removeContainer } from './containerRegistry';
 import type { MicroFrontendModuleRegistry } from './createMicroFrontendRuntime';
 import { ExposedModuleNotFoundError, SharedModuleAlreadyRegisteredError } from './errors';
@@ -97,6 +98,17 @@ export function importModule<TModule>(request: AppRequest): TModule {
     throw new ExposedModuleNotFoundError(appName, exposedModule);
   }
   return module as TModule;
+}
+
+/** Makes a new instance of the app (see containerInstances.ts) and returns the module it exposes. */
+export function instantiateModule<TModule>(request: AppRequest): { readonly evalId: string; readonly module: TModule } {
+  const { appName, exposedModule } = parseAppRequest(request);
+  const instance = instantiateContainer(appName);
+  const module = getExposedModule(instance.container, exposedModule);
+  if (module == null) {
+    throw new ExposedModuleNotFoundError(appName, exposedModule);
+  }
+  return { evalId: instance.evalId, module: module as TModule };
 }
 
 function ensureRuntimeContext(
@@ -225,5 +237,9 @@ async function runAppDisposeCallbacks(disposeCallbacks: Set<AppDisposeCallback>)
 export const microFrontendModuleRegistry: MicroFrontendModuleRegistry = {
   hasContainer,
   importModule,
-  removeContainer,
+  instantiateModule,
+  removeContainer(appName) {
+    removeContainer(appName);
+    removeContainerDefinition(appName);
+  },
 };

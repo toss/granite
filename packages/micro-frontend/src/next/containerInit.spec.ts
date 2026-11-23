@@ -12,7 +12,9 @@ async function containerPlugin(options: Parameters<typeof microFrontend>[0]): Pr
 
 async function wrap(code: string): Promise<string> {
   const plugin = (await containerPlugin({ appName: 'shopping', exposes: { './App': './src/App.tsx' } }))!;
-  if (typeof plugin.renderChunk !== 'function') throw new Error('Missing renderChunk');
+  if (typeof plugin.renderChunk !== 'function') {
+    throw new Error('Missing renderChunk');
+  }
   const result = (await plugin.renderChunk.call({} as never, code, {} as never, {} as never, {} as never)) as {
     code: string;
   };
@@ -84,5 +86,44 @@ describe('container init (microFrontend plugin)', () => {
     };
     expect(evaluate(undefined)).toBe('host');
     expect(evaluate({ get: (name: string) => ({ owner: `container:${name}` }) })).toBe('container:brick-module');
+  });
+  it('defines the container with its own body, and an instance run does not define it again', async () => {
+    const definitions: Array<{ container: unknown; run: (evaluation: unknown) => void }> = [];
+    const inits: unknown[] = [];
+    const context = run(
+      await wrap('globalThis.runs = (globalThis.runs || 0) + 1; globalThis.lastScope = __graniteShareScope;'),
+      {
+        __GRANITE_DEFERRED_EVAL__: true,
+        __MICRO_FRONTEND__: {
+          defineContainer: (container: unknown, body: (evaluation: unknown) => void) =>
+            definitions.push({ container, run: body }),
+          initContainer: (container: unknown) => {
+            inits.push(container);
+            return { get: () => container };
+          },
+        },
+      }
+    );
+    (context.__GRANITE_DEFERRED_EVAL__ as (evaluation: unknown) => void)({ evalId: 'e1', sourceUrl: 'shopping.hbc' });
+    expect(definitions).toHaveLength(1);
+    expect(definitions[0]!.container).toEqual({ evalId: 'e1', sourceUrl: 'shopping.hbc', appName: 'shopping' });
+    expect(context.runs).toBe(1);
+
+    // The host runs the definition again for another instance: the modules run again with the instance's identity.
+    definitions[0]!.run({ evalId: 'e1.1', sourceUrl: 'shopping.hbc', instanceOf: 'e1' });
+    expect(definitions).toHaveLength(1);
+    expect(context.runs).toBe(2);
+    expect(inits).toEqual([
+      { evalId: 'e1', sourceUrl: 'shopping.hbc', appName: 'shopping' },
+      { evalId: 'e1.1', sourceUrl: 'shopping.hbc', appName: 'shopping' },
+    ]);
+  });
+
+  it('does not define the container without the evaluation argument', async () => {
+    const definitions: unknown[] = [];
+    run(await wrap('globalThis.ran = true;'), {
+      __MICRO_FRONTEND__: { defineContainer: (container: unknown) => definitions.push(container) },
+    });
+    expect(definitions).toEqual([]);
   });
 });

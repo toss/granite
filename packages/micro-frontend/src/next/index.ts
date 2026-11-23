@@ -160,12 +160,19 @@ function dispose(appName: string): Plugin {
  * (`{ evalId, sourceUrl }`) as an argument, then initialize the container through the host runtime's
  * `hooks.beforeInitContainer` before any module runs. Shared-module stubs then read the container's share scope.
  * Without native deferred evaluation, or without the host runtime entry, the bundle runs as before.
+ *
+ * The body is also the container's definition: when native calls it, it hands itself to the host runtime
+ * (`defineContainer`), so the host can run it again for another instance of the app. Each run is a full copy of
+ * the bundle's modules with its own `evalId`, without reading or evaluating the bundle file again. An instance run
+ * carries `instanceOf` and does not define the container again.
  */
 function containerInit(appNameValue: string): Plugin {
   const appName = JSON.stringify(appNameValue);
   const prefix =
-    '(function(__graniteBody){if(globalThis.__GRANITE_DEFERRED_EVAL__===true){globalThis.__GRANITE_DEFERRED_EVAL__=__graniteBody;}else{__graniteBody(undefined);}})(function(__graniteEval){' +
+    '(function(__graniteBody){if(globalThis.__GRANITE_DEFERRED_EVAL__===true){globalThis.__GRANITE_DEFERRED_EVAL__=__graniteBody;}else{__graniteBody(undefined);}})(function __graniteRun(__graniteEval){' +
     'var __graniteContext=globalThis.__MICRO_FRONTEND__;' +
+    'if(__graniteEval!=null&&__graniteEval.instanceOf==null&&__graniteContext!=null&&typeof __graniteContext.defineContainer==="function")' +
+    `{__graniteContext.defineContainer({evalId:__graniteEval.evalId,sourceUrl:__graniteEval.sourceUrl,appName:${appName}},__graniteRun);}` +
     'var __graniteShareScope=__graniteEval!=null&&__graniteContext!=null&&typeof __graniteContext.initContainer==="function"' +
     `?__graniteContext.initContainer({evalId:__graniteEval.evalId,sourceUrl:__graniteEval.sourceUrl,appName:${appName}}):undefined;`;
   return {

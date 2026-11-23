@@ -1,5 +1,6 @@
 import { removePendingHostComponentRoutes } from './host/pendingHostComponentStore';
 import { installContainerInit, type BeforeInitContainerHook } from './runtime/containerInit';
+import { installContainerDefinitions } from './runtime/containerInstances';
 import { createMicroFrontendRuntimeWithDependencies } from './runtime/createMicroFrontendRuntime';
 import { parseNativeRuntimeEvent } from './runtime/parseNativeRuntimeEvent';
 import { microFrontendModuleRegistry } from './runtime/registry';
@@ -23,6 +24,7 @@ export interface MicroFrontendRuntimeHooks {
 
 export function createMicroFrontendRuntime(options: CreateMicroFrontendRuntimeOptions): MicroFrontendRuntimeApi {
   installContainerInit(options.hooks?.beforeInitContainer);
+  installContainerDefinitions();
   return createMicroFrontendRuntimeWithDependencies({
     adapter: options.adapter,
     nativeRuntime: NativeGraniteMicroFrontendRuntime,

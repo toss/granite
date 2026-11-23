@@ -2,6 +2,7 @@ import { openPendingHostComponentSession, closePendingHostComponentSession } fro
 import type {
   AppRequest,
   MicroFrontendAdapter,
+  MicroFrontendAppInstance,
   MicroFrontendLifecycleEvent,
   MicroFrontendRuntimeApi,
   MicroFrontendRuntimeEvent,
@@ -41,6 +42,8 @@ export interface MicroFrontendModuleRegistry {
   readonly hasContainer: (appName: string) => boolean;
   readonly removeContainer: (appName: string) => void;
   readonly importModule: <TModule>(request: AppRequest) => TModule;
+  /** Optional: registries without container definitions cannot make instances. */
+  readonly instantiateModule?: <TModule>(request: AppRequest) => MicroFrontendAppInstance<TModule>;
 }
 
 export interface CreateMicroFrontendRuntimeDependencies {
@@ -147,6 +150,15 @@ export function createMicroFrontendRuntimeWithDependencies(
       const { appName } = parseAppRequest(request);
       await preloadApp(appName);
       return dependencies.registry.importModule<TModule>(request);
+    },
+    async instantiateApp<TModule>(request: AppRequest): Promise<MicroFrontendAppInstance<TModule>> {
+      const { appName } = parseAppRequest(request);
+      await preloadApp(appName);
+      const instantiate = dependencies.registry.instantiateModule;
+      if (instantiate == null) {
+        throw new Error('This micro-frontend registry cannot make app instances');
+      }
+      return instantiate<TModule>(request);
     },
     getSessions: sessionStore.getSessions,
     onSessionsChanged(listener) {

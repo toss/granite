@@ -6,6 +6,7 @@ import {
   resolvePendingHostComponent,
 } from '../host/pendingHostComponentStore';
 import type { MicroFrontendSessionEvent } from '../types';
+import { defineContainer, removeContainerDefinition } from './containerInstances';
 import {
   createMicroFrontendRuntimeWithDependencies,
   type NativeMicroFrontendRuntime,
@@ -91,6 +92,33 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledWith({
       filePath: '/bundles/cart.hbc',
     });
+  });
+
+  it('makes a new instance of an app from its definition without loading the bundle again', async () => {
+    // Given: the bundle defines its container when native evaluates it (containerInit), then runs its first instance.
+    const fixture = createRuntimeFixture();
+    const run = (evaluation: { readonly evalId: string }) => {
+      const container = createContainer('cart');
+      exposeModule(container, './App', { default: () => evaluation.evalId });
+    };
+    vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(async () => {
+      defineContainer({ appName: 'cart', evalId: 'e1', sourceUrl: '/bundles/cart.hbc' }, run);
+      run({ evalId: 'e1' });
+    });
+
+    // When
+    const first = await fixture.runtime.importApp<AppModule>('cart/App');
+    const second = await fixture.runtime.instantiateApp<AppModule>('cart/App');
+    const third = await fixture.runtime.instantiateApp<AppModule>('cart/App');
+
+    // Then
+    expect(first.default()).toBe('e1');
+    expect([second.evalId, second.module.default()]).toEqual(['e1.1', 'e1.1']);
+    expect([third.evalId, third.module.default()]).toEqual(['e1.2', 'e1.2']);
+    expect(await fixture.runtime.importApp<AppModule>('cart/App')).toBe(first);
+    expect(fixture.adapter.loadBundle).toHaveBeenCalledOnce();
+    expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledOnce();
+    removeContainerDefinition('cart');
   });
 
   it('reuses a native view registered by the host when a remote bundle evaluates its wrapper', async () => {

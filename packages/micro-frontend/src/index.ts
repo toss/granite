@@ -54,6 +54,7 @@ export type {
   AppRequest,
   MicroFrontendAppProps,
   MicroFrontendAdapter,
+  MicroFrontendAppInstance,
   MicroFrontendBundle,
   MicroFrontendBundleRequest,
   MicroFrontendLifecycleCallback,
@@ -64,6 +65,8 @@ export type {
   MicroFrontendRuntimeEventSubscription,
   MicroFrontendSessionEvent,
 } from './types';
+export { ContainerDefinitionNotFoundError, ContainerInstanceError } from './runtime/containerInstances';
+export type { ContainerDefinition } from './runtime/containerInstances';
 export {
   AppContainerNotFoundError,
   ExposedModuleNotFoundError,
