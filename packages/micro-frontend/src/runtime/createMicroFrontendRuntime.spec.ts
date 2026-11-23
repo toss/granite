@@ -26,7 +26,7 @@ function CartPendingComponent() {
   return null;
 }
 
-function createRuntimeFixture() {
+function createRuntimeFixture(options: { afterPreloadApp?: (appName: string) => void | Promise<void> } = {}) {
   const listeners = new Set<(event: NativeMicroFrontendRuntimeEvent) => void>();
   const adapter = {
     loadBundle: vi.fn(async ({ appName }: { readonly appName: string }) => ({
@@ -46,6 +46,7 @@ function createRuntimeFixture() {
     adapter,
     nativeRuntime,
     onPreloadError,
+    afterPreloadApp: options.afterPreloadApp,
     registry: microFrontendModuleRegistry,
     removePendingHostComponentRoutes,
     parseEvent: parseNativeRuntimeEvent,
@@ -222,6 +223,47 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
       filePath: '/bundles/cart.hbc',
     });
     expect(listener).not.toHaveBeenCalled();
+  });
+
+  it('runs afterPreloadApp after every native preload request, also for an app evaluated before', async () => {
+    // Given
+    const afterPreloadApp = vi.fn<(appName: string) => void>();
+    const fixture = createRuntimeFixture({ afterPreloadApp });
+    fixture.runtime.onEvent(() => undefined);
+    vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(async () => {
+      createContainer('cart');
+    });
+
+    // When
+    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
+    await vi.waitFor(() => expect(afterPreloadApp).toHaveBeenCalledTimes(1));
+    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
+
+    // Then: the second request reuses the evaluation and still runs the hook.
+    await vi.waitFor(() => expect(afterPreloadApp).toHaveBeenCalledTimes(2));
+    expect(afterPreloadApp).toHaveBeenCalledWith('cart');
+    expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledOnce();
+  });
+
+  it('does not run afterPreloadApp for imports, and reports its errors as preload errors', async () => {
+    // Given
+    const failure = new Error('hook failed');
+    const afterPreloadApp = vi.fn(async () => {
+      throw failure;
+    });
+    const fixture = createRuntimeFixture({ afterPreloadApp });
+    fixture.runtime.onEvent(() => undefined);
+    vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(async () => {
+      exposeModule(createContainer('cart'), './App', { default: () => 'cart' });
+    });
+
+    // When
+    await fixture.runtime.importApp('cart/App');
+    expect(afterPreloadApp).not.toHaveBeenCalled();
+    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
+
+    // Then
+    await vi.waitFor(() => expect(fixture.onPreloadError).toHaveBeenCalledWith(failure));
   });
 
   it('reports native preload failures without forwarding them to session listeners', async () => {

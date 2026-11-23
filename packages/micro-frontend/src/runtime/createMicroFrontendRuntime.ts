@@ -50,6 +50,11 @@ export interface CreateMicroFrontendRuntimeDependencies {
   readonly adapter: MicroFrontendAdapter;
   readonly nativeRuntime: NativeMicroFrontendRuntime;
   readonly onPreloadError: (error: unknown) => void;
+  /**
+   * Runs after each native preload request, once the app is evaluated (also when it was evaluated before). The host
+   * can prepare what a later session of the app needs, e.g. an instance no session has used yet.
+   */
+  readonly afterPreloadApp?: (appName: string) => void | Promise<void>;
   readonly onLifecycleEvent?: (event: MicroFrontendLifecycleEvent) => void;
   readonly registry: MicroFrontendModuleRegistry;
   readonly removePendingHostComponentRoutes: (appName: string) => void;
@@ -75,9 +80,13 @@ export function createMicroFrontendRuntimeWithDependencies(
     nativeSubscription = dependencies.nativeRuntime.onEvent((event) => {
       const parsedEvent = dependencies.parseEvent(event);
       switch (parsedEvent.name) {
-        case 'preloadApp':
-          void preloadApp(parsedEvent.params.appName).catch(dependencies.onPreloadError);
+        case 'preloadApp': {
+          const { appName } = parsedEvent.params;
+          void preloadApp(appName)
+            .then(() => dependencies.afterPreloadApp?.(appName))
+            .catch(dependencies.onPreloadError);
           return;
+        }
         case 'openApp':
         case 'closeApp':
         case 'sessionVisibilityChanged':

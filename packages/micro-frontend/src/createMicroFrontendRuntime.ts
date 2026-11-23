@@ -20,6 +20,12 @@ export interface MicroFrontendRuntimeHooks {
    * Return a `shareScope` to give that container its own view of shared modules.
    */
   readonly beforeInitContainer?: BeforeInitContainerHook;
+  /**
+   * Runs after each native preload request (`preloadApp` event), once the app is evaluated, also when it was evaluated
+   * before. A preload can then always leave the app ready to open, e.g. by making an instance no session has used yet
+   * (`runtime.instantiateApp`). Errors go to `onPreloadError`.
+   */
+  readonly afterPreloadApp?: (appName: string) => void | Promise<void>;
 }
 
 export function createMicroFrontendRuntime(options: CreateMicroFrontendRuntimeOptions): MicroFrontendRuntimeApi {
@@ -30,6 +36,7 @@ export function createMicroFrontendRuntime(options: CreateMicroFrontendRuntimeOp
     nativeRuntime: NativeGraniteMicroFrontendRuntime,
     onLifecycleEvent: options.onLifecycleEvent,
     onPreloadError: options.onPreloadError ?? (() => undefined),
+    afterPreloadApp: options.hooks?.afterPreloadApp,
     parseEvent: parseNativeRuntimeEvent,
     registry: microFrontendModuleRegistry,
     removePendingHostComponentRoutes,
