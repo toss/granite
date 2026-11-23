@@ -1,5 +1,7 @@
 # @granite-js/style-utils
 
+## 3.0.9
+
 ## 3.0.8
 
 ## 3.0.7

@@ -1,5 +1,12 @@
 # @granite-js/micro-frontend
 
+## 3.0.9
+
+### Patch Changes
+
+- e9f5937: Add `PortalInitialContentMarker.isMarker(view)` on Android. It tells whether a view is the native view that the JS `PortalInitialContentView` component renders, so a host that walks a Portal view tree to find the content a session drew can skip these markers without checking the native view class.
+  - @granite-js/utils@3.0.9
+
 ## 3.0.8
 
 ### Patch Changes
