@@ -6,14 +6,16 @@ import {
   resolvePendingHostComponent,
 } from '../host/pendingHostComponentStore';
 import type { MicroFrontendSessionEvent } from '../types';
+import { resetAppCopies } from './appInstances';
+import { installContainerInit, type MicroFrontendContainer } from './containerInit';
 import { defineContainer, removeContainerDefinition } from './containerInstances';
 import {
   createMicroFrontendRuntimeWithDependencies,
   type NativeMicroFrontendRuntime,
   type NativeMicroFrontendRuntimeEvent,
 } from './createMicroFrontendRuntime';
-import { resetEvalIds } from './evalIds';
 import { getMicroFrontendGlobalContext } from './globalContext';
+import { resetInstanceIds } from './instanceIds';
 import { parseNativeRuntimeEvent } from './parseNativeRuntimeEvent';
 import { createContainer, exposeModule, microFrontendModuleRegistry } from './registry';
 
@@ -27,7 +29,7 @@ function CartPendingComponent() {
   return null;
 }
 
-function createRuntimeFixture(options: { afterPreloadApp?: (appName: string) => void | Promise<void> } = {}) {
+function createRuntimeFixture(options: { instancePerSession?: boolean } = {}) {
   const listeners = new Set<(event: NativeMicroFrontendRuntimeEvent) => void>();
   const adapter = {
     loadBundle: vi.fn(async ({ appName }: { readonly appName: string }) => ({
@@ -47,7 +49,7 @@ function createRuntimeFixture(options: { afterPreloadApp?: (appName: string) => 
     adapter,
     nativeRuntime,
     onPreloadError,
-    afterPreloadApp: options.afterPreloadApp,
+    instancePerSession: () => options.instancePerSession === true,
     registry: microFrontendModuleRegistry,
     removePendingHostComponentRoutes,
     parseEvent: parseNativeRuntimeEvent,
@@ -62,6 +64,34 @@ function createRuntimeFixture(options: { afterPreloadApp?: (appName: string) => 
     onPreloadError,
     runtime,
   };
+}
+
+/**
+ * A cart bundle built with containerInit(), evaluated by native: the wrapper defines the container on the first
+ * evaluation and initializes every instance. Each instance's App answers its instanceId.
+ */
+function createCartBundleFixture(options: { instancePerSession: boolean }) {
+  resetInstanceIds();
+  resetAppCopies();
+  removeContainerDefinition('cart');
+  const containers = new Map<string, MicroFrontendContainer>();
+  let initializing: MicroFrontendContainer | undefined;
+  installContainerInit(({ container }) => {
+    containers.set(container.instanceId, container);
+    initializing = container;
+  });
+  const initContainer = () => Reflect.get(getMicroFrontendGlobalContext(), 'initContainer') as (value: object) => void;
+  const body = (evaluation: { readonly instanceId?: string; readonly instanceOf?: string }) => {
+    if (evaluation.instanceOf == null) {
+      defineContainer({ appName: 'cart', sourceUrl: '/bundles/cart.hbc' }, body);
+    }
+    initContainer()({ instanceId: evaluation.instanceId, appName: 'cart', sourceUrl: '/bundles/cart.hbc' });
+    const instanceId = initializing?.instanceId;
+    exposeModule(createContainer('cart'), './App', { default: () => instanceId ?? 'none' });
+  };
+  const fixture = createRuntimeFixture(options);
+  vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementation(async () => body({}));
+  return { ...fixture, containers };
 }
 
 describe('createMicroFrontendRuntimeWithDependencies', () => {
@@ -96,33 +126,55 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     });
   });
 
-  it('makes a new instance of an app from its definition without loading the bundle again', async () => {
-    // Given: the bundle defines its container when native evaluates it (containerInit), then runs its first instance.
-    resetEvalIds();
-    const fixture = createRuntimeFixture();
-    const run = (evaluation: { readonly evalId?: string }) => {
-      const container = createContainer('cart');
-      exposeModule(container, './App', { default: () => evaluation.evalId ?? 'native' });
-    };
-    vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(async () => {
-      // Native calls the first evaluation with `{ sourceUrl }` only.
-      defineContainer({ appName: 'cart', sourceUrl: '/bundles/cart.hbc' }, run);
-      run({});
-    });
+  it('gives each session its own app instance with instancePerSession, and never hands one to another session', async () => {
+    // Given: native evaluates the cart bundle once; the wrapper defines its container and initializes each instance.
+    const fixture = createCartBundleFixture({ instancePerSession: true });
+    const open = (sessionId: string) =>
+      fixture.emit({ name: 'openApp', params: { appName: 'cart', scheme: 'granite://cart', sessionId } });
+    fixture.runtime.onEvent(() => undefined);
+    open('s1');
+    open('s2');
 
-    // When
-    const first = await fixture.runtime.importApp<AppModule>('cart/App');
-    const second = await fixture.runtime.instantiateApp<AppModule>('cart/App');
-    const third = await fixture.runtime.instantiateApp<AppModule>('cart/App');
+    // When / Then: the first session takes the evaluation, and keeps it.
+    const s1 = await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's1' });
+    expect(s1.default()).toBe('cart@1');
+    expect(await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's1' })).toBe(s1);
 
-    // Then
-    expect(first.default()).toBe('native');
-    expect([second.evalId, second.module.default()]).toEqual(['cart@2', 'cart@2']);
-    expect([third.evalId, third.module.default()]).toEqual(['cart@3', 'cart@3']);
-    expect(await fixture.runtime.importApp<AppModule>('cart/App')).toBe(first);
+    // Another session gets a new instance from the definition, without loading the bundle again.
+    const s2 = await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's2' });
+    expect(s2.default()).toBe('cart@2');
     expect(fixture.adapter.loadBundle).toHaveBeenCalledOnce();
     expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledOnce();
-    removeContainerDefinition('cart');
+
+    // A native preload leaves one instance no session has used yet, and the next session takes it.
+    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
+    await vi.waitFor(() => expect(fixture.containers.get('cart@3')?.owner()).toBeUndefined());
+    expect(fixture.containers.has('cart@3')).toBe(true);
+    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
+    open('s3');
+    expect((await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's3' })).default()).toBe('cart@3');
+    expect(fixture.containers.has('cart@4')).toBe(false);
+
+    // A closed session's instance never goes to another session.
+    fixture.emit({ name: 'closeApp', params: { appName: 'cart', sessionId: 's2' } });
+    open('s4');
+    expect((await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's4' })).default()).toBe('cart@4');
+    expect(fixture.containers.get('cart@2')?.owner()).toBe('s2');
+
+    // Without a session, importApp returns the app's first instance.
+    expect(await fixture.runtime.importApp<AppModule>('cart/App')).toBe(s1);
+  });
+
+  it('gives every session the first instance without instancePerSession', async () => {
+    const fixture = createCartBundleFixture({ instancePerSession: false });
+    fixture.runtime.onEvent(() => undefined);
+    fixture.emit({ name: 'openApp', params: { appName: 'cart', scheme: 'granite://cart', sessionId: 's1' } });
+    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
+
+    const module = await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's1' });
+    expect(module.default()).toBe('cart@1');
+    expect(fixture.containers.get('cart@1')?.owner()).toBeUndefined();
+    expect(fixture.containers.size).toBe(1);
   });
 
   it('reuses a native view registered by the host when a remote bundle evaluates its wrapper', async () => {
@@ -226,47 +278,6 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
       filePath: '/bundles/cart.hbc',
     });
     expect(listener).not.toHaveBeenCalled();
-  });
-
-  it('runs afterPreloadApp after every native preload request, also for an app evaluated before', async () => {
-    // Given
-    const afterPreloadApp = vi.fn<(appName: string) => void>();
-    const fixture = createRuntimeFixture({ afterPreloadApp });
-    fixture.runtime.onEvent(() => undefined);
-    vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(async () => {
-      createContainer('cart');
-    });
-
-    // When
-    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
-    await vi.waitFor(() => expect(afterPreloadApp).toHaveBeenCalledTimes(1));
-    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
-
-    // Then: the second request reuses the evaluation and still runs the hook.
-    await vi.waitFor(() => expect(afterPreloadApp).toHaveBeenCalledTimes(2));
-    expect(afterPreloadApp).toHaveBeenCalledWith('cart');
-    expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledOnce();
-  });
-
-  it('does not run afterPreloadApp for imports, and reports its errors as preload errors', async () => {
-    // Given
-    const failure = new Error('hook failed');
-    const afterPreloadApp = vi.fn(async () => {
-      throw failure;
-    });
-    const fixture = createRuntimeFixture({ afterPreloadApp });
-    fixture.runtime.onEvent(() => undefined);
-    vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(async () => {
-      exposeModule(createContainer('cart'), './App', { default: () => 'cart' });
-    });
-
-    // When
-    await fixture.runtime.importApp('cart/App');
-    expect(afterPreloadApp).not.toHaveBeenCalled();
-    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
-
-    // Then
-    await vi.waitFor(() => expect(fixture.onPreloadError).toHaveBeenCalledWith(failure));
   });
 
   it('reports native preload failures without forwarding them to session listeners', async () => {

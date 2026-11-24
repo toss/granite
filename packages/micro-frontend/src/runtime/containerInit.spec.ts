@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest';
+import { resetAppCopies } from './appInstances';
 import { installContainerInit, type MicroFrontendShareScope } from './containerInit';
-import { evalIdForDefinition, nextEvalId, resetEvalIds } from './evalIds';
 import { getMicroFrontendGlobalContext } from './globalContext';
+import { instanceIdForDefinition, nextInstanceId, resetInstanceIds } from './instanceIds';
 
 function initContainer(value: unknown): MicroFrontendShareScope | undefined {
   const fn = Reflect.get(getMicroFrontendGlobalContext(), 'initContainer') as (value: unknown) => unknown;
@@ -9,7 +10,8 @@ function initContainer(value: unknown): MicroFrontendShareScope | undefined {
 }
 
 afterEach(() => {
-  resetEvalIds();
+  resetInstanceIds();
+  resetAppCopies();
   Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
 });
 
@@ -31,13 +33,13 @@ describe('container init', () => {
   it('lets the host hook give one container its own view of a shared module', () => {
     const seen: unknown[] = [];
     installContainerInit(({ container, shareScope }) => {
-      seen.push(container);
+      seen.push({ instanceId: container.instanceId, appName: container.appName, sourceUrl: container.sourceUrl });
       return {
         shareScope: {
           get(name) {
             switch (name) {
               case 'brick-module':
-                return { scopedTo: container.evalId, base: shareScope.get(name) };
+                return { scopedTo: container.instanceId, base: shareScope.get(name) };
               default:
                 return shareScope.get(name);
             }
@@ -52,7 +54,7 @@ describe('container init', () => {
     const scope = initContainer({ appName: 'shopping', sourceUrl: 'shopping.hbc' });
     expect(scope?.get('brick-module')).toEqual({ scopedTo: 'shopping@1', base: 'brick' });
     expect(scope?.get('react')).toBe('react');
-    expect(seen).toEqual([{ evalId: 'shopping@1', appName: 'shopping', sourceUrl: 'shopping.hbc' }]);
+    expect(seen).toEqual([{ instanceId: 'shopping@1', appName: 'shopping', sourceUrl: 'shopping.hbc' }]);
   });
 
   it('ignores values that are not evaluation arguments', () => {
@@ -67,16 +69,16 @@ describe('container init', () => {
   it('gives a first evaluation the id its definition issued, and an instance the id issued for it', () => {
     const seen: string[] = [];
     installContainerInit(({ container }) => {
-      seen.push(container.evalId);
+      seen.push(container.instanceId);
     });
     // Native evaluates the bundle: the wrapper defines the container, then initializes it in the same run.
-    evalIdForDefinition('shopping');
+    instanceIdForDefinition('shopping');
     initContainer({ appName: 'shopping', sourceUrl: 'shopping.hbc' });
     // An older native evaluator passes its own id: ignored.
-    evalIdForDefinition('bare');
+    instanceIdForDefinition('bare');
     initContainer({ evalId: '95299355399413-2', appName: 'bare' });
-    // instantiateApp issues the instance's id and passes it to the run.
-    initContainer({ evalId: nextEvalId('shopping'), appName: 'shopping' });
+    // The runtime issues an instance's id and passes it to the run.
+    initContainer({ instanceId: nextInstanceId('shopping'), appName: 'shopping' });
 
     expect(seen).toEqual(['shopping@1', 'bare@1', 'shopping@2']);
   });

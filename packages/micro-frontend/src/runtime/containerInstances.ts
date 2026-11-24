@@ -1,27 +1,28 @@
-import { evalIdForDefinition, nextEvalId } from './evalIds';
 import { getMicroFrontendGlobalContext } from './globalContext';
+import { instanceIdForDefinition, nextInstanceId } from './instanceIds';
 import type { AppContainer } from './registry';
 
 /**
- * Container definitions and instances.
+ * Container definitions and app instances.
  *
  * A remote bundle built with `containerInit()` hands its body to the host runtime when native evaluates it
  * (`defineContainer`). The body is the container's definition: running it again makes another instance of the app,
- * a full copy of the bundle's modules (their own module state) with its own `evalId` (`<appName>@<n>`), without reading or evaluating
- * the bundle file again. The first instance is the evaluation itself; `instantiateContainer` makes the others.
+ * a full copy of the bundle's modules (their own module state) with its own `instanceId` (`<appName>@<n>`), without
+ * reading or evaluating the bundle file again. The first instance is the evaluation itself; `createContainerInstance`
+ * makes the others.
  */
 export interface ContainerDefinition {
   readonly appName: string;
-  /** The evaluation that defined the container (its first instance). */
-  readonly evalId: string;
+  /** The first instance: the evaluation that defined the container. */
+  readonly instanceId: string;
   readonly sourceUrl?: string;
 }
 
 export interface ContainerInstance {
   readonly appName: string;
-  readonly evalId: string;
+  readonly instanceId: string;
   readonly sourceUrl?: string;
-  /** The evaluation this instance copies. */
+  /** The first instance, whose definition this instance ran again. */
   readonly instanceOf: string;
   readonly container: AppContainer;
 }
@@ -74,11 +75,11 @@ export function defineContainer(value: unknown, run: unknown): void {
   if (typeof appName !== 'string' || appName.length === 0) {
     return;
   }
-  // The first evaluation's id. The same run's initContainer takes it (evalIds.ts).
-  const evalId = evalIdForDefinition(appName);
+  // The first instance's id. The same run's initContainer takes it (instanceIds.ts).
+  const instanceId = instanceIdForDefinition(appName);
   definitions.set(appName, {
     appName,
-    evalId,
+    instanceId,
     sourceUrl: typeof sourceUrl === 'string' ? sourceUrl : undefined,
     run: run as Definition['run'],
     instances: 0,
@@ -89,7 +90,11 @@ export function getContainerDefinition(appName: string): ContainerDefinition | u
   const definition = definitions.get(appName);
   return definition == null
     ? undefined
-    : Object.freeze({ appName: definition.appName, evalId: definition.evalId, sourceUrl: definition.sourceUrl });
+    : Object.freeze({
+        appName: definition.appName,
+        instanceId: definition.instanceId,
+        sourceUrl: definition.sourceUrl,
+      });
 }
 
 /** Test and reset helper: forgets an app's definition (for example after its evaluation failed). */
@@ -104,7 +109,7 @@ export function removeContainerDefinition(appName: string): void {
  * So the instance borrows the app's slot while it runs. Afterwards the registry is exactly as before, also when the
  * run throws: the slot gets the app's own container back, and the legacy containers the run pushed are removed.
  */
-export function instantiateContainer(appName: string): ContainerInstance {
+export function createContainerInstance(appName: string): ContainerInstance {
   const definition = definitions.get(appName);
   if (definition == null) {
     throw new ContainerDefinitionNotFoundError(appName);
@@ -118,20 +123,26 @@ export function instantiateContainer(appName: string): ContainerInstance {
     length: instances.length,
   };
   definition.instances += 1;
-  const evalId = nextEvalId(appName);
+  const instanceId = nextInstanceId(appName);
   Reflect.deleteProperty(containers, appName);
   Reflect.deleteProperty(instances, appName);
   try {
-    definition.run({ evalId, sourceUrl: definition.sourceUrl, instanceOf: definition.evalId });
+    // `evalId` is the same id under its older name, for bundles whose wrapper reads that field.
+    definition.run({
+      instanceId,
+      evalId: instanceId,
+      sourceUrl: definition.sourceUrl,
+      instanceOf: definition.instanceId,
+    });
     const container = containers[appName] as AppContainer | undefined;
     if (container == null || typeof container !== 'object' || container.exposedModules == null) {
       throw new ContainerInstanceError(appName, 'the run did not register its container');
     }
     return Object.freeze({
       appName,
-      evalId,
+      instanceId,
       sourceUrl: definition.sourceUrl,
-      instanceOf: definition.evalId,
+      instanceOf: definition.instanceId,
       container,
     });
   } finally {

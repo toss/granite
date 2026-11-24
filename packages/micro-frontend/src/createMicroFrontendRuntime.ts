@@ -12,6 +12,13 @@ export interface CreateMicroFrontendRuntimeOptions {
   readonly onLifecycleEvent?: MicroFrontendLifecycleCallback;
   readonly onPreloadError?: (error: unknown) => void;
   readonly hooks?: MicroFrontendRuntimeHooks;
+  /**
+   * Give each session its own app instance: `importApp(request, { sessionId })` returns the module from the instance
+   * that belongs to that session, and a native preload leaves one instance no session has used yet. An instance
+   * never goes to another session, also after its session closed. A function is read on each import and preload,
+   * so the host can decide on first use. Default: false (every session gets the app's only instance).
+   */
+  readonly instancePerSession?: boolean | (() => boolean);
 }
 
 export interface MicroFrontendRuntimeHooks {
@@ -20,12 +27,6 @@ export interface MicroFrontendRuntimeHooks {
    * Return a `shareScope` to give that container its own view of shared modules.
    */
   readonly beforeInitContainer?: BeforeInitContainerHook;
-  /**
-   * Runs after each native preload request (`preloadApp` event), once the app is evaluated, also when it was evaluated
-   * before. A preload can then always leave the app ready to open, e.g. by making an instance no session has used yet
-   * (`runtime.instantiateApp`). Errors go to `onPreloadError`.
-   */
-  readonly afterPreloadApp?: (appName: string) => void | Promise<void>;
 }
 
 export function createMicroFrontendRuntime(options: CreateMicroFrontendRuntimeOptions): MicroFrontendRuntimeApi {
@@ -36,7 +37,10 @@ export function createMicroFrontendRuntime(options: CreateMicroFrontendRuntimeOp
     nativeRuntime: NativeGraniteMicroFrontendRuntime,
     onLifecycleEvent: options.onLifecycleEvent,
     onPreloadError: options.onPreloadError ?? (() => undefined),
-    afterPreloadApp: options.hooks?.afterPreloadApp,
+    instancePerSession:
+      typeof options.instancePerSession === 'function'
+        ? options.instancePerSession
+        : () => options.instancePerSession === true,
     parseEvent: parseNativeRuntimeEvent,
     registry: microFrontendModuleRegistry,
     removePendingHostComponentRoutes,

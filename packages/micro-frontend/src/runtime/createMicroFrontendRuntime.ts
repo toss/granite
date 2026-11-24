@@ -2,7 +2,7 @@ import { openPendingHostComponentSession, closePendingHostComponentSession } fro
 import type {
   AppRequest,
   MicroFrontendAdapter,
-  MicroFrontendAppInstance,
+  MicroFrontendImportOptions,
   MicroFrontendLifecycleEvent,
   MicroFrontendRuntimeApi,
   MicroFrontendRuntimeEvent,
@@ -10,6 +10,7 @@ import type {
   MicroFrontendSessionEvent,
   MicroFrontendSessionState,
 } from '../types';
+import { withPendingOwner } from './appInstances';
 import { AppContainerNotFoundError, InvalidAppNameError } from './errors';
 import { getMicroFrontendGlobalContext } from './globalContext';
 import { setMicroFrontendLifecycleCallback } from './lifecycle';
@@ -42,19 +43,21 @@ export interface MicroFrontendModuleRegistry {
   readonly hasContainer: (appName: string) => boolean;
   readonly removeContainer: (appName: string) => void;
   readonly importModule: <TModule>(request: AppRequest) => TModule;
-  /** Optional: registries without container definitions cannot make instances. */
-  readonly instantiateModule?: <TModule>(request: AppRequest) => MicroFrontendAppInstance<TModule>;
+  /** Instance per session. Optional: without it every session gets the app's only instance. */
+  readonly importSessionModule?: <TModule>(
+    request: AppRequest,
+    session: { readonly sessionId: string; readonly isOpen: () => boolean }
+  ) => TModule;
+  /** After a native preload, leave one instance of the app that no session has used yet. */
+  readonly prepareUnusedInstance?: (appName: string) => void;
 }
 
 export interface CreateMicroFrontendRuntimeDependencies {
   readonly adapter: MicroFrontendAdapter;
   readonly nativeRuntime: NativeMicroFrontendRuntime;
   readonly onPreloadError: (error: unknown) => void;
-  /**
-   * Runs after each native preload request, once the app is evaluated (also when it was evaluated before). The host
-   * can prepare what a later session of the app needs, e.g. an instance no session has used yet.
-   */
-  readonly afterPreloadApp?: (appName: string) => void | Promise<void>;
+  /** Whether each session gets its own app instance (see appInstances.ts). Read on each import and preload. */
+  readonly instancePerSession?: () => boolean;
   readonly onLifecycleEvent?: (event: MicroFrontendLifecycleEvent) => void;
   readonly registry: MicroFrontendModuleRegistry;
   readonly removePendingHostComponentRoutes: (appName: string) => void;
@@ -72,6 +75,9 @@ export function createMicroFrontendRuntimeWithDependencies(
   let nativeSubscription: MicroFrontendRuntimeEventSubscription | undefined;
   // Sessions native has closed whose tree has not unmounted yet. Each is reported to native once.
   const sessionsAwaitingUnmount = new Set<string>();
+  // Session imports run one at a time: a session waits for its instance while that instance initializes.
+  let sessionImports: Promise<unknown> = Promise.resolve();
+  const isInstancePerSession = () => dependencies.instancePerSession?.() === true;
 
   function startEventDelivery() {
     if (nativeSubscription != null) {
@@ -83,7 +89,11 @@ export function createMicroFrontendRuntimeWithDependencies(
         case 'preloadApp': {
           const { appName } = parsedEvent.params;
           void preloadApp(appName)
-            .then(() => dependencies.afterPreloadApp?.(appName))
+            .then(() => {
+              if (isInstancePerSession()) {
+                dependencies.registry.prepareUnusedInstance?.(appName);
+              }
+            })
             .catch(dependencies.onPreloadError);
           return;
         }
@@ -155,19 +165,25 @@ export function createMicroFrontendRuntimeWithDependencies(
   const runtime: MicroFrontendRuntimeApi = {
     evaluateScript,
     preloadApp,
-    async importApp<TModule>(request: AppRequest): Promise<TModule> {
+    async importApp<TModule>(request: AppRequest, options?: MicroFrontendImportOptions): Promise<TModule> {
       const { appName } = parseAppRequest(request);
-      await preloadApp(appName);
-      return dependencies.registry.importModule<TModule>(request);
-    },
-    async instantiateApp<TModule>(request: AppRequest): Promise<MicroFrontendAppInstance<TModule>> {
-      const { appName } = parseAppRequest(request);
-      await preloadApp(appName);
-      const instantiate = dependencies.registry.instantiateModule;
-      if (instantiate == null) {
-        throw new Error('This micro-frontend registry cannot make app instances');
+      const sessionId = options?.sessionId;
+      const importSessionModule = dependencies.registry.importSessionModule;
+      if (sessionId == null || importSessionModule == null || !isInstancePerSession()) {
+        await preloadApp(appName);
+        return dependencies.registry.importModule<TModule>(request);
       }
-      return instantiate<TModule>(request);
+      const run = async (): Promise<TModule> => {
+        // An evaluation that starts now belongs to this session from its first module on.
+        await withPendingOwner(appName, sessionId, () => preloadApp(appName));
+        return importSessionModule<TModule>(request, {
+          sessionId,
+          isOpen: () => sessionStore.getSessions().some((session) => session.sessionId === sessionId),
+        });
+      };
+      const result = sessionImports.then(run, run);
+      sessionImports = result.catch(() => undefined);
+      return result;
     },
     getSessions: sessionStore.getSessions,
     onSessionsChanged(listener) {

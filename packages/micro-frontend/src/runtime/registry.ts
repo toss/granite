@@ -1,5 +1,14 @@
 import type { AppRequest } from '../types';
-import { instantiateContainer, removeContainerDefinition } from './containerInstances';
+import {
+  assignOwner,
+  attachContainer,
+  findOwnedCopy,
+  findUnusedCopy,
+  getCopy,
+  hasCopies,
+  withPendingOwnerSync,
+} from './appInstances';
+import { createContainerInstance, getContainerDefinition, removeContainerDefinition } from './containerInstances';
 import { createContainer, exposeModule, getContainer, getExposedModule, removeContainer } from './containerRegistry';
 import type { MicroFrontendModuleRegistry } from './createMicroFrontendRuntime';
 import { ExposedModuleNotFoundError, SharedModuleAlreadyRegisteredError } from './errors';
@@ -100,15 +109,62 @@ export function importModule<TModule>(request: AppRequest): TModule {
   return module as TModule;
 }
 
-/** Makes a new instance of the app (see containerInstances.ts) and returns the module it exposes. */
-export function instantiateModule<TModule>(request: AppRequest): { readonly evalId: string; readonly module: TModule } {
+/** The app's first instance (the evaluation that defined its container) gets the container the evaluation registered. */
+function attachFirstInstance(appName: string): void {
+  const definition = getContainerDefinition(appName);
+  const container = getContainer(appName);
+  if (definition != null && container != null) {
+    attachContainer(definition.instanceId, container);
+  }
+}
+
+/**
+ * Instance per session (see appInstances.ts): the module `request` names, from the app instance that belongs to the
+ * session. That is the instance the session took before, else one no session has used yet, else a new instance.
+ *
+ * Every session gets the app's only instance, as before, when the app has no container definition (a bundle built
+ * without containerInit(), or native without deferred evaluation), or when the session closed while it waited.
+ */
+export function importSessionModule<TModule>(
+  request: AppRequest,
+  session: { readonly sessionId: string; readonly isOpen: () => boolean }
+): TModule {
   const { appName, exposedModule } = parseAppRequest(request);
-  const instance = instantiateContainer(appName);
-  const module = getExposedModule(instance.container, exposedModule);
+  attachFirstInstance(appName);
+  if (getContainerDefinition(appName) == null || !hasCopies(appName) || !session.isOpen()) {
+    return importModule<TModule>(request);
+  }
+  let copy = findOwnedCopy(appName, session.sessionId) ?? findUnusedCopy(appName);
+  if (copy == null) {
+    // The new instance belongs to the session from its first module on (its init runs with the owner set).
+    const instance = withPendingOwnerSync(appName, session.sessionId, () => createContainerInstance(appName));
+    attachContainer(instance.instanceId, instance.container);
+    copy = getCopy(instance.instanceId);
+  }
+  const container = copy?.container;
+  if (copy == null || container == null) {
+    throw new ExposedModuleNotFoundError(appName, exposedModule);
+  }
+  assignOwner(copy, session.sessionId);
+  const module = getExposedModule(container, exposedModule);
   if (module == null) {
     throw new ExposedModuleNotFoundError(appName, exposedModule);
   }
-  return { evalId: instance.evalId, module: module as TModule };
+  return module as TModule;
+}
+
+/**
+ * After a native preload: leave exactly one instance of the app that no session has used yet, so the next session
+ * opens at once. The first preload's evaluation is that instance; a later preload makes a new one only when every
+ * instance belongs to a session.
+ */
+export function prepareUnusedInstance(appName: string): void {
+  attachFirstInstance(appName);
+  if (getContainerDefinition(appName) == null || findUnusedCopy(appName) != null) {
+    return;
+  }
+  const instance = createContainerInstance(appName);
+  attachContainer(instance.instanceId, instance.container);
 }
 
 function ensureRuntimeContext(
@@ -237,7 +293,8 @@ async function runAppDisposeCallbacks(disposeCallbacks: Set<AppDisposeCallback>)
 export const microFrontendModuleRegistry: MicroFrontendModuleRegistry = {
   hasContainer,
   importModule,
-  instantiateModule,
+  importSessionModule,
+  prepareUnusedInstance,
   removeContainer(appName) {
     removeContainer(appName);
     removeContainerDefinition(appName);

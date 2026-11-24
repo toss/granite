@@ -1,15 +1,21 @@
-import { evalIdForContainer } from './evalIds';
+import { ownerOf, recordCopy } from './appInstances';
 import { getMicroFrontendGlobalContext } from './globalContext';
+import { instanceIdForContainer } from './instanceIds';
 
 /**
- * One copy of a remote bundle's modules: its first evaluation (native ran it) or an instance made from its
- * definition. Each copy has its own `evalId` (`<appName>@<n>`, issued by this runtime, see evalIds.ts), so
- * evaluating or instantiating the same app twice yields two containers.
+ * One app instance: a copy of a remote bundle's modules, either its first evaluation (native ran it) or an instance
+ * made from its definition. Each has its own `instanceId` (`<appName>@<n>`, issued by this runtime, see
+ * instanceIds.ts), so the same app evaluated or instantiated twice yields two containers.
  */
 export interface MicroFrontendContainer {
-  readonly evalId: string;
+  readonly instanceId: string;
   readonly appName: string;
   readonly sourceUrl?: string;
+  /**
+   * The session this instance belongs to, read at call time: undefined while no session has taken it (it acts for
+   * the host). Once set it never changes, also after the session closed (see appInstances.ts).
+   */
+  readonly owner: () => string | undefined;
 }
 
 /** Shared modules as one container sees them. `get` is called lazily, on the container's first use. */
@@ -61,10 +67,12 @@ function toContainer(value: unknown): MicroFrontendContainer | undefined {
   if (typeof appName !== 'string' || appName.length === 0) {
     return undefined;
   }
-  // The wrapper passes the evaluation argument's evalId: an instance's id issued here, or nothing for a first
-  // evaluation (older native evaluators pass their own id, which is ignored). See evalIds.ts.
-  const evalId = evalIdForContainer(appName, Reflect.get(value, 'evalId'));
-  return Object.freeze({ evalId, appName, sourceUrl: typeof sourceUrl === 'string' ? sourceUrl : undefined });
+  // The wrapper passes the evaluation argument's id: an instance's id issued here, or nothing for a first
+  // evaluation (older native evaluators pass their own `evalId`, which is ignored). See instanceIds.ts.
+  const instanceId = instanceIdForContainer(appName, Reflect.get(value, 'instanceId') ?? Reflect.get(value, 'evalId'));
+  const source = typeof sourceUrl === 'string' ? sourceUrl : undefined;
+  recordCopy(instanceId, appName, source);
+  return Object.freeze({ instanceId, appName, sourceUrl: source, owner: () => ownerOf(instanceId) });
 }
 
 /** Installs (or clears) the host's hook. Without a hook every container uses the host's share scope. */

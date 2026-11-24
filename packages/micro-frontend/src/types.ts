@@ -69,24 +69,19 @@ export interface MicroFrontendLifecycleEvent {
 
 export type MicroFrontendLifecycleCallback = (event: MicroFrontendLifecycleEvent) => void;
 
-/** Another instance of an app: a full copy of its bundle's modules, with its own module state and `evalId`. */
-export interface MicroFrontendAppInstance<TModule> {
-  readonly evalId: string;
-  readonly module: TModule;
+export interface MicroFrontendImportOptions {
+  /**
+   * With `instancePerSession`, the module comes from the app instance that belongs to this session (Granite
+   * `sessionId`): the one the session took before, else one no session has used yet, else a new instance.
+   */
+  readonly sessionId?: string;
 }
 
 export interface MicroFrontendRuntimeApi {
   readonly evaluateScript: (filePath: string) => Promise<void>;
   readonly preloadApp: (appName: string) => Promise<void>;
-  readonly importApp: <TModule>(request: AppRequest) => Promise<TModule>;
-  /**
-   * Makes a new instance of the app and returns the module it exposes. The app is evaluated first if needed (that
-   * evaluation is its first instance, which `importApp` returns). Each call runs the bundle's modules again from
-   * the container definition kept at evaluation, without reading the bundle file. Requires a bundle built with
-   * `containerInit()` and a native runtime that passes the evaluation argument
-   * (`ContainerDefinitionNotFoundError` otherwise).
-   */
-  readonly instantiateApp: <TModule>(request: AppRequest) => Promise<MicroFrontendAppInstance<TModule>>;
+  /** The module `request` names. Without `options.sessionId` (or without `instancePerSession`): the app's first instance. */
+  readonly importApp: <TModule>(request: AppRequest, options?: MicroFrontendImportOptions) => Promise<TModule>;
   /** Read the current snapshot without starting event delivery. */
   readonly getSessions: () => readonly MicroFrontendSessionState[];
   /** Subscribe to changes and start native delivery if needed; read getSessions() for the initial snapshot. */

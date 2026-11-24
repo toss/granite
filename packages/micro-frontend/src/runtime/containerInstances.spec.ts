@@ -3,23 +3,23 @@ import {
   ContainerDefinitionNotFoundError,
   defineContainer,
   getContainerDefinition,
-  instantiateContainer,
+  createContainerInstance,
   removeContainerDefinition,
 } from './containerInstances';
-import { resetEvalIds } from './evalIds';
 import { getMicroFrontendGlobalContext } from './globalContext';
+import { resetInstanceIds } from './instanceIds';
 
 type Registry = Record<string, unknown>;
 
 /** A bundle body like the one containerInit() emits: registers its container under its app name, like the prelude. */
 function bundleBody(appName: string, log: string[], options: { fail?: () => boolean } = {}) {
   let moduleRuns = 0;
-  return (evaluation: { evalId?: string }) => {
+  return (evaluation: { instanceId?: string }) => {
     moduleRuns += 1;
-    // Native calls the first evaluation with `{ sourceUrl }` only; instance runs carry the evalId issued for them.
-    const evalId = evaluation.evalId ?? 'native';
-    const state = { evalId, run: moduleRuns };
-    log.push(evalId);
+    // Native calls the first evaluation with `{ sourceUrl }` only; instance runs carry the id issued for them.
+    const instanceId = evaluation.instanceId ?? 'native';
+    const state = { instanceId, run: moduleRuns };
+    log.push(instanceId);
     const context = getMicroFrontendGlobalContext();
     const containers = context.__CONTAINERS__ as Registry;
     const instances = context.__INSTANCES__ as unknown[] & Registry;
@@ -37,12 +37,13 @@ function bundleBody(appName: string, log: string[], options: { fail?: () => bool
 
 /** Like native evaluating the bundle: the wrapper defines the container, then the first evaluation runs. */
 function evaluate(appName: string, body: ReturnType<typeof bundleBody>, nativeEvalId?: string) {
+  // Older native evaluators passed their own `evalId`; it is ignored.
   defineContainer({ appName, evalId: nativeEvalId, sourceUrl: `${appName}.hbc` }, body);
   body({});
 }
 
 afterEach(() => {
-  resetEvalIds();
+  resetInstanceIds();
   for (const appName of ['shopping', 'bare']) {
     removeContainerDefinition(appName);
     const context = getMicroFrontendGlobalContext();
@@ -53,17 +54,17 @@ afterEach(() => {
 });
 
 describe('container instances', () => {
-  it('runs the definition again for a new instance with its own evalId and module state', () => {
+  it('runs the definition again for a new instance with its own instanceId and module state', () => {
     const log: string[] = [];
     evaluate('shopping', bundleBody('shopping', log));
     const first = getMicroFrontendGlobalContext().__CONTAINERS__.shopping;
 
-    const a = instantiateContainer('shopping');
-    const b = instantiateContainer('shopping');
+    const a = createContainerInstance('shopping');
+    const b = createContainerInstance('shopping');
 
-    expect(getContainerDefinition('shopping')?.evalId).toBe('shopping@1');
+    expect(getContainerDefinition('shopping')?.instanceId).toBe('shopping@1');
     expect(log).toEqual(['native', 'shopping@2', 'shopping@3']);
-    expect([a.evalId, b.evalId]).toEqual(['shopping@2', 'shopping@3']);
+    expect([a.instanceId, b.instanceId]).toEqual(['shopping@2', 'shopping@3']);
     expect(a.instanceOf).toBe('shopping@1');
     expect(a.container.exposedModules['./App']).not.toBe(b.container.exposedModules['./App']);
     // The app's own container keeps its slot: importApp still returns the first instance.
@@ -77,13 +78,13 @@ describe('container instances', () => {
     const first = getMicroFrontendGlobalContext().__CONTAINERS__.shopping;
 
     failing = true;
-    expect(() => instantiateContainer('shopping')).toThrow('module threw');
+    expect(() => createContainerInstance('shopping')).toThrow('module threw');
     failing = false;
 
     expect(getMicroFrontendGlobalContext().__CONTAINERS__.shopping).toBe(first);
     expect(getMicroFrontendGlobalContext().__INSTANCES__).toHaveLength(1);
     // The failed run used shopping@2; numbers are never reused.
-    expect(instantiateContainer('shopping').evalId).toBe('shopping@3');
+    expect(createContainerInstance('shopping').instanceId).toBe('shopping@3');
   });
 
   it('uses the newest definition of the app', () => {
@@ -93,26 +94,26 @@ describe('container instances', () => {
     Reflect.deleteProperty(getMicroFrontendGlobalContext().__INSTANCES__, 'shopping');
     evaluate('shopping', bundleBody('shopping', log));
 
-    expect(getContainerDefinition('shopping')?.evalId).toBe('shopping@2');
-    expect(instantiateContainer('shopping')).toMatchObject({ evalId: 'shopping@3', instanceOf: 'shopping@2' });
+    expect(getContainerDefinition('shopping')?.instanceId).toBe('shopping@2');
+    expect(createContainerInstance('shopping')).toMatchObject({ instanceId: 'shopping@3', instanceOf: 'shopping@2' });
   });
 
   it('fails for an app without a definition', () => {
-    expect(() => instantiateContainer('bare')).toThrow(ContainerDefinitionNotFoundError);
+    expect(() => createContainerInstance('bare')).toThrow(ContainerDefinitionNotFoundError);
   });
 
-  it('numbers evalIds per app, and ignores the id an older native evaluator passes', () => {
+  it('numbers instanceIds per app, and ignores the id an older native evaluator passes', () => {
     evaluate('shopping', bundleBody('shopping', []), '95299355399413-1');
     evaluate('bare', bundleBody('bare', []), '95299355399413-2');
 
-    expect(getContainerDefinition('shopping')?.evalId).toBe('shopping@1');
-    expect(getContainerDefinition('bare')?.evalId).toBe('bare@1');
-    expect(instantiateContainer('shopping').evalId).toBe('shopping@2');
-    expect(instantiateContainer('bare').evalId).toBe('bare@2');
+    expect(getContainerDefinition('shopping')?.instanceId).toBe('shopping@1');
+    expect(getContainerDefinition('bare')?.instanceId).toBe('bare@1');
+    expect(createContainerInstance('shopping').instanceId).toBe('shopping@2');
+    expect(createContainerInstance('bare').instanceId).toBe('bare@2');
   });
 
   it('ignores definitions without an app name or body', () => {
-    defineContainer({ evalId: 'e1' }, () => undefined);
+    defineContainer({ instanceId: 'e1' }, () => undefined);
     defineContainer({ appName: 'shopping' }, undefined);
     expect(getContainerDefinition('shopping')).toBeUndefined();
   });

@@ -163,9 +163,9 @@ function dispose(appName: string): Plugin {
  *
  * The body is also the container's definition: when native calls it, it hands itself to the host runtime
  * (`defineContainer`), so the host can run it again for another instance of the app. Each run is a full copy of
- * the bundle's modules, without reading or evaluating the bundle file again. The host runtime issues every copy's
- * `evalId` (`<appName>@<n>`): `defineContainer` for the first evaluation, `instantiateApp` for an instance, whose
- * run carries its `evalId` and `instanceOf` and does not define the container again.
+ * the bundle's modules, without reading or evaluating the bundle file again. The host runtime issues every instance's
+ * `instanceId` (`<appName>@<n>`): `defineContainer` for the first evaluation, the runtime for each later instance,
+ * whose run carries its `instanceId` and `instanceOf` and does not define the container again.
  */
 function containerInit(appNameValue: string): Plugin {
   const appName = JSON.stringify(appNameValue);
@@ -173,9 +173,9 @@ function containerInit(appNameValue: string): Plugin {
     '(function(__graniteBody){if(globalThis.__GRANITE_DEFERRED_EVAL__===true){globalThis.__GRANITE_DEFERRED_EVAL__=__graniteBody;}else{__graniteBody(undefined);}})(function __graniteRun(__graniteEval){' +
     'var __graniteContext=globalThis.__MICRO_FRONTEND__;' +
     'if(__graniteEval!=null&&__graniteEval.instanceOf==null&&__graniteContext!=null&&typeof __graniteContext.defineContainer==="function")' +
-    `{__graniteContext.defineContainer({evalId:__graniteEval.evalId,sourceUrl:__graniteEval.sourceUrl,appName:${appName}},__graniteRun);}` +
+    `{__graniteContext.defineContainer({instanceId:__graniteEval.instanceId!=null?__graniteEval.instanceId:__graniteEval.evalId,sourceUrl:__graniteEval.sourceUrl,appName:${appName}},__graniteRun);}` +
     'var __graniteShareScope=__graniteEval!=null&&__graniteContext!=null&&typeof __graniteContext.initContainer==="function"' +
-    `?__graniteContext.initContainer({evalId:__graniteEval.evalId,sourceUrl:__graniteEval.sourceUrl,appName:${appName}}):undefined;`;
+    `?__graniteContext.initContainer({instanceId:__graniteEval.instanceId!=null?__graniteEval.instanceId:__graniteEval.evalId,sourceUrl:__graniteEval.sourceUrl,appName:${appName}}):undefined;`;
   return {
     name: 'granite:micro-frontend:container-init',
     renderChunk(code) {
