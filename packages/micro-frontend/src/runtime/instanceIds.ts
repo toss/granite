@@ -3,7 +3,8 @@ import type { MicroFrontendBundle } from '../types';
 /**
  * Instance ids: `<appName>@<n>` by default, numbered per app by this runtime, e.g. `shopping@1`, `shopping@2`. The
  * host can format them itself (`createMicroFrontendRuntime({ formatInstanceId })`), for example to add what its
- * bundle loader reported about the bundle (a deployment id). Every id must be unique in the runtime.
+ * bundle loader reported about the bundle (a deployment id). Every id must be unique in the runtime; a formatted id
+ * that is not falls back to the default.
  *
  * An app instance is one copy of an app's modules: the bundle's first evaluation, which native runs, or an instance
  * made from the app's container definition. The JavaScript runtime issues every id: native does not know the app
@@ -52,14 +53,49 @@ export function getEvaluatingBundle(appName: string): MicroFrontendBundle | unde
 /** The id `defineContainer` issued for the evaluation that is running now, until its `initContainer` takes it. */
 const pendingFirst = new Map<string, string>();
 
+/**
+ * The next id of the app. An id never stops an instance: when the host's `formatInstanceId` throws, or returns no
+ * string, an empty one or one already issued, the instance gets the default `<appName>@<n>` (with the next free `n`).
+ */
 export function nextInstanceId(appName: string, bundle?: MicroFrontendBundle): string {
+  const sequence = takeSequence(appName);
+  const formatted = formatOrUndefined({ appName, sequence, bundle });
+  if (formatted != null) {
+    issued.add(formatted);
+    return formatted;
+  }
+  let fallback = defaultFormat({ appName, sequence });
+  while (issued.has(fallback)) {
+    fallback = defaultFormat({ appName, sequence: takeSequence(appName) });
+  }
+  issued.add(fallback);
+  return fallback;
+}
+
+function takeSequence(appName: string): number {
   const sequence = (counters.get(appName) ?? 0) + 1;
   counters.set(appName, sequence);
-  const instanceId = format({ appName, sequence, bundle });
-  if (typeof instanceId !== 'string' || instanceId.length === 0 || issued.has(instanceId)) {
-    throw new Error(`formatInstanceId must return a new non-empty id; got '${String(instanceId)}' for ${appName}`);
+  return sequence;
+}
+
+function formatOrUndefined(info: MicroFrontendInstanceIdInfo): string | undefined {
+  if (format === defaultFormat) {
+    return undefined;
   }
-  issued.add(instanceId);
+  let instanceId: unknown;
+  try {
+    instanceId = format(info);
+  } catch (error) {
+    console.warn(`[micro-frontend] formatInstanceId threw for ${info.appName}; using the default id`, error);
+    return undefined;
+  }
+  if (typeof instanceId !== 'string' || instanceId.length === 0 || issued.has(instanceId)) {
+    console.warn(
+      `[micro-frontend] formatInstanceId must return a new non-empty id; got '${String(instanceId)}' for ` +
+        `${info.appName}; using the default id`
+    );
+    return undefined;
+  }
   return instanceId;
 }
 

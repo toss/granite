@@ -185,17 +185,42 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     expect([s1.default(), s2.default()]).toEqual(['cart@d-42@1', 'cart@d-42@2']);
   });
 
-  it('rejects a formatted instance id that is not new', async () => {
+  it('falls back to the default id when the formatted one is not new', async () => {
     const fixture = createCartBundleFixture({ instancePerSession: true });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     setInstanceIdFormat(({ appName }) => appName);
     fixture.runtime.onEvent(() => undefined);
     fixture.emit({ name: 'openApp', params: { appName: 'cart', scheme: 'granite://cart', sessionId: 's1' } });
     fixture.emit({ name: 'openApp', params: { appName: 'cart', scheme: 'granite://cart', sessionId: 's2' } });
 
-    await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's1' });
-    await expect(fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's2' })).rejects.toThrow(
-      'formatInstanceId must return a new non-empty id'
-    );
+    const s1 = await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's1' });
+    const s2 = await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's2' });
+
+    expect([s1.default(), s2.default()]).toEqual(['cart', 'cart@2']);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('using the default id'));
+    warn.mockRestore();
+  });
+
+  it('falls back to the default id when the formatter throws or the adapter reports no deployment', async () => {
+    const fixture = createCartBundleFixture({ instancePerSession: true });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    setInstanceIdFormat(({ appName, sequence, bundle }) => {
+      const deploymentId = (bundle as { deploymentId?: string } | undefined)?.deploymentId;
+      if (sequence === 2) {throw new Error('broken formatter');}
+      return deploymentId ? `${appName}@${deploymentId}@${sequence}` : `${appName}@${sequence}`;
+    });
+    fixture.runtime.onEvent(() => undefined);
+    for (const sessionId of ['s1', 's2', 's3']) {
+      fixture.emit({ name: 'openApp', params: { appName: 'cart', scheme: 'granite://cart', sessionId } });
+    }
+
+    const ids = [];
+    for (const sessionId of ['s1', 's2', 's3']) {
+      ids.push((await fixture.runtime.importApp<AppModule>('cart/App', { sessionId })).default());
+    }
+
+    expect(ids).toEqual(['cart@1', 'cart@2', 'cart@3']);
+    warn.mockRestore();
   });
 
   it('gives every session the first instance without instancePerSession', async () => {
