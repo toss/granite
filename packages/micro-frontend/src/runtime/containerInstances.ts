@@ -1,5 +1,6 @@
 import { getMicroFrontendGlobalContext } from './globalContext';
-import { instanceIdForDefinition, nextInstanceId } from './instanceIds';
+import type { MicroFrontendBundle } from '../types';
+import { getEvaluatingBundle, instanceIdForDefinition, nextInstanceId } from './instanceIds';
 import type { AppContainer } from './registry';
 
 /**
@@ -27,7 +28,12 @@ export interface ContainerInstance {
   readonly container: AppContainer;
 }
 
-type Definition = ContainerDefinition & { readonly run: (evaluation: object) => void; instances: number };
+type Definition = ContainerDefinition & {
+  readonly run: (evaluation: object) => void;
+  /** What the adapter returned for the evaluation that defined the container. */
+  readonly bundle?: MicroFrontendBundle;
+  instances: number;
+};
 
 /** Non-enumerable entry on the global context, because older bundles validate its enumerable key set. */
 const DEFINE_CONTAINER = 'defineContainer';
@@ -76,8 +82,10 @@ export function defineContainer(value: unknown, run: unknown): void {
     return;
   }
   // The first instance's id. The same run's initContainer takes it (instanceIds.ts).
-  const instanceId = instanceIdForDefinition(appName);
+  const bundle = getEvaluatingBundle(appName);
+  const instanceId = instanceIdForDefinition(appName, bundle);
   definitions.set(appName, {
+    bundle,
     appName,
     instanceId,
     sourceUrl: typeof sourceUrl === 'string' ? sourceUrl : undefined,
@@ -123,7 +131,7 @@ export function createContainerInstance(appName: string): ContainerInstance {
     length: instances.length,
   };
   definition.instances += 1;
-  const instanceId = nextInstanceId(appName);
+  const instanceId = nextInstanceId(appName, definition.bundle);
   Reflect.deleteProperty(containers, appName);
   Reflect.deleteProperty(instances, appName);
   try {

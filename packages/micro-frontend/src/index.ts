@@ -1,5 +1,6 @@
 export { createMicroFrontendRuntime } from './createMicroFrontendRuntime';
 export type { CreateMicroFrontendRuntimeOptions, MicroFrontendRuntimeHooks } from './createMicroFrontendRuntime';
+export type { FormatInstanceId, MicroFrontendInstanceIdInfo } from './runtime/instanceIds';
 export type {
   BeforeInitContainerArgs,
   BeforeInitContainerHook,

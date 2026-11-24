@@ -2,6 +2,7 @@ import { removePendingHostComponentRoutes } from './host/pendingHostComponentSto
 import { installContainerInit, type BeforeInitContainerHook } from './runtime/containerInit';
 import { installContainerDefinitions } from './runtime/containerInstances';
 import { createMicroFrontendRuntimeWithDependencies } from './runtime/createMicroFrontendRuntime';
+import { setInstanceIdFormat, type FormatInstanceId } from './runtime/instanceIds';
 import { parseNativeRuntimeEvent } from './runtime/parseNativeRuntimeEvent';
 import { microFrontendModuleRegistry } from './runtime/registry';
 import NativeGraniteMicroFrontendRuntime from './specs/NativeGraniteMicroFrontendRuntime';
@@ -19,6 +20,12 @@ export interface CreateMicroFrontendRuntimeOptions {
    * so the host can decide on first use. Default: false (every session gets the app's only instance).
    */
   readonly instancePerSession?: boolean | (() => boolean);
+  /**
+   * Formats each app instance's id. Default: `<appName>@<sequence>` (`shopping@1`). `bundle` is what the adapter's
+   * `loadBundle` returned for the evaluation that defined the instance's container, so a host can add what its loader
+   * knows (for example a deployment id). Every id must be unique in the runtime.
+   */
+  readonly formatInstanceId?: FormatInstanceId;
 }
 
 export interface MicroFrontendRuntimeHooks {
@@ -30,6 +37,7 @@ export interface MicroFrontendRuntimeHooks {
 }
 
 export function createMicroFrontendRuntime(options: CreateMicroFrontendRuntimeOptions): MicroFrontendRuntimeApi {
+  setInstanceIdFormat(options.formatInstanceId);
   installContainerInit(options.hooks?.beforeInitContainer);
   installContainerDefinitions();
   return createMicroFrontendRuntimeWithDependencies({

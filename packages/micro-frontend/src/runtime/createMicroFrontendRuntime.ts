@@ -13,6 +13,7 @@ import type {
 import { withPendingOwner } from './appInstances';
 import { AppContainerNotFoundError, InvalidAppNameError } from './errors';
 import { getMicroFrontendGlobalContext } from './globalContext';
+import { setEvaluatingBundle } from './instanceIds';
 import { setMicroFrontendLifecycleCallback } from './lifecycle';
 import { installNativeComponentRegistryCompatibility } from './nativeComponentRegistryCompatibility';
 import { parseAppRequest } from './parseAppRequest';
@@ -150,8 +151,14 @@ export function createMicroFrontendRuntimeWithDependencies(
 
   async function evaluateApp(appName: string): Promise<void> {
     try {
-      const { filePath } = await dependencies.adapter.loadBundle({ appName });
-      await evaluateScript(filePath);
+      const bundle = await dependencies.adapter.loadBundle({ appName });
+      // Instance ids of this evaluation can use what the adapter reported (formatInstanceId).
+      setEvaluatingBundle(appName, bundle);
+      try {
+        await evaluateScript(bundle.filePath);
+      } finally {
+        setEvaluatingBundle(appName, undefined);
+      }
 
       if (!dependencies.registry.hasContainer(appName)) {
         throw new AppContainerNotFoundError(appName);
