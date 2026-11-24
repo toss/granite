@@ -3,8 +3,6 @@
 
 #include <jsi/jsi.h>
 
-#include <atomic>
-#include <chrono>
 #include <string>
 
 namespace granite::microfrontend {
@@ -18,18 +16,12 @@ using facebook::jsi::StringBuffer;
 namespace {
 namespace jsi = facebook::jsi;
 
-std::string mintEvalId() {
-  static std::atomic<uint64_t> counter{0};
-  const auto now = std::chrono::steady_clock::now().time_since_epoch().count();
-  return std::to_string(now) + "-" + std::to_string(++counter);
-}
-
-// Deferred evaluation with an evaluation scope argument.
+// Deferred evaluation with an evaluation argument.
 // A bundle built with the deferred wrapper hands its body back as a function through
 // `__GRANITE_DEFERRED_EVAL__` instead of running it. Native then calls the body with
-// `{ evalId, sourceUrl }`, so each evaluation knows its own identity lexically (no global
-// "current bundle" state, no stack inspection). Bundles without the wrapper run during
-// evaluateJavaScript exactly as before.
+// `{ sourceUrl }`: the argument tells the bundle that native deferred it, and the host runtime
+// gives the evaluation its id (`<appName>@<n>`), because only JavaScript knows the app name.
+// Bundles without the wrapper run during evaluateJavaScript exactly as before.
 void evaluateWithScope(Runtime &runtime, const std::shared_ptr<const jsi::Buffer> &buffer, const std::string &sourceUrl) {
   auto global = runtime.global();
   // Only a function is handed over through this slot; ownership travels as the call ARGUMENT below.
@@ -46,7 +38,6 @@ void evaluateWithScope(Runtime &runtime, const std::shared_ptr<const jsi::Buffer
     return;  // bundle without the deferred wrapper: it already ran during evaluation
   }
   auto scope = jsi::Object(runtime);
-  scope.setProperty(runtime, "evalId", jsi::String::createFromUtf8(runtime, mintEvalId()));
   scope.setProperty(runtime, "sourceUrl", jsi::String::createFromUtf8(runtime, sourceUrl));
   slot.getObject(runtime).getFunction(runtime).call(runtime, scope);
 }

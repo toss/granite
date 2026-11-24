@@ -1,9 +1,10 @@
+import { evalIdForContainer } from './evalIds';
 import { getMicroFrontendGlobalContext } from './globalContext';
 
 /**
- * One evaluation of a remote bundle. A bundle built with `containerInit()` receives its identity from the
- * native evaluator as an argument (`evalId` is minted per evaluation), so evaluating the same app twice
- * yields two containers.
+ * One copy of a remote bundle's modules: its first evaluation (native ran it) or an instance made from its
+ * definition. Each copy has its own `evalId` (`<appName>@<n>`, issued by this runtime, see evalIds.ts), so
+ * evaluating or instantiating the same app twice yields two containers.
  */
 export interface MicroFrontendContainer {
   readonly evalId: string;
@@ -55,12 +56,14 @@ function toContainer(value: unknown): MicroFrontendContainer | undefined {
   if (value == null || typeof value !== 'object') {
     return undefined;
   }
-  const evalId = Reflect.get(value, 'evalId');
   const appName = Reflect.get(value, 'appName');
   const sourceUrl = Reflect.get(value, 'sourceUrl');
-  if (typeof evalId !== 'string' || evalId.length === 0 || typeof appName !== 'string' || appName.length === 0) {
+  if (typeof appName !== 'string' || appName.length === 0) {
     return undefined;
   }
+  // The wrapper passes the evaluation argument's evalId: an instance's id issued here, or nothing for a first
+  // evaluation (older native evaluators pass their own id, which is ignored). See evalIds.ts.
+  const evalId = evalIdForContainer(appName, Reflect.get(value, 'evalId'));
   return Object.freeze({ evalId, appName, sourceUrl: typeof sourceUrl === 'string' ? sourceUrl : undefined });
 }
 

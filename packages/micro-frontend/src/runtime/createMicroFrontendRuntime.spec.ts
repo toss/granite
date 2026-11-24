@@ -12,6 +12,7 @@ import {
   type NativeMicroFrontendRuntime,
   type NativeMicroFrontendRuntimeEvent,
 } from './createMicroFrontendRuntime';
+import { resetEvalIds } from './evalIds';
 import { getMicroFrontendGlobalContext } from './globalContext';
 import { parseNativeRuntimeEvent } from './parseNativeRuntimeEvent';
 import { createContainer, exposeModule, microFrontendModuleRegistry } from './registry';
@@ -97,14 +98,16 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
 
   it('makes a new instance of an app from its definition without loading the bundle again', async () => {
     // Given: the bundle defines its container when native evaluates it (containerInit), then runs its first instance.
+    resetEvalIds();
     const fixture = createRuntimeFixture();
-    const run = (evaluation: { readonly evalId: string }) => {
+    const run = (evaluation: { readonly evalId?: string }) => {
       const container = createContainer('cart');
-      exposeModule(container, './App', { default: () => evaluation.evalId });
+      exposeModule(container, './App', { default: () => evaluation.evalId ?? 'native' });
     };
     vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementationOnce(async () => {
-      defineContainer({ appName: 'cart', evalId: 'e1', sourceUrl: '/bundles/cart.hbc' }, run);
-      run({ evalId: 'e1' });
+      // Native calls the first evaluation with `{ sourceUrl }` only.
+      defineContainer({ appName: 'cart', sourceUrl: '/bundles/cart.hbc' }, run);
+      run({});
     });
 
     // When
@@ -113,9 +116,9 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     const third = await fixture.runtime.instantiateApp<AppModule>('cart/App');
 
     // Then
-    expect(first.default()).toBe('e1');
-    expect([second.evalId, second.module.default()]).toEqual(['e1.1', 'e1.1']);
-    expect([third.evalId, third.module.default()]).toEqual(['e1.2', 'e1.2']);
+    expect(first.default()).toBe('native');
+    expect([second.evalId, second.module.default()]).toEqual(['cart@2', 'cart@2']);
+    expect([third.evalId, third.module.default()]).toEqual(['cart@3', 'cart@3']);
     expect(await fixture.runtime.importApp<AppModule>('cart/App')).toBe(first);
     expect(fixture.adapter.loadBundle).toHaveBeenCalledOnce();
     expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledOnce();

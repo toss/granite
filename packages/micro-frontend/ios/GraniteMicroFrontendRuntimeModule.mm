@@ -7,8 +7,6 @@
 #import <React-callinvoker/ReactCommon/CallInvoker.h>
 #import <jsi/jsi.h>
 
-#include <atomic>
-#include <chrono>
 #include <string>
 
 static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
@@ -16,15 +14,10 @@ static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
 
 namespace {
 
-std::string GraniteMintEvalId() {
-  static std::atomic<uint64_t> counter{0};
-  const auto now = std::chrono::steady_clock::now().time_since_epoch().count();
-  return std::to_string(now) + "-" + std::to_string(++counter);
-}
-
-// Deferred evaluation with an evaluation scope argument (same contract as Android's BundleEvaluator).
+// Deferred evaluation with an evaluation argument (same contract as Android's BundleEvaluator).
 // A container bundle hands its body back through `__GRANITE_DEFERRED_EVAL__` instead of running it; the body is
-// then called with `{ evalId, sourceUrl }`. Bundles without the wrapper run during evaluateJavaScript as before.
+// then called with `{ sourceUrl }`. The host runtime gives the evaluation its id (`<appName>@<n>`), because only
+// JavaScript knows the app name. Bundles without the wrapper run during evaluateJavaScript as before.
 void GraniteEvaluateWithScope(facebook::jsi::Runtime &runtime,
                               std::string source,
                               const std::string &sourceUrl) {
@@ -43,7 +36,6 @@ void GraniteEvaluateWithScope(facebook::jsi::Runtime &runtime,
     return;  // bundle without the deferred wrapper: it already ran during evaluation
   }
   auto scope = jsi::Object(runtime);
-  scope.setProperty(runtime, "evalId", jsi::String::createFromUtf8(runtime, GraniteMintEvalId()));
   scope.setProperty(runtime, "sourceUrl", jsi::String::createFromUtf8(runtime, sourceUrl));
   slot.getObject(runtime).getFunction(runtime).call(runtime, scope);
 }

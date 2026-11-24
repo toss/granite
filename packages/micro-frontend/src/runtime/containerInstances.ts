@@ -1,3 +1,4 @@
+import { evalIdForDefinition, nextEvalId } from './evalIds';
 import { getMicroFrontendGlobalContext } from './globalContext';
 import type { AppContainer } from './registry';
 
@@ -6,7 +7,7 @@ import type { AppContainer } from './registry';
  *
  * A remote bundle built with `containerInit()` hands its body to the host runtime when native evaluates it
  * (`defineContainer`). The body is the container's definition: running it again makes another instance of the app,
- * a full copy of the bundle's modules (their own module state) with its own `evalId`, without reading or evaluating
+ * a full copy of the bundle's modules (their own module state) with its own `evalId` (`<appName>@<n>`), without reading or evaluating
  * the bundle file again. The first instance is the evaluation itself; `instantiateContainer` makes the others.
  */
 export interface ContainerDefinition {
@@ -69,11 +70,12 @@ export function defineContainer(value: unknown, run: unknown): void {
     return;
   }
   const appName = Reflect.get(value, 'appName');
-  const evalId = Reflect.get(value, 'evalId');
   const sourceUrl = Reflect.get(value, 'sourceUrl');
-  if (typeof appName !== 'string' || appName.length === 0 || typeof evalId !== 'string' || evalId.length === 0) {
+  if (typeof appName !== 'string' || appName.length === 0) {
     return;
   }
+  // The first evaluation's id. The same run's initContainer takes it (evalIds.ts).
+  const evalId = evalIdForDefinition(appName);
   definitions.set(appName, {
     appName,
     evalId,
@@ -116,7 +118,7 @@ export function instantiateContainer(appName: string): ContainerInstance {
     length: instances.length,
   };
   definition.instances += 1;
-  const evalId = `${definition.evalId}.${definition.instances}`;
+  const evalId = nextEvalId(appName);
   Reflect.deleteProperty(containers, appName);
   Reflect.deleteProperty(instances, appName);
   try {

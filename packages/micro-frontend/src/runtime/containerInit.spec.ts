@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { installContainerInit, type MicroFrontendShareScope } from './containerInit';
+import { evalIdForDefinition, nextEvalId, resetEvalIds } from './evalIds';
 import { getMicroFrontendGlobalContext } from './globalContext';
 
 function initContainer(value: unknown): MicroFrontendShareScope | undefined {
@@ -8,6 +9,7 @@ function initContainer(value: unknown): MicroFrontendShareScope | undefined {
 }
 
 afterEach(() => {
+  resetEvalIds();
   Reflect.deleteProperty(globalThis, '__MICRO_FRONTEND__');
 });
 
@@ -20,8 +22,8 @@ describe('container init', () => {
   it('gives every container the host share scope without a hook', () => {
     installContainerInit(undefined);
     getMicroFrontendGlobalContext().__SHARED__.react = { get: () => 'react', loaded: true };
-    expect(initContainer({ evalId: 'e1', appName: 'shopping' })?.get('react')).toBe('react');
-    expect(() => initContainer({ evalId: 'e1', appName: 'shopping' })?.get('missing')).toThrow(
+    expect(initContainer({ appName: 'shopping' })?.get('react')).toBe('react');
+    expect(() => initContainer({ appName: 'shopping' })?.get('missing')).toThrow(
       'Shared module missing is not registered'
     );
   });
@@ -47,10 +49,10 @@ describe('container init', () => {
     shared['brick-module'] = { get: () => 'brick', loaded: true };
     shared.react = { get: () => 'react', loaded: true };
 
-    const scope = initContainer({ evalId: 'e1', appName: 'shopping', sourceUrl: 'shopping.hbc' });
-    expect(scope?.get('brick-module')).toEqual({ scopedTo: 'e1', base: 'brick' });
+    const scope = initContainer({ appName: 'shopping', sourceUrl: 'shopping.hbc' });
+    expect(scope?.get('brick-module')).toEqual({ scopedTo: 'shopping@1', base: 'brick' });
     expect(scope?.get('react')).toBe('react');
-    expect(seen).toEqual([{ evalId: 'e1', appName: 'shopping', sourceUrl: 'shopping.hbc' }]);
+    expect(seen).toEqual([{ evalId: 'shopping@1', appName: 'shopping', sourceUrl: 'shopping.hbc' }]);
   });
 
   it('ignores values that are not evaluation arguments', () => {
@@ -58,6 +60,24 @@ describe('container init', () => {
       throw new Error('must not run');
     });
     expect(initContainer(undefined)).toBeUndefined();
-    expect(initContainer({ evalId: '', appName: 'shopping' })).toBeUndefined();
+    expect(initContainer({ evalId: 'e1' })).toBeUndefined();
+    expect(initContainer({ evalId: 'e1', appName: '' })).toBeUndefined();
+  });
+
+  it('gives a first evaluation the id its definition issued, and an instance the id issued for it', () => {
+    const seen: string[] = [];
+    installContainerInit(({ container }) => {
+      seen.push(container.evalId);
+    });
+    // Native evaluates the bundle: the wrapper defines the container, then initializes it in the same run.
+    evalIdForDefinition('shopping');
+    initContainer({ appName: 'shopping', sourceUrl: 'shopping.hbc' });
+    // An older native evaluator passes its own id: ignored.
+    evalIdForDefinition('bare');
+    initContainer({ evalId: '95299355399413-2', appName: 'bare' });
+    // instantiateApp issues the instance's id and passes it to the run.
+    initContainer({ evalId: nextEvalId('shopping'), appName: 'shopping' });
+
+    expect(seen).toEqual(['shopping@1', 'bare@1', 'shopping@2']);
   });
 });

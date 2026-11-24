@@ -104,18 +104,19 @@ describe('container init (microFrontend plugin)', () => {
         },
       }
     );
-    (context.__GRANITE_DEFERRED_EVAL__ as (evaluation: unknown) => void)({ evalId: 'e1', sourceUrl: 'shopping.hbc' });
+    // Native calls the first evaluation with `{ sourceUrl }` only; the host runtime issues its evalId.
+    (context.__GRANITE_DEFERRED_EVAL__ as (evaluation: unknown) => void)({ sourceUrl: 'shopping.hbc' });
     expect(definitions).toHaveLength(1);
-    expect(definitions[0]!.container).toEqual({ evalId: 'e1', sourceUrl: 'shopping.hbc', appName: 'shopping' });
+    expect(definitions[0]!.container).toEqual({ evalId: undefined, sourceUrl: 'shopping.hbc', appName: 'shopping' });
     expect(context.runs).toBe(1);
 
     // The host runs the definition again for another instance: the modules run again with the instance's identity.
-    definitions[0]!.run({ evalId: 'e1.1', sourceUrl: 'shopping.hbc', instanceOf: 'e1' });
+    definitions[0]!.run({ evalId: 'shopping@2', sourceUrl: 'shopping.hbc', instanceOf: 'shopping@1' });
     expect(definitions).toHaveLength(1);
     expect(context.runs).toBe(2);
     expect(inits).toEqual([
-      { evalId: 'e1', sourceUrl: 'shopping.hbc', appName: 'shopping' },
-      { evalId: 'e1.1', sourceUrl: 'shopping.hbc', appName: 'shopping' },
+      { evalId: undefined, sourceUrl: 'shopping.hbc', appName: 'shopping' },
+      { evalId: 'shopping@2', sourceUrl: 'shopping.hbc', appName: 'shopping' },
     ]);
   });
 

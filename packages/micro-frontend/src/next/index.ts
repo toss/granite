@@ -156,15 +156,16 @@ function dispose(appName: string): Plugin {
 }
 
 /**
- * Remote bundles: defer evaluation so that the native evaluator can pass this evaluation's identity
- * (`{ evalId, sourceUrl }`) as an argument, then initialize the container through the host runtime's
- * `hooks.beforeInitContainer` before any module runs. Shared-module stubs then read the container's share scope.
- * Without native deferred evaluation, or without the host runtime entry, the bundle runs as before.
+ * Remote bundles: defer evaluation so that the native evaluator calls the body with an evaluation argument
+ * (`{ sourceUrl }`), then initialize the container through the host runtime's `hooks.beforeInitContainer` before any
+ * module runs. Shared-module stubs then read the container's share scope. Without native deferred evaluation (no
+ * argument), or without the host runtime entry, the bundle runs as before.
  *
  * The body is also the container's definition: when native calls it, it hands itself to the host runtime
  * (`defineContainer`), so the host can run it again for another instance of the app. Each run is a full copy of
- * the bundle's modules with its own `evalId`, without reading or evaluating the bundle file again. An instance run
- * carries `instanceOf` and does not define the container again.
+ * the bundle's modules, without reading or evaluating the bundle file again. The host runtime issues every copy's
+ * `evalId` (`<appName>@<n>`): `defineContainer` for the first evaluation, `instantiateApp` for an instance, whose
+ * run carries its `evalId` and `instanceOf` and does not define the container again.
  */
 function containerInit(appNameValue: string): Plugin {
   const appName = JSON.stringify(appNameValue);
