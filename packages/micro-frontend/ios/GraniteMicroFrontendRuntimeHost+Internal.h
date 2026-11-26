@@ -13,6 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)emitCloseApp:(NSString *)sessionId;
 + (void)emitSessionVisibilityChanged:(NSString *)sessionId isVisible:(BOOL)isVisible;
 + (void)unregisterSession:(NSString *)sessionId token:(NSString *)token;
+/// JavaScript reports that a closed session's React tree unmounted. Any thread.
++ (void)sessionDidUnmount:(NSString *)sessionId;
 @end
 
 NS_ASSUME_NONNULL_END

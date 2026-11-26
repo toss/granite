@@ -10,12 +10,22 @@
 #endif
 
 @class GraniteMicroFrontendSessionEntry;
+@class GraniteMicroFrontendAwaitingUnmount;
 
 static NSRecursiveLock *runtimeLock;
 static NSMutableDictionary<NSString *, GraniteMicroFrontendSessionEntry *> *sessions;
 static NSMutableArray<NSDictionary *> *pendingEvents;
 static __weak id<GraniteMicroFrontendRuntimeEventSink> eventSink;
 static BOOL isDeliveringEvents;
+typedef void (^GraniteMicroFrontendUnmountHandler)(GraniteMicroFrontendSessionReleaseReason reason);
+/// Closed sessions whose release waits for JavaScript's unmount report, keyed by session id.
+static NSMutableDictionary<NSString *, GraniteMicroFrontendAwaitingUnmount *> *awaitingUnmounts;
+
+GraniteMicroFrontendSessionReleaseReason const GraniteMicroFrontendSessionReleaseReasonUnmounted = @"unmounted";
+GraniteMicroFrontendSessionReleaseReason const GraniteMicroFrontendSessionReleaseReasonTimeout = @"timeout";
+GraniteMicroFrontendSessionReleaseReason const GraniteMicroFrontendSessionReleaseReasonRuntimeDetached =
+    @"runtimeDetached";
+GraniteMicroFrontendSessionReleaseReason const GraniteMicroFrontendSessionReleaseReasonNotOpened = @"notOpened";
 
 static void GraniteMicroFrontendRequireMainThread(void) {
   if (!NSThread.isMainThread) {
@@ -33,6 +43,15 @@ static void GraniteMicroFrontendRequireMainThread(void) {
 @end
 
 @implementation GraniteMicroFrontendSessionEntry
+@end
+
+/// The unmount handlers of one closed session, for the registration (`token`) that closed it.
+@interface GraniteMicroFrontendAwaitingUnmount : NSObject
+@property(nonatomic, copy) NSString *token;
+@property(nonatomic, strong) NSMutableArray<GraniteMicroFrontendUnmountHandler> *handlers;
+@end
+
+@implementation GraniteMicroFrontendAwaitingUnmount
 @end
 
 @interface GraniteMicroFrontendSessionRegistration ()
@@ -57,6 +76,7 @@ static void GraniteMicroFrontendRequireMainThread(void) {
 
 @interface GraniteMicroFrontendRuntimeHost ()
 + (void)drainEventsToSink:(id<GraniteMicroFrontendRuntimeEventSink>)sink;
++ (void)releaseSession:(NSString *)sessionId reason:(GraniteMicroFrontendSessionReleaseReason)reason;
 @end
 
 @implementation GraniteMicroFrontendSessionRegistration
@@ -116,6 +136,51 @@ static void GraniteMicroFrontendRequireMainThread(void) {
     [GraniteMicroFrontendRuntimeHost emitCloseApp:_sessionId];
   }
   return shouldEmit;
+}
+
+- (BOOL)closeAppWithUnmountTimeout:(NSTimeInterval)timeout
+                         onUnmount:(void (^)(GraniteMicroFrontendSessionReleaseReason reason))onUnmount {
+  NSParameterAssert(onUnmount != nil);
+  BOOL shouldEmit = NO;
+  BOOL joinedAwaitingUnmount = NO;
+  NSString *sessionId = _sessionId;
+  [runtimeLock lock];
+  @try {
+    GraniteMicroFrontendAwaitingUnmount *awaiting = awaitingUnmounts[sessionId];
+    GraniteMicroFrontendSessionEntry *entry = sessions[sessionId];
+    if ([awaiting.token isEqualToString:_token]) {
+      // closeApp already went out and its unmount is still awaited: releasing now would cut off the cleanups that
+      // are still running, so this handler waits for the same release.
+      [awaiting.handlers addObject:[onUnmount copy]];
+      joinedAwaitingUnmount = YES;
+    } else if ([entry.token isEqualToString:_token] && entry.opened && !entry.closed) {
+      entry.closed = YES;
+      shouldEmit = YES;
+      // Registered before the event goes out, so a fast report cannot arrive first.
+      GraniteMicroFrontendAwaitingUnmount *newAwaiting = [[GraniteMicroFrontendAwaitingUnmount alloc] init];
+      newAwaiting.token = _token;
+      newAwaiting.handlers = [NSMutableArray arrayWithObject:[onUnmount copy]];
+      awaitingUnmounts[sessionId] = newAwaiting;
+    }
+  } @finally {
+    [runtimeLock unlock];
+  }
+  if (joinedAwaitingUnmount) {
+    return NO;
+  }
+  if (!shouldEmit) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      onUnmount(GraniteMicroFrontendSessionReleaseReasonNotOpened);
+    });
+    return NO;
+  }
+  [GraniteMicroFrontendRuntimeHost emitCloseApp:sessionId];
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(MAX(timeout, 0) * NSEC_PER_SEC)),
+                 dispatch_get_main_queue(), ^{
+                   [GraniteMicroFrontendRuntimeHost releaseSession:sessionId
+                                                            reason:GraniteMicroFrontendSessionReleaseReasonTimeout];
+                 });
+  return YES;
 }
 
 - (void)invalidate {
@@ -325,6 +390,7 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
   runtimeLock = [[NSRecursiveLock alloc] init];
   sessions = [[NSMutableDictionary alloc] init];
   pendingEvents = [[NSMutableArray alloc] init];
+  awaitingUnmounts = [[NSMutableDictionary alloc] init];
 }
 
 + (nullable GraniteMicroFrontendSessionRegistration *)registerSession:(NSString *)sessionId {
@@ -467,11 +533,43 @@ static char GraniteMicroFrontendViewControllerSessionBindingKey;
 }
 
 + (void)detachEventSink:(id<GraniteMicroFrontendRuntimeEventSink>)sink {
+  NSArray<GraniteMicroFrontendUnmountHandler> *orphanedHandlers = nil;
   [runtimeLock lock];
   if (eventSink == sink) {
     eventSink = nil;
+    // The runtime that would report these unmounts is gone.
+    NSMutableArray<GraniteMicroFrontendUnmountHandler> *handlers = [NSMutableArray array];
+    for (GraniteMicroFrontendAwaitingUnmount *awaiting in awaitingUnmounts.allValues) {
+      [handlers addObjectsFromArray:awaiting.handlers];
+    }
+    orphanedHandlers = handlers;
+    [awaitingUnmounts removeAllObjects];
   }
   [runtimeLock unlock];
+  if (orphanedHandlers.count > 0) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      for (GraniteMicroFrontendUnmountHandler handler in orphanedHandlers) {
+        handler(GraniteMicroFrontendSessionReleaseReasonRuntimeDetached);
+      }
+    });
+  }
+}
+
++ (void)sessionDidUnmount:(NSString *)sessionId {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [self releaseSession:sessionId reason:GraniteMicroFrontendSessionReleaseReasonUnmounted];
+  });
+}
+
+/// Main thread. Calls the session's unmount handlers once; later reasons find nothing.
++ (void)releaseSession:(NSString *)sessionId reason:(GraniteMicroFrontendSessionReleaseReason)reason {
+  [runtimeLock lock];
+  GraniteMicroFrontendAwaitingUnmount *awaiting = awaitingUnmounts[sessionId];
+  [awaitingUnmounts removeObjectForKey:sessionId];
+  [runtimeLock unlock];
+  for (GraniteMicroFrontendUnmountHandler handler in awaiting.handlers) {
+    handler(reason);
+  }
 }
 
 + (void)unregisterSession:(NSString *)sessionId token:(NSString *)token {

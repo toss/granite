@@ -71,7 +71,8 @@ const createApp = () => {
 
   function registerComponent(appKey: string, component: React.ComponentType<any>): string {
     if (AppRegistry.getAppKeys().includes(appKey)) {
-      // `AppRegistry.registerComponent` returns the app key.
+      // The first registration of an app key stays: AppRegistry holds one component per key. The caller still returns
+      // its own component (see `registerApp`). `AppRegistry.registerComponent` returns the app key.
       return appKey;
     }
 
@@ -162,6 +163,12 @@ const createApp = () => {
  * - Query Parameters: You can easily use query parameters received through URL schemes. For example, you can receive a `referrer` parameter and log it.
  * - Back Navigation Control: You can control back navigation events. For example, when a user presses back on a screen, you can show a dialog or close the screen.
  * - Screen Visibility: You can determine whether a screen is visible or hidden from the user. For example, you can use this value to handle specific actions when a user leaves for the home screen.
+ *
+ * Calling `registerApp` again with an `appName` that is already registered (for example, when a shared runtime
+ * evaluates the same service bundle once more) keeps the first `AppRegistry` registration, because `AppRegistry` holds
+ * one component per app key, and returns a new app component that renders the container passed to this call. A host
+ * that renders the returned component directly (such as a micro-frontend host) therefore renders each evaluation's
+ * own app.
  *
  * @example
  *

@@ -78,10 +78,12 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
         }
     }
 
-    fun detach(target: GraniteMicroFrontendRuntimeEventTarget) {
+    /** Returns whether [target] was the runtime receiving events. */
+    fun detach(target: GraniteMicroFrontendRuntimeEventTarget): Boolean {
         synchronized(lock) {
             attachedTargets.remove(target)
-            if (activeTarget === target) {
+            val wasActive = activeTarget === target
+            if (wasActive) {
                 activeTarget = null
                 didLoseActiveTarget = true
             }
@@ -90,6 +92,7 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
                 inFlight = null
                 isDelivering = false
             }
+            return wasActive
         }
     }
 

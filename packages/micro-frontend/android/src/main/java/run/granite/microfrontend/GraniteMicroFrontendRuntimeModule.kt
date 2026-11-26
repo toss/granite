@@ -43,6 +43,10 @@ class GraniteMicroFrontendRuntimeModule(
         GraniteMicroFrontendRuntimeHost.startEventDelivery(this)
     }
 
+    override fun sessionDidUnmount(sessionId: String) {
+        GraniteMicroFrontendRuntimeHost.sessionDidUnmount(sessionId)
+    }
+
     override fun emit(event: GraniteMicroFrontendEvent, onDelivered: () -> Unit): Boolean =
         reactApplicationContext.runOnJSQueueThread {
             emitOnEvent(event.toWritableMap())

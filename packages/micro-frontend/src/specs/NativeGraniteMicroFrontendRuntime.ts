@@ -19,6 +19,8 @@ export type EvaluateScriptRequest = Readonly<{
 export interface Spec extends TurboModule {
   evaluateScript(request: EvaluateScriptRequest): Promise<void>;
   startEventDelivery(): void;
+  /** The closed session's React tree has unmounted (its effect cleanups have run). */
+  sessionDidUnmount(sessionId: string): void;
   readonly onEvent: CodegenTypes.EventEmitter<NativeMicroFrontendRuntimeEvent>;
 }
 
@@ -35,6 +37,13 @@ const NativeGraniteMicroFrontendRuntime: Spec = {
   },
   startEventDelivery() {
     getNativeModule().startEventDelivery();
+  },
+  sessionDidUnmount(sessionId) {
+    const native = getNativeModule();
+    // A JS bundle can be newer than the native binary. Native then releases the session on its own timeout.
+    if (typeof native.sessionDidUnmount === 'function') {
+      native.sessionDidUnmount(sessionId);
+    }
   },
   onEvent(listener) {
     return getNativeModule().onEvent(listener);

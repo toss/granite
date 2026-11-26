@@ -1,0 +1,101 @@
+import { ownerOf, recordCopy } from './appInstances';
+import { getMicroFrontendGlobalContext } from './globalContext';
+import { instanceIdForContainer } from './instanceIds';
+
+/**
+ * One app instance: a copy of a remote bundle's modules, either its first evaluation (native ran it) or an instance
+ * made from its definition. Each has its own `instanceId` (`<appName>@<n>`, issued by this runtime, see
+ * instanceIds.ts), so the same app evaluated or instantiated twice yields two containers.
+ */
+export interface MicroFrontendContainer {
+  readonly instanceId: string;
+  readonly appName: string;
+  readonly sourceUrl?: string;
+  /**
+   * The session this instance belongs to, read at call time: undefined while no session has taken it (it acts for
+   * the host). Once set it never changes, also after the session closed (see appInstances.ts).
+   */
+  readonly owner: () => string | undefined;
+}
+
+/** Shared modules as one container sees them. `get` is called lazily, on the container's first use. */
+export interface MicroFrontendShareScope {
+  readonly get: (moduleName: string) => unknown;
+}
+
+export interface BeforeInitContainerArgs {
+  readonly container: MicroFrontendContainer;
+  /** The host's share scope. Delegate to it for modules the hook does not replace. */
+  readonly shareScope: MicroFrontendShareScope;
+}
+
+export interface BeforeInitContainerResult {
+  /** The share scope this container uses instead of the host's. */
+  readonly shareScope?: MicroFrontendShareScope;
+}
+
+/**
+ * Like Module Federation's `beforeInitContainer`: runs once per container, before its code runs, and may
+ * give that container its own view of the shared modules.
+ */
+export type BeforeInitContainerHook = (args: BeforeInitContainerArgs) => BeforeInitContainerResult | void;
+
+/**
+ * Granite-owned entry the `containerInit()` wrapper calls. Non-enumerable because older bundles validate the
+ * enumerable key set of the global context.
+ */
+const INIT_CONTAINER = 'initContainer';
+
+function hostShareScope(): MicroFrontendShareScope {
+  return Object.freeze({
+    get(moduleName: string) {
+      const shared = getMicroFrontendGlobalContext().__SHARED__[moduleName];
+      if (shared == null) {
+        throw new Error(`Shared module ${moduleName} is not registered`);
+      }
+      return shared.get();
+    },
+  });
+}
+
+function toContainer(value: unknown): MicroFrontendContainer | undefined {
+  if (value == null || typeof value !== 'object') {
+    return undefined;
+  }
+  const appName = Reflect.get(value, 'appName');
+  const sourceUrl = Reflect.get(value, 'sourceUrl');
+  if (typeof appName !== 'string' || appName.length === 0) {
+    return undefined;
+  }
+  // The wrapper passes the evaluation argument's id: an instance's id issued here, or nothing for a first
+  // evaluation (older native evaluators pass their own `evalId`, which is ignored). See instanceIds.ts.
+  const instanceId = instanceIdForContainer(appName, Reflect.get(value, 'instanceId') ?? Reflect.get(value, 'evalId'));
+  const source = typeof sourceUrl === 'string' ? sourceUrl : undefined;
+  recordCopy(instanceId, appName, source);
+  return Object.freeze({ instanceId, appName, sourceUrl: source, owner: () => ownerOf(instanceId) });
+}
+
+/** Installs (or clears) the host's hook. Without a hook every container uses the host's share scope. */
+export function installContainerInit(hook: BeforeInitContainerHook | undefined): void {
+  const context = getMicroFrontendGlobalContext();
+  Reflect.defineProperty(context, INIT_CONTAINER, {
+    configurable: true,
+    enumerable: false,
+    writable: false,
+    value: (value: unknown): MicroFrontendShareScope | undefined => initContainer(value, hook),
+  });
+}
+
+export function initContainer(
+  value: unknown,
+  hook: BeforeInitContainerHook | undefined
+): MicroFrontendShareScope | undefined {
+  const container = toContainer(value);
+  if (container == null) {
+    // Not an evaluation argument from a known native evaluator: behave exactly like an unwrapped bundle.
+    return undefined;
+  }
+  const shareScope = hostShareScope();
+  const result = hook?.({ container, shareScope });
+  return result?.shareScope ?? shareScope;
+}

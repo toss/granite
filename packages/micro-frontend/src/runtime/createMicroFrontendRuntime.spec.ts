@@ -6,12 +6,16 @@ import {
   resolvePendingHostComponent,
 } from '../host/pendingHostComponentStore';
 import type { MicroFrontendSessionEvent } from '../types';
+import { resetAppCopies } from './appInstances';
+import { installContainerInit, type MicroFrontendContainer } from './containerInit';
+import { defineContainer, removeContainerDefinition } from './containerInstances';
 import {
   createMicroFrontendRuntimeWithDependencies,
   type NativeMicroFrontendRuntime,
   type NativeMicroFrontendRuntimeEvent,
 } from './createMicroFrontendRuntime';
 import { getMicroFrontendGlobalContext } from './globalContext';
+import { resetInstanceIds, setInstanceIdFormat } from './instanceIds';
 import { parseNativeRuntimeEvent } from './parseNativeRuntimeEvent';
 import { createContainer, exposeModule, microFrontendModuleRegistry } from './registry';
 
@@ -25,7 +29,7 @@ function CartPendingComponent() {
   return null;
 }
 
-function createRuntimeFixture() {
+function createRuntimeFixture(options: { instancePerSession?: boolean } = {}) {
   const listeners = new Set<(event: NativeMicroFrontendRuntimeEvent) => void>();
   const adapter = {
     loadBundle: vi.fn(async ({ appName }: { readonly appName: string }) => ({
@@ -45,6 +49,7 @@ function createRuntimeFixture() {
     adapter,
     nativeRuntime,
     onPreloadError,
+    instancePerSession: () => options.instancePerSession === true,
     registry: microFrontendModuleRegistry,
     removePendingHostComponentRoutes,
     parseEvent: parseNativeRuntimeEvent,
@@ -59,6 +64,34 @@ function createRuntimeFixture() {
     onPreloadError,
     runtime,
   };
+}
+
+/**
+ * A cart bundle built with containerInit(), evaluated by native: the wrapper defines the container on the first
+ * evaluation and initializes every instance. Each instance's App answers its instanceId.
+ */
+function createCartBundleFixture(options: { instancePerSession: boolean }) {
+  resetInstanceIds();
+  resetAppCopies();
+  removeContainerDefinition('cart');
+  const containers = new Map<string, MicroFrontendContainer>();
+  let initializing: MicroFrontendContainer | undefined;
+  installContainerInit(({ container }) => {
+    containers.set(container.instanceId, container);
+    initializing = container;
+  });
+  const initContainer = () => Reflect.get(getMicroFrontendGlobalContext(), 'initContainer') as (value: object) => void;
+  const body = (evaluation: { readonly instanceId?: string; readonly instanceOf?: string }) => {
+    if (evaluation.instanceOf == null) {
+      defineContainer({ appName: 'cart', sourceUrl: '/bundles/cart.hbc' }, body);
+    }
+    initContainer()({ instanceId: evaluation.instanceId, appName: 'cart', sourceUrl: '/bundles/cart.hbc' });
+    const instanceId = initializing?.instanceId;
+    exposeModule(createContainer('cart'), './App', { default: () => instanceId ?? 'none' });
+  };
+  const fixture = createRuntimeFixture(options);
+  vi.mocked(fixture.nativeRuntime.evaluateScript).mockImplementation(async () => body({}));
+  return { ...fixture, containers };
 }
 
 describe('createMicroFrontendRuntimeWithDependencies', () => {
@@ -91,6 +124,115 @@ describe('createMicroFrontendRuntimeWithDependencies', () => {
     expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledWith({
       filePath: '/bundles/cart.hbc',
     });
+  });
+
+  it('gives each session its own app instance with instancePerSession, and never hands one to another session', async () => {
+    // Given: native evaluates the cart bundle once; the wrapper defines its container and initializes each instance.
+    const fixture = createCartBundleFixture({ instancePerSession: true });
+    const open = (sessionId: string) =>
+      fixture.emit({ name: 'openApp', params: { appName: 'cart', scheme: 'granite://cart', sessionId } });
+    fixture.runtime.onEvent(() => undefined);
+    open('s1');
+    open('s2');
+
+    // When / Then: the first session takes the evaluation, and keeps it.
+    const s1 = await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's1' });
+    expect(s1.default()).toBe('cart@1');
+    expect(await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's1' })).toBe(s1);
+
+    // Another session gets a new instance from the definition, without loading the bundle again.
+    const s2 = await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's2' });
+    expect(s2.default()).toBe('cart@2');
+    expect(fixture.adapter.loadBundle).toHaveBeenCalledOnce();
+    expect(fixture.nativeRuntime.evaluateScript).toHaveBeenCalledOnce();
+
+    // A native preload leaves one instance no session has used yet, and the next session takes it.
+    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
+    await vi.waitFor(() => expect(fixture.containers.get('cart@3')?.owner()).toBeUndefined());
+    expect(fixture.containers.has('cart@3')).toBe(true);
+    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
+    open('s3');
+    expect((await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's3' })).default()).toBe('cart@3');
+    expect(fixture.containers.has('cart@4')).toBe(false);
+
+    // A closed session's instance never goes to another session.
+    fixture.emit({ name: 'closeApp', params: { appName: 'cart', sessionId: 's2' } });
+    open('s4');
+    expect((await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's4' })).default()).toBe('cart@4');
+    expect(fixture.containers.get('cart@2')?.owner()).toBe('s2');
+
+    // Without a session, importApp returns the app's first instance.
+    expect(await fixture.runtime.importApp<AppModule>('cart/App')).toBe(s1);
+  });
+
+  it('formats instance ids with what the adapter returned for the defining evaluation', async () => {
+    const fixture = createCartBundleFixture({ instancePerSession: true });
+    setInstanceIdFormat(({ appName, sequence, bundle }) => {
+      const deploymentId = (bundle as { deploymentId?: string } | undefined)?.deploymentId ?? 'none';
+      return `${appName}@${deploymentId}@${sequence}`;
+    });
+    vi.mocked(fixture.adapter.loadBundle).mockResolvedValue({
+      filePath: '/bundles/cart.hbc',
+      deploymentId: 'd-42',
+    } as { filePath: string });
+    fixture.runtime.onEvent(() => undefined);
+    fixture.emit({ name: 'openApp', params: { appName: 'cart', scheme: 'granite://cart', sessionId: 's1' } });
+    fixture.emit({ name: 'openApp', params: { appName: 'cart', scheme: 'granite://cart', sessionId: 's2' } });
+
+    const s1 = await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's1' });
+    const s2 = await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's2' });
+
+    expect([s1.default(), s2.default()]).toEqual(['cart@d-42@1', 'cart@d-42@2']);
+  });
+
+  it('falls back to the default id when the formatted one is not new', async () => {
+    const fixture = createCartBundleFixture({ instancePerSession: true });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    setInstanceIdFormat(({ appName }) => appName);
+    fixture.runtime.onEvent(() => undefined);
+    fixture.emit({ name: 'openApp', params: { appName: 'cart', scheme: 'granite://cart', sessionId: 's1' } });
+    fixture.emit({ name: 'openApp', params: { appName: 'cart', scheme: 'granite://cart', sessionId: 's2' } });
+
+    const s1 = await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's1' });
+    const s2 = await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's2' });
+
+    expect([s1.default(), s2.default()]).toEqual(['cart', 'cart@2']);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('using the default id'));
+    warn.mockRestore();
+  });
+
+  it('falls back to the default id when the formatter throws or the adapter reports no deployment', async () => {
+    const fixture = createCartBundleFixture({ instancePerSession: true });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    setInstanceIdFormat(({ appName, sequence, bundle }) => {
+      const deploymentId = (bundle as { deploymentId?: string } | undefined)?.deploymentId;
+      if (sequence === 2) {throw new Error('broken formatter');}
+      return deploymentId ? `${appName}@${deploymentId}@${sequence}` : `${appName}@${sequence}`;
+    });
+    fixture.runtime.onEvent(() => undefined);
+    for (const sessionId of ['s1', 's2', 's3']) {
+      fixture.emit({ name: 'openApp', params: { appName: 'cart', scheme: 'granite://cart', sessionId } });
+    }
+
+    const ids = [];
+    for (const sessionId of ['s1', 's2', 's3']) {
+      ids.push((await fixture.runtime.importApp<AppModule>('cart/App', { sessionId })).default());
+    }
+
+    expect(ids).toEqual(['cart@1', 'cart@2', 'cart@3']);
+    warn.mockRestore();
+  });
+
+  it('gives every session the first instance without instancePerSession', async () => {
+    const fixture = createCartBundleFixture({ instancePerSession: false });
+    fixture.runtime.onEvent(() => undefined);
+    fixture.emit({ name: 'openApp', params: { appName: 'cart', scheme: 'granite://cart', sessionId: 's1' } });
+    fixture.emit({ name: 'preloadApp', params: { appName: 'cart' } });
+
+    const module = await fixture.runtime.importApp<AppModule>('cart/App', { sessionId: 's1' });
+    expect(module.default()).toBe('cart@1');
+    expect(fixture.containers.get('cart@1')?.owner()).toBeUndefined();
+    expect(fixture.containers.size).toBe(1);
   });
 
   it('reuses a native view registered by the host when a remote bundle evaluates its wrapper', async () => {

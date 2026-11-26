@@ -16,6 +16,7 @@ describe('microFrontend plugin', () => {
       'granite:micro-frontend:prelude',
       'granite:micro-frontend:shared-modules',
       'granite:micro-frontend:dispose',
+      'granite:micro-frontend:container-init',
     ]);
 
     const prelude = getPlugin(plugins, 'granite:micro-frontend:prelude');

@@ -7,6 +7,9 @@
 #import <React-callinvoker/ReactCommon/CallInvoker.h>
 #import <jsi/jsi.h>
 
+#include <granite/microfrontend/DeferredEvaluation.h>
+#include <string>
+
 static NSString *const GraniteMicroFrontendRuntimeErrorDomain =
     @"GraniteMicroFrontendRuntime";
 
@@ -101,9 +104,8 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
         return;
       }
       try {
-        runtime->evaluateJavaScript(
-            std::make_unique<facebook::jsi::StringBuffer>(std::move(source)),
-            sourceUrl);
+        granite::microfrontend::evaluateWithScope(
+            *runtime, std::make_shared<facebook::jsi::StringBuffer>(std::move(source)), sourceUrl);
         resolve(nil);
       } catch (const std::exception &exception) {
         NSString *message = [NSString stringWithUTF8String:exception.what()];
@@ -118,6 +120,10 @@ RCT_EXPORT_MODULE(GraniteMicroFrontendRuntime)
 
 - (void)startEventDelivery {
   [GraniteMicroFrontendRuntimeHost startEventDeliveryToEventSink:self];
+}
+
+- (void)sessionDidUnmount:(NSString *)sessionId {
+  [GraniteMicroFrontendRuntimeHost sessionDidUnmount:sessionId];
 }
 
 - (BOOL)enqueueRuntimeEvent:(NSDictionary *)event {

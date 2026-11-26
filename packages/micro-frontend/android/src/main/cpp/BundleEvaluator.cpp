@@ -1,7 +1,10 @@
 #include "BundleEvaluator.h"
 #include "FileReader.h"
 
+#include <granite/microfrontend/DeferredEvaluation.h>
 #include <jsi/jsi.h>
+
+#include <string>
 
 namespace granite::microfrontend {
 
@@ -33,9 +36,7 @@ void BundleEvaluator::evaluateScriptSync(
       reinterpret_cast<const char *>(pinnedScriptData.get()),
       pinnedScriptData.size()};
   auto *runtime = reinterpret_cast<Runtime *>(runtimePointer);
-  runtime->evaluateJavaScript(
-      std::make_shared<StringBuffer>(std::move(source)),
-      sourceUrl->toStdString());
+  evaluateWithScope(*runtime, std::make_shared<StringBuffer>(std::move(source)), sourceUrl->toStdString());
 }
 
 void BundleEvaluator::evaluateFileSync(
@@ -79,9 +80,7 @@ void BundleEvaluator::evaluateFileSync(
   }
 
   auto *runtime = reinterpret_cast<Runtime *>(runtimePointer);
-  runtime->evaluateJavaScript(
-      std::make_shared<StringBuffer>(std::move(source)),
-      sourceUrl->toStdString());
+  evaluateWithScope(*runtime, std::make_shared<StringBuffer>(std::move(source)), sourceUrl->toStdString());
 }
 
 } // namespace granite::microfrontend

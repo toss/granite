@@ -99,13 +99,13 @@ class GraniteMicroFrontendSessionStoreTest {
         val events = Collections.synchronizedList(mutableListOf<GraniteMicroFrontendEvent>())
         val openDeliveryStarted = CountDownLatch(1)
         val continueOpenDelivery = CountDownLatch(1)
-        val store = GraniteMicroFrontendSessionStore { event ->
+        val store = GraniteMicroFrontendSessionStore(emit = { event ->
             if (event is GraniteMicroFrontendEvent.OpenApp) {
                 openDeliveryStarted.countDown()
                 assertTrue(continueOpenDelivery.await(5, TimeUnit.SECONDS))
             }
             events.add(event)
-        }
+        })
         val registration = store.registerSession("session-1")
         val openResult = AtomicBoolean()
         val closeResult = AtomicBoolean()

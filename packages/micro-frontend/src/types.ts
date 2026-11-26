@@ -69,10 +69,19 @@ export interface MicroFrontendLifecycleEvent {
 
 export type MicroFrontendLifecycleCallback = (event: MicroFrontendLifecycleEvent) => void;
 
+export interface MicroFrontendImportOptions {
+  /**
+   * With `instancePerSession`, the module comes from the app instance that belongs to this session (Granite
+   * `sessionId`): the one the session took before, else one no session has used yet, else a new instance.
+   */
+  readonly sessionId?: string;
+}
+
 export interface MicroFrontendRuntimeApi {
   readonly evaluateScript: (filePath: string) => Promise<void>;
   readonly preloadApp: (appName: string) => Promise<void>;
-  readonly importApp: <TModule>(request: AppRequest) => Promise<TModule>;
+  /** The module `request` names. Without `options.sessionId` (or without `instancePerSession`): the app's first instance. */
+  readonly importApp: <TModule>(request: AppRequest, options?: MicroFrontendImportOptions) => Promise<TModule>;
   /** Read the current snapshot without starting event delivery. */
   readonly getSessions: () => readonly MicroFrontendSessionState[];
   /** Subscribe to changes and start native delivery if needed; read getSessions() for the initial snapshot. */
