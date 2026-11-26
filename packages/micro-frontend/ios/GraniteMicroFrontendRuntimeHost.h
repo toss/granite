@@ -12,7 +12,8 @@ FOUNDATION_EXPORT GraniteMicroFrontendSessionReleaseReason const GraniteMicroFro
 FOUNDATION_EXPORT GraniteMicroFrontendSessionReleaseReason const GraniteMicroFrontendSessionReleaseReasonTimeout;
 /// The JavaScript runtime that would report it is gone.
 FOUNDATION_EXPORT GraniteMicroFrontendSessionReleaseReason const GraniteMicroFrontendSessionReleaseReasonRuntimeDetached;
-/// No `closeApp` was sent (the session never opened, or was already closed), so JavaScript has nothing to unmount.
+/// No `closeApp` was sent and none awaits the unmount (the session never opened, or its resources were already
+/// released), so JavaScript has nothing to unmount.
 FOUNDATION_EXPORT GraniteMicroFrontendSessionReleaseReason const GraniteMicroFrontendSessionReleaseReasonNotOpened;
 
 @interface GraniteMicroFrontendSessionRegistration : NSObject
@@ -23,6 +24,8 @@ FOUNDATION_EXPORT GraniteMicroFrontendSessionReleaseReason const GraniteMicroFro
 /// resources may be released: when JavaScript reports the unmount, after `timeout`, or when the runtime is gone.
 /// Keep what the session's JavaScript can still call (for example its native module registry) until then.
 /// Returns whether `closeApp` was sent. `invalidate` may be called right after; it does not cancel `onUnmount`.
+/// When an earlier call already sent `closeApp` and its unmount is still awaited, this call sends nothing, returns NO,
+/// and `onUnmount` is called with the same release as that earlier call (its timeout applies).
 - (BOOL)closeAppWithUnmountTimeout:(NSTimeInterval)timeout
                          onUnmount:(void (^)(GraniteMicroFrontendSessionReleaseReason reason))onUnmount
     NS_SWIFT_NAME(closeApp(unmountTimeout:onUnmount:));

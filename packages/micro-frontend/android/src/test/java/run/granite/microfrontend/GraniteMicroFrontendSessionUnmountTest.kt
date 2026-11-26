@@ -98,6 +98,61 @@ class GraniteMicroFrontendSessionUnmountTest {
     }
 
     @Test
+    fun `a second closeApp while the unmount is awaited waits for the same release`() {
+        val scheduler = ManualScheduler()
+        val events = mutableListOf<GraniteMicroFrontendEvent>()
+        val store = GraniteMicroFrontendSessionStore(events::add, scheduler)
+        val registration = openedSession(store)
+        val reasons = mutableListOf<String>()
+
+        assertTrue(registration.closeApp(3_000) { reasons += "first:$it" })
+        assertFalse(registration.closeApp(3_000) { reasons += "second:$it" })
+        scheduler.runPosted()
+        assertEquals(emptyList<String>(), reasons)
+
+        store.sessionDidUnmount("shopping:1")
+        scheduler.runPosted()
+        scheduler.runDelayed()
+
+        assertEquals(listOf("first:unmounted", "second:unmounted"), reasons)
+        assertEquals(1, events.count { it == GraniteMicroFrontendEvent.CloseApp("shopping:1") })
+    }
+
+    @Test
+    fun `a second closeApp after close() still waits for the same release`() {
+        val scheduler = ManualScheduler()
+        val store = GraniteMicroFrontendSessionStore({}, scheduler)
+        val registration = openedSession(store)
+        val reasons = mutableListOf<String>()
+
+        registration.closeApp(3_000) { reasons += "first:$it" }
+        registration.close()
+        assertFalse(registration.closeApp(3_000) { reasons += "second:$it" })
+        scheduler.runPosted()
+        assertEquals(emptyList<String>(), reasons)
+
+        scheduler.runDelayed()
+
+        assertEquals(listOf("first:timeout", "second:timeout"), reasons)
+    }
+
+    @Test
+    fun `a closeApp after the release is released at once`() {
+        val scheduler = ManualScheduler()
+        val store = GraniteMicroFrontendSessionStore({}, scheduler)
+        val registration = openedSession(store)
+        val reasons = mutableListOf<String>()
+
+        registration.closeApp(3_000) { reasons += "first:$it" }
+        store.sessionDidUnmount("shopping:1")
+        scheduler.runPosted()
+        assertFalse(registration.closeApp(3_000) { reasons += "second:$it" })
+        scheduler.runPosted()
+
+        assertEquals(listOf("first:unmounted", "second:notOpened"), reasons)
+    }
+
+    @Test
     fun `an unmount report for an unknown session does nothing`() {
         val scheduler = ManualScheduler()
         val store = GraniteMicroFrontendSessionStore({}, scheduler)

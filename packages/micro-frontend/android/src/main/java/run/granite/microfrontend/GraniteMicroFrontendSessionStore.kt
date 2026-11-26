@@ -15,7 +15,10 @@ object GraniteMicroFrontendSessionReleaseReason {
     /** The JavaScript runtime that would report it is gone. */
     const val RUNTIME_DETACHED = "runtimeDetached"
 
-    /** No `closeApp` was sent (the session never opened, or was already closed), so JavaScript has nothing to unmount. */
+    /**
+     * No `closeApp` was sent and none awaits the unmount (the session never opened, or its resources were already
+     * released), so JavaScript has nothing to unmount.
+     */
     const val NOT_OPENED = "notOpened"
 }
 
@@ -46,7 +49,7 @@ internal class GraniteMicroFrontendSessionStore(
     private val sessions = mutableMapOf<String, SessionEntry>()
 
     /** Closed sessions whose release waits for JavaScript's unmount report, keyed by session id. */
-    private val unmountHandlers = mutableMapOf<String, (String) -> Unit>()
+    private val awaitingUnmount = mutableMapOf<String, AwaitingUnmount>()
 
     fun registerSession(sessionId: String): GraniteMicroFrontendSessionRegistration {
         require(sessionId.isNotBlank()) { "sessionId must not be blank" }
@@ -99,26 +102,37 @@ internal class GraniteMicroFrontendSessionStore(
     }
 
     fun closeApp(sessionId: String, token: String, unmountTimeoutMillis: Long, onUnmount: (String) -> Unit): Boolean {
-        val emitted = synchronized(lock) {
+        val outcome = synchronized(lock) {
+            val awaiting = awaitingUnmount[sessionId]
             val session = sessions[sessionId]
-            if (session == null || session.token != token || !session.opened || session.closed) {
-                false
+            if (awaiting != null && awaiting.token == token) {
+                // closeApp already went out and its unmount is still awaited: releasing now would cut off the
+                // cleanups that are still running, so this handler waits for the same release.
+                awaiting.handlers += onUnmount
+                CloseOutcome.JOINED
+            } else if (session == null || session.token != token || !session.opened || session.closed) {
+                CloseOutcome.NOT_SENT
             } else {
                 session.closed = true
                 // Registered before the event goes out, so a fast report cannot arrive first.
-                unmountHandlers[sessionId] = onUnmount
+                awaitingUnmount[sessionId] = AwaitingUnmount(token, mutableListOf(onUnmount))
                 emit(GraniteMicroFrontendEvent.CloseApp(sessionId))
-                true
+                CloseOutcome.SENT
             }
         }
-        if (!emitted) {
-            mainThread.post { onUnmount(GraniteMicroFrontendSessionReleaseReason.NOT_OPENED) }
-            return false
+        when (outcome) {
+            CloseOutcome.SENT -> {
+                mainThread.postDelayed(unmountTimeoutMillis.coerceAtLeast(0)) {
+                    release(sessionId, GraniteMicroFrontendSessionReleaseReason.TIMEOUT)
+                }
+                return true
+            }
+            CloseOutcome.JOINED -> return false
+            CloseOutcome.NOT_SENT -> {
+                mainThread.post { onUnmount(GraniteMicroFrontendSessionReleaseReason.NOT_OPENED) }
+                return false
+            }
         }
-        mainThread.postDelayed(unmountTimeoutMillis.coerceAtLeast(0)) {
-            release(sessionId, GraniteMicroFrontendSessionReleaseReason.TIMEOUT)
-        }
-        return true
     }
 
     /** JavaScript reports that a closed session's React tree unmounted. Any thread. */
@@ -129,17 +143,17 @@ internal class GraniteMicroFrontendSessionStore(
     /** The runtime that would report the pending unmounts is gone. */
     fun releaseAllAwaitingUnmount(reason: String) {
         val handlers = synchronized(lock) {
-            unmountHandlers.values.toList().also { unmountHandlers.clear() }
+            awaitingUnmount.values.flatMap { it.handlers }.also { awaitingUnmount.clear() }
         }
         if (handlers.isNotEmpty()) {
             mainThread.post { handlers.forEach { it(reason) } }
         }
     }
 
-    /** Main thread. Calls the session's unmount handler once; later reasons find nothing. */
+    /** Main thread. Calls the session's unmount handlers once; later reasons find nothing. */
     private fun release(sessionId: String, reason: String) {
-        val handler = synchronized(lock) { unmountHandlers.remove(sessionId) } ?: return
-        handler(reason)
+        val awaiting = synchronized(lock) { awaitingUnmount.remove(sessionId) } ?: return
+        awaiting.handlers.forEach { it(reason) }
     }
 
     fun unregisterSession(sessionId: String, token: String) {
@@ -171,6 +185,11 @@ internal class GraniteMicroFrontendSessionStore(
 
     private enum class Outcome { REMOVED, UNKNOWN, STALE_TOKEN }
 
+    private enum class CloseOutcome { SENT, JOINED, NOT_SENT }
+
+    /** The unmount handlers of one closed session, for the registration ([token]) that closed it. */
+    private class AwaitingUnmount(val token: String, val handlers: MutableList<(String) -> Unit>)
+
     private data class SessionEntry(
         val token: String,
         var opened: Boolean = false,
@@ -201,6 +220,8 @@ class GraniteMicroFrontendSessionRegistration internal constructor(
      * JavaScript can still call (for example its native module registry) until then.
      *
      * Returns whether `closeApp` was sent. [close] may be called right after; it does not cancel [onUnmount].
+     * When an earlier call already sent `closeApp` and its unmount is still awaited, this call sends nothing,
+     * returns false, and [onUnmount] is called with the same release as that earlier call (its timeout applies).
      */
     fun closeApp(unmountTimeoutMillis: Long, onUnmount: (reason: String) -> Unit): Boolean =
         store.closeApp(sessionId, token, unmountTimeoutMillis, onUnmount)
