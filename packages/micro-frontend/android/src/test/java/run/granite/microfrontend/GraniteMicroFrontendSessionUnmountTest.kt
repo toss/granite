@@ -153,6 +153,45 @@ class GraniteMicroFrontendSessionUnmountTest {
     }
 
     @Test
+    fun `a session id registered again while the unmount is awaited keeps each release to its own close`() {
+        val scheduler = ManualScheduler()
+        val store = GraniteMicroFrontendSessionStore({}, scheduler)
+        val first = openedSession(store)
+        val reasons = mutableListOf<String>()
+
+        first.closeApp(3_000) { reasons += "first:$it" }
+        first.close()
+        openedSession(store).closeApp(3_000) { reasons += "second:$it" }
+        assertFalse(first.closeApp(3_000) { reasons += "first-again:$it" })
+        scheduler.runPosted()
+        assertEquals(emptyList<String>(), reasons)
+
+        scheduler.runDelayed()
+
+        assertEquals(listOf("first:timeout", "first-again:timeout", "second:timeout"), reasons)
+    }
+
+    @Test
+    fun `an unmount report settles the oldest close awaited under the session id`() {
+        val scheduler = ManualScheduler()
+        val store = GraniteMicroFrontendSessionStore({}, scheduler)
+        val first = openedSession(store)
+        val reasons = mutableListOf<String>()
+
+        first.closeApp(3_000) { reasons += "first:$it" }
+        first.close()
+        openedSession(store).closeApp(3_000) { reasons += "second:$it" }
+
+        store.sessionDidUnmount("shopping:1")
+        scheduler.runPosted()
+        assertEquals(listOf("first:unmounted"), reasons)
+
+        store.sessionDidUnmount("shopping:1")
+        scheduler.runPosted()
+        assertEquals(listOf("first:unmounted", "second:unmounted"), reasons)
+    }
+
+    @Test
     fun `an unmount report for an unknown session does nothing`() {
         val scheduler = ManualScheduler()
         val store = GraniteMicroFrontendSessionStore({}, scheduler)

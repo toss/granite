@@ -48,8 +48,12 @@ internal class GraniteMicroFrontendSessionStore(
     private val lock = Any()
     private val sessions = mutableMapOf<String, SessionEntry>()
 
-    /** Closed sessions whose release waits for JavaScript's unmount report, keyed by session id. */
-    private val awaitingUnmount = mutableMapOf<String, AwaitingUnmount>()
+    /**
+     * Closed sessions whose release waits for JavaScript's unmount report, keyed by session id, oldest close first.
+     * An id can hold several: once a registration is unregistered, the id can be registered and closed again while
+     * the earlier close is still awaited.
+     */
+    private val awaitingUnmount = mutableMapOf<String, ArrayDeque<AwaitingUnmount>>()
 
     fun registerSession(sessionId: String): GraniteMicroFrontendSessionRegistration {
         require(sessionId.isNotBlank()) { "sessionId must not be blank" }
@@ -103,32 +107,33 @@ internal class GraniteMicroFrontendSessionStore(
 
     fun closeApp(sessionId: String, token: String, unmountTimeoutMillis: Long, onUnmount: (String) -> Unit): Boolean {
         val outcome = synchronized(lock) {
-            val awaiting = awaitingUnmount[sessionId]
+            val awaiting = awaitingUnmount[sessionId]?.firstOrNull { it.token == token }
             val session = sessions[sessionId]
-            if (awaiting != null && awaiting.token == token) {
+            if (awaiting != null) {
                 // closeApp already went out and its unmount is still awaited: releasing now would cut off the
                 // cleanups that are still running, so this handler waits for the same release.
                 awaiting.handlers += onUnmount
-                CloseOutcome.JOINED
+                CloseOutcome.Joined
             } else if (session == null || session.token != token || !session.opened || session.closed) {
-                CloseOutcome.NOT_SENT
+                CloseOutcome.NotSent
             } else {
                 session.closed = true
+                val entry = AwaitingUnmount(token, mutableListOf(onUnmount))
                 // Registered before the event goes out, so a fast report cannot arrive first.
-                awaitingUnmount[sessionId] = AwaitingUnmount(token, mutableListOf(onUnmount))
+                awaitingUnmount.getOrPut(sessionId) { ArrayDeque() }.addLast(entry)
                 emit(GraniteMicroFrontendEvent.CloseApp(sessionId))
-                CloseOutcome.SENT
+                CloseOutcome.Sent(entry)
             }
         }
         when (outcome) {
-            CloseOutcome.SENT -> {
+            is CloseOutcome.Sent -> {
                 mainThread.postDelayed(unmountTimeoutMillis.coerceAtLeast(0)) {
-                    release(sessionId, GraniteMicroFrontendSessionReleaseReason.TIMEOUT)
+                    release(sessionId, outcome.entry, GraniteMicroFrontendSessionReleaseReason.TIMEOUT)
                 }
                 return true
             }
-            CloseOutcome.JOINED -> return false
-            CloseOutcome.NOT_SENT -> {
+            CloseOutcome.Joined -> return false
+            CloseOutcome.NotSent -> {
                 mainThread.post { onUnmount(GraniteMicroFrontendSessionReleaseReason.NOT_OPENED) }
                 return false
             }
@@ -137,23 +142,39 @@ internal class GraniteMicroFrontendSessionStore(
 
     /** JavaScript reports that a closed session's React tree unmounted. Any thread. */
     fun sessionDidUnmount(sessionId: String) {
-        mainThread.post { release(sessionId, GraniteMicroFrontendSessionReleaseReason.UNMOUNTED) }
+        mainThread.post { releaseOldest(sessionId, GraniteMicroFrontendSessionReleaseReason.UNMOUNTED) }
     }
 
     /** The runtime that would report the pending unmounts is gone. */
     fun releaseAllAwaitingUnmount(reason: String) {
         val handlers = synchronized(lock) {
-            awaitingUnmount.values.flatMap { it.handlers }.also { awaitingUnmount.clear() }
+            awaitingUnmount.values.flatMap { queue -> queue.flatMap { it.handlers } }.also { awaitingUnmount.clear() }
         }
         if (handlers.isNotEmpty()) {
             mainThread.post { handlers.forEach { it(reason) } }
         }
     }
 
-    /** Main thread. Calls the session's unmount handlers once; later reasons find nothing. */
-    private fun release(sessionId: String, reason: String) {
-        val awaiting = synchronized(lock) { awaitingUnmount.remove(sessionId) } ?: return
-        awaiting.handlers.forEach { it(reason) }
+    /** Main thread. Calls the handlers of [entry] once; later reasons find nothing. */
+    private fun release(sessionId: String, entry: AwaitingUnmount, reason: String) {
+        synchronized(lock) {
+            val queue = awaitingUnmount[sessionId] ?: return
+            if (!queue.remove(entry)) return
+            if (queue.isEmpty()) awaitingUnmount.remove(sessionId)
+        }
+        entry.handlers.forEach { it(reason) }
+    }
+
+    /**
+     * Main thread. The unmount report carries only the session id, so it settles the oldest close still awaited
+     * under that id; a later close of the same id keeps waiting for its own report or timeout.
+     */
+    private fun releaseOldest(sessionId: String, reason: String) {
+        val oldest = synchronized(lock) {
+            val queue = awaitingUnmount[sessionId] ?: return
+            queue.removeFirst().also { if (queue.isEmpty()) awaitingUnmount.remove(sessionId) }
+        }
+        oldest.handlers.forEach { it(reason) }
     }
 
     fun unregisterSession(sessionId: String, token: String) {
@@ -185,7 +206,13 @@ internal class GraniteMicroFrontendSessionStore(
 
     private enum class Outcome { REMOVED, UNKNOWN, STALE_TOKEN }
 
-    private enum class CloseOutcome { SENT, JOINED, NOT_SENT }
+    private sealed interface CloseOutcome {
+        class Sent(val entry: AwaitingUnmount) : CloseOutcome
+
+        object Joined : CloseOutcome
+
+        object NotSent : CloseOutcome
+    }
 
     /** The unmount handlers of one closed session, for the registration ([token]) that closed it. */
     private class AwaitingUnmount(val token: String, val handlers: MutableList<(String) -> Unit>)
