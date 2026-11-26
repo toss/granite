@@ -12,6 +12,32 @@ const secondOpen = {
 } as const;
 
 describe('runtime session snapshots', () => {
+  it('retains the native binding through visibility changes and replaces it only after closing', () => {
+    const { runtime, emit } = createSessionRuntimeFixture();
+    runtime.onSessionsChanged(() => undefined);
+    emit({ ...firstOpen, params: { ...firstOpen.params, key: 'native:A', rootKey: 'native:root' } });
+    emit({ name: 'sessionVisibilityChanged', params: { sessionId: firstOpen.params.sessionId, isVisible: true } });
+    emit({ ...firstOpen, params: { ...firstOpen.params, key: 'native:ignored' } });
+    expect(runtime.getSessions()[0]?.key).toBe('native:A');
+    expect(runtime.getSessions()[0]?.rootKey).toBe('native:root');
+    emit({ name: 'closeApp', params: { sessionId: firstOpen.params.sessionId } });
+    emit({ ...firstOpen, params: { ...firstOpen.params, key: 'native:B' } });
+    expect(runtime.getSessions()[0]?.key).toBe('native:B');
+    expect(runtime.getSessions()[0]?.rootKey).toBeUndefined();
+  });
+
+  it('replaces a queued old binding when the host closes before reopening the same session', () => {
+    const { runtime, emit } = createSessionRuntimeFixture();
+    // Native delivery may retain an unacknowledged open from the old runtime.
+    // The host's close-before-release sequence must precede the fresh open.
+    emit({ ...firstOpen, params: { ...firstOpen.params, key: 'runtime-A:session' } });
+    emit({ name: 'closeApp', params: { sessionId: firstOpen.params.sessionId } });
+    emit({ ...firstOpen, params: { ...firstOpen.params, key: 'runtime-B:session' } });
+    runtime.onSessionsChanged(() => undefined);
+
+    expect(runtime.getSessions()).toEqual([{ ...firstOpen.params, key: 'runtime-B:session', isVisible: false }]);
+  });
+
   it('reads without starting native delivery and receives queued events on first subscription', () => {
     // Given
     const { runtime, emit, nativeRuntime, listenerCount } = createSessionRuntimeFixture();

@@ -17,10 +17,12 @@ sealed interface GraniteMicroFrontendEvent {
         )
     }
 
-    data class OpenApp(
+    data class OpenApp @JvmOverloads constructor(
         val sessionId: String,
         val appName: String,
         val scheme: String,
+        val key: String? = null,
+        val rootKey: String? = null,
     ) : GraniteMicroFrontendEvent {
         override fun toWritableMap(): WritableMap = eventMap(
             name = "openApp",
@@ -28,6 +30,8 @@ sealed interface GraniteMicroFrontendEvent {
                 putString("sessionId", sessionId)
                 putString("appName", appName)
                 putString("scheme", scheme)
+                key?.let { putString("key", it) }
+                rootKey?.let { putString("rootKey", it) }
             },
         )
     }

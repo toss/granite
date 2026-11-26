@@ -43,7 +43,7 @@ internal class GraniteMicroFrontendRuntimeEventRouter {
                 didLoseActiveTarget = false
                 FLog.w(
                     TAG,
-                    "Runtime replaced while %d event(s) were pending; session state is redelivered from the queue",
+                    "Runtime replaced with %d pending event(s); acknowledged events are not replayed",
                     pendingEvents.size,
                 )
             }

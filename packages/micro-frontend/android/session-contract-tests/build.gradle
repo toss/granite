@@ -1,0 +1,61 @@
+plugins {
+    id 'com.android.library' version '8.7.2'
+    id 'org.jetbrains.kotlin.android' version '2.1.20'
+}
+
+def prepareSources = tasks.register('prepareContractSources', Sync) {
+    from('../src/main/java') {
+        include 'run/granite/microfrontend/GraniteMicroFrontendEvent.kt'
+        include 'run/granite/microfrontend/GraniteMicroFrontendSessionStore.kt'
+        include 'run/granite/microfrontend/GraniteMicroFrontendRuntimeEventRouter.kt'
+        include 'run/granite/microfrontend/GraniteMicroFrontendRuntimeHost.kt'
+        include 'run/granite/microfrontend/GraniteMicroFrontendRuntimeModule.kt'
+        include 'run/granite/microfrontend/ActivitySessionBinding.kt'
+        include 'run/granite/microfrontend/BundleEvaluator.kt'
+    }
+    into layout.buildDirectory.dir('contract-sources')
+}
+
+def prepareTests = tasks.register('prepareContractTests', Sync) {
+    from('../src/test/java') {
+        include 'run/granite/microfrontend/GraniteMicroFrontendSessionStoreTest.kt'
+        include 'run/granite/microfrontend/GraniteMicroFrontendRuntimeEventRouterTest.kt'
+        include 'run/granite/microfrontend/GraniteMicroFrontendEventTest.kt'
+        include 'run/granite/microfrontend/ActivitySessionBindingTest.kt'
+    }
+    into layout.buildDirectory.dir('contract-tests')
+}
+
+android {
+    namespace 'run.granite.microfrontend.sessioncontracts'
+    compileSdk 36
+    defaultConfig { minSdk 24 }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = '17' }
+    sourceSets {
+        main {
+            manifest.srcFile '../src/main/AndroidManifest.xml'
+            java.srcDirs = [layout.buildDirectory.dir('contract-sources'), 'src/main/java']
+        }
+        test {
+            java.srcDirs = [layout.buildDirectory.dir('contract-tests')]
+        }
+    }
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.includeAndroidResources = true
+    }
+}
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach { dependsOn prepareSources, prepareTests }
+tasks.withType(JavaCompile).configureEach { dependsOn prepareSources, prepareTests }
+tasks.withType(Test).configureEach { maxHeapSize = '2g' }
+
+dependencies {
+    implementation 'com.facebook.react:react-android:0.84.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    testImplementation 'org.robolectric:robolectric:4.14.1'
+}

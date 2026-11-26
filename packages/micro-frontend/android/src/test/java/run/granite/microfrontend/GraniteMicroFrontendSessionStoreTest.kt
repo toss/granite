@@ -3,6 +3,7 @@ package run.granite.microfrontend
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import java.util.Collections
 import java.util.concurrent.CountDownLatch
@@ -11,6 +12,61 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
 class GraniteMicroFrontendSessionStoreTest {
+    @Test
+    fun `empty binding keys fail before opening or emitting the session`() {
+        val events = mutableListOf<GraniteMicroFrontendEvent>()
+        val store = GraniteMicroFrontendSessionStore(events::add)
+        val registration = store.registerSession("session-1")
+
+        assertThrows(IllegalArgumentException::class.java) {
+            registration.openApp("shopping", "granite://shopping", "", "root")
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            registration.openApp("shopping", "granite://shopping", "session", "")
+        }
+        assertTrue(events.isEmpty())
+        assertFalse(registration.setVisible(true))
+        assertTrue(registration.openApp("shopping", "granite://shopping", "session", "root"))
+        assertEquals(1, events.size)
+    }
+
+    @Test
+    fun `open app carries each session key and the common root key`() {
+        val events = mutableListOf<GraniteMicroFrontendEvent>()
+        val store = GraniteMicroFrontendSessionStore(events::add)
+        val shopping = store.registerSession("shopping-1")
+        val mission = store.registerSession("mission-1")
+
+        assertTrue(shopping.openApp("shopping", "granite://shopping", "key-shopping", "key-root"))
+        assertTrue(mission.openApp("mission", "granite://mission", "key-mission", "key-root"))
+        assertFalse(shopping.openApp("shopping", "granite://shopping", "replacement-key", "replacement-root"))
+
+        assertEquals(
+            listOf(
+                GraniteMicroFrontendEvent.OpenApp("shopping-1", "shopping", "granite://shopping", "key-shopping", "key-root"),
+                GraniteMicroFrontendEvent.OpenApp("mission-1", "mission", "granite://mission", "key-mission", "key-root"),
+            ),
+            events,
+        )
+    }
+
+    @Test
+    fun `stale registration cannot emit keys after the session id is reused`() {
+        val events = mutableListOf<GraniteMicroFrontendEvent>()
+        val store = GraniteMicroFrontendSessionStore(events::add)
+        val previous = store.registerSession("shopping-1")
+        previous.close()
+        val replacement = store.registerSession("shopping-1")
+
+        assertFalse(previous.openApp("shopping", "granite://shopping", "old-key", "key-root"))
+        assertTrue(replacement.openApp("shopping", "granite://shopping", "new-key", "key-root"))
+
+        assertEquals(
+            listOf(GraniteMicroFrontendEvent.OpenApp("shopping-1", "shopping", "granite://shopping", "new-key", "key-root")),
+            events,
+        )
+    }
+
     @Test
     fun `session emits open visible close in native lifecycle order`() {
         val events = mutableListOf<GraniteMicroFrontendEvent>()

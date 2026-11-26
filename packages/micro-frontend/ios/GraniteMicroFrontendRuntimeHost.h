@@ -18,6 +18,12 @@ FOUNDATION_EXPORT GraniteMicroFrontendSessionReleaseReason const GraniteMicroFro
 
 @interface GraniteMicroFrontendSessionRegistration : NSObject
 - (void)openAppWithAppName:(NSString *)appName scheme:(NSString *)scheme;
+/// Optional native registry handles are forwarded to the host's JS session adapter.
+- (void)openAppWithAppName:(NSString *)appName
+                  scheme:(NSString *)scheme
+                     key:(nullable NSString *)key
+                 rootKey:(nullable NSString *)rootKey
+    NS_SWIFT_NAME(openApp(withAppName:scheme:key:rootKey:));
 - (BOOL)setVisible:(BOOL)isVisible;
 - (BOOL)closeApp;
 /// Sends `closeApp` like `closeApp`, then calls `onUnmount` exactly once, on the main thread, when the session's
@@ -39,6 +45,13 @@ FOUNDATION_EXPORT GraniteMicroFrontendSessionReleaseReason const GraniteMicroFro
                                                                         sessionId:(NSString *)sessionId
                                                                           appName:(NSString *)appName
                                                                            scheme:(NSString *)scheme;
+/// Attaches optional registry handles on the first bind. Rebinding retains the existing session.
++ (nullable GraniteMicroFrontendViewControllerSessionBinding *)bindViewController:(UIViewController *)viewController
+                                                                        sessionId:(NSString *)sessionId
+                                                                          appName:(NSString *)appName
+                                                                           scheme:(NSString *)scheme
+                                                                              key:(nullable NSString *)key
+                                                                          rootKey:(nullable NSString *)rootKey;
 - (void)invalidate;
 @end
 

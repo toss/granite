@@ -10,6 +10,11 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)startEventDeliveryToEventSink:(id<GraniteMicroFrontendRuntimeEventSink>)eventSink;
 + (void)detachEventSink:(id<GraniteMicroFrontendRuntimeEventSink>)eventSink;
 + (void)emitOpenApp:(NSString *)sessionId appName:(NSString *)appName scheme:(NSString *)scheme;
++ (void)emitOpenApp:(NSString *)sessionId
+           appName:(NSString *)appName
+            scheme:(NSString *)scheme
+               key:(nullable NSString *)key
+           rootKey:(nullable NSString *)rootKey;
 + (void)emitCloseApp:(NSString *)sessionId;
 + (void)emitSessionVisibilityChanged:(NSString *)sessionId isVisible:(BOOL)isVisible;
 + (void)unregisterSession:(NSString *)sessionId token:(NSString *)token;
